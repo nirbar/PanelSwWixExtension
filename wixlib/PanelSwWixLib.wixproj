@@ -1,0 +1,67 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <ProjectGuid>{b6ac15a8-5ef9-4f89-accc-3f5c3fc04bce}</ProjectGuid>
+    <OutputName>PanelSwWixExtension</OutputName>
+    <OutputType>Library</OutputType>
+    <BindFiles>True</BindFiles>
+    <Pedantic>True</Pedantic>
+    <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
+    <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
+    <OutputPath>$(SolutionDir)\bin\$(Configuration)\</OutputPath>
+    <IntermediateOutputPath>$(ProjectDir)\obj\$(Configuration)</IntermediateOutputPath>
+    <Name>PanelSwWixLib</Name>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="PanelSwWixExtension.wxs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="en-US.wxl" />
+  </ItemGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
+    <Pedantic>True</Pedantic>
+    <ShowSourceTrace>False</ShowSourceTrace>
+    <SuppressSchemaValidation>False</SuppressSchemaValidation>
+    <SuppressSpecificWarnings />
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <VerboseOutput>False</VerboseOutput>
+    <LibBindFiles>True</LibBindFiles>
+    <LibSuppressIntermediateFileVersionMatching>False</LibSuppressIntermediateFileVersionMatching>
+    <LibSuppressSchemaValidation>False</LibSuppressSchemaValidation>
+    <LibSuppressSpecificWarnings />
+    <LibTreatWarningsAsErrors>False</LibTreatWarningsAsErrors>
+    <LibVerboseOutput>False</LibVerboseOutput>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <DefineConstants>TRACE</DefineConstants>
+    <IncludeSearchPaths />
+    <Pedantic>True</Pedantic>
+    <ShowSourceTrace>False</ShowSourceTrace>
+    <SuppressSchemaValidation>False</SuppressSchemaValidation>
+    <SuppressSpecificWarnings />
+    <TreatWarningsAsErrors>False</TreatWarningsAsErrors>
+    <VerboseOutput>False</VerboseOutput>
+    <LibBindFiles>True</LibBindFiles>
+    <LibSuppressIntermediateFileVersionMatching>False</LibSuppressIntermediateFileVersionMatching>
+    <LibSuppressSchemaValidation>False</LibSuppressSchemaValidation>
+    <LibSuppressSpecificWarnings />
+    <LibTreatWarningsAsErrors>False</LibTreatWarningsAsErrors>
+    <LibVerboseOutput>False</LibVerboseOutput>
+  </PropertyGroup>
+  <Import Project="$(WixTargetsPath)" />
+</Project>

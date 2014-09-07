@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<tableDefinitions xmlns="http://schemas.microsoft.com/wix/2006/tables">
+  <tableDefinition name="CustomUninstallKey">
+    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="Name" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Data" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="DataType" type="string" length="0" modularize="property" nullable="yes" category="text" />
+    <columnDefinition name="Attributes" type="number" length="2" modularize="property" minValue="0" maxValue="127" category="integer" />
+    <columnDefinition name="Condition" type="string" length="0" modularize="property" nullable="yes" category="condition" />
+  </tableDefinition>
+
+<tableDefinition name="ReadIniValues">
+    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="FilePath" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Section" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Key" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="DestProperty" type="string" length="0" modularize="property" category="text" />
+    <columnDefinition name="Attributes" type="number" length="2" nullable="yes" minValue="0" maxValue="127" />
+    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
+  </tableDefinition>
+  
+</tableDefinitions>

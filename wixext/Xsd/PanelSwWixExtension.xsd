@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:html="http://www.w3.org/1999/xhtml"
+            xmlns:wix="http://schemas.microsoft.com/wix/2006/wi"
+             xmlns:xs="http://www.w3.org/2001/XMLSchema"
+            xmlns:xse="http://schemas.microsoft.com/wix/2005/XmlSchemaExtension"
+      targetNamespace="http://schemas.panel-sw.co.il/wix/WixExtension"
+                xmlns="http://schemas.panel-sw.co.il/wix/WixExtension">
+  <xs:annotation>
+    <xs:documentation>
+      Windows Installer XML PanelSw Extension
+
+      This extension significantly simplifies various system tasks that aren't natively supported by Windows installer.
+    </xs:documentation>
+  </xs:annotation>
+
+  <xs:import namespace="http://schemas.microsoft.com/wix/2006/wi" />
+
+  <xs:element name="CustomUninstallKey">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[
+Overwrite or create registry values in Software\Microsoft\Windows\CurrentVersion\Uninstall\[ProductCode].
+
+\par Example:
+\code
+<Wix ... xmlns:PanelSw="http://schemas.panel-sw.co.il/wix/WixExtension">
+<Product ...>
+ <PanelSw:CustomUninstallKey Id="UninstallString" Name="UninstallString" Data="[#test2]" DataType="REG_SZ" />
+</Product>
+</Wix>
+\endcode
+        ]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Id" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Name" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Name of the registry value. Deafult is same as Id attribute.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Data" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Data of the registry value.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="DataType" default="REG_SZ" use="optional" type="RegistryValueType">
+            <xs:annotation>
+              <xs:documentation>Data type of the registry value. One of REG_SZ, REG_DWORD. Default is REG_SZ</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:simpleType name="RegistryValueType">
+    <xs:annotation>
+      <xs:documentation>Windows registry data types.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:NMTOKEN">
+      <xs:enumeration value="REG_SZ" />
+      <xs:enumeration value="REG_DWORD" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:element name="ReadIniValues">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[
+Read values from a .INI file
+
+\par Example:
+\code
+<Wix ... xmlns:PanelSw="http://schemas.panel-sw.co.il/wix/WixExtension">
+<Product ...>
+ <PanelSw:ReadIniValues Id="MyValue" FilePath="[MyIniFile]" Section="[SectionProp]" Key="[KeyProp]" IgnoreErrors="yes" DestProperty="DestProperty">MY_CONDITION</PanelSw:ReadIniValues>
+</Product>
+</Wix>
+\endcode
+        ]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Id" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="FilePath" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>.INI file full path</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Section" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>INI Section.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Key" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>.INI key</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="DestProperty" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Property name in which the value will be placed.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="IgnoreErrors" type="YesNoType" use="optional" default="no">
+            <xs:annotation>
+              <xs:documentation>Property name in which the value will be placed.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:simpleType name="YesNoType">
+    <xs:annotation>
+      <xs:documentation>Values of this type will either be "yes" or "no".</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:NMTOKEN">
+      <xs:enumeration value="yes" />
+      <xs:enumeration value="no" />
+    </xs:restriction>
+  </xs:simpleType>
+
+</xs:schema>

@@ -1,0 +1,8 @@
+LIBRARY "PanelSwCustomActions"
+
+EXPORTS
+
+ReadIniValues
+TerminateSuccessfully
+CustomUninstallKey_Immediate
+CustomUninstallKey_deferred
