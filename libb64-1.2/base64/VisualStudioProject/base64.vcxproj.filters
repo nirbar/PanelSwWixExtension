@@ -9,9 +9,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\base64.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\src\cencode.c">
       <Filter>Source Files</Filter>
     </ClCompile>
