@@ -11,7 +11,7 @@
 
 #define CustomUninstallKey_ExecCA L"CustomUninstallKey_deferred"
 #define CustomUninstallKey_RollbackCA L"CustomUninstallKey_rollback"
-#define CustomUninstallKeyQuery L"SELECT `Id`, `Name`, `Data`, `DataType`, `Attributes`, `Condition` FROM `CustomUninstallKey`"
+#define CustomUninstallKeyQuery L"SELECT `Id`, `Name`, `Data`, `DataType`, `Attributes`, `Condition` FROM `PSW_CustomUninstallKey`"
 enum eCustomUninstallKeyQuery { Id = 1, Name, Data, DataType, Attributes, Condition };
 
 UINT __stdcall CustomUninstallKey_Immediate(MSIHANDLE hInstall)

@@ -37,8 +37,9 @@ namespace PanelSw.Wix.Extensions
 
         public override void FinalizeCompile()
         {
-            Core.EnsureTable(null, "CustomUninstallKey");
-            Core.EnsureTable(null, "ReadIniValues");
+            Core.EnsureTable(null, "PSW_CustomUninstallKey");
+            Core.EnsureTable(null, "PSW_ReadIniValues");
+            Core.EnsureTable(null, "PSW_RemoveRegistryValue");
             base.FinalizeCompile();
         }
 
@@ -193,7 +194,7 @@ namespace PanelSw.Wix.Extensions
             if (!Core.EncounteredError)
             {
                 // create a row in the Win32_CopyFiles table
-                Row row = Core.CreateRow(sourceLineNumbers, "CustomUninstallKey");
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_CustomUninstallKey");
                 row[0] = id;
                 row[1] = name;
                 row[2] = data;
@@ -314,7 +315,7 @@ namespace PanelSw.Wix.Extensions
             if (!Core.EncounteredError)
             {
                 // create a row in the ReadIniValues table
-                Row row = Core.CreateRow(sourceLineNumbers, "ReadIniValues");
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_ReadIniValues");
                 row[0] = id;
                 row[1] = FilePath;
                 row[2] = Section;
