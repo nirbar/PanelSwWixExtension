@@ -4,10 +4,6 @@
 #include "RegistryKey.h"
 #include "RegDataSerializer.h"
 #include <strutil.h>
-/*
-#include <objbase.h>
-#pragma comment( lib, "msxml2.lib");
-*/
 
 #define CustomUninstallKey_ExecCA L"CustomUninstallKey_deferred"
 #define CustomUninstallKey_RollbackCA L"CustomUninstallKey_rollback"
@@ -38,8 +34,6 @@ UINT __stdcall CustomUninstallKey_deferred(MSIHANDLE hInstall)
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
 	CCustomUninstallKey data(hInstall);
-
-	::MessageBoxA(NULL, "MsiBreak", "MsiBreak", MB_OK);
 
 	hr = WcaInitialize(hInstall, "CustomUninstallKey_deferred");
 	ExitOnFailure(hr, "Failed to initialize");

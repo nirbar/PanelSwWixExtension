@@ -27,8 +27,6 @@ private:
 	HRESULT GetRoot( CRegistryKey::RegRoot *pRoot);
 	HRESULT GetUninstallKey( WCHAR* keyName);
 	HRESULT ParseDataType( WCHAR* attrString, CRegistryKey::RegValueType *pDataType);
-	
-	HRESULT Data2String( BYTE* pSrcData, DWORD dwSrcSize, WCHAR** pDestDataStr);
 
 	MSIHANDLE _hInstall;
 };

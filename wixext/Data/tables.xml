@@ -21,10 +21,9 @@
 
   <tableDefinition name="PSW_RemoveRegistryValue">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="FilePath" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Section" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Root" type="string" length="0" modularize="property" category="text" />
     <columnDefinition name="Key" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="DestProperty" type="string" length="0" modularize="property" category="text" />
+    <columnDefinition name="Name" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Attributes" type="number" length="2" nullable="yes" minValue="0" maxValue="127" />
     <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
   </tableDefinition>

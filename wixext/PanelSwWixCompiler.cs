@@ -67,6 +67,10 @@ namespace PanelSw.Wix.Extensions
                             this.ParseReadIniValuesElement(element);
                             break;
 
+                        case "RemoveRegistryValue":
+                            this.ParseRemoveRegistryValue(element);
+                            break;
+
                         default:
                             this.Core.UnexpectedElement(parentElement, element);
                             break;
@@ -323,6 +327,98 @@ namespace PanelSw.Wix.Extensions
                 row[4] = DestProperty;
                 row[5] = Attributes;
                 row[6] = condition;
+            }
+        }
+
+        private void ParseRemoveRegistryValue(XmlNode node)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string id = null;
+            string root = null;
+            string key = null;
+            string name = null;
+            string condition = "";
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == this.schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName.ToLower())
+                    {
+                        case "id":
+                            id = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "root":
+                            root = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "key":
+                            key = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "name":
+                            name = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        default:
+                            this.Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+                else
+                {
+                    this.Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            if (string.IsNullOrEmpty(id))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+            }
+            if (string.IsNullOrEmpty(key))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Key"));
+            }
+            if (string.IsNullOrEmpty(root))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Root"));
+            }
+            if (string.IsNullOrEmpty(name))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Name"));
+            }
+
+            // find unexpected child elements
+            foreach (XmlNode child in node.ChildNodes)
+            {
+                if (XmlNodeType.Element == child.NodeType)
+                {
+                    if (child.NamespaceURI == this.schema.TargetNamespace)
+                    {
+                        this.Core.UnexpectedElement(node, child);
+                    }
+                    else
+                    {
+                        this.Core.UnsupportedExtensionElement(node, child);
+                    }
+                }
+                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
+                {
+                    condition = child.Value.Trim();
+                }
+            }
+
+            // reference the Win32_CopyFiles custom actions since nothing will happen without these
+            this.Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "RemoveRegistryValue_Immediate");
+
+            if (!Core.EncounteredError)
+            {
+                // create a row in the ReadIniValues table
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_RemoveRegistryValue");
+                row[0] = id;
+                row[1] = root;
+                row[2] = key;
+                row[3] = name;
+                row[4] = 0;
+                row[5] = condition;
             }
         }
 

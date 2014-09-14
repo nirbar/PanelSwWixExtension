@@ -1,0 +1,8 @@
+syntax: glob
+*/bin/*
+bin/*
+Debug/*
+*/Debug/*
+*.*sdf
+ipch/*
+*.suo

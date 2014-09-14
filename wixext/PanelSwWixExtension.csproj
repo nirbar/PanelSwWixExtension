@@ -80,7 +80,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="wix">
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\WiX Toolset v3.8\bin\wix.dll</HintPath>
+      <HintPath>C:\Program Files (x86)\WiX Toolset v3.8\bin\wix.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

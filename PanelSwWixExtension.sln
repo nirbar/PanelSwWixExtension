@@ -1,8 +1,6 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
-MinimumVisualStudioVersion = 10.0.40219.1
+# Visual Studio 2012
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "PanelSwWixLib", "wixlib\PanelSwWixLib.wixproj", "{B6AC15A8-5EF9-4F89-ACCC-3F5C3FC04BCE}"
 	ProjectSection(ProjectDependencies) = postProject
 		{0C3A56AA-8073-44E1-8DE4-C257D581BFF0} = {0C3A56AA-8073-44E1-8DE4-C257D581BFF0}
@@ -20,8 +18,6 @@ EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "ReadIniValuesUT", "UnitTests\ReadIniValuesUT\ReadIniValuesUT.wixproj", "{EEC5D4C5-9873-42E1-8A7F-79DB5314592B}"
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "CustomUninstallKeyUT", "UnitTests\CustomUninstallKeyUT\CustomUninstallKeyUT.wixproj", "{5E7E80C3-8093-4DF6-AD3D-DE3F2872B01F}"
-EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "base64", "libb64-1.2\base64\VisualStudioProject\base64.vcxproj", "{0B094121-DC64-4D74-AFA0-750B83F800D0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -121,24 +117,6 @@ Global
 		{5E7E80C3-8093-4DF6-AD3D-DE3F2872B01F}.Release|x64.ActiveCfg = Release|x86
 		{5E7E80C3-8093-4DF6-AD3D-DE3F2872B01F}.Release|x86.ActiveCfg = Release|x86
 		{5E7E80C3-8093-4DF6-AD3D-DE3F2872B01F}.Release|x86.Build.0 = Release|x86
-		{0B094121-DC64-4D74-AFA0-750B83F800D0}.Debug|Any CPU.ActiveCfg = Debug|Win32
-		{0B094121-DC64-4D74-AFA0-750B83F800D0}.Debug|ARM.ActiveCfg = Debug|Win32
-		{0B094121-DC64-4D74-AFA0-750B83F800D0}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
-		{0B094121-DC64-4D74-AFA0-750B83F800D0}.Debug|Mixed Platforms.Build.0 = Debug|Win32
-		{0B094121-DC64-4D74-AFA0-750B83F800D0}.Debug|Win32.ActiveCfg = Debug|Win32
-		{0B094121-DC64-4D74-AFA0-750B83F800D0}.Debug|Win32.Build.0 = Debug|Win32
-		{0B094121-DC64-4D74-AFA0-750B83F800D0}.Debug|x64.ActiveCfg = Debug|Win32
-		{0B094121-DC64-4D74-AFA0-750B83F800D0}.Debug|x86.ActiveCfg = Debug|Win32
-		{0B094121-DC64-4D74-AFA0-750B83F800D0}.Debug|x86.Build.0 = Debug|Win32
-		{0B094121-DC64-4D74-AFA0-750B83F800D0}.Release|Any CPU.ActiveCfg = Release|Win32
-		{0B094121-DC64-4D74-AFA0-750B83F800D0}.Release|ARM.ActiveCfg = Release|Win32
-		{0B094121-DC64-4D74-AFA0-750B83F800D0}.Release|Mixed Platforms.ActiveCfg = Release|Win32
-		{0B094121-DC64-4D74-AFA0-750B83F800D0}.Release|Mixed Platforms.Build.0 = Release|Win32
-		{0B094121-DC64-4D74-AFA0-750B83F800D0}.Release|Win32.ActiveCfg = Release|Win32
-		{0B094121-DC64-4D74-AFA0-750B83F800D0}.Release|Win32.Build.0 = Release|Win32
-		{0B094121-DC64-4D74-AFA0-750B83F800D0}.Release|x64.ActiveCfg = Release|Win32
-		{0B094121-DC64-4D74-AFA0-750B83F800D0}.Release|x86.ActiveCfg = Release|Win32
-		{0B094121-DC64-4D74-AFA0-750B83F800D0}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
