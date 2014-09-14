@@ -108,6 +108,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TerminateSuccessfully.cpp" />
+    <ClCompile Include="XmlSearch.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="CustomAction.def" />

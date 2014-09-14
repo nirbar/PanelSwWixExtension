@@ -33,9 +33,9 @@ UINT __stdcall ReadIniValues(MSIHANDLE hInstall)
 	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized.");
 
-	// Ensure table ReadIniValues exists.
-	hr = WcaTableExists(L"ReadIniValues");
-	ExitOnFailure(hr, "Table does not exist 'ReadIniValues'. Have you authored 'PanelSw:ReadIniValues' entries in WiX code?");
+	// Ensure table PSW_ReadIniValues exists.
+	hr = WcaTableExists(L"PSW_ReadIniValues");
+	ExitOnFailure(hr, "Table does not exist 'PSW_ReadIniValues'. Have you authored 'PanelSw:ReadIniValues' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(READINIVALUES_QUERY, &hView);

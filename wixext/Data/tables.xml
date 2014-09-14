@@ -28,6 +28,15 @@
     <columnDefinition name="Attributes" type="number" length="2" nullable="yes" minValue="0" maxValue="127" />
     <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
   </tableDefinition>
-  
+
+  <tableDefinition name="PSW_XmlSearch">
+    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="Property_" type="string" length="0" modularize="property" category="text" />
+    <columnDefinition name="FilePath" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="XPath" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Match" type="string" length="0" modularize="property" category="text" />
+    <columnDefinition name="Attributes" type="number" length="2" nullable="yes" minValue="0" maxValue="127" />
+    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
+  </tableDefinition>
 
 </tableDefinitions>

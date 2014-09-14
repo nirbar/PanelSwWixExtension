@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
+     >
+  <Product Id="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}" Name="XmlSearchUT" Language="1033" Version="1.0.0.0" Manufacturer="PoingGrab" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate />
+
+    <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+  </Product>
+
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+      </Directory>
+    </Directory>
+
+    <Property Id="MSIFASTINSTALL" Value="1"></Property>
+
+    <Property Id="XML_SEARCH">
+      <PanelSW:XmlSearch Id="Test1" FilePath="$(var.ProjectDir)Product.wxs" XPath="/Wix/Product[\[]@Name='XmlSearchUT'[\]]/@Id"></PanelSW:XmlSearch>
+    </Property>
+    <Condition Message="Expected XML_SEARCH=[ProductCode]">XML_SEARCH=ProductCode</Condition>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="Test" Guid="*">
+        <File Id="Test" Source="$(var.ProjectDir)Product.wxs" KeyPath="yes"></File>
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>

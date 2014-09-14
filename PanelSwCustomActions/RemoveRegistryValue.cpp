@@ -20,8 +20,11 @@ UINT __stdcall RemoveRegistryValue_Immediate(MSIHANDLE hInstall)
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized.");
+		
+	// Ensure table PSW_RemoveRegistryValue exists.
+	hr = WcaTableExists(L"PSW_RemoveRegistryValue");
+	ExitOnFailure(hr, "Table does not exist 'PSW_RemoveRegistryValue'. Have you authored 'PanelSw:RemoveRegistryValue' entries in WiX code?");
 
-	
 	hr = WcaOpenExecuteView( RemoveRegistryValueQuery, &hView);
 	ExitOnFailure(hr, "Failed to execute view");
 
@@ -51,9 +54,9 @@ UINT __stdcall RemoveRegistryValue_Immediate(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to get Id");
 		hr = WcaGetRecordString( hRec, eRemoveRegistryValueQuery::Root, &pRoot);
 		ExitOnFailure(hr, "Failed to get Root");
-		hr = WcaGetRecordString( hRec, eRemoveRegistryValueQuery::Key, &pKey);
+		hr = WcaGetRecordFormattedString( hRec, eRemoveRegistryValueQuery::Key, &pKey);
 		ExitOnFailure(hr, "Failed to get Key");
-		hr = WcaGetRecordString( hRec, eRemoveRegistryValueQuery::Name, &pName);
+		hr = WcaGetRecordFormattedString( hRec, eRemoveRegistryValueQuery::Name, &pName);
 		ExitOnFailure(hr, "Failed to get Name");
 		hr = WcaGetRecordString( hRec, eRemoveRegistryValueQuery::Area, &pArea);
 		ExitOnFailure(hr, "Failed to get Area");

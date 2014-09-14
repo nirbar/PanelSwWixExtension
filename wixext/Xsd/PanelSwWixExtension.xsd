@@ -65,16 +65,6 @@ Overwrite or create registry values in Software\Microsoft\Windows\CurrentVersion
     </xs:complexType>
   </xs:element>
 
-  <xs:simpleType name="RegistryValueType">
-    <xs:annotation>
-      <xs:documentation>Windows registry data types.</xs:documentation>
-    </xs:annotation>
-    <xs:restriction base="xs:NMTOKEN">
-      <xs:enumeration value="REG_SZ" />
-      <xs:enumeration value="REG_DWORD" />
-    </xs:restriction>
-  </xs:simpleType>
-
   <xs:element name="ReadIniValues">
     <xs:annotation>
       <xs:appinfo>
@@ -129,6 +119,73 @@ Read values from a .INI file
             <xs:annotation>
               <xs:documentation>Property name in which the value will be placed.</xs:documentation>
             </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="XmlSearch">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[
+Read values from a XML file
+
+\par Example:
+\code
+<Wix ... xmlns:PanelSw="http://schemas.panel-sw.co.il/wix/WixExtension">
+<Property Id="My_Prop">
+ <PanelSw:XmlSearch Id="My_Prop" XmlFilePath="[MyXmlFile]" XPath="/Root/Element[\[]@HasThisAttribute[\]]/@OtherAttribute" Match="first">MY_CONDITION</PanelSw:XmlSearch>
+</Property>
+</Wix>
+\endcode
+        ]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Id" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="FilePath" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>XML file full path. This value can be formatted</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="XPath" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>XPath expression to the required value. This value can be formatted</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Match" use="optional" default="first">
+            <xs:annotation>
+              <xs:documentation>Configures how to handle multiple XPath matches. Defaults to 'first'.</xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="first">
+                  <xs:annotation>
+                    <xs:documentation>Return the first match.</xs:documentation>
+                  </xs:annotation>
+                </xs:enumeration>
+                <xs:enumeration value="all">
+                  <xs:annotation>
+                    <xs:documentation>Return all matching results, delimited with the null property [~], and terminated with a double-null [~][~].</xs:documentation>
+                  </xs:annotation>
+                </xs:enumeration>
+                <xs:enumeration value="enforceSingle">
+                  <xs:annotation>
+                    <xs:documentation>Fail if the xpath expression matches more than one result.</xs:documentation>
+                  </xs:annotation>
+                </xs:enumeration>
+              </xs:restriction>
+            </xs:simpleType>
           </xs:attribute>
         </xs:extension>
       </xs:simpleContent>
@@ -229,6 +286,16 @@ Remove registry values.
       <xs:enumeration value="HKCC" />
       <xs:enumeration value="HKPD" />
       <xs:enumeration value="HKU" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="RegistryValueType">
+    <xs:annotation>
+      <xs:documentation>Windows registry data types.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:NMTOKEN">
+      <xs:enumeration value="REG_SZ" />
+      <xs:enumeration value="REG_DWORD" />
     </xs:restriction>
   </xs:simpleType>
 
