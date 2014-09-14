@@ -153,6 +153,10 @@ HRESULT QueryXml( LPCWSTR pFile, LPCWSTR pXpath, eXmlMatch eMatch, LPCWSTR pProp
 	ExitOnNull( pFile, hr, E_INVALIDARG, "pFile is null");
 	ExitOnNull( pXpath, hr, E_INVALIDARG, "pXpath is null");
 	ExitOnNull( pProperty, hr, E_INVALIDARG, "pProperty is null");
+	
+	// Create XML doc.
+	hr = ::CoCreateInstance(CLSID_DOMDocument, NULL, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&pXmlDoc);
+	ExitOnFailure( hr, "Failed to CoCreateInstance CLSID_DOMDocument");
 
 	// Load XML document
 	filePath = pFile;
@@ -198,32 +202,28 @@ HRESULT QueryXml( LPCWSTR pFile, LPCWSTR pXpath, eXmlMatch eMatch, LPCWSTR pProp
 	for( LONG i = 0; i < maxMatches; ++i)
 	{
 		CComPtr<IXMLDOMNode> pNode;
-		CComBSTR xmlString;
+		CComVariant nodeValue;
 
 		hr = pNodeList->get_item( i, &pNode);
 		ExitOnFailure( hr, "Failed to get node.");
 		ExitOnNull( pNode.p, hr, E_FAIL, "Failed to get node.");
 
-		hr = pNode->get_xml( &xmlString);
-		ExitOnFailure( hr, "Failed to get node's XML.");
+		hr = pNode->get_nodeValue( &nodeValue);
+		ExitOnFailure( hr, "Failed to get node's value.");
+		
+		hr = nodeValue.ChangeType( VT_BSTR);
+		ExitOnFailure( hr, "Failed to get node's value as string.");
 
 		// Add result
-		hr = result.AppendBSTR( xmlString);
+		hr = result.AppendBSTR( nodeValue.bstrVal);
 		ExitOnFailure( hr, "Failed to append result.");
 
-		// Add delimiter
-		if( maxMatches > 1)
+		// Add delimiter (unless this is the last)
+		if( i < maxMatches - 1)
 		{
 			hr = result.AppendBSTR( delimiter);
 			ExitOnFailure( hr, "Failed to append delimiter.");
 		}
-	}
-
-	// Final delimiter
-	if( maxMatches > 1)
-	{
-		hr = result.AppendBSTR( delimiter);
-		ExitOnFailure( hr, "Failed to append delimiter.");
 	}
 
 	// Put in property

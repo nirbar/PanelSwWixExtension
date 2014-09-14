@@ -176,7 +176,7 @@ Read values from a XML file
                 </xs:enumeration>
                 <xs:enumeration value="all">
                   <xs:annotation>
-                    <xs:documentation>Return all matching results, delimited with the null property [~], and terminated with a double-null [~][~].</xs:documentation>
+                    <xs:documentation>Return all matching results, delimited with the null property [~].</xs:documentation>
                   </xs:annotation>
                 </xs:enumeration>
                 <xs:enumeration value="enforceSingle">
