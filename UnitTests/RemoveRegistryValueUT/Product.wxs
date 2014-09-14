@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
+     >
+  <Product Id="{162B3494-45A1-45F9-9F3B-0AC4D19D75DB}" Name="RemoveRegistryValueUT" Language="1033" Version="1.0.0.0" Manufacturer="PoingGrab" UpgradeCode="{F419BD1C-AFC0-41D3-9400-757E2256322B}">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate />
+
+    <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+  </Product>
+
+  <Fragment>
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+      </Directory>
+    </Directory>
+
+    <Property Id="MSIFASTINSTALL" Value="1"></Property>
+    <PanelSW:RemoveRegistryValue Id="Test1" Root="HKLM" Key="Software\PanelSW\Nir" Name="Bar">COND1</PanelSW:RemoveRegistryValue>
+    <PanelSW:RemoveRegistryValue Id="Test2" Root="HKLM" Key="Software\PanelSW\Nir" Name="Bar"></PanelSW:RemoveRegistryValue>
+
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="Test" Guid="*">
+        <File Id="Test" Source="$(var.ProjectDir)Product.wxs" KeyPath="yes"></File>
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>

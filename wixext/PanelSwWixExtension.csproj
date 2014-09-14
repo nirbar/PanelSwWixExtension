@@ -79,9 +79,8 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
-    <Reference Include="wix, Version=3.0.0.0, Culture=neutral, PublicKeyToken=ce35f76fcda82bad, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\..\Program Files (x86)\WiX Toolset v3.6\bin\wix.dll</HintPath>
+    <Reference Include="wix">
+      <HintPath>C:\Program Files (x86)\WiX Toolset v3.8\bin\wix.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

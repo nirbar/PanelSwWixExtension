@@ -14,7 +14,7 @@ public:
 	WCHAR** operator &() { if (m_p) delete[] m_p; m_p = 0; return &m_p; }
 };
 
-#define READINIVALUES_QUERY L"SELECT `Id`, `FilePath`, `Section`, `Key`, `DestProperty`, `Attributes`, `Condition` FROM `ReadIniValues`"
+#define READINIVALUES_QUERY L"SELECT `Id`, `FilePath`, `Section`, `Key`, `DestProperty`, `Attributes`, `Condition` FROM `PSW_ReadIniValues`"
 enum ReadIniValuesAttributes
 {
 	NONE = 0,

@@ -29,7 +29,6 @@ private:
 	HRESULT XmlExecute( IXMLDOMElement *xmlElem);
 
 	HRESULT Bstr2Dword( VARIANT str, DWORD* dwVal);
-	HRESULT Data2String(BYTE* pSrcData, DWORD dwSrcSize, WCHAR** pDestDataStr);
 
 	HRESULT DeleteKey( CRegistryKey::RegRoot root, WCHAR* subkeyName, CRegistryKey::RegArea area);
 	HRESULT CreateKey( CRegistryKey::RegRoot root, WCHAR* subkeyName, CRegistryKey::RegArea area);

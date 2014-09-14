@@ -57,6 +57,8 @@ public:
 
 	HRESULT DeleteValue( WCHAR* name);
 
+	static HRESULT ParseRoot( LPCWSTR pRootString, RegRoot* peRoot);
+
 private:
 
 	HKEY Root2Handle( RegRoot root);

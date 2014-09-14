@@ -445,20 +445,3 @@ HRESULT CRegistryXmlParser::CreateValue( CRegistryKey::RegRoot root, WCHAR* subk
 LExit:
 	return hr;
 }
-
-HRESULT CRegistryXmlParser::Data2String(BYTE* pSrcData, DWORD dwSrcSize, WCHAR** pDestDataStr)
-{
-	HRESULT hr = S_OK;
-
-	hr = StrAlloc(pDestDataStr, dwSrcSize);
-	ExitOnFailure(hr, "Failed to allocate memory");
-
-	for (DWORD i = 0; i < dwSrcSize; ++i)
-	{
-		BYTE b = pSrcData[i];
-		wsprintfW((*pDestDataStr) + i, L"%02X", b);
-	}
-
-LExit:
-	return hr;
-}

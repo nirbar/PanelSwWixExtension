@@ -75,14 +75,14 @@ HRESULT CRegistryKey::Open( RegRoot root, WCHAR* key, RegArea area, RegAccess ac
 	HKEY hKey = NULL, hParentKey = NULL;
 	LONG lRes;
 
+	ExitOnNull( key, hr, E_INVALIDARG, "key is NULL");
+
 	hr = Close();
 	ExitOnFailure( hr, "Failed to close registry key");
 
 	hParentKey = Root2Handle( root);
-	ExitOnNull( hParentKey, hr, E_FILENOTFOUND, "key is NULL");
+	ExitOnNull( hParentKey, hr, E_INVALIDARG, "Parent key is NULL");
 
-	ExitOnNull( key, hr, E_FILENOTFOUND, "key is NULL");
-	ExitOnNull( *key, hr, E_FILENOTFOUND, "key points to NULL");
 	WcaLog( LOGLEVEL::LOGMSG_STANDARD, "Attempting to open registry key %ls", key);
 
 	_samAccess = access;
@@ -219,4 +219,46 @@ HKEY CRegistryKey::Root2Handle( RegRoot root)
 	}
 
 	return NULL;
+}
+
+HRESULT CRegistryKey::ParseRoot( LPCWSTR pRootString, RegRoot* peRoot)
+{
+	HRESULT hr = S_OK;
+
+	ExitOnNull( pRootString, hr, E_INVALIDARG, "Invalid root string");
+	ExitOnNull( peRoot, hr, E_INVALIDARG, "Invalid root pointer");
+
+	if(( _wcsicmp( pRootString, L"HKLM") == 0)
+		|| ( _wcsicmp( pRootString, L"HKEY_LOCAL_MACHINE") == 0))
+	{
+		(*peRoot) = RegRoot::LocalMachine;
+	}
+	else if(( _wcsicmp( pRootString, L"HKCR") == 0)
+		|| ( _wcsicmp( pRootString, L"HKEY_CLASSES_ROOT") == 0))
+	{
+		(*peRoot) = RegRoot::ClassesRoot;
+	}
+	else if(( _wcsicmp( pRootString, L"HKCC") == 0)
+		|| ( _wcsicmp( pRootString, L"HKEY_CURRENT_CONFIG") == 0))
+	{
+		(*peRoot) = RegRoot::CurrentConfig;
+	}
+	else if(( _wcsicmp( pRootString, L"HKCU") == 0)
+		|| ( _wcsicmp( pRootString, L"HKEY_CURRENT_USER") == 0))
+	{
+		(*peRoot) = RegRoot::CurrentUser;
+	}
+	else if(( _wcsicmp( pRootString, L"HKU") == 0)
+		|| ( _wcsicmp( pRootString, L"HKEY_USERS") == 0))
+	{
+		(*peRoot) = RegRoot::Users;
+	}
+	else
+	{
+		hr = E_INVALIDARG;
+		ExitOnFailure( hr, "Invalid root name");
+	}
+
+LExit:
+	return hr;
 }
