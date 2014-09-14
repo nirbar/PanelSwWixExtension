@@ -4,8 +4,8 @@
 #include "RegDataSerializer.h"
 #include <strutil.h>
 
-#define RemoveRegistryValueQuery L"SELECT `Id`, `Root`, `Key`, `Name`, `Attributes`, `Condition` FROM `PSW_RemoveRegistryValue`"
-enum eRemoveRegistryValueQuery { Id = 1, Root, Key, Name, Attributes, Condition };
+#define RemoveRegistryValueQuery L"SELECT `Id`, `Root`, `Key`, `Name`, `Area`, `Attributes`, `Condition` FROM `PSW_RemoveRegistryValue`"
+enum eRemoveRegistryValueQuery { Id = 1, Root, Key, Name, Area, Attributes, Condition };
 
 UINT __stdcall RemoveRegistryValue_Immediate(MSIHANDLE hInstall)
 {
@@ -34,7 +34,9 @@ UINT __stdcall RemoveRegistryValue_Immediate(MSIHANDLE hInstall)
 		WCHAR* pName = NULL;
 		WCHAR* pRoot = NULL;
 		WCHAR* pKey = NULL;
+		WCHAR* pArea = NULL;
 		CRegistryKey::RegRoot eRoot;
+		CRegistryKey::RegArea eArea;
 		CRegistryKey key;
 		WCHAR* pCondition = NULL;
 
@@ -53,6 +55,8 @@ UINT __stdcall RemoveRegistryValue_Immediate(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to get Key");
 		hr = WcaGetRecordString( hRec, eRemoveRegistryValueQuery::Name, &pName);
 		ExitOnFailure(hr, "Failed to get Name");
+		hr = WcaGetRecordString( hRec, eRemoveRegistryValueQuery::Area, &pArea);
+		ExitOnFailure(hr, "Failed to get Area");
 		hr = WcaGetRecordString( hRec, eRemoveRegistryValueQuery::Condition, &pCondition);
 		ExitOnFailure(hr, "Failed to get Condition");
 
@@ -77,12 +81,16 @@ UINT __stdcall RemoveRegistryValue_Immediate(MSIHANDLE hInstall)
 		hr = CRegistryKey::ParseRoot( pRoot, &eRoot);
 		ExitOnFailure(hr, "Failed to parse root");
 
+		// Parse area name.
+		hr = CRegistryKey::ParseArea( pArea, &eArea);
+		ExitOnFailure(hr, "Failed to parse area");
+
 		// CustomActionData
-		hr = actionData.AddDeleteValue( pId, eRoot, pKey, CRegistryKey::RegArea::Default /* TODO */, pName);
+		hr = actionData.AddDeleteValue( pId, eRoot, pKey, eArea, pName);
 		ExitOnFailure(hr, "Failed to add 'DeleteValue' to CustomActionData");
 
 		// Rollback CustomActionData
-		hr = key.Open( eRoot, pKey, CRegistryKey::RegArea::Default /* TODO */, CRegistryKey::RegAccess::ReadOnly);
+		hr = key.Open( eRoot, pKey, eArea, CRegistryKey::RegAccess::ReadOnly);
 		if( hr == E_FILENOTFOUND)
 		{
 			hr = S_OK;
@@ -104,7 +112,7 @@ UINT __stdcall RemoveRegistryValue_Immediate(MSIHANDLE hInstall)
 		hr = dataSerialiser.Serialize( &pDataString);
 		ExitOnFailure(hr, "Failed to serialize data");
 
-		hr = rollbackActionData.AddCreateValue(pId, eRoot, pKey, CRegistryKey::RegArea::Default, pName, valueType, pDataString);
+		hr = rollbackActionData.AddCreateValue(pId, eRoot, pKey, eArea, pName, valueType, pDataString);
 		ExitOnFailure(hr, "Failed to create XML element");
 	}
 	

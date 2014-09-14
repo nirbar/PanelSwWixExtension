@@ -58,6 +58,7 @@ public:
 	HRESULT DeleteValue( WCHAR* name);
 
 	static HRESULT ParseRoot( LPCWSTR pRootString, RegRoot* peRoot);
+	static HRESULT ParseArea( LPCWSTR pAreaString, RegArea* peArea);
 
 private:
 

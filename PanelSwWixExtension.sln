@@ -19,7 +19,7 @@ Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "ReadIniValuesUT", "UnitTest
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "CustomUninstallKeyUT", "UnitTests\CustomUninstallKeyUT\CustomUninstallKeyUT.wixproj", "{5E7E80C3-8093-4DF6-AD3D-DE3F2872B01F}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "RemoveRegistryValueUT", "RemoveRegistryValueUT\RemoveRegistryValueUT.wixproj", "{301175D9-93BD-49D2-8AE2-31693630372C}"
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "RemoveRegistryValueUT", "UnitTests\RemoveRegistryValueUT\RemoveRegistryValueUT.wixproj", "{301175D9-93BD-49D2-8AE2-31693630372C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

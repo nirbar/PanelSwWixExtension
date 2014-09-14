@@ -21,8 +21,8 @@
     </Directory>
 
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
-    <PanelSW:RemoveRegistryValue Id="Test1" Root="HKLM" Key="Software\PanelSW\Nir" Name="Bar">COND1</PanelSW:RemoveRegistryValue>
-    <PanelSW:RemoveRegistryValue Id="Test2" Root="HKLM" Key="Software\PanelSW\Nir" Name="Bar"></PanelSW:RemoveRegistryValue>
+    <PanelSW:RemoveRegistryValue Id="Test1" Root="HKLM" Key="Software\PanelSW\Nir" Name="Bar" Area="x86">COND1</PanelSW:RemoveRegistryValue>
+    <PanelSW:RemoveRegistryValue Id="Test2" Root="HKLM" Key="Software\PanelSW\Nir" Name="Bar" Area="x64"></PanelSW:RemoveRegistryValue>
 
   </Fragment>
 

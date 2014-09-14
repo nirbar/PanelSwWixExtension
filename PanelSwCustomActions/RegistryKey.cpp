@@ -225,8 +225,13 @@ HRESULT CRegistryKey::ParseRoot( LPCWSTR pRootString, RegRoot* peRoot)
 {
 	HRESULT hr = S_OK;
 
-	ExitOnNull( pRootString, hr, E_INVALIDARG, "Invalid root string");
 	ExitOnNull( peRoot, hr, E_INVALIDARG, "Invalid root pointer");
+	
+	if(( pRootString == NULL) || ( wcslen( pRootString) == 0))
+	{
+		(*peRoot) = RegRoot::CurrentUser;
+		ExitFunction();
+	}
 
 	if(( _wcsicmp( pRootString, L"HKLM") == 0)
 		|| ( _wcsicmp( pRootString, L"HKEY_LOCAL_MACHINE") == 0))
@@ -257,6 +262,40 @@ HRESULT CRegistryKey::ParseRoot( LPCWSTR pRootString, RegRoot* peRoot)
 	{
 		hr = E_INVALIDARG;
 		ExitOnFailure( hr, "Invalid root name");
+	}
+
+LExit:
+	return hr;
+}
+
+HRESULT CRegistryKey::ParseArea( LPCWSTR pAreaString, RegArea* peArea)
+{
+	HRESULT hr = S_OK;
+
+	ExitOnNull( peArea, hr, E_INVALIDARG, "Invalid area pointer");
+
+	if(( pAreaString == NULL) || ( wcslen( pAreaString) == 0))
+	{
+		(*peArea) = RegArea::Default;
+		ExitFunction();
+	}
+
+	if( _wcsicmp( pAreaString, L"x86") == 0)
+	{
+		(*peArea) = RegArea::X86;
+	}
+	else if( _wcsicmp( pAreaString, L"x64") == 0)
+	{
+		(*peArea) = RegArea::X64;
+	}
+	else if( _wcsicmp( pAreaString, L"default") == 0)
+	{
+		(*peArea) = RegArea::Default;
+	}
+	else
+	{
+		hr = E_INVALIDARG;
+		ExitOnFailure( hr, "Invalid area name");
 	}
 
 LExit:

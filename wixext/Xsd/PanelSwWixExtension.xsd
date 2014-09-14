@@ -165,7 +165,7 @@ Remove registry values.
               <xs:documentation>Identifier for the value (primary key).</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="Root" default="HKCU" use="optional" type="RegistryRootType">
+          <xs:attribute name="Root" use="required" type="RegistryRootType">
             <xs:annotation>
               <xs:documentation>Root of the registry hive.</xs:documentation>
             </xs:annotation>
@@ -175,10 +175,22 @@ Remove registry values.
               <xs:documentation>Registry key name.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="Name" type="xs:string" use="optional">
+          <xs:attribute name="Name" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation>Name of the registry value. Deafult is same as Id attribute.</xs:documentation>
             </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Area" use="optional">
+            <xs:annotation>
+              <xs:documentation>Remove the value from the x86 / x64 area. Default to the package's platform.</xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="x86" />
+                <xs:enumeration value="x64" />
+                <xs:enumeration value="default" />
+              </xs:restriction>
+            </xs:simpleType>
           </xs:attribute>
         </xs:extension>
       </xs:simpleContent>

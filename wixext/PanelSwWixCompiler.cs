@@ -330,6 +330,13 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
+        private enum RegistryArea
+        {
+            x86,
+            x64,
+            Default
+        }
+
         private void ParseRemoveRegistryValue(XmlNode node)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
@@ -337,6 +344,7 @@ namespace PanelSw.Wix.Extensions
             string root = null;
             string key = null;
             string name = null;
+            RegistryArea area = RegistryArea.Default;
             string condition = "";
 
             foreach (XmlAttribute attrib in node.Attributes)
@@ -356,6 +364,26 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "name":
                             name = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "area":
+                            switch (this.Core.GetAttributeValue(sourceLineNumbers, attrib))
+                            {
+                                case "x86":
+                                    area = RegistryArea.x86;
+                                    break;
+
+                                case "x64":
+                                    area = RegistryArea.x64;
+                                    break;
+
+                                case "default":
+                                    area = RegistryArea.Default;
+                                    break;
+
+                                default:
+                                    this.Core.OnMessage(WixErrors.ValueNotSupported(sourceLineNumbers, node.Name, "Area", this.Core.GetAttributeValue(sourceLineNumbers, attrib)));
+                                    break;
+                            }
                             break;
 
                         default:
@@ -417,8 +445,9 @@ namespace PanelSw.Wix.Extensions
                 row[1] = root;
                 row[2] = key;
                 row[3] = name;
-                row[4] = 0;
-                row[5] = condition;
+                row[4] = area.ToString();
+                row[5] = 0;
+                row[6] = condition;
             }
         }
 
