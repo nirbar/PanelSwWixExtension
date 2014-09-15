@@ -301,3 +301,61 @@ HRESULT CRegistryKey::ParseArea( LPCWSTR pAreaString, RegArea* peArea)
 LExit:
 	return hr;
 }
+
+HRESULT CRegistryKey::ParseValueType(LPCWSTR pTypeString, RegValueType* peType)
+{
+	HRESULT hr = S_OK;
+
+	ExitOnNull(peType, hr, E_INVALIDARG, "Invalid type pointer");
+
+	if ((pTypeString == NULL) || (wcslen(pTypeString) == 0))
+	{
+		(*peType) = RegValueType::String;
+		ExitFunction();
+	}
+
+	if ((_wcsicmp(pTypeString, L"REG_SZ") == 0)
+		|| (_wcsicmp(pTypeString, L"String") == 0)
+		|| (_wcsicmp(pTypeString, L"1") == 0))
+	{
+		(*peType) = RegValueType::String;
+	}
+	else if ((_wcsicmp(pTypeString, L"REG_BINARY") == 0)
+		|| (_wcsicmp(pTypeString, L"Binary") == 0)
+		|| (_wcsicmp(pTypeString, L"3") == 0))
+	{
+		(*peType) = RegValueType::Binary;
+	}
+	else if ((_wcsicmp(pTypeString, L"REG_DWORD") == 0)
+		|| (_wcsicmp(pTypeString, L"DWord") == 0)
+		|| (_wcsicmp(pTypeString, L"4") == 0))
+	{
+		(*peType) = RegValueType::DWord;
+	}
+	else if ((_wcsicmp(pTypeString, L"REG_EXPAND_SZ") == 0)
+		|| (_wcsicmp(pTypeString, L"Expandable") == 0)
+		|| (_wcsicmp(pTypeString, L"2") == 0))
+	{
+		(*peType) = RegValueType::Expandable;
+	}
+	else if ((_wcsicmp(pTypeString, L"REG_MULTI_SZ") == 0)
+		|| (_wcsicmp(pTypeString, L"MultiString") == 0)
+		|| (_wcsicmp(pTypeString, L"7") == 0))
+	{
+		(*peType) = RegValueType::MultiString;
+	}
+	else if ((_wcsicmp(pTypeString, L"REG_QWORD") == 0)
+		|| (_wcsicmp(pTypeString, L"QWord") == 0)
+		|| (_wcsicmp(pTypeString, L"11") == 0))
+	{
+		(*peType) = RegValueType::QWord;
+	}
+	else
+	{
+		hr = E_INVALIDARG;
+		ExitOnFailure(hr, "Invalid area name");
+	}
+
+LExit:
+	return hr;
+}

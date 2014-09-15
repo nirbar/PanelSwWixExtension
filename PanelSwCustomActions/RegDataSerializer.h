@@ -8,6 +8,7 @@ public:
 	~CRegDataSerializer();
 
 	HRESULT Set(const BYTE* pData, DWORD dwDataType, DWORD dwSize);
+	HRESULT Set(LPCWSTR pDataString, LPCWSTR pDataTypeString);
 
 	BYTE* Data() const { return _bytes; }
 	DWORD Size() const { return _size; }

@@ -24,9 +24,7 @@ private:
 
 	HRESULT CreateRollbackCustomActionData( CRegistryXmlParser *pRollbackParser, WCHAR* pId, WCHAR* pName);
 
-	HRESULT GetRoot( CRegistryKey::RegRoot *pRoot);
 	HRESULT GetUninstallKey( WCHAR* keyName);
-	HRESULT ParseDataType( WCHAR* attrString, CRegistryKey::RegValueType *pDataType);
 
 	MSIHANDLE _hInstall;
 };

@@ -82,14 +82,10 @@ HRESULT CCustomUninstallKey::CreateCustomActionData()
 	PMSIHANDLE hView;
     PMSIHANDLE hRec;
 	CRegistryXmlParser xmlParser, xmlRollbackParser;
-	CRegistryKey::RegRoot root;
 	WCHAR uninstallKey[ MAX_PATH];
 	CComBSTR xmlString = L"";
 	HRESULT hr = S_OK;
 	bool bRemoving = false;
-
-	hr = GetRoot( &root);
-	ExitOnFailure(hr, "Failed to get registry root");
 
 	hr = GetUninstallKey( uninstallKey);
 	ExitOnFailure(hr, "Failed to get uninstall registry key");
@@ -111,7 +107,6 @@ HRESULT CCustomUninstallKey::CreateCustomActionData()
 		WCHAR* pName = NULL;
 		WCHAR* pData = NULL;
 		WCHAR* pDataType = NULL;
-		CRegistryKey::RegValueType dataType;
 		WCHAR* pCondition = NULL;
 		int nAttrib;
 		
@@ -145,19 +140,24 @@ HRESULT CCustomUninstallKey::CreateCustomActionData()
 			ExitOnFailure(hr, "Failed to evaluate condition");
 		}
 
-		// Save as XML element
-		hr = ParseDataType( pDataType, &dataType);
-		ExitOnFailure(hr, "Failed to parse data type");
-		
 		// Install / UnInstall ?
 		if (bRemoving)
 		{
-			hr = xmlParser.AddDeleteKey(pId, root, uninstallKey, CRegistryKey::RegArea::Default);
+			hr = xmlParser.AddDeleteKey(pId, CRegistryKey::RegRoot::LocalMachine, uninstallKey, CRegistryKey::RegArea::Default);
 			ExitOnFailure(hr, "Failed to create XML element");
 		}
 		else
 		{
-			hr = xmlParser.AddCreateValue(pId, root, uninstallKey, CRegistryKey::RegArea::Default, pName, dataType, pData);
+			CRegDataSerializer dataSer;
+			WCHAR* pDataStr = NULL;
+
+			hr = dataSer.Set(pData, pDataType);
+			ExitOnFailure(hr, "Failed to create parse registry data");
+
+			hr = dataSer.Serialize(&pDataStr);
+			ExitOnFailure(hr, "Failed to serialize registry data");
+
+			hr = xmlParser.AddCreateValue(pId, CRegistryKey::RegRoot::LocalMachine, uninstallKey, CRegistryKey::RegArea::Default, pName, (CRegistryKey::RegValueType)dataSer.DataType(), pDataStr);
 			ExitOnFailure(hr, "Failed to create XML element");
 		}
 
@@ -189,21 +189,17 @@ HRESULT CCustomUninstallKey::CreateRollbackCustomActionData( CRegistryXmlParser 
 	BYTE* pDataBytes = NULL;
 	WCHAR* pDataStr = NULL;
 	DWORD dwSize = 0;
-	CRegistryKey::RegRoot root;
 	WCHAR keyName[ MAX_PATH];
 	CRegDataSerializer dataSer;
-
-	hr = GetRoot( &root);
-	ExitOnFailure( hr, "Failed to get Uninstall key's root");
 
 	hr = GetUninstallKey( keyName);
 	ExitOnFailure( hr, "Failed to get Uninstall key");
 
-	hr = key.Open( root, keyName, CRegistryKey::RegArea::Default, CRegistryKey::RegAccess::ReadOnly);
+	hr = key.Open( CRegistryKey::RegRoot::LocalMachine, keyName, CRegistryKey::RegArea::Default, CRegistryKey::RegAccess::ReadOnly);
 	if( hr == E_FILENOTFOUND)
 	{
 		// Delete key on rollback
-		hr = pRollbackParser->AddDeleteKey( pId, root, keyName, CRegistryKey::RegArea::Default);
+		hr = pRollbackParser->AddDeleteKey(pId, CRegistryKey::RegRoot::LocalMachine, keyName, CRegistryKey::RegArea::Default);
 		ExitOnFailure( hr, "Failed to create rollback XML element");
 		ExitFunction();
 	}
@@ -212,7 +208,7 @@ HRESULT CCustomUninstallKey::CreateRollbackCustomActionData( CRegistryXmlParser 
 	if( hr == E_FILENOTFOUND)
 	{
 		// Delete value on rollback
-		hr = pRollbackParser->AddDeleteValue( pId, root, keyName, CRegistryKey::RegArea::Default, pName);
+		hr = pRollbackParser->AddDeleteValue(pId, CRegistryKey::RegRoot::LocalMachine, keyName, CRegistryKey::RegArea::Default, pName);
 		ExitOnFailure( hr, "Failed to create rollback XML element");
 		ExitFunction();
 	}
@@ -223,7 +219,7 @@ HRESULT CCustomUninstallKey::CreateRollbackCustomActionData( CRegistryXmlParser 
 	hr = dataSer.Serialize(&pDataStr);
 	ExitOnFailure(hr, "Failed to serialize registry data");
 
-	hr = pRollbackParser->AddCreateValue(pId, root, keyName, CRegistryKey::RegArea::Default, pName, valType, pDataStr);
+	hr = pRollbackParser->AddCreateValue(pId, CRegistryKey::RegRoot::LocalMachine, keyName, CRegistryKey::RegArea::Default, pName, valType, pDataStr);
 	ExitOnFailure( hr, "Failed to create rollback XML element");
 
 LExit:
@@ -235,32 +231,6 @@ LExit:
 	return hr;
 }
 
-HRESULT CCustomUninstallKey::GetRoot( CRegistryKey::RegRoot *pRoot)
-{
-	WCHAR* pAllUsers = NULL;
-	HRESULT hr = S_OK;
-
-	hr = WcaGetProperty( L"ALLUSERS", &pAllUsers);
-	ExitOnFailure( hr, "Failed to get ALLUSERS property");
-
-	if( wcscmp( pAllUsers, L"1") == 0)
-	{
-		(*pRoot) = CRegistryKey::RegRoot::LocalMachine;
-	}
-	else if( wcscmp( pAllUsers, L"") == 0)
-	{
-		(*pRoot) = CRegistryKey::RegRoot::CurrentUser;
-	}
-	else
-	{
-		hr = E_INVALIDDATA;
-		WcaLogError( hr, "Invalid value for 'ALLUSERS' property: '%ls'", pAllUsers);
-	}
-
-LExit:
-	return hr;
-}
-
 HRESULT CCustomUninstallKey::GetUninstallKey( WCHAR* keyName)
 {
 	WCHAR *prodCode = NULL;
@@ -269,44 +239,8 @@ HRESULT CCustomUninstallKey::GetUninstallKey( WCHAR* keyName)
 	hr = WcaGetProperty( L"ProductCode", &prodCode);
 	ExitOnFailure( hr, "Failed to get ProductCode");
 
-	wsprintf( keyName, L"Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\%ls", prodCode);
+	wsprintfW( keyName, L"Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\%ls", prodCode);
 
 LExit:
-	return hr;
-}
-
-HRESULT CCustomUninstallKey::ParseDataType( WCHAR* attrString, CRegistryKey::RegValueType *pDataType)
-{
-	HRESULT hr = S_OK;
-
-	if( _wcsicmp( attrString, L"REG_SZ") == 0)
-	{
-		(*pDataType) = CRegistryKey::RegValueType::String;
-	}
-	else if (_wcsicmp(attrString, L"REG_DWORD") == 0)
-	{
-		(*pDataType) = CRegistryKey::RegValueType::DWord;
-	}
-	else if (_wcsicmp(attrString, L"REG_BINARY") == 0)
-	{
-		(*pDataType) = CRegistryKey::RegValueType::Binary;
-	}
-	else if (_wcsicmp(attrString, L"REG_EXPAND_SZ") == 0)
-	{
-		(*pDataType) = CRegistryKey::RegValueType::Expandable;
-	}
-	else if (_wcsicmp(attrString, L"REG_MULTI_SZ") == 0)
-	{
-		(*pDataType) = CRegistryKey::RegValueType::MultiString;
-	}
-	else if (_wcsicmp(attrString, L"REG_QWORD") == 0)
-	{
-		(*pDataType) = CRegistryKey::RegValueType::QWord;
-	}
-	else
-	{
-		hr = E_INVALIDARG;
-	}
-
 	return hr;
 }

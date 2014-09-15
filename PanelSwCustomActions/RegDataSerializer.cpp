@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "RegDataSerializer.h"
+#include "RegistryKey.h"
 #include <memory>
 #include <strutil.h>
 #include <memutil.h>
@@ -83,6 +84,71 @@ LExit:
 	return hr;
 }
 
+HRESULT CRegDataSerializer::Set(LPCWSTR pDataString, LPCWSTR pDataTypeString)
+{
+	HRESULT hr = S_OK;
+	DWORD dwSize = 0;
+	DWORD dwTmpSize = 0;
+	LONG lValue = 0;
+	LONG64 l64Value = 0;
+	BYTE *pData = NULL;
+	LPCWSTR pTmp = NULL;
+	CRegistryKey::RegValueType eType;
+
+	hr = CRegistryKey::ParseValueType(pDataTypeString, &eType);
+	ExitOnFailure(hr, "Failed to parse data type");
+	_dataType = eType;
+
+	switch (eType)
+	{
+	case CRegistryKey::String:
+	case CRegistryKey::Expandable:
+		dwSize = ((1 + wcslen(pDataString)) * sizeof(WCHAR));
+		pData = (BYTE*)pDataString;
+		break;
+	
+	case CRegistryKey::MultiString:
+		pTmp = pDataString;
+		pData = (BYTE*)pDataString;
+		while ((dwTmpSize = wcslen(pTmp)) > 0)
+		{
+			pTmp += dwTmpSize + 1;
+			dwTmpSize = ((1 + dwTmpSize) * sizeof(WCHAR));
+			dwSize += dwTmpSize;
+		}
+		dwSize += sizeof(WCHAR);
+		break;
+	
+	case CRegistryKey::DWord:
+		lValue = ::wcstol(pDataString, NULL, 0);
+		pData = (BYTE*)&lValue;
+		dwSize = sizeof(lValue);
+		break;
+	
+	case CRegistryKey::QWord:
+		l64Value = ::wcstoll(pDataString, NULL, 0);
+		pData = (BYTE*)&l64Value;
+		dwSize = sizeof(l64Value);
+		break;
+
+	case CRegistryKey::Binary:
+		hr = DeSerialize(pDataString, pDataTypeString);
+		ExitFunction();
+		break;
+	
+	default:
+		hr = E_INVALIDARG;
+		ExitOnFailure(hr, "Invalid registry data type");
+		break;
+	}
+
+	hr = Set(pData, _dataType, dwSize);
+	ExitOnFailure(hr, "Invalid registry data");
+
+LExit:
+	return hr;
+}
+
 HRESULT CRegDataSerializer::Serialize(LPWSTR* ppDst) const
 {
 	HRESULT hr = S_OK;
@@ -120,8 +186,12 @@ HRESULT CRegDataSerializer::DeSerialize(LPCWSTR pSrc, LPCWSTR sDataType)
 	size_t iStrSize = 0;
 	int iMemSize = 0;
 	LPSTR pAnsiStr = NULL;
+	CRegistryKey::RegValueType eType;
 
 	_dataType = ::wcstol(sDataType, NULL, 10);
+	hr = CRegistryKey::ParseValueType(sDataType, &eType);
+	ExitOnFailure(hr, "Failed to parse data type");
+	_dataType = eType;
 
 	// Allocate c-string
 	iStrSize = 1 + wcslen( pSrc);

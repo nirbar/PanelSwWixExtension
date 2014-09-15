@@ -2,8 +2,8 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
      xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
      >
-	<Product Id="{9972FF2F-0828-4B45-81A0-9E71B07DFC83}" Name="CustomUninstallKeyUT" Language="1033" Version="1.0.0.0" Manufacturer="PoingGrab" UpgradeCode="370186f7-0cd5-4fb1-82c1-382311d94780">
-		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+	<Product Id="{9972FF2F-0828-4B45-81A0-9E71B07DFC83}" Name="CustomUninstallKeyUT" Language="1033" Version="1.0.0.0" Manufacturer="Nir Bar" UpgradeCode="370186f7-0cd5-4fb1-82c1-382311d94780">
+		<Package InstallerVersion="200" Compressed="yes" InstallScope="perUser" InstallPrivileges="elevated" />
 
 		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
 		<MediaTemplate />
@@ -14,21 +14,19 @@
 	</Product>
 
 	<Fragment>
-		<Directory Id="TARGETDIR" Name="SourceDir">
-			<Directory Id="ProgramFilesFolder">
-				<Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
-			</Directory>
-		</Directory>
+		<Directory Id="TARGETDIR" Name="SourceDir" />
 
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
-    <PanelSW:CustomUninstallKey Id="Test" Data="1" DataType="REG_DWORD" Name="Test">1=1</PanelSW:CustomUninstallKey>
-    
-	</Fragment>
+
+    <PanelSW:CustomUninstallKey Id="Test1" Data="1" DataType="REG_DWORD">1=1</PanelSW:CustomUninstallKey>
+    <PanelSW:CustomUninstallKey Id="Test2" Data="1" DataType="REG_SZ"></PanelSW:CustomUninstallKey>
+
+  </Fragment>
 
 	<Fragment>
-    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+    <ComponentGroup Id="ProductComponents" Directory="TARGETDIR">
       <Component Id="Test" Guid="*">
-        <File Id="Test" Source="$(var.ProjectDir)Product.wxs" KeyPath="yes"></File>
+        <RegistryValue KeyPath="yes" Id="CustomUninstallKeyUT" Key="Software\Panel-SW.co.il\CustomUninstallKeyUT" Root="HKCU" Name="Test" Type="integer" Value="1" />
       </Component>
     </ComponentGroup>
   </Fragment>
