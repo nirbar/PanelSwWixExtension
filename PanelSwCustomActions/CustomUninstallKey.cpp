@@ -19,6 +19,10 @@ UINT __stdcall CustomUninstallKey_Immediate(MSIHANDLE hInstall)
 	hr = WcaInitialize(hInstall, "CustomUninstallKey_Immediate");
 	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	
+	// Ensure table PSW_CustomUninstallKey exists.
+	hr = WcaTableExists(L"PSW_CustomUninstallKey");
+	ExitOnFailure(hr, "Table does not exist 'PSW_CustomUninstallKey'. Have you authored 'PanelSw:CustomUninstallKey' entries in WiX code?");
 
 	// TODO: Add your custom action code here.
 	hr = data.CreateCustomActionData();

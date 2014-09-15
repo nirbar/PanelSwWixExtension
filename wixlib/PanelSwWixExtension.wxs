@@ -49,6 +49,17 @@
     </InstallUISequence>
   </Fragment>
 
+  <!-- XmlSearch -->
+  <Fragment>
+    <CustomAction Id="XmlSearch" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="XmlSearch" Execute="immediate" Return="check" />
+    <InstallExecuteSequence>
+      <Custom Action="XmlSearch" After="AppSearch" Overridable="yes"></Custom>
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="XmlSearch" After="AppSearch" Overridable="yes"></Custom>
+    </InstallUISequence>
+  </Fragment>
+
   <!-- TerminateSuccessfully -->
   <Fragment>
     <CustomAction Id="TerminateSuccessfully_Immediate" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="TerminateSuccessfully" Execute="immediate" Return="check" />

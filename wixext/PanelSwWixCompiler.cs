@@ -40,6 +40,7 @@ namespace PanelSw.Wix.Extensions
             Core.EnsureTable(null, "PSW_CustomUninstallKey");
             Core.EnsureTable(null, "PSW_ReadIniValues");
             Core.EnsureTable(null, "PSW_RemoveRegistryValue");
+            Core.EnsureTable(null, "PSW_XmlSearch");
             base.FinalizeCompile();
         }
 
@@ -69,6 +70,19 @@ namespace PanelSw.Wix.Extensions
 
                         case "RemoveRegistryValue":
                             this.ParseRemoveRegistryValue(element);
+                            break;
+
+                        default:
+                            this.Core.UnexpectedElement(parentElement, element);
+                            break;
+                    }
+                    break;
+
+                case "Property":
+                    switch (element.LocalName)
+                    {
+                        case "XmlSearch":
+                            this.ParseXmlSearchElement(element);
                             break;
 
                         default:
@@ -366,23 +380,13 @@ namespace PanelSw.Wix.Extensions
                             name = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "area":
-                            switch (this.Core.GetAttributeValue(sourceLineNumbers, attrib))
+                            try
                             {
-                                case "x86":
-                                    area = RegistryArea.x86;
-                                    break;
-
-                                case "x64":
-                                    area = RegistryArea.x64;
-                                    break;
-
-                                case "default":
-                                    area = RegistryArea.Default;
-                                    break;
-
-                                default:
-                                    this.Core.OnMessage(WixErrors.ValueNotSupported(sourceLineNumbers, node.Name, "Area", this.Core.GetAttributeValue(sourceLineNumbers, attrib)));
-                                    break;
+                                area = (RegistryArea)Enum.Parse(typeof(RegistryArea), this.Core.GetAttributeValue(sourceLineNumbers, attrib));
+                            }
+                            catch
+                            {
+                                this.Core.OnMessage(WixErrors.ValueNotSupported(sourceLineNumbers, node.Name, "Area", this.Core.GetAttributeValue(sourceLineNumbers, attrib)));
                             }
                             break;
 
@@ -446,6 +450,120 @@ namespace PanelSw.Wix.Extensions
                 row[2] = key;
                 row[3] = name;
                 row[4] = area.ToString();
+                row[5] = 0;
+                row[6] = condition;
+            }
+        }
+
+        private enum XmlSearchMatch
+        {
+            first,
+            all,
+            enforceSingle
+        }
+
+        private void ParseXmlSearchElement(XmlNode node)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string id = null;
+            string filePath = null;
+            string xpath = null;
+            string property = null;
+            XmlSearchMatch match = XmlSearchMatch.first;
+            string condition = "";
+
+            if (node.ParentNode.LocalName != "Property")
+            {
+                this.Core.UnexpectedElement(node.ParentNode, node);
+            }
+            property = node.ParentNode.Attributes["Id"].Value;
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == this.schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName.ToLower())
+                    {
+                        case "id":
+                            id = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "filepath":
+                            filePath = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "xpath":
+                            xpath = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "match":
+                            try
+                            {
+                                match = (XmlSearchMatch)Enum.Parse(typeof(XmlSearchMatch), this.Core.GetAttributeValue(sourceLineNumbers, attrib));
+                            }
+                            catch
+                            {
+                                this.Core.OnMessage(WixErrors.ValueNotSupported(sourceLineNumbers, node.Name, "Match", this.Core.GetAttributeValue(sourceLineNumbers, attrib)));
+                            }
+                            break;
+
+                        default:
+                            this.Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+                else
+                {
+                    this.Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            if (string.IsNullOrEmpty(property))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.Name, "Id"));
+            }
+            if (string.IsNullOrEmpty(id))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+            }
+            if (string.IsNullOrEmpty(filePath))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "FilePath"));
+            }
+            if (string.IsNullOrEmpty(xpath))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "XPath"));
+            }
+
+            // find unexpected child elements
+            foreach (XmlNode child in node.ChildNodes)
+            {
+                if (XmlNodeType.Element == child.NodeType)
+                {
+                    if (child.NamespaceURI == this.schema.TargetNamespace)
+                    {
+                        this.Core.UnexpectedElement(node, child);
+                    }
+                    else
+                    {
+                        this.Core.UnsupportedExtensionElement(node, child);
+                    }
+                }
+                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
+                {
+                    condition = child.Value.Trim();
+                }
+            }
+
+            // reference the Win32_CopyFiles custom actions since nothing will happen without these
+            this.Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "XmlSearch");
+
+            if (!Core.EncounteredError)
+            {
+                // create a row in the ReadIniValues table
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_XmlSearch");
+                row[0] = id;
+                row[1] = property;
+                row[2] = filePath;
+                row[3] = xpath;
+                row[4] = match.ToString();
                 row[5] = 0;
                 row[6] = condition;
             }
