@@ -192,6 +192,7 @@ HRESULT QueryXml( LPCWSTR pFile, LPCWSTR pXpath, eXmlMatch eMatch, LPCWSTR pProp
 			hr = E_INVALIDARG;
 			ExitOnFailure( hr, "Too many XmlSreach matches.");
 		}
+		maxMatches = 1;
 		break;
 	default:
 		hr = E_INVALIDARG;

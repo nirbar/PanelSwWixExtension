@@ -23,9 +23,18 @@
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
 
     <Property Id="XML_SEARCH">
-      <PanelSW:XmlSearch Id="Test1" FilePath="$(var.ProjectDir)Product.wxs" XPath="/Wix/Product[\[]@Name='XmlSearchUT'[\]]/@*" Match="all"></PanelSW:XmlSearch>
+      <PanelSW:XmlSearch Id="Test1" FilePath="$(var.ProjectDir)Product.wxs" XPath="/Wix/Product[\[]@Name='XmlSearchUT'[\]]/@Id" Match="enforceSingle"></PanelSW:XmlSearch>
     </Property>
     <Condition Message="Expected XML_SEARCH=[ProductCode]">XML_SEARCH=ProductCode</Condition>
+
+    <!-- Terminate after validating result. -->
+    <InstallUISequence>
+      <Custom Action="TerminateSuccessfully_Immediate" After="LaunchConditions"></Custom>
+    </InstallUISequence>
+    <InstallExecuteSequence>
+      <Custom Action="TerminateSuccessfully_Immediate" After="LaunchConditions"></Custom>
+    </InstallExecuteSequence>
+
   </Fragment>
 
   <Fragment>

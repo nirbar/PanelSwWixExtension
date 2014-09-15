@@ -6,3 +6,5 @@ Debug/*
 *.*sdf
 ipch/*
 *.suo
+*/obj/*
+*.user
