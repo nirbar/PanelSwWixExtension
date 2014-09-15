@@ -6,6 +6,8 @@ WiX Elements:
 
 1. *ReadIniValues*: Reads .INI file values.
 
+1. *XmlSearch*: Read XML values.
+
 1. *CustomUninstallKey*: Overwrite registry values in the product's [Uninstall](http://msdn.microsoft.com/en-us/library/aa372105%28v=vs.85%29.aspx) registry key
 
 1. *RemoveRegistryValue*: Removes registry values. Complements the standard [RemoveRegistryValue](http://wixtoolset.org/documentation/manual/v3/xsd/wix/removeregistryvalue.html) WiX element that will only remove registry values during installation.
