@@ -126,7 +126,7 @@ HRESULT CRegDataSerializer::Set(LPCWSTR pDataString, LPCWSTR pDataTypeString)
 		break;
 	
 	case CRegistryKey::QWord:
-		l64Value = ::wcstoll(pDataString, NULL, 0);
+		l64Value = ::_wcstoi64(pDataString, NULL, 0);
 		pData = (BYTE*)&l64Value;
 		dwSize = sizeof(l64Value);
 		break;
