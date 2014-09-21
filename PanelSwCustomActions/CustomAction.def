@@ -4,6 +4,7 @@ EXPORTS
 
 ReadIniValues
 TerminateSuccessfully
+Rollback
 CustomUninstallKey_Immediate
 CustomUninstallKey_deferred
 RemoveRegistryValue_Immediate

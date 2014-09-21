@@ -65,5 +65,11 @@
     <CustomAction Id="TerminateSuccessfully_Immediate" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="TerminateSuccessfully" Execute="immediate" Return="check" />
     <CustomAction Id="TerminateSuccessfully_Deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="TerminateSuccessfully" Execute="deferred" Return="check" />
   </Fragment>
-  
+
+  <!-- Rollback -->
+  <Fragment>
+    <CustomAction Id="Rollback_Immediate" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="Rollback" Execute="immediate" Return="check" />
+    <CustomAction Id="Rollback_Deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="Rollback" Execute="deferred" Return="check" />
+  </Fragment>
+
 </Wix>
