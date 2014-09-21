@@ -81,6 +81,12 @@ HRESULT CRegistryXmlParser::AddDeleteKey( WCHAR* pId, CRegistryKey::RegRoot root
 	hr = xmlElem->setAttribute( attName, value);
 	ExitOnFailure( hr, "Failed to set XML attribute");
 
+	if( area == CRegistryKey::RegArea::Default)
+	{
+		hr = CRegistryKey::GetDefaultArea( &area);
+		ExitOnFailure( hr, "Failed to get default registry area");
+	}
+
 	attName = "Area";
 	value = area;
 	hr = xmlElem->setAttribute( attName, value);
@@ -122,6 +128,12 @@ HRESULT CRegistryXmlParser::AddDeleteValue( WCHAR* pId, CRegistryKey::RegRoot ro
 	value = subkeyName;
 	hr = xmlElem->setAttribute( attName, value);
 	ExitOnFailure( hr, "Failed to set XML attribute");
+
+	if( area == CRegistryKey::RegArea::Default)
+	{
+		hr = CRegistryKey::GetDefaultArea( &area);
+		ExitOnFailure( hr, "Failed to get default registry area");
+	}
 
 	attName = "Area";
 	value = area;
@@ -170,6 +182,12 @@ HRESULT CRegistryXmlParser::AddCreateKey( WCHAR* pId, CRegistryKey::RegRoot root
 	hr = xmlElem->setAttribute( attName, value);
 	ExitOnFailure( hr, "Failed to set XML attribute");
 
+	if( area == CRegistryKey::RegArea::Default)
+	{
+		hr = CRegistryKey::GetDefaultArea( &area);
+		ExitOnFailure( hr, "Failed to get default registry area");
+	}
+
 	attName = "Area";
 	value = area;
 	hr = xmlElem->setAttribute( attName, value);
@@ -212,6 +230,12 @@ HRESULT CRegistryXmlParser::AddCreateValue(WCHAR* pId, CRegistryKey::RegRoot roo
 	value = subkeyName;
 	hr = xmlElem->setAttribute( attName, value);
 	ExitOnFailure( hr, "Failed to set XML attribute");
+	
+	if( area == CRegistryKey::RegArea::Default)
+	{
+		hr = CRegistryKey::GetDefaultArea( &area);
+		ExitOnFailure( hr, "Failed to get default registry area");
+	}
 
 	attName = "Area";
 	value = area;

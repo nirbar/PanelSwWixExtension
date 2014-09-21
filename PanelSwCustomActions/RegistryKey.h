@@ -60,6 +60,7 @@ public:
 	static HRESULT ParseRoot( LPCWSTR pRootString, RegRoot* peRoot);
 	static HRESULT ParseArea(LPCWSTR pAreaString, RegArea* peArea);
 	static HRESULT ParseValueType(LPCWSTR pTypeString, RegValueType* peType);
+	static HRESULT GetDefaultArea( RegArea* pArea);
 
 private:
 

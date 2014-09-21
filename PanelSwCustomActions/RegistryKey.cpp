@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include "RegistryKey.h"
+#include <strutil.h>
 
 CRegistryKey::CRegistryKey(void)
 	: _hKey( NULL)
@@ -57,6 +58,12 @@ HRESULT CRegistryKey::Create( RegRoot root, WCHAR* key, RegArea area, RegAccess 
 
 	_samAccess = access;
 	_area = area;
+	if( _area == RegArea::Default)
+	{
+		hr = GetDefaultArea( &_area);
+		ExitOnFailure( hr, "Failed to get default registry area");
+	}
+
 	lRes = ::RegCreateKeyExW( hParentKey, key, 0, NULL, 0, _samAccess | _area, NULL, &hKey, NULL);
 	hr = HRESULT_FROM_WIN32( lRes);
 	ExitOnFailure( hr, "Failed to create registry key");
@@ -87,6 +94,12 @@ HRESULT CRegistryKey::Open( RegRoot root, WCHAR* key, RegArea area, RegAccess ac
 
 	_samAccess = access;
 	_area = area;
+	if( _area == RegArea::Default)
+	{
+		hr = GetDefaultArea( &_area);
+		ExitOnFailure( hr, "Failed to get default registry area");
+	}
+
 	lRes = ::RegOpenKeyExW( hParentKey, key, 0, _samAccess | _area, &hKey);
 	hr = HRESULT_FROM_WIN32( lRes);
 	ExitOnFailure( hr, "Failed to open registry key");
@@ -274,23 +287,19 @@ HRESULT CRegistryKey::ParseArea( LPCWSTR pAreaString, RegArea* peArea)
 
 	ExitOnNull( peArea, hr, E_INVALIDARG, "Invalid area pointer");
 
-	if(( pAreaString == NULL) || ( wcslen( pAreaString) == 0))
+	if(( pAreaString == NULL) || ((*pAreaString) == NULL) || ( _wcsicmp( pAreaString, L"default") == 0))
 	{
-		(*peArea) = RegArea::Default;
+		hr = GetDefaultArea( peArea);
+		ExitOnFailure( hr, "Failed to get default registry area");
 		ExitFunction();
 	}
-
-	if( _wcsicmp( pAreaString, L"x86") == 0)
+	else if( _wcsicmp( pAreaString, L"x86") == 0)
 	{
 		(*peArea) = RegArea::X86;
 	}
 	else if( _wcsicmp( pAreaString, L"x64") == 0)
 	{
 		(*peArea) = RegArea::X64;
-	}
-	else if( _wcsicmp( pAreaString, L"default") == 0)
-	{
-		(*peArea) = RegArea::Default;
 	}
 	else
 	{
@@ -357,5 +366,64 @@ HRESULT CRegistryKey::ParseValueType(LPCWSTR pTypeString, RegValueType* peType)
 	}
 
 LExit:
+	return hr;
+}
+
+HRESULT CRegistryKey::GetDefaultArea( CRegistryKey::RegArea* pArea)
+{
+	HRESULT hr = S_OK;
+	DWORD dwRes = ERROR_SUCCESS;
+	MSIHANDLE hDatabase = NULL;
+	PMSIHANDLE hSummaryInfo;
+	UINT uiDataType = 0;
+	DWORD dwDataSize = 0;
+	WCHAR *pTemplate = NULL;
+	FILETIME ftJunk;
+	INT iJunk;
+
+	ExitOnNull( pArea, hr, E_INVALIDARG, "pArea is NULL");
+	(*pArea) = RegArea::Default;
+
+	::MessageBox( NULL, L"MsiBreak", L"MsiBreak", MB_OK);
+
+	hDatabase = WcaGetDatabaseHandle();
+	ExitOnNull( hDatabase, hr, E_FAIL, "Failed to get MSI database");
+
+	dwRes = ::MsiGetSummaryInformation( hDatabase, NULL, 0, &hSummaryInfo);
+	hr = HRESULT_FROM_WIN32( dwRes);
+	ExitOnFailure( hr, "Failed to get summary stream");
+
+	dwRes = ::MsiSummaryInfoGetProperty( hSummaryInfo, 7 /*PID_TEMPLATE*/ , &uiDataType, &iJunk, &ftJunk, L"", &dwDataSize);
+	if( dwRes != ERROR_MORE_DATA)
+	{
+		hr = E_INVALIDSTATE;
+		ExitOnFailure( hr, "Failed getting MSI Template property size from summary stream");
+	}
+
+	++dwDataSize;
+	hr = StrAlloc( &pTemplate, dwDataSize);
+	ExitOnFailure( hr, "Failed to allocate memory");
+	
+	dwRes = ::MsiSummaryInfoGetProperty( hSummaryInfo, 7 /*PID_TEMPLATE*/ , &uiDataType, &iJunk, &ftJunk, pTemplate, &dwDataSize);
+	hr = HRESULT_FROM_WIN32( dwRes);
+	ExitOnFailure( hr, "Failed to get summary stream template property");
+
+	if(( ::wcsstr( pTemplate, L"Intel64") != NULL) || ( ::wcsstr( pTemplate, L"x64") != NULL))
+	{
+		(*pArea) = RegArea::X64;
+	}
+	else
+	{
+		(*pArea) = RegArea::X86;
+	}
+
+LExit:
+
+	if( pTemplate != NULL)
+	{
+		StrFree( pTemplate);
+		pTemplate = NULL;
+	}
+
 	return hr;
 }
