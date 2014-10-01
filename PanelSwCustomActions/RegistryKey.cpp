@@ -1,6 +1,9 @@
 #include "stdafx.h"
 #include "RegistryKey.h"
 #include <strutil.h>
+#include "..\CaCommon\SummaryStream.h"
+
+#pragma comment( lib, "CaCommon.lib")
 
 CRegistryKey::CRegistryKey(void)
 	: _hKey( NULL)
@@ -373,57 +376,18 @@ HRESULT CRegistryKey::GetDefaultArea( CRegistryKey::RegArea* pArea)
 {
 	HRESULT hr = S_OK;
 	DWORD dwRes = ERROR_SUCCESS;
-	MSIHANDLE hDatabase = NULL;
-	PMSIHANDLE hSummaryInfo;
-	UINT uiDataType = 0;
-	DWORD dwDataSize = 0;
-	WCHAR *pTemplate = NULL;
-	FILETIME ftJunk;
-	INT iJunk;
+	bool bIsX64 = false;
+
+	::MessageBox( NULL, L"MsiBreak", L"MsiBreak", MB_OK);
 
 	ExitOnNull( pArea, hr, E_INVALIDARG, "pArea is NULL");
 	(*pArea) = RegArea::Default;
 
-	::MessageBox( NULL, L"MsiBreak", L"MsiBreak", MB_OK);
-
-	hDatabase = WcaGetDatabaseHandle();
-	ExitOnNull( hDatabase, hr, E_FAIL, "Failed to get MSI database");
-
-	dwRes = ::MsiGetSummaryInformation( hDatabase, NULL, 0, &hSummaryInfo);
-	hr = HRESULT_FROM_WIN32( dwRes);
-	ExitOnFailure( hr, "Failed to get summary stream");
-
-	dwRes = ::MsiSummaryInfoGetProperty( hSummaryInfo, 7 /*PID_TEMPLATE*/ , &uiDataType, &iJunk, &ftJunk, L"", &dwDataSize);
-	if( dwRes != ERROR_MORE_DATA)
-	{
-		hr = E_INVALIDSTATE;
-		ExitOnFailure( hr, "Failed getting MSI Template property size from summary stream");
-	}
-
-	++dwDataSize;
-	hr = StrAlloc( &pTemplate, dwDataSize);
-	ExitOnFailure( hr, "Failed to allocate memory");
+	hr = CSummaryStream::GetInstance()->IsPackageX64( &bIsX64);
+	ExitOnFailure( hr, "Failed determining package bitness");
 	
-	dwRes = ::MsiSummaryInfoGetProperty( hSummaryInfo, 7 /*PID_TEMPLATE*/ , &uiDataType, &iJunk, &ftJunk, pTemplate, &dwDataSize);
-	hr = HRESULT_FROM_WIN32( dwRes);
-	ExitOnFailure( hr, "Failed to get summary stream template property");
-
-	if(( ::wcsstr( pTemplate, L"Intel64") != NULL) || ( ::wcsstr( pTemplate, L"x64") != NULL))
-	{
-		(*pArea) = RegArea::X64;
-	}
-	else
-	{
-		(*pArea) = RegArea::X86;
-	}
+	(*pArea) = bIsX64 ? RegArea::X64 : RegArea::X86;
 
 LExit:
-
-	if( pTemplate != NULL)
-	{
-		StrFree( pTemplate);
-		pTemplate = NULL;
-	}
-
 	return hr;
 }

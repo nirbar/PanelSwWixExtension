@@ -19,7 +19,7 @@ enum eXmlMatch
 HRESULT ParseXmlMatch( LPCWSTR pMatchString, eXmlMatch *peMatch);
 HRESULT QueryXml( LPCWSTR pFile, LPCWSTR pXpath, eXmlMatch eMatch, LPCWSTR pProperty);
 
-UINT __stdcall XmlSearch(MSIHANDLE hInstall)
+extern "C" __declspec( dllexport ) UINT WINAPI XmlSearch(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
