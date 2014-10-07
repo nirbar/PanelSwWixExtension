@@ -26,10 +26,12 @@ HRESULT CSummaryStream::IsPackageX64( bool *pIsX64)
 	if( _pTemplate == NULL)
 	{
 		hr = GetProperty( SummaryStreamProperties::PID_TEMPLATE, &_pTemplate);
-		ExitOnFailure( hr, "Failed getting template property from summary stream");
-		ExitOnNull( _pTemplate, hr, E_FAIL, "Failed getting template property from summary stream");
+		BreakExitOnFailure( hr, "Failed getting template property from summary stream");
+		BreakExitOnNull( _pTemplate, hr, E_FAIL, "Failed getting template property from summary stream");
 	}
 	
+	MsiDebugBreak();
+
 	if(( ::wcsstr( _pTemplate, L"Intel64") != NULL) || ( ::wcsstr( _pTemplate, L"x64") != NULL))
 	{
 		(*pIsX64) = false;
@@ -55,29 +57,29 @@ HRESULT CSummaryStream::GetProperty( SummaryStreamProperties eProp, LPWSTR *ppPr
 	FILETIME ftJunk;
 	INT iJunk;
 
-	ExitOnNull( ppProp, hr, E_INVALIDARG, "ppProp is NULL");
+	BreakExitOnNull( ppProp, hr, E_INVALIDARG, "ppProp is NULL");
 
 	hDatabase = WcaGetDatabaseHandle();
-	ExitOnNull( hDatabase, hr, E_FAIL, "Failed to get MSI database");
+	BreakExitOnNull( hDatabase, hr, E_FAIL, "Failed to get MSI database");
 
 	dwRes = ::MsiGetSummaryInformation( hDatabase, NULL, 0, &hSummaryInfo);
 	hr = HRESULT_FROM_WIN32( dwRes);
-	ExitOnFailure( hr, "Failed to get summary stream");
+	BreakExitOnFailure( hr, "Failed to get summary stream");
 
 	dwRes = ::MsiSummaryInfoGetProperty( hSummaryInfo, eProp , &uiDataType, &iJunk, &ftJunk, L"", &dwDataSize);
 	if( dwRes != ERROR_MORE_DATA)
 	{
 		hr = E_INVALIDSTATE;
-		ExitOnFailure( hr, "Failed getting MSI Template property size from summary stream");
+		BreakExitOnFailure( hr, "Failed getting MSI Template property size from summary stream");
 	}
 
 	++dwDataSize;
 	hr = StrAlloc( ppProp, dwDataSize);
-	ExitOnFailure( hr, "Failed to allocate memory");
+	BreakExitOnFailure( hr, "Failed to allocate memory");
 	
 	dwRes = ::MsiSummaryInfoGetProperty( hSummaryInfo, eProp , &uiDataType, &iJunk, &ftJunk, (*ppProp), &dwDataSize);
 	hr = HRESULT_FROM_WIN32( dwRes);
-	ExitOnFailure( hr, "Failed to get summary stream template property");
+	BreakExitOnFailure1( hr, "Failed to get summary stream property with PID=%u", eProp);
 	
 LExit:
 	return hr;

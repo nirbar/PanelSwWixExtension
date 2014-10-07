@@ -17,5 +17,7 @@
 // WiX Header Files:
 #include <wcautil.h>
 
+#include "WixBreak.h"
+
 
 // TODO: reference additional headers your program requires here

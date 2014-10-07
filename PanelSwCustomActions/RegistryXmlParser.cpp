@@ -13,19 +13,19 @@ CRegistryXmlParser::CRegistryXmlParser()
 	IXMLDOMNode *pTmpNode = NULL;
 		
 	hr = ::CoInitialize(NULL); 
-	ExitOnFailure( hr, "Failed to CoInitialize");
+	BreakExitOnFailure( hr, "Failed to CoInitialize");
 
 	// XML docs.
 	hr = ::CoCreateInstance(CLSID_DOMDocument, NULL, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&_pXmlDoc);
-	ExitOnFailure( hr, "Failed to CoCreateInstance CLSID_DOMDocument");
+	BreakExitOnFailure( hr, "Failed to CoCreateInstance CLSID_DOMDocument");
 	
 	// XML root.
 	hr = _pXmlDoc->createElement( L"Root", &pRoot);
-	ExitOnFailure( hr, "Failed to create root XML element");
+	BreakExitOnFailure( hr, "Failed to create root XML element");
 
 	// Append root to docs
 	hr = _pXmlDoc->appendChild( pRoot, &pTmpNode);
-	ExitOnFailure( hr, "Failed to append root XML element");
+	BreakExitOnFailure( hr, "Failed to append root XML element");
 	pRoot.Attach( (IXMLDOMElement*) pTmpNode);
 
 LExit:
@@ -45,7 +45,7 @@ HRESULT CRegistryXmlParser::GetXmlString( BSTR* ppString)
 	UINT strSize = 0;
 
 	hr = _pXmlDoc->get_xml( ppString);
-	ExitOnFailure( hr, "Failed to get XML string");
+	BreakExitOnFailure( hr, "Failed to get XML string");
 
 LExit:
 	return hr;
@@ -61,40 +61,40 @@ HRESULT CRegistryXmlParser::AddDeleteKey( WCHAR* pId, CRegistryKey::RegRoot root
 	CComVariant value;
 
 	hr = _pXmlDoc->get_documentElement( &xmlRoot);
-	ExitOnFailure( hr, "Failed to get XML root");
+	BreakExitOnFailure( hr, "Failed to get XML root");
 
 	hr = _pXmlDoc->createElement( L"DeleteKey", &xmlElem);
-	ExitOnFailure( hr, "Failed to create XML element");
+	BreakExitOnFailure( hr, "Failed to create XML element");
 
 	attName = "Id";
 	value = pId;
 	hr = xmlElem->setAttribute( attName, value);
-	ExitOnFailure( hr, "Failed to set XML attribute");
+	BreakExitOnFailure( hr, "Failed to set XML attribute");
 
 	attName = "Root";
 	value = (DWORD)root;
 	hr = xmlElem->setAttribute( attName, value);
-	ExitOnFailure( hr, "Failed to set XML attribute");
+	BreakExitOnFailure( hr, "Failed to set XML attribute");
 
 	attName = "Key";
 	value = subkeyName;
 	hr = xmlElem->setAttribute( attName, value);
-	ExitOnFailure( hr, "Failed to set XML attribute");
+	BreakExitOnFailure( hr, "Failed to set XML attribute");
 
 	if( area == CRegistryKey::RegArea::Default)
 	{
 		hr = CRegistryKey::GetDefaultArea( &area);
-		ExitOnFailure( hr, "Failed to get default registry area");
+		BreakExitOnFailure( hr, "Failed to get default registry area");
 	}
 
 	attName = "Area";
 	value = area;
 	hr = xmlElem->setAttribute( attName, value);
-	ExitOnFailure( hr, "Failed to set XML attribute");
+	BreakExitOnFailure( hr, "Failed to set XML attribute");
 		
 	hr = xmlRoot->appendChild( xmlElem, &tmpNode);
 	tmpNode.Release();
-	ExitOnFailure( hr, "Failed to append XML element");
+	BreakExitOnFailure( hr, "Failed to append XML element");
 
 LExit:
 	return hr;
@@ -109,45 +109,45 @@ HRESULT CRegistryXmlParser::AddDeleteValue( WCHAR* pId, CRegistryKey::RegRoot ro
 	CComVariant value;
 	
 	hr = _pXmlDoc->get_documentElement( &xmlRoot);
-	ExitOnFailure( hr, "Failed to get XML root");
+	BreakExitOnFailure( hr, "Failed to get XML root");
 
 	hr = _pXmlDoc->createElement( L"DeleteValue", &xmlElem);
-	ExitOnFailure( hr, "Failed to create XML element");
+	BreakExitOnFailure( hr, "Failed to create XML element");
 
 	attName = "Id";
 	value = pId;
 	hr = xmlElem->setAttribute( attName, value);
-	ExitOnFailure( hr, "Failed to set XML attribute");
+	BreakExitOnFailure( hr, "Failed to set XML attribute");
 
 	attName = "Root";
 	value = (DWORD)root;
 	hr = xmlElem->setAttribute( attName, value);
-	ExitOnFailure( hr, "Failed to set XML attribute");
+	BreakExitOnFailure( hr, "Failed to set XML attribute");
 
 	attName = "Key";
 	value = subkeyName;
 	hr = xmlElem->setAttribute( attName, value);
-	ExitOnFailure( hr, "Failed to set XML attribute");
+	BreakExitOnFailure( hr, "Failed to set XML attribute");
 
 	if( area == CRegistryKey::RegArea::Default)
 	{
 		hr = CRegistryKey::GetDefaultArea( &area);
-		ExitOnFailure( hr, "Failed to get default registry area");
+		BreakExitOnFailure( hr, "Failed to get default registry area");
 	}
 
 	attName = "Area";
 	value = area;
 	hr = xmlElem->setAttribute( attName, value);
-	ExitOnFailure( hr, "Failed to set XML attribute");
+	BreakExitOnFailure( hr, "Failed to set XML attribute");
 
 	attName = "Name";
 	value = valName;
 	hr = xmlElem->setAttribute( attName, value);
-	ExitOnFailure( hr, "Failed to set XML attribute");
+	BreakExitOnFailure( hr, "Failed to set XML attribute");
 		
 	hr = xmlRoot->appendChild( xmlElem, &tmpNode);
 	tmpNode.Release();
-	ExitOnFailure( hr, "Failed to append XML element");
+	BreakExitOnFailure( hr, "Failed to append XML element");
 
 LExit:
 	return hr;
@@ -162,40 +162,40 @@ HRESULT CRegistryXmlParser::AddCreateKey( WCHAR* pId, CRegistryKey::RegRoot root
 	CComVariant value;
 	
 	hr = _pXmlDoc->get_documentElement( &xmlRoot);
-	ExitOnFailure( hr, "Failed to get XML root");
+	BreakExitOnFailure( hr, "Failed to get XML root");
 
 	hr = _pXmlDoc->createElement( L"CreateKey", &xmlElem);
-	ExitOnFailure( hr, "Failed to create XML element");
+	BreakExitOnFailure( hr, "Failed to create XML element");
 	
 	attName = "Id";
 	value = pId;
 	hr = xmlElem->setAttribute( attName, value);
-	ExitOnFailure( hr, "Failed to set XML attribute");
+	BreakExitOnFailure( hr, "Failed to set XML attribute");
 
 	attName = "Root";
 	value = (DWORD)root;
 	hr = xmlElem->setAttribute( attName, value);
-	ExitOnFailure( hr, "Failed to set XML attribute");
+	BreakExitOnFailure( hr, "Failed to set XML attribute");
 
 	attName = "Key";
 	value = subkeyName;
 	hr = xmlElem->setAttribute( attName, value);
-	ExitOnFailure( hr, "Failed to set XML attribute");
+	BreakExitOnFailure( hr, "Failed to set XML attribute");
 
 	if( area == CRegistryKey::RegArea::Default)
 	{
 		hr = CRegistryKey::GetDefaultArea( &area);
-		ExitOnFailure( hr, "Failed to get default registry area");
+		BreakExitOnFailure( hr, "Failed to get default registry area");
 	}
 
 	attName = "Area";
 	value = area;
 	hr = xmlElem->setAttribute( attName, value);
-	ExitOnFailure( hr, "Failed to set XML attribute");
+	BreakExitOnFailure( hr, "Failed to set XML attribute");
 		
 	hr = xmlRoot->appendChild( xmlElem, &tmpNode);
 	tmpNode.Release();
-	ExitOnFailure( hr, "Failed to append XML element");
+	BreakExitOnFailure( hr, "Failed to append XML element");
 
 LExit:
 	return hr;
@@ -211,55 +211,55 @@ HRESULT CRegistryXmlParser::AddCreateValue(WCHAR* pId, CRegistryKey::RegRoot roo
 	void *pArrayData = NULL;
 	
 	hr = _pXmlDoc->get_documentElement( &xmlRoot);
-	ExitOnFailure( hr, "Failed to get XML root");
+	BreakExitOnFailure( hr, "Failed to get XML root");
 
 	hr = _pXmlDoc->createElement( L"CreateValue", &xmlElem);
-	ExitOnFailure( hr, "Failed to create XML element");
+	BreakExitOnFailure( hr, "Failed to create XML element");
 
 	attName = "Id";
 	value = pId;
 	hr = xmlElem->setAttribute( attName, value);
-	ExitOnFailure( hr, "Failed to set XML attribute");
+	BreakExitOnFailure( hr, "Failed to set XML attribute");
 
 	attName = "Root";
 	value = (DWORD)root;
 	hr = xmlElem->setAttribute( attName, value);
-	ExitOnFailure( hr, "Failed to set XML attribute");
+	BreakExitOnFailure( hr, "Failed to set XML attribute");
 
 	attName = "Key";
 	value = subkeyName;
 	hr = xmlElem->setAttribute( attName, value);
-	ExitOnFailure( hr, "Failed to set XML attribute");
+	BreakExitOnFailure( hr, "Failed to set XML attribute");
 	
 	if( area == CRegistryKey::RegArea::Default)
 	{
 		hr = CRegistryKey::GetDefaultArea( &area);
-		ExitOnFailure( hr, "Failed to get default registry area");
+		BreakExitOnFailure( hr, "Failed to get default registry area");
 	}
 
 	attName = "Area";
 	value = area;
 	hr = xmlElem->setAttribute( attName, value);
-	ExitOnFailure( hr, "Failed to set XML attribute");
+	BreakExitOnFailure( hr, "Failed to set XML attribute");
 
 	attName = "Name";
 	value = valName;
 	hr = xmlElem->setAttribute( attName, value);
-	ExitOnFailure( hr, "Failed to set XML attribute");
+	BreakExitOnFailure( hr, "Failed to set XML attribute");
 
 	attName = "Type";
 	value = valType;
 	hr = xmlElem->setAttribute( attName, value);
-	ExitOnFailure( hr, "Failed to set XML attribute");
+	BreakExitOnFailure( hr, "Failed to set XML attribute");
 
 	attName = "Data";
 	value = pData;
 	hr = xmlElem->setAttribute( attName, value);
-	ExitOnFailure( hr, "Failed to set XML attribute");
+	BreakExitOnFailure( hr, "Failed to set XML attribute");
 		
 	hr = xmlRoot->appendChild( xmlElem, &tmpNode);
 	tmpNode.Release();
-	ExitOnFailure( hr, "Failed to append XML element");
+	BreakExitOnFailure( hr, "Failed to append XML element");
 
 LExit:
 	return hr;
@@ -279,46 +279,46 @@ HRESULT CRegistryXmlParser::Execute( WCHAR *pCustomActionData)
 
 	// XML docs.
 	hr = ::CoCreateInstance(CLSID_DOMDocument, NULL, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&pXmlDoc);
-	ExitOnFailure( hr, "Failed to CoCreateInstance CLSID_DOMDocument");
+	BreakExitOnFailure( hr, "Failed to CoCreateInstance CLSID_DOMDocument");
 
 	hr = pXmlDoc->loadXML( pCustomActionData, &isXmlSuccess);
-	ExitOnFailure( hr, "Failed to load XML");
+	BreakExitOnFailure( hr, "Failed to load XML");
 	if( ! isXmlSuccess)
 	{
 		hr = E_FAIL;
-		ExitOnFailure( hr, "Failed to load XML");
+		BreakExitOnFailure( hr, "Failed to load XML");
 	}
 
 	hr = pXmlDoc->selectNodes( CComBSTR( L"/Root/*"), &pTmpNodes);
-	ExitOnFailure( hr, "Failed to select XML nodes");
-	ExitOnNull( pTmpNodes, hr, E_FAIL, "Failed to select XML nodes");
+	BreakExitOnFailure( hr, "Failed to select XML nodes");
+	BreakExitOnNull( pTmpNodes, hr, E_FAIL, "Failed to select XML nodes");
 	pNodes.Attach( pTmpNodes);
 
 	hr = pNodes->get_length( &nodeCount);
-	ExitOnFailure( hr, "Failed to get node count");
+	BreakExitOnFailure( hr, "Failed to get node count");
 
 	for( LONG i = 0; i < nodeCount; ++i)
 	{
 		pTmpNode = NULL;
 
 		hr = pNodes->get_item( i, &pTmpNode);
-		ExitOnFailure( hr, "Failed to get node");
-		ExitOnNull( pTmpNode, hr, E_FAIL, "Failed to get node");
+		BreakExitOnFailure( hr, "Failed to get node");
+		BreakExitOnNull( pTmpNode, hr, E_FAIL, "Failed to get node");
 
 		hr = pTmpNode->get_nodeType( &nodeType);
-		ExitOnFailure( hr, "Failed to get node type");
+		BreakExitOnFailure( hr, "Failed to get node type");
 		if( nodeType != DOMNodeType::NODE_ELEMENT)
 		{
 			hr = E_FAIL;
-			ExitOnFailure( hr, "Expected an element");
+			BreakExitOnFailure( hr, "Expected an element");
 		}
 
 		hr = pTmpNode->QueryInterface( IID_IXMLDOMElement, (void**)&pCurrElem);
-		ExitOnFailure( hr, "Failed quering as IID_IXMLDOMElement");
-		ExitOnNull( pCurrElem, hr, E_FAIL, "Failed to get IID_IXMLDOMElement");
+		BreakExitOnFailure( hr, "Failed quering as IID_IXMLDOMElement");
+		BreakExitOnNull( pCurrElem, hr, E_FAIL, "Failed to get IID_IXMLDOMElement");
 
 		hr = XmlExecute( pCurrElem);
-		ExitOnFailure( hr, "Failed to parse-execute XML element");
+		BreakExitOnFailure( hr, "Failed to parse-execute XML element");
 	}
 
 LExit:
@@ -336,15 +336,15 @@ HRESULT CRegistryXmlParser::XmlExecute( IXMLDOMElement *xmlElem)
 
 	// Get common fields.
 	hr = xmlElem->get_tagName( &tag);
-	ExitOnFailure( hr, "Failed to get XML tag name");	
+	BreakExitOnFailure( hr, "Failed to get XML tag name");	
 	hr = xmlElem->getAttribute( CComBSTR( "Id"), &id);
-	ExitOnFailure( hr, "Failed to get XML Id attribute");
+	BreakExitOnFailure( hr, "Failed to get XML Id attribute");
 	hr = xmlElem->getAttribute( CComBSTR( "Root"), &root);
-	ExitOnFailure( hr, "Failed to get XML Root attribute");
+	BreakExitOnFailure( hr, "Failed to get XML Root attribute");
 	hr = xmlElem->getAttribute( CComBSTR( "Key"), &key);
-	ExitOnFailure( hr, "Failed to get XML Key attribute");
+	BreakExitOnFailure( hr, "Failed to get XML Key attribute");
 	hr = xmlElem->getAttribute( CComBSTR( "Area"), &area);
-	ExitOnFailure( hr, "Failed to get XML Area attribute");
+	BreakExitOnFailure( hr, "Failed to get XML Area attribute");
 
 	Bstr2Dword( root, (DWORD*)&dwRoot);
 	Bstr2Dword( area, (DWORD*)&dwArea);
@@ -352,35 +352,35 @@ HRESULT CRegistryXmlParser::XmlExecute( IXMLDOMElement *xmlElem)
 	if( wcscmp( tag, L"DeleteKey") == 0)
 	{
 		hr = DeleteKey( (CRegistryKey::RegRoot)dwRoot, key.bstrVal, (CRegistryKey::RegArea)dwArea);
-		ExitOnFailure( hr, "Failed to delete key");
+		BreakExitOnFailure( hr, "Failed to delete key");
 		ExitFunction();
 	}
 	else if( wcscmp( tag, L"CreateKey") == 0)
 	{
 		hr = CreateKey( (CRegistryKey::RegRoot)dwRoot, key.bstrVal, (CRegistryKey::RegArea)dwArea);
-		ExitOnFailure( hr, "Failed to create key");
+		BreakExitOnFailure( hr, "Failed to create key");
 		ExitFunction();
 	}
 	else if( wcscmp( tag, L"DeleteValue") == 0)
 	{
 		hr = xmlElem->getAttribute( CComBSTR( "Name"), &valName);
-		ExitOnFailure( hr, "Failed to get XML Name attribute");
+		BreakExitOnFailure( hr, "Failed to get XML Name attribute");
 
 		hr = DeleteValue( (CRegistryKey::RegRoot)dwRoot, key.bstrVal, (CRegistryKey::RegArea)dwArea, valName.bstrVal);
-		ExitOnFailure( hr, "Failed to create key");
+		BreakExitOnFailure( hr, "Failed to create key");
 		ExitFunction();
 	}
 	else if( wcscmp( tag, L"CreateValue") == 0)
 	{
 		hr = xmlElem->getAttribute( CComBSTR( "Name"), &valName);
-		ExitOnFailure( hr, "Failed to get XML Name attribute");
+		BreakExitOnFailure( hr, "Failed to get XML Name attribute");
 		hr = xmlElem->getAttribute( CComBSTR( "Type"), &valType);
-		ExitOnFailure( hr, "Failed to get XML Type attribute");
+		BreakExitOnFailure( hr, "Failed to get XML Type attribute");
 		hr = xmlElem->getAttribute( CComBSTR( "Data"), &valData);
-		ExitOnFailure( hr, "Failed to get XML Data attribute");
+		BreakExitOnFailure( hr, "Failed to get XML Data attribute");
 
 		hr = regDataSer.DeSerialize(valData.bstrVal, valType.bstrVal);
-		ExitOnFailure(hr, "Failed to desrialize registry data");
+		BreakExitOnFailure(hr, "Failed to desrialize registry data");
 
 		hr = CreateValue( 
 			(CRegistryKey::RegRoot)dwRoot
@@ -390,7 +390,7 @@ HRESULT CRegistryXmlParser::XmlExecute( IXMLDOMElement *xmlElem)
 			, regDataSer.DataType()
 			, regDataSer.Data()
 			, regDataSer.Size());
-		ExitOnFailure( hr, "Failed to create value");
+		BreakExitOnFailure( hr, "Failed to create value");
 
 		ExitFunction();
 	}
@@ -415,10 +415,10 @@ HRESULT CRegistryXmlParser::DeleteKey( CRegistryKey::RegRoot root, WCHAR* subkey
 	{
 		return S_OK;
 	}
-	ExitOnFailure( hr, "Failed to open registry key");
+	BreakExitOnFailure( hr, "Failed to open registry key");
 
 	hr = regKey.Delete();
-	ExitOnFailure( hr, "Failed to delete registry key");
+	BreakExitOnFailure( hr, "Failed to delete registry key");
 
 LExit:
 	return hr;
@@ -430,7 +430,7 @@ HRESULT CRegistryXmlParser::CreateKey( CRegistryKey::RegRoot root, WCHAR* subkey
 	HRESULT hr;
 
 	hr = regKey.Create( root, subkeyName, (CRegistryKey::RegArea)area, CRegistryKey::RegAccess::All);
-	ExitOnFailure( hr, "Failed to create registry key");
+	BreakExitOnFailure( hr, "Failed to create registry key");
 
 LExit:
 	return hr;
@@ -446,10 +446,10 @@ HRESULT CRegistryXmlParser::DeleteValue( CRegistryKey::RegRoot root, WCHAR* subk
 	{
 		return S_OK;
 	}
-	ExitOnFailure( hr, "Failed to open registry key");
+	BreakExitOnFailure( hr, "Failed to open registry key");
 
 	hr = regKey.DeleteValue( valName);
-	ExitOnFailure( hr, "Failed to open registry value");
+	BreakExitOnFailure( hr, "Failed to open registry value");
 
 LExit:
 	return hr;
@@ -461,10 +461,10 @@ HRESULT CRegistryXmlParser::CreateValue( CRegistryKey::RegRoot root, WCHAR* subk
 	HRESULT hr;
 
 	hr = regKey.Create( root, subkeyName, (CRegistryKey::RegArea)area, CRegistryKey::RegAccess::All);
-	ExitOnFailure( hr, "Failed to create registry key");
+	BreakExitOnFailure( hr, "Failed to create registry key");
 
 	hr = regKey.SetValue( valName, (CRegistryKey::RegValueType)valType, valData, dataSize);
-	ExitOnFailure( hr, "Failed to create registry value");
+	BreakExitOnFailure( hr, "Failed to create registry value");
 
 LExit:
 	return hr;
