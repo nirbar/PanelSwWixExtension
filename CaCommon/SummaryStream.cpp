@@ -23,6 +23,8 @@ HRESULT CSummaryStream::IsPackageX64( bool *pIsX64)
 {
 	HRESULT hr = S_OK;
 
+	BreakExitOnNull( pIsX64, hr, E_INVALIDARG, "pIsX64 is NULL");
+
 	if( _pTemplate == NULL)
 	{
 		hr = GetProperty( SummaryStreamProperties::PID_TEMPLATE, &_pTemplate);
