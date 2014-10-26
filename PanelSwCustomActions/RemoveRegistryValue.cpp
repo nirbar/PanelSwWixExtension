@@ -7,7 +7,7 @@
 #define RemoveRegistryValueQuery L"SELECT `Id`, `Root`, `Key`, `Name`, `Area`, `Attributes`, `Condition` FROM `PSW_RemoveRegistryValue`"
 enum eRemoveRegistryValueQuery { Id = 1, Root, Key, Name, Area, Attributes, Condition };
 
-extern "C" __declspec( dllexport ) UINT WINAPI RemoveRegistryValue_Immediate(MSIHANDLE hInstall)
+extern "C" __declspec( dllexport ) UINT RemoveRegistryValue_Immediate(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -137,7 +137,7 @@ LExit:
 }
 
 
-extern "C" __declspec( dllexport ) UINT WINAPI RemoveRegistryValue_Deferred(MSIHANDLE hInstall)
+extern "C" __declspec( dllexport ) UINT RemoveRegistryValue_Deferred(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

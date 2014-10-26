@@ -21,7 +21,7 @@ enum ReadIniValuesAttributes
 	IGNORE_ERRORS = 1
 };
 
-extern "C" __declspec( dllexport ) UINT WINAPI ReadIniValues(MSIHANDLE hInstall)
+extern "C" __declspec( dllexport ) UINT ReadIniValues(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
