@@ -55,7 +55,7 @@ HRESULT CRegDataSerializer::Allocate(DWORD size)
 	if (_bytes == NULL)
 	{
 		hr = E_INSUFFICIENT_BUFFER;
-		ExitOnFailure(hr, "Failed to allocate buffer");
+		BreakExitOnFailure(hr, "Failed to allocate buffer");
 	}
 
 	_size = size;
@@ -71,11 +71,11 @@ HRESULT CRegDataSerializer::Set(const BYTE* pData, DWORD dwDataType, DWORD dwSiz
 	errno_t err;
 
 	hr = Allocate(dwSize);
-	ExitOnFailure(hr, "Failed to allocate buffer");
+	BreakExitOnFailure(hr, "Failed to allocate buffer");
 
 	err = memcpy_s(_bytes, _bufSize, pData, dwSize);
 	hr = HRESULT_FROM_WIN32(err);
-	ExitOnFailure(hr, "Failed to copy memory");
+	BreakExitOnFailure(hr, "Failed to copy memory");
 
 	_size = dwSize;
 	_dataType = dwDataType;
@@ -96,7 +96,7 @@ HRESULT CRegDataSerializer::Set(LPCWSTR pDataString, LPCWSTR pDataTypeString)
 	CRegistryKey::RegValueType eType;
 
 	hr = CRegistryKey::ParseValueType(pDataTypeString, &eType);
-	ExitOnFailure(hr, "Failed to parse data type");
+	BreakExitOnFailure(hr, "Failed to parse data type");
 	_dataType = eType;
 
 	switch (eType)
@@ -138,12 +138,12 @@ HRESULT CRegDataSerializer::Set(LPCWSTR pDataString, LPCWSTR pDataTypeString)
 	
 	default:
 		hr = E_INVALIDARG;
-		ExitOnFailure(hr, "Invalid registry data type");
+		BreakExitOnFailure(hr, "Invalid registry data type");
 		break;
 	}
 
 	hr = Set(pData, _dataType, dwSize);
-	ExitOnFailure(hr, "Invalid registry data");
+	BreakExitOnFailure(hr, "Invalid registry data");
 
 LExit:
 	return hr;
@@ -159,21 +159,21 @@ HRESULT CRegDataSerializer::Serialize(LPWSTR* ppDst) const
 
 	stStrSize = 1 + Base64EncodeGetRequiredLength( _size, ATL_BASE64_FLAG_NOCRLF);
 	pAnsiStr = (LPSTR)MemAlloc( stStrSize, TRUE);
-	ExitOnNull( pAnsiStr, hr, NTE_NO_MEMORY,  "Failed to allocate memory");
+	BreakExitOnNull( pAnsiStr, hr, NTE_NO_MEMORY,  "Failed to allocate memory");
 
 	iStrSize = stStrSize;
 	if( ! Base64Encode( _bytes, _size, pAnsiStr, &iStrSize, ATL_BASE64_FLAG_NOCRLF))
 	{
 		hr = E_FAIL;
-		ExitOnFailure( hr, "Failed to encode to base64 string");
+		BreakExitOnFailure( hr, "Failed to encode to base64 string");
 	}
 
 	hr = StrAlloc( ppDst, iStrSize);
-	ExitOnFailure(hr, "Failed to allocate string");
+	BreakExitOnFailure(hr, "Failed to allocate string");
 
 	err = mbstowcs_s( &stStrSize, (*ppDst), iStrSize, pAnsiStr, iStrSize - 1);
 	hr = HRESULT_FROM_WIN32( err);
-	ExitOnFailure(hr, "Failed to convert ansi-string to wide string.");
+	BreakExitOnFailure(hr, "Failed to convert ansi-string to wide string.");
 
 LExit:
 	return hr;
@@ -190,28 +190,28 @@ HRESULT CRegDataSerializer::DeSerialize(LPCWSTR pSrc, LPCWSTR sDataType)
 
 	_dataType = ::wcstol(sDataType, NULL, 10);
 	hr = CRegistryKey::ParseValueType(sDataType, &eType);
-	ExitOnFailure(hr, "Failed to parse data type");
+	BreakExitOnFailure(hr, "Failed to parse data type");
 	_dataType = eType;
 
 	// Allocate c-string
 	iStrSize = 1 + wcslen( pSrc);
 	pAnsiStr = (LPSTR)MemAlloc( iStrSize, TRUE);
-	ExitOnNull( pAnsiStr, hr, NTE_NO_MEMORY,  "Failed to allocate memory");
+	BreakExitOnNull( pAnsiStr, hr, NTE_NO_MEMORY,  "Failed to allocate memory");
 
 	// w-string to c-string
 	err = ::wcstombs_s( &iStrSize, pAnsiStr, iStrSize, pSrc, (iStrSize - 1) * sizeof( WCHAR));
 	hr = HRESULT_FROM_WIN32( err);
-	ExitOnFailure(hr, "Failed to convert wide-string to ansi-string.");
+	BreakExitOnFailure(hr, "Failed to convert wide-string to ansi-string.");
 
 	iMemSize = 1 + Base64DecodeGetRequiredLength( iStrSize);	
 	hr = Allocate( iMemSize);
-	ExitOnFailure(hr, "Failed to allocate memory.");
+	BreakExitOnFailure(hr, "Failed to allocate memory.");
 
 	iMemSize = _bufSize;
 	if( ! Base64Decode( pAnsiStr, iStrSize, _bytes, &iMemSize))
 	{
 		hr = E_FAIL;
-		ExitOnFailure( hr, "Failed to decode base64 string");
+		BreakExitOnFailure( hr, "Failed to decode base64 string");
 	}
 	_size = iMemSize;
 

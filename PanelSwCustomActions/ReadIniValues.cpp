@@ -21,7 +21,7 @@ enum ReadIniValuesAttributes
 	IGNORE_ERRORS = 1
 };
 
-UINT __stdcall ReadIniValues(MSIHANDLE hInstall)
+extern "C" __declspec( dllexport ) UINT ReadIniValues(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -30,22 +30,22 @@ UINT __stdcall ReadIniValues(MSIHANDLE hInstall)
 	bool bIgnoreErrors = false;
 
 	hr = WcaInitialize(hInstall, "ReadIniValues");
-	ExitOnFailure(hr, "Failed to initialize");
+	BreakExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized.");
 
 	// Ensure table PSW_ReadIniValues exists.
 	hr = WcaTableExists(L"PSW_ReadIniValues");
-	ExitOnFailure(hr, "Table does not exist 'PSW_ReadIniValues'. Have you authored 'PanelSw:ReadIniValues' entries in WiX code?");
+	BreakExitOnFailure(hr, "Table does not exist 'PSW_ReadIniValues'. Have you authored 'PanelSw:ReadIniValues' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(READINIVALUES_QUERY, &hView);
-	ExitOnFailure(hr, "Failed to execute SQL query on 'ReadIniValues'.");
+	BreakExitOnFailure(hr, "Failed to execute SQL query on 'ReadIniValues'.");
 	WcaLog(LOGMSG_STANDARD, "Executed query.");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
-		ExitOnFailure(hr, "Failed to fetch record.");
+		BreakExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
 		WCHAR *Id = NULL;
@@ -56,19 +56,19 @@ UINT __stdcall ReadIniValues(MSIHANDLE hInstall)
 		WCHAR *Condition = NULL;
 		int Attributes;
 		hr = WcaGetRecordString(hRecord, 1, &Id);
-		ExitOnFailure(hr, "Failed to get Id.");
+		BreakExitOnFailure(hr, "Failed to get Id.");
 		hr = WcaGetRecordFormattedString(hRecord, 2, &FilePath);
-		ExitOnFailure(hr, "Failed to get FilePath.");
+		BreakExitOnFailure(hr, "Failed to get FilePath.");
 		hr = WcaGetRecordFormattedString(hRecord, 3, &Section);
-		ExitOnFailure(hr, "Failed to get Section.");
+		BreakExitOnFailure(hr, "Failed to get Section.");
 		hr = WcaGetRecordFormattedString(hRecord, 4, &Key);
-		ExitOnFailure(hr, "Failed to get Key.");
+		BreakExitOnFailure(hr, "Failed to get Key.");
 		hr = WcaGetRecordString(hRecord, 5, &DestProperty);
-		ExitOnFailure(hr, "Failed to get DestProperty.");
+		BreakExitOnFailure(hr, "Failed to get DestProperty.");
 		hr = WcaGetRecordInteger(hRecord, 6, &Attributes);
-		ExitOnFailure(hr, "Failed to get Attributes.");
+		BreakExitOnFailure(hr, "Failed to get Attributes.");
 		hr = WcaGetRecordString(hRecord, 7, &Condition);
-		ExitOnFailure(hr, "Failed to get Condition.");
+		BreakExitOnFailure(hr, "Failed to get Condition.");
 		WcaLog(LOGMSG_STANDARD, "Id=%S; FilePath=%S; Section=%S; Key=%S; DestProperty=%S; Attributes=%i; Condition=%S"
 			, Id
 			, FilePath
@@ -95,7 +95,7 @@ UINT __stdcall ReadIniValues(MSIHANDLE hInstall)
 
 		case MSICONDITION::MSICONDITION_ERROR:
 			hr = E_FAIL;
-			ExitOnFailure(hr, "Bad Condition field");
+			BreakExitOnFailure(hr, "Bad Condition field");
 		}
 
 		// Get the value.
@@ -121,7 +121,7 @@ UINT __stdcall ReadIniValues(MSIHANDLE hInstall)
 				{
 					hr = S_OK;
 				}
-				ExitOnFailure(hr, "File not found.");
+				BreakExitOnFailure(hr, "File not found.");
 			}
 			continue;
 		}
@@ -129,7 +129,7 @@ UINT __stdcall ReadIniValues(MSIHANDLE hInstall)
 		hr = WcaSetProperty(DestProperty, Value);
 		if (!bIgnoreErrors)
 		{
-			ExitOnFailure(hr, "Failed to set property.");
+			BreakExitOnFailure(hr, "Failed to set property.");
 		}
 	}
 

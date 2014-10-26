@@ -18,31 +18,13 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="ReadIniValues.cpp">
+    <ClCompile Include="DllMain.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="TerminateSuccessfully.cpp">
+    <ClCompile Include="SummaryStream.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="CustomUninstallKey.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RegistryKey.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RegistryXmlParser.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RegDataSerializer.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="RemoveRegistryValue.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="XmlSearch.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="Rollback.cpp">
+    <ClCompile Include="MsiBreak.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -53,16 +35,13 @@
     <ClInclude Include="targetver.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="CustomUninstallKey.h">
+    <ClInclude Include="SummaryStream.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RegistryKey.h">
+    <ClInclude Include="MsiBreak.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RegistryXmlParser.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RegDataSerializer.h">
+    <ClInclude Include="WixBreak.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

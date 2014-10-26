@@ -11,54 +11,52 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{0C3A56AA-8073-44E1-8DE4-C257D581BFF0}</ProjectGuid>
-    <RootNamespace>PanelSwCustomActions</RootNamespace>
+    <ProjectGuid>{7C6B230A-9186-4C1E-B61D-E803CC36A347}</ProjectGuid>
+    <RootNamespace>CaCommon</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  
-  <PropertyGroup>
+
+  <PropertyGroup Label="Configuration">
     <_ProjectFileVersion>11.0.50727.1</_ProjectFileVersion>
-    <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</WholeProgramOptimization>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
     <PlatformToolset>v120_xp</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
     <UseOfAtl>Static</UseOfAtl>
   </PropertyGroup>
-
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
-    <WholeProgramOptimization>true</WholeProgramOptimization>
-  </PropertyGroup>
-
+  
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
-  <ImportGroup Label="PropertySheets">
+  <ImportGroup>
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <PropertyGroup Label="UserMacros" />
+
   <PropertyGroup>
-    <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
+    <OutDir>$(SolutionDir)\Lib\$(Configuration)\</OutDir>
     <IntDir>obj\$(Configuration)\</IntDir>
-    <LibraryPath>$(SolutionDir)\Lib\$(Configuration)\;$(WIX)SDK\VS2013\lib\x86;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SolutionDir)CaCommon;$(WIX)SDK\VS2013\inc;$(IncludePath)</IncludePath>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
+    <LinkIncremental>true</LinkIncremental>
+    <TargetExt>.lib</TargetExt>
   </PropertyGroup>
 
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>$(WIX)sdk\VS2013\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;CUSTOMACTIONTEST_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>msi.lib;dutil.lib;wcautil.lib;Version.lib;Shell32.lib;msxml2.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>msi.lib;dutil.lib;wcautil.lib;Version.lib;msxml2.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(WIX)sdk\VS2013\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <ModuleDefinitionFile>CustomAction.def</ModuleDefinitionFile>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
-	
+  
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
@@ -68,9 +66,6 @@
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
-    <Link>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
-    </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -82,30 +77,25 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="RegDataSerializer.cpp" />
-    <ClCompile Include="CustomUninstallKey.cpp" />
-    <ClCompile Include="ReadIniValues.cpp" />
-    <ClCompile Include="RegistryKey.cpp" />
-    <ClCompile Include="RegistryXmlParser.cpp" />
-    <ClCompile Include="RemoveRegistryValue.cpp" />
-    <ClCompile Include="Rollback.cpp" />
-    <ClCompile Include="stdafx.cpp" />
-    <ClCompile Include="TerminateSuccessfully.cpp" />
-    <ClCompile Include="XmlSearch.cpp" />
+    <ClCompile Include="DllMain.cpp" />
+    <ClCompile Include="MsiBreak.cpp" />
+    <ClCompile Include="stdafx.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="SummaryStream.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="RegDataSerializer.h" />
-    <ClInclude Include="CustomUninstallKey.h" />
-    <ClInclude Include="RegistryKey.h" />
-    <ClInclude Include="RegistryXmlParser.h" />
+    <ClInclude Include="MsiBreak.h" />
     <ClInclude Include="stdafx.h" />
+    <ClInclude Include="SummaryStream.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="WixBreak.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -4,19 +4,22 @@
 //
 
 #pragma once
+#ifndef _WIN32_WINNT            // Specifies that the minimum required platform is Windows 2000.
+#define _WIN32_WINNT 0x0501
+#endif
 
 #include "targetver.h"
 
 #define WIN32_LEAN_AND_MEAN             // Exclude rarely-used stuff from Windows headers
 // Windows Header Files:
 #include <windows.h>
-#include <tchar.h>
 #include <strsafe.h>
 #include <msiquery.h>
 
 // WiX Header Files:
 #include <wcautil.h>
 
+#include "WixBreak.h"
+
 
 // TODO: reference additional headers your program requires here
-#include "WixBreak.h"
