@@ -11,6 +11,10 @@
 #define BreakExitOnNull1(p, x, e, f, s)		if (NULL == p) { MsiDebugBreak(); } ExitOnNull1(p, x, e, f, s)		 
 #define BreakExitOnNull2(p, x, e, f, s, t)  if (NULL == p) { MsiDebugBreak(); } ExitOnNull2(p, x, e, f, s, t)  
 
+#define BreakExitOnWin32Error(e, x, s)			if (ERROR_SUCCESS != e) { MsiDebugBreak(); } ExitOnWin32Error(e, x, s)		
+#define BreakExitOnWin32Error1(e, x, f, s)		if (ERROR_SUCCESS != e) { MsiDebugBreak(); } ExitOnWin32Error1(e, x, f, s)	
+#define BreakExitOnWin32Error2(e, x, f, s, t)	if (ERROR_SUCCESS != e) { MsiDebugBreak(); } ExitOnWin32Error2(e, x, f, s, t)
+
 #else
 
 #define BreakExitOnFailure(x, s)			ExitOnFailure(x, s)				
@@ -20,5 +24,9 @@
 #define BreakExitOnNull(p, x, e, s)			ExitOnNull(p, x, e, s)			
 #define BreakExitOnNull1(p, x, e, f, s)		ExitOnNull1(p, x, e, f, s)		
 #define BreakExitOnNull2(p, x, e, f, s, t)	ExitOnNull2(p, x, e, f, s, t) 
+
+#define BreakExitOnWin32Error(e, x, s)			ExitOnWin32Error(e, x, s)		
+#define BreakExitOnWin32Error1(e, x, f, s)		ExitOnWin32Error1(e, x, f, s)	
+#define BreakExitOnWin32Error2(e, x, f, s, t)	ExitOnWin32Error2(e, x, f, s, t)
 
 #endif
