@@ -2,12 +2,12 @@
 #include "stdafx.h"
 #include <errno.h>
 #include <objbase.h>
-#include <msxml.h>
+#include <msxml6.h>
 #include <atlbase.h>
-#pragma comment( lib, "msxml2.lib")
+#pragma comment( lib, "msxml6.lib")
 
-#define XmlSearchQuery L"SELECT `Id`, `Property_`, `FilePath`, `XPath`, `Match`, `Attributes`, `Condition` FROM `PSW_XmlSearch`"
-enum eXmlSearchQueryQuery { Id = 1, Property_, FilePath, XPath, Match, Attributes, Condition };
+#define XmlSearchQuery L"SELECT `Id`, `Property_`, `FilePath`, `Expression`, `Language`, `Namespaces`, `Match`, `Attributes`, `Condition` FROM `PSW_XmlSearch`"
+enum eXmlSearchQueryQuery { Id = 1, Property_, FilePath, Expression, Language, Namespaces, Match, Attributes, Condition };
 
 enum eXmlMatch
 {
@@ -17,7 +17,7 @@ enum eXmlMatch
 };
 
 HRESULT ParseXmlMatch( LPCWSTR pMatchString, eXmlMatch *peMatch);
-HRESULT QueryXml( LPCWSTR pFile, LPCWSTR pXpath, eXmlMatch eMatch, LPCWSTR pProperty);
+HRESULT QueryXml(LPCWSTR pFile, LPCWSTR pExpression, LPCWSTR Language, LPCWSTR Namespaces, eXmlMatch eMatch, LPCWSTR pProperty);
 
 extern "C" __declspec( dllexport ) UINT XmlSearch(MSIHANDLE hInstall)
 {
@@ -52,7 +52,9 @@ extern "C" __declspec( dllexport ) UINT XmlSearch(MSIHANDLE hInstall)
 		WCHAR *Id = NULL;
 		WCHAR *Property = NULL;
 		WCHAR *FilePath = NULL;
-		WCHAR *XPath = NULL;
+		WCHAR *Expression = NULL;
+		WCHAR *Language = NULL;
+		WCHAR *Namespaces = NULL;
 		WCHAR *Match = NULL;
 		WCHAR *Condition = NULL;
 		eXmlMatch eMatch = eXmlMatch::first;
@@ -63,29 +65,36 @@ extern "C" __declspec( dllexport ) UINT XmlSearch(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to get Property_.");
 		hr = WcaGetRecordFormattedString(hRecord, eXmlSearchQueryQuery::FilePath, &FilePath);
 		BreakExitOnFailure(hr, "Failed to get FilePath.");
-		hr = WcaGetRecordFormattedString(hRecord, eXmlSearchQueryQuery::XPath, &XPath);
-		BreakExitOnFailure(hr, "Failed to get XPath.");
+		hr = WcaGetRecordFormattedString(hRecord, eXmlSearchQueryQuery::Expression, &Expression);
+		BreakExitOnFailure(hr, "Failed to get Expression.");
+		hr = WcaGetRecordString(hRecord, eXmlSearchQueryQuery::Language, &Language);
+		BreakExitOnFailure(hr, "Failed to get Language.");
+		hr = WcaGetRecordString(hRecord, eXmlSearchQueryQuery::Namespaces, &Namespaces);
+		BreakExitOnFailure(hr, "Failed to get Namespaces.");
 		hr = WcaGetRecordString(hRecord, eXmlSearchQueryQuery::Match, &Match);
-		BreakExitOnFailure(hr, "Failed to get Section.");
-		hr = WcaGetRecordString(hRecord, 7, &Condition);
+		BreakExitOnFailure(hr, "Failed to get Match.");
+		hr = WcaGetRecordString(hRecord, eXmlSearchQueryQuery::Condition, &Condition);
 		BreakExitOnFailure(hr, "Failed to get Condition.");
 
 		// Test condition
-		MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, Condition);
-		switch (condRes)
+		if ((Condition != NULL) && (*Condition != NULL))
 		{
-		case MSICONDITION::MSICONDITION_NONE:
-		case MSICONDITION::MSICONDITION_TRUE:
-			WcaLog(LOGMSG_STANDARD, "Condition evaluated to true / none.");
-			break;
+			MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, Condition);
+			switch (condRes)
+			{
+			case MSICONDITION::MSICONDITION_NONE:
+			case MSICONDITION::MSICONDITION_TRUE:
+				WcaLog(LOGMSG_STANDARD, "Condition evaluated to true / none.");
+				break;
 
-		case MSICONDITION::MSICONDITION_FALSE:
-			WcaLog(LOGMSG_STANDARD, "Skipping. Condition evaluated to false");
-			continue;
+			case MSICONDITION::MSICONDITION_FALSE:
+				WcaLog(LOGMSG_STANDARD, "Skipping. Condition evaluated to false");
+				continue;
 
-		case MSICONDITION::MSICONDITION_ERROR:
-			hr = E_FAIL;
-			BreakExitOnFailure(hr, "Bad Condition field");
+			case MSICONDITION::MSICONDITION_ERROR:
+				hr = E_FAIL;
+				BreakExitOnFailure(hr, "Bad Condition field");
+			}
 		}
 
 		// Parse 'match' column
@@ -95,7 +104,7 @@ extern "C" __declspec( dllexport ) UINT XmlSearch(MSIHANDLE hInstall)
 			BreakExitOnFailure(hr, "Invalide match field");
 		}
 
-		hr = QueryXml( FilePath, XPath, eMatch, Property);
+		hr = QueryXml( FilePath, Expression, Language, Namespaces, eMatch, Property);
 		BreakExitOnFailure(hr, "Failed to query XML.");
 	}
 
@@ -138,10 +147,10 @@ LExit:
 	return hr;
 }
 
-HRESULT QueryXml( LPCWSTR pFile, LPCWSTR pXpath, eXmlMatch eMatch, LPCWSTR pProperty)
+HRESULT QueryXml(LPCWSTR pFile, LPCWSTR pExpression, LPCWSTR szLanguage, LPCWSTR szNamespaces, eXmlMatch eMatch, LPCWSTR pProperty)
 {
 	HRESULT hr = S_OK;
-	CComPtr<IXMLDOMDocument> pXmlDoc;
+	CComPtr<IXMLDOMDocument2> pXmlDoc;
 	CComPtr<IXMLDOMNodeList> pNodeList;
 	CComVariant filePath;
 	VARIANT_BOOL isXmlSuccess;
@@ -151,8 +160,10 @@ HRESULT QueryXml( LPCWSTR pFile, LPCWSTR pXpath, eXmlMatch eMatch, LPCWSTR pProp
 	CComBSTR delimiter(L"[~]");
 
 	BreakExitOnNull( pFile, hr, E_INVALIDARG, "pFile is null");
-	BreakExitOnNull( pXpath, hr, E_INVALIDARG, "pXpath is null");
+	BreakExitOnNull( pExpression, hr, E_INVALIDARG, "pExpression is null");
 	BreakExitOnNull( pProperty, hr, E_INVALIDARG, "pProperty is null");
+
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Running Expression '%ls' on '%ls'", pExpression, pFile);
 	
 	// Create XML doc.
 	hr = ::CoCreateInstance(CLSID_DOMDocument, NULL, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&pXmlDoc);
@@ -168,10 +179,38 @@ HRESULT QueryXml( LPCWSTR pFile, LPCWSTR pXpath, eXmlMatch eMatch, LPCWSTR pProp
 		BreakExitOnFailure( hr, "Failed to load XML");
 	}
 
-	// Execute XPath
-	hr = pXmlDoc->selectNodes( CComBSTR( pXpath), &pNodeList);
+	// Set language.
+	if ((szLanguage != NULL) && (*szLanguage != NULL))
+	{
+		static const CComBSTR SelectionLanguage(L"SelectionLanguage");
+		hr = pXmlDoc->setProperty(SelectionLanguage, CComVariant(szLanguage));
+		BreakExitOnFailure(hr, "Failed setting SelectionLanguage");
+
+		CComVariant varTmp;
+		hr = pXmlDoc->getProperty(SelectionLanguage, &varTmp);
+		BreakExitOnFailure(hr, "Failed getting namespaces");
+
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "SelectionLanguage is %ls", varTmp.bstrVal);
+	}
+
+	// Set namespaces.
+	if ((szNamespaces != NULL) && (*szNamespaces != NULL))
+	{
+		static const CComBSTR SelectionNamespaces(L"SelectionNamespaces");
+		hr = pXmlDoc->setProperty(SelectionNamespaces, CComVariant(szNamespaces));
+		BreakExitOnFailure(hr, "Failed setting namespaces");
+
+		CComVariant varTmp;
+		hr = pXmlDoc->getProperty(SelectionNamespaces, &varTmp);
+		BreakExitOnFailure(hr, "Failed getting namespaces");
+
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "SelectionNamespaces is %ls", varTmp.bstrVal);
+	}
+
+	// Execute Expression
+	hr = pXmlDoc->selectNodes(CComBSTR(pExpression), &pNodeList);
 	BreakExitOnFailure( hr, "Failed to select XML nodes");
-	BreakExitOnNull( pNodeList, hr, E_FAIL, "Failed to select XML nodes");
+	BreakExitOnNull( pNodeList, hr, E_FAIL, "selectNodes returned NULL");
 	
 	// Get match-count
 	hr = pNodeList->get_length( &nodeCount);

@@ -163,6 +163,30 @@ Read values from a XML file
               <xs:documentation>XPath expression to the required value. This value can be formatted</xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="Language" use="optional" default="XSLPattern">
+            <xs:annotation>
+              <xs:documentation>SelectionLanguage of the expression.</xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="XSLPattern">
+                  <xs:annotation>
+                    <xs:documentation>Expression is XSLPattern.</xs:documentation>
+                  </xs:annotation>
+                </xs:enumeration>
+                <xs:enumeration value="XPath">
+                  <xs:annotation>
+                    <xs:documentation>Expression is XPath.</xs:documentation>
+                  </xs:annotation>
+                </xs:enumeration>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+          <xs:attribute name="Namespaces" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Namespaces to set for the node selection.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
           <xs:attribute name="Match" use="optional" default="first">
             <xs:annotation>
               <xs:documentation>Configures how to handle multiple XPath matches. Defaults to 'first'.</xs:documentation>

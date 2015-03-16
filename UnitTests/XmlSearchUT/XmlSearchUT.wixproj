@@ -24,6 +24,10 @@
     <Compile Include="Product.wxs" />
   </ItemGroup>
   <ItemGroup>
+    <WixExtension Include="WixUtilExtension">
+      <HintPath>$(WixExtDir)\WixUtilExtension.dll</HintPath>
+      <Name>WixUtilExtension</Name>
+    </WixExtension>
     <WixExtension Include="PanelSwWixExtension">
       <HintPath>..\..\bin\Debug\PanelSwWixExtension.dll</HintPath>
       <Name>PanelSwWixExtension</Name>

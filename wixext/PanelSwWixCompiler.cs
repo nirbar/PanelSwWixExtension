@@ -469,6 +469,8 @@ namespace PanelSw.Wix.Extensions
             string filePath = null;
             string xpath = null;
             string property = null;
+            string lang = null;
+            string namespaces = null;
             XmlSearchMatch match = XmlSearchMatch.first;
             string condition = "";
 
@@ -492,6 +494,12 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "xpath":
                             xpath = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "language":
+                            lang = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "namespaces":
+                            namespaces = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "match":
                             try
@@ -563,9 +571,11 @@ namespace PanelSw.Wix.Extensions
                 row[1] = property;
                 row[2] = filePath;
                 row[3] = xpath;
-                row[4] = match.ToString();
-                row[5] = 0;
-                row[6] = condition;
+                row[4] = lang;
+                row[5] = namespaces;
+                row[6] = match.ToString();
+                row[7] = 0;
+                row[8] = condition;
             }
         }
 
