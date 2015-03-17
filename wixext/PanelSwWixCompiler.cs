@@ -41,6 +41,7 @@ namespace PanelSw.Wix.Extensions
             Core.EnsureTable(null, "PSW_ReadIniValues");
             Core.EnsureTable(null, "PSW_RemoveRegistryValue");
             Core.EnsureTable(null, "PSW_XmlSearch");
+            Core.EnsureTable(null, "PSW_Telemetry");
             base.FinalizeCompile();
         }
 
@@ -70,6 +71,10 @@ namespace PanelSw.Wix.Extensions
 
                         case "RemoveRegistryValue":
                             this.ParseRemoveRegistryValue(element);
+                            break;
+
+                        case "Telemetry":
+                            this.ParseTelemetry(element);
                             break;
 
                         default:
@@ -579,5 +584,119 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
+        [Flags]
+        private enum TelemetrySequence
+        {
+            None = 0,
+            OnExecute = 1,
+            OnCommit = 2,
+            OnRollback = 4
+        }
+
+        private void ParseTelemetry(XmlNode node)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string id = null;
+            string url = null;
+            string data = null;
+            TelemetrySequence flags = TelemetrySequence.None;
+            string condition = "";
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                string tmp;
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == this.schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName.ToLower())
+                    {
+                        case "id":
+                            id = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "url":
+                            url = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "data":
+                            data = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "onsuccess":
+                            tmp = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            if( tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            {
+                                flags |= TelemetrySequence.OnCommit;
+                            }
+                            break;
+                        case "onstart":
+                            tmp = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            if( tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            {
+                                flags |= TelemetrySequence.OnExecute;
+                            }
+                            break;
+                        case "onfailure":
+                            tmp = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            if( tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            {
+                                flags |= TelemetrySequence.OnRollback;
+                            }
+                            break;
+
+                        default:
+                            this.Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+                else
+                {
+                    this.Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            if (string.IsNullOrEmpty(id))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.Name, "Id"));
+            }
+            if (string.IsNullOrEmpty(url))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Url"));
+            }
+            if (string.IsNullOrEmpty(data))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Data"));
+            }
+
+            // find unexpected child elements
+            foreach (XmlNode child in node.ChildNodes)
+            {
+                if (XmlNodeType.Element == child.NodeType)
+                {
+                    if (child.NamespaceURI == this.schema.TargetNamespace)
+                    {
+                        this.Core.UnexpectedElement(node, child);
+                    }
+                    else
+                    {
+                        this.Core.UnsupportedExtensionElement(node, child);
+                    }
+                }
+                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
+                {
+                    condition = child.Value.Trim();
+                }
+            }
+
+            // reference the Win32_CopyFiles custom actions since nothing will happen without these
+            this.Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "Telemetry");
+
+            if (!Core.EncounteredError)
+            {
+                // create a row in the ReadIniValues table
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_Telemetry");
+                row[0] = id;
+                row[1] = url;
+                row[2] = data;
+                row[3] = flags;
+                row[4] = condition;
+            }
+        }
     }
 }

@@ -2,5 +2,6 @@
 <WixLocalization Culture="en-us" xmlns="http://schemas.microsoft.com/wix/2006/localization">
   <String Id="CustomUninstallKey">Writing additional registry values</String>
   <String Id="RemoveRegistryValue">Removing additional registry values</String>
+  <String Id="Telemetry">Posting telemetry data</String>
 </WixLocalization>
 

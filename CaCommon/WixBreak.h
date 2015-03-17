@@ -15,6 +15,8 @@
 #define BreakExitOnWin32Error1(e, x, f, s)		if (ERROR_SUCCESS != e) { MsiDebugBreak(); } ExitOnWin32Error1(e, x, f, s)	
 #define BreakExitOnWin32Error2(e, x, f, s, t)	if (ERROR_SUCCESS != e) { MsiDebugBreak(); } ExitOnWin32Error2(e, x, f, s, t)
 
+#define BreakExitOnNullWithLastError(p, x, s)	if (NULL == p) { DWORD Dutil_er = ::GetLastError(); x = HRESULT_FROM_WIN32(Dutil_er); if (!FAILED(x)) { x = E_FAIL; } MsiDebugBreak(); Dutil_RootFailure(__FILE__, __LINE__, x); ExitTrace(x, s); goto LExit; }
+
 #else
 
 #define BreakExitOnFailure(x, s)			ExitOnFailure(x, s)				
@@ -28,5 +30,7 @@
 #define BreakExitOnWin32Error(e, x, s)			ExitOnWin32Error(e, x, s)		
 #define BreakExitOnWin32Error1(e, x, f, s)		ExitOnWin32Error1(e, x, f, s)	
 #define BreakExitOnWin32Error2(e, x, f, s, t)	ExitOnWin32Error2(e, x, f, s, t)
+
+#define BreakExitOnNullWithLastError(p, x, s)	ExitOnNullWithLastError(p, x, s)
 
 #endif

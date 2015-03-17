@@ -59,6 +59,24 @@
       <Custom Action="XmlSearch" After="AppSearch" Overridable="yes"></Custom>
     </InstallUISequence>
   </Fragment>
+  
+  <!-- Telemetry -->
+  <Fragment>
+    <CustomAction Id="Telemetry" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="PostTelemetry" Execute="immediate" Return="check" />
+    <CustomAction Id="Telemetry_deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Return="check" Impersonate="no" />
+    <CustomAction Id="Telemetry_rollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Return="check" Impersonate="no" />
+    <CustomAction Id="Telemetry_commit" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="commit" Return="check" Impersonate="no" />
+
+    <InstallExecuteSequence>
+      <Custom Action="Telemetry_Immediate" After="InstallInitialize" Overridable="yes"></Custom>
+    </InstallExecuteSequence>
+
+    <UI>
+      <ProgressText Action="Telemetry_deferred">!(loc.Telemetry)</ProgressText>
+      <ProgressText Action="Telemetry_rollback">!(loc.Telemetry)</ProgressText>
+      <ProgressText Action="Telemetry_commit">!(loc.Telemetry)</ProgressText>
+    </UI>
+  </Fragment>
 
   <!-- TerminateSuccessfully -->
   <Fragment>

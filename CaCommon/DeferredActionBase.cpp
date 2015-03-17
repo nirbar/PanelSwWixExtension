@@ -89,6 +89,7 @@ LExit:
 }
 
 CDeferredActionBase::CDeferredActionBase()
+	: _uCost( 0)
 {
 	HRESULT hr = S_OK;
 	CComPtr<IXMLDOMElement> pRoot;
@@ -144,6 +145,10 @@ HRESULT CDeferredActionBase::AddElement(LPCWSTR szName, LPCWSTR szReceiver, UINT
 	value = uCosting;
 	hr = (*ppElem)->setAttribute(attName, value);
 	BreakExitOnFailure(hr, "Failed to set XML attribute");
+
+	hr = xmlRoot->appendChild((*ppElem), &tmpNode);
+	tmpNode.Release();
+	BreakExitOnFailure(hr, "Failed to append XML element");
 
 LExit:
 	return hr;

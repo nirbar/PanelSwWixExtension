@@ -15,6 +15,67 @@
 
   <xs:import namespace="http://schemas.microsoft.com/wix/2006/wi" />
 
+  <xs:element name="Telemetry">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Patch" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[
+Post telemetry data to a given URL
+
+\par Example:
+\code
+<Wix ... xmlns:PanelSw="http://schemas.panel-sw.co.il/wix/WixExtension">
+ <PanelSw:Telemetry Id="My_Telemetry" OnRollback="yes" OnSucess="yes" OnStart="yes" Url="http://www.example.com/telemetry" Data="REMOVE=[REMOVE]&UPGRADINGPRODUCTCODE=[UPGRADINGPRODUCTCODE]&ACTION=[ACTION]" >
+  MY_CONDITION
+ </PanelSw:XmlSearch>
+</Wix>
+\endcode
+        ]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Id" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Url" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>URL of the web site to post telemetry data to. This field is Formatted</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Data" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Telemetry POST data. This field is Formatted</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="OnFailure" use="optional" default="no" type="YesNoType">
+            <xs:annotation>
+              <xs:documentation>Whether or not to post this data during rollback.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="OnSucess" use="optional" default="no" type="YesNoType">
+            <xs:annotation>
+              <xs:documentation>Whether or not to post this data during commit.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="OnStart" use="optional" default="no" type="YesNoType">
+            <xs:annotation>
+              <xs:documentation>Whether or not to post this data during execute sequence (right after InstallInitialize).</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="CustomUninstallKey">
     <xs:annotation>
       <xs:appinfo>

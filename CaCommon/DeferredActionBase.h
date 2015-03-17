@@ -15,17 +15,17 @@ public:
 	typedef HRESULT(*ReceiverToExecutorFunc)(LPCWSTR szReceiver, CDeferredActionBase** ppExecutor);
 	static HRESULT DeferredEntryPoint(ReceiverToExecutorFunc mapFunc);
 
-	// Overriden by inheriting classes. Execute the command object (XML element)
-	virtual HRESULT DeferredExecute(IXMLDOMElement* pElem) = 0;
-
-	// Overriden by inheriting classes. Return the receiver name (usually the class name)
-	virtual HRESULT GetReceiverName(LPWSTR* pszName) = 0;
+	UINT GetCost() const { return _uCost; }
 
 protected:
 
-	HRESULT AddElement(LPCWSTR szName, LPCWSTR szReceiver, UINT uCosting, IXMLDOMElement** ppElem);
+	// Overriden by inheriting classes. Execute the command object (XML element)
+	virtual HRESULT DeferredExecute(IXMLDOMElement* pElem) = 0;
+
+	HRESULT AddElement(LPCWSTR szTag, LPCWSTR szReceiver, UINT uCosting, IXMLDOMElement** ppElem);
 
 private:
 	CComPtr<IXMLDOMDocument> _pXmlDoc;
+	UINT _uCost;
 };
 
