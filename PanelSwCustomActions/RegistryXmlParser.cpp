@@ -42,7 +42,6 @@ CRegistryXmlParser::~CRegistryXmlParser()
 HRESULT CRegistryXmlParser::GetXmlString( BSTR* ppString)
 {
 	HRESULT hr = S_OK;
-	UINT strSize = 0;
 
 	hr = _pXmlDoc->get_xml( ppString);
 	BreakExitOnFailure( hr, "Failed to get XML string");

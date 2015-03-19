@@ -153,3 +153,14 @@ HRESULT CDeferredActionBase::AddElement(LPCWSTR szName, LPCWSTR szReceiver, UINT
 LExit:
 	return hr;
 }
+
+HRESULT CDeferredActionBase::GetCustomActionData(BSTR* pszCustomActionData)
+{
+	HRESULT hr = S_OK;
+
+	hr = _pXmlDoc->get_xml(pszCustomActionData);
+	BreakExitOnFailure(hr, "Failed to get XML string");
+
+LExit:
+	return hr;
+}

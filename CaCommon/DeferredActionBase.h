@@ -17,6 +17,8 @@ public:
 
 	UINT GetCost() const { return _uCost; }
 
+	HRESULT GetCustomActionData(BSTR* pszCustomActionData);
+
 protected:
 
 	// Overriden by inheriting classes. Execute the command object (XML element)

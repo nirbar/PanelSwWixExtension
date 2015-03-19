@@ -62,13 +62,13 @@
   
   <!-- Telemetry -->
   <Fragment>
-    <CustomAction Id="Telemetry" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="PostTelemetry" Execute="immediate" Return="check" />
-    <CustomAction Id="Telemetry_deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Return="check" Impersonate="no" />
-    <CustomAction Id="Telemetry_rollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Return="check" Impersonate="no" />
-    <CustomAction Id="Telemetry_commit" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="commit" Return="check" Impersonate="no" />
+    <CustomAction Id="Telemetry" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="Telemetry" Execute="immediate" Return="check" />
+    <CustomAction Id="Telemetry_deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Return="asyncNoWait" Impersonate="no" />
+    <CustomAction Id="Telemetry_rollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Return="asyncNoWait" Impersonate="no" />
+    <CustomAction Id="Telemetry_commit" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="commit" Return="asyncNoWait" Impersonate="no" />
 
     <InstallExecuteSequence>
-      <Custom Action="Telemetry_Immediate" After="InstallInitialize" Overridable="yes"></Custom>
+      <Custom Action="Telemetry" After="InstallInitialize" Overridable="yes"></Custom>
     </InstallExecuteSequence>
 
     <UI>

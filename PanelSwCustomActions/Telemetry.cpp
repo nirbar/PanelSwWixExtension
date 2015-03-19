@@ -7,6 +7,8 @@
 
 
 #define TELEMETRY_QUERY L"SELECT `Id`, `Url`, `Data`, `Flags`, `Condition` FROM `PSW_Telemetry`"
+enum TelemetryQuery { Id=1, Url=2, Data=3, Flags=3, Condition=5 };
+
 enum TelemetryFlags
 {
 	None = 0,
@@ -15,7 +17,7 @@ enum TelemetryFlags
 	OnRollback = 4
 };
 
-extern "C" __declspec(dllexport) UINT PostTelemetry(MSIHANDLE hInstall)
+extern "C" __declspec(dllexport) UINT Telemetry(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -24,6 +26,7 @@ extern "C" __declspec(dllexport) UINT PostTelemetry(MSIHANDLE hInstall)
 	CTelemetry oRollbackTelemetry;
 	CTelemetry oCommitTelemetry;
 	CTelemetry oDeferredTelemetry;
+	CComBSTR szCustomActionData;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");
@@ -47,15 +50,15 @@ extern "C" __declspec(dllexport) UINT PostTelemetry(MSIHANDLE hInstall)
 		CWixString szId, szUrl, szData, szCondition;
 		int nFlags;
 
-		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szId);
+		hr = WcaGetRecordString(hRecord, TelemetryQuery::Id, (LPWSTR*)szId);
 		BreakExitOnFailure(hr, "Failed to get Id.");
-		hr = WcaGetRecordFormattedString(hRecord, 2, (LPWSTR*)szUrl);
+		hr = WcaGetRecordFormattedString(hRecord, TelemetryQuery::Url, (LPWSTR*)szUrl);
 		BreakExitOnFailure(hr, "Failed to get URL.");
-		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)szData);
+		hr = WcaGetRecordFormattedString(hRecord, TelemetryQuery::Data, (LPWSTR*)szData);
 		BreakExitOnFailure(hr, "Failed to get Data.");
-		hr = WcaGetRecordInteger(hRecord, 6, &nFlags);
+		hr = WcaGetRecordInteger(hRecord, TelemetryQuery::Flags, &nFlags);
 		BreakExitOnFailure(hr, "Failed to get Flags.");
-		hr = WcaGetRecordString(hRecord, 7, (LPWSTR*)szCondition);
+		hr = WcaGetRecordString(hRecord, TelemetryQuery::Condition, (LPWSTR*)szCondition);
 		BreakExitOnFailure(hr, "Failed to get Condition.");
 
 		// Test condition
@@ -92,11 +95,24 @@ extern "C" __declspec(dllexport) UINT PostTelemetry(MSIHANDLE hInstall)
 			BreakExitOnFailure(hr, "Failed creating custom action data for rollback action.");
 		}
 	}
+	
+	// Schedule actions.
+	hr = oRollbackTelemetry.GetCustomActionData(&szCustomActionData);
+	BreakExitOnFailure(hr, "Failed getting custom action data for rollback action.");
+	hr = WcaDoDeferredAction(L"Telemetry_rollback", szCustomActionData, oRollbackTelemetry.GetCost());
+	BreakExitOnFailure(hr, "Failed scheduling rollback action.");
 
-//TODO: 
-//	Add costing for deferred, commit, rollback actions.
-//	In wixlib - schedule all telemetry actions.
+	szCustomActionData.Empty();
+	hr = oDeferredTelemetry.GetCustomActionData(&szCustomActionData);
+	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
+	hr = WcaDoDeferredAction(L"Telemetry_deferred", szCustomActionData, oDeferredTelemetry.GetCost());
+	BreakExitOnFailure(hr, "Failed scheduling deferred action.");
 
+	szCustomActionData.Empty();
+	hr = oCommitTelemetry.GetCustomActionData(&szCustomActionData);
+	BreakExitOnFailure(hr, "Failed getting custom action data for commit action.");
+	hr = WcaDoDeferredAction(L"Telemetry_commit", szCustomActionData, oCommitTelemetry.GetCost());
+	BreakExitOnFailure(hr, "Failed scheduling commit action.");
 
 LExit:
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
