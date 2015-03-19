@@ -694,7 +694,7 @@ namespace PanelSw.Wix.Extensions
                 row[0] = id;
                 row[1] = url;
                 row[2] = data;
-                row[3] = flags;
+                row[3] = (int)flags;
                 row[4] = condition;
             }
         }

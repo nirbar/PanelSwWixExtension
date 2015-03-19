@@ -61,7 +61,7 @@ Post telemetry data to a given URL
               <xs:documentation>Whether or not to post this data during rollback.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="OnSucess" use="optional" default="no" type="YesNoType">
+          <xs:attribute name="OnSuccess" use="optional" default="no" type="YesNoType">
             <xs:annotation>
               <xs:documentation>Whether or not to post this data during commit.</xs:documentation>
             </xs:annotation>
