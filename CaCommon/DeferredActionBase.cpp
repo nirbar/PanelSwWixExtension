@@ -12,6 +12,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(ReceiverToExecutorFunc mapFunc)
 	VARIANT_BOOL isXmlSuccess;
 	LONG nodeCount = 0;
 	DOMNodeType nodeType;
+	CDeferredActionBase* pExecutor = NULL;
 
 	// Get CustomActionData
 	hr = WcaGetProperty(L"CustomActionData", (LPWSTR*)szCustomActionData);
@@ -44,7 +45,6 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(ReceiverToExecutorFunc mapFunc)
 		CComVariant vReceiver;
 		CComVariant vCost;
 		UINT uCost = 0;
-		CDeferredActionBase* pExecutor = NULL;
 
 		// Get element
 		hr = pNodes->get_item(i, &pTmpNode);
@@ -82,9 +82,20 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(ReceiverToExecutorFunc mapFunc)
 		uCost = ::wcstoul(vCost.bstrVal, NULL, 10);
 		hr = WcaProgressMessage(uCost, FALSE);
 		BreakExitOnFailure(hr, "Failed to progress by cost");
+
+		// Release CDeferredActionBase.
+		delete pExecutor;
+		pExecutor = NULL;
 	}
 
 LExit:
+
+	if (pExecutor != NULL)
+	{
+		delete pExecutor;
+		pExecutor = NULL;
+	}
+
 	return hr;
 }
 

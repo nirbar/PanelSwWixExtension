@@ -83,6 +83,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CommonDeferred.cpp" />
     <ClCompile Include="RegDataSerializer.cpp" />
     <ClCompile Include="CustomUninstallKey.cpp" />
     <ClCompile Include="ReadIniValues.cpp" />

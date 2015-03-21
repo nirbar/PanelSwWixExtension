@@ -141,6 +141,26 @@ public:
 		return (_pS == (WCHAR*)dw);
 	}
 
+	BOOL Equals(LPCWSTR szOther)
+	{
+		if (IsNullOrEmpty())
+		{
+			return FALSE;
+		}
+
+		return (::wcscmp(_pS, szOther) == 0);
+	}
+
+	BOOL EqualsIgnoreCase(LPCWSTR szOther)
+	{
+		if (IsNullOrEmpty())
+		{
+			return FALSE;
+		}
+
+		return (::_wcsicmp(_pS, szOther) == 0);
+	}
+
 private:
 
 	WCHAR *_pS;
