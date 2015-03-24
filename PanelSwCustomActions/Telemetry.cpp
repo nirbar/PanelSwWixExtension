@@ -7,7 +7,7 @@
 
 
 #define TELEMETRY_QUERY L"SELECT `Id`, `Url`, `Data`, `Flags`, `Condition` FROM `PSW_Telemetry`"
-enum TelemetryQuery { Id=1, Url=2, Data=3, Flags=3, Condition=5 };
+enum TelemetryQuery { Id=1, Url=2, Data=3, Flags=4, Condition=5 };
 
 enum TelemetryFlags
 {
@@ -48,7 +48,7 @@ extern "C" __declspec(dllexport) UINT Telemetry(MSIHANDLE hInstall)
 
 		// Get fields
 		CWixString szId, szUrl, szData, szCondition;
-		int nFlags;
+		int nFlags = 0;
 
 		hr = WcaGetRecordString(hRecord, TelemetryQuery::Id, (LPWSTR*)szId);
 		BreakExitOnFailure(hr, "Failed to get Id.");
@@ -60,6 +60,14 @@ extern "C" __declspec(dllexport) UINT Telemetry(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to get Flags.");
 		hr = WcaGetRecordString(hRecord, TelemetryQuery::Condition, (LPWSTR*)szCondition);
 		BreakExitOnFailure(hr, "Failed to get Condition.");
+
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Will post telemetry: Id=%ls\nUrl=%ls\nData=%ls\nFlags=%i\nCondition=%ls"
+			, (LPCWSTR)szId
+			, (LPCWSTR)szUrl
+			, (LPCWSTR)szData
+			, (LPCWSTR)nFlags
+			, (LPCWSTR)szCondition
+			);
 
 		// Test condition
 		MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, szCondition);
@@ -153,6 +161,7 @@ HRESULT CTelemetry::DeferredExecute(IXMLDOMElement* pElem)
 	hr = pElem->getAttribute(CComBSTR(L"Data"), &vData);
 	BreakExitOnFailure(hr, "Failed to get Data");
 
+	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Posting telemetry: Url=%ls Data=%ls", vUrl.bstrVal, vData.bstrVal);
 	hr = Post(vUrl.bstrVal, vData.bstrVal);
 	BreakExitOnFailure2(hr, "Failed to post Data '%ls' to URL '%ls'", vData.bstrVal, vUrl.bstrVal);
 
@@ -164,20 +173,25 @@ HRESULT CTelemetry::Post(LPCWSTR szUrl, LPCWSTR szData)
 {
 	HRESULT hr = S_OK;
 	char szHttpUseragent[512];
-	DWORD szhttpUserAgent = sizeof(szHttpUseragent);
+	DWORD dwDataLen = 0;
+	BOOL bRes = TRUE;
 	HINTERNET hInet = NULL;
 	HINTERNET hCnnct = NULL;
 	HINTERNET hRequest = NULL;
 
-	hr = ::ObtainUserAgentString(0, szHttpUseragent, &szhttpUserAgent);
+	dwDataLen = sizeof(szHttpUseragent);
+	hr = ::ObtainUserAgentString(0, szHttpUseragent, &dwDataLen);
 	BreakExitOnFailure(hr, "Failed getting user agent");
+	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "User Agent=%s", szHttpUseragent);
 
 	// http://msdn.microsoft.com/en-us/library/windows/desktop/aa385096%28v=vs.85%29.aspx
 	hInet = ::InternetOpenA(szHttpUseragent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
 	BreakExitOnNullWithLastError(hInet, hr, "Failed openning internet connection");
+	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Openned internet connection");
 
 	hCnnct = ::InternetConnect(hInet, szUrl, INTERNET_DEFAULT_HTTP_PORT, NULL, NULL, INTERNET_SERVICE_HTTP, 0, 0);
 	BreakExitOnNullWithLastError(hCnnct, hr, "Failed connecting to URL");
+	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Connected");
 
 	//http://msdn.microsoft.com/en-us/library/windows/desktop/aa384233%28v=vs.85%29.aspx
 	hRequest = ::HttpOpenRequest(hCnnct, L"POST", szUrl, L"HTTP/1.1", NULL, NULL,
@@ -191,12 +205,13 @@ HRESULT CTelemetry::Post(LPCWSTR szUrl, LPCWSTR szData)
 		INTERNET_FLAG_PRAGMA_NOCACHE |
 		INTERNET_FLAG_RELOAD, NULL);
 	BreakExitOnNullWithLastError(hRequest, hr, "Failed openning request to URL");
-
-	int datalen = 0;
-	datalen = ::wcslen(szData);
+	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Openned request to URL=%ls", szUrl);
 
 	//http://msdn.microsoft.com/en-us/library/windows/desktop/aa384247%28v=vs.85%29.aspx
-	::HttpSendRequest(hRequest, NULL, 0, (LPVOID)szData, datalen);
+	dwDataLen = ::wcslen(szData);
+	bRes = ::HttpSendRequest(hRequest, NULL, 0, (LPVOID)szData, dwDataLen);
+	BreakExitOnNullWithLastError(bRes, hr, "Failed sending HTTP request");
+	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Request sent", szUrl);
 
 LExit:
 
