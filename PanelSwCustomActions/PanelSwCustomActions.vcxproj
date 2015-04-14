@@ -36,8 +36,8 @@
   <PropertyGroup>
     <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
     <IntDir>obj\$(Configuration)\</IntDir>
-    <LibraryPath>$(SolutionDir)\Lib\$(Configuration)\;$(WIX)SDK\VS2013\lib\x86;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SolutionDir)CaCommon;$(WIX)SDK\VS2013\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>$(SolutionDir)\Lib\$(Configuration)\;$(WIX)SDK\VS2012\lib\x86;$(WIX)SDK\VS2013\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)CaCommon;$(WIX)SDK\VS2012\inc;$(WIX)SDK\VS2013\inc;$(IncludePath)</IncludePath>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>
@@ -84,6 +84,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="CommonDeferred.cpp" />
+    <ClCompile Include="Log.cpp" />
     <ClCompile Include="RegDataSerializer.cpp" />
     <ClCompile Include="CustomUninstallKey.cpp" />
     <ClCompile Include="ReadIniValues.cpp" />

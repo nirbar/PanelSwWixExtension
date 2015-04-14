@@ -36,6 +36,10 @@
     <LinkIncremental>true</LinkIncremental>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>$(WIX)SDK\VS2013\inc;$(WIX)SDK\VS2012\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>$(WIX)SDK\VS2013\lib\x86;$(WIX)SDK\VS2012\lib\x86;$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>$(WIX)sdk\VS2013\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>

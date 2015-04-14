@@ -5,7 +5,7 @@
 
 // DllMain - Initialize and cleanup WiX custom action utils.
 PROC_FILESYSTEMREDIRECTION _gFsRedirect;
-extern "C" BOOL DllMain(
+extern "C" BOOL WINAPI DllMain(
 	__in HINSTANCE hInst,
 	__in ULONG ulReason,
 	__in LPVOID
