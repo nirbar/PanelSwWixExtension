@@ -2,6 +2,7 @@
 #include "../CaCommon/DeferredActionBase.h"
 #include "../CaCommon/WixString.h"
 #include "Telemetry.h"
+#include "ShellExecute.h"
 
 // ReceiverToExecutorFunc implementation.
 HRESULT ReceiverToExecutor(LPCWSTR szReceiver, CDeferredActionBase** ppExecutor)
@@ -14,6 +15,11 @@ HRESULT ReceiverToExecutor(LPCWSTR szReceiver, CDeferredActionBase** ppExecutor)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating Telemetry handler");
 		(*ppExecutor) = new CTelemetry();
+	}
+	if (szRcvr.Equals(L"CShellExecute"))
+	{
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating ShellExecute handler");
+		(*ppExecutor) = new CShellExecute();
 	}
 	else
 	{

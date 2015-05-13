@@ -42,6 +42,7 @@ namespace PanelSw.Wix.Extensions
             Core.EnsureTable(null, "PSW_RemoveRegistryValue");
             Core.EnsureTable(null, "PSW_XmlSearch");
             Core.EnsureTable(null, "PSW_Telemetry");
+            Core.EnsureTable(null, "PSW_ShellExecute");
             base.FinalizeCompile();
         }
 
@@ -75,6 +76,10 @@ namespace PanelSw.Wix.Extensions
 
                         case "Telemetry":
                             this.ParseTelemetry(element);
+                            break;
+
+                        case "ShellExecute":
+                            this.ParseShellExecute(element);
                             break;
 
                         default:
@@ -696,6 +701,110 @@ namespace PanelSw.Wix.Extensions
                 row[2] = data;
                 row[3] = (int)flags;
                 row[4] = condition;
+            }
+        }
+
+        private void ParseShellExecute(XmlElement node)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string id = null;
+            string target = null;
+            string args = "";
+            string workDir = "";
+            string verb = "";
+            int wait = 0;
+            int show = 0;
+            string condition = "";
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                string tmp;
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == this.schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName.ToLower())
+                    {
+                        case "id":
+                            id = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "target":
+                            target = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "args":
+                            args = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "workingdir":
+                            workDir = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "verb":
+                            verb = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "wait":
+                            tmp = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            {
+                                wait = 1;
+                            }
+                            break;
+                        case "show":
+                            show = this.Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 15);
+                            break;
+
+                        default:
+                            this.Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+                else
+                {
+                    this.Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            if (string.IsNullOrEmpty(id))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.Name, "Id"));
+            }
+            if (string.IsNullOrEmpty(target))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Target"));
+            }
+
+            // find unexpected child elements
+            foreach (XmlNode child in node.ChildNodes)
+            {
+                if (XmlNodeType.Element == child.NodeType)
+                {
+                    if (child.NamespaceURI == this.schema.TargetNamespace)
+                    {
+                        this.Core.UnexpectedElement(node, child);
+                    }
+                    else
+                    {
+                        this.Core.UnsupportedExtensionElement(node, child);
+                    }
+                }
+                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
+                {
+                    condition = child.Value.Trim();
+                }
+            }
+
+            // reference the Win32_CopyFiles custom actions since nothing will happen without these
+            this.Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "ShellExecute_Immediate");
+
+            if (!Core.EncounteredError)
+            {
+                // create a row in the ReadIniValues table
+                // `Id`, `Target`, `Args`, `Verb`, `WorkingDir`, `Show`, `Wait`, `Condition`
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_ShellExecute");
+                row[0] = id;
+                row[1] = target;
+                row[2] = args;
+                row[3] = verb;
+                row[4] = workDir;
+                row[5] = show;
+                row[6] = wait;
+                row[7] = condition;
             }
         }
     }

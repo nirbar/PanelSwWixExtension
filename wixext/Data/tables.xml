@@ -48,4 +48,15 @@
     <columnDefinition name="Flags" type="number" length="2" minValue="0" maxValue="127" />
     <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
   </tableDefinition>
+
+  <tableDefinition name="PSW_ShellExecute">
+    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="Target" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Args" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Verb" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="WorkingDir" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Show" type="number" length="2" minValue="0" maxValue="127" />
+    <columnDefinition name="Wait" type="number" length="2" minValue="0" maxValue="127" />
+    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
+  </tableDefinition>
 </tableDefinitions>

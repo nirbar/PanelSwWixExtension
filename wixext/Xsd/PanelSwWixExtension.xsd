@@ -15,6 +15,63 @@
 
   <xs:import namespace="http://schemas.microsoft.com/wix/2006/wi" />
 
+  <xs:element name="ShellExecute">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Patch" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[
+Call ShellExecuteEx with parameters
+        ]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Id" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Target" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>ShellExecuteEx szFile parameter. This field is Formatted.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Args" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>ShellExecuteEx lpParameters parameter. This field is Formatted.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="WorkingDir" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>ShellExecuteEx lpDirectory parameter. This field is Formatted. Default is empty ("").</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Verb" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>ShellExecuteEx lpVerb parameter. This field is Formatted. Default is empty ("").</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Wait" use="optional" default="no" type="YesNoType">
+            <xs:annotation>
+              <xs:documentation>Whether or not to wait for the ShellExecute target to terminate. Defaults to 'no'</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Show" use="optional" type="xs:decimal">
+            <xs:annotation>
+              <xs:documentation>ShellExecuteEx nShow parameter. Default is 0 (SW_HIDE).</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="Telemetry">
     <xs:annotation>
       <xs:appinfo>
