@@ -590,7 +590,7 @@ namespace PanelSw.Wix.Extensions
         }
 
         [Flags]
-        private enum TelemetrySequence
+        private enum ExecutePhase
         {
             None = 0,
             OnExecute = 1,
@@ -604,7 +604,7 @@ namespace PanelSw.Wix.Extensions
             string id = null;
             string url = null;
             string data = null;
-            TelemetrySequence flags = TelemetrySequence.None;
+            ExecutePhase flags = ExecutePhase.None;
             string condition = "";
 
             foreach (XmlAttribute attrib in node.Attributes)
@@ -627,21 +627,21 @@ namespace PanelSw.Wix.Extensions
                             tmp = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
                             if( tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
                             {
-                                flags |= TelemetrySequence.OnCommit;
+                                flags |= ExecutePhase.OnCommit;
                             }
                             break;
                         case "onstart":
                             tmp = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
                             if( tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
                             {
-                                flags |= TelemetrySequence.OnExecute;
+                                flags |= ExecutePhase.OnExecute;
                             }
                             break;
                         case "onfailure":
                             tmp = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
                             if( tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
                             {
-                                flags |= TelemetrySequence.OnRollback;
+                                flags |= ExecutePhase.OnRollback;
                             }
                             break;
 
@@ -714,6 +714,7 @@ namespace PanelSw.Wix.Extensions
             string verb = "";
             int wait = 0;
             int show = 0;
+            ExecutePhase flags = ExecutePhase.None;
             string condition = "";
 
             foreach (XmlAttribute attrib in node.Attributes)
@@ -747,6 +748,28 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "show":
                             show = this.Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 15);
+                            break;
+                        
+                        case "onsuccess":
+                            tmp = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            {
+                                flags |= ExecutePhase.OnCommit;
+                            }
+                            break;
+                        case "onexecute":
+                            tmp = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            {
+                                flags |= ExecutePhase.OnExecute;
+                            }
+                            break;
+                        case "onfailure":
+                            tmp = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            {
+                                flags |= ExecutePhase.OnRollback;
+                            }
                             break;
 
                         default:
@@ -804,7 +827,8 @@ namespace PanelSw.Wix.Extensions
                 row[4] = workDir;
                 row[5] = show;
                 row[6] = wait;
-                row[7] = condition;
+                row[7] = (int)flags;
+                row[8] = condition;
             }
         }
     }

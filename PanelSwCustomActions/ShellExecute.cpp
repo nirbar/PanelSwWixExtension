@@ -4,8 +4,16 @@
 #pragma comment (lib, "Shell32.lib")
 
 
-#define ShellExecute_QUERY L"SELECT `Id`, `Target`, `Args`, `Verb`, `WorkingDir`, `Show`, `Wait`, `Condition` FROM `PSW_ShellExecute`"
-enum ShellExecuteQuery { Id=1, Target=2, Args=3, Verb=4, WorkingDir=5, Show=6, Wait=7, Condition=8 };
+#define ShellExecute_QUERY L"SELECT `Id`, `Target`, `Args`, `Verb`, `WorkingDir`, `Show`, `Wait`, `Flags`, `Condition` FROM `PSW_ShellExecute`"
+enum ShellExecuteQuery { Id=1, Target=2, Args=3, Verb=4, WorkingDir=5, Show=6, Wait=7, Flags=8, Condition=9 };
+
+enum ShellExecuteFlags
+{
+	None = 0,
+	OnExecute = 1,
+	OnCommit = 2,
+	OnRollback = 4
+};
 
 extern "C" __declspec(dllexport) UINT PSW_ShellExecute(MSIHANDLE hInstall)
 {
@@ -14,6 +22,8 @@ extern "C" __declspec(dllexport) UINT PSW_ShellExecute(MSIHANDLE hInstall)
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
 	CShellExecute oDeferredShellExecute;
+	CShellExecute oRollbackShellExecute;
+	CShellExecute oCommitShellExecute;
 	CComBSTR szCustomActionData;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
@@ -37,6 +47,7 @@ extern "C" __declspec(dllexport) UINT PSW_ShellExecute(MSIHANDLE hInstall)
 		// Get fields
 		CWixString szId, szTarget, szArgs, szVerb, szWorkingDir, szCondition;
 		int nShow = 0;
+		int nFlags = ShellExecuteFlags::OnExecute;
 		int nWait = 0;
 
 		hr = WcaGetRecordString(hRecord, ShellExecuteQuery::Id, (LPWSTR*)szId);
@@ -53,6 +64,8 @@ extern "C" __declspec(dllexport) UINT PSW_ShellExecute(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to get Show.");
 		hr = WcaGetRecordInteger(hRecord, ShellExecuteQuery::Wait, &nWait);
 		BreakExitOnFailure(hr, "Failed to get Wait.");
+		hr = WcaGetRecordInteger(hRecord, ShellExecuteQuery::Flags, &nFlags);
+		BreakExitOnFailure(hr, "Failed to get Flags.");
 		hr = WcaGetRecordString(hRecord, ShellExecuteQuery::Condition, (LPWSTR*)szCondition);
 		BreakExitOnFailure(hr, "Failed to get Condition.");
 
@@ -74,16 +87,40 @@ extern "C" __declspec(dllexport) UINT PSW_ShellExecute(MSIHANDLE hInstall)
 			BreakExitOnFailure(hr, "Bad Condition field");
 		}
 
-		hr = oDeferredShellExecute.AddShellExec( szTarget, szArgs, szVerb, szWorkingDir, nShow, nWait != 0);
-		BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
+		if ((nFlags & ShellExecuteFlags::OnExecute) != 0)
+		{
+			hr = oDeferredShellExecute.AddShellExec( szTarget, szArgs, szVerb, szWorkingDir, nShow, nWait != 0);
+			BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
+		}
+		if ((nFlags & ShellExecuteFlags::OnCommit) != 0)
+		{
+			hr = oCommitShellExecute.AddShellExec( szTarget, szArgs, szVerb, szWorkingDir, nShow, nWait != 0);
+			BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
+		}
+		if ((nFlags & ShellExecuteFlags::OnRollback) != 0)
+		{
+			hr = oRollbackShellExecute.AddShellExec( szTarget, szArgs, szVerb, szWorkingDir, nShow, nWait != 0);
+			BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
+		}
 	}
 	
 	// Schedule actions.
+	hr = oRollbackShellExecute.GetCustomActionData(&szCustomActionData);
+	BreakExitOnFailure(hr, "Failed getting custom action data for rollback action.");
+	hr = WcaDoDeferredAction(L"ShellExecute_rollback", szCustomActionData, oRollbackShellExecute.GetCost());
+	BreakExitOnFailure(hr, "Failed scheduling rollback action.");
+
 	szCustomActionData.Empty();
 	hr = oDeferredShellExecute.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
 	hr = WcaDoDeferredAction(L"ShellExecute_deferred", szCustomActionData, oDeferredShellExecute.GetCost());
 	BreakExitOnFailure(hr, "Failed scheduling deferred action.");
+
+	szCustomActionData.Empty();
+	hr = oCommitShellExecute.GetCustomActionData(&szCustomActionData);
+	BreakExitOnFailure(hr, "Failed getting custom action data for commit action.");
+	hr = WcaDoDeferredAction(L"ShellExecute_commit", szCustomActionData, oCommitShellExecute.GetCost());
+	BreakExitOnFailure(hr, "Failed scheduling commit action.");
 
 LExit:
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;

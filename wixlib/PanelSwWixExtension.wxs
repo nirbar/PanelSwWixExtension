@@ -10,13 +10,16 @@
   <Fragment>
     <CustomAction Id="ShellExecute_Immediate" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="PSW_ShellExecute" Execute="immediate" Return="check" />
     <CustomAction Id="ShellExecute_deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Return="check" Impersonate="no" />
+    <CustomAction Id="ShellExecute_rollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Return="check" Impersonate="no" />
+    <CustomAction Id="ShellExecute_commit" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="commit" Return="check" Impersonate="no" />
 
     <InstallExecuteSequence>
-      <Custom Action="ShellExecute_Immediate" Before="InstallFinalize" Overridable="yes"></Custom>
+      <Custom Action="ShellExecute_Immediate" After="InstallInitialize" Overridable="yes"></Custom>
     </InstallExecuteSequence>
-
     <UI>
-      <ProgressText Action="ShellExecute_deferred">!(loc.ShellExecute)</ProgressText>
+      <ProgressText Action="ShellExecute_deferred">Executing command "[1]" [2] in "[3]" with verb [4]</ProgressText>
+      <ProgressText Action="ShellExecute_rollback">Executing command "[1]" [2] in "[3]" with verb [4]</ProgressText>
+      <ProgressText Action="ShellExecute_commit">Executing command "[1]" [2] in "[3]" with verb [4]</ProgressText>
     </UI>
   </Fragment>
 
