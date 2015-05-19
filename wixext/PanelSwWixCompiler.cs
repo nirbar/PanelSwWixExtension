@@ -749,8 +749,8 @@ namespace PanelSw.Wix.Extensions
                         case "show":
                             show = this.Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 15);
                             break;
-                        
-                        case "onsuccess":
+
+                        case "oncommit":
                             tmp = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
                             if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
                             {
@@ -764,7 +764,7 @@ namespace PanelSw.Wix.Extensions
                                 flags |= ExecutePhase.OnExecute;
                             }
                             break;
-                        case "onfailure":
+                        case "onrollback":
                             tmp = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
                             if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
                             {
@@ -810,6 +810,12 @@ namespace PanelSw.Wix.Extensions
                 {
                     condition = child.Value.Trim();
                 }
+            }
+
+            // Default to execute deferred.
+            if (flags == ExecutePhase.None)
+            {
+                flags = ExecutePhase.OnExecute;
             }
 
             // reference the Win32_CopyFiles custom actions since nothing will happen without these

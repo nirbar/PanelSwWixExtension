@@ -67,19 +67,19 @@ Call ShellExecuteEx with parameters
               <xs:documentation>ShellExecuteEx nShow parameter. Default is 0 (SW_HIDE).</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="OnFailure" use="optional" default="no" type="YesNoType">
+          <xs:attribute name="OnRollback" use="optional" default="no" type="YesNoType">
             <xs:annotation>
               <xs:documentation>Whether or not to post this data during rollback.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="OnSuccess" use="optional" default="yes" type="YesNoType">
+          <xs:attribute name="OnCommit" use="optional" default="no" type="YesNoType">
             <xs:annotation>
               <xs:documentation>Whether or not to post this data during commit.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="OnExecute" use="optional" default="no" type="YesNoType">
             <xs:annotation>
-              <xs:documentation>Whether or not to post this data during execute sequence (deferred, right after InstallInitialize).</xs:documentation>
+              <xs:documentation>Whether or not to post this data during execute sequence (deferred, right after InstallInitialize). If neither OnXXX attribute is pecified as 'yes' then OnExecute='yes' will be the default.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>
