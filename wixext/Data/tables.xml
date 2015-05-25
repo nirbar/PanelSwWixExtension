@@ -44,6 +44,7 @@
   <tableDefinition name="PSW_Telemetry">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
     <columnDefinition name="Url" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Method" type="string" length="0" modularize="property" category="text" />
     <columnDefinition name="Data" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Flags" type="number" length="2" minValue="0" maxValue="127" />
     <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />

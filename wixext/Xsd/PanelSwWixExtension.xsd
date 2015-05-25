@@ -97,12 +97,12 @@ Call ShellExecuteEx with parameters
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[
-Post telemetry data to a given URL
+Send telemetry data to a given URL
 
 \par Example:
 \code
 <Wix ... xmlns:PanelSw="http://schemas.panel-sw.co.il/wix/WixExtension">
- <PanelSw:Telemetry Id="My_Telemetry" OnRollback="yes" OnSucess="yes" OnStart="yes" Url="example.com" Data="telemetry?REMOVE=[REMOVE]&UPGRADINGPRODUCTCODE=[UPGRADINGPRODUCTCODE]&ACTION=[ACTION]" >
+ <PanelSw:Telemetry Id="My_Telemetry" Method="POST" Secure="yes" OnRollback="yes" OnSucess="yes" OnStart="yes" Url="www.example.com" Data="telemetry?REMOVE=[REMOVE]&UPGRADINGPRODUCTCODE=[UPGRADINGPRODUCTCODE]&ACTION=[ACTION]" >
   MY_CONDITION
  </PanelSw:XmlSearch>
 </Wix>
@@ -121,6 +121,35 @@ Post telemetry data to a given URL
           <xs:attribute name="Url" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation>URL of the web site to post telemetry data to. This field should be the host name rather than a full URL; Use example.com rather than http://www.example.com. This field is Formatted</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Method" use="required">
+            <xs:annotation>
+              <xs:documentation>SelectionLanguage of the expression.</xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+              <xs:restriction base="xs:string">
+                <xs:enumeration value="POST">
+                  <xs:annotation>
+                    <xs:documentation>Post data.</xs:documentation>
+                  </xs:annotation>
+                </xs:enumeration>
+                <xs:enumeration value="GET">
+                  <xs:annotation>
+                    <xs:documentation>Get data.</xs:documentation>
+                  </xs:annotation>
+                </xs:enumeration>
+                <xs:enumeration value="PUT">
+                  <xs:annotation>
+                    <xs:documentation>PUT data.</xs:documentation>
+                  </xs:annotation>
+                </xs:enumeration>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>
+          <xs:attribute name="Secure" use="optional" default="no" type="YesNoType">
+            <xs:annotation>
+              <xs:documentation>Use HTTP or HTTPS protocol.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="Data" type="xs:string" use="required">

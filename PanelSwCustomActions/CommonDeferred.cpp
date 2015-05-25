@@ -16,7 +16,7 @@ HRESULT ReceiverToExecutor(LPCWSTR szReceiver, CDeferredActionBase** ppExecutor)
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating Telemetry handler");
 		(*ppExecutor) = new CTelemetry();
 	}
-	if (szRcvr.Equals(L"CShellExecute"))
+	else if (szRcvr.Equals(L"CShellExecute"))
 	{
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating ShellExecute handler");
 		(*ppExecutor) = new CShellExecute();

@@ -19,7 +19,7 @@
     </Directory>
 
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
-    <PanelSW:Telemetry Id="Test1" Data="search?q=panel-sw" Url="google.co.il" OnStart="yes" />
+    <PanelSW:Telemetry Id="Test1" Data="search?q=panel-sw" Url="www.google.co.il" Method="GET" OnStart="yes" />
   </Fragment>
 
   <Fragment>

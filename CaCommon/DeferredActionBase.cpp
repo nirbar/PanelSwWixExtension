@@ -69,7 +69,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(ReceiverToExecutorFunc mapFunc)
 
 		hr = mapFunc(vReceiver.bstrVal, &pExecutor);
 		BreakExitOnFailure1(hr, "Failed to get CDeferredActionBase for '%ls'", (LPCWSTR)vReceiver.bstrVal);
-		BreakExitOnNull1(pExecutor, hr, E_INVALIDARG, "Failed to get CDeferredActionBase for '%ls'", (LPCWSTR)vReceiver.bstrVal);
+		//BreakExitOnNull1(pExecutor, hr, E_INVALIDARG, "Failed to get CDeferredActionBase for '%ls'", (LPCWSTR)vReceiver.bstrVal);
 
 		// Execute
 		hr = pExecutor->DeferredExecute(pCurrElem);

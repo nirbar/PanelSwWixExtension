@@ -595,7 +595,8 @@ namespace PanelSw.Wix.Extensions
             None = 0,
             OnExecute = 1,
             OnCommit = 2,
-            OnRollback = 4
+            OnRollback = 4,
+            Secure = 8
         }
 
         private void ParseTelemetry(XmlNode node)
@@ -603,6 +604,7 @@ namespace PanelSw.Wix.Extensions
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
             string id = null;
             string url = null;
+            string method = null;
             string data = null;
             ExecutePhase flags = ExecutePhase.None;
             string condition = "";
@@ -619,6 +621,9 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "url":
                             url = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "method":
+                            method = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "data":
                             data = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
@@ -644,6 +649,13 @@ namespace PanelSw.Wix.Extensions
                                 flags |= ExecutePhase.OnRollback;
                             }
                             break;
+                        case "secure":
+                            tmp = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            {
+                                flags |= ExecutePhase.Secure;
+                            }
+                            break;
 
                         default:
                             this.Core.UnexpectedAttribute(sourceLineNumbers, attrib);
@@ -663,6 +675,10 @@ namespace PanelSw.Wix.Extensions
             if (string.IsNullOrEmpty(url))
             {
                 this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Url"));
+            }
+            if (string.IsNullOrEmpty(method))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Method"));
             }
             if (string.IsNullOrEmpty(data))
             {
@@ -698,9 +714,10 @@ namespace PanelSw.Wix.Extensions
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_Telemetry");
                 row[0] = id;
                 row[1] = url;
-                row[2] = data;
-                row[3] = (int)flags;
-                row[4] = condition;
+                row[2] = method;
+                row[3] = data;
+                row[4] = (int)flags;
+                row[5] = condition;
             }
         }
 

@@ -1,20 +1,20 @@
 #include "Telemetry.h"
 #include "../CaCommon/WixString.h"
-#include <Urlmon.h>
-#include <Wininet.h>
-#pragma comment (lib, "Wininet.lib")
-#pragma comment (lib, "Urlmon.lib")
+#include <Winhttp.h>
+#pragma comment (lib, "Winhttp.lib")
 
 
-#define TELEMETRY_QUERY L"SELECT `Id`, `Url`, `Data`, `Flags`, `Condition` FROM `PSW_Telemetry`"
-enum TelemetryQuery { Id=1, Url=2, Data=3, Flags=4, Condition=5 };
+#define TELEMETRY_QUERY L"SELECT `Id`, `Url`, `Method`, `Data`, `Flags`, `Condition` FROM `PSW_Telemetry`"
+enum TelemetryQuery { Id=1, Url=2, Method=3, Data=4, Flags=5, Condition=6 };
 
 enum TelemetryFlags
 {
 	None = 0,
 	OnExecute = 1,
 	OnCommit = 2,
-	OnRollback = 4
+	OnRollback = 4,
+
+	Secure = 8
 };
 
 extern "C" __declspec(dllexport) UINT Telemetry(MSIHANDLE hInstall)
@@ -47,13 +47,16 @@ extern "C" __declspec(dllexport) UINT Telemetry(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		CWixString szId, szUrl, szData, szCondition;
+		CWixString szId, szUrl, szMethod, szData, szCondition;
 		int nFlags = 0;
+		BOOL bSecure = FALSE;
 
 		hr = WcaGetRecordString(hRecord, TelemetryQuery::Id, (LPWSTR*)szId);
 		BreakExitOnFailure(hr, "Failed to get Id.");
 		hr = WcaGetRecordFormattedString(hRecord, TelemetryQuery::Url, (LPWSTR*)szUrl);
 		BreakExitOnFailure(hr, "Failed to get URL.");
+		hr = WcaGetRecordFormattedString(hRecord, TelemetryQuery::Method, (LPWSTR*)szMethod);
+		BreakExitOnFailure(hr, "Failed to get Method.");
 		hr = WcaGetRecordFormattedString(hRecord, TelemetryQuery::Data, (LPWSTR*)szData);
 		BreakExitOnFailure(hr, "Failed to get Data.");
 		hr = WcaGetRecordInteger(hRecord, TelemetryQuery::Flags, &nFlags);
@@ -87,19 +90,24 @@ extern "C" __declspec(dllexport) UINT Telemetry(MSIHANDLE hInstall)
 			BreakExitOnFailure(hr, "Bad Condition field");
 		}
 
-		if ((nFlags & TelemetryFlags::OnExecute) != 0)
+		if ((nFlags & TelemetryFlags::Secure) == TelemetryFlags::Secure)
 		{
-			hr = oDeferredTelemetry.AddPost(szUrl, szData);
+			bSecure = TRUE;
+		}
+
+		if ((nFlags & TelemetryFlags::OnExecute) == TelemetryFlags::OnExecute)
+		{
+			hr = oDeferredTelemetry.AddPost(szUrl, szMethod, szData, bSecure);
 			BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
 		}
-		if ((nFlags & TelemetryFlags::OnCommit) != 0)
+		if ((nFlags & TelemetryFlags::OnCommit) == TelemetryFlags::OnCommit)
 		{
-			hr = oCommitTelemetry.AddPost(szUrl, szData);
+			hr = oCommitTelemetry.AddPost(szUrl, szMethod, szData, bSecure);
 			BreakExitOnFailure(hr, "Failed creating custom action data for commit action.");
 		}
-		if ((nFlags & TelemetryFlags::OnRollback) != 0)
+		if ((nFlags & TelemetryFlags::OnRollback) == TelemetryFlags::OnRollback)
 		{
-			hr = oRollbackTelemetry.AddPost(szUrl, szData);
+			hr = oRollbackTelemetry.AddPost(szUrl, szMethod, szData, bSecure);
 			BreakExitOnFailure(hr, "Failed creating custom action data for rollback action.");
 		}
 	}
@@ -127,7 +135,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-HRESULT CTelemetry::AddPost(LPCWSTR szUrl, LPCWSTR szData)
+HRESULT CTelemetry::AddPost(LPCWSTR szUrl, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure)
 {
 	HRESULT hr = S_OK;
 	CComPtr<IXMLDOMElement> pElem;
@@ -138,8 +146,14 @@ HRESULT CTelemetry::AddPost(LPCWSTR szUrl, LPCWSTR szData)
 	hr = pElem->setAttribute(CComBSTR("Url"), CComVariant(szUrl));
 	BreakExitOnFailure(hr, "Failed to add XML attribute 'Url'");
 
+	hr = pElem->setAttribute(CComBSTR("Method"), CComVariant(szMethod));
+	BreakExitOnFailure(hr, "Failed to add XML attribute 'Method'");
+
 	hr = pElem->setAttribute(CComBSTR("Data"), CComVariant(szData));
 	BreakExitOnFailure(hr, "Failed to add XML attribute 'Data'");
+
+	hr = pElem->setAttribute(CComBSTR("Secure"), CComVariant(bSecure));
+	BreakExitOnFailure(hr, "Failed to add XML attribute 'Secure'");
 
 LExit:
 	return hr;
@@ -152,80 +166,127 @@ HRESULT CTelemetry::DeferredExecute(IXMLDOMElement* pElem)
 	CComVariant vTag;
 	CComVariant vUrl;
 	CComVariant vData;
+	CComVariant vMethod;
+	CComVariant vSecure;
+	int nSecure = 0;
 
 	// Get URL
 	hr = pElem->getAttribute(CComBSTR(L"Url"), &vUrl);
 	BreakExitOnFailure(hr, "Failed to get URL");
 
+	// Get Method
+	hr = pElem->getAttribute(CComBSTR(L"Method"), &vMethod);
+	BreakExitOnFailure(hr, "Failed to get Method");
+
 	// Get Data
 	hr = pElem->getAttribute(CComBSTR(L"Data"), &vData);
 	BreakExitOnFailure(hr, "Failed to get Data");
 
-	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Posting telemetry: Url=%ls Data=%ls", vUrl.bstrVal, vData.bstrVal);
-	hr = Post(vUrl.bstrVal, vData.bstrVal);
+	// Get Secure
+	hr = pElem->getAttribute(CComBSTR(L"Secure"), &vSecure);
+	BreakExitOnFailure(hr, "Failed to get Secure");
+	nSecure = _ttoi(vSecure.bstrVal);
+
+
+	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Posting telemetry: Url=%ls Method=%ls Data=%ls Secure=%ls"
+		, vUrl.bstrVal
+		, vMethod.bstrVal
+		, vData.bstrVal
+		, vSecure.bstrVal);
+
+	hr = Post(vUrl.bstrVal, vMethod.bstrVal, vData.bstrVal, nSecure != 0);
 	BreakExitOnFailure2(hr, "Failed to post Data '%ls' to URL '%ls'", vData.bstrVal, vUrl.bstrVal);
 
 LExit:
 	return hr;
 }
 
-HRESULT CTelemetry::Post(LPCWSTR szUrl, LPCWSTR szData)
+HRESULT CTelemetry::Post(LPCWSTR szUrl, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure)
 {
 	HRESULT hr = S_OK;
-	char szHttpUseragent[512];
-	DWORD dwDataLen = 0;
-	BOOL bRes = TRUE;
-	HINTERNET hInet = NULL;
-	HINTERNET hCnnct = NULL;
+	DWORD dwSize = 0;
+	DWORD dwPrevSize = 0;
+	DWORD dwDownloaded = 0;
+	LPSTR pszOutBuffer;
+	BOOL  bResults = FALSE;
+	HINTERNET hSession = NULL;
+	HINTERNET hConnect = NULL;
 	HINTERNET hRequest = NULL;
 
-	dwDataLen = sizeof(szHttpUseragent);
-	hr = ::ObtainUserAgentString(0, szHttpUseragent, &dwDataLen);
-	BreakExitOnFailure(hr, "Failed getting user agent");
-	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "User Agent=%s", szHttpUseragent);
+	// Use WinHttpOpen to obtain a session handle.
+	hSession = WinHttpOpen(L"WinHTTP Example/1.0",
+		WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
+		WINHTTP_NO_PROXY_NAME,
+		WINHTTP_NO_PROXY_BYPASS, 0);
+	BreakExitOnNullWithLastError(hSession, hr, "Failed openning HTTP session");
 
-	// http://msdn.microsoft.com/en-us/library/windows/desktop/aa385096%28v=vs.85%29.aspx
-	hInet = ::InternetOpenA(szHttpUseragent, INTERNET_OPEN_TYPE_PRECONFIG, NULL, NULL, 0);
-	BreakExitOnNullWithLastError(hInet, hr, "Failed openning internet connection");
-	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Openned internet connection");
+	// Specify an HTTP server.
+	hConnect = WinHttpConnect(hSession, szUrl,
+		bSecure ? INTERNET_DEFAULT_HTTPS_PORT : INTERNET_DEFAULT_HTTP_PORT, 0);
+	BreakExitOnNullWithLastError(hConnect, hr, "Failed connecting to URL");
 
-	hCnnct = ::InternetConnect(hInet, szUrl, INTERNET_DEFAULT_HTTP_PORT, NULL, NULL, INTERNET_SERVICE_HTTP, 0, 0);
-	BreakExitOnNullWithLastError(hCnnct, hr, "Failed connecting to URL");
-	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Connected");
+	// Create an HTTP request handle.
+	hRequest = WinHttpOpenRequest(hConnect, szMethod, NULL,	NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES, 
+		bSecure ? WINHTTP_FLAG_SECURE : 0);
+	BreakExitOnNullWithLastError(hRequest, hr, "Failed openning request");
 
-	//http://msdn.microsoft.com/en-us/library/windows/desktop/aa384233%28v=vs.85%29.aspx
-	hRequest = ::HttpOpenRequest(hCnnct, L"POST", szUrl, L"HTTP/1.1", NULL, NULL,
-		INTERNET_FLAG_HYPERLINK | INTERNET_FLAG_IGNORE_CERT_CN_INVALID |
-		INTERNET_FLAG_IGNORE_CERT_DATE_INVALID |
-		INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTP |
-		INTERNET_FLAG_IGNORE_REDIRECT_TO_HTTPS |
-		INTERNET_FLAG_NO_AUTH |
-		INTERNET_FLAG_NO_CACHE_WRITE |
-		INTERNET_FLAG_NO_UI |
-		INTERNET_FLAG_PRAGMA_NOCACHE |
-		INTERNET_FLAG_RELOAD, NULL);
-	BreakExitOnNullWithLastError(hRequest, hr, "Failed openning request to URL");
-	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Openned request to URL=%ls", szUrl);
+	// Send a request.
+	bResults = WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, (LPVOID)szData, 0, 0, 0);
+	BreakExitOnNull(bResults, hr, E_FAIL, "Failed sending HTTP request");
 
-	//http://msdn.microsoft.com/en-us/library/windows/desktop/aa384247%28v=vs.85%29.aspx
-	dwDataLen = ::wcslen(szData);
-	bRes = ::HttpSendRequest(hRequest, NULL, 0, (LPVOID)szData, dwDataLen);
-	BreakExitOnNullWithLastError(bRes, hr, "Failed sending HTTP request");
-	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Request sent", szUrl);
+	// End the request.
+	bResults = WinHttpReceiveResponse(hRequest, NULL);
+	BreakExitOnNull(bResults, hr, E_FAIL, "Failed receiving HTTP response");
+
+	// Keep checking for data until there is nothing left.
+	do
+	{
+		// Check for available data.
+		dwSize = 0;
+		bResults = WinHttpQueryDataAvailable(hRequest, &dwSize);
+		BreakExitOnNullWithLastError(bResults, hr, "Failed querying available data.");
+
+		// No more data.
+		if (dwSize == 0)
+		{
+			break;
+		}
+
+		// Allocate space for the buffer.
+		if (dwSize > dwPrevSize)
+		{
+			pszOutBuffer = new char[dwSize + 1];
+			BreakExitOnNull(pszOutBuffer, hr, E_FAIL, "Failed allocating memory");
+			dwPrevSize = dwSize;
+		}
+
+		// Read the Data.
+		ZeroMemory(pszOutBuffer, dwSize + 1);
+
+		bResults = WinHttpReadData(hRequest, (LPVOID)pszOutBuffer, dwSize, &dwDownloaded);
+		BreakExitOnNullWithLastError(bResults, hr, "Failed reading data");
+		BreakExitOnNull(dwDownloaded, hr, E_FAIL,  "Failed reading data (dwDownloaded=0)");
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, pszOutBuffer);
+
+	} while (dwSize > 0);
 
 LExit:
-
-	if (hInet != NULL)
-	{
-		::InternetCloseHandle(hInet);
-	}
-	if (hCnnct != NULL)
-	{
-		::InternetCloseHandle(hCnnct);
-	}
+	// Close any open handles.
 	if (hRequest != NULL)
 	{
-		InternetCloseHandle(hRequest);
+		WinHttpCloseHandle(hRequest);
+	}
+	if (hConnect != NULL)
+	{
+		WinHttpCloseHandle(hConnect);
+	}
+	if (hSession != NULL)
+	{
+		WinHttpCloseHandle(hSession);
+	}
+	if (pszOutBuffer != NULL)
+	{
+		delete[] pszOutBuffer;
 	}
 
 	return hr;
