@@ -101,6 +101,19 @@
     <CustomAction Id="TerminateSuccessfully_Deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="TerminateSuccessfully" Execute="deferred" Return="check" />
   </Fragment>
 
+  <!-- SplitPath -->
+  <Fragment>
+    <CustomAction Id="SplitPath" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="SplitPath" Execute="immediate" Return="check" />
+
+    <InstallExecuteSequence>
+      <Custom Action="SplitPath" After="CostFinalize" Overridable="yes"></Custom>
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="SplitPath" After="CostFinalize" Overridable="yes"></Custom>
+    </InstallUISequence>
+  </Fragment>
+  
+  
   <!-- Rollback -->
   <Fragment>
     <CustomAction Id="Rollback_Immediate" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="Rollback" Execute="immediate" Return="check" />
