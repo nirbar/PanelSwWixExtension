@@ -34,7 +34,7 @@ extern "C" __declspec(dllexport) UINT SplitPath(MSIHANDLE hInstall)
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will split property '%ls'", szFullPath);
 
 	er = ::_wsplitpath_s<_MAX_DRIVE + 1, _MAX_DIR + 1, _MAX_FNAME + 1, _MAX_EXT + 1>((LPCWSTR)szFullPath, szDrive, szFolder, szName, szExt);
-	ExitOnNull1(er, hr, E_FAIL, "Failed splitting '%ls' full-path", (LPCWSTR)szFullPath);
+	ExitOnNull1( ( er==ERROR_SUCCESS), hr, E_FAIL, "Failed splitting '%ls' full-path", (LPCWSTR)szFullPath);
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Split full path '%ls' to '%ls' '%ls' '%ls' '%ls'", szFullPath, szDrive, szFolder, szName, szExt);
 
 	// Store back in properties
