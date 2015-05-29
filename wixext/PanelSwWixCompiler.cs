@@ -604,6 +604,7 @@ namespace PanelSw.Wix.Extensions
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
             string id = null;
             string url = null;
+            string page = null;
             string method = null;
             string data = null;
             ExecutePhase flags = ExecutePhase.None;
@@ -621,6 +622,9 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "url":
                             url = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "page":
+                            page = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "method":
                             method = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
@@ -680,10 +684,6 @@ namespace PanelSw.Wix.Extensions
             {
                 this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Method"));
             }
-            if (string.IsNullOrEmpty(data))
-            {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Data"));
-            }
 
             // find unexpected child elements
             foreach (XmlNode child in node.ChildNodes)
@@ -714,10 +714,11 @@ namespace PanelSw.Wix.Extensions
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_Telemetry");
                 row[0] = id;
                 row[1] = url;
-                row[2] = method;
-                row[3] = data;
-                row[4] = (int)flags;
-                row[5] = condition;
+                row[2] = page ?? "";
+                row[3] = method;
+                row[4] = data ?? "";
+                row[5] = (int)flags;
+                row[6] = condition;
             }
         }
 

@@ -6,13 +6,13 @@ class CTelemetry :
 {
 public:
 
-	HRESULT AddPost(LPCWSTR szUrl, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure);
+	HRESULT AddPost(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure);
 
 protected:
 	// Execute the command object (XML element)
 	virtual HRESULT DeferredExecute(IXMLDOMElement* pElem);
 
 private:
-	HRESULT Post(LPCWSTR szUrl, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure);
+	HRESULT Post(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure);
 };
 

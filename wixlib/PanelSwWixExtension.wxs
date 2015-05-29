@@ -17,9 +17,9 @@
       <Custom Action="ShellExecute_Immediate" After="InstallInitialize" Overridable="yes"></Custom>
     </InstallExecuteSequence>
     <UI>
-      <ProgressText Action="ShellExecute_deferred">Executing command "[1]" [2] in "[3]" with verb [4]</ProgressText>
-      <ProgressText Action="ShellExecute_rollback">Executing command "[1]" [2] in "[3]" with verb [4]</ProgressText>
-      <ProgressText Action="ShellExecute_commit">Executing command "[1]" [2] in "[3]" with verb [4]</ProgressText>
+      <ProgressText Action="ShellExecute_deferred">Executing commands</ProgressText>
+      <ProgressText Action="ShellExecute_rollback">Executing commands</ProgressText>
+      <ProgressText Action="ShellExecute_commit">Executing commands</ProgressText>
     </UI>
   </Fragment>
 

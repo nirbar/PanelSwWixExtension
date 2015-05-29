@@ -102,7 +102,7 @@ Send telemetry data to a given URL
 \par Example:
 \code
 <Wix ... xmlns:PanelSw="http://schemas.panel-sw.co.il/wix/WixExtension">
- <PanelSw:Telemetry Id="My_Telemetry" Method="POST" Secure="yes" OnRollback="yes" OnSucess="yes" OnStart="yes" Url="www.example.com" Data="telemetry?REMOVE=[REMOVE]&UPGRADINGPRODUCTCODE=[UPGRADINGPRODUCTCODE]&ACTION=[ACTION]" >
+ <PanelSw:Telemetry Id="My_Telemetry" Method="POST" Secure="yes" OnRollback="yes" OnSucess="yes" OnStart="yes" Url="www.example.com" Page="/telemetry?REMOVE=[REMOVE]&UPGRADINGPRODUCTCODE=[UPGRADINGPRODUCTCODE]&ACTION=[ACTION]" >
   MY_CONDITION
  </PanelSw:XmlSearch>
 </Wix>
@@ -152,9 +152,14 @@ Send telemetry data to a given URL
               <xs:documentation>Use HTTP or HTTPS protocol.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="Data" type="xs:string" use="required">
+          <xs:attribute name="Page" type="xs:string" use="optional" default="">
             <xs:annotation>
-              <xs:documentation>Telemetry POST data. This field is Formatted</xs:documentation>
+              <xs:documentation>Telemetry page and any parameters. This field is Formatted</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Data" type="xs:string" use="optional" default="">
+            <xs:annotation>
+              <xs:documentation>Telemetry data. This field is Formatted</xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="OnFailure" use="optional" default="no" type="YesNoType">
