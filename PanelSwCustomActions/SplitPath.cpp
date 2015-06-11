@@ -31,7 +31,7 @@ extern "C" __declspec(dllexport) UINT SplitPath(MSIHANDLE hInstall)
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "No path to split...");
 		ExitFunction();
 	}
-	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will split property '%ls'", szFullPath);
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will split property '%ls'", (LPCWSTR)szFullPath);
 
 	er = ::_wsplitpath_s<_MAX_DRIVE + 1, _MAX_DIR + 1, _MAX_FNAME + 1, _MAX_EXT + 1>((LPCWSTR)szFullPath, szDrive, szFolder, szName, szExt);
 	ExitOnNull1( ( er==ERROR_SUCCESS), hr, E_FAIL, "Failed splitting '%ls' full-path", (LPCWSTR)szFullPath);
@@ -39,16 +39,16 @@ extern "C" __declspec(dllexport) UINT SplitPath(MSIHANDLE hInstall)
 
 	// Store back in properties
 	hr = WcaSetProperty(SplitDriveProp, szDrive);
-	ExitOnFailure(hr, "Failed setting the '%ls'", szDrive);
+	ExitOnFailure1(hr, "Failed setting the '%ls'", szDrive);
 
 	hr = WcaSetProperty(SplitDirectoryProp, szFolder);
-	ExitOnFailure(hr, "Failed setting the '%ls'", szFolder);
+	ExitOnFailure1(hr, "Failed setting the '%ls'", szFolder);
 
 	hr = WcaSetProperty(SplitFileNameProp, szName);
-	ExitOnFailure(hr, "Failed setting the '%ls'", szName);
+	ExitOnFailure1(hr, "Failed setting the '%ls'", szName);
 
 	hr = WcaSetProperty(SplitFileExtProp, szExt);
-	ExitOnFailure(hr, "Failed setting the '%ls'", SplitFileExtProp);
+	ExitOnFailure1(hr, "Failed setting the '%ls'", SplitFileExtProp);
 
 LExit:
 

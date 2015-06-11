@@ -112,8 +112,20 @@
       <Custom Action="SplitPath" After="CostFinalize" Overridable="yes"></Custom>
     </InstallUISequence>
   </Fragment>
-  
-  
+
+  <!-- SplitString -->
+  <Fragment>
+    <CustomAction Id="SplitString" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="SplitString" Execute="immediate" Return="check" />
+
+    <InstallExecuteSequence>
+      <Custom Action="SplitString" After="CostFinalize" Overridable="yes"></Custom>
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="SplitString" After="CostFinalize" Overridable="yes"></Custom>
+    </InstallUISequence>
+  </Fragment>
+
+
   <!-- Rollback -->
   <Fragment>
     <CustomAction Id="Rollback_Immediate" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="Rollback" Execute="immediate" Return="check" />

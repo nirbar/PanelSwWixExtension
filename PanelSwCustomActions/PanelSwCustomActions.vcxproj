@@ -94,6 +94,7 @@
     <ClCompile Include="Rollback.cpp" />
     <ClCompile Include="ShellExecute.cpp" />
     <ClCompile Include="SplitPath.cpp" />
+    <ClCompile Include="SplitString.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="Telemetry.cpp" />
     <ClCompile Include="TerminateSuccessfully.cpp" />
