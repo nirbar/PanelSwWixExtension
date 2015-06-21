@@ -43,6 +43,7 @@ namespace PanelSw.Wix.Extensions
             Core.EnsureTable(null, "PSW_XmlSearch");
             Core.EnsureTable(null, "PSW_Telemetry");
             Core.EnsureTable(null, "PSW_ShellExecute");
+            Core.EnsureTable(null, "PSW_MsiSqlQuery");
             base.FinalizeCompile();
         }
 
@@ -80,6 +81,10 @@ namespace PanelSw.Wix.Extensions
 
                         case "ShellExecute":
                             this.ParseShellExecute(element);
+                            break;
+
+                        case "MsiSqlQuery":
+                            this.ParseMsiSqlQuery(element);
                             break;
 
                         default:
@@ -853,6 +858,80 @@ namespace PanelSw.Wix.Extensions
                 row[6] = wait;
                 row[7] = (int)flags;
                 row[8] = condition;
+            }
+        }
+
+        private void ParseMsiSqlQuery(XmlNode node)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string id = null;
+            string query = null;
+            string condition = null;
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == this.schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName.ToLower())
+                    {
+                        case "id":
+                            id = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "query":
+                            query = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        default:
+                            this.Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+                else
+                {
+                    this.Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            if (string.IsNullOrEmpty(id))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+            }
+
+            if (string.IsNullOrEmpty(query))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Query"));
+            }
+
+            // find unexpected child elements
+            foreach (XmlNode child in node.ChildNodes)
+            {
+                if (XmlNodeType.Element == child.NodeType)
+                {
+                    if (child.NamespaceURI == this.schema.TargetNamespace)
+                    {
+                        this.Core.UnexpectedElement(node, child);
+                    }
+                    else
+                    {
+                        this.Core.UnsupportedExtensionElement(node, child);
+                    }
+                }
+                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
+                {
+                    condition = child.Value.Trim();
+                }
+            }
+
+            // reference the Win32_CopyFiles custom actions since nothing will happen without these
+            this.Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "MsiSqlQuery");
+
+            if (!Core.EncounteredError)
+            {
+                // create a row in the Win32_CopyFiles table
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_MsiSqlQuery");
+                row[0] = id;
+                row[1] = query;
+                row[2] = condition;
             }
         }
     }

@@ -15,6 +15,46 @@
 
   <xs:import namespace="http://schemas.microsoft.com/wix/2006/wi" />
 
+  <xs:element name="MsiSqlQuery">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[
+Execute a MSI-SQL query on the MSI database.
+
+\par Example:
+\code
+<Wix ... xmlns:PanelSw="http://schemas.panel-sw.co.il/wix/WixExtension">
+<Product ...>
+ <PanelSw:MsiSqlQuery Id="Q1" Query="INSERT INTO {MyTable} (`Col1`, `Col2`) VALUES (`1`, `2`) TEMPORARY">MY_CONDITION</PanelSw:MsiSqlQuery>
+</Product>
+</Wix>
+\endcode
+        ]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Id" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Query" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Query to execute against the MSI database.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="ShellExecute">
     <xs:annotation>
       <xs:appinfo>

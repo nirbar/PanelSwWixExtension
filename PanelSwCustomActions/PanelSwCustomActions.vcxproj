@@ -85,6 +85,7 @@
   <ItemGroup>
     <ClCompile Include="CommonDeferred.cpp" />
     <ClCompile Include="Log.cpp" />
+    <ClCompile Include="MsiSqlQuery.cpp" />
     <ClCompile Include="RegDataSerializer.cpp" />
     <ClCompile Include="CustomUninstallKey.cpp" />
     <ClCompile Include="ReadIniValues.cpp" />

@@ -125,6 +125,14 @@
     </InstallUISequence>
   </Fragment>
 
+  <!-- MsiSqlQuery -->
+  <Fragment>
+    <CustomAction Id="MsiSqlQuery" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="MsiSqlQuery" Execute="immediate" Return="check" />
+
+    <InstallExecuteSequence>
+      <Custom Action="MsiSqlQuery" After="CostFinalize" Overridable="yes"></Custom>
+    </InstallExecuteSequence>
+  </Fragment>
 
   <!-- Rollback -->
   <Fragment>
