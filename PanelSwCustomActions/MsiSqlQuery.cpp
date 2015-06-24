@@ -10,12 +10,10 @@ extern "C" __declspec(dllexport) UINT MsiSqlQuery(MSIHANDLE hInstall)
 	UINT er = ERROR_SUCCESS;
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
-	bool bIgnoreErrors = false;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized.");
-	BreakExitOnFailure(hr, "Failed to CoInitialize");
 
 	// Ensure table PSW_XmlSearch exists.
 	hr = WcaTableExists(L"PSW_MsiSqlQuery");
