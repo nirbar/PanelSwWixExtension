@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "../CaCommon//WixString.h"
+#include "../CaCommon/WixString.h"
 
 #define MsiSqlQueryQuery L"SELECT `Id`, `Query`, `Condition` FROM `PSW_MsiSqlQuery`"
 enum eMsiSqlQueryQuery { Id = 1, Query, Condition };
@@ -23,7 +23,7 @@ extern "C" __declspec(dllexport) UINT MsiSqlQuery(MSIHANDLE hInstall)
 
 	// Execute view
 	hr = WcaOpenExecuteView(MsiSqlQueryQuery, &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query on 'PSW_XmlSearch'.");
+	BreakExitOnFailure(hr, "Failed to execute SQL query on 'PSW_MsiSqlQuery'.");
 	WcaLog(LOGMSG_STANDARD, "Executed query.");
 
 	// Iterate records

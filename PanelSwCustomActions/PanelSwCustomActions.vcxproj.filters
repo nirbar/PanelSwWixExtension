@@ -66,6 +66,9 @@
     <ClCompile Include="MsiSqlQuery.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="RegularExpression.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
