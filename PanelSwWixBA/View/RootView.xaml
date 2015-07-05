@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<!--
+  <copyright file="RootView.xaml" company="Panel-SW.com">
+    Copyright (c) 2015, Panel-SW.com.
+    This software is released under Microsoft Reciprocal License (MS-RL).
+    The license and further copyright text can be found in the file
+    LICENSE.TXT at the root directory of the distribution.
+  </copyright>
+-->
+<Window x:Class="PanelSW.WixBA.RootView"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:ux="clr-namespace:PanelSW.WixBA"
+    WindowStartupLocation="CenterScreen"
+    WindowStyle="None"
+    AllowsTransparency="True"
+    Background="{x:Null}"
+    Width="725"
+    Height="457">
+
+  <Window.Resources>
+    <ResourceDictionary Source="Styles.xaml"/>
+  </Window.Resources>
+
+  <Grid>
+        <Grid.RowDefinitions>
+			<RowDefinition Height="109"/>
+            <RowDefinition />
+            <RowDefinition Height="54"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="1*" />
+        </Grid.ColumnDefinitions>
+        <Rectangle Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" MouseLeftButtonDown="Background_MouseLeftButtonDown" Fill="{StaticResource BackgroundBrush}"/>
+
+		<!-- Title -->
+		<TextBlock Grid.Row="0" Grid.Column="0"
+                   HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextWrapping="WrapWithOverflow"
+                   Text="{Binding Title}"
+			   />
+
+		<!-- Page -->
+		<ContentControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,0" 
+						VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
+						Content="{Binding CurrentView}"/>
+
+        <!-- 4 Buttons, bound to CurrentView Button1..4 properties -->
+        <StackPanel Grid.Row="2" Grid.Column="0">
+			<Rectangle Fill="{StaticResource ButtonsBackgroundBrush}"/>
+			
+            <Button Height="31" Width="103"
+                    Command="{Binding CurrentView.CurrentViewModel.Button1Command}" 
+					Visibility="{Binding CurrentView.CurrentViewModel.Button1Visibility}"
+					Content="{Binding CurrentView.CurrentViewModel.Button1Content}"
+					/>
+
+            <Button Height="31" Width="103"
+                    Command="{Binding CurrentView.CurrentViewModel.Button2Command}" 
+					Visibility="{Binding CurrentView.CurrentViewModel.Button2Visibility}"
+					Content="{Binding CurrentView.CurrentViewModel.Button2Content}"
+					/>
+
+            <Button Height="31" Width="103"
+                    Command="{Binding CurrentView.CurrentViewModel.Button3Command}" 
+					Visibility="{Binding CurrentView.CurrentViewModel.Button3Visibility}"
+					Content="{Binding CurrentView.CurrentViewModel.Button3Content}"
+					/>
+
+            <Button Height="31" Width="103"
+                    Command="{Binding CurrentView.CurrentViewModel.Button4Command}" 
+					Visibility="{Binding CurrentView.CurrentViewModel.Button4Visibility}"
+					Content="{Binding CurrentView.CurrentViewModel.Button4Content}"
+					/>
+        </StackPanel>
+		
+    </Grid>
+</Window>

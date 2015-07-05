@@ -1,0 +1,34 @@
+﻿<ux:BaseView x:Class="PanelSW.WixBA.View.WelcomeView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ux="clr-namespace:PanelSW.WixBA.View"
+             xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+    >
+
+    <UserControl.Resources>
+        <ResourceDictionary Source="Styles.xaml"/>
+    </UserControl.Resources>
+
+    <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0">
+        <Grid.RowDefinitions>
+            <RowDefinition />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition />
+        </Grid.ColumnDefinitions>
+
+        <!-- Welcome Help -->
+        <TextBlock  Grid.Row="0" 
+                    DataContext="{Binding WelcomeViewModel}"
+                    Visibility="{Binding Button4Visibility}">
+            This wizard will gather all the required information for installing and configuring Panel-SW.            
+        </TextBlock>
+
+        <!-- Repair/Uninstall Help -->
+        <TextBlock Grid.Row="0" Grid.Column="0" 
+                   DataContext="{Binding WelcomeViewModel}"
+                   Visibility="{Binding Button3Visibility}">
+                Already installed.
+        </TextBlock>
+    </Grid>
+</ux:BaseView>
