@@ -67,7 +67,7 @@ namespace PanelSW.WixBA
         {
             get
             {
-                return "Next";
+                return "Accept";
             }
         }
 

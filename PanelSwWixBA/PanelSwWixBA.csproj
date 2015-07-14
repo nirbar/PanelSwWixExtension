@@ -29,6 +29,7 @@
     <Compile Include="Utils\EnumBooleanConverter.cs" />
     <Compile Include="Utils\Hresult.cs" />
     <Compile Include="Model\Model.cs" />
+    <Compile Include="ViewModel\DbAccountViewModel.cs" />
     <Compile Include="ViewModel\InstallDirViewModel.cs" />
     <Compile Include="ViewModel\FinishViewModel.cs" />
     <Compile Include="ViewModel\EulaViewModel.cs" />
@@ -38,6 +39,9 @@
     <Compile Include="Utils\RelayCommand.cs" />
     <Compile Include="ViewModel\InstallationViewModel.cs" />
     <Compile Include="View\BaseView.cs" />
+    <Compile Include="View\DbAccountView.xaml.cs">
+      <DependentUpon>DbAccountView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="View\InstallDirView.xaml.cs">
       <DependentUpon>InstallDirView.xaml</DependentUpon>
     </Compile>
@@ -50,6 +54,10 @@
     <Compile Include="View\WelcomeView.xaml.cs">
       <DependentUpon>WelcomeView.xaml</DependentUpon>
     </Compile>
+    <Page Include="View\DbAccountView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
     <Page Include="View\InstallDirView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>

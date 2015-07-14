@@ -82,7 +82,7 @@ namespace PanelSW.WixBA
 		{
 			get
 			{
-				return "Install";
+				return "Next";
 			}
 		}
 		

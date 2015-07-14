@@ -50,8 +50,15 @@ namespace PanelSW.WixBA
                     this._installCommand = new RelayCommand(
                         param =>
                         {
+                            if (PanelSwWixBA.Model.ShowSqlWindows)
+                            {
+                                _root.CurrentView = _root.DbAccountView;
+                            }
+                            else
+                            {
                                 PanelSwWixBA.Plan(LaunchAction.Install);
-                            _root.CurrentView = _root.ProgressView;
+                                _root.CurrentView = _root.ProgressView;
+                            }
                         }
                     );
                 }
@@ -72,7 +79,14 @@ namespace PanelSW.WixBA
 		{
 			get
 			{
-				return "Install";
+                if (PanelSwWixBA.Model.ShowSqlWindows)
+                {
+                    return "Next";
+                }
+                else
+                {
+                    return "Install";
+                }
 			}
 		}
 		

@@ -274,6 +274,37 @@ namespace PanelSW.WixBA
 
         #endregion
 
+        #region SQL Account
+
+        private DbAccountView _dbAccountView = null;
+        public DbAccountView DbAccountView
+        {
+            get
+            {
+                if (_dbAccountView == null)
+                {
+                    _dbAccountView = new DbAccountView(this);
+                }
+                return _dbAccountView;
+            }
+        }
+
+        private DbAccountViewModel _dbAccountViewModel = null;
+        public DbAccountViewModel DbAccountViewModel
+        {
+            get
+            {
+                if (_dbAccountViewModel == null)
+                {
+                    _dbAccountViewModel = new DbAccountViewModel(this);
+                }
+
+                return _dbAccountViewModel;
+            }
+        }
+
+        #endregion
+
         #region Progress
 
         private ProgressView _progressView = null;

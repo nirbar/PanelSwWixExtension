@@ -15,7 +15,14 @@
     </BootstrapperApplicationRef>
     <WixVariable Id="WixMbaPrereqPackageId" Value="Netfx4Full" />
     <WixVariable Id="WixMbaPrereqLicenseUrl" Value="NetfxLicense.rtf" />
-    
+
+    <Variable Name="HAS_SQL" Value="1"/>
+    <Variable Name="SQL_SERVER" Value="localhost"/>
+    <Variable Name="SQL_USERNAME" Value=""/>
+    <Variable Name="SQL_AUTH" Value="0"/>
+    <Variable Name="SQL_DATABASE" Value=""/>
+    <Variable Name="SQL_PASSWORD" Value="" Hidden="yes"  />
+
 		<Chain>
 			<!-- TODO: Define the list of chained packages. -->
 			<!-- <MsiPackage SourceFile="path\to\your.msi" /> -->

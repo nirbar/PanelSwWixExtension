@@ -20,6 +20,7 @@ namespace PanelSW.WixBA
     using System.Reflection;
     using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
     using Microsoft.Win32;
+    using System.Security;
 
     /// <summary>
     /// The model.
@@ -160,5 +161,99 @@ namespace PanelSW.WixBA
 
             return request;
         }
+
+        #region SQL info
+
+        public bool ShowSqlWindows
+        {
+            get
+            {
+                return
+                    Engine.NumericVariables.Contains("HAS_SQL")
+                    ? (Engine.NumericVariables["HAS_SQL"] != 0)
+                    : false;
+            }
+            set
+            {
+                Engine.NumericVariables["HAS_SQL"] = value ? 1 : 0;
+            }
+        }
+
+        public String SqlServer
+        {
+            get
+            {
+                return
+                    Engine.StringVariables.Contains("SQL_SERVER")
+                    ? Engine.StringVariables["SQL_SERVER"]
+                    : "";
+            }
+            set
+            {
+                Engine.StringVariables["SQL_SERVER"] = value;
+            }
+        }
+
+        public String SqlDbName
+        {
+            get
+            {
+                return
+                    Engine.StringVariables.Contains("SQL_DATABASE")
+                    ? Engine.StringVariables["SQL_DATABASE"]
+                    : "";
+            }
+            set
+            {
+                Engine.StringVariables["SQL_DATABASE"] = value;
+            }
+        }
+
+        public bool SqlAuth
+        {
+            get
+            {
+                return
+                    Engine.NumericVariables.Contains("SQL_AUTH")
+                    ? (Engine.NumericVariables["SQL_AUTH"] != 0)
+                    : false;
+            }
+            set
+            {
+                Engine.NumericVariables["SQL_AUTH"] = value ? 1 : 0;
+            }
+        }
+
+        public String SqlUserName
+        {
+            get
+            {
+                return
+                    Engine.StringVariables.Contains("SQL_USERNAME")
+                    ? Engine.StringVariables["SQL_USERNAME"]
+                    : "";
+            }
+            set
+            {
+                Engine.StringVariables["SQL_USERNAME"] = value;
+            }
+        }
+
+        public String SqlPassword
+        {
+            get
+            {
+                return
+                    Engine.StringVariables.Contains("SQL_PASSWORD")
+                    ? Engine.StringVariables["SQL_PASSWORD"]
+                    : "";
+            }
+            set
+            {
+                Engine.StringVariables["SQL_PASSWORD"] = value;
+            }
+        }
+
+        #endregion
     }
 }
