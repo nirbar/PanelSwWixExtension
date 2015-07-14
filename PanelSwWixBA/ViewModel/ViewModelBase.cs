@@ -23,7 +23,7 @@ namespace PanelSW.WixBA
     /// <summary>
     /// Validate that the machine is part of a domain 
     /// </summary>
-    public class ViewModelBase : PropertyNotifyBase
+    public abstract class ViewModelBase : PropertyNotifyBase
     {
         protected RootViewModel _root;
 
@@ -31,6 +31,8 @@ namespace PanelSW.WixBA
         {
             this._root = root;
         }
+
+        public abstract string Title { get; }
 
 		#region Button1: "Close" by default
 
@@ -86,7 +88,7 @@ namespace PanelSW.WixBA
 		{
 			get
 			{
-				return Visibility.Hidden;
+                return Visibility.Collapsed;
 			}
 		}
 		
@@ -126,7 +128,7 @@ namespace PanelSW.WixBA
 		{
 			get
 			{
-				return Visibility.Hidden;
+                return Visibility.Collapsed;
 			}
 		}
 		
@@ -166,7 +168,7 @@ namespace PanelSW.WixBA
         {
             get
             {
-                return Visibility.Hidden;
+                return Visibility.Collapsed;
             }
         }
 

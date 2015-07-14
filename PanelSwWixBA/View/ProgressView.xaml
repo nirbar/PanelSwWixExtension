@@ -17,8 +17,11 @@
         </Grid.ColumnDefinitions>
 
         <!-- Progress -->
-        <ProgressBar Grid.Row="0" Grid.ColumnSpan="3" Margin="3" DataContext="{Binding ProgressViewModel}" 
-                     Value="{Binding Path=Progress}" Visibility="{Binding ProgressEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+        <ProgressBar Grid.Row="0" Grid.ColumnSpan="3" Margin="3" Height="24"
+                     BorderBrush="#afc1ca" BorderThickness="2"
+                     DataContext="{Binding ProgressViewModel}" 
+                     Value="{Binding Path=Progress}" 
+                     Visibility="{Binding ProgressEnabled, Converter={StaticResource BooleanToVisibilityConverter}}"/>
         <TextBlock Grid.Row="0" Grid.ColumnSpan="3" Style="{StaticResource StatusTextStyle}" DataContext="{Binding ProgressViewModel}" Visibility="{Binding ProgressEnabled, Converter={StaticResource BooleanToVisibilityConverter}}" Text="{Binding Message}"/>
     </Grid>
 </ux:BaseView>

@@ -36,17 +36,24 @@
 		<!-- Title -->
 		<TextBlock Grid.Row="0" Grid.Column="0"
                    HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextWrapping="WrapWithOverflow"
+                   FontSize="48" TextAlignment="Center"
                    Text="{Binding Title}"
 			   />
 
-		<!-- Page -->
-		<ContentControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="0,0,0,0" 
+        <TextBlock Grid.Row="0" Grid.Column="0" FontSize="24" Margin="10,0,0,0"
+                   HorizontalAlignment="Left" VerticalAlignment="Bottom" TextWrapping="WrapWithOverflow"
+                   Text="{Binding CurrentView.CurrentViewModel.Title}" 
+                   />
+
+        <!-- Page -->
+		<ContentControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="10,10,10,10" 
+                        BorderBrush="#0b99a5" BorderThickness="2"
 						VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
 						Content="{Binding CurrentView}"/>
 
         <!-- 4 Buttons, bound to CurrentView Button1..4 properties -->
+        <Rectangle Grid.Column="0" Grid.Row="2" Fill="{StaticResource ButtonsBackgroundBrush}"/>
         <StackPanel Grid.Row="2" Grid.Column="0">
-			<Rectangle Fill="{StaticResource ButtonsBackgroundBrush}"/>
 			
             <Button Height="31" Width="103"
                     Command="{Binding CurrentView.CurrentViewModel.Button1Command}" 

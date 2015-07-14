@@ -51,6 +51,22 @@ namespace PanelSW.WixBA
         public InstallationViewModel InstallationViewModel { get; private set; }
         public IntPtr ViewWindowHandle { get; set; }
 
+        private string _title = null;
+        public virtual string Title
+        {
+            get
+            {
+                return _title ?? PanelSwWixBA.Model.WixBundleName;
+            }
+            set
+            {
+                _title = value;
+                OnPropertyChanged("Title");
+            }
+        }
+
+
+
         private BaseView _currentView;
         public BaseView CurrentView
         {

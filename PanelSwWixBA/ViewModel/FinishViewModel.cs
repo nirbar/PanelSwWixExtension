@@ -23,5 +23,13 @@ namespace PanelSW.WixBA
 			: base( root)
         {
         }
+
+        public override string Title
+        {
+            get
+            {
+                return "Thanks You!";
+            }
+        }
     }
 }

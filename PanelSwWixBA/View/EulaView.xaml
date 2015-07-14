@@ -9,18 +9,11 @@
         <ResourceDictionary Source="Styles.xaml"/>
     </UserControl.Resources>
 
-    <Grid VerticalAlignment="Stretch" HorizontalAlignment="Stretch" Margin="0">
-        <Grid.RowDefinitions>
-            <RowDefinition />
-        </Grid.RowDefinitions>
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition />
-        </Grid.ColumnDefinitions>
-
-        <!-- License -->
-        <TextBox Grid.Row="0" Background="Transparent" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Auto"
-                     DataContext="{Binding EulaViewModel}"
-                     Text="{Binding LicenseText}"
-                     />
-    </Grid>
+    <!-- License -->
+    <TextBox Background="Transparent" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Auto"
+             VerticalAlignment="Stretch" HorizontalAlignment="Stretch" TextWrapping="WrapWithOverflow"
+             DataContext="{Binding EulaViewModel}"
+             Text="{Binding LicenseText}"
+             />
 </ux:BaseView>
+    

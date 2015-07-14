@@ -26,6 +26,14 @@ namespace PanelSW.WixBA
         {
         }
 
+        public override string Title
+        {
+            get
+            {
+                return "End User License Agreement";
+            }
+        }
+        
         #region Next - Button4
 
         private ICommand _nextCommand;

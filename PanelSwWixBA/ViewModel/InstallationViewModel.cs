@@ -163,7 +163,7 @@ namespace PanelSW.WixBA
             }
         }
 
-        public string Title
+        public override string Title
         {
             get
             {

@@ -29,6 +29,14 @@ namespace PanelSW.WixBA
         {
         }
 
+        public override string Title
+        {
+            get
+            {
+                return "Target Folder";
+            }
+        }
+
 		
 		#region Install - Button4
 

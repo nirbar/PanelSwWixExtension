@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:bal="http://schemas.microsoft.com/wix/BalExtension"
+     >
+  
+	<Bundle Name="PanelSwWixBAUT" Version="1.0.0.0" 
+          Manufacturer="Panel-SW" 
+          UpgradeCode="b7d64e95-3b25-4e8a-a748-aaf6deb08b5d"
+          Compressed="no"
+          >
+
+    <BootstrapperApplicationRef Id="ManagedBootstrapperApplicationHost">
+      <Payload Name="BootstrapperCore.config" SourceFile="$(var.PanelSwWixBA.ProjectDir)PanelSwWixBA.BootstrapperCore.config"/>
+      <Payload SourceFile="$(var.PanelSwWixBA.TargetPath)"/>
+    </BootstrapperApplicationRef>
+    <WixVariable Id="WixMbaPrereqPackageId" Value="Netfx4Full" />
+    <WixVariable Id="WixMbaPrereqLicenseUrl" Value="NetfxLicense.rtf" />
+    
+		<Chain>
+			<!-- TODO: Define the list of chained packages. -->
+			<!-- <MsiPackage SourceFile="path\to\your.msi" /> -->
+    <MsiPackage SourceFile="$(var.XmlSearchUT.TargetPath)" />
+		</Chain>
+	</Bundle>
+</Wix>

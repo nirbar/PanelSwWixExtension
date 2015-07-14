@@ -87,6 +87,7 @@
                 <Setter Property="HorizontalAlignment" Value="Stretch"/>
                 <Setter Property="IsTabStop" Value="False" />
                 <Setter Property="Template" Value="{StaticResource ButtonTemplateKey}"/>
+                <Setter Property="Margin" Value="0,10,0,0"/>
             </Style>
         </Style.Resources>
     </Style>

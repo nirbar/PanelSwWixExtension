@@ -48,6 +48,14 @@ namespace PanelSW.WixBA
             PanelSwWixBA.Model.Bootstrapper.CacheComplete += this.CacheComplete;
         }
 
+        public override string Title
+        {
+            get
+            {
+                return "Configuring";
+            }
+        }
+
         public bool ProgressEnabled
         {
             get { return this.root.State == InstallationState.Applying; }
@@ -216,7 +224,7 @@ namespace PanelSW.WixBA
         {
             get 
 			{
-                return this.Button1Command.CanExecute(this) ? Visibility.Visible : Visibility.Hidden;
+                return this.Button1Command.CanExecute(this) ? Visibility.Visible : Visibility.Collapsed;
 			}
         }
 

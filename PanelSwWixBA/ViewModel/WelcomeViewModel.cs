@@ -31,6 +31,14 @@ namespace PanelSW.WixBA
             this._root.PropertyChanged += new System.ComponentModel.PropertyChangedEventHandler(this.RootPropertyChanged);
         }
 
+        public override string Title
+        {
+            get
+            {
+                return "Welcome";
+            }
+        }
+
         void RootPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if ("State" == e.PropertyName)
@@ -65,8 +73,8 @@ namespace PanelSW.WixBA
         public override Visibility /* InstallEnabled */ Button4Visibility
         {
             get 
-			{ 
-				return this._installCommand.CanExecute(this) ? Visibility.Visible : Visibility.Hidden;
+			{
+                return this._installCommand.CanExecute(this) ? Visibility.Visible : Visibility.Collapsed;
 			}
         }
 
@@ -104,8 +112,8 @@ namespace PanelSW.WixBA
         public override Visibility /* RepairEnabled */ Button3Visibility
         {
             get 
-			{ 
-				return this._repairCommand.CanExecute(this) ? Visibility.Visible : Visibility.Hidden;
+			{
+                return this._repairCommand.CanExecute(this) ? Visibility.Visible : Visibility.Collapsed;
 			}
         }
 
@@ -144,7 +152,7 @@ namespace PanelSW.WixBA
         {
             get
             {
-                return this._uninstallCommand.CanExecute(this) ? Visibility.Visible : Visibility.Hidden;
+                return this._uninstallCommand.CanExecute(this) ? Visibility.Visible : Visibility.Collapsed;
             }
         }
 
