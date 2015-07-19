@@ -128,7 +128,7 @@ namespace PanelSW.WixBA
             this.Engine.Log(LogLevel.Verbose, "Running the WiX BA.");
             PanelSwWixBA.Model = new Model(this);
             PanelSwWixBA.Dispatcher = Threading.Dispatcher.CurrentDispatcher;
-            RootViewModel viewModel = new RootViewModel();
+            RootViewModel viewModel = this.RootViewModel;
 
             // Kick off detect which will populate the view models.
             this.Engine.Detect();
@@ -145,6 +145,19 @@ namespace PanelSW.WixBA
             Threading.Dispatcher.Run();
 
             this.Engine.Quit(PanelSwWixBA.Model.Result);
+        }
+
+        private RootViewModel _rootViewModel = null;
+        protected virtual RootViewModel RootViewModel
+        {
+            get
+            {
+                if( _rootViewModel == null)
+                {
+                    _rootViewModel = new RootViewModel();
+                }
+                return _rootViewModel;
+            }
         }
     }
 }

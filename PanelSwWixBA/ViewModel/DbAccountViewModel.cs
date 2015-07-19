@@ -102,6 +102,80 @@ namespace PanelSW.WixBA
             }
         }
 
+        #region Test Connection String
+
+        private ICommand _testConnectionCommand = null;
+        public ICommand TestConnectionCommand
+        {
+            get
+            {
+                if( _testConnectionCommand == null)
+                {
+                    _testConnectionCommand = new RelayCommand(
+                        (a) =>
+                        {
+                            if( !TestConnectionString())
+                            {
+                                PanelSwWixBA.Dispatcher.Invoke((Action)delegate()
+                                    {
+                                        MessageBox.Show(
+                                            "SQL Connection String validation failed."
+                                            , "SQL Connection Error"
+                                            , MessageBoxButtons.OK
+                                            , MessageBoxIcon.Error
+                                            );
+                                    }
+                                    );
+                            }
+                        }
+                        );
+                }
+
+                return _testConnectionCommand;
+            }
+        }
+
+        private bool TestConnectionString()
+        {
+            try
+            {
+                SqlConnectionStringBuilder csBuilder = new SqlConnectionStringBuilder();
+                csBuilder.DataSource = SqlServer;
+                csBuilder.InitialCatalog = DatabaseName;
+                if (string.IsNullOrWhiteSpace(UserName))
+                {
+                    csBuilder.IntegratedSecurity = true;
+                }
+                else
+                {
+                    csBuilder.IntegratedSecurity = false;
+                    csBuilder.UserID = UserName;
+                    csBuilder.Password = root.DbAccountView.DbAccountPassword;
+                }
+
+                using (SqlConnection conn = new SqlConnection(csBuilder.ConnectionString))
+                {
+                    conn.Open();
+                }
+
+                return true;
+            }
+            catch( Exception ex)
+            {
+                PanelSwWixBA.Model.Engine.Log(LogLevel.Error
+                    , string.Format(
+                    "Exception caugth on testing SQL connection string: {0}: {1}"
+                    , ex.GetType().ToString()
+                    , ex.Message
+                    )
+                    );
+
+                return false;
+            }
+        }
+
+        #endregion
+
         #region Next Button (Button 3)
 
         private ICommand _nextCommand;
