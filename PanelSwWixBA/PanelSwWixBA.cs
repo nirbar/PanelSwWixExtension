@@ -126,7 +126,7 @@ namespace PanelSW.WixBA
         protected override void Run()
         {
             this.Engine.Log(LogLevel.Verbose, "Running the WiX BA.");
-            PanelSwWixBA.Model = new Model(this);
+            PanelSwWixBA.Model = RootModel;
             PanelSwWixBA.Dispatcher = Threading.Dispatcher.CurrentDispatcher;
             RootViewModel viewModel = this.RootViewModel;
 
@@ -157,6 +157,19 @@ namespace PanelSW.WixBA
                     _rootViewModel = new RootViewModel();
                 }
                 return _rootViewModel;
+            }
+        }
+
+        private Model _rootModel = null;
+        protected virtual Model RootModel
+        {
+            get
+            {
+                if (_rootModel == null)
+                {
+                    _rootModel = new Model(this);
+                }
+                return _rootModel;
             }
         }
     }

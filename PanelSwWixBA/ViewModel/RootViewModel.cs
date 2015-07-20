@@ -20,6 +20,7 @@ namespace PanelSW.WixBA
     using System.Windows.Input;
     using Microsoft.Tools.WindowsInstallerXml.Bootstrapper;
     using PanelSW.WixBA.View;
+    using System.IO;
 
     /// <summary>
     /// The errors returned from the engine
@@ -73,6 +74,22 @@ namespace PanelSW.WixBA
             }
         }
 
+        public virtual Uri ImageFile 
+        { 
+            get
+            {
+                string imagePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
+                imagePath = Path.GetDirectoryName(imagePath);
+                imagePath = Path.Combine(imagePath, "Bundle.png");
+
+                if (!File.Exists(imagePath))
+                {
+                    return null;
+                }
+
+                return new Uri(imagePath);
+            }
+        }
 
 
         private BaseView _currentView;
@@ -192,7 +209,7 @@ namespace PanelSW.WixBA
         #region Welcome
 
         private WelcomeView _welcomeView = null;
-        public virtual WelcomeView WelcomeView
+        public virtual BaseView WelcomeView
         {
             get
             {
@@ -205,7 +222,7 @@ namespace PanelSW.WixBA
         }
 
         private WelcomeViewModel _welcomeViewModel = null;
-        public virtual WelcomeViewModel WelcomeViewModel
+        public virtual ViewModelBase WelcomeViewModel
         {
             get
             {
@@ -223,7 +240,7 @@ namespace PanelSW.WixBA
         #region Eula
 
         private EulaView _eulaView = null;
-        public virtual EulaView EulaView
+        public virtual BaseView EulaView
         {
             get
             {
@@ -236,7 +253,7 @@ namespace PanelSW.WixBA
         }
 
         private EulaViewModel _eulaViewModel = null;
-        public virtual EulaViewModel EulaViewModel
+        public virtual ViewModelBase EulaViewModel
         {
             get
             {
@@ -254,7 +271,7 @@ namespace PanelSW.WixBA
         #region Install Dir
 
         private InstallDirView _installDirView = null;
-        public virtual InstallDirView InstallDirView
+        public virtual BaseView InstallDirView
         {
             get
             {
@@ -267,7 +284,7 @@ namespace PanelSW.WixBA
         }
 
         private InstallDirViewModel _installDirViewModel = null;
-        public virtual InstallDirViewModel InstallDirViewModel
+        public virtual ViewModelBase InstallDirViewModel
         {
             get
             {
@@ -285,7 +302,7 @@ namespace PanelSW.WixBA
         #region SQL Account
 
         private DbAccountView _dbAccountView = null;
-        public virtual DbAccountView DbAccountView
+        public virtual BaseView DbAccountView
         {
             get
             {
@@ -298,7 +315,7 @@ namespace PanelSW.WixBA
         }
 
         private DbAccountViewModel _dbAccountViewModel = null;
-        public virtual DbAccountViewModel DbAccountViewModel
+        public virtual ViewModelBase DbAccountViewModel
         {
             get
             {
@@ -316,7 +333,7 @@ namespace PanelSW.WixBA
         #region Progress
 
         private ProgressView _progressView = null;
-        public virtual ProgressView ProgressView
+        public virtual BaseView ProgressView
         {
             get
             {
@@ -329,7 +346,7 @@ namespace PanelSW.WixBA
         }
 
         private ProgressViewModel _progressViewModel = null;
-        public virtual ProgressViewModel ProgressViewModel
+        public virtual ViewModelBase ProgressViewModel
         {
             get
             {
@@ -347,7 +364,7 @@ namespace PanelSW.WixBA
         #region Finish
 
         private FinishView _finishView = null;
-        public virtual FinishView FinishView
+        public virtual BaseView FinishView
         {
             get
             {
@@ -360,7 +377,7 @@ namespace PanelSW.WixBA
         }
 
         private FinishViewModel _finishViewModel = null;
-        public virtual FinishViewModel FinishViewModel
+        public virtual ViewModelBase FinishViewModel
         {
             get
             {

@@ -33,6 +33,14 @@ namespace PanelSW.WixBA
                 return "End User License Agreement";
             }
         }
+
+        public override object Button1Content
+        {
+            get
+            {
+                return "Decline";
+            }
+        }
         
         #region Next - Button4
 

@@ -63,24 +63,36 @@
 
 
         <!-- User name -->
-        <Label Grid.Row="4" Grid.Column="0">
+        <Label Grid.Row="4" Grid.Column="0"
+               DataContext="{Binding DbAccountViewModel}"
+               IsEnabled="{Binding SqlAuthentication}"
+               >
             User:
         </Label>
         <TextBox Grid.Row="4" Grid.Column="1"
                  DataContext="{Binding DbAccountViewModel}"
+                 IsEnabled="{Binding SqlAuthentication}"
                  Text="{Binding UserName}" 
                  />
 
         <!-- Password -->
-        <Label Grid.Row="5" Grid.Column="0">
+        <Label Grid.Row="5" Grid.Column="0"
+               DataContext="{Binding DbAccountViewModel}"
+               IsEnabled="{Binding SqlAuthentication}"
+               >
             Password:
         </Label>
-        <PasswordBox x:Name="_passwordBox" Grid.Row="6" Grid.Column="1"/>
+        <PasswordBox x:Name="_passwordBox" Grid.Row="6" Grid.Column="1"
+                     DataContext="{Binding DbAccountViewModel}"
+                     IsEnabled="{Binding SqlAuthentication}"
+                     />
         
         <!-- Test Connection -->
         <Button Grid.Column="3" Grid.Row="6"
                 DataContext="{Binding DbAccountViewModel}"
                 Command="{Binding TestConnectionCommand}"
-                />        
+                >
+            Test
+        </Button>
     </Grid>
 </ux:BaseView>

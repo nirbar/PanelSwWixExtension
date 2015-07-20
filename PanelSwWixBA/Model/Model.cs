@@ -28,7 +28,7 @@ namespace PanelSW.WixBA
     public class Model
     {
         private Version version;
-        private const string BurnBundleInstallDirectoryVariable = "ControlAppInstallFolder";
+        private const string BurnBundleInstallDirectoryVariable = "InstallFolder";
         private const string BurnBundleLayoutDirectoryVariable = "WixBundleLayoutDirectory";
 
         /// <summary>

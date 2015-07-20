@@ -10,7 +10,7 @@
     </UserControl.Resources>
 
     <!-- License -->
-    <TextBox Background="Transparent" IsReadOnly="True" ScrollViewer.VerticalScrollBarVisibility="Auto"
+    <TextBlock Background="Transparent" ScrollViewer.VerticalScrollBarVisibility="Auto"
              VerticalAlignment="Stretch" HorizontalAlignment="Stretch" TextWrapping="WrapWithOverflow"
              DataContext="{Binding EulaViewModel}"
              Text="{Binding LicenseText}"

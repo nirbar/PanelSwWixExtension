@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <!--
-  <copyright file="Styles.xaml" company="Panel-SW.com">
-    Copyright (c) 2015, Panel-SW.com.
+  <copyright file="Styles.xaml" company="Outercurve Foundation">
+    Copyright (c) 2004, Outercurve Foundation.
     This software is released under Microsoft Reciprocal License (MS-RL).
     The license and further copyright text can be found in the file
     LICENSE.TXT at the root directory of the distribution.
@@ -10,7 +10,8 @@
 <ResourceDictionary
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:ux="clr-namespace:PanelSW.WixBA">
+    xmlns:xctk="http://schemas.xceed.com/wpf/xaml/toolkit"
+    >
 
     <!-- Converters -->
     <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
@@ -70,6 +71,7 @@
         <Setter Property="BorderBrush" Value="#0b99a5" />
         <Setter Property="BorderThickness" Value="2" />
         <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
         <Setter Property="IsTabStop" Value="False" />
         <Setter Property="Template" Value="{StaticResource ButtonTemplateKey}"/>
     </Style>
@@ -85,9 +87,9 @@
                 <Setter Property="BorderBrush" Value="#0b99a5" />
                 <Setter Property="BorderThickness" Value="2" />
                 <Setter Property="HorizontalAlignment" Value="Stretch"/>
+                <Setter Property="VerticalAlignment" Value="Center"/>
                 <Setter Property="IsTabStop" Value="False" />
                 <Setter Property="Template" Value="{StaticResource ButtonTemplateKey}"/>
-                <Setter Property="Margin" Value="0,10,0,0"/>
             </Style>
         </Style.Resources>
     </Style>
@@ -102,8 +104,10 @@
     </Style>
 
     <Style TargetType="ProgressBar">
-        <Setter Property="Foreground" Value="#e9f0f3" />
-        <Setter Property="Background" Value="#10b3c1" />
+        <Setter Property="Foreground" Value="#33485b" />
+        <Setter Property="Background" Value="#15becd" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="#afc1ca" />
         <Setter Property="Template" Value="{StaticResource ProgressBarTemplateKey}"/>
     </Style>
 
@@ -150,15 +154,26 @@
     </Style>
 
     <Style TargetType="TextBox">
-        <Setter Property="FontSize" Value="17" />
+        <Setter Property="FontSize" Value="14" />
         <Setter Property="FontFamily" Value="Corbel Regular" />
         <Setter Property="Foreground" Value="#212735" />
         <Setter Property="HorizontalAlignment" Value="Stretch"/>
         <Setter Property="VerticalAlignment" Value="Center"/>
-        <Setter Property="Height" Value="39" />
+        <Setter Property="Height" Value="25" />
         <Setter Property="Background" Value="White" />
         <Setter Property="BorderBrush" Value="#afc1ca" />
-        <Setter Property="BorderThickness" Value="2" />        
+        <Setter Property="BorderThickness" Value="2" />
+    </Style>
+
+    <Style TargetType="PasswordBox">
+        <Setter Property="FontSize" Value="14" />
+        <Setter Property="Foreground" Value="#212735" />
+        <Setter Property="HorizontalAlignment" Value="Stretch"/>
+        <Setter Property="VerticalAlignment" Value="Center"/>
+        <Setter Property="Height" Value="25" />
+        <Setter Property="Background" Value="White" />
+        <Setter Property="BorderBrush" Value="#afc1ca" />
+        <Setter Property="BorderThickness" Value="2" />
     </Style>
 
     <Style TargetType="Rectangle">

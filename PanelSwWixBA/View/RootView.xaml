@@ -22,9 +22,9 @@
     <ResourceDictionary Source="Styles.xaml"/>
   </Window.Resources>
 
-  <Grid>
+    <Grid>
         <Grid.RowDefinitions>
-			<RowDefinition Height="109"/>
+            <RowDefinition Height="109"/>
             <RowDefinition />
             <RowDefinition Height="54"/>
         </Grid.RowDefinitions>
@@ -33,12 +33,19 @@
         </Grid.ColumnDefinitions>
         <Rectangle Grid.Column="0" Grid.Row="0" Grid.RowSpan="2" MouseLeftButtonDown="Background_MouseLeftButtonDown" Fill="{StaticResource BackgroundBrush}"/>
 
-		<!-- Title -->
-		<TextBlock Grid.Row="0" Grid.Column="0"
-                   HorizontalAlignment="Stretch" VerticalAlignment="Stretch" TextWrapping="WrapWithOverflow"
+        <StackPanel Grid.Row="0" Grid.Column="0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch">
+
+            <!-- Icon -->
+            <Image Height="64" Width="64" HorizontalAlignment="Left" VerticalAlignment="Top"
+               Source="{Binding ImageFile}"
+               />
+
+            <!-- Title -->
+            <TextBlock HorizontalAlignment="Center" VerticalAlignment="Stretch" TextWrapping="WrapWithOverflow"
                    FontSize="48" TextAlignment="Center"
                    Text="{Binding Title}"
 			   />
+        </StackPanel>
 
         <TextBlock Grid.Row="0" Grid.Column="0" FontSize="24" Margin="10,0,0,0"
                    HorizontalAlignment="Left" VerticalAlignment="Bottom" TextWrapping="WrapWithOverflow"
@@ -46,7 +53,7 @@
                    />
 
         <!-- Page -->
-		<ContentControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="10,10,10,10" 
+        <ContentControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Margin="10,10,10,10" 
                         BorderBrush="#0b99a5" BorderThickness="2"
 						VerticalAlignment="Stretch" HorizontalAlignment="Stretch"
 						Content="{Binding CurrentView}"/>
@@ -54,7 +61,7 @@
         <!-- 4 Buttons, bound to CurrentView Button1..4 properties -->
         <Rectangle Grid.Column="0" Grid.Row="2" Fill="{StaticResource ButtonsBackgroundBrush}"/>
         <StackPanel Grid.Row="2" Grid.Column="0">
-			
+
             <Button Height="31" Width="103"
                     Command="{Binding CurrentView.CurrentViewModel.Button1Command}" 
 					Visibility="{Binding CurrentView.CurrentViewModel.Button1Visibility}"
@@ -79,6 +86,6 @@
 					Content="{Binding CurrentView.CurrentViewModel.Button4Content}"
 					/>
         </StackPanel>
-		
+
     </Grid>
 </Window>

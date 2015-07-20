@@ -48,8 +48,6 @@ namespace PanelSW.WixBA
             }
         }
 
-        internal DbAccountView DbAccountView { get; set; }
-
         public string SqlServer
         {
             get
@@ -150,7 +148,7 @@ namespace PanelSW.WixBA
                 {
                     csBuilder.IntegratedSecurity = false;
                     csBuilder.UserID = UserName;
-                    csBuilder.Password = root.DbAccountView.DbAccountPassword;
+                    csBuilder.Password = ((DbAccountView)root.DbAccountView).DbAccountPassword;
                 }
 
                 using (SqlConnection conn = new SqlConnection(csBuilder.ConnectionString))
@@ -188,7 +186,7 @@ namespace PanelSW.WixBA
                     _nextCommand = new RelayCommand(
                         (a) =>
                         {
-                            PanelSwWixBA.Model.SqlPassword = root.DbAccountView.DbAccountPassword;
+                            PanelSwWixBA.Model.SqlPassword = ((DbAccountView)root.DbAccountView).DbAccountPassword;
 
                             PanelSwWixBA.Plan(LaunchAction.Install);
                             _root.CurrentView = _root.ProgressView;
