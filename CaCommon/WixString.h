@@ -107,6 +107,16 @@ public:
 		return 0;
 	}
 
+	DWORD StrLen() const
+	{
+		if (_pS != NULL)
+		{
+			return ::wcslen(_pS);
+		}
+
+		return 0;
+	}
+
 	operator const WCHAR*()
 	{
 		return _pS;

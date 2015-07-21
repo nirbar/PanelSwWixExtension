@@ -116,13 +116,11 @@
   <!-- SplitString -->
   <Fragment>
     <CustomAction Id="SplitString" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="SplitString" Execute="immediate" Return="check" />
+  </Fragment>
 
-    <InstallExecuteSequence>
-      <Custom Action="SplitString" After="CostFinalize" Overridable="yes"></Custom>
-    </InstallExecuteSequence>
-    <InstallUISequence>
-      <Custom Action="SplitString" After="CostFinalize" Overridable="yes"></Custom>
-    </InstallUISequence>
+  <!-- TrimString -->
+  <Fragment>
+    <CustomAction Id="TrimString" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="TrimString" Execute="immediate" Return="check" />
   </Fragment>
 
   <!-- MsiSqlQuery -->

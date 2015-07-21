@@ -60,10 +60,10 @@
     <ClCompile Include="SplitPath.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="SplitString.cpp">
+    <ClCompile Include="MsiSqlQuery.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="MsiSqlQuery.cpp">
+    <ClCompile Include="StringOperations.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

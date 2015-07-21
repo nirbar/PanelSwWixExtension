@@ -68,3 +68,98 @@ LExit:
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
 }
+
+#undef SplitProp
+#undef SplitTokenProp 
+
+#define TrimProp L"PROPERTY_TO_TRIM"
+
+extern "C" __declspec(dllexport) UINT TrimString(MSIHANDLE hInstall)
+{
+	HRESULT hr = S_OK;
+	UINT er = ERROR_SUCCESS;
+	BOOL bRes = TRUE;
+	CWixString szPropName;
+	CWixString szFullString;
+	LPCWSTR pFirst = NULL;
+	size_t i = 0;
+
+	hr = WcaInitialize(hInstall, __FUNCTION__);
+	ExitOnFailure(hr, "Failed to initialize");
+
+	WcaLog(LOGMSG_STANDARD, "Initialized.");
+
+	// Get property-to-trim name
+	hr = WcaGetProperty(TrimProp, (LPWSTR*)szPropName);
+	ExitOnFailure1(hr, "Failed getting %ls", TrimProp);
+	if (szPropName.IsNullOrEmpty())
+	{
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "No property name to trim...");
+		ExitFunction();
+	}
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will trim property '%ls'", (LPCWSTR)szPropName);
+
+	// Get string-to-trim
+	hr = WcaGetProperty((LPCWSTR)szPropName, (LPWSTR*)szFullString);
+	ExitOnFailure1(hr, "Failed getting %ls", (LPCWSTR)szPropName);
+	if (szFullString.IsNullOrEmpty())
+	{
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "No string to trim...");
+		ExitFunction();
+	}
+	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Will trim string '%ls'", (LPCWSTR)szFullString);
+
+	// Trim right (i is unsigned, so after 0 it will be MAX_SIZE)
+	for (i = szFullString.StrLen() - 1; i < szFullString.StrLen(); --i)
+	{
+		switch (((LPCWSTR)szFullString)[i])
+		{
+		case L' ':
+		case L'\r':
+		case L'\n':
+		case L'\t':
+		case L'\v':
+			((LPWSTR)szFullString)[i] = NULL;
+			continue;
+
+		default:
+			break;
+		}
+		break;
+	}
+
+	// Trim left
+	for (i = 0; i < szFullString.StrLen(); ++i)
+	{
+		switch (((LPCWSTR)szFullString)[i])
+		{
+		case L' ':
+		case L'\r':
+		case L'\n':
+		case L'\t':
+		case L'\v':
+			continue;
+
+		default:
+			break;
+		}
+		break;
+	}
+
+	if (i == szFullString.StrLen())
+	{
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "%ls is all white-spaces", szPropName);
+		
+		hr = WcaSetProperty(szPropName, L"");
+		ExitOnFailure1(hr, "Failed setting %ls", (LPCWSTR)szPropName);
+	}
+
+	pFirst = i + (LPCWSTR)szFullString;
+	hr = WcaSetProperty(szPropName, pFirst);
+	ExitOnFailure1(hr, "Failed setting %ls", (LPCWSTR)szPropName);
+
+LExit:
+
+	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
+	return WcaFinalize(er);
+}
