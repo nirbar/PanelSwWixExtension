@@ -20,9 +20,8 @@
         <!-- Welcome Help -->
         <TextBlock  Grid.Row="0" 
                     DataContext="{Binding WelcomeViewModel}"
-                    Visibility="{Binding Button4Visibility}">
-            This wizard will gather all the required information for installing and configuring Panel-SW.            
-        </TextBlock>
+                    Text="{Binding WelcomeText}"
+                    />
 
         <!-- Repair/Uninstall Help -->
         <TextBlock Grid.Row="0" Grid.Column="0" 

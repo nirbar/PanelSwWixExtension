@@ -39,6 +39,17 @@ namespace PanelSW.WixBA
             }
         }
 
+        public string WelcomeText
+        {
+            get
+            {
+                return string.Format(
+                    "This wizard will gather all the required information for installing and configuring {0}."
+                    , PanelSwWixBA.Model.WixBundleName
+                    );
+            }
+        }
+
         void RootPropertyChanged(object sender, PropertyChangedEventArgs e)
         {
             if ("State" == e.PropertyName)
