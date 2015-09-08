@@ -116,19 +116,29 @@ namespace PanelSW.WixBA
                         {
                             bool shouldClose = false;
 
-                            PanelSwWixBA.Dispatcher.Invoke(
-                                (Action)delegate()
-                                {
-                                    System.Windows.Forms.DialogResult res= System.Windows.Forms.MessageBox.Show(
-                                        "Are you sure you want to cancel the configuration?"
-                                        , "Cancel?"
-                                        , System.Windows.Forms.MessageBoxButtons.YesNo
-                                        , System.Windows.Forms.MessageBoxIcon.Question
-                                        );
+                            switch( State)
+                            {
+                                case InstallationState.Applied:
+                                case InstallationState.Failed:
+                                    shouldClose = true;
+                                    break;
 
-                                    shouldClose = (res == System.Windows.Forms.DialogResult.Yes);
-                                }
-                                );
+                                default:
+                                    PanelSwWixBA.Dispatcher.Invoke(
+                                        (Action)delegate()
+                                        {
+                                            System.Windows.Forms.DialogResult res = System.Windows.Forms.MessageBox.Show(
+                                                "Are you sure you want to cancel the configuration?"
+                                                , "Cancel?"
+                                                , System.Windows.Forms.MessageBoxButtons.YesNo
+                                                , System.Windows.Forms.MessageBoxIcon.Question
+                                                );
+
+                                            shouldClose = (res == System.Windows.Forms.DialogResult.Yes);
+                                        }
+                                        );
+                                    break;
+                            }
 
                             if (shouldClose)
                             {
