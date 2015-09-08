@@ -32,6 +32,27 @@ public:
 		Release();
 	}
 
+#pragma region Copy C-tor, Assignment operators
+
+	CWixString(const CWixString& other)
+	{
+		Copy((LPCWSTR)other);
+	}
+
+	CWixString& operator=(const CWixString& other)
+	{
+		Copy((LPCWSTR)other);
+		return *this;
+	}
+
+	CWixString& operator=(LPCWSTR szOther)
+	{
+		Copy(szOther);
+		return *this;
+	}
+
+#pragma endregion
+
 	HRESULT Allocate(DWORD dwSize)
 	{
 		HRESULT hr = S_OK;
@@ -92,6 +113,31 @@ public:
 		return hr;
 	}
 
+	HRESULT Format(LPCWSTR stFormat, ...)
+	{
+		HRESULT hr = S_OK;
+		va_list va;
+		va_start(va, stFormat);
+
+		size_t sSize = ::_vscwprintf(stFormat, va);
+		if (sSize == 0)
+		{
+			hr = Release();
+			ExitFunction();
+		}
+
+		++sSize;
+		hr = Allocate(sSize);
+		BreakExitOnFailure(hr, "Failed allocating memory");
+
+		_vswprintf(_pS, stFormat, va);
+
+	LExit:
+
+		va_end(va);
+		return hr;
+	}
+
 	DWORD Capacity() const
 	{
 		if (_dwCapacity > 0)
@@ -117,7 +163,7 @@ public:
 		return 0;
 	}
 
-	operator const WCHAR*()
+	operator const WCHAR*() const
 	{
 		return _pS;
 	}
@@ -132,13 +178,6 @@ public:
 		Release();
 
 		return &_pS;
-	}
-
-	WCHAR* operator=(const WCHAR* pS)
-	{
-		Copy(pS);
-
-		return _pS;
 	}
 
 	BOOL IsNullOrEmpty() const
@@ -169,6 +208,63 @@ public:
 		}
 
 		return (::_wcsicmp(_pS, szOther) == 0);
+	}
+
+	DWORD Find(LPCWSTR szOther) const
+	{
+		LPCWSTR pOther = NULL;
+
+		if (IsNullOrEmpty())
+		{
+			return INFINITE;
+		}
+
+		pOther = ::wcsstr(_pS, szOther);
+		if (pOther == NULL)
+		{
+			return INFINITE;
+		}
+
+		return (pOther - _pS);
+	}
+
+	DWORD FindIgnoreCase(LPCWSTR szOther) const
+	{
+		LPCWSTR pOther = NULL;
+
+		if (IsNullOrEmpty())
+		{
+			return INFINITE;
+		}
+
+		LPCWSTR wzSource = _pS;
+		LPCWSTR wzSearch = NULL;
+		DWORD_PTR cchSourceIndex = 0;
+
+		// Walk through wzString (the source string) one character at a time
+		while (*wzSource)
+		{
+			cchSourceIndex = 0;
+			wzSearch = szOther;
+
+			// Look ahead in the source string until we get a full match or we hit the end of the source
+			while ((NULL != wzSource[cchSourceIndex]) && (NULL != *wzSearch) && (::towlower(wzSource[cchSourceIndex]) == towlower(*wzSearch)))
+			{
+				++cchSourceIndex;
+				++wzSearch;
+			}
+
+			// If we found it, return the point that we found it at
+			if (NULL == *wzSearch)
+			{
+				return (wzSource - _pS);
+			}
+
+			// Walk ahead one character
+			++wzSource;
+		}
+
+		return (pOther - _pS);
 	}
 
 private:
