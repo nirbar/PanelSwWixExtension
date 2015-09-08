@@ -28,7 +28,7 @@ namespace PanelSW.WixBA
         {
             get
             {
-                return "Thanks You!";
+                return "Configuration is complete. Thank You!";
             }
         }
     }
