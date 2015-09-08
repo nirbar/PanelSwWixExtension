@@ -112,17 +112,30 @@ namespace PanelSW.WixBA
                     _testConnectionCommand = new RelayCommand(
                         (a) =>
                         {
-                            if( !TestConnectionString())
+                            if( TestConnectionString())
                             {
                                 PanelSwWixBA.Dispatcher.Invoke((Action)delegate()
-                                    {
-                                        MessageBox.Show(
-                                            "SQL Connection String validation failed."
-                                            , "SQL Connection Error"
-                                            , MessageBoxButtons.OK
-                                            , MessageBoxIcon.Error
-                                            );
-                                    }
+                                {
+                                    MessageBox.Show(
+                                        "SQL Connection String validation succeeded."
+                                        , "SQL Connection Valid"
+                                        , MessageBoxButtons.OK
+                                        , MessageBoxIcon.Information
+                                        );
+                                }
+                                    );
+                            }
+                            else
+                            {
+                                PanelSwWixBA.Dispatcher.Invoke((Action)delegate()
+                                {
+                                    MessageBox.Show(
+                                        "SQL Connection String validation failed."
+                                        , "SQL Connection Error"
+                                        , MessageBoxButtons.OK
+                                        , MessageBoxIcon.Error
+                                        );
+                                }
                                     );
                             }
                         }
