@@ -22,21 +22,12 @@
 
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
 
-    <PanelSW:MsiSqlQuery Id="Test1" 
-                         Query="INSERT INTO `File` (`File`, `Component_`, `FileName`, `FileSize`, `Sequence`) VALUES (`Test1`, `Test`, `Name1`, `3`, `2`) TEMPORARY"
-                         >
-      <![CDATA[WOULD_FAIL_IF_RUN]]>
-    </PanelSW:MsiSqlQuery>
-
     <PanelSW:MsiSqlQuery Id="Test2"
-                         Query="INSERT INTO `File` (`File`, `Component_`, `FileName`, `FileSize`, `Sequence`) VALUES ('Test2', 'Test', 'Name1', 3, 2) TEMPORARY"
+                         Query="INSERT INTO `RemoveFile` (`FileKey`, `Component_`, `FileName`, `DirProperty`, `InstallMode`) VALUES ('ClearConfig', 'Test', 'AgentCachedConfig*.xml', 'INSTALLFOLDER', 2) TEMPORARY"
                          >
     </PanelSW:MsiSqlQuery>
 
     <!-- Terminate after validating result. -->
-    <InstallExecuteSequence>
-      <Custom Action="TerminateSuccessfully_Immediate" After="MsiSqlQuery"></Custom>
-    </InstallExecuteSequence>
 
   </Fragment>
 
@@ -44,6 +35,7 @@
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component Id="Test" Guid="*">
         <File Id="Test" Source="$(var.ProjectDir)Product.wxs" KeyPath="yes"></File>
+        <RemoveFile Id="Junk" On="install" Name="junk" />
       </Component>
     </ComponentGroup>
   </Fragment>
