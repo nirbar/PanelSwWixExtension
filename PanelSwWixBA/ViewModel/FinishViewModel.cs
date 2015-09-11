@@ -28,7 +28,17 @@ namespace PanelSW.WixBA
         {
             get
             {
-                return "Configuration is complete. Thank You!";
+                switch (_root.State)
+                {
+                    case InstallationState.Failed:
+                        return "There was an error with the configuration. Please refer to the log file at:\n" + PanelSwWixBA.Model.Engine.StringVariables["WixBundleLog"];
+
+                    case InstallationState.Applied:
+                        return "Configuration is complete. Thank You!";
+
+                    default:
+                        return "";
+                }
             }
         }
     }
