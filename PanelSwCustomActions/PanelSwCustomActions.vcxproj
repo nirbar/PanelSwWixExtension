@@ -91,6 +91,7 @@
     <ClCompile Include="ReadIniValues.cpp" />
     <ClCompile Include="RegistryKey.cpp" />
     <ClCompile Include="RegistryXmlParser.cpp" />
+    <ClCompile Include="RegularExpression.cpp" />
     <ClCompile Include="RemoveRegistryValue.cpp" />
     <ClCompile Include="Rollback.cpp" />
     <ClCompile Include="ShellExecute.cpp" />

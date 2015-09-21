@@ -15,6 +15,71 @@
 
   <xs:import namespace="http://schemas.microsoft.com/wix/2006/wi" />
 
+  <xs:element name="RegularExpression">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[
+Execute a Regular Expression to replace or find matches.
+
+\par Example:
+\code
+<Wix ... xmlns:PanelSw="http://schemas.panel-sw.co.il/wix/WixExtension">
+<Product ...>
+ <PanelSw:RegularExpression Id="Q1" Input="My Input Text is [MY_TEXT]" Expression="M.\s" Replacement="Your " DstProperty="YOUR_PROP" IgnoreCase="yes">MY_CONDITION</PanelSw:MsiSqlQuery>
+</Product>
+</Wix>
+\endcode
+        ]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Id" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Input" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Input text. This field is formatted.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Expression" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Regular Expression. This field is formatted.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Replacement" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Replacement text. To replace a pattern with an empty string, set this property to "". To match a pattern do not set this field. This field is formatted.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="DstProperty" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Target property. For matches, this will be used as a base property name and results will be placed in property names like DSTPROP_0, DSTPROP_1. For replace operations this will be the name of the target property.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="IgnoreCase" type="YesNoType" use="optional">
+            <xs:annotation>
+              <xs:documentation>Set to yes to ignore case in matches. Default is no.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Extended" type="YesNoType" use="optional">
+            <xs:annotation>
+              <xs:documentation>Set to yes for extended regex syntax. Default is no.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="MsiSqlQuery">
     <xs:annotation>
       <xs:appinfo>

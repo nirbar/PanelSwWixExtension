@@ -44,6 +44,7 @@ namespace PanelSw.Wix.Extensions
             Core.EnsureTable(null, "PSW_Telemetry");
             Core.EnsureTable(null, "PSW_ShellExecute");
             Core.EnsureTable(null, "PSW_MsiSqlQuery");
+            Core.EnsureTable(null, "PSW_RegularExpression");
             base.FinalizeCompile();
         }
 
@@ -85,6 +86,10 @@ namespace PanelSw.Wix.Extensions
 
                         case "MsiSqlQuery":
                             this.ParseMsiSqlQuery(element);
+                            break;
+
+                        case "RegularExpression":
+                            this.ParseRegularExpression(element);
                             break;
 
                         default:
@@ -932,6 +937,135 @@ namespace PanelSw.Wix.Extensions
                 row[0] = id;
                 row[1] = query;
                 row[2] = condition;
+            }
+        }
+
+        [Flags]
+        enum RegexSearchFlags
+        {
+            Search = 0
+            , Replace = 1
+        };
+
+        [Flags]
+        enum RegexResultFlags
+        {
+            MustMatch = 1
+        };
+
+        [Flags]
+        enum RegexMatchFlags
+        {
+            IgnoreCare = 1
+            , Extended = 2
+        };
+
+        private void ParseRegularExpression(XmlNode node)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string id = null;
+            string input = null;
+            string regex = null;
+            string replacement = null;
+            string prop = null;
+            int flags = 0;
+            string condition = null;
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == this.schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName.ToLower())
+                    {
+                        case "id":
+                            id = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "input":
+                            input = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "expression":
+                            regex = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "replacement":
+                            replacement = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            flags |= (int)RegexSearchFlags.Replace;
+                            break;
+                        case "dstproperty":
+                            prop = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "ignorecase":
+                            flags |= (int)RegexMatchFlags.IgnoreCare << 2;
+                            break;
+                        case "extended":
+                            flags |= (int)RegexMatchFlags.Extended << 2;
+                            break;
+
+                        default:
+                            this.Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+                else
+                {
+                    this.Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            if (string.IsNullOrEmpty(id))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+            }
+            if (string.IsNullOrEmpty(input))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Input"));
+            }
+            if (string.IsNullOrEmpty(regex))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Expression"));
+            }
+            if (string.IsNullOrEmpty(prop))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "DstProperty"));
+            }
+            if (string.IsNullOrEmpty(input))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Input"));
+            }
+
+            // find unexpected child elements
+            foreach (XmlNode child in node.ChildNodes)
+            {
+                if (XmlNodeType.Element == child.NodeType)
+                {
+                    if (child.NamespaceURI == this.schema.TargetNamespace)
+                    {
+                        this.Core.UnexpectedElement(node, child);
+                    }
+                    else
+                    {
+                        this.Core.UnsupportedExtensionElement(node, child);
+                    }
+                }
+                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
+                {
+                    condition = child.Value.Trim();
+                }
+            }
+
+            // reference the Win32_CopyFiles custom actions since nothing will happen without these
+            this.Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "RegularExpression");
+
+            if (!Core.EncounteredError)
+            {
+                // create a row in the Win32_CopyFiles table
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_RegularExpression");
+                row[0] = id;
+                row[1] = input;
+                row[2] = regex;
+                row[3] = replacement;
+                row[4] = prop;
+                row[5] = flags;
+                row[6] = condition;
             }
         }
     }

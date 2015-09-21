@@ -127,6 +127,17 @@
   <Fragment>
     <CustomAction Id="TrimString" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="TrimString" Execute="immediate" Return="check" />
   </Fragment>
+  
+  <!-- RegularExpression -->
+  <Fragment>
+    <CustomAction Id="RegularExpression" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="RegularExpression" Execute="firstSequence" Return="check" />
+    <InstallUISequence>
+      <Custom Action="RegularExpression" After="CostFinalize" />
+    </InstallUISequence>
+    <InstallExecuteSequence>
+      <Custom Action="RegularExpression" After="CostFinalize" />
+    </InstallExecuteSequence>
+  </Fragment>
 
   <!-- MsiSqlQuery -->
   <Fragment>

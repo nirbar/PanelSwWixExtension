@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
+     >
+  <Product Id="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}" Name="RegexUT" Language="1033" Version="1.0.0.0" Manufacturer="PoingGrab" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate />
+
+    <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
+      <Component Id="Test" Directory="INSTALLFOLDER">
+        <File Source="$(var.ProjectDir)Product.wxs" />
+      </Component>
+    </Feature>
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+      </Directory>
+    </Directory>
+
+    <Property Id="MSIFASTINSTALL" Value="1"></Property>
+
+    <Property Id="MY_INPUT" Value="Test Text" />
+    <PanelSW:RegularExpression Id="_1"
+                               Input="My Input is [MY_INPUT]"
+                               DstProperty="REGEX_MATCH"
+                               Expression="is (.*)"
+                               />
+    <PanelSW:RegularExpression Id="_2"
+                               Input="My Input is [MY_INPUT]"
+                               DstProperty="REGEX_REPLACE"
+                               Replacement="is YOUR INPUT"
+                               Expression="is (.*)"
+                               />
+    <CustomAction Id="TextRegexMatch" Error="REGEX_MATCH_0 Should be '[MY_INPUT]'" Execute="immediate" />
+    <CustomAction Id="TextRegexReplace" Error="REGEX_MATCH_0 Should be '[MY_INPUT]'" Execute="immediate" />
+    <InstallUISequence>
+      <Custom Action="TextRegexMatch" After="RegularExpression"><![CDATA[REGEX_MATCH_1<>MY_INPUT]]></Custom>
+      <Custom Action="TextRegexReplace" After="TextRegexMatch"><![CDATA[REGEX_REPLACE<>"My Input is YOUR INPUT"]]></Custom>
+    </InstallUISequence>
+
+    <!-- Terminate after validating result. -->
+    <InstallUISequence>
+      <Custom Action="TerminateSuccessfully_Immediate" After="TextRegexReplace"></Custom>
+    </InstallUISequence>
+  </Product>
+</Wix>
