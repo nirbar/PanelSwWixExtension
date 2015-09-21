@@ -113,6 +113,11 @@
     </InstallUISequence>
   </Fragment>
 
+  <!-- PathExists -->
+  <Fragment>
+    <CustomAction Id="PathExists" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="SplitString" Execute="immediate" Return="check" />
+  </Fragment>
+
   <!-- SplitString -->
   <Fragment>
     <CustomAction Id="SplitString" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="SplitString" Execute="immediate" Return="check" />
