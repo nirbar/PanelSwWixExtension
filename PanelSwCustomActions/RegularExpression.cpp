@@ -130,27 +130,24 @@ extern "C" __declspec(dllexport) UINT RegularExpression(MSIHANDLE hInstall)
 		
 			bRes = regex_search((LPCWSTR)sInput, results, rx);
 			BreakExitOnNull((bRes || ((flags.s.result & ResultFlags::MustMatch) == 0)), hr, E_FAIL, "Regex returned no matches");
-
-			// Iterate results
-			if (bRes)
-			{
-				match_results<LPCWSTR>::const_iterator curIt = results.begin();
-				match_results<LPCWSTR>::const_iterator endIt = results.end();
-
-				for (size_t i = 0; curIt != endIt; ++i, ++curIt)
-				{
-					CWixString sPropName;
-
-					hr = sPropName.Format(L"%s_%u", (LPCWSTR)sDstProperty, i);
-					BreakExitOnFailure(hr, "Failed formatting string");
-
-					hr = WcaSetProperty((LPCWSTR)sPropName, curIt->str().c_str());
-					BreakExitOnFailure1(hr, "Failed setting property '%ls'", (LPCWSTR)sPropName);
-				}
-			}
-			else
+			if (!bRes)
 			{
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "No matches");
+				continue;
+			}
+
+			// Iterate results
+			match_results<LPCWSTR>::const_iterator curIt = results.begin();
+			match_results<LPCWSTR>::const_iterator endIt = results.end();
+			for (size_t i = 0; curIt != endIt; ++i, ++curIt)
+			{
+				CWixString sPropName;
+
+				hr = sPropName.Format(L"%s_%Iu", (LPCWSTR)sDstProperty, i);
+				BreakExitOnFailure(hr, "Failed formatting string");
+
+				hr = WcaSetProperty((LPCWSTR)sPropName, curIt->str().c_str());
+				BreakExitOnFailure1(hr, "Failed setting property '%ls'", (LPCWSTR)sPropName);
 			}
 		}
 		// Replace
@@ -159,9 +156,8 @@ extern "C" __declspec(dllexport) UINT RegularExpression(MSIHANDLE hInstall)
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Replacing regex '%ls' with '%ls' on input '%ls'", (LPCWSTR)sExpression, (LPCWSTR)sReplace, (LPCWSTR)sInput);
 	
 			std::wstring rep = regex_replace((LPCWSTR)sInput, rx, (LPCWSTR)sReplace);
-			CWixString replaceResult = rep.c_str();
 			
-			hr = WcaSetProperty(sDstProperty, replaceResult);
+			hr = WcaSetProperty(sDstProperty, rep.c_str());
 			BreakExitOnFailure(hr, "Failed setting target property");
 		}
 
