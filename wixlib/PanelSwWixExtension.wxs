@@ -139,6 +139,66 @@
     </InstallExecuteSequence>
   </Fragment>
 
+  <Fragment>
+    <Property Id="DOMAIN_ADMINISTRATORS" Value="N/A" />
+    <Property Id="DOMAIN_GUESTS" Value="N/A" />
+    <Property Id="DOMAIN_USERS" Value="N/A" />
+    <Property Id="ENTERPRISE_DOMAIN_CONTROLLERS" Value="N/A" />
+    <Property Id="DOMAIN_DOMAIN_CONTROLLERS" Value="N/A" />
+    <Property Id="DOMAIN_COMPUTERS" Value="N/A" />
+    <Property Id="BUILTIN_ADMINISTRATORS" Value="N/A" />
+    <Property Id="BUILTIN_GUESTS" Value="N/A" />
+    <Property Id="BUILTIN_USERS" Value="N/A" />
+    <Property Id="LOCAL_ADMIN" Value="N/A" />
+    <Property Id="LOCAL_GUEST" Value="N/A" />
+    <Property Id="ACCOUNT_OPERATORS" Value="N/A" />
+    <Property Id="BACKUP_OPERATORS" Value="N/A" />
+    <Property Id="PRINTER_OPERATORS" Value="N/A" />
+    <Property Id="SERVER_OPERATORS" Value="N/A" />
+    <Property Id="AUTHENTICATED_USERS" Value="N/A" />
+    <Property Id="PERSONAL_SELF" Value="N/A" />
+    <Property Id="CREATOR_OWNER" Value="N/A" />
+    <Property Id="CREATOR_GROUP" Value="N/A" />
+    <Property Id="LOCAL_SYSTEM" Value="N/A" />
+    <Property Id="POWER_USERS" Value="N/A" />
+    <Property Id="EVERYONE" Value="N/A" />
+    <Property Id="REPLICATOR" Value="N/A" />
+    <Property Id="INTERACTIVE" Value="N/A" />
+    <Property Id="NETWORK" Value="N/A" />
+    <Property Id="SERVICE" Value="N/A" />
+    <Property Id="RESTRICTED_CODE" Value="N/A" />
+    <Property Id="WRITE_RESTRICTED_CODE" Value="N/A" />
+    <Property Id="ANONYMOUS" Value="N/A" />
+    <Property Id="SCHEMA_ADMINISTRATORS" Value="N/A" />
+    <Property Id="CERT_SERV_ADMINISTRATORS" Value="N/A" />
+    <Property Id="RAS_SERVERS" Value="N/A" />
+    <Property Id="ENTERPRISE_ADMINS" Value="N/A" />
+    <Property Id="GROUP_POLICY_ADMINS" Value="N/A" />
+    <Property Id="ALIAS_PREW2KCOMPACC" Value="N/A" />
+    <Property Id="LOCAL_SERVICE" Value="N/A" />
+    <Property Id="NETWORK_SERVICE" Value="N/A" />
+    <Property Id="REMOTE_DESKTOP" Value="N/A" />
+    <Property Id="NETWORK_CONFIGURATION_OPS" Value="N/A" />
+    <Property Id="PERFMON_USERS" Value="N/A" />
+    <Property Id="PERFLOG_USERS" Value="N/A" />
+    <Property Id="IIS_USERS" Value="N/A" />
+    <Property Id="CRYPTO_OPERATORS" Value="N/A" />
+    <Property Id="OWNER_RIGHTS" Value="N/A" />
+    <Property Id="EVENT_LOG_READERS" Value="N/A" />
+    <Property Id="ENTERPRISE_RO_DCs" Value="N/A" />
+    <Property Id="CERTSVC_DCOM_ACCESS" Value="N/A" />
+
+    <CustomAction Id="AccountNames" BinaryKey="PanelSwCustomActions.dll" DllEntry="AccountNames" />
+    <InstallUISequence>
+      <Custom Action="AccountNames" Before="AppSearch" />
+    </InstallUISequence>
+    <InstallExecuteSequence>
+      <Custom Action="AccountNames" Before="AppSearch" />
+    </InstallExecuteSequence>
+
+  </Fragment>
+  
+
   <!-- MsiSqlQuery -->
   <Fragment>
     <CustomAction Id="MsiSqlQuery" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="MsiSqlQuery" Execute="immediate" Return="check" />
