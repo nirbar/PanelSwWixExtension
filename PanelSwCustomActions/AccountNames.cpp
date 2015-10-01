@@ -83,16 +83,14 @@ extern "C" __declspec(dllexport) UINT AccountNames(MSIHANDLE hInstall)
 		if (!bRes)
 		{
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed converting SID '%ls': Error %u", itCur->first, ::GetLastError());
-			continue;
+			goto LForContinue;
 		}
 
 		bRes = ::LookupAccountSid(NULL, pSid, (LPWSTR)accountName, &dwNameLen, (LPWSTR)domainName, &dwDomainLen, &eUse);
 		if (!bRes && (::GetLastError() != ERROR_INSUFFICIENT_BUFFER))
 		{
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed getting SID for '%ls': Error %u", itCur->first, ::GetLastError());
-			::LocalFree(pSid);
-			pSid = NULL;
-			continue;
+			goto LForContinue;
 		}
 
 		hr = accountName.Allocate(dwNameLen);
@@ -102,7 +100,7 @@ extern "C" __declspec(dllexport) UINT AccountNames(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed allocating memory");
 
 		bRes = ::LookupAccountSid(NULL, pSid, (LPWSTR)accountName, &dwNameLen, (LPWSTR)domainName, &dwDomainLen, &eUse);
-		BreakExitOnNullWithLastError(bRes, hr, "Failed looking up SID (2)");
+		BreakExitOnNullWithLastError(bRes, hr, "Failed looking up SID");
 
 		if (domainName.StrLen() > 0)
 		{
@@ -115,19 +113,17 @@ extern "C" __declspec(dllexport) UINT AccountNames(MSIHANDLE hInstall)
 			BreakExitOnFailure(hr, "Failed copying string");
 		}
 
-
 		hr = WcaSetProperty(itCur->second, (LPCWSTR)fullName);
 		BreakExitOnFailure(hr, "Failed setting property");
 
-		::LocalFree(pSid);
-		pSid = NULL;
+LForContinue:
+
+		if (pSid != NULL)
+		{
+			::LocalFree(pSid);
+			pSid = NULL;
+		}
 	}
-
-
-
-
-
-
 
 LExit:
 

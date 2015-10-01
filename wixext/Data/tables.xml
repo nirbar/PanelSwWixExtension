@@ -51,6 +51,15 @@
     <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
   </tableDefinition>
 
+  <tableDefinition name="PSW_FileRegex">
+    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="FilePath" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Regex" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Replacement" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="IgnoreCase" type="number" length="2" nullable="yes" minValue="0" maxValue="127" />
+    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
+  </tableDefinition>
+
   <tableDefinition name="PSW_Telemetry">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
     <columnDefinition name="Url" type="string" length="0" modularize="property" category="formatted" />

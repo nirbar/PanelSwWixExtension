@@ -51,9 +51,9 @@
       <Custom Action="TextRegexReplace2" After="TextRegexMatch"><![CDATA[REGEX_REPLACE_3<>"My Input is Test Text"]]></Custom>
     </InstallUISequence>
 
-    <!-- Terminate after validating result. -->
-    <InstallUISequence>
-      <Custom Action="TerminateSuccessfully_Immediate" After="TextRegexReplace2"></Custom>
-    </InstallUISequence>
+    <PanelSW:FileRegex Id="_1" FilePath="[#Product.wxs]" Regex="\bRegularExpressio(\w)\b" Replacement="$1_RegularExpressio" IgnoreCase="no"><![CDATA[Not Installed]]></PanelSW:FileRegex>
+  
+  
+  
   </Product>
 </Wix>

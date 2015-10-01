@@ -3,6 +3,7 @@
 #include "../CaCommon/WixString.h"
 #include "Telemetry.h"
 #include "ShellExecute.h"
+#include "FileRegex.h"
 
 // ReceiverToExecutorFunc implementation.
 HRESULT ReceiverToExecutor(LPCWSTR szReceiver, CDeferredActionBase** ppExecutor)
@@ -20,6 +21,11 @@ HRESULT ReceiverToExecutor(LPCWSTR szReceiver, CDeferredActionBase** ppExecutor)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating ShellExecute handler");
 		(*ppExecutor) = new CShellExecute();
+	}
+	else if (szRcvr.Equals(L"CFileRegex"))
+	{
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating FileRegex handler");
+		(*ppExecutor) = new CFileRegex();
 	}
 	else
 	{

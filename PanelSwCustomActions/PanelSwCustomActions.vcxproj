@@ -64,7 +64,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -85,6 +85,7 @@
   <ItemGroup>
     <ClCompile Include="AccountNames.cpp" />
     <ClCompile Include="CommonDeferred.cpp" />
+    <ClCompile Include="FileRegex.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="MsiSqlQuery.cpp" />
     <ClCompile Include="RegDataSerializer.cpp" />
@@ -104,6 +105,7 @@
     <ClCompile Include="XmlSearch.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FileRegex.h" />
     <ClInclude Include="RegDataSerializer.h" />
     <ClInclude Include="CustomUninstallKey.h" />
     <ClInclude Include="RegistryKey.h" />
