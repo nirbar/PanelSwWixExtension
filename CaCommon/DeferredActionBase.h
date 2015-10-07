@@ -19,6 +19,8 @@ public:
 
 	HRESULT GetCustomActionData(BSTR* pszCustomActionData);
 
+	HRESULT Prepend( CDeferredActionBase* pOther);
+
 protected:
 
 	// Overriden by inheriting classes. Execute the command object (XML element)

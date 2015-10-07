@@ -1,4 +1,5 @@
 #include "FileRegex.h"
+#include "FileOperations.h"
 #include "../CaCommon/WixString.h"
 #include <regex>
 #include <sstream>
@@ -24,7 +25,13 @@ extern "C" __declspec(dllexport) UINT FileRegex(MSIHANDLE hInstall)
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
 	CFileRegex oDeferredFileRegex;
+	CFileOperations rollbackCAD;
+	CFileOperations deferredFileCAD;
+	CFileOperations commitCAD;
+	CWixString tempPath;
 	CComBSTR szCustomActionData;
+	DWORD dwRes = 0;
+	DWORD dwUnique = 0;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");
@@ -39,6 +46,17 @@ extern "C" __declspec(dllexport) UINT FileRegex(MSIHANDLE hInstall)
 	BreakExitOnFailure1(hr, "Failed to execute SQL query '%ls'.", FileRegex_QUERY);
 	WcaLog(LOGMSG_STANDARD, "Executed query.");
 
+	// Get temporay folder
+	dwRes = ::GetTempPath(dwRes, (LPWSTR)tempPath);
+	BreakExitOnNullWithLastError( dwRes, hr, "Failed getting temporary folder");
+
+	hr = tempPath.Allocate(dwRes + 1);
+	BreakExitOnFailure(hr, "Failed allocating memory");
+
+	dwRes = ::GetTempPath(dwRes + 1, (LPWSTR)tempPath);
+	BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary folder");
+	BreakExitOnNull( (dwRes < tempPath.Capacity()), hr, E_FAIL, "Failed getting temporary folder");
+
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
@@ -46,6 +64,7 @@ extern "C" __declspec(dllexport) UINT FileRegex(MSIHANDLE hInstall)
 
 		// Get fields
 		CWixString szId, szFilePath, szRegex, szReplacement, szCondition;
+		CWixString tempFile;
 		int nIgnoreCase = 0;
 
 		hr = WcaGetRecordString(hRecord, FileRegexQuery::Id, (LPWSTR*)szId);
@@ -79,13 +98,44 @@ extern "C" __declspec(dllexport) UINT FileRegex(MSIHANDLE hInstall)
 			BreakExitOnFailure(hr, "Bad Condition field");
 		}
 
+		// Generate temp file name.
+		hr = tempFile.Allocate(MAX_PATH + 1);
+		BreakExitOnFailure(hr, "Failed allocating memory");
+
+		dwRes = ::GetTempFileName((LPCWSTR)tempPath, L"RGX", ++dwUnique, (LPWSTR)tempFile);
+		BreakExitOnNullWithLastError( dwRes, hr, "Failed getting temporary file name");
+
+		hr = rollbackCAD.AddMoveFile( (LPCWSTR)tempFile, szFilePath);
+		BreakExitOnFailure(hr, "Failed creating custom action data for rollback action.");
+
+		// Add deferred data to copy file szFilePath -> tempFile.
+		hr = deferredFileCAD.AddCopyFile(szFilePath, (LPCWSTR)tempFile);
+		BreakExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
+
 		hr = oDeferredFileRegex.AddFileRegex(szFilePath, szRegex, szReplacement, nIgnoreCase != 0);
 		BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
+
+		hr = commitCAD.AddDeleteFile( (LPCWSTR)tempFile);
+		BreakExitOnFailure(hr, "Failed creating custom action data for commit action.");
 	}
 
+	hr = rollbackCAD.GetCustomActionData(&szCustomActionData);
+	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
+	hr = WcaDoDeferredAction(L"FileRegex_rollback", szCustomActionData, rollbackCAD.GetCost());
+	BreakExitOnFailure(hr, "Failed scheduling deferred action.");
+
+	szCustomActionData.Empty();
+	hr = oDeferredFileRegex.Prepend(&deferredFileCAD);
+	BreakExitOnFailure(hr, "Failed getting custom action data for deferred file actions.");
 	hr = oDeferredFileRegex.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
 	hr = WcaDoDeferredAction(L"FileRegex_deferred", szCustomActionData, oDeferredFileRegex.GetCost());
+	BreakExitOnFailure(hr, "Failed scheduling deferred action.");
+
+	szCustomActionData.Empty();
+	hr = commitCAD.GetCustomActionData(&szCustomActionData);
+	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
+	hr = WcaDoDeferredAction(L"FileRegex_commit", szCustomActionData, commitCAD.GetCost());
 	BreakExitOnFailure(hr, "Failed scheduling deferred action.");
 
 LExit:

@@ -4,6 +4,7 @@
 #include "Telemetry.h"
 #include "ShellExecute.h"
 #include "FileRegex.h"
+#include "FileOperations.h"
 
 // ReceiverToExecutorFunc implementation.
 HRESULT ReceiverToExecutor(LPCWSTR szReceiver, CDeferredActionBase** ppExecutor)
@@ -26,6 +27,11 @@ HRESULT ReceiverToExecutor(LPCWSTR szReceiver, CDeferredActionBase** ppExecutor)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating FileRegex handler");
 		(*ppExecutor) = new CFileRegex();
+	}
+	else if (szRcvr.Equals(L"CFileOperations"))
+	{
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating FileOperations handler");
+		(*ppExecutor) = new CFileOperations();
 	}
 	else
 	{

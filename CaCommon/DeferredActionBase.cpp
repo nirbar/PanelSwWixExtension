@@ -175,3 +175,54 @@ HRESULT CDeferredActionBase::GetCustomActionData(BSTR* pszCustomActionData)
 LExit:
 	return hr;
 }
+
+HRESULT CDeferredActionBase::Prepend( CDeferredActionBase* pOther)
+{
+	HRESULT hr = S_OK;
+	CWixString szCustomActionData;
+	CComPtr<IXMLDOMDocument> pXmlDoc;
+	CComPtr<IXMLDOMNodeList> pNodes;
+	IXMLDOMNodeList* pTmpNodes = NULL;
+	IXMLDOMElement* pRootElem = NULL;
+	IXMLDOMNode* pRootFirstChild = NULL;
+	LONG nodeCount = 0;
+
+	hr = pOther->_pXmlDoc->selectNodes(CComBSTR(L"/Root/*"), &pTmpNodes);
+	BreakExitOnFailure(hr, "Failed to select XML nodes");
+	BreakExitOnNull(pTmpNodes, hr, E_FAIL, "Failed to select XML nodes");
+	pNodes.Attach(pTmpNodes);
+
+	hr = pNodes->get_length(&nodeCount);
+	BreakExitOnFailure(hr, "Failed to get node count");
+
+	hr = _pXmlDoc->get_documentElement( &pRootElem);
+	BreakExitOnFailure(hr, "Failed to get XML root element");
+	BreakExitOnNull(pRootElem, hr, E_FAIL, "Failed to get XML root element");
+
+	hr = pRootElem->get_firstChild( &pRootFirstChild);
+	BreakExitOnFailure(hr, "Failed to get XML root element's first child");
+
+	// Iterate elements
+	for (LONG i = 0; i < nodeCount; ++i)
+	{
+		IXMLDOMNode* pTmpNode = NULL;
+		IXMLDOMNode* pTmpNode1 = NULL;
+		IXMLDOMNode* pTmpNode2 = NULL;
+
+		// Get element
+		hr = pNodes->get_item(i, &pTmpNode);
+		BreakExitOnFailure(hr, "Failed to get node");
+		BreakExitOnNull(pTmpNode, hr, E_FAIL, "Failed to get node");
+		
+		hr = pTmpNode->cloneNode( VARIANT_BOOL(true), &pTmpNode1);
+		BreakExitOnFailure(hr, "Failed to clone node");
+		BreakExitOnNull(pTmpNode1, hr, E_FAIL, "Failed to clone node");
+
+		hr = pRootElem->insertBefore(pTmpNode1, CComVariant( pRootFirstChild), &pTmpNode2);
+		BreakExitOnFailure(hr, "Failed to insert node");
+		BreakExitOnNull(pTmpNode2, hr, E_FAIL, "Failed to insert node");
+	}
+
+LExit:
+	return hr;
+}

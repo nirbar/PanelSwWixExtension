@@ -85,6 +85,7 @@
   <ItemGroup>
     <ClCompile Include="AccountNames.cpp" />
     <ClCompile Include="CommonDeferred.cpp" />
+    <ClCompile Include="FileOperations.cpp" />
     <ClCompile Include="FileRegex.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="MsiSqlQuery.cpp" />
@@ -105,6 +106,7 @@
     <ClCompile Include="XmlSearch.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="FileOperations.h" />
     <ClInclude Include="FileRegex.h" />
     <ClInclude Include="RegDataSerializer.h" />
     <ClInclude Include="CustomUninstallKey.h" />
