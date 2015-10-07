@@ -9,6 +9,7 @@ public:
 	CWixString()
 		: _pS(NULL)
 		, _dwCapacity(0)
+		, _pTokenContext( NULL)
 	{
 
 	}
@@ -16,6 +17,7 @@ public:
 	CWixString(const WCHAR *pS)
 		: _pS(NULL)
 		, _dwCapacity(0)
+		, _pTokenContext( NULL)
 	{
 		Copy(pS);
 	}
@@ -23,6 +25,7 @@ public:
 	CWixString(DWORD dwSize)
 		: _pS(NULL)
 		, _dwCapacity(0)
+		, _pTokenContext( NULL)
 	{
 		Allocate(dwSize);
 	}
@@ -130,13 +133,32 @@ public:
 		hr = Allocate(sSize);
 		BreakExitOnFailure(hr, "Failed allocating memory");
 
-		_vswprintf(_pS, stFormat, va);
+		vswprintf_s(_pS, Capacity(), stFormat, va);
 
 	LExit:
 
 		va_end(va);
 		return hr;
 	}
+
+	#pragma region Tokenize
+	
+	HRESULT Tokenize(LPCWSTR delimiters, LPCWSTR* firstToken)
+	{
+		_pTokenContext = NULL;
+		(*firstToken) = ::wcstok_s(_pS, delimiters, &_pTokenContext);
+	
+		return ((*firstToken) == NULL) ? HRESULT_FROM_WIN32(ERROR_NO_MORE_ITEMS) : S_OK;
+	}
+	
+	HRESULT NextToken(LPCWSTR delimiters, LPCWSTR* nextToken)
+	{
+		(*nextToken) = ::wcstok_s(NULL, delimiters, &_pTokenContext);
+	
+		return ((*nextToken) == NULL) ? HRESULT_FROM_WIN32(ERROR_NO_MORE_ITEMS) : S_OK;
+	}
+	
+	#pragma endregion	
 
 	DWORD Capacity() const
 	{
@@ -270,5 +292,6 @@ public:
 private:
 
 	WCHAR *_pS;
+	WCHAR *_pTokenContext;
 	DWORD _dwCapacity;
 };

@@ -156,7 +156,6 @@ HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szRepla
 {
     HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
-	LARGE_INTEGER fileSize;
 	DWORD dwBytesRead = 0;
 	wstring content;
 	wifstream fileRead;

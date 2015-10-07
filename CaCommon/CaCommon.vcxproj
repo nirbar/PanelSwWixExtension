@@ -91,6 +91,7 @@
     <ClCompile Include="SummaryStream.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="AutoRelease.h" />
     <ClInclude Include="DeferredActionBase.h" />
     <ClInclude Include="MsiBreak.h" />
     <ClInclude Include="stdafx.h" />

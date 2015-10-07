@@ -53,9 +53,9 @@ extern "C" __declspec(dllexport) UINT SplitString(MSIHANDLE hInstall)
 	hr = szDstPropName.Allocate(szPropName.Capacity() + 20);
 	BreakExitOnFailure(hr, "Failed allocating memory");
 
-	for (szCurrValue = ::wcstok((LPWSTR)szFullString, (LPCWSTR)szToken);
-		szCurrValue != NULL;
-		++i, szCurrValue = ::wcstok(NULL, (LPCWSTR)szToken))
+	for (hr = szFullString.Tokenize((LPCWSTR)szToken, &szCurrValue);
+		(SUCCEEDED(hr) && (szCurrValue != NULL));
+		++i, hr = szFullString.NextToken((LPCWSTR)szToken, &szCurrValue))
 	{
 		wsprintf((LPWSTR)szDstPropName, L"%s_%Iu", (LPCWSTR)szPropName, i);
 

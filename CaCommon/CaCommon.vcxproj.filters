@@ -53,5 +53,8 @@
     <ClInclude Include="DeferredActionBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="AutoRelease.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

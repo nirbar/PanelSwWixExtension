@@ -26,19 +26,6 @@ HRESULT CRegistryKey::Close()
 	_hRootKey = NULL;
 	::memset( _keyName, 0, sizeof( WCHAR) * MAX_PATH);
 
-	if(( _hKey != NULL)
-		&& ( _hKey != HKEY_CLASSES_ROOT)
-		&& ( _hKey != HKEY_CURRENT_USER)
-		&& ( _hKey != HKEY_LOCAL_MACHINE)
-		&& ( _hKey != HKEY_CURRENT_CONFIG)
-		&& ( _hKey != HKEY_USERS)
-		)
-	{
-		LONG lRes = ::RegCloseKey( _hKey);
-		hr = HRESULT_FROM_WIN32( lRes);
-		_hKey = NULL;
-	}
-
 	return hr;
 }
 

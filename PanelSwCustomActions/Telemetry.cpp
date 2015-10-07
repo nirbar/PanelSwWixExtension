@@ -207,7 +207,7 @@ HRESULT CTelemetry::DeferredExecute(IXMLDOMElement* pElem)
 		, vSecure.bstrVal);
 
 	hr = Post(vUrl.bstrVal, vPage.bstrVal, vMethod.bstrVal, vData.bstrVal, nSecure != 0);
-	BreakExitOnFailure2(hr, "Failed to post Data '%ls' to URL '%ls%ls'", vData.bstrVal, vUrl.bstrVal, vPage.bstrVal);
+	BreakExitOnFailure3(hr, "Failed to post Data '%ls' to URL '%ls%ls'", vData.bstrVal, vUrl.bstrVal, vPage.bstrVal);
 
 LExit:
 	return hr;
