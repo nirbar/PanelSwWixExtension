@@ -15,6 +15,46 @@
 
   <xs:import namespace="http://schemas.microsoft.com/wix/2006/wi" />
 
+  <xs:element name="DeletePath">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[
+Execute a Regular Expression to perform find & replace operations within files.
+
+\par Example:
+\code
+<Wix ... xmlns:PanelSw="http://schemas.panel-sw.co.il/wix/WixExtension">
+<Product ...>
+ <PanelSw:DeletePath Id="Q1" Path="[#someFile]">MY_CONDITION</PanelSw:DeletePath>
+</Product>
+</Wix>
+\endcode
+        ]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Id" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Path" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Full file path to perform find &amp; replace in. This field is formatted.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="FileRegex">
     <xs:annotation>
       <xs:appinfo>

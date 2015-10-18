@@ -46,6 +46,7 @@ namespace PanelSw.Wix.Extensions
             Core.EnsureTable(null, "PSW_MsiSqlQuery");
             Core.EnsureTable(null, "PSW_RegularExpression");
             Core.EnsureTable(null, "PSW_FileRegex");
+            Core.EnsureTable(null, "PSW_DeletePath");
             base.FinalizeCompile();
         }
 
@@ -95,6 +96,10 @@ namespace PanelSw.Wix.Extensions
 
                         case "FileRegex":
                             this.ParseFileRegex(element);
+                            break;
+
+                        case "DeletePath":
+                            this.ParseDeletePath(element);
                             break;
 
                         default:
@@ -1163,6 +1168,79 @@ namespace PanelSw.Wix.Extensions
                 row[3] = replacement ?? "";
                 row[4] = ignoreCase ? 1 : 0;
                 row[5] = condition;
+            }
+        }
+
+        private void ParseDeletePath(XmlNode node)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string id = null;
+            string filepath = null;
+            string condition = null;
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == this.schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName.ToLower())
+                    {
+                        case "id":
+                            id = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "path":
+                            filepath = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        default:
+                            this.Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+                else
+                {
+                    this.Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            if (string.IsNullOrEmpty(id))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+            }
+            if (string.IsNullOrEmpty(filepath))
+            {
+                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Path"));
+            }
+
+            // find unexpected child elements
+            foreach (XmlNode child in node.ChildNodes)
+            {
+                if (XmlNodeType.Element == child.NodeType)
+                {
+                    if (child.NamespaceURI == this.schema.TargetNamespace)
+                    {
+                        this.Core.UnexpectedElement(node, child);
+                    }
+                    else
+                    {
+                        this.Core.UnsupportedExtensionElement(node, child);
+                    }
+                }
+                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
+                {
+                    condition = child.Value.Trim();
+                }
+            }
+
+            // reference the Win32_CopyFiles custom actions since nothing will happen without these
+            this.Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "DeletePath");
+
+            if (!Core.EncounteredError)
+            {
+                // create a row in the Win32_CopyFiles table
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_DeletePath");
+                row[0] = id;
+                row[1] = filepath;
+                row[2] = condition;
             }
         }
     }

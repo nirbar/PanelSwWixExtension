@@ -148,14 +148,14 @@ public:
 		_pTokenContext = NULL;
 		(*firstToken) = ::wcstok_s(_pS, delimiters, &_pTokenContext);
 	
-		return ((*firstToken) == NULL) ? HRESULT_FROM_WIN32(ERROR_NO_MORE_ITEMS) : S_OK;
+		return ((*firstToken) == NULL) ? E_NOMOREITEMS : S_OK;
 	}
 	
 	HRESULT NextToken(LPCWSTR delimiters, LPCWSTR* nextToken)
 	{
 		(*nextToken) = ::wcstok_s(NULL, delimiters, &_pTokenContext);
 	
-		return ((*nextToken) == NULL) ? HRESULT_FROM_WIN32(ERROR_NO_MORE_ITEMS) : S_OK;
+		return ((*nextToken) == NULL) ? E_NOMOREITEMS : S_OK;
 	}
 	
 	#pragma endregion	

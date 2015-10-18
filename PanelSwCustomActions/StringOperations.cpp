@@ -63,6 +63,11 @@ extern "C" __declspec(dllexport) UINT SplitString(MSIHANDLE hInstall)
 		ExitOnFailure1(hr, "Failed setting property '%ls'", (LPCWSTR)szDstPropName);
 	}
 
+	if (hr == E_NOMOREITEMS)
+	{
+		hr = S_OK;
+	}
+
 LExit:
 
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;

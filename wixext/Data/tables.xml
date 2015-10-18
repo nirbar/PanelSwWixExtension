@@ -87,4 +87,10 @@
     <columnDefinition name="Query" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
   </tableDefinition>
+
+  <tableDefinition name="PSW_DeletePath">
+    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="Path" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
+  </tableDefinition>
 </tableDefinitions>

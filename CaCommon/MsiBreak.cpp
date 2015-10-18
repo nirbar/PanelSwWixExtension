@@ -1,4 +1,5 @@
 #include "MsiBreak.h"
+#include <strsafe.h>
 
 HRESULT MsiDebugBreak()
 {
@@ -34,7 +35,7 @@ HRESULT MsiBreak()
 	WCHAR szMsg[ MAX_PATH + 100];
 
 	dwPrcId = ::GetCurrentProcessId();
-	wsprintf( szMsg, L"MsiBreak process %u", dwPrcId);
+	::StringCbPrintf(szMsg, ARRAYSIZE(szMsg), L"MsiBreak process %u", dwPrcId);
 
 	::MessageBox( NULL, szMsg, L"MsiBreak", MB_OK);
 
