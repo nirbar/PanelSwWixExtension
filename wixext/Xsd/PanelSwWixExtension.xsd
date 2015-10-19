@@ -30,7 +30,7 @@ Execute a Regular Expression to perform find & replace operations within files.
 \code
 <Wix ... xmlns:PanelSw="http://schemas.panel-sw.co.il/wix/WixExtension">
 <Product ...>
- <PanelSw:DeletePath Id="Q1" Path="[#someFile]">MY_CONDITION</PanelSw:DeletePath>
+ <PanelSw:DeletePath Id="Q1" Path="[#someFile]" IgnoreMissing="yes">MY_CONDITION</PanelSw:DeletePath>
 </Product>
 </Wix>
 \endcode
@@ -48,6 +48,11 @@ Execute a Regular Expression to perform find & replace operations within files.
           <xs:attribute name="Path" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation>Full file path to perform find &amp; replace in. This field is formatted.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="IgnoreMissing" type="YesNoType" use="optional">
+            <xs:annotation>
+              <xs:documentation>Skip is source is missing. Default is no.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>

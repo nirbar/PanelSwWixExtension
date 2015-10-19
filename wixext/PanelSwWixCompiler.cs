@@ -1171,12 +1171,19 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
+        [Flags]
+        private enum DeletePathFlags
+        {
+            IgnoreMissing = 1
+        }
+
         private void ParseDeletePath(XmlNode node)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
             string id = null;
             string filepath = null;
             string condition = null;
+            DeletePathFlags flags = 0;
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -1189,6 +1196,12 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "path":
                             filepath = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "ignoremissing":
+                            if (this.Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            {
+                                flags |= DeletePathFlags.IgnoreMissing;
+                            }
                             break;
 
                         default:
@@ -1240,7 +1253,8 @@ namespace PanelSw.Wix.Extensions
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_DeletePath");
                 row[0] = id;
                 row[1] = filepath;
-                row[2] = condition;
+                row[2] = (int)flags;
+                row[3] = condition;
             }
         }
     }

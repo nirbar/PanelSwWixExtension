@@ -6,9 +6,9 @@ class CFileOperations :
 {
 public:
 
-	HRESULT AddCopyFile(LPCWSTR szFrom, LPCWSTR szTo);
-	HRESULT AddMoveFile(LPCWSTR szFrom, LPCWSTR szTo);
-	HRESULT AddDeleteFile(LPCWSTR szFile);
+	HRESULT AddCopyFile(LPCWSTR szFrom, LPCWSTR szTo, int flags = 0);
+	HRESULT AddMoveFile(LPCWSTR szFrom, LPCWSTR szTo, int flags = 0);
+	HRESULT AddDeleteFile(LPCWSTR szFile, int flags = 0);
 
 protected:
 	// Execute the command object (XML element)

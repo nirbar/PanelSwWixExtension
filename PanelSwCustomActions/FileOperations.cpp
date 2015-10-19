@@ -2,8 +2,13 @@
 #include "../CaCommon/WixString.h"
 #include <Shellapi.h>
 
-#define DeletePath_QUERY L"SELECT `Id`, `Path`, `Condition` FROM `PSW_DeletePath`"
-enum DeletePathQuery { Id = 1, Path = 2, Condition = 3 };
+#define DeletePath_QUERY L"SELECT `Id`, `Path`, `Flags`, `Condition` FROM `PSW_DeletePath`"
+enum DeletePathQuery { Id = 1, Path, Flags, Condition };
+enum DeletePathAttributes
+{
+	IgnoreMissingPath = 1
+};
+
 
 extern "C" __declspec(dllexport) UINT DeletePath(MSIHANDLE hInstall)
 {
@@ -51,12 +56,14 @@ extern "C" __declspec(dllexport) UINT DeletePath(MSIHANDLE hInstall)
 		// Get fields
 		CWixString szId, szFilePath, szRegex, szReplacement, szCondition;
 		CWixString tempFile;
-		int nIgnoreCase = 0;
+		int flags = 0;
 
 		hr = WcaGetRecordString(hRecord, DeletePathQuery::Id, (LPWSTR*)szId);
 		BreakExitOnFailure(hr, "Failed to get Id.");
 		hr = WcaGetRecordFormattedString(hRecord, DeletePathQuery::Path, (LPWSTR*)szFilePath);
 		BreakExitOnFailure(hr, "Failed to get Path.");
+		hr = WcaGetRecordInteger(hRecord, DeletePathQuery::Flags, &flags);
+		BreakExitOnFailure(hr, "Failed to get Flags.");
 		hr = WcaGetRecordString(hRecord, DeletePathQuery::Condition, (LPWSTR*)szCondition);
 		BreakExitOnFailure(hr, "Failed to get Condition.");
 
@@ -85,14 +92,14 @@ extern "C" __declspec(dllexport) UINT DeletePath(MSIHANDLE hInstall)
 		dwRes = ::GetTempFileName((LPCWSTR)tempPath, L"DLT", ++dwUnique, (LPWSTR)tempFile);
 		BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
 
-		hr = rollbackCAD.AddMoveFile((LPCWSTR)tempFile, szFilePath);
+		hr = rollbackCAD.AddMoveFile((LPCWSTR)tempFile, szFilePath, flags);
 		BreakExitOnFailure(hr, "Failed creating custom action data for rollback action.");
 
 		// Add deferred data to move file szFilePath -> tempFile.
-		hr = deferredFileCAD.AddMoveFile(szFilePath, (LPCWSTR)tempFile);
+		hr = deferredFileCAD.AddMoveFile(szFilePath, (LPCWSTR)tempFile, flags);
 		BreakExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
 
-		hr = commitCAD.AddDeleteFile((LPCWSTR)tempFile);
+		hr = commitCAD.AddDeleteFile((LPCWSTR)tempFile, flags);
 		BreakExitOnFailure(hr, "Failed creating custom action data for commit action.");
 	}
 
@@ -118,7 +125,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-HRESULT CFileOperations::AddCopyFile(LPCWSTR szFrom, LPCWSTR szTo)
+HRESULT CFileOperations::AddCopyFile(LPCWSTR szFrom, LPCWSTR szTo, int flags)
 {
 	HRESULT hr = S_OK;
 	CComPtr<IXMLDOMElement> pElem;
@@ -132,11 +139,14 @@ HRESULT CFileOperations::AddCopyFile(LPCWSTR szFrom, LPCWSTR szTo)
 	hr = pElem->setAttribute(CComBSTR("To"), CComVariant(szTo));
 	BreakExitOnFailure(hr, "Failed to add XML attribute 'To'");
 
+	hr = pElem->setAttribute(CComBSTR("Flags"), CComVariant(flags));
+	BreakExitOnFailure(hr, "Failed to add XML attribute 'Flags'");
+
 LExit:
 	return hr;
 }
 
-HRESULT CFileOperations::AddMoveFile(LPCWSTR szFrom, LPCWSTR szTo)
+HRESULT CFileOperations::AddMoveFile(LPCWSTR szFrom, LPCWSTR szTo, int flags)
 {
 	HRESULT hr = S_OK;
 	CComPtr<IXMLDOMElement> pElem;
@@ -150,11 +160,14 @@ HRESULT CFileOperations::AddMoveFile(LPCWSTR szFrom, LPCWSTR szTo)
 	hr = pElem->setAttribute(CComBSTR("To"), CComVariant(szTo));
 	BreakExitOnFailure(hr, "Failed to add XML attribute 'To'");
 
+	hr = pElem->setAttribute(CComBSTR("Flags"), CComVariant(flags));
+	BreakExitOnFailure(hr, "Failed to add XML attribute 'Flags'");
+
 LExit:
 	return hr;
 }
 
-HRESULT CFileOperations::AddDeleteFile(LPCWSTR szPath)
+HRESULT CFileOperations::AddDeleteFile(LPCWSTR szPath, int flags)
 {
 	HRESULT hr = S_OK;
 	CComPtr<IXMLDOMElement> pElem;
@@ -164,6 +177,9 @@ HRESULT CFileOperations::AddDeleteFile(LPCWSTR szPath)
 
 	hr = pElem->setAttribute(CComBSTR("Path"), CComVariant(szPath));
 	BreakExitOnFailure(hr, "Failed to add XML attribute 'Path'");
+
+	hr = pElem->setAttribute(CComBSTR("Flags"), CComVariant(flags));
+	BreakExitOnFailure(hr, "Failed to add XML attribute 'Flags'");
 
 LExit:
 	return hr;
@@ -207,14 +223,30 @@ HRESULT CFileOperations::CopyFile(IXMLDOMElement* pElem)
 {
 	CComVariant vFrom;
 	CComVariant vTo;
+	CComVariant vFlags;
 	CWixString sFrom;
 	CWixString sTo;
 	SHFILEOPSTRUCT opInfo;
 	HRESULT hr = S_OK;
 	INT nRes = ERROR_SUCCESS;
+	int flags = 0;
 
 	hr = pElem->getAttribute(CComBSTR(L"From"), &vFrom);
 	BreakExitOnFailure(hr, "Failed getting 'From' attribute");
+
+	hr = pElem->getAttribute(CComBSTR(L"Flags"), &vFlags);
+	BreakExitOnFailure(hr, "Failed getting 'Flags' attribute");
+	flags = ::_wtoi(vFlags.bstrVal);
+
+	// Ignore if Src doesn't exist?
+	if ((flags & DeletePathAttributes::IgnoreMissingPath) != 0)
+	{
+		if (!::PathFileExists(vFrom.bstrVal))
+		{
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping copy '%ls' as it doesn't exist and marked to ignore missing", vFrom.bstrVal);
+			ExitFunction1(hr = S_FALSE);
+		}
+	}
 
 	hr = pElem->getAttribute(CComBSTR(L"To"), &vTo);
 	BreakExitOnFailure(hr, "Failed getting 'To' attribute");
@@ -245,17 +277,33 @@ HRESULT CFileOperations::MoveFile(IXMLDOMElement* pElem)
 {
 	CComVariant vFrom;
 	CComVariant vTo;
+	CComVariant vFlags;
 	CWixString sFrom;
 	CWixString sTo;
 	SHFILEOPSTRUCT opInfo;
 	HRESULT hr = S_OK;
 	INT nRes = ERROR_SUCCESS;
+	int flags = 0;
 
 	hr = pElem->getAttribute(CComBSTR(L"From"), &vFrom);
 	BreakExitOnFailure(hr, "Failed getting 'From' attribute");
 
 	hr = pElem->getAttribute(CComBSTR(L"To"), &vTo);
 	BreakExitOnFailure(hr, "Failed getting 'To' attribute");
+
+	hr = pElem->getAttribute(CComBSTR(L"Flags"), &vFlags);
+	BreakExitOnFailure(hr, "Failed getting 'Flags' attribute");
+	flags = ::_wtoi(vFlags.bstrVal);
+
+	// Ignore if Src doesn't exist?
+	if ((flags & DeletePathAttributes::IgnoreMissingPath) != 0)
+	{
+		if (!::PathFileExists(vFrom.bstrVal))
+		{
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping move '%ls' as it doesn't exist and marked to ignore missing", vFrom.bstrVal);
+			ExitFunction1(hr = S_FALSE);
+		}
+	}
 
 	hr = sFrom.Format(L"%s\0\0", (LPCWSTR)vFrom.bstrVal);
 	BreakExitOnFailure(hr, "Failed formatting string");
@@ -282,13 +330,29 @@ LExit:
 HRESULT CFileOperations::DeleteFile(IXMLDOMElement* pElem)
 {
 	CComVariant vPath;
+	CComVariant vFlags;
 	CWixString sPath;
 	SHFILEOPSTRUCT opInfo;
 	HRESULT hr = S_OK;
 	INT nRes = ERROR_SUCCESS;
+	int flags = 0;
 
 	hr = pElem->getAttribute(CComBSTR(L"Path"), &vPath);
 	BreakExitOnFailure(hr, "Failed getting 'Path' attribute");
+
+	hr = pElem->getAttribute(CComBSTR(L"Flags"), &vFlags);
+	BreakExitOnFailure(hr, "Failed getting 'Flags' attribute");
+	flags = ::_wtoi(vFlags.bstrVal);
+
+	// Ignore if Src doesn't exist?
+	if ((flags & DeletePathAttributes::IgnoreMissingPath) != 0)
+	{
+		if (!::PathFileExists(vPath.bstrVal))
+		{
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping delete '%ls' as it doesn't exist and marked to ignore missing", vPath.bstrVal);
+			ExitFunction1(hr = S_FALSE);
+		}
+	}
 
 	hr = sPath.Format(L"%s\0\0", (LPCWSTR)vPath.bstrVal);
 	BreakExitOnFailure(hr, "Failed formatting string");
