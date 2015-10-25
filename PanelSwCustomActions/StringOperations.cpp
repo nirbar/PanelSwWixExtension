@@ -57,7 +57,8 @@ extern "C" __declspec(dllexport) UINT SplitString(MSIHANDLE hInstall)
 		(SUCCEEDED(hr) && (szCurrValue != NULL));
 		++i, hr = szFullString.NextToken((LPCWSTR)szToken, &szCurrValue))
 	{
-		wsprintf((LPWSTR)szDstPropName, L"%s_%Iu", (LPCWSTR)szPropName, i);
+		hr = szDstPropName.Format(L"%s_%Iu", (LPCWSTR)szPropName, i);
+		ExitOnFailure(hr, "Failed formatting string");
 
 		hr = WcaSetProperty((LPCWSTR)szDstPropName, szCurrValue);
 		ExitOnFailure1(hr, "Failed setting property '%ls'", (LPCWSTR)szDstPropName);

@@ -1175,6 +1175,7 @@ namespace PanelSw.Wix.Extensions
         private enum DeletePathFlags
         {
             IgnoreMissing = 1
+            , IgnoreErrors = 2 * IgnoreMissing
         }
 
         private void ParseDeletePath(XmlNode node)
@@ -1201,6 +1202,12 @@ namespace PanelSw.Wix.Extensions
                             if (this.Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("yes", StringComparison.OrdinalIgnoreCase))
                             {
                                 flags |= DeletePathFlags.IgnoreMissing;
+                            }
+                            break;
+                        case "ignoreerrors":
+                            if (this.Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            {
+                                flags |= DeletePathFlags.IgnoreErrors;
                             }
                             break;
 

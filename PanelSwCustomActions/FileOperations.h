@@ -15,6 +15,11 @@ protected:
 	virtual HRESULT DeferredExecute(IXMLDOMElement* pElem);
 
 private:
+	enum DeletePathAttributes
+	{
+		IgnoreMissingPath = 1
+		, IgnoreErrors = 2 * IgnoreMissingPath
+	};
 
 	HRESULT CopyFile(IXMLDOMElement* pElem);
 	HRESULT MoveFile(IXMLDOMElement* pElem);

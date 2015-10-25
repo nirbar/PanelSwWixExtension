@@ -4,11 +4,6 @@
 
 #define DeletePath_QUERY L"SELECT `Id`, `Path`, `Flags`, `Condition` FROM `PSW_DeletePath`"
 enum DeletePathQuery { Id = 1, Path, Flags, Condition };
-enum DeletePathAttributes
-{
-	IgnoreMissingPath = 1
-};
-
 
 extern "C" __declspec(dllexport) UINT DeletePath(MSIHANDLE hInstall)
 {
@@ -265,9 +260,16 @@ HRESULT CFileOperations::CopyFile(IXMLDOMElement* pElem)
 	opInfo.fFlags = FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR | FOF_NOERRORUI | FOF_NO_UI;
 
 	nRes = ::SHFileOperation(&opInfo);
-	BreakExitOnNull1((!nRes), hr, E_FAIL, "Failed copying file (Error %i)", nRes);
-	BreakExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed copying file (operation aborted)");
-	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Copied '%ls' to '%ls'", vFrom.bstrVal, vTo.bstrVal);
+	if ((flags & DeletePathAttributes::IgnoreErrors) == 0)
+	{
+		BreakExitOnNull1((!nRes), hr, E_FAIL, "Failed copying file (Error %i)", nRes);
+		BreakExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed copying file (operation aborted)");
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Copied '%ls' to '%ls'", vFrom.bstrVal, vTo.bstrVal);
+	}
+	else if (nRes != 0)
+	{
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed Copying '%ls' to '%ls'; Ignoring error (%i)", vFrom.bstrVal, vTo.bstrVal, nRes);
+	}
 
 LExit:
 	return hr;
@@ -319,9 +321,16 @@ HRESULT CFileOperations::MoveFile(IXMLDOMElement* pElem)
 	opInfo.fFlags = FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR | FOF_NOERRORUI | FOF_NO_UI;
 
 	nRes = ::SHFileOperation(&opInfo);
-	BreakExitOnNull1((!nRes), hr, E_FAIL, "Failed moving file (Error %i)", nRes);
-	BreakExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed moving file (operation aborted)");
-	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Moved '%ls' to '%ls'", vFrom.bstrVal, vTo.bstrVal);
+	if ((flags & DeletePathAttributes::IgnoreErrors) == 0)
+	{
+		BreakExitOnNull1((!nRes), hr, E_FAIL, "Failed moving file (Error %i)", nRes);
+		BreakExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed moving file (operation aborted)");
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Moved '%ls' to '%ls'", vFrom.bstrVal, vTo.bstrVal);
+	}
+	else if (nRes != 0)
+	{
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed moving '%ls' to '%ls'; Ignoring error (%i)", vFrom.bstrVal, vTo.bstrVal, nRes);
+	}
 
 LExit:
 	return hr;
@@ -364,9 +373,16 @@ HRESULT CFileOperations::DeleteFile(IXMLDOMElement* pElem)
 	opInfo.fFlags = FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR | FOF_NOERRORUI | FOF_NO_UI;
 
 	nRes = ::SHFileOperation(&opInfo);
-	BreakExitOnNull1((!nRes), hr, E_FAIL, "Failed deleting file (Error %i)", nRes);
-	BreakExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed deleting file (operation aborted)");
-	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Deleted '%ls'", vPath.bstrVal);
+	if ((flags & DeletePathAttributes::IgnoreErrors) == 0)
+	{
+		BreakExitOnNull1((!nRes), hr, E_FAIL, "Failed deleting file (Error %i)", nRes);
+		BreakExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed deleting file (operation aborted)");
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Deleted '%ls'", vPath.bstrVal);
+	}
+	else if (nRes != 0)
+	{
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed deleting '%ls'; Ignoring error (%i)", vPath.bstrVal, nRes);
+	}
 
 LExit:
 	return hr;
