@@ -34,9 +34,9 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <OutDir>$(SolutionDir)bin\$(Configuration)\</OutDir>
-    <IntDir>obj\$(Configuration)\</IntDir>
-    <LibraryPath>$(SolutionDir)\Lib\$(Configuration)\;$(WIX)SDK\VS2012\lib\x86;$(WIX)SDK\VS2013\lib\x86;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)..\ibvcTest\out\bin\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)..\ibvcTest\out\obj\$(Configuration)\</IntDir>
+    <LibraryPath>$(SolutionDir)..\ibvcTest\out\bin\$(Configuration)\;$(WIX)SDK\VS2012\lib\x86;$(WIX)SDK\VS2013\lib\x86;$(LibraryPath)</LibraryPath>
     <IncludePath>$(SolutionDir)CaCommon;$(WIX)SDK\VS2012\inc;$(WIX)SDK\VS2013\inc;$(IncludePath)</IncludePath>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>

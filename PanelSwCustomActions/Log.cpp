@@ -24,7 +24,7 @@ extern "C" __declspec(dllexport) UINT Log(MSIHANDLE hInstall)
 	hr = WcaGetProperty( szPropName, (LPWSTR*)szMsg);
 	BreakExitOnFailure1(hr, "Failed to get property '%ls'", szPropName);
 
-	WcaLog( LOGLEVEL::LOGMSG_STANDARD, "%ls", szMsg);
+	WcaLog( LOGLEVEL::LOGMSG_STANDARD, "%ls", (LPCWSTR)szMsg);
 
 LExit:
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
@@ -56,7 +56,7 @@ extern "C" __declspec(dllexport) UINT Warn(MSIHANDLE hInstall)
 	hRecord = ::MsiCreateRecord( 1);
 	BreakExitOnNullWithLastError(hRecord, hr, "Failed to create a warning record.");
 
-	hr = WcaSetRecordString( hRecord, 0, szMsg);
+	hr = WcaSetRecordString(hRecord, 0, (LPCWSTR)szMsg);
 	BreakExitOnFailure(hr, "Failed to set warning record message");
 
 	WcaProcessMessage( INSTALLMESSAGE::INSTALLMESSAGE_WARNING, hRecord);

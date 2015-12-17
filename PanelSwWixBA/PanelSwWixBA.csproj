@@ -13,7 +13,7 @@
     <AssemblyName>PanelSwWixBA</AssemblyName>
     <OutputType>Library</OutputType>
     <OutputName>PanelSwWixBA</OutputName>
-    <OutputPath>$(SolutionDir)bin\$(AssemblyName)\$(Configuration)\</OutputPath>
+    <OutputPath>$(SolutionDir)..\ibvcTest\out\bin\$(Configuration)\</OutputPath>
     <RootNamespace>PanelSW.WixBA</RootNamespace>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>

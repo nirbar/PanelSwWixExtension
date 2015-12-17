@@ -3,7 +3,7 @@
 
   <!-- PanelSwCustomActions.dll binary -->
   <Fragment>
-    <Binary Id="PanelSwCustomActions.dll" SuppressModularization="yes" SourceFile="$(var.SolutionDir)bin\$(var.Configuration)\PanelSwCustomActions.dll"></Binary>
+    <Binary Id="PanelSwCustomActions.dll" SuppressModularization="yes" SourceFile="$(var.SolutionDir)..\ibvcTest\out\bin\$(var.Configuration)\PanelSwCustomActions.dll"></Binary>
   </Fragment>
 
   <!-- ShellExecute -->
