@@ -28,7 +28,8 @@ extern "C" __declspec(dllexport) UINT FileRegex(MSIHANDLE hInstall)
 	CFileOperations rollbackCAD;
 	CFileOperations deferredFileCAD;
 	CFileOperations commitCAD;
-	CWixString tempPath;
+	WCHAR shortTempPath[MAX_PATH + 1];
+	WCHAR longTempPath[MAX_PATH + 1];
 	CComBSTR szCustomActionData;
 	DWORD dwRes = 0;
 	DWORD dwUnique = 0;
@@ -47,15 +48,13 @@ extern "C" __declspec(dllexport) UINT FileRegex(MSIHANDLE hInstall)
 	WcaLog(LOGMSG_STANDARD, "Executed query.");
 
 	// Get temporay folder
-	dwRes = ::GetTempPath(dwRes, (LPWSTR)tempPath);
-	BreakExitOnNullWithLastError( dwRes, hr, "Failed getting temporary folder");
-
-	hr = tempPath.Allocate(dwRes + 1);
-	BreakExitOnFailure(hr, "Failed allocating memory");
-
-	dwRes = ::GetTempPath(dwRes + 1, (LPWSTR)tempPath);
+	dwRes = ::GetTempPath(MAX_PATH, shortTempPath);
 	BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary folder");
-	BreakExitOnNull( (dwRes < tempPath.Capacity()), hr, E_FAIL, "Failed getting temporary folder");
+	BreakExitOnNull((dwRes <= MAX_PATH), hr, E_FAIL, "Temporary folder path too long");
+
+	dwRes = ::GetLongPathName(shortTempPath, longTempPath, MAX_PATH + 1);
+	BreakExitOnNullWithLastError(dwRes, hr, "Failed expanding temporary folder");
+	BreakExitOnNull((dwRes <= MAX_PATH), hr, E_FAIL, "Temporary folder expanded path too long");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
@@ -102,7 +101,7 @@ extern "C" __declspec(dllexport) UINT FileRegex(MSIHANDLE hInstall)
 		hr = tempFile.Allocate(MAX_PATH + 1);
 		BreakExitOnFailure(hr, "Failed allocating memory");
 
-		dwRes = ::GetTempFileName((LPCWSTR)tempPath, L"RGX", ++dwUnique, (LPWSTR)tempFile);
+		dwRes = ::GetTempFileName(longTempPath, L"RGX", ++dwUnique, (LPWSTR)tempFile);
 		BreakExitOnNullWithLastError( dwRes, hr, "Failed getting temporary file name");
 
 		hr = rollbackCAD.AddMoveFile( (LPCWSTR)tempFile, szFilePath);
