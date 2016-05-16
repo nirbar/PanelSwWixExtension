@@ -244,10 +244,10 @@ HRESULT CFileOperations::CopyFile(IXMLDOMElement* pElem)
 	hr = pElem->getAttribute(CComBSTR(L"To"), &vTo);
 	BreakExitOnFailure(hr, "Failed getting 'To' attribute");
 
-	hr = sFrom.Format(L"%s\0\0", (LPCWSTR)vFrom.bstrVal);
+	hr = sFrom.Format(L"%s%c%c", (LPCWSTR)vFrom.bstrVal, '\0', '\0');
 	BreakExitOnFailure(hr, "Failed formatting string");
 
-	hr = sTo.Format(L"%s\0\0", (LPCWSTR)vTo.bstrVal);
+	hr = sTo.Format(L"%s%c%c", (LPCWSTR)vTo.bstrVal, '\0', '\0');
 	BreakExitOnFailure(hr, "Failed formatting string");
 
 	// Prepare 
@@ -305,10 +305,10 @@ HRESULT CFileOperations::MoveFile(IXMLDOMElement* pElem)
 		}
 	}
 
-	hr = sFrom.Format(L"%s\0\0", (LPCWSTR)vFrom.bstrVal);
+	hr = sFrom.Format(L"%s%c%c", (LPCWSTR)vFrom.bstrVal, '\0', '\0');
 	BreakExitOnFailure(hr, "Failed formatting string");
 
-	hr = sTo.Format(L"%s\0\0", (LPCWSTR)vTo.bstrVal);
+	hr = sTo.Format(L"%s%c%c", (LPCWSTR)vTo.bstrVal, '\0', '\0');
 	BreakExitOnFailure(hr, "Failed formatting string");
 
 	// Prepare 
@@ -361,7 +361,7 @@ HRESULT CFileOperations::DeleteFile(IXMLDOMElement* pElem)
 		}
 	}
 
-	hr = sPath.Format(L"%s\0\0", (LPCWSTR)vPath.bstrVal);
+	hr = sPath.Format(L"%s%c%c", (LPCWSTR)vPath.bstrVal, '\0', '\0');
 	BreakExitOnFailure(hr, "Failed formatting string");
 
 	// Prepare 
