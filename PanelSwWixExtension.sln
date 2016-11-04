@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.40629.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "PanelSwWixLib", "wixlib\PanelSwWixLib.wixproj", "{B6AC15A8-5EF9-4F89-ACCC-3F5C3FC04BCE}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -33,8 +33,6 @@ EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "TelemetryUT", "UnitTests\TelemetryUT\TelemetryUT.wixproj", "{12C34100-BC94-48E7-AE28-8B62CAD23155}"
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "MsiSqlQueryUT", "UnitTests\MsiSqlQueryUT\MsiSqlQueryUT.wixproj", "{9831ED5E-E812-484B-BDCF-AB27ED9297F6}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PanelSwWixBA", "PanelSwWixBA\PanelSwWixBA.csproj", "{7C27518B-84AD-4679-8EF4-29DF552CF1AC}"
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "PanelSwWixBAUT", "UnitTests\PanelSwWixBAUT\PanelSwWixBAUT.wixproj", "{B7D64E95-3B25-4E8A-A748-AAF6DEB08B5D}"
 EndProject
@@ -230,22 +228,6 @@ Global
 		{9831ED5E-E812-484B-BDCF-AB27ED9297F6}.Release|x64.ActiveCfg = Release|x86
 		{9831ED5E-E812-484B-BDCF-AB27ED9297F6}.Release|x86.ActiveCfg = Release|x86
 		{9831ED5E-E812-484B-BDCF-AB27ED9297F6}.Release|x86.Build.0 = Release|x86
-		{7C27518B-84AD-4679-8EF4-29DF552CF1AC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{7C27518B-84AD-4679-8EF4-29DF552CF1AC}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{7C27518B-84AD-4679-8EF4-29DF552CF1AC}.Debug|ARM.ActiveCfg = Debug|Any CPU
-		{7C27518B-84AD-4679-8EF4-29DF552CF1AC}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{7C27518B-84AD-4679-8EF4-29DF552CF1AC}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
-		{7C27518B-84AD-4679-8EF4-29DF552CF1AC}.Debug|Win32.ActiveCfg = Debug|Any CPU
-		{7C27518B-84AD-4679-8EF4-29DF552CF1AC}.Debug|x64.ActiveCfg = Debug|Any CPU
-		{7C27518B-84AD-4679-8EF4-29DF552CF1AC}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{7C27518B-84AD-4679-8EF4-29DF552CF1AC}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{7C27518B-84AD-4679-8EF4-29DF552CF1AC}.Release|Any CPU.Build.0 = Debug|Any CPU
-		{7C27518B-84AD-4679-8EF4-29DF552CF1AC}.Release|ARM.ActiveCfg = Debug|Any CPU
-		{7C27518B-84AD-4679-8EF4-29DF552CF1AC}.Release|Mixed Platforms.ActiveCfg = Debug|Any CPU
-		{7C27518B-84AD-4679-8EF4-29DF552CF1AC}.Release|Mixed Platforms.Build.0 = Debug|Any CPU
-		{7C27518B-84AD-4679-8EF4-29DF552CF1AC}.Release|Win32.ActiveCfg = Debug|Any CPU
-		{7C27518B-84AD-4679-8EF4-29DF552CF1AC}.Release|x64.ActiveCfg = Debug|Any CPU
-		{7C27518B-84AD-4679-8EF4-29DF552CF1AC}.Release|x86.ActiveCfg = Debug|Any CPU
 		{B7D64E95-3B25-4E8A-A748-AAF6DEB08B5D}.Debug|Any CPU.ActiveCfg = Debug|x86
 		{B7D64E95-3B25-4E8A-A748-AAF6DEB08B5D}.Debug|ARM.ActiveCfg = Debug|x86
 		{B7D64E95-3B25-4E8A-A748-AAF6DEB08B5D}.Debug|Mixed Platforms.ActiveCfg = Debug|x86

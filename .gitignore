@@ -6,3 +6,5 @@ bin/
 *.suo
 *.user
 *.opensdf
+*.opendb
+*.db

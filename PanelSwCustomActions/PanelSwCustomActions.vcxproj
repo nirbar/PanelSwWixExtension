@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Debug|Win32">
       <Configuration>Debug</Configuration>
@@ -20,7 +20,7 @@
     <_ProjectFileVersion>11.0.50727.1</_ProjectFileVersion>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v120_xp</PlatformToolset>
+    <PlatformToolset>v140_xp</PlatformToolset>
     <UseOfAtl>Static</UseOfAtl>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -34,9 +34,9 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <OutDir>$(SolutionDir)..\ibvcTest\out\bin\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)..\ibvcTest\out\obj\$(Configuration)\</IntDir>
-    <LibraryPath>$(SolutionDir)..\ibvcTest\out\bin\$(Configuration)\;$(WIX)SDK\VS2012\lib\x86;$(WIX)SDK\VS2013\lib\x86;$(LibraryPath)</LibraryPath>
+    <OutDir>$(SolutionDir)\out\bin\$(Configuration)\</OutDir>
+    <IntDir>$(SolutionDir)\out\obj\$(Configuration)\</IntDir>
+    <LibraryPath>$(SolutionDir)\out\bin\$(Configuration)\;$(WIX)SDK\VS2012\lib\x86;$(WIX)SDK\VS2013\lib\x86;$(LibraryPath)</LibraryPath>
     <IncludePath>$(SolutionDir)CaCommon;$(WIX)SDK\VS2012\inc;$(WIX)SDK\VS2013\inc;$(IncludePath)</IncludePath>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
@@ -48,7 +48,7 @@
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>msi.lib;dutil.lib;wcautil.lib;Version.lib;Shell32.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>msi.lib;dutil.lib;wcautil.lib;Version.lib;Shell32.lib;User32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(WIX)sdk\VS2013\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>

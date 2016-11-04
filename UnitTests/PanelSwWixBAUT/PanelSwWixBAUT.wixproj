@@ -30,14 +30,6 @@
     </WixExtension>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\PanelSwWixBA\PanelSwWixBA.csproj">
-      <Name>PanelSwWixBA</Name>
-      <Project>{7c27518b-84ad-4679-8ef4-29df552cf1ac}</Project>
-      <Private>True</Private>
-      <DoNotHarvest>True</DoNotHarvest>
-      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
-      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
-    </ProjectReference>
     <ProjectReference Include="..\XmlSearchUT\XmlSearchUT.wixproj">
       <Name>XmlSearchUT</Name>
       <Project>{0631b7fa-d5a5-4b4b-8289-e0415420d6c7}</Project>
