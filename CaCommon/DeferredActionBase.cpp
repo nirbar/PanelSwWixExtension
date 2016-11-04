@@ -154,6 +154,7 @@ HRESULT CDeferredActionBase::AddElement(LPCWSTR szName, LPCWSTR szReceiver, UINT
 
 	attName = L"Cost";
 	value = uCosting;
+    _uCost += uCosting;
 	hr = (*ppElem)->setAttribute(attName, value);
 	BreakExitOnFailure(hr, "Failed to set XML attribute");
 
