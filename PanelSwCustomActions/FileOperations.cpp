@@ -396,7 +396,7 @@ unsigned long long CFileOperations::FileSize(LPCWSTR szPath)
     errno_t err = 0;
 
     err = ::_wfopen_s(&pFile, szPath, L"r");
-    ExitOnNull((err == 0), size, 0, "Failed openning file %ls", szPath);
+    ExitOnNull((err == 0), size, 0, "Failed opening file %ls", szPath);
 
     err = ::fseek(pFile, 0, SEEK_END);
     ExitOnNull((err == 0), size, 0, "Failed seeking in file %ls", szPath);

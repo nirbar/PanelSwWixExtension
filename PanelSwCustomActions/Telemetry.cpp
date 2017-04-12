@@ -230,7 +230,7 @@ HRESULT CTelemetry::Post(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWST
 		WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
 		WINHTTP_NO_PROXY_NAME,
 		WINHTTP_NO_PROXY_BYPASS, 0);
-	BreakExitOnNullWithLastError(hSession, hr, "Failed openning HTTP session");
+	BreakExitOnNullWithLastError(hSession, hr, "Failed opening HTTP session");
 
 	// Specify an HTTP server.
 	hConnect = ::WinHttpConnect(hSession, szUrl,
@@ -240,7 +240,7 @@ HRESULT CTelemetry::Post(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWST
 	// Create an HTTP request handle.
 	hRequest = ::WinHttpOpenRequest(hConnect, szMethod, szPage, NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES,
 		bSecure ? WINHTTP_FLAG_SECURE : 0);
-	BreakExitOnNullWithLastError(hRequest, hr, "Failed openning request");
+	BreakExitOnNullWithLastError(hRequest, hr, "Failed opening request");
 
 	// Get data size
 	if(( szData != NULL) && ((*szData) != NULL))

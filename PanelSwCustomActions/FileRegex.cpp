@@ -47,7 +47,7 @@ extern "C" __declspec(dllexport) UINT FileRegex(MSIHANDLE hInstall)
 	BreakExitOnFailure1(hr, "Failed to execute SQL query '%ls'.", FileRegex_QUERY);
 	WcaLog(LOGMSG_STANDARD, "Executed query.");
 
-	// Get temporay folder
+	// Get temporary folder
 	dwRes = ::GetTempPath(MAX_PATH, shortTempPath);
 	BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary folder");
 	BreakExitOnNull((dwRes <= MAX_PATH), hr, E_FAIL, "Temporary folder path too long");
@@ -206,6 +206,7 @@ HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szRepla
     HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
 	DWORD dwBytesRead = 0;
+	DWORD dwFileAttr = FILE_ATTRIBUTE_NORMAL;
 	wstring content;
 	wifstream fileRead;
 	wofstream fileWrite;
@@ -216,11 +217,12 @@ HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szRepla
 	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Replacing matches of regex '%ls' with '%ls' on file '%ls'", szRegex, szReplacement, szFilePath);
 
 	fileRead.open(szFilePath);
-	BreakExitOnNull(fileRead.good(), hr, E_FAIL, "Failed openning file for reading");
+	BreakExitOnNull(fileRead.good(), hr, E_FAIL, "Failed opening file for reading");
 
 	fileRead.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
 	fileStream << fileRead.rdbuf();
 	content = fileStream.str();
+	fileRead.close();
 
 	if (bIgnoreCase)
 	{
@@ -231,11 +233,15 @@ HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szRepla
 	content = std::regex_replace(content.c_str(), rx, szReplacement);
 
 	// Truncate file & write
+	dwFileAttr = ::GetFileAttributes(szFilePath);
+
 	fileWrite.open(szFilePath, ios_base::trunc);
-	BreakExitOnNull(fileWrite.good(), hr, E_FAIL, "Failed openning file for writing");
+	BreakExitOnNull(fileWrite.good(), hr, E_FAIL, "Failed opening file for writing");
 
 	fileWrite.write(content.c_str(), content.length());
-	BreakExitOnNull(fileWrite.good(), hr, E_FAIL, "Failed writing to file");
+	BreakExitOnNull1(fileWrite.good(), hr, E_FAIL, "Failed writing to file: %s", strerror(errno));
+
+	::SetFileAttributes(szFilePath, dwFileAttr);
 
 LExit:
 
