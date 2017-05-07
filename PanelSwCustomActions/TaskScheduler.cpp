@@ -89,6 +89,7 @@ extern "C" __declspec(dllexport) UINT TaskScheduler(MSIHANDLE hInstall)
 	hr = WcaDoDeferredAction(L"TaskScheduler_commit", szCustomActionData, oCommit.GetCost());
 	BreakExitOnFailure(hr, "Failed scheduling commit action.");
 
+	// Rollback deletes same files as commit does (after importing tasks).
 	hr = oCommit.Prepend(&oRollback);
 	BreakExitOnFailure(hr, "Failed pre-pending custom action data for deferred action.");
 	hr = oCommit.GetCustomActionData(&szCustomActionData);
@@ -192,17 +193,8 @@ HRESULT CTaskScheduler::AddRollbackTask(LPCWSTR szTaskName, CTaskScheduler* pRol
 		dwRes = ::GetTempFileName(szTempFolder, L"TSK", 0, szBackupFile);
 		BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
 
-		hr = AddElement(L"TaskScheduler", L"CTaskScheduler", 1, &pElem);
-		BreakExitOnFailure(hr, "Failed to add XML element");
-
-		hr = pElem->setAttribute(CComBSTR("TaskName"), CComVariant(szTaskName));
-		BreakExitOnFailure(hr, "Failed to add XML attribute 'TaskName'");
-
-		hr = pElem->setAttribute(CComBSTR("BackupFile"), CComVariant(szBackupFile));
-		BreakExitOnFailure(hr, "Failed to add XML attribute 'TaskXml'");
-
-		hr = pElem->setAttribute(CComBSTR("Action"), CComVariant(ACTION_BACKUP));
-		BreakExitOnFailure(hr, "Failed to add XML attribute 'Action'");
+		hr = AddBackupTask(szTaskName, szBackupFile);
+		BreakExitOnFailure(hr, "Failed setting action data to backup task");
 
 		hr = pRollback->AddRestoreTask(szTaskName, szBackupFile);
 		BreakExitOnFailure(hr, "Failed setting rollback action data");
