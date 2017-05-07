@@ -15,6 +15,26 @@
 
   <xs:import namespace="http://schemas.microsoft.com/wix/2006/wi" />
 
+  <xs:element name="TaskScheduler">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
+      </xs:appinfo>
+      <xs:documentation><![CDATA[Add a task to Windows Task Scheduler. Task definition XML should be in inner text]]></xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="TaskName" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Task name in Windows Task Scheduler (primary key).]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="DeletePath">
     <xs:annotation>
       <xs:appinfo>

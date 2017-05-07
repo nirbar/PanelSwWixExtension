@@ -5,6 +5,7 @@
 #include "ShellExecute.h"
 #include "FileRegex.h"
 #include "FileOperations.h"
+#include "TaskScheduler.h"
 
 // ReceiverToExecutorFunc implementation.
 HRESULT ReceiverToExecutor(LPCWSTR szReceiver, CDeferredActionBase** ppExecutor)
@@ -32,6 +33,11 @@ HRESULT ReceiverToExecutor(LPCWSTR szReceiver, CDeferredActionBase** ppExecutor)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating FileOperations handler");
 		(*ppExecutor) = new CFileOperations();
+	}
+	else if (szRcvr.Equals(L"CTaskScheduler"))
+	{
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating TaskScheduler handler");
+		(*ppExecutor) = new CTaskScheduler();
 	}
 	else
 	{

@@ -23,7 +23,7 @@ namespace PanelSw.Wix.Extensions
         /// </summary>
         public PanelSwWixCompiler()
         {
-            this.schema = LoadXmlSchemaHelper(Assembly.GetExecutingAssembly(), "PanelSw.Wix.Extensions.Xsd.PanelSwWixExtension.xsd");
+            schema = LoadXmlSchemaHelper(Assembly.GetExecutingAssembly(), "PanelSw.Wix.Extensions.Xsd.PanelSwWixExtension.xsd");
         }
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace PanelSw.Wix.Extensions
         /// <value>Schema for this extension.</value>
         public override XmlSchema Schema
         {
-            get { return this.schema; }
+            get { return schema; }
         }
 
         public override void FinalizeCompile()
@@ -46,7 +46,8 @@ namespace PanelSw.Wix.Extensions
             Core.EnsureTable(null, "PSW_MsiSqlQuery");
             Core.EnsureTable(null, "PSW_RegularExpression");
             Core.EnsureTable(null, "PSW_FileRegex");
-            Core.EnsureTable(null, "PSW_DeletePath");
+            Core.EnsureTable(null, "PSW_DeletePath"); 
+            Core.EnsureTable(null, "PSW_TaskScheduler");
             base.FinalizeCompile();
         }
 
@@ -67,43 +68,43 @@ namespace PanelSw.Wix.Extensions
                     switch (element.LocalName)
                     {
                         case "CustomUninstallKey":
-                            this.ParseCustomUninstallKeyElement(element);
+                            ParseCustomUninstallKeyElement(element);
                             break;
 
                         case "ReadIniValues":
-                            this.ParseReadIniValuesElement(element);
+                            ParseReadIniValuesElement(element);
                             break;
 
                         case "RemoveRegistryValue":
-                            this.ParseRemoveRegistryValue(element);
+                            ParseRemoveRegistryValue(element);
                             break;
 
                         case "Telemetry":
-                            this.ParseTelemetry(element);
+                            ParseTelemetry(element);
                             break;
 
                         case "ShellExecute":
-                            this.ParseShellExecute(element);
+                            ParseShellExecute(element);
                             break;
 
                         case "MsiSqlQuery":
-                            this.ParseMsiSqlQuery(element);
+                            ParseMsiSqlQuery(element);
                             break;
 
                         case "RegularExpression":
-                            this.ParseRegularExpression(element);
+                            ParseRegularExpression(element);
                             break;
 
                         case "FileRegex":
-                            this.ParseFileRegex(element);
+                            ParseFileRegex(element);
                             break;
 
                         case "DeletePath":
-                            this.ParseDeletePath(element);
+                            ParseDeletePath(element);
                             break;
 
                         default:
-                            this.Core.UnexpectedElement(parentElement, element);
+                            Core.UnexpectedElement(parentElement, element);
                             break;
                     }
                     break;
@@ -112,18 +113,104 @@ namespace PanelSw.Wix.Extensions
                     switch (element.LocalName)
                     {
                         case "XmlSearch":
-                            this.ParseXmlSearchElement(element);
+                            ParseXmlSearchElement(element);
                             break;
 
                         default:
-                            this.Core.UnexpectedElement(parentElement, element);
+                            Core.UnexpectedElement(parentElement, element);
+                            break;
+                    }
+                    break;
+
+                case "Component":
+                    switch (element.LocalName)
+                    {
+                        case "TaskScheduler":
+                            ParseTaskSchedulerElement(parentElement, element);
+                            break;
+
+                        default:
+                            Core.UnexpectedElement(parentElement, element);
                             break;
                     }
                     break;
 
                 default:
-                    this.Core.UnexpectedElement(parentElement, element);
+                    Core.UnexpectedElement(parentElement, element);
                     break;
+            }
+        }
+
+        private void ParseTaskSchedulerElement(XmlElement parentElement, XmlElement element)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
+            string taskXml = null;
+            string taskName = null;
+            string component = null;
+
+            component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
+
+            foreach (XmlAttribute attrib in element.Attributes)
+            {
+                if ((0 != attrib.NamespaceURI.Length) && (attrib.NamespaceURI != schema.TargetNamespace))
+                {
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+
+                switch (attrib.LocalName)
+                {
+                    case "TaskName":
+                        taskName = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    default:
+                        Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                        break;
+                }
+            }
+
+           foreach (XmlNode child in element.ChildNodes)
+            {
+                if (XmlNodeType.Element == child.NodeType)
+                {
+                    if (child.NamespaceURI == schema.TargetNamespace)
+                    {
+                        Core.UnexpectedElement(element, child);
+                    }
+                    else
+                    {
+                        Core.UnsupportedExtensionElement(element, child);
+                    }
+                }
+                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
+                {
+                    taskXml = child.Value.Trim();
+                    taskXml = taskXml.Replace(Environment.NewLine, "");
+                }
+            }
+
+            if (string.IsNullOrEmpty(component))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.Name, "Id"));
+            }
+            if (string.IsNullOrEmpty(taskXml))
+            {
+                Core.OnMessage(WixErrors.ExpectedElement(sourceLineNumbers, element.Name, "Text or CDATA"));
+            }
+            if (string.IsNullOrEmpty(taskName))
+            {
+                Core.OnMessage(WixErrors.ExpectedElement(sourceLineNumbers, element.Name, "TaskName"));
+            }
+
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "TaskScheduler");
+
+            if (!Core.EncounteredError)
+            {
+                // create a row in the Win32_CopyFiles table
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_TaskScheduler");
+                row[0] = taskName;
+                row[1] = component;
+                row[2] = taskXml;
             }
         }
 
@@ -147,66 +234,66 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
-                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == this.schema.TargetNamespace)
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
                 {
                     switch (attrib.LocalName.ToLower())
                     {
                         case "id":
-                            id = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            id = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             if (string.IsNullOrEmpty(name))
                             {
                                 name = id;
                             }
                             break;
                         case "name":
-                            name = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            name = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "data":
-                            data = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            data = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "datatype":
-                            datatype = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            datatype = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "operation":
-                            if (this.Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("delete", StringComparison.OrdinalIgnoreCase))
+                            if (Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("delete", StringComparison.OrdinalIgnoreCase))
                             {
                                 attributes |= CustomUninstallKeyAttributes.Delete;
                             }
-                            if (this.Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("write", StringComparison.OrdinalIgnoreCase))
+                            if (Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("write", StringComparison.OrdinalIgnoreCase))
                             {
                                 attributes |= CustomUninstallKeyAttributes.Write;
                             }
                             break;
 
                         default:
-                            this.Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                             break;
                     }
                 }
                 else
                 {
-                    this.Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
                 }
             }
 
             if (string.IsNullOrEmpty(id))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
             }
 
             if (string.IsNullOrEmpty(name))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Name"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Name"));
             }
 
             if (string.IsNullOrEmpty(data))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Data"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Data"));
             }
 
             if (string.IsNullOrEmpty(datatype))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "DataType"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "DataType"));
             }
 
             if (attributes == CustomUninstallKeyAttributes.None)
@@ -219,13 +306,13 @@ namespace PanelSw.Wix.Extensions
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == this.schema.TargetNamespace)
+                    if (child.NamespaceURI == schema.TargetNamespace)
                     {
-                        this.Core.UnexpectedElement(node, child);
+                        Core.UnexpectedElement(node, child);
                     }
                     else
                     {
-                        this.Core.UnsupportedExtensionElement(node, child);
+                        Core.UnsupportedExtensionElement(node, child);
                     }
                 }
                 else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
@@ -235,9 +322,9 @@ namespace PanelSw.Wix.Extensions
             }
 
             // reference the Win32_CopyFiles custom actions since nothing will happen without these
-            this.Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "CustomUninstallKey_Immediate");
-            this.Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "CustomUninstallKey_deferred");
-            this.Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "CustomUninstallKey_rollback");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "CustomUninstallKey_Immediate");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "CustomUninstallKey_deferred");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "CustomUninstallKey_rollback");
 
             if (!Core.EncounteredError)
             {
@@ -271,63 +358,63 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
-                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == this.schema.TargetNamespace)
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
                 {
                     switch (attrib.LocalName.ToLower())
                     {
                         case "id":
-                            id = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            id = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "destproperty":
-                            DestProperty = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            DestProperty = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "filepath":
-                            FilePath = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            FilePath = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "section":
-                            Section = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            Section = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "key":
-                            Key = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            Key = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "ignoreerrors":
-                            IgnoreErrors = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            IgnoreErrors = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
 
                         default:
-                            this.Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                             break;
                     }
                 }
                 else
                 {
-                    this.Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
                 }
             }
 
             if (string.IsNullOrEmpty(id))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
             }
 
             if (string.IsNullOrEmpty(DestProperty))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "DestProperty"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "DestProperty"));
             }
 
             if (string.IsNullOrEmpty(FilePath))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "FilePath"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "FilePath"));
             }
 
             if (string.IsNullOrEmpty(Key))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Key"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Key"));
             }
 
             if (string.IsNullOrEmpty(Section))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Section"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Section"));
             }
 
             // Attributes
@@ -342,13 +429,13 @@ namespace PanelSw.Wix.Extensions
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == this.schema.TargetNamespace)
+                    if (child.NamespaceURI == schema.TargetNamespace)
                     {
-                        this.Core.UnexpectedElement(node, child);
+                        Core.UnexpectedElement(node, child);
                     }
                     else
                     {
-                        this.Core.UnsupportedExtensionElement(node, child);
+                        Core.UnsupportedExtensionElement(node, child);
                     }
                 }
                 else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
@@ -358,7 +445,7 @@ namespace PanelSw.Wix.Extensions
             }
 
             // reference the Win32_CopyFiles custom actions since nothing will happen without these
-            this.Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "ReadIniValues");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "ReadIniValues");
 
             if (!Core.EncounteredError)
             {
@@ -393,59 +480,59 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
-                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == this.schema.TargetNamespace)
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
                 {
                     switch (attrib.LocalName.ToLower())
                     {
                         case "id":
-                            id = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            id = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "root":
-                            root = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            root = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "key":
-                            key = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            key = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "name":
-                            name = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            name = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "area":
                             try
                             {
-                                area = (RegistryArea)Enum.Parse(typeof(RegistryArea), this.Core.GetAttributeValue(sourceLineNumbers, attrib));
+                                area = (RegistryArea)Enum.Parse(typeof(RegistryArea), Core.GetAttributeValue(sourceLineNumbers, attrib));
                             }
                             catch
                             {
-                                this.Core.OnMessage(WixErrors.ValueNotSupported(sourceLineNumbers, node.Name, "Area", this.Core.GetAttributeValue(sourceLineNumbers, attrib)));
+                                Core.OnMessage(WixErrors.ValueNotSupported(sourceLineNumbers, node.Name, "Area", Core.GetAttributeValue(sourceLineNumbers, attrib)));
                             }
                             break;
 
                         default:
-                            this.Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                             break;
                     }
                 }
                 else
                 {
-                    this.Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
                 }
             }
 
             if (string.IsNullOrEmpty(id))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
             }
             if (string.IsNullOrEmpty(key))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Key"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Key"));
             }
             if (string.IsNullOrEmpty(root))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Root"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Root"));
             }
             if (string.IsNullOrEmpty(name))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Name"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Name"));
             }
 
             // find unexpected child elements
@@ -453,13 +540,13 @@ namespace PanelSw.Wix.Extensions
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == this.schema.TargetNamespace)
+                    if (child.NamespaceURI == schema.TargetNamespace)
                     {
-                        this.Core.UnexpectedElement(node, child);
+                        Core.UnexpectedElement(node, child);
                     }
                     else
                     {
-                        this.Core.UnsupportedExtensionElement(node, child);
+                        Core.UnsupportedExtensionElement(node, child);
                     }
                 }
                 else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
@@ -469,7 +556,7 @@ namespace PanelSw.Wix.Extensions
             }
 
             // reference the Win32_CopyFiles custom actions since nothing will happen without these
-            this.Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "RemoveRegistryValue_Immediate");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "RemoveRegistryValue_Immediate");
 
             if (!Core.EncounteredError)
             {
@@ -506,68 +593,68 @@ namespace PanelSw.Wix.Extensions
 
             if (node.ParentNode.LocalName != "Property")
             {
-                this.Core.UnexpectedElement(node.ParentNode, node);
+                Core.UnexpectedElement(node.ParentNode, node);
             }
             property = node.ParentNode.Attributes["Id"].Value;
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
-                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == this.schema.TargetNamespace)
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
                 {
                     switch (attrib.LocalName.ToLower())
                     {
                         case "id":
-                            id = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            id = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "filepath":
-                            filePath = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            filePath = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "xpath":
-                            xpath = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            xpath = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "language":
-                            lang = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            lang = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "namespaces":
-                            namespaces = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            namespaces = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "match":
                             try
                             {
-                                match = (XmlSearchMatch)Enum.Parse(typeof(XmlSearchMatch), this.Core.GetAttributeValue(sourceLineNumbers, attrib));
+                                match = (XmlSearchMatch)Enum.Parse(typeof(XmlSearchMatch), Core.GetAttributeValue(sourceLineNumbers, attrib));
                             }
                             catch
                             {
-                                this.Core.OnMessage(WixErrors.ValueNotSupported(sourceLineNumbers, node.Name, "Match", this.Core.GetAttributeValue(sourceLineNumbers, attrib)));
+                                Core.OnMessage(WixErrors.ValueNotSupported(sourceLineNumbers, node.Name, "Match", Core.GetAttributeValue(sourceLineNumbers, attrib)));
                             }
                             break;
 
                         default:
-                            this.Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                             break;
                     }
                 }
                 else
                 {
-                    this.Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
                 }
             }
 
             if (string.IsNullOrEmpty(property))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.Name, "Id"));
             }
             if (string.IsNullOrEmpty(id))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
             }
             if (string.IsNullOrEmpty(filePath))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "FilePath"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "FilePath"));
             }
             if (string.IsNullOrEmpty(xpath))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "XPath"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "XPath"));
             }
 
             // find unexpected child elements
@@ -575,13 +662,13 @@ namespace PanelSw.Wix.Extensions
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == this.schema.TargetNamespace)
+                    if (child.NamespaceURI == schema.TargetNamespace)
                     {
-                        this.Core.UnexpectedElement(node, child);
+                        Core.UnexpectedElement(node, child);
                     }
                     else
                     {
-                        this.Core.UnsupportedExtensionElement(node, child);
+                        Core.UnsupportedExtensionElement(node, child);
                     }
                 }
                 else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
@@ -591,7 +678,7 @@ namespace PanelSw.Wix.Extensions
             }
 
             // reference the Win32_CopyFiles custom actions since nothing will happen without these
-            this.Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "XmlSearch");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "XmlSearch");
 
             if (!Core.EncounteredError)
             {
@@ -633,48 +720,48 @@ namespace PanelSw.Wix.Extensions
             foreach (XmlAttribute attrib in node.Attributes)
             {
                 string tmp;
-                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == this.schema.TargetNamespace)
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
                 {
                     switch (attrib.LocalName.ToLower())
                     {
                         case "id":
-                            id = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            id = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "url":
-                            url = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            url = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "page":
-                            page = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            page = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "method":
-                            method = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            method = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "data":
-                            data = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            data = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "onsuccess":
-                            tmp = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            tmp = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             if( tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
                             {
                                 flags |= ExecutePhase.OnCommit;
                             }
                             break;
                         case "onstart":
-                            tmp = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            tmp = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             if( tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
                             {
                                 flags |= ExecutePhase.OnExecute;
                             }
                             break;
                         case "onfailure":
-                            tmp = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            tmp = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             if( tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
                             {
                                 flags |= ExecutePhase.OnRollback;
                             }
                             break;
                         case "secure":
-                            tmp = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            tmp = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
                             {
                                 flags |= ExecutePhase.Secure;
@@ -682,27 +769,27 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            this.Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                             break;
                     }
                 }
                 else
                 {
-                    this.Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
                 }
             }
 
             if (string.IsNullOrEmpty(id))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.Name, "Id"));
             }
             if (string.IsNullOrEmpty(url))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Url"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Url"));
             }
             if (string.IsNullOrEmpty(method))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Method"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Method"));
             }
 
             // find unexpected child elements
@@ -710,13 +797,13 @@ namespace PanelSw.Wix.Extensions
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == this.schema.TargetNamespace)
+                    if (child.NamespaceURI == schema.TargetNamespace)
                     {
-                        this.Core.UnexpectedElement(node, child);
+                        Core.UnexpectedElement(node, child);
                     }
                     else
                     {
-                        this.Core.UnsupportedExtensionElement(node, child);
+                        Core.UnsupportedExtensionElement(node, child);
                     }
                 }
                 else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
@@ -726,7 +813,7 @@ namespace PanelSw.Wix.Extensions
             }
 
             // reference the Win32_CopyFiles custom actions since nothing will happen without these
-            this.Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "Telemetry");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "Telemetry");
 
             if (!Core.EncounteredError)
             {
@@ -758,52 +845,52 @@ namespace PanelSw.Wix.Extensions
             foreach (XmlAttribute attrib in node.Attributes)
             {
                 string tmp;
-                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == this.schema.TargetNamespace)
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
                 {
                     switch (attrib.LocalName.ToLower())
                     {
                         case "id":
-                            id = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            id = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "target":
-                            target = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            target = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "args":
-                            args = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            args = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "workingdir":
-                            workDir = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            workDir = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "verb":
-                            verb = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            verb = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "wait":
-                            tmp = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            tmp = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
                             {
                                 wait = 1;
                             }
                             break;
                         case "show":
-                            show = this.Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 15);
+                            show = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 15);
                             break;
 
                         case "oncommit":
-                            tmp = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            tmp = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
                             {
                                 flags |= ExecutePhase.OnCommit;
                             }
                             break;
                         case "onexecute":
-                            tmp = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            tmp = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
                             {
                                 flags |= ExecutePhase.OnExecute;
                             }
                             break;
                         case "onrollback":
-                            tmp = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            tmp = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
                             {
                                 flags |= ExecutePhase.OnRollback;
@@ -811,23 +898,23 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            this.Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                             break;
                     }
                 }
                 else
                 {
-                    this.Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
                 }
             }
 
             if (string.IsNullOrEmpty(id))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.Name, "Id"));
             }
             if (string.IsNullOrEmpty(target))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Target"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Target"));
             }
 
             // find unexpected child elements
@@ -835,13 +922,13 @@ namespace PanelSw.Wix.Extensions
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == this.schema.TargetNamespace)
+                    if (child.NamespaceURI == schema.TargetNamespace)
                     {
-                        this.Core.UnexpectedElement(node, child);
+                        Core.UnexpectedElement(node, child);
                     }
                     else
                     {
-                        this.Core.UnsupportedExtensionElement(node, child);
+                        Core.UnsupportedExtensionElement(node, child);
                     }
                 }
                 else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
@@ -857,7 +944,7 @@ namespace PanelSw.Wix.Extensions
             }
 
             // reference the Win32_CopyFiles custom actions since nothing will happen without these
-            this.Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "ShellExecute_Immediate");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "ShellExecute_Immediate");
 
             if (!Core.EncounteredError)
             {
@@ -885,36 +972,36 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
-                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == this.schema.TargetNamespace)
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
                 {
                     switch (attrib.LocalName.ToLower())
                     {
                         case "id":
-                            id = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            id = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "query":
-                            query = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            query = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
 
                         default:
-                            this.Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                             break;
                     }
                 }
                 else
                 {
-                    this.Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
                 }
             }
 
             if (string.IsNullOrEmpty(id))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
             }
 
             if (string.IsNullOrEmpty(query))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Query"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Query"));
             }
 
             // find unexpected child elements
@@ -922,13 +1009,13 @@ namespace PanelSw.Wix.Extensions
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == this.schema.TargetNamespace)
+                    if (child.NamespaceURI == schema.TargetNamespace)
                     {
-                        this.Core.UnexpectedElement(node, child);
+                        Core.UnexpectedElement(node, child);
                     }
                     else
                     {
-                        this.Core.UnsupportedExtensionElement(node, child);
+                        Core.UnsupportedExtensionElement(node, child);
                     }
                 }
                 else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
@@ -938,7 +1025,7 @@ namespace PanelSw.Wix.Extensions
             }
 
             // reference the Win32_CopyFiles custom actions since nothing will happen without these
-            this.Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "MsiSqlQuery");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "MsiSqlQuery");
 
             if (!Core.EncounteredError)
             {
@@ -983,25 +1070,25 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
-                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == this.schema.TargetNamespace)
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
                 {
                     switch (attrib.LocalName.ToLower())
                     {
                         case "id":
-                            id = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            id = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "input":
-                            input = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            input = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "expression":
-                            regex = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            regex = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "replacement":
-                            replacement = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            replacement = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             flags |= (int)RegexSearchFlags.Replace;
                             break;
                         case "dstproperty":
-                            prop = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            prop = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "ignorecase":
                             flags |= (int)RegexMatchFlags.IgnoreCare << 2;
@@ -1011,35 +1098,35 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            this.Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                             break;
                     }
                 }
                 else
                 {
-                    this.Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
                 }
             }
 
             if (string.IsNullOrEmpty(id))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
             }
             if (string.IsNullOrEmpty(input))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Input"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Input"));
             }
             if (string.IsNullOrEmpty(regex))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Expression"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Expression"));
             }
             if (string.IsNullOrEmpty(prop))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "DstProperty"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "DstProperty"));
             }
             if (string.IsNullOrEmpty(input))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Input"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Input"));
             }
 
             // find unexpected child elements
@@ -1047,13 +1134,13 @@ namespace PanelSw.Wix.Extensions
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == this.schema.TargetNamespace)
+                    if (child.NamespaceURI == schema.TargetNamespace)
                     {
-                        this.Core.UnexpectedElement(node, child);
+                        Core.UnexpectedElement(node, child);
                     }
                     else
                     {
-                        this.Core.UnsupportedExtensionElement(node, child);
+                        Core.UnsupportedExtensionElement(node, child);
                     }
                 }
                 else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
@@ -1063,7 +1150,7 @@ namespace PanelSw.Wix.Extensions
             }
 
             // reference the Win32_CopyFiles custom actions since nothing will happen without these
-            this.Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "RegularExpression");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "RegularExpression");
 
             if (!Core.EncounteredError)
             {
@@ -1091,48 +1178,48 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
-                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == this.schema.TargetNamespace)
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
                 {
                     switch (attrib.LocalName.ToLower())
                     {
                         case "id":
-                            id = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            id = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "filepath":
-                            filepath = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            filepath = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "regex":
-                            regex = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            regex = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "replacement":
-                            replacement = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            replacement = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "ignorecase":
                             ignoreCase = true;
                             break;
 
                         default:
-                            this.Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                             break;
                     }
                 }
                 else
                 {
-                    this.Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
                 }
             }
 
             if (string.IsNullOrEmpty(id))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
             }
             if (string.IsNullOrEmpty(filepath))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "FilePath"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "FilePath"));
             }
             if (string.IsNullOrEmpty(regex))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Regex"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Regex"));
             }
 
             // find unexpected child elements
@@ -1140,13 +1227,13 @@ namespace PanelSw.Wix.Extensions
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == this.schema.TargetNamespace)
+                    if (child.NamespaceURI == schema.TargetNamespace)
                     {
-                        this.Core.UnexpectedElement(node, child);
+                        Core.UnexpectedElement(node, child);
                     }
                     else
                     {
-                        this.Core.UnsupportedExtensionElement(node, child);
+                        Core.UnsupportedExtensionElement(node, child);
                     }
                 }
                 else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
@@ -1156,7 +1243,7 @@ namespace PanelSw.Wix.Extensions
             }
 
             // reference the Win32_CopyFiles custom actions since nothing will happen without these
-            this.Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "FileRegex_Immediate");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "FileRegex_Immediate");
 
             if (!Core.EncounteredError)
             {
@@ -1188,47 +1275,47 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
-                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == this.schema.TargetNamespace)
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
                 {
                     switch (attrib.LocalName.ToLower())
                     {
                         case "id":
-                            id = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            id = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "path":
-                            filepath = this.Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            filepath = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "ignoremissing":
-                            if (this.Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            if (Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("yes", StringComparison.OrdinalIgnoreCase))
                             {
                                 flags |= DeletePathFlags.IgnoreMissing;
                             }
                             break;
                         case "ignoreerrors":
-                            if (this.Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            if (Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("yes", StringComparison.OrdinalIgnoreCase))
                             {
                                 flags |= DeletePathFlags.IgnoreErrors;
                             }
                             break;
 
                         default:
-                            this.Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                             break;
                     }
                 }
                 else
                 {
-                    this.Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
                 }
             }
 
             if (string.IsNullOrEmpty(id))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
             }
             if (string.IsNullOrEmpty(filepath))
             {
-                this.Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Path"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Path"));
             }
 
             // find unexpected child elements
@@ -1236,13 +1323,13 @@ namespace PanelSw.Wix.Extensions
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == this.schema.TargetNamespace)
+                    if (child.NamespaceURI == schema.TargetNamespace)
                     {
-                        this.Core.UnexpectedElement(node, child);
+                        Core.UnexpectedElement(node, child);
                     }
                     else
                     {
-                        this.Core.UnsupportedExtensionElement(node, child);
+                        Core.UnsupportedExtensionElement(node, child);
                     }
                 }
                 else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
@@ -1252,7 +1339,7 @@ namespace PanelSw.Wix.Extensions
             }
 
             // reference the Win32_CopyFiles custom actions since nothing will happen without these
-            this.Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "DeletePath");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "DeletePath");
 
             if (!Core.EncounteredError)
             {

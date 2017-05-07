@@ -4,5 +4,6 @@
   <String Id="RemoveRegistryValue">Removing additional registry values</String>
   <String Id="Telemetry">Posting telemetry data</String>
   <String Id="ShellExecute">Executing command "[1]" [2] in "[3]" with verb [4]</String>
+  <String Id="TaskScheduler">Configuring Scheduled Tasks</String>
 </WixLocalization>
 

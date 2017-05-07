@@ -101,6 +101,7 @@
     <ClCompile Include="PathOperations.cpp" />
     <ClCompile Include="StringOperations.cpp" />
     <ClCompile Include="stdafx.cpp" />
+    <ClCompile Include="TaskScheduler.cpp" />
     <ClCompile Include="Telemetry.cpp" />
     <ClCompile Include="TerminateSuccessfully.cpp" />
     <ClCompile Include="XmlSearch.cpp" />
@@ -115,6 +116,7 @@
     <ClInclude Include="ShellExecute.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="TaskScheduler.h" />
     <ClInclude Include="Telemetry.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
