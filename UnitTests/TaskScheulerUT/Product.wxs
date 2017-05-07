@@ -20,11 +20,6 @@
 
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
 
-    <CustomActionRef Id="Rollback_Deferred"/>
-    <InstallExecuteSequence>
-      <Custom Action="Rollback_Deferred" Before="InstallFinalize"><![CDATA[REMOVE AND Not ALLOW_REMOVE]]></Custom>
-    </InstallExecuteSequence>
-
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component Id="Test" Guid="*">
         <File Source="$(var.ProjectDir)Product.wxs" />

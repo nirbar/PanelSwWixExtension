@@ -291,7 +291,8 @@ HRESULT CTaskScheduler::CreateTask(LPCWSTR szTaskName, LPCWSTR szTaskXml)
 	CComPtr<IRegisteredTask> pRegTask;
 
 	BreakExitOnNull(pRootFolder_.p, hr, E_FAIL, "Task root folder not set");
-	
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Creating task '%ls'", szTaskName);
+
 	hr = pService_->NewTask(NULL, &pTask);
 	BreakExitOnFailure1(hr, "Failed creating a new task for '%ls'", szTaskName);
 
@@ -310,6 +311,7 @@ HRESULT CTaskScheduler::RemoveTask(LPCWSTR szTaskName)
 	HRESULT hr = S_OK;
 	
 	BreakExitOnNull(pRootFolder_.p, hr, E_FAIL, "Task root folder not set");
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Removing task '%ls'", szTaskName);
 
 	hr = pRootFolder_->DeleteTask(CComBSTR(szTaskName), NULL);
 	BreakExitOnFailure1(hr, "Failed deleting task '%ls'", szTaskName);
@@ -369,6 +371,7 @@ HRESULT CTaskScheduler::BackupTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 	DWORD dwJunk = 0;
 
 	BreakExitOnNull(pRootFolder_.p, hr, E_FAIL, "Task root folder not set");
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Backing-up task '%ls'", szTaskName);
 
 	hr = pRootFolder_->GetTask(BSTR(szTaskName), &pTask);
 	BreakExitOnFailure1(hr, "Failed getting existing task '%ls'", szTaskName);
@@ -396,8 +399,6 @@ HRESULT CTaskScheduler::RestoreTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 {
 	HRESULT hr = S_OK;
 	LPWSTR szTaskXml = NULL;
-	CComPtr<ITaskDefinition> pTask;
-	CComPtr<IRegisteredTask> pRegTask;
 	HANDLE hFile = INVALID_HANDLE_VALUE;
 	DWORD dwFileSize;
 	DWORD dwStrSize;
@@ -405,6 +406,7 @@ HRESULT CTaskScheduler::RestoreTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 	BOOL bRes = TRUE;
 
 	BreakExitOnNull(pRootFolder_.p, hr, E_FAIL, "Task root folder not set");
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Restoring task '%ls'", szTaskName);
 
 	hFile = ::CreateFile(szBackupFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 	BreakExitOnNullWithLastError((hFile != INVALID_HANDLE_VALUE), hr, "Failed opening backup file");
@@ -420,14 +422,8 @@ HRESULT CTaskScheduler::RestoreTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 	bRes = ::ReadFile(hFile, szTaskXml, dwFileSize, &dwReadSize, NULL);
 	BreakExitOnNullWithLastError(bRes, hr, "Failed reading backup file");
 
-	hr = pService_->NewTask(NULL, &pTask);
-	BreakExitOnFailure1(hr, "Failed creating a new task for '%ls'", szTaskName);
-
-	hr = pTask->put_XmlText(CComBSTR(szTaskXml));
-	BreakExitOnFailure1(hr, "Failed setting task XML for '%ls'", szTaskName);
-
-	hr = pRootFolder_->RegisterTaskDefinition(CComBSTR(szTaskName), pTask, TASK_CREATE_OR_UPDATE, CComVariant(), CComVariant(), TASK_LOGON_NONE, CComVariant(), &pRegTask);
-	BreakExitOnFailure1(hr, "Failed creating task '%ls'", szTaskName);
+	hr = CreateTask(szTaskName, szTaskXml);
+	BreakExitOnFailure1(hr, "Failed restoring task '%ls'", szTaskName);
 
 LExit:
 	if (hFile != INVALID_HANDLE_VALUE)
