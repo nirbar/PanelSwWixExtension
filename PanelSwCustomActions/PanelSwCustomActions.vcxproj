@@ -14,8 +14,10 @@
     <ProjectGuid>{0C3A56AA-8073-44E1-8DE4-C257D581BFF0}</ProjectGuid>
     <RootNamespace>PanelSwCustomActions</RootNamespace>
     <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <Import Project="$(SolutionDir)PanelSwWixExtension.props" />
   <PropertyGroup>
     <_ProjectFileVersion>11.0.50727.1</_ProjectFileVersion>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
@@ -34,22 +36,24 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <OutDir>$(SolutionDir)\out\bin\$(Configuration)\</OutDir>
-    <IntDir>$(SolutionDir)\out\obj\$(Configuration)\</IntDir>
-    <LibraryPath>$(SolutionDir)\out\bin\$(Configuration)\;$(WIX)SDK\VS2012\lib\x86;$(WIX)SDK\VS2013\lib\x86;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SolutionDir)CaCommon;$(WIX)SDK\VS2012\inc;$(WIX)SDK\VS2013\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir)..\CaCommon\;$(WIX)SDK\VS2015\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)CaCommon;$(WIX)SDK\VS2015\inc;$(IncludePath)</IncludePath>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+  </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(WIX)sdk\VS2013\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WIX)sdk\VS2015\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;CUSTOMACTIONTEST_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
       <AdditionalDependencies>msi.lib;dutil.lib;wcautil.lib;Version.lib;Shell32.lib;User32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(WIX)sdk\VS2013\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(WIX)sdk\VS2015\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>

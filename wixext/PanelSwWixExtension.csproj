@@ -26,8 +26,8 @@
     <UseApplicationTrust>false</UseApplicationTrust>
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <GenerateResourceNeverLockTypeAssemblies>true</GenerateResourceNeverLockTypeAssemblies>
-    <OutputPath>$(SolutionDir)\out\bin\$(Configuration)\</OutputPath>
   </PropertyGroup>
+  <Import Project="$(SolutionDir)PanelSwWixExtension.props"/>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
@@ -49,6 +49,10 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="PanelSwWixCompiler.cs" />
     <Compile Include="PanelSwWixExtension.cs" />
+    <Compile Include="$(IntermediateOutputPath)\BuildVersion.cs">
+      <AutoGen>true</AutoGen>
+      <Link>BuildVersion.cs</Link>
+    </Compile>
     <EmbeddedResource Include="Data\tables.xml">
       <LogicalName>$(RootNamespace).Data.tables.xml</LogicalName>
       <SubType>Designer</SubType>
@@ -61,7 +65,7 @@
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
       <SubType>Designer</SubType>
     </EmbeddedResource>
-    <EmbeddedResource Include="$(OutputPath)\PanelSwWixExtension.wixlib">
+    <EmbeddedResource Include="$(OutputPath)\..\PanelSwWixLib\PanelSwWixExtension.wixlib">
       <Link>Data\PanelSwWixExtension.wixlib</Link>
     </EmbeddedResource>
     <XsdGenSource Include="Xsd\PanelSwWixExtension.xsd">

@@ -1,0 +1,36 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <JetVersion>1.0.1</JetVersion>
+    <JetProductName>PanelSwWixExxtension</JetProductName>
+    <JetManufacturer>Panel::Software</JetManufacturer>
+
+    <!-- Output folder -->
+    <OutputPath>$(SolutionDir)build\bin\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
+    <IntermediateOutputPath>$(SolutionDir)build\obj\$(Configuration)\$(MSBuildProjectName)\</IntermediateOutputPath>
+    <OutDir>$(OutputPath)</OutDir>
+    <IntDir>$(IntermediateOutputPath)</IntDir>
+    <OutputDirectory>$(OutputPath)</OutputDirectory>
+    <IntermediateDirectory>$(IntermediateOutputPath)</IntermediateDirectory>
+
+    <WixVariables>JetVersion=$(JetVersion);JetProductName=$(JetProductName);JetManufacturer=$(JetManufacturer)</WixVariables>
+
+  </PropertyGroup>
+
+  <!-- C# generate version -->
+  <Target Name="GenerateVersion" BeforeTargets="BeforeCompile">
+    <ItemGroup>
+      <AssemblyAttributes Include="AssemblyVersion">
+        <_Parameter1>$(JetVersion).0</_Parameter1>
+      </AssemblyAttributes>
+    </ItemGroup>
+    <WriteCodeFragment Language="C#" OutputFile="$(IntermediateOutputPath)BuildVersion.cs" AssemblyAttributes="@(AssemblyAttributes)" />
+  </Target>
+
+  <!-- C++ generate version -->
+  <PropertyGroup>
+    <JETBA_COMMA_VERSION>$(JetVersion.Replace('.',','))</JETBA_COMMA_VERSION>
+    <PreprocessorDefinitions>JETBA_COLON_VERSION="$(JetVersion)";JETBA_COMMA_VERSION=$(JETBA_COMMA_VERSION)</PreprocessorDefinitions>
+  </PropertyGroup>
+
+</Project>
