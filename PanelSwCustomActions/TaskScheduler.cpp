@@ -78,8 +78,8 @@ extern "C" __declspec(dllexport) UINT TaskScheduler(MSIHANDLE hInstall)
 			break;
 
 		case WCA_TODO::WCA_TODO_UNKNOWN:
-			hr = E_INVALIDSTATE;
-			BreakExitOnFailure(hr, "Bad component to-do");
+			WcaLog(LOGMSG_STANDARD, "Component '%ls' action is unknown. Skipping configuration of task '%ls'.", (LPCWSTR)szComponent, (LPCWSTR)szTaskName);
+			break;
 		}
 	}
 
@@ -306,6 +306,11 @@ HRESULT CTaskScheduler::RemoveTask(LPCWSTR szTaskName)
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Removing task '%ls'", szTaskName);
 
 	hr = pRootFolder_->DeleteTask(CComBSTR(szTaskName), NULL);
+	if ((hr == E_FILENOTFOUND) || (hr == E_PATHNOTFOUND))
+	{
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Task '%ls' does not exist", szTaskName);
+		ExitFunction1(hr = S_FALSE);
+	}
 	BreakExitOnFailure1(hr, "Failed deleting task '%ls'", szTaskName);
 
 LExit:
