@@ -95,12 +95,12 @@ extern "C" __declspec(dllexport) UINT TaskScheduler(MSIHANDLE hInstall)
 	hr = oCommit.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for rollback action.");
 	hr = WcaDoDeferredAction(L"TaskScheduler_rollback", szCustomActionData, oCommit.GetCost());
-	BreakExitOnFailure(hr, "Failed scheduling deferred action.");
+	BreakExitOnFailure(hr, "Failed scheduling rollback action.");
 
 	szCustomActionData.Empty();
 	hr = oDeferred.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
-	hr = WcaDoDeferredAction(L"TaskScheduler_deferred", szCustomActionData, oCommit.GetCost());
+	hr = WcaDoDeferredAction(L"TaskScheduler_deferred", szCustomActionData, oDeferred.GetCost());
 	BreakExitOnFailure(hr, "Failed scheduling deferred action.");
 
 LExit:

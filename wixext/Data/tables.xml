@@ -100,4 +100,12 @@
     <columnDefinition name="Component_" type="string" length="0" modularize="property" category="identifier" />
     <columnDefinition name="TaskXml" type="string" length="0" modularize="property" category="formatted" />
   </tableDefinition>
+
+  <tableDefinition name="PSW_ExecOnComponent">
+    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="Component_" type="string" length="0" modularize="property" category="identifier" />
+    <columnDefinition name="Command" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Flags" type="number" length="4" minValue="0" maxValue="65535" />
+    <columnDefinition name="Order" type="number" length="2" minValue="0" maxValue="127" />
+  </tableDefinition>
 </tableDefinitions>

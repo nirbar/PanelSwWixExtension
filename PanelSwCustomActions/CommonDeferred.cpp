@@ -6,6 +6,7 @@
 #include "FileRegex.h"
 #include "FileOperations.h"
 #include "TaskScheduler.h"
+#include "ExecOnComponent.h"
 
 // ReceiverToExecutorFunc implementation.
 HRESULT ReceiverToExecutor(LPCWSTR szReceiver, CDeferredActionBase** ppExecutor)
@@ -38,6 +39,11 @@ HRESULT ReceiverToExecutor(LPCWSTR szReceiver, CDeferredActionBase** ppExecutor)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating TaskScheduler handler");
 		(*ppExecutor) = new CTaskScheduler();
+	}
+	else if (szRcvr.Equals(L"CExecOnComponent"))
+	{
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating ExecOnComponent handler");
+		(*ppExecutor) = new CExecOnComponent();
 	}
 	else
 	{

@@ -48,6 +48,7 @@ namespace PanelSw.Wix.Extensions
             Core.EnsureTable(null, "PSW_FileRegex");
             Core.EnsureTable(null, "PSW_DeletePath"); 
             Core.EnsureTable(null, "PSW_TaskScheduler");
+            Core.EnsureTable(null, "PSW_ExecOnComponent");
             base.FinalizeCompile();
         }
 
@@ -129,6 +130,10 @@ namespace PanelSw.Wix.Extensions
                             ParseTaskSchedulerElement(parentElement, element);
                             break;
 
+                        case "ExecOnComponent":
+                            ParseExecOnComponentElement(parentElement, element);
+                            break;
+
                         default:
                             Core.UnexpectedElement(parentElement, element);
                             break;
@@ -138,6 +143,205 @@ namespace PanelSw.Wix.Extensions
                 default:
                     Core.UnexpectedElement(parentElement, element);
                     break;
+            }
+        }
+
+        [Flags]
+        enum ExecOnComponentFlags
+        {
+            None = 0,
+
+            // Action
+            OnInstall = 1,
+            OnRemove = 2 * OnInstall,
+            OnReinstall = 2 * OnRemove,
+
+            // Action rollback
+            OnInstallRollback = 2 * OnReinstall,
+            OnRemoveRollback = 2 * OnInstallRollback,
+            OnReinstallRollback = 2 * OnRemoveRollback,
+
+            AnyAction = OnInstall | OnRemove | OnReinstall | OnInstallRollback | OnReinstallRollback | OnRemoveRollback,
+
+            // Schedule
+            BeforeStopServices = 2 * OnReinstallRollback,
+            AfterStopServices = 2 * BeforeStopServices,
+            BeforeStartServices = 2 * AfterStopServices,
+            AfterStartServices = 2 * BeforeStartServices,
+
+            AnyTiming = BeforeStopServices | AfterStopServices | BeforeStartServices | AfterStartServices,
+
+            // Return
+            IgnoreExitCode = 2 * AfterStartServices
+        }
+
+        private void ParseExecOnComponentElement(XmlElement parentElement, XmlElement element)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
+            string id = null;
+            string component = null;
+            string command = null;
+            ExecOnComponentFlags flags = ExecOnComponentFlags.None;
+            int order = 0;
+            YesNoType aye;
+
+            component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
+
+            foreach (XmlAttribute attrib in element.Attributes)
+            {
+                if ((0 != attrib.NamespaceURI.Length) && (attrib.NamespaceURI != schema.TargetNamespace))
+                {
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+
+                switch (attrib.LocalName)
+                {
+                    case "Id":
+                        id = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "Command":
+                        command = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "Order":
+                        order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 127);
+                        break;
+
+                    case "IgnoreExitCode":
+                        aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                        if (aye == YesNoType.Yes)
+                        {
+                            flags |= ExecOnComponentFlags.IgnoreExitCode;                                
+                        }
+                        break;
+
+                    case "OnInstall":
+                        aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                        if (aye == YesNoType.Yes)
+                        {
+                            flags |= ExecOnComponentFlags.OnInstall;
+                        }
+                        break;
+
+                    case "OnInstallRollback":
+                        aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                        if (aye == YesNoType.Yes)
+                        {
+                            flags |= ExecOnComponentFlags.OnInstallRollback;
+                        }
+                        break;
+
+                    case "OnReinstall":
+                        aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                        if (aye == YesNoType.Yes)
+                        {
+                            flags |= ExecOnComponentFlags.OnReinstall;
+                        }
+                        break;
+
+                    case "OnReinstallRollback":
+                        aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                        if (aye == YesNoType.Yes)
+                        {
+                            flags |= ExecOnComponentFlags.OnReinstallRollback;
+                        }
+                        break;
+
+                    case "OnUninstall":
+                        aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                        if (aye == YesNoType.Yes)
+                        {
+                            flags |= ExecOnComponentFlags.OnRemove;
+                        }
+                        break;
+
+                    case "OnUninstallRollback":
+                        aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                        if (aye == YesNoType.Yes)
+                        {
+                            flags |= ExecOnComponentFlags.OnRemoveRollback;
+                        }
+                        break;
+
+                    case "BeforeStopServices":
+                        aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                        if (aye == YesNoType.Yes)
+                        {
+                            flags |= ExecOnComponentFlags.BeforeStopServices;
+                        }
+                        break;
+
+                    case "AfterStopServices":
+                        aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                        if (aye == YesNoType.Yes)
+                        {
+                            flags |= ExecOnComponentFlags.AfterStopServices;
+                        }
+                        break;
+
+                    case "BeforeStartServices":
+                        aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                        if (aye == YesNoType.Yes)
+                        {
+                            flags |= ExecOnComponentFlags.BeforeStartServices;
+                        }
+                        break;
+
+                    case "AfterStartServices":
+                        aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                        if (aye == YesNoType.Yes)
+                        {
+                            flags |= ExecOnComponentFlags.AfterStartServices;
+                        }
+                        break;
+
+                    default:
+                        Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                        break;
+                }
+            }
+
+            foreach (XmlNode child in element.ChildNodes)
+            {
+                if (child.NamespaceURI == schema.TargetNamespace)
+                {
+                    Core.UnexpectedElement(element, child);
+                }
+            }
+
+            if (string.IsNullOrEmpty(component))
+            {
+                Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, parentElement.Name, "Id", ""));
+            }
+            if (string.IsNullOrEmpty(id))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "Id"));
+            }
+            if (string.IsNullOrEmpty(command))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "Command"));
+            }
+            if ((flags & ExecOnComponentFlags.AnyAction) == ExecOnComponentFlags.None)
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "OnXXX"));
+            }
+            if ((flags & ExecOnComponentFlags.AnyTiming) == ExecOnComponentFlags.None)
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "BeforeXXX or AfterXXX"));
+            }
+
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "ExecOnComponent");
+
+            if (!Core.EncounteredError)
+            {
+                // create a row in the Win32_CopyFiles table
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_ExecOnComponent");
+                row[0] = id;
+                row[1] = component;
+                row[2] = command;
+                row[3] = (int)flags;
+                row[4] = order;
             }
         }
 
@@ -191,7 +395,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(component))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, parentElement.Name, "Id", ""));
             }
             if (string.IsNullOrEmpty(taskXml))
             {

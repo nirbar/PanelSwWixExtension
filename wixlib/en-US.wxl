@@ -5,5 +5,6 @@
   <String Id="Telemetry">Posting telemetry data</String>
   <String Id="ShellExecute">Executing command "[1]" [2] in "[3]" with verb [4]</String>
   <String Id="TaskScheduler">Configuring Scheduled Tasks</String>
+  <String Id="ExecOnComponent"><![CDATA[Executing custom actions]]></String>
 </WixLocalization>
 

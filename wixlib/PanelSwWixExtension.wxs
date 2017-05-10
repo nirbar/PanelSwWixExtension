@@ -263,4 +263,37 @@
     </UI>
   </Fragment>
 
+  <!-- ExecOnComponent -->
+  <Fragment>
+    <CustomAction Id="ExecOnComponent" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="ExecOnComponent" Execute="immediate" Return="check" />
+    <CustomAction Id="ExecOnComponent_BeforeStop_rollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" />
+    <CustomAction Id="ExecOnComponent_BeforeStop_deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" />
+    <CustomAction Id="ExecOnComponent_AfterStop_rollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" />
+    <CustomAction Id="ExecOnComponent_AfterStop_deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" />
+    <CustomAction Id="ExecOnComponent_BeforeStart_rollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" />
+    <CustomAction Id="ExecOnComponent_BeforeStart_deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" />
+    <CustomAction Id="ExecOnComponent_AfterStart_rollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" />
+    <CustomAction Id="ExecOnComponent_AfterStart_deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" />
+
+    <InstallExecuteSequence>
+      <Custom Action="ExecOnComponent" After="InstallInitialize" Overridable="yes"/>
+      <Custom Action="ExecOnComponent_BeforeStop_rollback" Before="StopServices" Overridable="yes"/>
+      <Custom Action="ExecOnComponent_BeforeStop_deferred" Before="StopServices" Overridable="yes"/>
+
+      <Custom Action="ExecOnComponent_AfterStop_rollback" After="StopServices" Overridable="yes"/>
+      <Custom Action="ExecOnComponent_AfterStop_deferred" After="StopServices" Overridable="yes"/>
+
+      <Custom Action="ExecOnComponent_BeforeStart_rollback" Before="StartServices" Overridable="yes"/>
+      <Custom Action="ExecOnComponent_BeforeStart_deferred" Before="StartServices" Overridable="yes"/>
+
+      <Custom Action="ExecOnComponent_AfterStart_rollback" After="StartServices" Overridable="yes"/>
+      <Custom Action="ExecOnComponent_AfterStart_deferred" After="StartServices" Overridable="yes"/>
+    </InstallExecuteSequence>
+
+    <UI>
+      <ProgressText Action="ExecOnComponent_deferred">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_rollback">!(loc.ExecOnComponent)</ProgressText>
+    </UI>
+  </Fragment>
+
 </Wix>
