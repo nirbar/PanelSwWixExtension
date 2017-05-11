@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd">
+  <metadata minClientVersion="2.7">
+    <id>PanelSwWixExtension</id>
+    <version>1.0.2</version>
+    <title>Wix Extension</title>
+    <authors>Nir Bar</authors>
+    <owners>Nir Bar</owners>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <projectUrl>https://bitbucket.org/nirbar1/panelswwixextension</projectUrl>
+    <description>A WiX extension with various actions including- File regular expressions; XmlSearch; TaskScheduler; ExecOnComponent</description>
+    <summary>A WiX extension with various actions</summary>
+    <tags>WiX MSI Installer WixToolset XML</tags>
+  </metadata>
+
+  <files>
+    <file src=".\Nuget\*" target="tools" />
+    <file src=".\build\bin\Release\PanelSwWixExtension\PanelSwWixExtension.dll" target="tools\lib"/>
+    <file src=".\wixext\Xsd\PanelSwWixExtension.xsd" target="content"/>
+  </files>
+
+</package>
