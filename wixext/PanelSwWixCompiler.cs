@@ -130,6 +130,7 @@ namespace PanelSw.Wix.Extensions
                             ParseTaskSchedulerElement(parentElement, element);
                             break;
 
+                        case "ExecOn":
                         case "ExecOnComponent":
                             ParseExecOnComponentElement(parentElement, element);
                             break;
@@ -172,7 +173,10 @@ namespace PanelSw.Wix.Extensions
             AnyTiming = BeforeStopServices | AfterStopServices | BeforeStartServices | AfterStartServices,
 
             // Return
-            IgnoreExitCode = 2 * AfterStartServices
+            IgnoreExitCode = 2 * AfterStartServices,
+
+            // Impersonate
+            Impersonate = 2 * IgnoreExitCode
         }
 
         private void ParseExecOnComponentElement(XmlElement parentElement, XmlElement element)
@@ -206,6 +210,14 @@ namespace PanelSw.Wix.Extensions
 
                     case "Order":
                         order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 127);
+                        break;
+
+                    case "Impersonate":
+                        aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                        if (aye == YesNoType.Yes)
+                        {
+                            flags |= ExecOnComponentFlags.Impersonate;
+                        }
                         break;
 
                     case "IgnoreExitCode":

@@ -8,7 +8,7 @@ PanelSwWixExtension is a [WiX](http://wixtoolset.org/) extension that contains v
 - *XmlSearch*: Read XML values.
 - *CustomUninstallKey*: Overwrite registry values in the product's [Uninstall](http://msdn.microsoft.com/en-us/library/aa372105%28v=vs.85%29.aspx) registry key
 - *RemoveRegistryValue*: Removes registry values. Complements the standard [RemoveRegistryValue](http://wixtoolset.org/documentation/manual/v3/xsd/wix/removeregistryvalue.html) WiX element that will only remove registry values during installation.
-- *ExecOnComponent*: Execute a custom command on component action.
+- *ExecOn*: Execute a custom command on component action.
 - *TaskScheduler*: Add a task to Windows Task Scheduler. Task definition XML should be in inner text.
 - *DeletePath*: Delete folder or file specified by a path.
 - *FileRegex*: Execute a Regular Expression to perform find & replace operations within files.

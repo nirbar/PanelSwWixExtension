@@ -26,10 +26,13 @@ enum Flags
 	AfterStartServices = 2 * BeforeStartServices,
 
 	// Return
-	IgnoreExitCode = 2 * AfterStartServices
+	IgnoreExitCode = 2 * AfterStartServices,
+
+	// Impersonate
+	Impersonate = 2 * IgnoreExitCode,
 };
 
-static HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, int nFlags, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart);
+static HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, int nFlags, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart, CExecOnComponent* pBeforeStopImp, CExecOnComponent* pAfterStopImp, CExecOnComponent* pBeforeStartImp, CExecOnComponent* pAfterStartImp);
 
 extern "C" __declspec(dllexport) UINT ExecOnComponent(MSIHANDLE hInstall)
 {
@@ -40,6 +43,8 @@ extern "C" __declspec(dllexport) UINT ExecOnComponent(MSIHANDLE hInstall)
 	CComBSTR szCustomActionData;
 	CExecOnComponent oDeferredBeforeStop, oDeferredAfterStop, oDeferredBeforeStart, oDeferredAfterStart;
 	CExecOnComponent oRollbackBeforeStop, oRollbackAfterStop, oRollbackBeforeStart, oRollbackAfterStart;
+	CExecOnComponent oDeferredBeforeStopImp, oDeferredAfterStopImp, oDeferredBeforeStartImp, oDeferredAfterStartImp;
+	CExecOnComponent oRollbackBeforeStopImp, oRollbackAfterStopImp, oRollbackBeforeStartImp, oRollbackAfterStartImp;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");
@@ -80,12 +85,12 @@ extern "C" __declspec(dllexport) UINT ExecOnComponent(MSIHANDLE hInstall)
 		case WCA_TODO::WCA_TODO_INSTALL:
 			if (nFlags & Flags::OnInstall)
 			{
-				hr = ScheduleExecution(szId, szCommand, nFlags, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart);
+				hr = ScheduleExecution(szId, szCommand, nFlags, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, &oDeferredBeforeStopImp, &oDeferredAfterStopImp, &oDeferredBeforeStartImp, &oDeferredAfterStartImp);
 				BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			if (nFlags & Flags::OnInstallRollback)
 			{
-				hr = ScheduleExecution(szId, szCommand, nFlags, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart);
+				hr = ScheduleExecution(szId, szCommand, nFlags, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, &oRollbackBeforeStopImp, &oRollbackAfterStopImp, &oRollbackBeforeStartImp, &oRollbackAfterStartImp);
 				BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			break;
@@ -93,12 +98,12 @@ extern "C" __declspec(dllexport) UINT ExecOnComponent(MSIHANDLE hInstall)
 		case WCA_TODO::WCA_TODO_REINSTALL:
 			if (nFlags & Flags::OnReinstall)
 			{
-				hr = ScheduleExecution(szId, szCommand, nFlags, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart);
+				hr = ScheduleExecution(szId, szCommand, nFlags, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, &oDeferredBeforeStopImp, &oDeferredAfterStopImp, &oDeferredBeforeStartImp, &oDeferredAfterStartImp);
 				BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			if (nFlags & Flags::OnReinstallRollback)
 			{
-				hr = ScheduleExecution(szId, szCommand, nFlags, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart);
+				hr = ScheduleExecution(szId, szCommand, nFlags, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, &oRollbackBeforeStopImp, &oRollbackAfterStopImp, &oRollbackBeforeStartImp, &oRollbackAfterStartImp);
 				BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			break;
@@ -106,12 +111,12 @@ extern "C" __declspec(dllexport) UINT ExecOnComponent(MSIHANDLE hInstall)
 		case WCA_TODO::WCA_TODO_UNINSTALL:
 			if (nFlags & Flags::OnRemove)
 			{
-				hr = ScheduleExecution(szId, szCommand, nFlags, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart);
+				hr = ScheduleExecution(szId, szCommand, nFlags, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, &oDeferredBeforeStopImp, &oDeferredAfterStopImp, &oDeferredBeforeStartImp, &oDeferredAfterStartImp);
 				BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			if (nFlags & Flags::OnRemoveRollback)
 			{
-				hr = ScheduleExecution(szId, szCommand, nFlags, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart);
+				hr = ScheduleExecution(szId, szCommand, nFlags, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, &oRollbackBeforeStopImp, &oRollbackAfterStopImp, &oRollbackBeforeStartImp, &oRollbackAfterStartImp);
 				BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			break;
@@ -171,37 +176,115 @@ extern "C" __declspec(dllexport) UINT ExecOnComponent(MSIHANDLE hInstall)
 	hr = WcaSetProperty(L"ExecOnComponent_AfterStart_deferred", szCustomActionData);
 	BreakExitOnFailure(hr, "Failed setting deferred action data.");
 
+	// Rollback actions, impersonated
+	szCustomActionData.Empty();
+	hr = oRollbackBeforeStopImp.GetCustomActionData(&szCustomActionData);
+	BreakExitOnFailure(hr, "Failed getting custom action data for rollback.");
+	hr = WcaSetProperty(L"ExecOnComponent_Imp_BeforeStop_rollback", szCustomActionData);
+	BreakExitOnFailure(hr, "Failed setting rollback action data.");
+
+	szCustomActionData.Empty();
+	hr = oRollbackAfterStopImp.GetCustomActionData(&szCustomActionData);
+	BreakExitOnFailure(hr, "Failed getting custom action data for rollback.");
+	hr = WcaSetProperty(L"ExecOnComponent_Imp_AfterStop_rollback", szCustomActionData);
+	BreakExitOnFailure(hr, "Failed setting rollback action data.");
+
+	szCustomActionData.Empty();
+	hr = oRollbackBeforeStartImp.GetCustomActionData(&szCustomActionData);
+	BreakExitOnFailure(hr, "Failed getting custom action data for rollback.");
+	hr = WcaSetProperty(L"ExecOnComponent_Imp_BeforeStart_rollback", szCustomActionData);
+	BreakExitOnFailure(hr, "Failed setting rollback action data.");
+
+	szCustomActionData.Empty();
+	hr = oRollbackAfterStartImp.GetCustomActionData(&szCustomActionData);
+	BreakExitOnFailure(hr, "Failed getting custom action data for rollback.");
+	hr = WcaSetProperty(L"ExecOnComponent_Imp_AfterStart_rollback", szCustomActionData);
+	BreakExitOnFailure(hr, "Failed setting rollback action data.");
+
+	// Deferred actions, impersonated
+	szCustomActionData.Empty();
+	hr = oDeferredBeforeStopImp.GetCustomActionData(&szCustomActionData);
+	BreakExitOnFailure(hr, "Failed getting custom action data for deferred.");
+	hr = WcaSetProperty(L"ExecOnComponent_Imp_BeforeStop_deferred", szCustomActionData);
+	BreakExitOnFailure(hr, "Failed setting deferred action data.");
+
+	szCustomActionData.Empty();
+	hr = oDeferredAfterStopImp.GetCustomActionData(&szCustomActionData);
+	BreakExitOnFailure(hr, "Failed getting custom action data for deferred.");
+	hr = WcaSetProperty(L"ExecOnComponent_Imp_AfterStop_deferred", szCustomActionData);
+	BreakExitOnFailure(hr, "Failed setting deferred action data.");
+
+	szCustomActionData.Empty();
+	hr = oDeferredBeforeStartImp.GetCustomActionData(&szCustomActionData);
+	BreakExitOnFailure(hr, "Failed getting custom action data for deferred.");
+	hr = WcaSetProperty(L"ExecOnComponent_Imp_BeforeStart_deferred", szCustomActionData);
+	BreakExitOnFailure(hr, "Failed setting deferred action data.");
+
+	szCustomActionData.Empty();
+	hr = oDeferredAfterStartImp.GetCustomActionData(&szCustomActionData);
+	BreakExitOnFailure(hr, "Failed getting custom action data for deferred.");
+	hr = WcaSetProperty(L"ExecOnComponent_Imp_AfterStart_deferred", szCustomActionData);
+	BreakExitOnFailure(hr, "Failed setting deferred action data."); 
+
 LExit:
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
 }
 
-HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, int nFlags, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart)
+HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, int nFlags, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart, CExecOnComponent* pBeforeStopImp, CExecOnComponent* pAfterStopImp, CExecOnComponent* pBeforeStartImp, CExecOnComponent* pAfterStartImp)
 {
 	HRESULT hr = S_OK;
 
 	if (nFlags & Flags::BeforeStopServices)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' before StopServices", (LPCWSTR)szCommand);
-		hr = pBeforeStop->AddExec(szCommand, nFlags);
+		if (nFlags & Flags::Impersonate)
+		{
+			hr = pBeforeStopImp->AddExec(szCommand, nFlags);
+		}
+		else
+		{
+			hr = pBeforeStop->AddExec(szCommand, nFlags);
+		}
 		BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
 	if (nFlags & Flags::AfterStopServices)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' after StopServices", (LPCWSTR)szCommand);
-		hr = pAfterStop->AddExec(szCommand, nFlags);
+		if (nFlags & Flags::Impersonate)
+		{
+			hr = pAfterStopImp->AddExec(szCommand, nFlags);
+		}
+		else
+		{
+			hr = pAfterStop->AddExec(szCommand, nFlags);
+		}
 		BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
 	if (nFlags & Flags::BeforeStartServices)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' before StartServices", (LPCWSTR)szCommand);
-		hr = pBeforeStart->AddExec(szCommand, nFlags);
+		if (nFlags & Flags::Impersonate)
+		{
+			hr = pBeforeStartImp->AddExec(szCommand, nFlags);
+		}
+		else
+		{
+			hr = pBeforeStart->AddExec(szCommand, nFlags);
+		}
 		BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
 	if (nFlags & Flags::AfterStartServices)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' after StartServices", (LPCWSTR)szCommand);
-		hr = pAfterStart->AddExec(szCommand, nFlags);
+		if (nFlags & Flags::Impersonate)
+		{
+			hr = pAfterStartImp->AddExec(szCommand, nFlags);
+		}
+		else
+		{
+			hr = pAfterStart->AddExec(szCommand, nFlags);
+		}
 		BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
 

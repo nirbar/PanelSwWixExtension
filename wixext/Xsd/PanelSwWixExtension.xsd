@@ -15,7 +15,7 @@
 
   <xs:import namespace="http://schemas.microsoft.com/wix/2006/wi" />
 
-  <xs:element name="ExecOnComponent">
+  <xs:element name="ExecOn">
     <xs:annotation>
       <xs:appinfo>
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
@@ -95,9 +95,16 @@
               <xs:documentation><![CDATA['yes' to ignore exit code.]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
+
+          <xs:attribute name="Impersonate" type="YesNoType" default="no">
+            <xs:annotation>
+              <xs:documentation><![CDATA['yes' to execute in user context; 'no' to execute as LocalSystem. Default is 'no'.]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+
           <xs:attribute name="Order" type="xs:integer">
             <xs:annotation>
-              <xs:documentation><![CDATA[Order of command execution. When absent, execution order is indeterminate]]></xs:documentation>
+              <xs:documentation><![CDATA[Order of command execution. When absent, execution order is indeterminate. Note, that ordering applies to commands executed on the same event and context.]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>

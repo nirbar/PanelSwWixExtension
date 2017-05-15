@@ -23,9 +23,12 @@
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component Id="Test" Guid="*">
         <File Source="$(var.ProjectDir)Product.wxs" />
-        <PanelSW:ExecOnComponent Id="_1" Command='"notepad.exe" "[#Product.wxs]"' IgnoreExitCode='yes' OnInstall='yes' OnInstallRollback='yes' OnReinstall='yes' OnReinstallRollback='yes' OnUninstall='yes' OnUninstallRollback='yes'
-                                 BeforeStopServices='yes' AfterStopServices='yes' BeforeStartServices='yes' AfterStartServices='yes'
-                                 />
+        <PanelSW:ExecOn Id="_1" Command='"notepad.exe" "[#Product.wxs]"' IgnoreExitCode='yes' OnInstall='yes' OnInstallRollback='yes' OnReinstall='yes' OnReinstallRollback='yes' OnUninstall='yes' OnUninstallRollback='yes'
+                        BeforeStopServices='yes' AfterStopServices='yes' BeforeStartServices='yes' AfterStartServices='yes'
+                        />
+        <PanelSW:ExecOn Id="_2" Command='"notepad.exe" "[#Product.wxs]"' IgnoreExitCode='yes' OnInstall='yes' OnInstallRollback='yes' OnReinstall='yes' OnReinstallRollback='yes' OnUninstall='yes' OnUninstallRollback='yes'
+                        BeforeStopServices='yes' AfterStopServices='yes' BeforeStartServices='yes' AfterStartServices='yes' Impersonate='yes'
+                        />
       </Component>
     </ComponentGroup>
   </Product>
