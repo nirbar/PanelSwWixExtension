@@ -20,7 +20,7 @@
       <xs:appinfo>
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
       </xs:appinfo>
-      <xs:documentation><![CDATA[Add a task to Windows Task Scheduler. Task definition XML should be in inner text]]></xs:documentation>
+      <xs:documentation><![CDATA[Execute a custom command on component action.]]></xs:documentation>
     </xs:annotation>
     <xs:complexType>
       <xs:simpleContent>
@@ -239,7 +239,7 @@ Execute a Regular Expression to perform find & replace operations within files.
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[
-Execute a Regular Expression to replace or find matches.
+Execute a Regular Expression to replace or find matches in property values.
 
 \par Example:
 \code
