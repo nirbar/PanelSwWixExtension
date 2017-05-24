@@ -25,7 +25,9 @@
         <File Source="$(var.ProjectDir)Product.wxs" />
         <PanelSW:ExecOn Id="_1" Command='"notepad.exe" "[#Product.wxs]"' IgnoreExitCode='yes' OnInstall='yes' OnInstallRollback='yes' OnReinstall='yes' OnReinstallRollback='yes' OnUninstall='yes' OnUninstallRollback='yes'
                         BeforeStopServices='yes' AfterStopServices='yes' BeforeStartServices='yes' AfterStartServices='yes'
-                        />
+                        >
+          <PanelSW:ExitCode Value='0' Behavior='scheduleReboot'/>
+        </PanelSW:ExecOn>
         <PanelSW:ExecOn Id="_2" Command='"notepad.exe" "[#Product.wxs]"' IgnoreExitCode='yes' OnInstall='yes' OnInstallRollback='yes' OnReinstall='yes' OnReinstallRollback='yes' OnUninstall='yes' OnUninstallRollback='yes'
                         BeforeStopServices='yes' AfterStopServices='yes' BeforeStartServices='yes' AfterStartServices='yes' Impersonate='yes'
                         />

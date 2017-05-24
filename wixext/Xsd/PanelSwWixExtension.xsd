@@ -23,95 +23,122 @@
       <xs:documentation><![CDATA[Execute a custom command on component action.]]></xs:documentation>
     </xs:annotation>
     <xs:complexType>
-      <xs:simpleContent>
-        <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string" use="required">
-            <xs:annotation>
-              <xs:documentation><![CDATA[Primary key.]]></xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="Command" type="xs:string" use="required">
-            <xs:annotation>
-              <xs:documentation><![CDATA[Command line to execute. The executable to run should be enclosed with double-quotes. This field is formatted.]]></xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="ExitCode" />
+      </xs:choice>
+      <xs:attribute name="Id" type="xs:string" use="required">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Primary key.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Command" type="xs:string" use="required">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Command line to execute. The executable to run should be enclosed with double-quotes. This field is formatted.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
 
-          <!-- On Component Action -->
-          <xs:attribute name="OnInstall" type="YesNoType">
-            <xs:annotation>
-              <xs:documentation><![CDATA['yes' to execute on component installation.]]></xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="OnInstallRollback" type="YesNoType">
-            <xs:annotation>
-              <xs:documentation><![CDATA['yes' to execute on component installation rollback.]]></xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="OnReinstall" type="YesNoType">
-            <xs:annotation>
-              <xs:documentation><![CDATA['yes' to execute on component reinstallation.]]></xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="OnReinstallRollback" type="YesNoType">
-            <xs:annotation>
-              <xs:documentation><![CDATA['yes' to execute on component reinstallation rollback.]]></xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="OnUninstall" type="YesNoType">
-            <xs:annotation>
-              <xs:documentation><![CDATA['yes' to execute on component removal.]]></xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="OnUninstallRollback" type="YesNoType">
-            <xs:annotation>
-              <xs:documentation><![CDATA['yes' to execute on component removal rollback.]]></xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
+      <!-- On Component Action -->
+      <xs:attribute name="OnInstall" type="YesNoType">
+        <xs:annotation>
+          <xs:documentation><![CDATA['yes' to execute on component installation.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="OnInstallRollback" type="YesNoType">
+        <xs:annotation>
+          <xs:documentation><![CDATA['yes' to execute on component installation rollback.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="OnReinstall" type="YesNoType">
+        <xs:annotation>
+          <xs:documentation><![CDATA['yes' to execute on component reinstallation.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="OnReinstallRollback" type="YesNoType">
+        <xs:annotation>
+          <xs:documentation><![CDATA['yes' to execute on component reinstallation rollback.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="OnUninstall" type="YesNoType">
+        <xs:annotation>
+          <xs:documentation><![CDATA['yes' to execute on component removal.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="OnUninstallRollback" type="YesNoType">
+        <xs:annotation>
+          <xs:documentation><![CDATA['yes' to execute on component removal rollback.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
 
-          <!-- Timing -->
-          <xs:attribute name="BeforeStopServices" type="YesNoType">
-            <xs:annotation>
-              <xs:documentation><![CDATA['yes' to execute before StopServices action.]]></xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="AfterStopServices" type="YesNoType">
-            <xs:annotation>
-              <xs:documentation><![CDATA['yes' to execute after StopServices action.]]></xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="BeforeStartServices" type="YesNoType">
-            <xs:annotation>
-              <xs:documentation><![CDATA['yes' to execute before StartServices action.]]></xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="AfterStartServices" type="YesNoType">
-            <xs:annotation>
-              <xs:documentation><![CDATA['yes' to execute after StartServices action.]]></xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
+      <!-- Timing -->
+      <xs:attribute name="BeforeStopServices" type="YesNoType">
+        <xs:annotation>
+          <xs:documentation><![CDATA['yes' to execute before StopServices action.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="AfterStopServices" type="YesNoType">
+        <xs:annotation>
+          <xs:documentation><![CDATA['yes' to execute after StopServices action.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="BeforeStartServices" type="YesNoType">
+        <xs:annotation>
+          <xs:documentation><![CDATA['yes' to execute before StartServices action.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="AfterStartServices" type="YesNoType">
+        <xs:annotation>
+          <xs:documentation><![CDATA['yes' to execute after StartServices action.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
 
-          <xs:attribute name="IgnoreExitCode" type="YesNoType">
-            <xs:annotation>
-              <xs:documentation><![CDATA['yes' to ignore exit code.]]></xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
+      <xs:attribute name="IgnoreExitCode" type="YesNoType">
+        <xs:annotation>
+          <xs:documentation><![CDATA['yes' to ignore exit code.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
 
-          <xs:attribute name="Impersonate" type="YesNoType" default="no">
-            <xs:annotation>
-              <xs:documentation><![CDATA['yes' to execute in user context; 'no' to execute as LocalSystem. Default is 'no'.]]></xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
+      <xs:attribute name="Impersonate" type="YesNoType" default="no">
+        <xs:annotation>
+          <xs:documentation><![CDATA['yes' to execute in user context; 'no' to execute as LocalSystem. Default is 'no'.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
 
-          <xs:attribute name="Order" type="xs:integer">
-            <xs:annotation>
-              <xs:documentation><![CDATA[Order of command execution. When absent, execution order is indeterminate. Note, that ordering applies to commands executed on the same event and context.]]></xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
-        </xs:extension>
-      </xs:simpleContent>
+      <xs:attribute name="Order" type="xs:integer">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Order of command execution. When absent, execution order is indeterminate. Note, that ordering applies to commands executed on the same event and context.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
-
+  
+  <xs:element name="ExitCode">
+    <xs:annotation>
+      <xs:documentation>Describes map of exit code returned from command</xs:documentation>
+      <xs:appinfo>
+        <xse:parent ref="ExecOn" />
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:attribute name="Value" type="xs:integer" use="required">
+        <xs:annotation>
+          <xs:documentation>Exit code returned from executable package. If no value is provided it means all values not explicitly set default to this behavior.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Behavior" use="required">
+        <xs:annotation>
+          <xs:documentation>Choose one of the supported behaviors error codes: success, error, scheduleReboot.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:string">
+            <xs:enumeration value="success" />
+            <xs:enumeration value="error" />
+            <xs:enumeration value="scheduleReboot" />
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+  
   <xs:element name="TaskScheduler">
     <xs:annotation>
       <xs:appinfo>

@@ -42,6 +42,12 @@
       <RefTargetDir>INSTALLFOLDER</RefTargetDir>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <WixExtension Include="WixUtilExtension">
+      <HintPath>$(WixExtDir)\WixUtilExtension.dll</HintPath>
+      <Name>WixUtilExtension</Name>
+    </WixExtension>
+  </ItemGroup>
   <PropertyGroup Condition=" '$(Configuration)' == 'Debug' ">
     <Pedantic>True</Pedantic>
     <ShowSourceTrace>False</ShowSourceTrace>

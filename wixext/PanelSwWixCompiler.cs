@@ -49,6 +49,7 @@ namespace PanelSw.Wix.Extensions
             Core.EnsureTable(null, "PSW_DeletePath"); 
             Core.EnsureTable(null, "PSW_TaskScheduler");
             Core.EnsureTable(null, "PSW_ExecOnComponent");
+            Core.EnsureTable(null, "PSW_ExecOnComponent_ExitCode");
             base.FinalizeCompile();
         }
 
@@ -314,14 +315,6 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            foreach (XmlNode child in element.ChildNodes)
-            {
-                if (child.NamespaceURI == schema.TargetNamespace)
-                {
-                    Core.UnexpectedElement(element, child);
-                }
-            }
-
             if (string.IsNullOrEmpty(component))
             {
                 Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, parentElement.Name, "Id", ""));
@@ -341,6 +334,62 @@ namespace PanelSw.Wix.Extensions
             if ((flags & ExecOnComponentFlags.AnyTiming) == ExecOnComponentFlags.None)
             {
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "BeforeXXX or AfterXXX"));
+            }
+
+            // ExitCode mapping
+            foreach (XmlNode child in element.ChildNodes)
+            {
+                if (child.NamespaceURI == schema.TargetNamespace)
+                {
+                    switch(child.LocalName)
+                    {
+                        case "ExitCode":
+                            ushort from = 0, to = 0;
+                            foreach (XmlAttribute a in child.Attributes)
+                            {
+                                if ((0 != a.NamespaceURI.Length) && (a.NamespaceURI != schema.TargetNamespace))
+                                {
+                                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, a);
+                                }
+
+                                switch (a.LocalName)
+                                {
+                                    case "Value":
+                                        from = (ushort)Core.GetAttributeIntegerValue(sourceLineNumbers, a, 0, 0xffff);
+                                        break;
+
+                                    case "Behavior":
+                                        switch (Core.GetAttributeValue(sourceLineNumbers, a))
+                                        {
+                                            case "success":
+                                                to = 0;
+                                                break;
+                                            case "scheduleReboot":
+                                                to = 3010;
+                                                break;
+                                            case "error":
+                                                to = 0x4005;
+                                                break;
+                                            default:
+                                                to = (ushort)Core.GetAttributeIntegerValue(sourceLineNumbers, a, 0, 0xffff);
+                                                break;
+                                        }
+                                        break;
+                                }
+                            }
+
+                            Row row = Core.CreateRow(sourceLineNumbers, "PSW_ExecOnComponent_ExitCode");
+                            row[0] = id;
+                            row[1] = (int)from;
+                            row[2] = (int)to;
+                            break;
+
+
+                        default:
+                            Core.UnexpectedElement(element, child);
+                            break;
+                    }
+                }
             }
 
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "ExecOnComponent");
