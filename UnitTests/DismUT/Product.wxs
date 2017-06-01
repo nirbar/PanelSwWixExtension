@@ -19,14 +19,11 @@
     </Directory>
 
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
-    <CustomAction Id="Dism" BinaryKey="PanelSwCustomActions.dll" DllEntry="Dism" Execute="deferred" Impersonate="no"/>
-    <InstallExecuteSequence>
-      <Custom Action="Dism" After="InstallInitialize"/>
-    </InstallExecuteSequence>
     
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component Id="Test" Guid="*">
         <File Source="$(var.ProjectDir)Product.wxs" />
+        <PanelSW:Dism Id="_1" EnableFeature="IIS"/>
       </Component>
     </ComponentGroup>
   </Product>

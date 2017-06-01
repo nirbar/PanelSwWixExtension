@@ -87,9 +87,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\DismX64\Dism.cpp" />
     <ClCompile Include="AccountNames.cpp" />
     <ClCompile Include="CommonDeferred.cpp" />
-    <ClCompile Include="Dism.cpp" />
     <ClCompile Include="ExecOnComponent.cpp" />
     <ClCompile Include="FileOperations.cpp" />
     <ClCompile Include="FileRegex.cpp" />

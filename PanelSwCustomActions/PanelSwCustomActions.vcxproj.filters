@@ -80,7 +80,7 @@
     <ClCompile Include="ExecOnComponent.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="Dism.cpp">
+    <ClCompile Include="..\DismX64\Dism.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

@@ -15,6 +15,31 @@
 
   <xs:import namespace="http://schemas.microsoft.com/wix/2006/wi" />
 
+  <xs:element name="Dism">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
+      </xs:appinfo>
+      <xs:documentation><![CDATA[Enable Windows Feature using DISM API. Features will be installed when the parent component is being installed or repaired.]]></xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Id" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="EnableFeature" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Feature Regex pattern. Any Windows Feature matching the regular expression will be enabled. For example, IIS will match all feature that contain 'IIS' in their name, while '^IIS$' will only match a feature whose full name is IIS.]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="ExecOn">
     <xs:annotation>
       <xs:appinfo>

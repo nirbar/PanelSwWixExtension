@@ -5,6 +5,10 @@
   <Fragment>
     <Binary Id="PanelSwCustomActions.dll" SuppressModularization="yes" SourceFile="$(var.PanelSwCustomActions.TargetPath)"></Binary>
   </Fragment>
+  <!-- DismX64.dll binary -->
+  <Fragment>
+    <Binary Id="DismX64.dll" SuppressModularization="yes" SourceFile="$(var.DismX64.TargetPath)"></Binary>
+  </Fragment>
 
   <!-- ShellExecute -->
   <Fragment>
@@ -311,6 +315,20 @@
       <ProgressText Action="ExecOnComponent_deferred">!(loc.ExecOnComponent)</ProgressText>
       <ProgressText Action="ExecOnComponent_rollback">!(loc.ExecOnComponent)</ProgressText>
     </UI>
+  </Fragment>
+
+
+  <!-- DISM -->
+  <Fragment>
+    <CustomAction Id="DismSched" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="DismSched" Execute="immediate"/>
+    <CustomAction Id="Dism" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="Dism" Execute="deferred" Impersonate="no"/>
+    <CustomAction Id="Dism64" SuppressModularization="yes" BinaryKey="DismX64.dll" DllEntry="Dism" Execute="deferred" Impersonate="no"/>
+
+    <InstallExecuteSequence>
+      <Custom Action="DismSched" Before="StopServices" Overridable="yes"/>
+      <Custom Action="Dism" After="DismSched" Overridable="yes"><![CDATA[Not VersionNT64]]></Custom>
+      <Custom Action="Dism64" After="DismSched" Overridable="yes"><![CDATA[VersionNT64]]></Custom>
+    </InstallExecuteSequence>
   </Fragment>
 
 </Wix>
