@@ -50,6 +50,7 @@ namespace PanelSw.Wix.Extensions
             Core.EnsureTable(null, "PSW_TaskScheduler");
             Core.EnsureTable(null, "PSW_ExecOnComponent");
             Core.EnsureTable(null, "PSW_ExecOnComponent_ExitCode");
+            Core.EnsureTable(null, "PSW_Dism");
             base.FinalizeCompile();
         }
 
@@ -134,6 +135,10 @@ namespace PanelSw.Wix.Extensions
                         case "ExecOn":
                         case "ExecOnComponent":
                             ParseExecOnComponentElement(parentElement, element);
+                            break;
+
+                        case "Dism":
+                            ParseDismElement(parentElement, element);
                             break;
 
                         default:
@@ -403,6 +408,68 @@ namespace PanelSw.Wix.Extensions
                 row[2] = command;
                 row[3] = (int)flags;
                 row[4] = order;
+            }
+        }
+
+        private void ParseDismElement(XmlElement parentElement, XmlElement element)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
+            string id = null;
+            string features = null;
+            string component = null;
+
+            component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
+
+            foreach (XmlAttribute attrib in element.Attributes)
+            {
+                if ((0 != attrib.NamespaceURI.Length) && (attrib.NamespaceURI != schema.TargetNamespace))
+                {
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+
+                switch (attrib.LocalName)
+                {
+                    case "EnableFeature":
+                        features = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "Id":
+                        id = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    default:
+                        Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                        break;
+                }
+            }
+
+            foreach (XmlNode child in element.ChildNodes)
+            {
+                Core.UnsupportedExtensionElement(element, child);
+            }
+
+            if (string.IsNullOrEmpty(component))
+            {
+                Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, parentElement.Name, "Id", ""));
+            }
+            if (string.IsNullOrEmpty(features))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "EnableFeature"));
+            }
+            if (string.IsNullOrEmpty(id))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "Id"));
+            }
+
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "Dism");
+
+            if (!Core.EncounteredError)
+            {
+                // create a row in the Win32_CopyFiles table
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_Dism");
+                row[0] = id;
+                row[1] = component;
+                row[2] = features;
             }
         }
 

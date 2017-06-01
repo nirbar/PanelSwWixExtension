@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
+     >
+  <Product Id="{769C11E5-D811-4CE3-BE79-CC23725E6B38}" Name="$(var.ProjectName)" Language="1033" Version="1.0.0.0" Manufacturer="Panel::Software" UpgradeCode="{8DC7207F-59B4-45E6-90B0-75769F8040B8}">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate />
+
+    <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+      </Directory>
+    </Directory>
+
+    <Property Id="MSIFASTINSTALL" Value="1"></Property>
+    
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="Test" Guid="*">
+        <File Source="$(var.ProjectDir)Product.wxs" />
+        <PanelSW:Dism Id="_1" EnableFeature="IIS"/>
+      </Component>
+    </ComponentGroup>
+  </Product>
+</Wix>
