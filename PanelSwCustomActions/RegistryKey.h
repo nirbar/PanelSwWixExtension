@@ -51,7 +51,9 @@ public:
 
 	HRESULT Close();	
 
-	HRESULT GetValue( WCHAR* name, BYTE** pData, RegValueType* pType, DWORD* pDataSize);
+    HRESULT EnumValues(DWORD dwIndex, LPWSTR* pszName, RegValueType* pdwType);
+    HRESULT GetValue(WCHAR* name, BYTE** pData, RegValueType* pType, DWORD* pDataSize);
+    HRESULT GetStringValue(LPWSTR szName, LPWSTR* pszData);
 
 	HRESULT SetValueString( WCHAR* name, WCHAR* value);
 	HRESULT SetValue( WCHAR* name, RegValueType type, BYTE* value, DWORD valueSize);

@@ -1,4 +1,5 @@
 #include "ExecOnComponent.h"
+#include "RegistryKey.h"
 #include "../CaCommon/WixString.h"
 #include <wcautil.h>
 
@@ -36,6 +37,7 @@ enum Flags
 };
 
 static HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, CExecOnComponent::ExitCodeMap *pExitCodeMap, int nFlags, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart, CExecOnComponent* pBeforeStopImp, CExecOnComponent* pAfterStopImp, CExecOnComponent* pBeforeStartImp, CExecOnComponent* pAfterStartImp);
+static HRESULT RefreshEnvironment();
 
 extern "C" __declspec(dllexport) UINT ExecOnComponent(MSIHANDLE hInstall)
 {
@@ -375,6 +377,13 @@ HRESULT CExecOnComponent::DeferredExecute(IXMLDOMElement* pElem)
 	int nFlags;
     DWORD exitCode = 0;
 
+    hr = RefreshEnvironment();
+    if (FAILED(hr))
+    {
+        WcaLogError(hr, "Failed refreshing environment. Ignoring error.");
+        hr = S_OK;
+    }
+
 	hr = pElem->getAttribute(L"Command", &vCommand);
 	BreakExitOnFailure(hr, "Failed to get XML attribute 'Command'");
 
@@ -471,4 +480,38 @@ HRESULT CExecOnComponent::DeferredExecute(IXMLDOMElement* pElem)
 
 LExit:
 	return hr;
+}
+
+static HRESULT RefreshEnvironment()
+{
+    HRESULT hr = S_OK;
+    BOOL bRes = TRUE;
+    CRegistryKey envKey;
+    CWixString szValueName;
+    CRegistryKey::RegValueType valueType;
+
+    hr = envKey.Open(CRegistryKey::RegRoot::LocalMachine, L"SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment", CRegistryKey::RegArea::X64, CRegistryKey::RegAccess::ReadOnly);
+    BreakExitOnFailure(hr, "Failed to open environment registry key");
+
+    for (DWORD dwIndex = 0; S_OK == envKey.EnumValues(dwIndex, (LPWSTR*)szValueName, &valueType); ++dwIndex)
+    {
+        if ((valueType == CRegistryKey::RegValueType::String) || (valueType == CRegistryKey::RegValueType::Expandable))
+        {
+            CWixString szValueData;
+
+            hr = envKey.GetStringValue(szValueName, (LPWSTR*)szValueData);
+            BreakExitOnFailure(hr, "Failed to get environment variable '%ls' from registry key", (LPCWSTR)szValueName);
+
+            WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Setting process environment variable '%ls'='%ls'", (LPCWSTR)szValueName, (LPCWSTR)szValueData);
+
+            bRes = ::SetEnvironmentVariable(szValueName, szValueData);
+            BreakExitOnNullWithLastError(bRes, hr, "Failed setting environment variable");
+        }
+
+        szValueName.Release();
+    }
+    BreakExitOnFailure(hr, "Failed enumerating environment registry key");
+
+LExit:
+    return hr;
 }

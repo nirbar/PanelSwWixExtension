@@ -9,4 +9,5 @@ bin/
 *.opendb
 *.db
 /nuget-out
+.vs/
 *.ipch

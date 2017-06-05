@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "RegistryKey.h"
 #include <strutil.h>
+#include <regutil.h>
 #include "..\CaCommon\SummaryStream.h"
 
 #pragma comment( lib, "CaCommon.lib")
@@ -124,6 +125,33 @@ HRESULT CRegistryKey::Delete()
 
 LExit:
 	return hr;
+}
+
+HRESULT CRegistryKey::EnumValues(DWORD dwIndex, LPWSTR* pszName, RegValueType* pdwType)
+{
+    HRESULT hr = S_OK;
+
+    hr = RegValueEnum(_hKey, dwIndex, pszName, (DWORD*)pdwType);
+    if (hr == E_NOMOREITEMS)
+    {
+        hr = S_FALSE;
+        ExitFunction();
+    }
+    BreakExitOnFailure(hr, "Failed to enumerate values for registry key");
+
+LExit:
+    return hr;
+}
+
+HRESULT CRegistryKey::GetStringValue(LPWSTR szName, LPWSTR* pszData)
+{
+    HRESULT hr = S_OK;
+
+    hr = RegReadString(_hKey, szName, pszData);
+    BreakExitOnFailure(hr, "Failed to get registry string value '%ls'", szName);
+
+LExit:
+    return hr;
 }
 
 HRESULT CRegistryKey::GetValue( WCHAR* name, BYTE** pData, RegValueType* pType, DWORD* pDataSize)
@@ -364,8 +392,6 @@ HRESULT CRegistryKey::GetDefaultArea( CRegistryKey::RegArea* pArea)
 	HRESULT hr = S_OK;
 	DWORD dwRes = ERROR_SUCCESS;
 	bool bIsX64 = false;
-
-	::MessageBox( NULL, L"MsiBreak", L"MsiBreak", MB_OK);
 
 	BreakExitOnNull( pArea, hr, E_INVALIDARG, "pArea is NULL");
 	(*pArea) = RegArea::Default;
