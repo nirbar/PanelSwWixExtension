@@ -36,8 +36,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <LibraryPath>C:\Program Files %28x86%29\Windows Kits\8.1\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\Lib\x86;$(OutDir)..\CaCommon\;$(WIX)SDK\VS2015\lib\x86;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\Program Files (x86)\Windows Kits\8.1\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\Include;$(SolutionDir)CaCommon;$(WIX)SDK\VS2015\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>C:\Program Files %28x86%29\Windows Kits\10\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\Lib\x86;C:\Program Files %28x86%29\Windows Kits\8.1\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\Lib\x86;$(OutDir)..\CaCommon\;$(WIX)SDK\VS2015\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files %28x86%29\Windows Kits\8.1\Include\shared;C:\Program Files %28x86%29\Windows Kits\10\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\Include;C:\Program Files (x86)\Windows Kits\8.1\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\Include;$(SolutionDir)CaCommon;$(WIX)SDK\VS2015\inc;$(IncludePath)</IncludePath>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>

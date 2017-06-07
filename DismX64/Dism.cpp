@@ -54,7 +54,7 @@ extern "C" __declspec(dllexport) UINT DismSched(MSIHANDLE hInstall)
 
 	// Execute view
 	hr = WcaOpenExecuteView(Dism_QUERY, &hView);
-	ExitOnFailure1(hr, "Failed to execute SQL query '%ls'.", Dism_QUERY);
+	ExitOnFailure(hr, "Failed to execute SQL query '%ls'.", Dism_QUERY);
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
@@ -166,7 +166,7 @@ extern "C" __declspec(dllexport) UINT Dism(MSIHANDLE hInstall)
 	if (FAILED(hr))
 	{
 		DismGetLastErrorMessage(&pErrorString);
-		ExitOnFailure1(hr, "Failed initializing DISM. %ls", (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+		ExitOnFailure(hr, "Failed initializing DISM. %ls", (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 	}
 	bDismInit = TRUE;
 
@@ -174,7 +174,7 @@ extern "C" __declspec(dllexport) UINT Dism(MSIHANDLE hInstall)
 	if (FAILED(hr))
 	{
 		DismGetLastErrorMessage(&pErrorString);
-		ExitOnFailure1(hr, "Failed opening DISM online session. %ls",  (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+		ExitOnFailure(hr, "Failed opening DISM online session. %ls",  (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 	}
 
 	// Enumerate features
@@ -182,7 +182,7 @@ extern "C" __declspec(dllexport) UINT Dism(MSIHANDLE hInstall)
 	if (FAILED(hr))
 	{
 		DismGetLastErrorMessage(&pErrorString);
-		ExitOnFailure1(hr, "Failed querying DISM features. %ls",  (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+		ExitOnFailure(hr, "Failed querying DISM features. %ls",  (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 	}
 
 	for (UINT i = 0; i < uFeatureNum; ++i)
@@ -197,7 +197,7 @@ extern "C" __declspec(dllexport) UINT Dism(MSIHANDLE hInstall)
 		case DismPackageFeatureState::DismStateRemoved:
 		case DismPackageFeatureState::DismStatePartiallyInstalled:
 			// Test if feature matches any regex
-			for (wregex rx : enableFaetures)
+			for (const wregex& rx : enableFaetures)
 			{
 				match_results<LPCWSTR> results;
 
@@ -219,7 +219,7 @@ extern "C" __declspec(dllexport) UINT Dism(MSIHANDLE hInstall)
 				if (FAILED(hr))
 				{
 					DismGetLastErrorMessage(&pErrorString);
-					ExitOnFailure1(hr, "Failed enabling feature '%ls'. %ls", pFeatures[i].FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+					ExitOnFailure(hr, "Failed enabling feature '%ls'. %ls", pFeatures[i].FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 				}
 				break;
 			}

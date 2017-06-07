@@ -4,6 +4,7 @@ PanelSwWixExtension is a [WiX](http://wixtoolset.org/) extension that contains v
 
 ## WiX Elements
 
+- *Dism*: Enable Windows Feature using DISM API. Features will be installed when the parent component is being installed or repaired.
 - *ReadIniValues*: Reads .INI file values.
 - *XmlSearch*: Read XML values.
 - *CustomUninstallKey*: Overwrite registry values in the product's [Uninstall](http://msdn.microsoft.com/en-us/library/aa372105%28v=vs.85%29.aspx) registry key
