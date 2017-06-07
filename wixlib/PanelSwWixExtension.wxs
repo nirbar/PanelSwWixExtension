@@ -312,8 +312,22 @@
     </InstallExecuteSequence>
 
     <UI>
-      <ProgressText Action="ExecOnComponent_deferred">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_rollback">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_BeforeStop_rollback">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_BeforeStop_deferred">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_Imp_BeforeStop_rollback">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_Imp_BeforeStop_deferred">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_AfterStop_rollback">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_AfterStop_deferred">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_Imp_AfterStop_rollback">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_Imp_AfterStop_deferred">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_BeforeStart_rollback">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_BeforeStart_deferred">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_Imp_BeforeStart_rollback">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_Imp_BeforeStart_deferred">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_AfterStart_rollback">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_AfterStart_deferred">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_Imp_AfterStart_rollback">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_Imp_AfterStart_deferred">!(loc.ExecOnComponent)</ProgressText>
     </UI>
   </Fragment>
 

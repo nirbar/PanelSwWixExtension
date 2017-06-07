@@ -322,7 +322,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(component))
             {
-                Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, parentElement.Name, "Id", ""));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.Name, "Id"));
             }
             if (string.IsNullOrEmpty(id))
             {
