@@ -5,6 +5,10 @@
   <Fragment>
     <Binary Id="PanelSwCustomActions.dll" SuppressModularization="yes" SourceFile="$(var.PanelSwCustomActions.TargetPath)"></Binary>
   </Fragment>
+  <!-- PswManagedCA.CA.dll binary -->
+  <Fragment>
+    <Binary Id="PswManagedCA.dll" SuppressModularization="yes" SourceFile="$(var.PswManagedCA.TargetDir)$(var.PswManagedCA.TargetName).CA.dll"></Binary>
+  </Fragment>
   <!-- DismX64.dll binary -->
   <Fragment>
     <Binary Id="DismX64.dll" SuppressModularization="yes" SourceFile="$(var.DismX64.TargetPath)"></Binary>
@@ -331,7 +335,6 @@
     </UI>
   </Fragment>
 
-
   <!-- DISM -->
   <Fragment>
     <CustomAction Id="DismSched" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="DismSched" Execute="immediate"/>
@@ -342,6 +345,28 @@
       <Custom Action="DismSched" Before="StopServices" Overridable="yes"/>
       <Custom Action="Dism" After="DismSched" Overridable="yes"><![CDATA[Not VersionNT64]]></Custom>
       <Custom Action="Dism64" After="DismSched" Overridable="yes"><![CDATA[VersionNT64]]></Custom>
+    </InstallExecuteSequence>
+  </Fragment>
+
+  <!-- ZipFile -->
+  <Fragment>
+    <CustomAction Id="ZipFileSched" SuppressModularization="yes" BinaryKey="PswManagedCA.dll" DllEntry="ZipFileSched" Execute="immediate"/>
+    <CustomAction Id="ZipFileExec" SuppressModularization="yes" BinaryKey="PswManagedCA.dll" DllEntry="ZipFileExec" Execute="deferred" Impersonate="no"/>
+
+    <InstallExecuteSequence>
+      <Custom Action="ZipFileSched" After="DuplicateFiles" Overridable="yes"/>
+      <Custom Action="ZipFileExec" After="ZipFileSched" Overridable="yes"/>
+    </InstallExecuteSequence>
+  </Fragment>
+
+  <!-- Unzip -->
+  <Fragment>
+    <CustomAction Id="UnzipSched" SuppressModularization="yes" BinaryKey="PswManagedCA.dll" DllEntry="UnzipSched" Execute="immediate"/>
+    <CustomAction Id="UnzipExec" SuppressModularization="yes" BinaryKey="PswManagedCA.dll" DllEntry="UnzipExec" Execute="deferred" Impersonate="no"/>
+
+    <InstallExecuteSequence>
+      <Custom Action="UnzipSched" After="DuplicateFiles" Overridable="yes"/>
+      <Custom Action="UnzipExec" After="UnzipSched" Overridable="yes"/>
     </InstallExecuteSequence>
   </Fragment>
 

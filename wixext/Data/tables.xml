@@ -120,4 +120,20 @@
     <columnDefinition name="Component_" type="string" length="0" modularize="property" category="identifier" />
     <columnDefinition name="EnableFeatures" type="string" length="0" modularize="property" category="formatted" />
   </tableDefinition>
+
+  <tableDefinition name="PSW_ZipFile">
+    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="ZipFile" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="CompressFolder" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="FilePattern" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Recursive" type="number" length="1" minValue="0" maxValue="1" />
+    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
+  </tableDefinition>
+
+  <tableDefinition name="PSW_Unzip">
+    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="ZipFile" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="TargetFolder" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
+  </tableDefinition>
 </tableDefinitions>

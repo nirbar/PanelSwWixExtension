@@ -50,7 +50,9 @@ namespace PanelSw.Wix.Extensions
             Core.EnsureTable(null, "PSW_TaskScheduler");
             Core.EnsureTable(null, "PSW_ExecOnComponent");
             Core.EnsureTable(null, "PSW_ExecOnComponent_ExitCode");
-            Core.EnsureTable(null, "PSW_Dism");
+            Core.EnsureTable(null, "PSW_Dism"); 
+            Core.EnsureTable(null, "PSW_ZipFile"); 
+            Core.EnsureTable(null, "PSW_Unzip"); 
             base.FinalizeCompile();
         }
 
@@ -104,6 +106,14 @@ namespace PanelSw.Wix.Extensions
 
                         case "DeletePath":
                             ParseDeletePath(element);
+                            break;
+
+                        case "ZipFile":
+                            ParseZipFile(element);
+                            break;
+
+                        case "Unzip":
+                            ParseUnzip(element);
                             break;
 
                         default:
@@ -1680,6 +1690,180 @@ namespace PanelSw.Wix.Extensions
                 row[0] = id;
                 row[1] = filepath;
                 row[2] = (int)flags;
+                row[3] = condition;
+            }
+        }
+
+        private void ParseZipFile(XmlNode node)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string id = null;
+            string dstZipFile = null;
+            string srcDir = null;
+            string filePattern = "*.*";
+            bool recursive = true;
+            string condition = null;
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName)
+                    {
+                        case "Id":
+                            id = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "TargetZipFile":
+                            dstZipFile = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "SourceFolder":
+                            srcDir = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "FilePattern":
+                            filePattern = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Recursive":
+                            recursive = (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes);
+                            break;
+
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+                else
+                {
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            if (string.IsNullOrEmpty(id))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+            }
+            if (string.IsNullOrEmpty(dstZipFile))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "TargetZipFile"));
+            }
+            if (string.IsNullOrEmpty(srcDir))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "SourceFolder"));
+            }
+
+            // find unexpected child elements
+            foreach (XmlNode child in node.ChildNodes)
+            {
+                if (XmlNodeType.Element == child.NodeType)
+                {
+                    if (child.NamespaceURI == schema.TargetNamespace)
+                    {
+                        Core.UnexpectedElement(node, child);
+                    }
+                    else
+                    {
+                        Core.UnsupportedExtensionElement(node, child);
+                    }
+                }
+                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
+                {
+                    condition = child.Value.Trim();
+                }
+            }
+
+            // reference the Win32_CopyFiles custom actions since nothing will happen without these
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "ZipFileSched");
+
+            if (!Core.EncounteredError)
+            {
+                // create a row in the Win32_CopyFiles table
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_ZipFile");
+                row[0] = id;
+                row[1] = dstZipFile;
+                row[2] = srcDir;
+                row[3] = filePattern;
+                row[4] = recursive ? 1 : 0;
+                row[5] = condition;
+            }
+        }
+
+        private void ParseUnzip(XmlNode node)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string id = null;
+            string zipFile = null;
+            string dstDir = null;
+            string condition = null;
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName)
+                    {
+                        case "Id":
+                            id = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "ZipFile":
+                            zipFile = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "TargetFolder":
+                            dstDir = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+                else
+                {
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            if (string.IsNullOrEmpty(id))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+            }
+            if (string.IsNullOrEmpty(zipFile))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "ZipFile"));
+            }
+            if (string.IsNullOrEmpty(dstDir))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "TargetFolder"));
+            }
+
+            // find unexpected child elements
+            foreach (XmlNode child in node.ChildNodes)
+            {
+                if (XmlNodeType.Element == child.NodeType)
+                {
+                    if (child.NamespaceURI == schema.TargetNamespace)
+                    {
+                        Core.UnexpectedElement(node, child);
+                    }
+                    else
+                    {
+                        Core.UnsupportedExtensionElement(node, child);
+                    }
+                }
+                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
+                {
+                    condition = child.Value.Trim();
+                }
+            }
+
+            // reference the Win32_CopyFiles custom actions since nothing will happen without these
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "UnzipSched");
+
+            if (!Core.EncounteredError)
+            {
+                // create a row in the Win32_CopyFiles table
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_Unzip");
+                row[0] = id;
+                row[1] = zipFile;
+                row[2] = dstDir;
                 row[3] = condition;
             }
         }
