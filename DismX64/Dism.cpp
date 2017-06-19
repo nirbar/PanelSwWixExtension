@@ -149,7 +149,7 @@ extern "C" __declspec(dllexport) UINT Dism(MSIHANDLE hInstall)
 	ExitOnFailure(hr, "Failed getting CustomActionData");
 
 	// Parse CAD
-	for (szTok = ::wcstok(szCAD, L";", &szTokData); szTok != NULL; szTok = ::wcstok(NULL, L";", &szTokData))
+	for (szTok = ::wcstok_s(szCAD, L";", &szTokData); szTok != NULL; szTok = ::wcstok_s(NULL, L";", &szTokData))
 	{
 		// Dism log?
 		if ((szDismLog == NULL) && (::wcsstr(szTok, DismLogPrefix) != NULL))

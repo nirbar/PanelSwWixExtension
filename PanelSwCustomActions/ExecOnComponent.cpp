@@ -2,6 +2,7 @@
 #include "RegistryKey.h"
 #include "../CaCommon/WixString.h"
 #include <wcautil.h>
+#include <procutil.h>
 
 #define ExecOnComponent_QUERY L"SELECT `Id`, `Component_`, `Command`, `Flags` FROM `PSW_ExecOnComponent` ORDER BY `Order`"
 enum ExecOnComponentQuery { Id = 1, Component = 2, Command = 3, Flags = 4 };
@@ -32,8 +33,11 @@ enum Flags
 	// Return
 	IgnoreExitCode = 2 * AfterStartServices,
 
+    // Not waiting
+    ASync = 2 * IgnoreExitCode,
+
 	// Impersonate
-	Impersonate = 2 * IgnoreExitCode,
+	Impersonate = 2 * ASync,
 };
 
 static HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, CExecOnComponent::ExitCodeMap *pExitCodeMap, int nFlags, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart, CExecOnComponent* pBeforeStopImp, CExecOnComponent* pAfterStopImp, CExecOnComponent* pBeforeStartImp, CExecOnComponent* pAfterStartImp);
@@ -85,8 +89,8 @@ extern "C" __declspec(dllexport) UINT ExecOnComponent(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to get Component.");
 		hr = WcaGetRecordFormattedString(hRecord, ExecOnComponentQuery::Command, (LPWSTR*)szCommand);
 		BreakExitOnFailure(hr, "Failed to get Command.");
-		hr = WcaGetRecordInteger(hRecord, ExecOnComponentQuery::Flags, &nFlags);
-		BreakExitOnFailure(hr, "Failed to get Flags.");
+        hr = WcaGetRecordInteger(hRecord, ExecOnComponentQuery::Flags, &nFlags);
+        BreakExitOnFailure(hr, "Failed to get Flags.");
 
         // Get exit code map (i.e. map exit code 1 to success)
         hr = szExitCodeQuery.Format(ExecOnComponentExitCode_QUERY_Fmt, (LPCWSTR)szId);
@@ -370,7 +374,7 @@ HRESULT CExecOnComponent::DeferredExecute(IXMLDOMElement* pElem)
 {
 	HRESULT hr = S_OK;
 	CComVariant vCommand;
-	CComVariant vFlags;
+    CComVariant vFlags;
     CComPtr<IXMLDOMNodeList> childNodes;
     LONG childCount = 0;
     ExitCodeMap exitCodeMap;
@@ -445,7 +449,26 @@ HRESULT CExecOnComponent::DeferredExecute(IXMLDOMElement* pElem)
     }
 
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing '%ls'", vCommand.bstrVal);
-	hr = QuietExec(vCommand.bstrVal, INFINITE);
+    if ((nFlags & Flags::ASync) == Flags::ASync)
+    {
+        HANDLE hProc = NULL;
+
+        WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Not logging output on async command");
+
+        hr = ProcExecute(vCommand.bstrVal, &hProc, NULL, NULL);
+        BreakExitOnFailure(hr, "Failed to launch command '%ls'", vCommand.bstrVal);
+        hr = S_OK;
+
+        if ((hProc != NULL) && (hProc != INVALID_HANDLE_VALUE))
+        {
+            ::CloseHandle(hProc);
+        }
+        ExitFunction();
+    }
+    else
+    {
+        hr = QuietExec(vCommand.bstrVal, INFINITE);
+    }
 
     // Parse exit code.
     exitCode = HRESULT_CODE(hr);
@@ -500,7 +523,7 @@ static HRESULT RefreshEnvironment()
             CWixString szValueData;
 
             hr = envKey.GetStringValue(szValueName, (LPWSTR*)szValueData);
-            BreakExitOnFailure(hr, "Failed to get environment variable '%ls' from registry key", (LPCWSTR)szValueName);
+            BreakExitOnFailure1(hr, "Failed to get environment variable '%ls' from registry key", (LPCWSTR)szValueName);
 
             WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Setting process environment variable '%ls'='%ls'", (LPCWSTR)szValueName, (LPCWSTR)szValueData);
 

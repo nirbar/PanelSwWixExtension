@@ -195,6 +195,12 @@
           <xs:documentation><![CDATA['yes' to ignore exit code.]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      
+        <xs:attribute name="Wait" type="YesNoType" default="yes">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Whether or not to wait for the command to terminate. Defaults to 'yes'.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
 
       <xs:attribute name="Impersonate" type="YesNoType" default="no">
         <xs:annotation>

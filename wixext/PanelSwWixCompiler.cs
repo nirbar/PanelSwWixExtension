@@ -191,8 +191,11 @@ namespace PanelSw.Wix.Extensions
             // Return
             IgnoreExitCode = 2 * AfterStartServices,
 
+            // Not waiting
+            ASync = 2 * IgnoreExitCode,
+
             // Impersonate
-            Impersonate = 2 * IgnoreExitCode
+            Impersonate = 2 * ASync,
         }
 
         private void ParseExecOnComponentElement(XmlElement parentElement, XmlElement element)
@@ -241,6 +244,14 @@ namespace PanelSw.Wix.Extensions
                         if (aye == YesNoType.Yes)
                         {
                             flags |= ExecOnComponentFlags.IgnoreExitCode;                                
+                        }
+                        break;
+
+                    case "Wait":
+                        aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                        if (aye == YesNoType.No)
+                        {
+                            flags |= ExecOnComponentFlags.ASync;
                         }
                         break;
 
