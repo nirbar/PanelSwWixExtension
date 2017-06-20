@@ -43,7 +43,7 @@ extern "C" __declspec(dllexport) UINT DismSched(MSIHANDLE hInstall)
 	// Are we logging?
 	if (szMsiLog && (::wcslen(szMsiLog) <= (MAX_PATH - 6)))
 	{
-		::wcscpy(szDismLog, szMsiLog);
+		::wcscpy_s(szDismLog, szMsiLog);
 
 		bRes = PathRenameExtension(szDismLog, L".dism.log");
 		ExitOnNullWithLastError1(bRes, hr, "Failed renaming file extension: '%ls'", szMsiLog);

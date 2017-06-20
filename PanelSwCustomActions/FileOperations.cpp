@@ -124,7 +124,7 @@ HRESULT CFileOperations::AddCopyFile(LPCWSTR szFrom, LPCWSTR szTo, int flags)
 	CComPtr<IXMLDOMElement> pElem;
     unsigned long long fileSize = FileSize(szFrom);
 
-	hr = AddElement(L"CopyFile", L"CFileOperations", fileSize, &pElem);
+	hr = AddElement(L"CopyFile", L"CFileOperations", (UINT)fileSize, &pElem);
 	BreakExitOnFailure(hr, "Failed to add XML element");
 
 	hr = pElem->setAttribute(CComBSTR("From"), CComVariant(szFrom));
@@ -146,7 +146,7 @@ HRESULT CFileOperations::AddMoveFile(LPCWSTR szFrom, LPCWSTR szTo, int flags)
 	CComPtr<IXMLDOMElement> pElem;
     unsigned long long fileSize = FileSize(szFrom);
 
-	hr = AddElement(L"MoveFile", L"CFileOperations", fileSize, &pElem);
+	hr = AddElement(L"MoveFile", L"CFileOperations", (UINT)fileSize, &pElem);
 	BreakExitOnFailure(hr, "Failed to add XML element");
 
 	hr = pElem->setAttribute(CComBSTR("From"), CComVariant(szFrom));
@@ -168,7 +168,7 @@ HRESULT CFileOperations::AddDeleteFile(LPCWSTR szPath, int flags)
 	CComPtr<IXMLDOMElement> pElem;
     unsigned long long fileSize = FileSize(szPath);
 
-	hr = AddElement(L"DeleteFile", L"CFileOperations", fileSize, &pElem);
+	hr = AddElement(L"DeleteFile", L"CFileOperations", (UINT)fileSize, &pElem);
 	BreakExitOnFailure(hr, "Failed to add XML element");
 
 	hr = pElem->setAttribute(CComBSTR("Path"), CComVariant(szPath));
