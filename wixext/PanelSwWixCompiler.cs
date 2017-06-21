@@ -482,7 +482,7 @@ namespace PanelSw.Wix.Extensions
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "Id"));
             }
 
-            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "Dism");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "DismSched");
 
             if (!Core.EncounteredError)
             {
