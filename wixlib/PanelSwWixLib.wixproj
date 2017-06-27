@@ -33,14 +33,6 @@
     <EmbeddedResource Include="en-US.wxl" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DismX64\DismX64.vcxproj">
-      <Name>DismX64</Name>
-      <Project>{cb9038ca-d9a1-4014-ba48-661afa842a41}</Project>
-      <Private>True</Private>
-      <DoNotHarvest>True</DoNotHarvest>
-      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
-      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
-    </ProjectReference>
     <ProjectReference Include="..\PanelSwCustomActions\PanelSwCustomActions.vcxproj">
       <Name>PanelSwCustomActions</Name>
       <Project>{0c3a56aa-8073-44e1-8de4-c257d581bff0}</Project>
@@ -95,4 +87,8 @@
     <LibVerboseOutput>False</LibVerboseOutput>
   </PropertyGroup>
   <Import Project="$(WixTargetsPath)" />
+  <Target Name="BeforeBuild">
+    <MSBuild Projects="$(SolutionDir)Dism\Dism.vcxproj" Properties="Configuration=$(Configuration);Platform=Win32"/>
+    <MSBuild Projects="$(SolutionDir)Dism\Dism.vcxproj" Properties="Configuration=$(Configuration);Platform=x64"/>
+  </Target>
 </Project>

@@ -22,7 +22,7 @@
     <_ProjectFileVersion>11.0.50727.1</_ProjectFileVersion>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
-    <PlatformToolset>v140_xp</PlatformToolset>
+    <PlatformToolset>v141</PlatformToolset>
     <UseOfAtl>Static</UseOfAtl>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -36,8 +36,8 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <LibraryPath>C:\Program Files %28x86%29\Windows Kits\10\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\Lib\x86;C:\Program Files %28x86%29\Windows Kits\8.1\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\Lib\x86;$(OutDir)..\CaCommon\;$(WIX)SDK\VS2015\lib\x86;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\Program Files %28x86%29\Windows Kits\8.1\Include\shared;C:\Program Files %28x86%29\Windows Kits\10\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\Include;C:\Program Files (x86)\Windows Kits\8.1\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\Include;$(SolutionDir)CaCommon;$(WIX)SDK\VS2015\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir)..\CaCommon\;$(WIX)SDK\VS2017\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)CaCommon;$(WIX)SDK\VS2017\inc;$(IncludePath)</IncludePath>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>
@@ -47,13 +47,13 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(WIX)sdk\VS2015\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WIX)sdk\VS2017\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;CUSTOMACTIONTEST_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
       <AdditionalDependencies>msi.lib;dutil.lib;wcautil.lib;Version.lib;Shell32.lib;User32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(WIX)sdk\VS2015\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(WIX)sdk\VS2017\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
@@ -87,9 +87,9 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\DismX64\Dism.cpp" />
     <ClCompile Include="AccountNames.cpp" />
     <ClCompile Include="CommonDeferred.cpp" />
+    <ClCompile Include="DismSched.cpp" />
     <ClCompile Include="ExecOnComponent.cpp" />
     <ClCompile Include="FileOperations.cpp" />
     <ClCompile Include="FileRegex.cpp" />

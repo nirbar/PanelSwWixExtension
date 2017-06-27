@@ -456,7 +456,7 @@ HRESULT CExecOnComponent::DeferredExecute(IXMLDOMElement* pElem)
         WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Not logging output on async command");
 
         hr = ProcExecute(vCommand.bstrVal, &hProc, NULL, NULL);
-        BreakExitOnFailure(hr, "Failed to launch command '%ls'", vCommand.bstrVal);
+        BreakExitOnFailure1(hr, "Failed to launch command '%ls'", vCommand.bstrVal);
         hr = S_OK;
 
         if ((hProc != NULL) && (hProc != INVALID_HANDLE_VALUE))
