@@ -338,7 +338,7 @@
 
   <!-- DISM -->
   <Fragment>
-    <CustomAction Id="DismSched" SuppressModularization="yes" BinaryKey="DismX86.dll" DllEntry="DismSched" Execute="immediate"/>
+    <CustomAction Id="DismSched" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="DismSched" Execute="immediate"/>
     <CustomAction Id="DismX86" SuppressModularization="yes" BinaryKey="DismX86.dll" DllEntry="Dism" Execute="deferred" Impersonate="no"/>
     <CustomAction Id="DismX64" SuppressModularization="yes" BinaryKey="DismX64.dll" DllEntry="Dism" Execute="deferred" Impersonate="no"/>
 
