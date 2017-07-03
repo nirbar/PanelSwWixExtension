@@ -16,6 +16,14 @@ namespace PswManagedCA
             public string Id { get; set; }
             public string ZipFile { get; set; }
             public string TargetFolder { get; set; }
+            public UnzipFlags Flags { get; set; }
+        }
+
+        [Flags]
+        public enum UnzipFlags
+        {
+            None = 0,
+            Overwrite = 1
         }
 
         private List<UnzipCatalog> catalogs_ = new List<UnzipCatalog>();
@@ -26,13 +34,14 @@ namespace PswManagedCA
             session.Log("Begin UnzipSched");
             Unzip unzipper = new Unzip();
 
-            IList<string> results = session.Database.ExecuteStringQuery("SELECT `Id`, `ZipFile`, `TargetFolder`, `Condition` FROM `PSW_Unzip`");
-            for (int i = 0; i < results.Count; i += 4)
+            IList<string> results = session.Database.ExecuteStringQuery("SELECT `Id`, `ZipFile`, `TargetFolder`, `Flags`, `Condition` FROM `PSW_Unzip`");
+            for (int i = 0; i < results.Count; i += 5)
             {
                 string id = results[i + 0]?.ToString();
                 string zipFile = results[i + 1]?.ToString();
                 string targetFolder = results[i + 2]?.ToString();
-                string condition = results[i + 3]?.ToString();
+                string flags = results[i + 3]?.ToString();
+                string condition = results[i + 4]?.ToString();
 
                 if (!string.IsNullOrEmpty(condition) && !session.EvaluateCondition(condition))
                 {
@@ -40,7 +49,8 @@ namespace PswManagedCA
                     continue;
                 }
 
-                unzipper.SchedUnzip(id, session.Format(zipFile), session.Format(targetFolder));
+                int nFlags = int.Parse(flags);
+                unzipper.SchedUnzip(id, session.Format(zipFile), session.Format(targetFolder), (UnzipFlags)nFlags);
             }
 
             XmlSerializer srlz = new XmlSerializer(unzipper.catalogs_.GetType());
@@ -53,14 +63,15 @@ namespace PswManagedCA
             return ActionResult.Success;
         }
 
-        private void SchedUnzip(string id, string zipFile, string targetFolder)
+        private void SchedUnzip(string id, string zipFile, string targetFolder, UnzipFlags flags)
         {
             zipFile = Path.GetFullPath(zipFile);
             UnzipCatalog ctlg = new UnzipCatalog()
             {
                 Id = id,
                 TargetFolder = targetFolder,
-                ZipFile = zipFile
+                ZipFile = zipFile,
+                Flags = flags,
             };
 
             catalogs_.Add(ctlg);
@@ -122,6 +133,19 @@ namespace PswManagedCA
                             if (directoryName.Length > 0)
                             {
                                 Directory.CreateDirectory(directoryName);
+                            }
+
+                            if (File.Exists(fullZipToPath))
+                            {
+                                if ((ctlg.Flags & UnzipFlags.Overwrite) != UnzipFlags.Overwrite)
+                                {
+                                    session.Log($"Skipping existing file '{fullZipToPath}'");
+                                    continue;
+                                }
+
+                                session.Log($"Overwriting existing file '{fullZipToPath}'");
+                                File.SetAttributes(fullZipToPath, System.IO.FileAttributes.Normal);
+                                File.Delete(fullZipToPath);
                             }
 
                             using (FileStream streamWriter = File.Create(fullZipToPath))

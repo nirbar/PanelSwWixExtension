@@ -1797,6 +1797,12 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
+        [Flags]
+        private enum UnzipFlags
+        {
+            None = 0,
+            Overwrite = 1
+        }
         private void ParseUnzip(XmlNode node)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
@@ -1804,6 +1810,8 @@ namespace PanelSw.Wix.Extensions
             string zipFile = null;
             string dstDir = null;
             string condition = null;
+            YesNoType aye = YesNoType.No;
+            UnzipFlags flags = UnzipFlags.None;
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -1819,6 +1827,13 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "TargetFolder":
                             dstDir = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Overwrite":
+                            aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                            if (aye == YesNoType.Yes)
+                            {
+                                flags |= UnzipFlags.Overwrite;                                    
+                            }
                             break;
 
                         default:
@@ -1875,7 +1890,8 @@ namespace PanelSw.Wix.Extensions
                 row[0] = id;
                 row[1] = zipFile;
                 row[2] = dstDir;
-                row[3] = condition;
+                row[3] = (int)flags;
+                row[4] = condition;
             }
         }
     }

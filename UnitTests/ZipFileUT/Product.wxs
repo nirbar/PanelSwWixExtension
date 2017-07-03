@@ -23,15 +23,19 @@
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
 
     <PanelSW:ZipFile Id="_1" SourceFolder="[INSTALLFOLDER]" TargetZipFile="[INSTALLFOLDER]\1.zip"><![CDATA[Not Installed]]></PanelSW:ZipFile>
-    <PanelSW:Unzip Id="_1" TargetFolder="[DesktopFolder]1\2\3" ZipFile="[INSTALLFOLDER]\1.zip"><![CDATA[Installed]]></PanelSW:Unzip>
+    <PanelSW:Unzip Id="_1" TargetFolder="[INSTALLFOLDER]" ZipFile="[INSTALLFOLDER]\1.zip" Overwrite="yes"><![CDATA[Not Installed]]></PanelSW:Unzip>
 
     <ComponentGroup Id="ProductComponents">
       <Component Directory="INSTALLFOLDER">
-        <File Source="$(var.ProjectDir)Product.wxs" />
+        <File Source="$(var.ProjectDir)Product.wxs" ReadOnly="yes" />
       </Component>
       <Component Directory="INSTALLFOLDER1">
         <File Source="$(var.ProjectDir)ZipFileUT.wixproj" />
       </Component>
     </ComponentGroup>
+    
+    <InstallExecuteSequence>
+      <Custom Action="UnzipExec" After="ZipFileExec"/>
+    </InstallExecuteSequence>
   </Product>
 </Wix>
