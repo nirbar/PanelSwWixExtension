@@ -213,16 +213,18 @@ HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szRepla
 	wstringstream fileStream;
 	wregex rx;
 	regex_constants::syntax_option_type syntax = std::regex_constants::syntax_option_type::ECMAScript;
+	size_t nSize1 = 0;
+	size_t nSize2 = 0;
 
-	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Replacing matches of regex '%ls' with '%ls' on file '%ls'", szRegex, szReplacement, szFilePath);
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Replacing matches of regex '%ls' with '%ls' on file '%ls'", szRegex, szReplacement, szFilePath);
 
 	fileRead.open(szFilePath);
 	BreakExitOnNull(fileRead.good(), hr, E_FAIL, "Failed opening file for reading");
 
-	fileRead.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
 	fileStream << fileRead.rdbuf();
 	content = fileStream.str();
 	fileRead.close();
+	nSize1 = content.length();
 
 	if (bIgnoreCase)
 	{
@@ -231,6 +233,7 @@ HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szRepla
 	rx.assign(szRegex, syntax);
 
 	content = std::regex_replace(content.c_str(), rx, szReplacement);
+	nSize2 = content.length();
 
 	// Truncate file & write
 	dwFileAttr = ::GetFileAttributes(szFilePath);
@@ -242,6 +245,8 @@ HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szRepla
 	BreakExitOnNull1(fileWrite.good(), hr, E_FAIL, "Failed writing to file: %s", strerror(errno));
 
 	::SetFileAttributes(szFilePath, dwFileAttr);
+
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Performed regex on '%ls'. Size before=%I; size after=%I", szFilePath, nSize1, nSize2);
 
 LExit:
 
