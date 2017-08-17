@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
+     >
+  <Product Id="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}" Name="RegexUT" Language="1033" Version="1.0.0.0" Manufacturer="PoingGrab" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate />
+
+    <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
+      <Component Id="Test" Directory="INSTALLFOLDER">
+        <File Source="$(var.ProjectDir)Product.wxs" />
+
+        <!-- Change and revert account -->
+        <PanelSW:ServiceConfig Id="_1" ServiceName="TapiSrv" Account="NT AUTHORITY\LocalService" />
+        <PanelSW:ServiceConfig Id="_2" ServiceName="TapiSrv" Account="NT AUTHORITY\NetworkService" />
+      </Component>
+    </Feature>
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+      </Directory>
+    </Directory>
+
+  </Product>
+</Wix>

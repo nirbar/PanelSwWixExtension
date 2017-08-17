@@ -53,6 +53,7 @@ namespace PanelSw.Wix.Extensions
             Core.EnsureTable(null, "PSW_Dism"); 
             Core.EnsureTable(null, "PSW_ZipFile"); 
             Core.EnsureTable(null, "PSW_Unzip"); 
+            Core.EnsureTable(null, "PSW_ServiceConfig");
             base.FinalizeCompile();
         }
 
@@ -149,6 +150,10 @@ namespace PanelSw.Wix.Extensions
 
                         case "Dism":
                             ParseDismElement(parentElement, element);
+                            break;
+
+                        case "ServiceConfig":
+                            ParseServiceConfigElement(parentElement, element);
                             break;
 
                         default:
@@ -429,6 +434,84 @@ namespace PanelSw.Wix.Extensions
                 row[2] = command;
                 row[3] = (int)flags;
                 row[4] = order;
+            }
+        }
+
+        private void ParseServiceConfigElement(XmlElement parentElement, XmlElement element)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
+            string id = null;
+            string service = null;
+            string account = null;
+            string password = null;
+            string component = null;
+
+            component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
+
+            foreach (XmlAttribute attrib in element.Attributes)
+            {
+                if ((0 != attrib.NamespaceURI.Length) && (attrib.NamespaceURI != schema.TargetNamespace))
+                {
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+
+                switch (attrib.LocalName)
+                {
+                    case "Id":
+                        id = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "ServiceName":
+                        service = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "Account":
+                        account = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "Password":
+                        password = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    default:
+                        Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                        break;
+                }
+            }
+
+            foreach (XmlNode child in element.ChildNodes)
+            {
+                Core.UnsupportedExtensionElement(element, child);
+            }
+
+            if (string.IsNullOrEmpty(component))
+            {
+                Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, parentElement.Name, "Id", ""));
+            }
+            if (string.IsNullOrEmpty(service))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "ServiceName"));
+            }
+            if (string.IsNullOrEmpty(account))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "Account"));
+            }
+            if (string.IsNullOrEmpty(id))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "Id"));
+            }
+
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "PSW_ServiceConfig");
+
+            if (!Core.EncounteredError)
+            {
+                // create a row in the Win32_CopyFiles table
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_ServiceConfig");
+                row[0] = id;
+                row[1] = component;
+                row[2] = service;
+                row[3] = account;
+                row[4] = password;
             }
         }
 

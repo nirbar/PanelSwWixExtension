@@ -7,6 +7,7 @@
 #include "FileOperations.h"
 #include "TaskScheduler.h"
 #include "ExecOnComponent.h"
+#include "ServiceConfig.h"
 
 // ReceiverToExecutorFunc implementation.
 HRESULT ReceiverToExecutor(LPCWSTR szReceiver, CDeferredActionBase** ppExecutor)
@@ -44,6 +45,11 @@ HRESULT ReceiverToExecutor(LPCWSTR szReceiver, CDeferredActionBase** ppExecutor)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating ExecOnComponent handler");
 		(*ppExecutor) = new CExecOnComponent();
+	}
+	else if (szRcvr.Equals(L"CServiceConfig"))
+	{
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating ServiceConfig handler");
+		(*ppExecutor) = new CServiceConfig();
 	}
 	else
 	{
