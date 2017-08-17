@@ -246,7 +246,7 @@ HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szRepla
 
 	::SetFileAttributes(szFilePath, dwFileAttr);
 
-	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Performed regex on '%ls'. Size before=%I; size after=%I", szFilePath, nSize1, nSize2);
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Performed regex on '%ls'. Size before=%i; size after=%i", szFilePath, nSize1, nSize2);
 
 LExit:
 

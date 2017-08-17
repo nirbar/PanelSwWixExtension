@@ -52,8 +52,11 @@
     </InstallUISequence>
 
     <PanelSW:FileRegex Id="_1" FilePath="[#Product.wxs]" Regex="\bRegularExpressio(\w)\b" Replacement="$1_RegularExpressio" IgnoreCase="no"><![CDATA[Not Installed]]></PanelSW:FileRegex>
-  
-  
-  
+    <PanelSW:FileRegex Id="_2" FilePath="[#Product.wxs]" Regex="&lt;!-(-.*-)-&gt;" Replacement="- Hi $1 -" IgnoreCase="no"><![CDATA[Not Installed]]></PanelSW:FileRegex>
+
+
+    <!--אבגדה-->
+
+
   </Product>
 </Wix>
