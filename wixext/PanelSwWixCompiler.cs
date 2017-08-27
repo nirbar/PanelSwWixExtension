@@ -1602,6 +1602,14 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
+        private enum FileEncoding
+        {
+            AutoDetect,
+            MultiByte,
+            Unicode,
+            ReverseUnicode
+        };
+
         private void ParseFileRegex(XmlNode node)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
@@ -1609,6 +1617,7 @@ namespace PanelSw.Wix.Extensions
             string filepath = null;
             string regex = null;
             string replacement = null;
+            FileEncoding encoding = FileEncoding.AutoDetect;
             bool ignoreCase = false;
             string condition = null;
 
@@ -1632,6 +1641,10 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "ignorecase":
                             ignoreCase = true;
+                            break;
+                        case "encoding":
+                            string enc = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            encoding = (FileEncoding)Enum.Parse(typeof(FileEncoding), enc);
                             break;
 
                         default:
@@ -1690,7 +1703,8 @@ namespace PanelSw.Wix.Extensions
                 row[2] = regex;
                 row[3] = replacement ?? "";
                 row[4] = ignoreCase ? 1 : 0;
-                row[5] = condition;
+                row[5] = (int)encoding;
+                row[6] = condition;
             }
         }
 

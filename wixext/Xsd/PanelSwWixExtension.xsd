@@ -399,6 +399,11 @@ Execute a Regular Expression to perform find & replace operations within files.
               <xs:documentation>Replacement text. Set to empty string to delete all regex matches. This field is formatted.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="Encoding" type="EncodingType" use="optional">
+            <xs:annotation>
+              <xs:documentation>File encoding. Default is 'AutoDetect'.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
           <xs:attribute name="IgnoreCase" type="YesNoType" use="optional">
             <xs:annotation>
               <xs:documentation>Set to yes to ignore case in matches. Default is no.</xs:documentation>
@@ -986,6 +991,18 @@ Remove registry values.
     <xs:restriction base="xs:NMTOKEN">
       <xs:enumeration value="REG_SZ" />
       <xs:enumeration value="REG_DWORD" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="EncodingType">
+    <xs:annotation>
+      <xs:documentation>File encoding.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:NMTOKEN">
+      <xs:enumeration value="AutoDetect" />
+      <xs:enumeration value="Unicode" />
+      <xs:enumeration value="ReverseUnicode" />
+      <xs:enumeration value="MultiByte" />
     </xs:restriction>
   </xs:simpleType>
 
