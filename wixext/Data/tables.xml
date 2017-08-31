@@ -57,6 +57,7 @@
     <columnDefinition name="Regex" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Replacement" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="IgnoreCase" type="number" length="2" nullable="yes" minValue="0" maxValue="127" />
+    <columnDefinition name="Encoding" type="number" length="2" nullable="no" minValue="0" maxValue="127" />
     <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
   </tableDefinition>
 
@@ -134,6 +135,15 @@
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
     <columnDefinition name="ZipFile" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="TargetFolder" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Flags" type="number" length="4" minValue="0" maxValue="65535" />
     <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
+  </tableDefinition>
+
+  <tableDefinition name="PSW_ServiceConfig">
+    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="Component_" type="string" length="0" modularize="property" category="identifier" />
+    <columnDefinition name="ServiceName" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Account" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Password" type="string" length="0" modularize="property" nullable="yes" category="formatted" />
   </tableDefinition>
 </tableDefinitions>

@@ -4,7 +4,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>3.8</ProductVersion>
-    <ProjectGuid>{738e0950-ad2f-49b0-a791-94e7e011e233}</ProjectGuid>
+    <ProjectGuid>{c6fc6cb8-13ad-48be-8fb1-8a7bc5790896}</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
     <OutputName>XmlSearchUT</OutputName>
     <OutputType>Package</OutputType>
@@ -32,9 +32,6 @@
       <HintPath>$(WixExtDir)\WixUtilExtension.dll</HintPath>
       <Name>WixUtilExtension</Name>
     </WixExtension>
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Unicode.ini" />
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
   <!--

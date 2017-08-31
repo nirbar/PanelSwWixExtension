@@ -6,5 +6,6 @@
   <String Id="ShellExecute">Executing command "[1]" [2] in "[3]" with verb [4]</String>
   <String Id="TaskScheduler">Configuring Scheduled Tasks</String>
   <String Id="ExecOnComponent"><![CDATA[Executing custom actions]]></String>
+  <String Id="ServiceConfig"><![CDATA[Configuring Services]]></String>
 </WixLocalization>
 

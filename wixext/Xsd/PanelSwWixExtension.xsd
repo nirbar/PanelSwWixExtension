@@ -15,6 +15,41 @@
 
   <xs:import namespace="http://schemas.microsoft.com/wix/2006/wi" />
 
+  <xs:element name="ServiceConfig">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
+      </xs:appinfo>
+      <xs:documentation><![CDATA[Configures a service start account.]]></xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Id" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="ServiceName" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Service name. Formatted]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Account" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Service start account. Formatted]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Password" type="xs:string">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Optional account password. Formatted]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="ZipFile">
     <xs:annotation>
       <xs:appinfo>
@@ -82,6 +117,11 @@
           <xs:attribute name="TargetFolder" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation><![CDATA[Folder to extract the archive into.]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Overwrite" type="YesNoType" use="optional" default="no">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Whether or not to overwrite existing files. Defaults to 'no'.]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>
@@ -357,6 +397,11 @@ Execute a Regular Expression to perform find & replace operations within files.
           <xs:attribute name="Replacement" type="xs:string" use="optional">
             <xs:annotation>
               <xs:documentation>Replacement text. Set to empty string to delete all regex matches. This field is formatted.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Encoding" type="EncodingType" use="optional">
+            <xs:annotation>
+              <xs:documentation>File encoding. Default is 'AutoDetect'.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="IgnoreCase" type="YesNoType" use="optional">
@@ -946,6 +991,18 @@ Remove registry values.
     <xs:restriction base="xs:NMTOKEN">
       <xs:enumeration value="REG_SZ" />
       <xs:enumeration value="REG_DWORD" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="EncodingType">
+    <xs:annotation>
+      <xs:documentation>File encoding.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:NMTOKEN">
+      <xs:enumeration value="AutoDetect" />
+      <xs:enumeration value="Unicode" />
+      <xs:enumeration value="ReverseUnicode" />
+      <xs:enumeration value="MultiByte" />
     </xs:restriction>
   </xs:simpleType>
 

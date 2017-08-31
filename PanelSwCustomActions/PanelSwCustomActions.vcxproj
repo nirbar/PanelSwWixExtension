@@ -103,6 +103,7 @@
     <ClCompile Include="RegularExpression.cpp" />
     <ClCompile Include="RemoveRegistryValue.cpp" />
     <ClCompile Include="Rollback.cpp" />
+    <ClCompile Include="ServiceConfig.cpp" />
     <ClCompile Include="ShellExecute.cpp" />
     <ClCompile Include="PathOperations.cpp" />
     <ClCompile Include="StringOperations.cpp" />
@@ -120,6 +121,7 @@
     <ClInclude Include="CustomUninstallKey.h" />
     <ClInclude Include="RegistryKey.h" />
     <ClInclude Include="RegistryXmlParser.h" />
+    <ClInclude Include="ServiceConfig.h" />
     <ClInclude Include="ShellExecute.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="targetver.h" />
