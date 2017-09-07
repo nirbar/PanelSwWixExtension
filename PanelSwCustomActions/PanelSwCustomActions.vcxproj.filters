@@ -86,6 +86,9 @@
     <ClCompile Include="ServiceConfig.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="CleanPendingFileRenameOperations.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">

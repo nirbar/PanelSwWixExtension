@@ -387,4 +387,12 @@
     </UI>
   </Fragment>
 
+  <!-- CleanPendingFileRenameOperations -->
+  <Fragment>
+    <CustomAction Id="CleanPendingFileRenameOperations" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CleanPendingFileRenameOperations" Execute="deferred" Impersonate="no" />
+    <InstallExecuteSequence>
+      <Custom Action="CleanPendingFileRenameOperations" Before="InstallFinalize" Overridable="yes"/>
+    </InstallExecuteSequence>
+  </Fragment>
+
 </Wix>
