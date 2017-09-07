@@ -146,4 +146,14 @@
     <columnDefinition name="Account" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Password" type="string" length="0" modularize="property" nullable="yes" category="formatted" />
   </tableDefinition>
+
+  <tableDefinition name="PSW_InstallUtil">
+    <columnDefinition name="File_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+  </tableDefinition>
+
+  <tableDefinition name="PSW_InstallUtil_Arg">
+    <columnDefinition name="File_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="Id" primaryKey="yes" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Value" type="string" length="0" modularize="property" category="formatted" />
+  </tableDefinition>
 </tableDefinitions>

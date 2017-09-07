@@ -10,7 +10,7 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>PswManagedCA</RootNamespace>
     <AssemblyName>PswManagedCA</AssemblyName>
-    <TargetFrameworkVersion>v2.0</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <TargetFrameworkProfile />
   </PropertyGroup>
@@ -36,13 +36,16 @@
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.Deployment.WindowsInstaller">
       <Private>True</Private>
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="InstallUtil.cs" />
     <Compile Include="Unzip.cs" />
+    <Compile Include="Util\SessionEx.cs" />
     <Compile Include="ZipFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ZipFileCatalog.cs" />
@@ -61,5 +64,5 @@
   <Target Name="EnsureWixToolsetInstalled" Condition=" '$(WixCATargetsImported)' != 'true' ">
     <Error Text="The WiX Toolset v3 build tools must be installed to build this project. To download the WiX Toolset, see http://wixtoolset.org/releases/" />
   </Target>
-  <Target Name="BeforeBuild" DependsOnTargets="GenerateVersion"/>
+  <Target Name="BeforeBuild" DependsOnTargets="GenerateVersion" />
 </Project>

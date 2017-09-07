@@ -14,6 +14,45 @@
   </xs:annotation>
 
   <xs:import namespace="http://schemas.microsoft.com/wix/2006/wi" />
+  <xs:element name="InstallUtil">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="File" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Install a .NET installer class when the parent component is installed and uninstalls it when the parent component is removed]]>
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Argument"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Argument">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent ref="InstallUtil" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Argument to pass to the .NET installer class]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:attribute name="Id" use="required">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Primary key for the argument.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Value" use="required">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Argument to pass to the .NET installer class]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
 
   <xs:element name="ServiceConfig">
     <xs:annotation>
