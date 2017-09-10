@@ -3,11 +3,153 @@
 #include <strutil.h>
 #include <regutil.h>
 #include <vector>
+#include <list>
 #include <Shlwapi.h>
+#include "../CaCommon/WixString.h"
 using namespace std;
 #pragma comment(lib, "Shlwapi.lib")
 
-// See MoveFileEx() https://msdn.microsoft.com/en-us/library/windows/desktop/aa365240(v=vs.85).aspx
+#define CleanPendingFileRenameOperationsSched_QUERY L"SELECT `File`, `Component_` FROM `File`"
+enum CleanPendingFileRenameOperationsSchedQuery { File = 1, Component = 2 };
+
+extern "C" __declspec(dllexport) int __cdecl CleanPendingFileRenameOperationsSched(MSIHANDLE hInstall)
+{
+	HRESULT hr = S_OK;
+	UINT er = ERROR_SUCCESS;
+	HKEY hKey = NULL;
+	DWORD dwSize = 0;
+	DWORD dwStrSize = 0;
+	DWORD dwIndex = 0;
+	LPWSTR szPendingFileRenameOperations = NULL;
+	CWixString szCleanPendingFileRenameOperations;
+	vector<LPCWSTR> vecFiles;
+	list<LPCWSTR> lstDeletedFiles;
+	PMSIHANDLE hView;
+	PMSIHANDLE hRecord;
+
+	hr = WcaInitialize(hInstall, "CleanPendingFileRenameOps");
+	ExitOnFailure(hr, "Failed to initialize");
+	WcaLog(LOGMSG_STANDARD, "Initialized.");
+
+	hr = RegOpen(HKEY_LOCAL_MACHINE, L"SYSTEM\\CurrentControlSet\\Control\\Session Manager", GENERIC_READ, &hKey);
+	ExitOnFailure(hr, "Failed to open Session Manager registry key");
+
+	er = ::RegQueryValueEx(hKey, L"PendingFileRenameOperations", NULL, NULL, NULL, &dwSize);
+	if (er == ERROR_FILE_NOT_FOUND)
+	{
+		WcaLog(LOGMSG_STANDARD, "No pending file rename operations.");
+		ExitFunction1(hr = S_OK);
+	}
+	ExitOnWin32Error(er, hr, "Failed querying value size of PendingFileRenameOperations");
+
+	dwStrSize = 1 + (dwSize / sizeof(WCHAR)); // Append NULL.
+	hr = StrAlloc(&szPendingFileRenameOperations, dwStrSize);
+	ExitOnFailure(hr, "Failed allocating memory");
+
+	// Ensure terminating NULL's
+	::ZeroMemory(szPendingFileRenameOperations, dwStrSize * sizeof(WCHAR));
+
+	er = ::RegQueryValueEx(hKey, L"PendingFileRenameOperations", NULL, NULL, (LPBYTE)szPendingFileRenameOperations, &dwSize);
+	ExitOnWin32Error(er, hr, "Failed querying value of PendingFileRenameOperations");
+
+	dwIndex = 0;
+	while (dwIndex < (dwStrSize - 1))
+	{
+		dwSize = ::wcslen(szPendingFileRenameOperations + dwIndex);
+		vecFiles.push_back(szPendingFileRenameOperations + dwIndex);
+
+		dwIndex += dwSize + 1;
+	}
+	
+	// Detect files scheduled to delete
+	for (DWORD i = 1; i < vecFiles.size(); i += 2)
+	{
+		LPCWSTR szRename = vecFiles[i];
+		LPCWSTR szDelete = vecFiles[i - 1];
+		if ((szRename && *szRename) || !szDelete || !*szDelete)
+		{
+			continue;
+		}
+
+		// Undocumented PendingFileRenameOperations operators.
+		if (::wcsncmp(szDelete, L"!", 1) == 0)
+		{
+			++szDelete;
+		}
+		if (::wcsncmp(szDelete, L"\\??\\", 4) == 0)
+		{
+			szDelete += 4;
+		}
+
+		lstDeletedFiles.push_back(szDelete);
+	}
+
+	// Allocate max size
+	hr = szCleanPendingFileRenameOperations.Allocate(dwStrSize);
+	ExitOnFailure(hr, "Failed allocating memory");
+
+	// Iterate files to be installed.
+	hr = WcaOpenExecuteView(CleanPendingFileRenameOperationsSched_QUERY, &hView);
+	BreakExitOnFailure1(hr, "Failed to execute SQL query '%ls'.", CleanPendingFileRenameOperationsSched_QUERY);
+
+	// Iterate records
+	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
+	{
+		BreakExitOnFailure(hr, "Failed to fetch record.");
+
+		// Get fields
+		CWixString szId, szComponent, szFilePathFmt, szFilePath;
+		WCA_TODO compAction = WCA_TODO_UNKNOWN;
+
+		hr = WcaGetRecordString(hRecord, CleanPendingFileRenameOperationsSchedQuery::File, (LPWSTR*)szId);
+		BreakExitOnFailure(hr, "Failed to get Id.");
+		hr = WcaGetRecordString(hRecord, CleanPendingFileRenameOperationsSchedQuery::Component, (LPWSTR*)szComponent);
+		BreakExitOnFailure(hr, "Failed to get Component.");
+
+		compAction = WcaGetComponentToDo((LPCWSTR)szComponent);
+		if (compAction != WCA_TODO::WCA_TODO_INSTALL)
+		{
+			continue;
+		}
+
+		hr = szFilePathFmt.Format(L"[#%s]", (LPCWSTR)szId);
+		BreakExitOnFailure(hr, "Failed formatting string.");
+
+		hr = szFilePath.MsiFormat((LPCWSTR)szFilePathFmt);
+		BreakExitOnFailure(hr, "Failed MSI-formatting string.");
+
+		for (LPCWSTR szDelete : lstDeletedFiles)
+		{
+			if (::wcsicmp(szDelete, (LPCWSTR)szFilePath) == 0)
+			{
+				hr = szCleanPendingFileRenameOperations.AppnedFormat(L"%s;", szDelete);
+				BreakExitOnFailure(hr, "Failed to append string.");
+			}
+		}
+	}
+	hr = S_OK;
+
+	if (!szCleanPendingFileRenameOperations.IsNullOrEmpty())
+	{
+		hr = WcaSetProperty(L"CleanPendingFileRenameOperations", (LPCWSTR)szCleanPendingFileRenameOperations);
+		BreakExitOnFailure(hr, "Failed to set property.");
+	}
+
+LExit:
+
+	if (hKey)
+	{
+		::RegCloseKey(hKey);
+	}
+	if (szPendingFileRenameOperations)
+	{
+		StrFree(szPendingFileRenameOperations);
+	}
+
+	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
+	return WcaFinalize(er);
+}
+
 extern "C" __declspec(dllexport) int __cdecl CleanPendingFileRenameOperations(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
@@ -18,6 +160,8 @@ extern "C" __declspec(dllexport) int __cdecl CleanPendingFileRenameOperations(MS
 	DWORD dwIndex = 0;
 	LPWSTR szPendingFileRenameOperations = NULL;
 	LPWSTR szCleanPendingFileRenameOperations = NULL;
+	CWixString szPreventDelete;
+	LPCWSTR szToken = NULL;
 	vector<LPCWSTR> vecFiles;
 	BOOL bAnyChange = FALSE;
 	errno_t ern = 0;
@@ -31,6 +175,9 @@ extern "C" __declspec(dllexport) int __cdecl CleanPendingFileRenameOperations(MS
 	hr = WcaInitialize(hInstall, "CleanPendingFileRenameOps");
 	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized.");
+
+	hr = WcaGetProperty(L"CustomActionData", (LPWSTR*)szPreventDelete);
+	BreakExitOnFailure(hr, "Failed getting 'CustomActionData'");
 
 	hr = RegOpen(HKEY_LOCAL_MACHINE, L"SYSTEM\\CurrentControlSet\\Control\\Session Manager", GENERIC_ALL, &hKey);
 	ExitOnFailure(hr, "Failed to open Session Manager registry key");
@@ -47,9 +194,11 @@ extern "C" __declspec(dllexport) int __cdecl CleanPendingFileRenameOperations(MS
 	hr = StrAlloc(&szPendingFileRenameOperations, dwStrSize);
 	ExitOnFailure(hr, "Failed allocating memory");
 
+	// Ensure terminating NULL's
+	::ZeroMemory(szPendingFileRenameOperations, dwStrSize * sizeof(WCHAR));
+
 	er = ::RegQueryValueEx(hKey, L"PendingFileRenameOperations", NULL, NULL, (LPBYTE)szPendingFileRenameOperations, &dwSize);
 	ExitOnWin32Error(er, hr, "Failed querying value of PendingFileRenameOperations");
-	szPendingFileRenameOperations[dwStrSize - 1] = NULL;
 
 	dwIndex = 0;
 	while (dwIndex < (dwStrSize - 1))
@@ -59,6 +208,37 @@ extern "C" __declspec(dllexport) int __cdecl CleanPendingFileRenameOperations(MS
 
 		dwIndex += dwSize + 1;
 	}
+
+	// Remove files for which we prevent deletion from the list
+	for (hr = szPreventDelete.Tokenize(L";", &szToken); SUCCEEDED(hr); hr = szPreventDelete.NextToken(L";", &szToken))
+	{
+		for (DWORD i = 1; i < vecFiles.size(); i += 2)
+		{
+			LPCWSTR szRename = vecFiles[i];
+			LPCWSTR szDelete = vecFiles[i - 1];
+			if ((szRename && *szRename) || !szDelete || !*szDelete)
+			{
+				continue;
+			}
+			if (::wcsncmp(szDelete, L"!", 1) == 0)
+			{
+				++szDelete;
+			}
+			if (::wcsncmp(szDelete, L"\\??\\", 4) == 0)
+			{
+				szDelete += 4;
+			}
+
+			if (::wcsicmp(szToken, szDelete) == 0)
+			{
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File '%ls' is scheduled to be deleted after reboot. Unscheduling.", szDelete);
+				bAnyChange = TRUE;
+				vecFiles[i - 1] = NULL;
+			}
+		}
+	}
+	ExitOnNull((hr == E_NOMOREITEMS), hr, hr, "Failed tokenizing string");
+	hr = S_OK;
 
 	// Odd indices will be created/replaced
 	// Even indices will be deleted/moved
@@ -72,11 +252,11 @@ extern "C" __declspec(dllexport) int __cdecl CleanPendingFileRenameOperations(MS
 		}
 
 		// Undocumented PendingFileRenameOperations operators.
-		if (wcsncmp(szRename, L"!", 1) == 0)
+		if (::wcsncmp(szRename, L"!", 1) == 0)
 		{
 			++szRename;
 		}
-		if (wcsncmp(szRename, L"\\??\\", 4) == 0)
+		if (::wcsncmp(szRename, L"\\??\\", 4) == 0)
 		{
 			szRename += 4;
 		}
@@ -89,11 +269,11 @@ extern "C" __declspec(dllexport) int __cdecl CleanPendingFileRenameOperations(MS
 				continue;
 			}
 			// Undocumented PendingFileRenameOperations operators.
-			if (wcsncmp(szDelete, L"!", 1) == 0)
+			if (::wcsncmp(szDelete, L"!", 1) == 0)
 			{
 				++szDelete;
 			}
-			if (wcsncmp(szDelete, L"\\??\\", 4) == 0)
+			if (::wcsncmp(szDelete, L"\\??\\", 4) == 0)
 			{
 				szDelete += 4;
 			}

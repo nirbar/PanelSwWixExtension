@@ -141,6 +141,48 @@ public:
 		return hr;
 	}
 
+	HRESULT MsiFormat(LPCWSTR stFormat)
+	{
+		HRESULT hr = S_OK;
+		LPWSTR szNew = NULL;
+
+		hr = WcaGetFormattedString(stFormat, &szNew);
+		if (SUCCEEDED(hr))
+		{
+			Release();
+			_pS = szNew;
+			_dwCapacity = 1 + ::wcslen(szNew);
+
+			szNew = NULL;
+		}
+
+	LExit:
+		if (szNew)
+		{
+			StrFree(szNew);
+		}
+
+		return hr;
+	}
+
+	HRESULT AppnedFormat(LPCWSTR szFormat, ...)
+	{
+		HRESULT hr = S_OK;
+		va_list va;
+		va_start(va, szFormat);
+		
+		hr = StrAllocFormattedArgs(&_pS, szFormat, va);
+		if (FAILED(hr))
+		{
+			Release();
+		}
+
+	LExit:
+
+		va_end(va);
+		return hr;
+	}
+
 	#pragma region Tokenize
 	
 	HRESULT Tokenize(LPCWSTR delimiters, LPCWSTR* firstToken)
