@@ -107,6 +107,7 @@
     <ClCompile Include="ServiceConfig.cpp" />
     <ClCompile Include="ShellExecute.cpp" />
     <ClCompile Include="PathOperations.cpp" />
+    <ClCompile Include="SqlSearch.cpp" />
     <ClCompile Include="StringOperations.cpp" />
     <ClCompile Include="stdafx.cpp" />
     <ClCompile Include="TaskScheduler.cpp" />

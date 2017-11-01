@@ -57,6 +57,7 @@ namespace PanelSw.Wix.Extensions
             Core.EnsureTable(null, "PSW_ServiceConfig");
             Core.EnsureTable(null, "PSW_InstallUtil");
             Core.EnsureTable(null, "PSW_InstallUtil_Arg");
+            Core.EnsureTable(null, "PSW_SqlSearch");
             base.FinalizeCompile();
         }
 
@@ -131,6 +132,10 @@ namespace PanelSw.Wix.Extensions
                     {
                         case "XmlSearch":
                             ParseXmlSearchElement(element);
+                            break;
+
+                        case "SqlSearch":
+                            ParseSqlSearchElement(element);
                             break;
 
                         default:
@@ -1234,6 +1239,89 @@ namespace PanelSw.Wix.Extensions
                 row[6] = match.ToString();
                 row[7] = 0;
                 row[8] = condition;
+            }
+        }
+
+        private void ParseSqlSearchElement(XmlNode node)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string id = null;
+            string server = null;
+            string instance = null;
+            string database = null;
+            string username = null;
+            string password = null;
+            string query = null;
+
+            if (node.ParentNode.LocalName != "Property")
+            {
+                Core.UnexpectedElement(node.ParentNode, node);
+            }
+            id = node.ParentNode.Attributes["Id"].Value;
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName)
+                    {
+                        case "Server":
+                            server = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Instance":
+                            instance = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Database":
+                            database = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Username":
+                            username = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Password":
+                            password = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Query":
+                            query = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+                else
+                {
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            if (string.IsNullOrEmpty(id))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.Name, "Id"));
+            }
+            if (string.IsNullOrEmpty(server))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "FilePath"));
+            }
+            if (string.IsNullOrEmpty(query))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "XPath"));
+            }
+
+            // reference the Win32_CopyFiles custom actions since nothing will happen without these
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "SqlSearch");
+
+            if (!Core.EncounteredError)
+            {
+                // create a row in the ReadIniValues table
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_SqlSearch");
+                row[0] = id;
+                row[1] = server;
+                row[2] = instance;
+                row[3] = database;
+                row[4] = username;
+                row[5] = password;
+                row[6] = query;
             }
         }
 

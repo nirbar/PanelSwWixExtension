@@ -156,4 +156,14 @@
     <columnDefinition name="Id" primaryKey="yes" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Value" type="string" length="0" modularize="property" category="formatted" />
   </tableDefinition>
+
+  <tableDefinition name="PSW_SqlSearch">
+    <columnDefinition name="Property_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="Server" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Instance" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
+    <columnDefinition name="Database" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Username" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
+    <columnDefinition name="Password" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
+    <columnDefinition name="Query" type="string" length="0" modularize="property" category="formatted" />
+  </tableDefinition>
 </tableDefinitions>
