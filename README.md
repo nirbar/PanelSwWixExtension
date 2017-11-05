@@ -4,21 +4,25 @@ PanelSwWixExtension is a [WiX](http://wixtoolset.org/) extension that contains v
 
 ## WiX Elements
 
-- *Dism*: Enable Windows Feature using DISM API. Features will be installed when the parent component is being installed or repaired.
-- *ZipFile*: Creates a ZIP archive from selected files.
-- *Unzip*: Extract a ZIP archive to selected folder.
-- *ReadIniValues*: Reads .INI file values.
-- *XmlSearch*: Read XML values.
-- *CustomUninstallKey*: Overwrite registry values in the product's [Uninstall](http://msdn.microsoft.com/en-us/library/aa372105%28v=vs.85%29.aspx) registry key
-- *RemoveRegistryValue*: Removes registry values. Complements the standard [RemoveRegistryValue](http://wixtoolset.org/documentation/manual/v3/xsd/wix/removeregistryvalue.html) WiX element that will only remove registry values during installation.
-- *ExecOn*: Execute a custom command on component action.
-- *TaskScheduler*: Add a task to Windows Task Scheduler. Task definition XML should be in inner text.
-- *DeletePath*: Delete folder or file specified by a path.
-- *FileRegex*: Execute a Regular Expression to perform find & replace operations within files.
-- *RegularExpression*: Execute a Regular Expression to replace or find matches in property values.
-- *MsiSqlQuery*: Execute a MSI-SQL query on the MSI database.
-- *ShellExecute*: Call ShellExecuteEx with parameters.
-- *Telemetry*: Send telemetry data to a given URL.
+- Immediate Actions:
+  - *SqlSearch*: Execute a SQL query and place result in a property.
+  - *ReadIniValues*: Reads .INI file values.
+  - *XmlSearch*: Read XML values.
+  - *RegularExpression*: Execute a Regular Expression to replace or find matches in property values.
+  - *MsiSqlQuery*: Execute a MSI-SQL query on the MSI database.
+- Deferred Actions:
+  - *Dism*: Enable Windows Feature using DISM API. Features will be installed when the parent component is being installed or repaired.
+  - *ZipFile*: Creates a ZIP archive from selected files.
+  - *Unzip*: Extract a ZIP archive to selected folder.
+  - *CustomUninstallKey*: Overwrite registry values in the product's [Uninstall](http://msdn.microsoft.com/en-us/library/aa372105%28v=vs.85%29.aspx) registry key
+  - *RemoveRegistryValue*: Removes registry values. Complements the standard [RemoveRegistryValue](http://wixtoolset.org/documentation/manual/v3/xsd/wix/removeregistryvalue.html) WiX element that will only remove registry values during installation.
+  - *ExecOn*: Execute a custom command on component action.
+  - *TaskScheduler*: Add a task to Windows Task Scheduler. Task definition XML should be in inner text.
+  - *DeletePath*: Delete folder or file specified by a path.
+  - *FileRegex*: Execute a Regular Expression to perform find & replace operations within files.
+  - *ShellExecute*: Call ShellExecuteEx with parameters.
+  - *Telemetry*: Send telemetry data to a given URL.
+  - *InstallUtil*: Install a .NET assembly service.
 
 ## Custom Actions
 
