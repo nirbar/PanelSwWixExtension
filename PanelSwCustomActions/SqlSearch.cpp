@@ -14,7 +14,7 @@ struct DBCOLUMNDATA
 	BYTE bData[1];
 };
 
-extern "C" __declspec( dllexport ) UINT SqlSearch(MSIHANDLE hInstall)
+extern "C" __declspec(dllexport) UINT SqlSearch(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -64,9 +64,9 @@ extern "C" __declspec( dllexport ) UINT SqlSearch(MSIHANDLE hInstall)
 		CWixString szUsername;
 		CWixString szPassword;
 		CWixString szQuery;
-		IDBCreateSession *pDbSession = NULL;
 		DBCOUNTITEM unRows = 0;
 		CComBSTR szError;
+		CComPtr<IDBCreateSession> pDbSession;
 		CComPtr<IRowset> pRowset;
 		CComPtr<IAccessor> pAccessor;
 		CComPtr<IColumnsInfo> pColumnsInfo;
@@ -199,14 +199,12 @@ extern "C" __declspec( dllexport ) UINT SqlSearch(MSIHANDLE hInstall)
 		case DBSTATUS_E_SCHEMAVIOLATION:
 		case DBSTATUS_E_BADSTATUS:
 		case DBSTATUS_S_DEFAULT: // Unexpected when getting data
-			hr = -::abs((long)pColumn->dwStatus);
+		default:
+			hr = min(-1, -::abs((long)pColumn->dwStatus));
 			BreakExitOnFailure(hr, "Failed getting column data");
 			break;
 		}
 	}
-
-	hr = ERROR_SUCCESS;
-	WcaLog(LOGMSG_STANDARD, "Done.");
 
 LExit:
 	if (pRowData)
