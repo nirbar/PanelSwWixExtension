@@ -26,7 +26,7 @@
     </ComponentGroup>
 
     <Property Id="SQL_TEST">
-      <PanelSW:SqlSearch Server="." Instance="SQLEXPRESS" Database="master" Query="SELECT name FROM sysdatabases WHERE name='HUBDB'" />
+      <PanelSW:SqlSearch Server="." Instance="SQLEXPRESS" Database="master" Query="SELECT TOP 1 name FROM sysdatabases" />
     </Property>
   </Product>
 </Wix>
