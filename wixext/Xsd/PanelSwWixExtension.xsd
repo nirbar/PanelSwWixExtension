@@ -12,8 +12,92 @@
       This extension significantly simplifies various system tasks that aren't natively supported by Windows installer.
     </xs:documentation>
   </xs:annotation>
-
   <xs:import namespace="http://schemas.microsoft.com/wix/2006/wi" />
+
+  <xs:element name="SqlSearch">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
+      </xs:appinfo>
+      <xs:documentation><![CDATA[Execute scalar SQL query]]></xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Server" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>SQL server name</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Instance" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>SQL instance name</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Database" use="required">
+            <xs:annotation>
+              <xs:documentation>Database name.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Username" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>SQL user name. Can be empty to denote SSPI Integrated Security</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Password" use="optional">
+            <xs:annotation>
+              <xs:documentation>SQL user password. Ignored if user name is empty</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Query" use="required">
+            <xs:annotation>
+              <xs:documentation>SQL query. Must return a single result at most.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="InstallUtil">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="File" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Install a .NET installer class when the parent component is installed and uninstalls it when the parent component is removed]]>
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Argument"/>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Argument">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent ref="InstallUtil" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Argument to pass to the .NET installer class]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:attribute name="Id" use="required">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Primary key for the argument.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Value" use="required">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Argument to pass to the .NET installer class]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
 
   <xs:element name="ServiceConfig">
     <xs:annotation>

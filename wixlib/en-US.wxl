@@ -7,5 +7,7 @@
   <String Id="TaskScheduler">Configuring Scheduled Tasks</String>
   <String Id="ExecOnComponent"><![CDATA[Executing custom actions]]></String>
   <String Id="ServiceConfig"><![CDATA[Configuring Services]]></String>
+  <String Id="InstallUtil"><![CDATA[Installing .NET service assemblies]]></String>
+  <String Id="SqlSearch"><![CDATA[Executing SQL queries]]></String>
 </WixLocalization>
 

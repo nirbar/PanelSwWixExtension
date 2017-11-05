@@ -1,0 +1,230 @@
+
+#include "stdafx.h"
+#include "../CaCommon/WixString.h"
+#include <sqlutil.h>
+#include <atlbase.h>
+
+#define SqlSearchQuery L"SELECT `Property_`, `Server`, `Instance`, `Database`, `Username`, `Password`, `Query` FROM `PSW_SqlSearch`"
+enum eSqlSearchQueryQuery { Property_ = 1, Server, Instance, Database, Username, Password, Query };
+
+struct DBCOLUMNDATA
+{
+	DBLENGTH dwLength;
+	DBSTATUS dwStatus;
+	BYTE bData[1];
+};
+
+extern "C" __declspec( dllexport ) UINT SqlSearch(MSIHANDLE hInstall)
+{
+	HRESULT hr = S_OK;
+	UINT er = ERROR_SUCCESS;
+	PMSIHANDLE hView;
+	PMSIHANDLE hRecord;
+	bool bIgnoreErrors = false;
+	BYTE *pRowData = NULL;
+	DBCOLUMNINFO *pColInfo = NULL;
+	HROW *phRow = NULL;
+
+	hr = WcaInitialize(hInstall, __FUNCTION__);
+	BreakExitOnFailure(hr, "Failed to initialize");
+	WcaLog(LOGMSG_STANDARD, "Initialized.");
+
+	hr = WcaTableExists(L"PSW_SqlSearch");
+	BreakExitOnFailure(hr, "Table does not exist 'PSW_SqlSearch'. Have you authored 'PanelSw:SqlSearch' entries in WiX code?");
+
+	// Execute view
+	hr = WcaOpenExecuteView(SqlSearchQuery, &hView);
+	BreakExitOnFailure(hr, "Failed to execute SQL query on 'PSW_SqlSearch'.");
+
+	// Iterate records
+	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
+	{
+		BreakExitOnFailure(hr, "Failed to fetch record.");
+		if (pRowData)
+		{
+			::CoTaskMemFree(pRowData);
+			pRowData = NULL;
+		}
+		if (pColInfo)
+		{
+			::CoTaskMemFree(pColInfo);
+			pColInfo = NULL;
+		}
+		if (phRow)
+		{
+			::CoTaskMemFree(phRow);
+			phRow = NULL;
+		}
+
+		// Get fields
+		CWixString szProperty;
+		CWixString szServer;
+		CWixString szInstance;
+		CWixString szDatabase;
+		CWixString szUsername;
+		CWixString szPassword;
+		CWixString szQuery;
+		IDBCreateSession *pDbSession = NULL;
+		DBCOUNTITEM unRows = 0;
+		CComBSTR szError;
+		CComPtr<IRowset> pRowset;
+		CComPtr<IAccessor> pAccessor;
+		CComPtr<IColumnsInfo> pColumnsInfo;
+		DBORDINAL nColCount = 0;
+		CComBSTR szColNames;
+		DBBINDING sDbBinding;
+		DBCOLUMNDATA *pColumn = NULL;
+		HACCESSOR hAccessor = NULL;
+		DBBINDSTATUS nBindStatus = DBBINDSTATUS_OK;
+
+		hr = WcaGetRecordString(hRecord, eSqlSearchQueryQuery::Property_, (LPWSTR*)szProperty);
+		BreakExitOnFailure(hr, "Failed to get Property_.");
+		hr = WcaGetRecordFormattedString(hRecord, eSqlSearchQueryQuery::Server, (LPWSTR*)szServer);
+		BreakExitOnFailure(hr, "Failed to get Server.");
+		hr = WcaGetRecordFormattedString(hRecord, eSqlSearchQueryQuery::Instance, (LPWSTR*)szInstance);
+		BreakExitOnFailure(hr, "Failed to get Instance.");
+		hr = WcaGetRecordFormattedString(hRecord, eSqlSearchQueryQuery::Database, (LPWSTR*)szDatabase);
+		BreakExitOnFailure(hr, "Failed to get Database.");
+		hr = WcaGetRecordFormattedString(hRecord, eSqlSearchQueryQuery::Username, (LPWSTR*)szUsername);
+		BreakExitOnFailure(hr, "Failed to get Username.");
+		hr = WcaGetRecordFormattedString(hRecord, eSqlSearchQueryQuery::Password, (LPWSTR*)szPassword);
+		BreakExitOnFailure(hr, "Failed to get Password.");
+		hr = WcaGetRecordFormattedString(hRecord, eSqlSearchQueryQuery::Query, (LPWSTR*)szQuery);
+		BreakExitOnFailure(hr, "Failed to get Query.");
+
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing SQL query '%ls'. Server='%ls', Instance='%ls', User='%ls'. Will place results in property '%ls'", (LPCWSTR)szQuery, (LPCWSTR)szServer, (LPCWSTR)szInstance, (LPCWSTR)szUsername, (LPCWSTR)szProperty);
+
+		hr = SqlConnectDatabase((LPCWSTR)szServer, (LPCWSTR)szInstance, (LPCWSTR)szDatabase, szUsername.IsNullOrEmpty(), (LPCWSTR)szUsername, (LPCWSTR)szPassword, &pDbSession);
+		BreakExitOnFailure(hr, "Failed connecting to database");
+		BreakExitOnNull(pDbSession, hr, E_FAIL, "Failed connecting to database (NULL)");
+
+		hr = SqlSessionExecuteQuery(pDbSession, (LPCWSTR)szQuery, &pRowset, NULL, &szError);
+		BreakExitOnFailure1(hr, "Failed executing query. %ls", (LPCWSTR)(LPWSTR)szError);
+		BreakExitOnNull(pRowset, hr, E_FAIL, "Failed executing query (NULL)");
+
+		// Requesting 2 rows to ensure one is returned at most.
+		hr = pRowset->GetNextRows(DB_NULL_HCHAPTER, 0, 2, &unRows, &phRow);
+		BreakExitOnFailure(hr, "Failed to get result row");
+		BreakExitOnNull((unRows <= 1), hr, E_FAIL, "Query returned more than one row");
+
+		// Empty result ==> clear property
+		if (unRows == 0)
+		{
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Query returned no results. Clearing property");
+
+			hr = WcaSetProperty((LPCWSTR)szProperty, L"");
+			BreakExitOnFailure1(hr, "Failed clearing property '%ls'", (LPCWSTR)szProperty);
+			continue;
+		}
+
+		// Get column info
+		hr = pRowset->QueryInterface<IColumnsInfo>(&pColumnsInfo);
+		BreakExitOnFailure(hr, "Failed to get result column info");
+
+		hr = pColumnsInfo->GetColumnInfo(&nColCount, &pColInfo, &szColNames);
+		BreakExitOnFailure(hr, "Failed to get result column info");
+		BreakExitOnNull1((nColCount <= 1), hr, E_INVALIDARG, "Query returned %i columns. Can only handle scalar queries", nColCount);
+
+		if (nColCount == 0)
+		{
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Query returned no results. Clearing property");
+
+			hr = WcaSetProperty((LPCWSTR)szProperty, L"");
+			BreakExitOnFailure1(hr, "Failed clearing property '%ls'", (LPCWSTR)szProperty);
+			continue;
+		}
+
+		sDbBinding.dwPart = DBPART_VALUE | DBPART_LENGTH | DBPART_STATUS;
+		sDbBinding.eParamIO = DBPARAMIO_NOTPARAM;
+		sDbBinding.iOrdinal = pColInfo[0].iOrdinal;
+		sDbBinding.wType = DBTYPE_WSTR;
+		sDbBinding.pTypeInfo = NULL;
+		sDbBinding.obValue = offsetof(DBCOLUMNDATA, bData);
+		sDbBinding.obLength = offsetof(DBCOLUMNDATA, dwLength);
+		sDbBinding.obStatus = offsetof(DBCOLUMNDATA, dwStatus);
+		sDbBinding.cbMaxLen = pColInfo[0].ulColumnSize;
+		sDbBinding.pObject = NULL;
+		sDbBinding.pBindExt = NULL;
+		sDbBinding.dwFlags = 0;
+		sDbBinding.dwMemOwner = DBMEMOWNER_CLIENTOWNED;
+		sDbBinding.bPrecision = 0;
+		sDbBinding.bScale = 0;
+
+		// Create accessor
+		hr = pRowset->QueryInterface<IAccessor>(&pAccessor);
+		BreakExitOnFailure(hr, "Failed to get result row accessor");
+
+		hr = pAccessor->CreateAccessor(DBACCESSOR_ROWDATA, 1, &sDbBinding, sizeof(DBCOLUMNDATA), &hAccessor, &nBindStatus);
+		BreakExitOnFailure1(hr, "Failed to create column data accessor (DBBINDSTATUS=%i)", nBindStatus);
+
+		pRowData = (BYTE*)::CoTaskMemAlloc(sDbBinding.cbMaxLen + sizeof(DBCOLUMNDATA));
+		BreakExitOnNull(pRowData, hr, E_FAIL, "Failed to allocate memory");
+
+		hr = pRowset->GetData(phRow[0], hAccessor, pRowData);
+		BreakExitOnFailure(hr, "Failed to get row data");
+
+		hr = pAccessor->ReleaseAccessor(hAccessor, NULL);
+		BreakExitOnFailure(hr, "Failed releasing accessor");
+		hAccessor = NULL;
+
+		pColumn = (DBCOLUMNDATA*)(pRowData + sDbBinding.obLength);
+		switch (pColumn->dwStatus)
+		{
+		case DBSTATUS_S_ISNULL:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Query result is null. Clearing property");
+			hr = WcaSetProperty((LPCWSTR)szProperty, L"");
+			BreakExitOnFailure1(hr, "Failed clearing property '%ls'", (LPCWSTR)szProperty);
+			break;
+
+		case DBSTATUS_S_OK:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Query returned '%ls'", pColumn->bData ? (LPCWSTR)pColumn->bData : L"<null>");
+			hr = WcaSetProperty((LPCWSTR)szProperty, pColumn->bData ? (LPCWSTR)pColumn->bData : L"");
+			BreakExitOnFailure1(hr, "Failed setting property '%ls'", (LPCWSTR)szProperty);
+			break;
+
+		case DBSTATUS_S_TRUNCATED:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Query returned truncated data '%ls'", pColumn->bData ? (LPCWSTR)pColumn->bData : L"<null>");
+			hr = WcaSetProperty((LPCWSTR)szProperty, pColumn->bData ? (LPCWSTR)pColumn->bData : L"");
+			BreakExitOnFailure1(hr, "Failed setting property '%ls'", (LPCWSTR)szProperty);
+			break;
+
+		case DBSTATUS_E_BADACCESSOR:
+		case DBSTATUS_E_CANTCONVERTVALUE:
+		case DBSTATUS_E_SIGNMISMATCH:
+		case DBSTATUS_E_DATAOVERFLOW:
+		case DBSTATUS_E_CANTCREATE:
+		case DBSTATUS_E_UNAVAILABLE:
+		case DBSTATUS_E_PERMISSIONDENIED:
+		case DBSTATUS_E_INTEGRITYVIOLATION:
+		case DBSTATUS_E_SCHEMAVIOLATION:
+		case DBSTATUS_E_BADSTATUS:
+		case DBSTATUS_S_DEFAULT: // Unexpected when getting data
+			hr = -::abs((long)pColumn->dwStatus);
+			BreakExitOnFailure(hr, "Failed getting column data");
+			break;
+		}
+	}
+
+	hr = ERROR_SUCCESS;
+	WcaLog(LOGMSG_STANDARD, "Done.");
+
+LExit:
+	if (pRowData)
+	{
+		::CoTaskMemFree(pRowData);
+		pRowData = NULL;
+	}
+	if (pColInfo)
+	{
+		::CoTaskMemFree(pColInfo);
+		pColInfo = NULL;
+	}
+	if (phRow)
+	{
+		::CoTaskMemFree(phRow);
+		phRow = NULL;
+	}
+
+	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
+	return WcaFinalize(er);
+}

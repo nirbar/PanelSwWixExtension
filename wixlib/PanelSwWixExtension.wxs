@@ -400,4 +400,43 @@
     </InstallExecuteSequence>
   </Fragment>
 
+  <!-- InstallUtil -->
+  <Fragment>
+    <CustomAction Id="PSW_InstallUtilSched" SuppressModularization="yes" BinaryKey="PswManagedCA.dll" DllEntry="InstallUtilSched" Execute="immediate"/>
+    <CustomAction Id="PSW_InstallUtil_InstallExec" SuppressModularization="yes" BinaryKey="PswManagedCA.dll" DllEntry="InstallUtilExec" Execute="deferred" Impersonate="no"/>
+    <CustomAction Id="PSW_InstallUtil_InstallRollback" SuppressModularization="yes" BinaryKey="PswManagedCA.dll" DllEntry="InstallUtilExec" Execute="rollback" Impersonate="no"/>
+    <CustomAction Id="PSW_InstallUtil_UninstallExec" SuppressModularization="yes" BinaryKey="PswManagedCA.dll" DllEntry="InstallUtilExec" Execute="deferred" Impersonate="no"/>
+    <CustomAction Id="PSW_InstallUtil_UninstallRollback" SuppressModularization="yes" BinaryKey="PswManagedCA.dll" DllEntry="InstallUtilExec" Execute="rollback" Impersonate="no"/>
+
+    <InstallExecuteSequence>
+      <Custom Action="PSW_InstallUtilSched" After="InstallInitialize" Overridable="yes"/>
+
+      <Custom Action="PSW_InstallUtil_InstallRollback" Before="PSW_InstallUtil_InstallExec" Overridable="yes"/>
+      <Custom Action="PSW_InstallUtil_InstallExec" Before="InstallServices" Overridable="yes"/>
+
+      <Custom Action="PSW_InstallUtil_UninstallRollback" Before="PSW_InstallUtil_UninstallExec" Overridable="yes"/>
+      <Custom Action="PSW_InstallUtil_UninstallExec" Before="DeleteServices" Overridable="yes"/>
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="PSW_InstallUtil_InstallExec">!(loc.InstallUtil)</ProgressText>
+      <ProgressText Action="PSW_InstallUtil_InstallRollback">!(loc.InstallUtil)</ProgressText>
+      <ProgressText Action="PSW_InstallUtil_UninstallExec">!(loc.InstallUtil)</ProgressText>
+      <ProgressText Action="PSW_InstallUtil_UninstallRollback">!(loc.InstallUtil)</ProgressText>
+    </UI>
+  </Fragment>
+
+  <!-- SqlSearch -->
+  <Fragment>
+    <CustomAction Id="SqlSearch" BinaryKey="PanelSwCustomActions.dll" DllEntry="SqlSearch" Execute="firstSequence" />
+    <InstallExecuteSequence>
+      <Custom Action="SqlSearch" After="AppSearch" Overridable="yes"></Custom>
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="SqlSearch" After="AppSearch" Overridable="yes"></Custom>
+    </InstallUISequence>
+    <UI>
+      <ProgressText Action="SqlSearch">!(loc.SqlSearch)</ProgressText>
+    </UI>
+  </Fragment>
+  
 </Wix>

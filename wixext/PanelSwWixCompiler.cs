@@ -10,6 +10,7 @@ namespace PanelSw.Wix.Extensions
     using System.Xml.Schema;
 
     using Microsoft.Tools.WindowsInstallerXml;
+    using System.IO;
 
     /// <summary>
     /// The compiler for the Windows Installer XML Toolset PanelSwWixExtension Extension.
@@ -54,6 +55,9 @@ namespace PanelSw.Wix.Extensions
             Core.EnsureTable(null, "PSW_ZipFile"); 
             Core.EnsureTable(null, "PSW_Unzip"); 
             Core.EnsureTable(null, "PSW_ServiceConfig");
+            Core.EnsureTable(null, "PSW_InstallUtil");
+            Core.EnsureTable(null, "PSW_InstallUtil_Arg");
+            Core.EnsureTable(null, "PSW_SqlSearch");
             base.FinalizeCompile();
         }
 
@@ -130,6 +134,10 @@ namespace PanelSw.Wix.Extensions
                             ParseXmlSearchElement(element);
                             break;
 
+                        case "SqlSearch":
+                            ParseSqlSearchElement(element);
+                            break;
+
                         default:
                             Core.UnexpectedElement(parentElement, element);
                             break;
@@ -162,9 +170,111 @@ namespace PanelSw.Wix.Extensions
                     }
                     break;
 
+                case "File":
+                    switch (element.LocalName)
+                    {
+                        case "InstallUtil":
+                            ParseInstallUtilElement(element, parentElement);
+                            break;
+
+                        default:
+                            Core.UnexpectedElement(parentElement, element);
+                            break;
+                    }
+                    break;
                 default:
                     Core.UnexpectedElement(parentElement, element);
                     break;
+            }
+        }
+
+        private void ParseInstallUtilElement(XmlNode node, XmlElement parentElement)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+
+            string file = parentElement.GetAttribute("Id");
+            if (string.IsNullOrEmpty(file))
+            {
+                file = parentElement.GetAttribute("Source");
+                file = Path.GetFileName(file);
+            }
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName.ToLower())
+                    {
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(file))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.Name, "Id"));
+            }
+
+            // reference the Win32_CopyFiles custom actions since nothing will happen without these
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "PSW_InstallUtilSched");
+
+            if (!Core.EncounteredError)
+            {
+                // create a row in the Win32_CopyFiles table
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_InstallUtil");
+                row[0] = file;
+            }
+
+            // Iterate child 'Argument' elements
+            foreach (XmlNode childNode in node.ChildNodes)
+            {
+                if (childNode.NodeType != XmlNodeType.Element)
+                {
+                    continue;
+                }
+
+                XmlElement child = childNode as XmlElement;
+                if (!child.LocalName.Equals("Argument", StringComparison.OrdinalIgnoreCase))
+                {
+                    Core.UnsupportedExtensionElement(node, child);
+                }
+
+                string argId = null;
+                string value = null;
+                foreach (XmlAttribute attrib in child.Attributes)
+                {
+                    switch (attrib.LocalName.ToLower())
+                    {
+                        case "id":
+                            argId = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "value":
+                            value = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(argId))
+                {
+                    Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, child.Name, "Id"));
+                    continue;
+                }
+                if (string.IsNullOrEmpty(value))
+                {
+                    Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, child.Name, "Value"));
+                    continue;
+                }
+
+                // create a row in the PeriGen_PsfConfig table
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_InstallUtil_Arg");
+                row[0] = file;
+                row[1] = argId;
+                row[2] = value;
             }
         }
 
@@ -1129,6 +1239,89 @@ namespace PanelSw.Wix.Extensions
                 row[6] = match.ToString();
                 row[7] = 0;
                 row[8] = condition;
+            }
+        }
+
+        private void ParseSqlSearchElement(XmlNode node)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string id = null;
+            string server = null;
+            string instance = null;
+            string database = null;
+            string username = null;
+            string password = null;
+            string query = null;
+
+            if (node.ParentNode.LocalName != "Property")
+            {
+                Core.UnexpectedElement(node.ParentNode, node);
+            }
+            id = node.ParentNode.Attributes["Id"].Value;
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName)
+                    {
+                        case "Server":
+                            server = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Instance":
+                            instance = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Database":
+                            database = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Username":
+                            username = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Password":
+                            password = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Query":
+                            query = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+                else
+                {
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            if (string.IsNullOrEmpty(id))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.Name, "Id"));
+            }
+            if (string.IsNullOrEmpty(server))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "FilePath"));
+            }
+            if (string.IsNullOrEmpty(query))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "XPath"));
+            }
+
+            // reference the Win32_CopyFiles custom actions since nothing will happen without these
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "SqlSearch");
+
+            if (!Core.EncounteredError)
+            {
+                // create a row in the ReadIniValues table
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_SqlSearch");
+                row[0] = id;
+                row[1] = server;
+                row[2] = instance;
+                row[3] = database;
+                row[4] = username;
+                row[5] = password;
+                row[6] = query;
             }
         }
 

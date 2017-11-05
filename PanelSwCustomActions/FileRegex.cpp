@@ -391,7 +391,7 @@ CFileRegex::FileEncoding CFileRegex::DetectEncoding(const void* pFileContent, DW
 	// Multi-byte
 	if (nTests & IS_TEXT_UNICODE_ILLEGAL_CHARS)
 	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File has ilegal UNICODE characters");
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File has illegal UNICODE characters");
 		eEncoding = FileEncoding::MultiByte;
 		ExitFunction();
 	}
@@ -402,13 +402,21 @@ CFileRegex::FileEncoding CFileRegex::DetectEncoding(const void* pFileContent, DW
 		ExitFunction();
 	}
 
-	// Unicode
+	// Unicode BOM
 	if (nTests & IS_TEXT_UNICODE_SIGNATURE)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File has UNICODE BOM");
 		eEncoding = FileEncoding::Unicode;
 		ExitFunction();
 	}
+	if (nTests & IS_TEXT_UNICODE_REVERSE_SIGNATURE)
+	{
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File has reverse UNICODE BOM");
+		eEncoding = FileEncoding::ReverseUnicode;
+		ExitFunction();
+	}
+
+	// Unicode
 	if (nTests & IS_TEXT_UNICODE_ASCII16)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File has only ASCII UNICODE characters");
@@ -421,20 +429,8 @@ CFileRegex::FileEncoding CFileRegex::DetectEncoding(const void* pFileContent, DW
 		eEncoding = FileEncoding::Unicode;
 		ExitFunction();
 	}
-	if (nTests & IS_TEXT_UNICODE_NULL_BYTES)
-	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File has NULL UNICODE characters");
-		eEncoding = FileEncoding::Unicode;
-		ExitFunction();
-	}
 
 	// Reverse unicode
-	if (nTests & IS_TEXT_UNICODE_REVERSE_SIGNATURE)
-	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File has reverse UNICODE BOM");
-		eEncoding = FileEncoding::ReverseUnicode;
-		ExitFunction();
-	}
 	if (nTests & IS_TEXT_UNICODE_REVERSE_ASCII16)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File has only reverse ASCII UNICODE characters");
@@ -462,7 +458,15 @@ CFileRegex::FileEncoding CFileRegex::DetectEncoding(const void* pFileContent, DW
 		ExitFunction();
 	}
 
-	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "All tests failed for UNICODE encoding. Assuming multibyte");
+	// Unicode NULL (can't tell if it strait or reverse).
+	if (nTests & IS_TEXT_UNICODE_NULL_BYTES)
+	{
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File has NULL UNICODE characters. Assuming unicode, though, it may as well be reverse unicode");
+		eEncoding = FileEncoding::Unicode;
+		ExitFunction();
+	}
+
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "All tests failed for UNICODE encoding. Assuming multi-byte");
 	eEncoding = FileEncoding::MultiByte;
 
 LExit:
