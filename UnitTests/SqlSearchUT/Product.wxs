@@ -25,8 +25,12 @@
       </Component>
     </ComponentGroup>
 
+    <Property Id="SQL_SERVER" Value="."/>
+    <Property Id="SQL_INSTANCE" Value="SQLEXPRESS"/>
+
     <Property Id="SQL_TEST">
-      <PanelSW:SqlSearch Server="." Instance="SQLEXPRESS" Database="master" Query="SELECT TOP 1 name FROM sysdatabases" />
+      <PanelSW:SqlSearch Server="[SQL_SERVER]" Instance="[SQL_INSTANCE]" Database="master" Username="[SQL_USER]" Password="[SQL_PSW]"
+                         Query="SELECT TOP 1 name FROM sysdatabases" />
     </Property>
   </Product>
 </Wix>
