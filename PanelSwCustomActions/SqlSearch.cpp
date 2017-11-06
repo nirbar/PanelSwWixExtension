@@ -3,6 +3,8 @@
 #include "../CaCommon/WixString.h"
 #include <sqlutil.h>
 #include <atlbase.h>
+#include <memory>
+using namespace std;
 
 #define SqlSearchQuery L"SELECT `Property_`, `Server`, `Instance`, `Database`, `Username`, `Password`, `Query` FROM `PSW_SqlSearch`"
 enum eSqlSearchQueryQuery { Property_ = 1, Server, Instance, Database, Username, Password, Query };
@@ -20,11 +22,6 @@ extern "C" __declspec(dllexport) UINT SqlSearch(MSIHANDLE hInstall)
 	UINT er = ERROR_SUCCESS;
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
-	bool bIgnoreErrors = false;
-	BYTE *pRowData = NULL;
-	DBCOLUMNINFO *pColInfo = NULL;
-	HROW *phRow = NULL;
-
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized.");
@@ -40,21 +37,6 @@ extern "C" __declspec(dllexport) UINT SqlSearch(MSIHANDLE hInstall)
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
 		BreakExitOnFailure(hr, "Failed to fetch record.");
-		if (pRowData)
-		{
-			::CoTaskMemFree(pRowData);
-			pRowData = NULL;
-		}
-		if (pColInfo)
-		{
-			::CoTaskMemFree(pColInfo);
-			pColInfo = NULL;
-		}
-		if (phRow)
-		{
-			::CoTaskMemFree(phRow);
-			phRow = NULL;
-		}
 
 		// Get fields
 		CWixString szProperty;
@@ -76,6 +58,9 @@ extern "C" __declspec(dllexport) UINT SqlSearch(MSIHANDLE hInstall)
 		DBCOLUMNDATA *pColumn = NULL;
 		HACCESSOR hAccessor = NULL;
 		DBBINDSTATUS nBindStatus = DBBINDSTATUS_OK;
+		unique_ptr<BYTE, void(__stdcall*)(LPVOID)> pRowData(NULL, ::CoTaskMemFree);
+		unique_ptr<DBCOLUMNINFO, void(__stdcall*)(LPVOID)> pColInfo(NULL, ::CoTaskMemFree);
+		unique_ptr<HROW, void(__stdcall*)(LPVOID)> phRow(NULL, ::CoTaskMemFree);
 
 		hr = WcaGetRecordString(hRecord, eSqlSearchQueryQuery::Property_, (LPWSTR*)szProperty);
 		BreakExitOnFailure(hr, "Failed to get Property_.");
@@ -103,7 +88,7 @@ extern "C" __declspec(dllexport) UINT SqlSearch(MSIHANDLE hInstall)
 		BreakExitOnNull(pRowset, hr, E_FAIL, "Failed executing query (NULL)");
 
 		// Requesting 2 rows to ensure one is returned at most.
-		hr = pRowset->GetNextRows(DB_NULL_HCHAPTER, 0, 2, &unRows, &phRow);
+		hr = pRowset->GetNextRows(DB_NULL_HCHAPTER, 0, 2, &unRows, &phRow._Myptr());
 		BreakExitOnFailure(hr, "Failed to get result row");
 		BreakExitOnNull((unRows <= 1), hr, E_FAIL, "Query returned more than one row");
 
@@ -121,7 +106,7 @@ extern "C" __declspec(dllexport) UINT SqlSearch(MSIHANDLE hInstall)
 		hr = pRowset->QueryInterface<IColumnsInfo>(&pColumnsInfo);
 		BreakExitOnFailure(hr, "Failed to get result column info");
 
-		hr = pColumnsInfo->GetColumnInfo(&nColCount, &pColInfo, &szColNames);
+		hr = pColumnsInfo->GetColumnInfo(&nColCount, &pColInfo._Myptr(), &szColNames);
 		BreakExitOnFailure(hr, "Failed to get result column info");
 		BreakExitOnNull1((nColCount <= 1), hr, E_INVALIDARG, "Query returned %i columns. Can only handle scalar queries", nColCount);
 
@@ -136,13 +121,13 @@ extern "C" __declspec(dllexport) UINT SqlSearch(MSIHANDLE hInstall)
 
 		sDbBinding.dwPart = DBPART_VALUE | DBPART_LENGTH | DBPART_STATUS;
 		sDbBinding.eParamIO = DBPARAMIO_NOTPARAM;
-		sDbBinding.iOrdinal = pColInfo[0].iOrdinal;
+		sDbBinding.iOrdinal = pColInfo->iOrdinal;
 		sDbBinding.wType = DBTYPE_WSTR;
 		sDbBinding.pTypeInfo = NULL;
 		sDbBinding.obValue = offsetof(DBCOLUMNDATA, bData);
 		sDbBinding.obLength = offsetof(DBCOLUMNDATA, dwLength);
 		sDbBinding.obStatus = offsetof(DBCOLUMNDATA, dwStatus);
-		sDbBinding.cbMaxLen = pColInfo[0].ulColumnSize;
+		sDbBinding.cbMaxLen = pColInfo->ulColumnSize;
 		sDbBinding.pObject = NULL;
 		sDbBinding.pBindExt = NULL;
 		sDbBinding.dwFlags = 0;
@@ -157,17 +142,17 @@ extern "C" __declspec(dllexport) UINT SqlSearch(MSIHANDLE hInstall)
 		hr = pAccessor->CreateAccessor(DBACCESSOR_ROWDATA, 1, &sDbBinding, sizeof(DBCOLUMNDATA), &hAccessor, &nBindStatus);
 		BreakExitOnFailure1(hr, "Failed to create column data accessor (DBBINDSTATUS=%i)", nBindStatus);
 
-		pRowData = (BYTE*)::CoTaskMemAlloc(sDbBinding.cbMaxLen + sizeof(DBCOLUMNDATA));
+		pRowData.reset((BYTE*)::CoTaskMemAlloc(sDbBinding.cbMaxLen + sizeof(DBCOLUMNDATA)));
 		BreakExitOnNull(pRowData, hr, E_FAIL, "Failed to allocate memory");
 
-		hr = pRowset->GetData(phRow[0], hAccessor, pRowData);
+		hr = pRowset->GetData(phRow.get()[0], hAccessor, pRowData.get());
 		BreakExitOnFailure(hr, "Failed to get row data");
 
 		hr = pAccessor->ReleaseAccessor(hAccessor, NULL);
 		BreakExitOnFailure(hr, "Failed releasing accessor");
 		hAccessor = NULL;
 
-		pColumn = (DBCOLUMNDATA*)(pRowData + sDbBinding.obLength);
+		pColumn = (DBCOLUMNDATA*)(pRowData.get() + sDbBinding.obLength);
 		switch (pColumn->dwStatus)
 		{
 		case DBSTATUS_S_ISNULL:
@@ -205,23 +190,10 @@ extern "C" __declspec(dllexport) UINT SqlSearch(MSIHANDLE hInstall)
 			break;
 		}
 	}
+	hr = S_OK;
+
 
 LExit:
-	if (pRowData)
-	{
-		::CoTaskMemFree(pRowData);
-		pRowData = NULL;
-	}
-	if (pColInfo)
-	{
-		::CoTaskMemFree(pColInfo);
-		pColInfo = NULL;
-	}
-	if (phRow)
-	{
-		::CoTaskMemFree(phRow);
-		phRow = NULL;
-	}
 
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
