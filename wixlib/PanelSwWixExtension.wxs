@@ -23,7 +23,7 @@
     <CustomAction Id="ShellExecute_commit" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="commit" Return="check" Impersonate="no" />
 
     <InstallExecuteSequence>
-      <Custom Action="ShellExecute_Immediate" After="InstallInitialize" Overridable="yes"></Custom>
+      <Custom Action="ShellExecute_Immediate" After="InstallInitialize" Overridable="yes"/>
     </InstallExecuteSequence>
     <UI>
       <ProgressText Action="ShellExecute_deferred">Executing commands</ProgressText>
@@ -39,7 +39,7 @@
     <CustomAction Id="CustomUninstallKey_rollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CustomUninstallKey_deferred" Execute="rollback" Return="check" Impersonate="no" />
 
     <InstallExecuteSequence>
-      <Custom Action="CustomUninstallKey_Immediate" After="PublishProduct" Overridable="yes"></Custom>
+      <Custom Action="CustomUninstallKey_Immediate" After="PublishProduct" Overridable="yes"/>
     </InstallExecuteSequence>
 
     <UI>
@@ -55,7 +55,7 @@
     <CustomAction Id="RemoveRegistryValue_rollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="RemoveRegistryValue_Deferred" Execute="rollback" Return="check" Impersonate="no" />
 
     <InstallExecuteSequence>
-      <Custom Action="RemoveRegistryValue_Immediate" After="RemoveRegistryValues" Overridable="yes"></Custom>
+      <Custom Action="RemoveRegistryValue_Immediate" After="RemoveRegistryValues" Overridable="yes"/>
     </InstallExecuteSequence>
 
     <UI>
@@ -68,10 +68,10 @@
   <Fragment>
     <CustomAction Id="ReadIniValues" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="ReadIniValues" Execute="immediate" Return="check" />
     <InstallExecuteSequence>
-      <Custom Action="ReadIniValues" After="AppSearch" Overridable="yes"></Custom>
+      <Custom Action="ReadIniValues" After="AppSearch" Overridable="yes"/>
     </InstallExecuteSequence>
     <InstallUISequence>
-      <Custom Action="ReadIniValues" After="AppSearch" Overridable="yes"></Custom>
+      <Custom Action="ReadIniValues" After="AppSearch" Overridable="yes"/>
     </InstallUISequence>
   </Fragment>
 
@@ -79,10 +79,10 @@
   <Fragment>
     <CustomAction Id="XmlSearch" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="XmlSearch" Execute="immediate" Return="check" />
     <InstallExecuteSequence>
-      <Custom Action="XmlSearch" After="AppSearch" Overridable="yes"></Custom>
+      <Custom Action="XmlSearch" After="AppSearch" Overridable="yes"/>
     </InstallExecuteSequence>
     <InstallUISequence>
-      <Custom Action="XmlSearch" After="AppSearch" Overridable="yes"></Custom>
+      <Custom Action="XmlSearch" After="AppSearch" Overridable="yes"/>
     </InstallUISequence>
   </Fragment>
 
@@ -94,7 +94,7 @@
     <CustomAction Id="Telemetry_commit" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="commit" Return="ignore" Impersonate="no" />
 
     <InstallExecuteSequence>
-      <Custom Action="Telemetry" After="InstallInitialize" Overridable="yes"></Custom>
+      <Custom Action="Telemetry" After="InstallInitialize" Overridable="yes"/>
     </InstallExecuteSequence>
 
     <UI>
@@ -115,10 +115,10 @@
     <CustomAction Id="SplitPath" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="SplitPath" Execute="immediate" Return="check" />
 
     <InstallExecuteSequence>
-      <Custom Action="SplitPath" After="CostFinalize" Overridable="yes"></Custom>
+      <Custom Action="SplitPath" After="CostFinalize" Overridable="yes"/>
     </InstallExecuteSequence>
     <InstallUISequence>
-      <Custom Action="SplitPath" After="CostFinalize" Overridable="yes"></Custom>
+      <Custom Action="SplitPath" After="CostFinalize" Overridable="yes"/>
     </InstallUISequence>
   </Fragment>
 
@@ -141,10 +141,10 @@
   <Fragment>
     <CustomAction Id="RegularExpression" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="RegularExpression" Execute="firstSequence" Return="check" />
     <InstallUISequence>
-      <Custom Action="RegularExpression" After="CostFinalize" />
+      <Custom Action="RegularExpression" After="CostFinalize" Overridable="yes" />
     </InstallUISequence>
     <InstallExecuteSequence>
-      <Custom Action="RegularExpression" After="CostFinalize" />
+      <Custom Action="RegularExpression" After="CostFinalize" Overridable="yes" />
     </InstallExecuteSequence>
   </Fragment>
 
@@ -156,7 +156,7 @@
     <CustomAction Id="FileRegex_commit" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="commit" Return="ignore" Impersonate="no" />
 
     <InstallExecuteSequence>
-      <Custom Action="FileRegex_Immediate" After="DuplicateFiles" Overridable="yes"></Custom>
+      <Custom Action="FileRegex_Immediate" After="DuplicateFiles" Overridable="yes"/>
     </InstallExecuteSequence>
     <UI>
       <ProgressText Action="ShellExecute_deferred">File search &amp; replace</ProgressText>
@@ -171,7 +171,7 @@
     <CustomAction Id="DeletePath_commit" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="commit" Return="ignore" Impersonate="no" />
 
     <InstallExecuteSequence>
-      <Custom Action="DeletePath" Before="InstallFinalize" Overridable="yes"></Custom>
+      <Custom Action="DeletePath" Before="InstallFinalize" Overridable="yes"/>
     </InstallExecuteSequence>
     <UI>
       <ProgressText Action="DeletePath_rollback">Deleting files and folders</ProgressText>
@@ -231,10 +231,10 @@
 
     <CustomAction Id="AccountNames" BinaryKey="PanelSwCustomActions.dll" DllEntry="AccountNames" />
     <InstallUISequence>
-      <Custom Action="AccountNames" Before="AppSearch" />
+      <Custom Action="AccountNames" Before="AppSearch" Overridable="yes" />
     </InstallUISequence>
     <InstallExecuteSequence>
-      <Custom Action="AccountNames" Before="AppSearch" />
+      <Custom Action="AccountNames" Before="AppSearch" Overridable="yes" />
     </InstallExecuteSequence>
 
   </Fragment>
@@ -245,7 +245,7 @@
     <CustomAction Id="MsiSqlQuery" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="MsiSqlQuery" Execute="immediate" Return="check" />
 
     <InstallExecuteSequence>
-      <Custom Action="MsiSqlQuery" After="CostFinalize" Overridable="yes"></Custom>
+      <Custom Action="MsiSqlQuery" After="CostFinalize" Overridable="yes"/>
     </InstallExecuteSequence>
   </Fragment>
 
@@ -429,10 +429,10 @@
   <Fragment>
     <CustomAction Id="SqlSearch" BinaryKey="PanelSwCustomActions.dll" DllEntry="SqlSearch" Execute="firstSequence" />
     <InstallExecuteSequence>
-      <Custom Action="SqlSearch" After="AppSearch" Overridable="yes"></Custom>
+      <Custom Action="SqlSearch" After="AppSearch" Overridable="yes"/>
     </InstallExecuteSequence>
     <InstallUISequence>
-      <Custom Action="SqlSearch" After="AppSearch" Overridable="yes"></Custom>
+      <Custom Action="SqlSearch" After="AppSearch" Overridable="yes"/>
     </InstallUISequence>
     <UI>
       <ProgressText Action="SqlSearch">!(loc.SqlSearch)</ProgressText>
