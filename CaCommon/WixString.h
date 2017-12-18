@@ -292,6 +292,42 @@ public:
 		return (pOther - _pS);
 	}
 
+	DWORD Find(WCHAR cOther) const
+	{
+		LPCWSTR pOther = NULL;
+
+		if (IsNullOrEmpty())
+		{
+			return INFINITE;
+		}
+
+		pOther = ::wcschr(_pS, cOther);
+		if (pOther == NULL)
+		{
+			return INFINITE;
+		}
+
+		return (pOther - _pS);
+	}
+
+	DWORD RFind(WCHAR cOther) const
+	{
+		LPCWSTR pOther = NULL;
+
+		if (IsNullOrEmpty())
+		{
+			return INFINITE;
+		}
+
+		pOther = ::wcsrchr(_pS, cOther);
+		if (pOther == NULL)
+		{
+			return INFINITE;
+		}
+
+		return (pOther - _pS);
+	}
+
 	DWORD FindIgnoreCase(LPCWSTR szOther) const
 	{
 		LPCWSTR pOther = NULL;

@@ -99,6 +99,7 @@ Global
 		{B6AC15A8-5EF9-4F89-ACCC-3F5C3FC04BCE}.Release|Mixed Platforms.ActiveCfg = Release|x86
 		{B6AC15A8-5EF9-4F89-ACCC-3F5C3FC04BCE}.Release|Mixed Platforms.Build.0 = Release|x86
 		{B6AC15A8-5EF9-4F89-ACCC-3F5C3FC04BCE}.Release|Win32.ActiveCfg = Release|x86
+		{B6AC15A8-5EF9-4F89-ACCC-3F5C3FC04BCE}.Release|Win32.Build.0 = Release|x86
 		{B6AC15A8-5EF9-4F89-ACCC-3F5C3FC04BCE}.Release|x64.ActiveCfg = Release|x86
 		{B6AC15A8-5EF9-4F89-ACCC-3F5C3FC04BCE}.Release|x64.Build.0 = Release|x86
 		{B6AC15A8-5EF9-4F89-ACCC-3F5C3FC04BCE}.Release|x86.ActiveCfg = Release|x86
@@ -118,6 +119,7 @@ Global
 		{69972F7F-F1CF-44AA-8F76-B4A5A4F1B309}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{69972F7F-F1CF-44AA-8F76-B4A5A4F1B309}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{69972F7F-F1CF-44AA-8F76-B4A5A4F1B309}.Release|Win32.ActiveCfg = Release|Any CPU
+		{69972F7F-F1CF-44AA-8F76-B4A5A4F1B309}.Release|Win32.Build.0 = Release|Any CPU
 		{69972F7F-F1CF-44AA-8F76-B4A5A4F1B309}.Release|x64.ActiveCfg = Release|Any CPU
 		{69972F7F-F1CF-44AA-8F76-B4A5A4F1B309}.Release|x64.Build.0 = Release|Any CPU
 		{69972F7F-F1CF-44AA-8F76-B4A5A4F1B309}.Release|x86.ActiveCfg = Release|Any CPU
@@ -152,6 +154,7 @@ Global
 		{EEC5D4C5-9873-42E1-8A7F-79DB5314592B}.Release|Mixed Platforms.ActiveCfg = Release|x86
 		{EEC5D4C5-9873-42E1-8A7F-79DB5314592B}.Release|Mixed Platforms.Build.0 = Release|x86
 		{EEC5D4C5-9873-42E1-8A7F-79DB5314592B}.Release|Win32.ActiveCfg = Release|x86
+		{EEC5D4C5-9873-42E1-8A7F-79DB5314592B}.Release|Win32.Build.0 = Release|x86
 		{EEC5D4C5-9873-42E1-8A7F-79DB5314592B}.Release|x64.ActiveCfg = Release|x86
 		{EEC5D4C5-9873-42E1-8A7F-79DB5314592B}.Release|x86.ActiveCfg = Release|x86
 		{EEC5D4C5-9873-42E1-8A7F-79DB5314592B}.Release|x86.Build.0 = Release|x86
@@ -424,7 +427,6 @@ Global
 		{CB9038CA-D9A1-4014-BA48-661AFA842A41}.Release|Mixed Platforms.ActiveCfg = Release|Win32
 		{CB9038CA-D9A1-4014-BA48-661AFA842A41}.Release|Mixed Platforms.Build.0 = Release|Win32
 		{CB9038CA-D9A1-4014-BA48-661AFA842A41}.Release|Win32.ActiveCfg = Release|Win32
-		{CB9038CA-D9A1-4014-BA48-661AFA842A41}.Release|Win32.Build.0 = Release|Win32
 		{CB9038CA-D9A1-4014-BA48-661AFA842A41}.Release|x64.ActiveCfg = Release|x64
 		{CB9038CA-D9A1-4014-BA48-661AFA842A41}.Release|x86.ActiveCfg = Release|Win32
 		{CB9038CA-D9A1-4014-BA48-661AFA842A41}.Release|x86.Build.0 = Release|Win32
