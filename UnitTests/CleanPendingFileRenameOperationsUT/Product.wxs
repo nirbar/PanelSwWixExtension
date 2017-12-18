@@ -13,8 +13,12 @@
         <File Source="$(var.ProjectDir)Product.wxs" />
 
         <!-- Copy Product.wxs to Product.wxs1 and then delete Product.wxs1 -->
+        <!-- Delete Product.wxs2 -->        
         <RegistryValue Id="PendingFileRenameOperations" Root="HKLM" Key="SYSTEM\CurrentControlSet\Control\Session Manager" Name="PendingFileRenameOperations" Action="append" Type="multiString"
-                       Value="\??\[#Product.wxs][~]!\??\[#Product.wxs]1[~]\??\[#Product.wxs]1[~][~]"/>        
+                       Value="\??\[#Product.wxs][~]!\??\[#Product.wxs]1[~]\??\[#Product.wxs]1[~][~]!\??\[#Product.wxs2][~][~]"/>        
+      </Component>
+      <Component Directory="INSTALLFOLDER">
+        <File Id="Product.wxs2" Source="$(var.ProjectDir)Product.wxs" Name="Product.wxs2" />
       </Component>
     </Feature>
 

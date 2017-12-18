@@ -387,10 +387,15 @@
     </UI>
   </Fragment>
 
-  <!-- CleanPendingFileRenameOperations -->
+  <!-- CleanPendingFileRenameOperations
+         - Remove 'delete' entries from registry key HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\PendingFileRenameOperations that schedule creation and deletion of the same file.
+         - Remove 'delete' entries of files that are scheduled to install based on their component action
+  -->
   <Fragment>
+    <CustomAction Id="CleanPendingFileRenameOperationsSched" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CleanPendingFileRenameOperationsSched" Execute="immediate"/>
     <CustomAction Id="CleanPendingFileRenameOperations" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CleanPendingFileRenameOperations" Execute="deferred" Impersonate="no" />
     <InstallExecuteSequence>
+      <Custom Action="CleanPendingFileRenameOperationsSched" Before="CleanPendingFileRenameOperations" Overridable="yes"/>
       <Custom Action="CleanPendingFileRenameOperations" Before="InstallFinalize" Overridable="yes"/>
     </InstallExecuteSequence>
   </Fragment>
