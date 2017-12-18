@@ -32,5 +32,21 @@
       <PanelSW:SqlSearch Server="[SQL_SERVER]" Instance="[SQL_INSTANCE]" Database="master" Username="[SQL_USER]" Password="[SQL_PSW]"
                          Query="SELECT TOP 1 name FROM sysdatabases" />
     </Property>
+
+    <Property Id="SQL_TEST1">
+      <PanelSW:SqlSearch Server="[SQL_SERVER]\[SQL_INSTANCE]" Database="master" Username="[SQL_USER]" Password="[SQL_PSW]"
+                         Query="SELECT TOP 1 name FROM sysdatabases" />
+    </Property>
+
+    <Property Id="SQL_TEST2">
+      <PanelSW:SqlSearch Server="[SQL_SERVER]\\\\\[SQL_INSTANCE]" Database="master" Username="[SQL_USER]" Password="[SQL_PSW]"
+                         Query="SELECT TOP 1 name FROM sysdatabases" />
+    </Property>
+
+    <!-- Hopefully, default instance exists on test machine -->    
+    <Property Id="SQL_TEST3">
+      <PanelSW:SqlSearch Server="[SQL_SERVER]\" Database="master" Username="[SQL_USER]" Password="[SQL_PSW]"
+                         Query="SELECT TOP 1 name FROM sysdatabases" />
+    </Property>
   </Product>
 </Wix>
