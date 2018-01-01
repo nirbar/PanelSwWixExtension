@@ -7,7 +7,7 @@
     <authors>Nir Bar</authors>
     <owners>Nir Bar</owners>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <projectUrl>https://bitbucket.org/nirbar1/panelswwixextension</projectUrl>
+    <projectUrl>https://github.com/nirbar/PanelSwWixExtension.git</projectUrl>
     <description>A WiX extension with various actions including- File regular expressions; XmlSearch; TaskScheduler; ExecOnComponent</description>
     <summary>A WiX extension with various actions</summary>
     <tags>WiX MSI Installer WixToolset XML</tags>
