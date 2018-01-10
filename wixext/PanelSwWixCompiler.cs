@@ -1696,6 +1696,7 @@ namespace PanelSw.Wix.Extensions
             string prop = null;
             int flags = 0;
             string condition = null;
+            byte order = 0xFF;
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -1724,6 +1725,9 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "extended":
                             flags |= (int)RegexMatchFlags.Extended << 2;
+                            break;
+                        case "order":
+                            order = (byte)Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 0xFF);
                             break;
 
                         default:
@@ -1792,6 +1796,7 @@ namespace PanelSw.Wix.Extensions
                 row[4] = prop;
                 row[5] = flags;
                 row[6] = condition;
+                row[7] = (int)order;
             }
         }
 
@@ -1813,6 +1818,7 @@ namespace PanelSw.Wix.Extensions
             FileEncoding encoding = FileEncoding.AutoDetect;
             bool ignoreCase = false;
             string condition = null;
+            byte order = 0xFF;
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -1838,6 +1844,9 @@ namespace PanelSw.Wix.Extensions
                         case "encoding":
                             string enc = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             encoding = (FileEncoding)Enum.Parse(typeof(FileEncoding), enc);
+                            break;
+                        case "order":
+                            order = (byte)Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 0xFF);
                             break;
 
                         default:
@@ -1898,6 +1907,7 @@ namespace PanelSw.Wix.Extensions
                 row[4] = ignoreCase ? 1 : 0;
                 row[5] = (int)encoding;
                 row[6] = condition;
+                row[7] = (int)order;
             }
         }
 

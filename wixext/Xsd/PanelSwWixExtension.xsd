@@ -493,6 +493,11 @@ Execute a Regular Expression to perform find & replace operations within files.
               <xs:documentation>Set to yes to ignore case in matches. Default is no.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="Order" type="xs:integer" default="255">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Order of regex execution, in range 0-255. Default is 255. Execution order is indeterminate accross expressions with the same order number.]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>
@@ -556,6 +561,11 @@ Execute a Regular Expression to replace or find matches in property values.
           <xs:attribute name="Extended" type="YesNoType" use="optional">
             <xs:annotation>
               <xs:documentation>Set to yes for extended regex syntax. Default is no.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Order" type="xs:integer" default="255">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Order of regex execution, in range 0-255. Default is 255. Execution order is indeterminate accross expressions with the same order number.]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>

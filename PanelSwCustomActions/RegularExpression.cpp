@@ -3,7 +3,7 @@
 #include <regex>
 
 using namespace std;
-#define RegularExpressionQuery L"SELECT `Id`, `Input`, `Expression`, `Replacement`, `DstProperty_`, `Flags`, `Condition` FROM `PSW_RegularExpression`"
+#define RegularExpressionQuery L"SELECT `Id`, `Input`, `Expression`, `Replacement`, `DstProperty_`, `Flags`, `Condition` FROM `PSW_RegularExpression` ORDER BY `Order`"
 enum eRegularExpressionQuery { Id = 1, Input, Expression, Replacement, DstProperty, Flags, Condition };
 enum SearchFlags
 {
