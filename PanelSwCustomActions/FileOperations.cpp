@@ -192,17 +192,17 @@ HRESULT CFileOperations::DeferredExecute(IXMLDOMElement* pElem)
 
 	if( vTag == L"CopyFile")
 	{
-		hr = CopyFile(pElem);
+		hr = CopyPath(pElem);
 		BreakExitOnFailure(hr, "Failed to copy file");
 	}
 	else if( vTag == L"MoveFile")
 	{
-		hr = MoveFile(pElem);
+		hr = MovePath(pElem);
 		BreakExitOnFailure(hr, "Failed to move file");
 	}
 	else if( vTag == L"DeleteFile")
 	{
-		hr = DeleteFile(pElem);
+		hr = DeletePath(pElem);
 		BreakExitOnFailure(hr, "Failed to delete file");
 	}
 	else
@@ -215,7 +215,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CFileOperations::CopyFile(IXMLDOMElement* pElem)
+HRESULT CFileOperations::CopyPath(IXMLDOMElement* pElem)
 {
 	CComVariant vFrom;
 	CComVariant vTo;
@@ -276,7 +276,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CFileOperations::MoveFile(IXMLDOMElement* pElem)
+HRESULT CFileOperations::MovePath(IXMLDOMElement* pElem)
 {
 	CComVariant vFrom;
 	CComVariant vTo;
@@ -337,7 +337,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CFileOperations::DeleteFile(IXMLDOMElement* pElem)
+HRESULT CFileOperations::DeletePath(IXMLDOMElement* pElem)
 {
 	CComVariant vPath;
 	CComVariant vFlags;

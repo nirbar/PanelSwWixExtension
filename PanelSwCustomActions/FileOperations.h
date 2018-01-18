@@ -23,8 +23,8 @@ private:
 		, IgnoreErrors = 2 * IgnoreMissingPath
 	};
 
-	HRESULT CopyFile(IXMLDOMElement* pElem);
-	HRESULT MoveFile(IXMLDOMElement* pElem);
-	HRESULT DeleteFile(IXMLDOMElement* pElem);
+	HRESULT CopyPath(IXMLDOMElement* pElem);
+	HRESULT MovePath(IXMLDOMElement* pElem);
+	HRESULT DeletePath(IXMLDOMElement* pElem);
 };
 
