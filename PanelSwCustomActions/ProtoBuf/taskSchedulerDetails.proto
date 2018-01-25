@@ -1,0 +1,19 @@
+syntax = "proto3";
+package com.panelsw.ca;
+
+message TaskSchedulerDetails{
+
+	enum Action
+	{
+		Create = 0;
+		Delete = 1;
+		Backup = 2;
+		Restore = 3;
+	}
+
+
+	bytes name = 1;
+	bytes taskXml = 2;
+	bytes backupFile = 3;
+	Action action = 4;
+}

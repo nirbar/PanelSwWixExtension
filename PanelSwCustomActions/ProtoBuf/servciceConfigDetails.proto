@@ -1,0 +1,9 @@
+syntax = "proto3";
+package com.panelsw.ca;
+
+message ServciceConfigDetails{
+
+	bytes name = 1;
+	bytes account = 2;
+	bytes password = 3;
+}

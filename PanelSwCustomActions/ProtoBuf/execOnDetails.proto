@@ -1,0 +1,12 @@
+syntax = "proto3";
+package com.panelsw.ca;
+
+message ExecOnDetails{
+	
+	bytes command = 1;
+	
+	map<int32, int32> exitCodeRemap = 2;
+
+	bool async = 3;
+	bool ignoreErrors = 4;
+}

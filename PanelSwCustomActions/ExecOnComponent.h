@@ -1,6 +1,5 @@
 #pragma once
 #include "../CaCommon/DeferredActionBase.h"
-#include <taskschd.h>
 #include <map>
 
 class CExecOnComponent :
@@ -14,6 +13,6 @@ public:
 
 protected:
 	// Execute the command object (XML element)
-	virtual HRESULT DeferredExecute(IXMLDOMElement* pElem);
+	HRESULT DeferredExecute(const ::google::protobuf::Any* pCommand) override;
 };
 

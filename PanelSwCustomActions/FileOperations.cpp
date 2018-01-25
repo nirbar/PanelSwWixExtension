@@ -1,6 +1,11 @@
 #include "FileOperations.h"
 #include "../CaCommon/WixString.h"
 #include <Shellapi.h>
+#include <Shlwapi.h>
+#include "fileOperationsDetails.pb.h"
+using namespace ::com::panelsw::ca;
+using namespace google::protobuf;
+
 #define DeletePath_QUERY L"SELECT `Id`, `Path`, `Flags`, `Condition` FROM `PSW_DeletePath`"
 enum DeletePathQuery { Id = 1, Path, Flags, Condition };
 
@@ -15,9 +20,9 @@ extern "C" __declspec(dllexport) UINT DeletePath(MSIHANDLE hInstall)
 	CFileOperations commitCAD;
 	WCHAR shortTempPath[MAX_PATH + 1];
 	WCHAR longTempPath[MAX_PATH + 1];
-	CComBSTR szCustomActionData;
 	DWORD dwRes = 0;
 	DWORD dwUnique = 0;
+	LPWSTR szCustomActionData = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");
@@ -101,19 +106,20 @@ extern "C" __declspec(dllexport) UINT DeletePath(MSIHANDLE hInstall)
 	hr = WcaDoDeferredAction(L"DeletePath_rollback", szCustomActionData, rollbackCAD.GetCost());
 	BreakExitOnFailure(hr, "Failed scheduling deferred action.");
 
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = deferredFileCAD.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
 	hr = WcaDoDeferredAction(L"DeletePath_deferred", szCustomActionData, deferredFileCAD.GetCost());
 	BreakExitOnFailure(hr, "Failed scheduling deferred action.");
 
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = commitCAD.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
 	hr = WcaDoDeferredAction(L"DeletePath_commit", szCustomActionData, commitCAD.GetCost());
 	BreakExitOnFailure(hr, "Failed scheduling deferred action.");
 
 LExit:
+	ReleaseStr(szCustomActionData);
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
 }
@@ -121,20 +127,27 @@ LExit:
 HRESULT CFileOperations::AddCopyFile(LPCWSTR szFrom, LPCWSTR szTo, int flags)
 {
 	HRESULT hr = S_OK;
-	CComPtr<IXMLDOMElement> pElem;
-    unsigned long long fileSize = FileSize(szFrom);
+	::com::panelsw::ca::Command *pCmd = nullptr;
+	FileOperationsDetails *pDetails = nullptr;
+	Any *pAny = nullptr;
 
-	hr = AddElement(L"CopyFile", L"CFileOperations", (UINT)fileSize, &pElem);
+	hr = AddCommand("CFileOperations", &pCmd);
 	BreakExitOnFailure(hr, "Failed to add XML element");
 
-	hr = pElem->setAttribute(CComBSTR("From"), CComVariant(szFrom));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'From'");
+	pDetails = new FileOperationsDetails();
+	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	hr = pElem->setAttribute(CComBSTR("To"), CComVariant(szTo));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'To'");
+	pAny = new Any();
+	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
-	hr = pElem->setAttribute(CComBSTR("Flags"), CComVariant(flags));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'Flags'");
+	pCmd->set_allocated_details(pAny);
+	pDetails->set_move(false);
+	pDetails->set_from(szFrom, WSTR_BYTE_SIZE(szFrom));
+	pDetails->set_to(szTo, WSTR_BYTE_SIZE(szTo));
+
+	pDetails->set_ignoreerrors(flags & DeletePathAttributes::IgnoreErrors);
+	pDetails->set_ignoremissing(flags & DeletePathAttributes::IgnoreMissingPath);
+	pAny->PackFrom(*pDetails);
 
 LExit:
 	return hr;
@@ -143,20 +156,27 @@ LExit:
 HRESULT CFileOperations::AddMoveFile(LPCWSTR szFrom, LPCWSTR szTo, int flags)
 {
 	HRESULT hr = S_OK;
-	CComPtr<IXMLDOMElement> pElem;
-    unsigned long long fileSize = FileSize(szFrom);
+	::com::panelsw::ca::Command *pCmd = nullptr;
+	FileOperationsDetails *pDetails = nullptr;
+	Any *pAny = nullptr;
 
-	hr = AddElement(L"MoveFile", L"CFileOperations", (UINT)fileSize, &pElem);
+	hr = AddCommand("CFileOperations", &pCmd);
 	BreakExitOnFailure(hr, "Failed to add XML element");
 
-	hr = pElem->setAttribute(CComBSTR("From"), CComVariant(szFrom));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'From'");
+	pDetails = new FileOperationsDetails();
+	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	hr = pElem->setAttribute(CComBSTR("To"), CComVariant(szTo));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'To'");
+	pAny = new Any();
+	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
-	hr = pElem->setAttribute(CComBSTR("Flags"), CComVariant(flags));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'Flags'");
+	pCmd->set_allocated_details(pAny);
+	pDetails->set_move(true);
+	pDetails->set_from(szFrom, WSTR_BYTE_SIZE(szFrom));
+	pDetails->set_to(szTo, WSTR_BYTE_SIZE(szTo));
+
+	pDetails->set_ignoreerrors(flags & DeletePathAttributes::IgnoreErrors);
+	pDetails->set_ignoremissing(flags & DeletePathAttributes::IgnoreMissingPath);
+	pAny->PackFrom(*pDetails);
 
 LExit:
 	return hr;
@@ -165,227 +185,157 @@ LExit:
 HRESULT CFileOperations::AddDeleteFile(LPCWSTR szPath, int flags)
 {
 	HRESULT hr = S_OK;
-	CComPtr<IXMLDOMElement> pElem;
-    unsigned long long fileSize = FileSize(szPath);
+	::com::panelsw::ca::Command *pCmd = nullptr;
+	FileOperationsDetails *pDetails = nullptr;
+	Any *pAny = nullptr;
 
-	hr = AddElement(L"DeleteFile", L"CFileOperations", (UINT)fileSize, &pElem);
+	hr = AddCommand("CFileOperations", &pCmd);
 	BreakExitOnFailure(hr, "Failed to add XML element");
 
-	hr = pElem->setAttribute(CComBSTR("Path"), CComVariant(szPath));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'Path'");
+	pDetails = new FileOperationsDetails();
+	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	hr = pElem->setAttribute(CComBSTR("Flags"), CComVariant(flags));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'Flags'");
+	pAny = new Any();
+	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+
+	pCmd->set_allocated_details(pAny);
+	pDetails->set_from(szPath, WSTR_BYTE_SIZE(szPath));
+	pDetails->set_ignoreerrors(flags & DeletePathAttributes::IgnoreErrors);
+	pDetails->set_ignoremissing(flags & DeletePathAttributes::IgnoreMissingPath);
+	pAny->PackFrom(*pDetails);
 
 LExit:
 	return hr;
 }
 
 // Execute the command object (XML element)
-HRESULT CFileOperations::DeferredExecute(IXMLDOMElement* pElem)
+HRESULT CFileOperations::DeferredExecute(const ::google::protobuf::Any* pCommand)
 {
 	HRESULT hr = S_OK;
-	CComBSTR vTag;
+	BOOL bRes = TRUE;
+	FileOperationsDetails details;
+	LPCWSTR szFrom = nullptr;
+	LPCWSTR szTo = nullptr;
 
-	hr = pElem->get_tagName( &vTag);
-	BreakExitOnFailure(hr, "Failed to get tag name");
+	BreakExitOnNull(pCommand->Is<FileOperationsDetails>(), hr, E_INVALIDARG, "Expected command to be FileOperationsDetails");
+	bRes = pCommand->UnpackTo(&details);
+	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking FileOperationsDetails");
 
-	if( vTag == L"CopyFile")
+	if (details.from().size())
 	{
-		hr = CopyPath(pElem);
+		szFrom = (LPCWSTR)details.from().data();
+	}
+	BreakExitOnNull(szFrom && *szFrom, hr, E_FAIL, "'From' field is empty");
+
+	if (details.to().size())
+	{
+		szTo = (LPCWSTR)details.to().data();
+	}
+
+	if (szFrom && szTo)
+	{
+		hr = CopyPath(szFrom, szTo, details.move(), details.ignoremissing(), details.ignoreerrors());
 		BreakExitOnFailure(hr, "Failed to copy file");
 	}
-	else if( vTag == L"MoveFile")
+	else 
 	{
-		hr = MovePath(pElem);
-		BreakExitOnFailure(hr, "Failed to move file");
-	}
-	else if( vTag == L"DeleteFile")
-	{
-		hr = DeletePath(pElem);
+		hr = DeletePath(szFrom, details.ignoremissing(), details.ignoreerrors());
 		BreakExitOnFailure(hr, "Failed to delete file");
-	}
-	else
-	{
-		hr = E_INVALIDARG;
-		BreakExitOnFailure1(hr, "Invalid tag: '%ls'", (LPWSTR)vTag);
 	}
 
 LExit:
 	return hr;
 }
 
-HRESULT CFileOperations::CopyPath(IXMLDOMElement* pElem)
+HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool bIgnoreMissing, bool bIgnoreErrors)
 {
-	CComVariant vFrom;
-	CComVariant vTo;
-	CComVariant vFlags;
-	CWixString sFrom;
-	CWixString sTo;
 	SHFILEOPSTRUCT opInfo;
 	HRESULT hr = S_OK;
 	INT nRes = ERROR_SUCCESS;
-	int flags = 0;
+	LPWSTR szFromNull = nullptr;
+	LPWSTR szToNull = nullptr;
 
-	hr = pElem->getAttribute(CComBSTR(L"From"), &vFrom);
-	BreakExitOnFailure(hr, "Failed getting 'From' attribute");
-
-	hr = pElem->getAttribute(CComBSTR(L"Flags"), &vFlags);
-	BreakExitOnFailure(hr, "Failed getting 'Flags' attribute");
-	flags = ::_wtoi(vFlags.bstrVal);
-
-	// Ignore if Src doesn't exist?
-	if ((flags & DeletePathAttributes::IgnoreMissingPath) != 0)
+	if (bIgnoreMissing)
 	{
-		if (!::PathFileExists(vFrom.bstrVal))
+		if (!::PathFileExists(szFrom))
 		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping copy '%ls' as it doesn't exist and marked to ignore missing", vFrom.bstrVal);
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping copy '%ls' as it doesn't exist and marked to ignore missing", szFrom);
 			ExitFunction1(hr = S_FALSE);
 		}
 	}
 
-	hr = pElem->getAttribute(CComBSTR(L"To"), &vTo);
-	BreakExitOnFailure(hr, "Failed getting 'To' attribute");
-
-	hr = sFrom.Format(L"%s%c%c", (LPCWSTR)vFrom.bstrVal, '\0', '\0');
+	hr = StrAllocFormatted(&szFromNull, L"%s%c%c", szFrom, L'\0', L'\0');
 	BreakExitOnFailure(hr, "Failed formatting string");
 
-	hr = sTo.Format(L"%s%c%c", (LPCWSTR)vTo.bstrVal, '\0', '\0');
+	hr = StrAllocFormatted(&szToNull, L"%s%c%c", szTo, L'\0', L'\0');
 	BreakExitOnFailure(hr, "Failed formatting string");
 
 	// Prepare 
 	::memset(&opInfo, 0, sizeof(opInfo));
-	opInfo.wFunc = FO_COPY;
-	opInfo.pFrom = (LPCWSTR)sFrom;
-	opInfo.pTo = (LPCWSTR)sTo;
+	opInfo.wFunc = bMove ? FO_MOVE : FO_COPY;
+	opInfo.pFrom = szFromNull;
+	opInfo.pTo = szToNull;
 	opInfo.fFlags = FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR | FOF_NOERRORUI | FOF_NO_UI;
 
 	nRes = ::SHFileOperation(&opInfo);
-	if ((flags & DeletePathAttributes::IgnoreErrors) == 0)
+	if (bIgnoreErrors)
 	{
 		BreakExitOnNull1((!nRes), hr, E_FAIL, "Failed copying file (Error %i)", nRes);
 		BreakExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed copying file (operation aborted)");
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Copied '%ls' to '%ls'", vFrom.bstrVal, vTo.bstrVal);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Copied '%ls' to '%ls'", szFrom, szTo);
 	}
 	else if (nRes != 0)
 	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed Copying '%ls' to '%ls'; Ignoring error (%i)", vFrom.bstrVal, vTo.bstrVal, nRes);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed Copying '%ls' to '%ls'; Ignoring error (%i)", szFrom, szTo, nRes);
 	}
 
 LExit:
+	ReleaseStr(szFromNull);
+	ReleaseStr(szToNull);
 	return hr;
 }
 
-HRESULT CFileOperations::MovePath(IXMLDOMElement* pElem)
+HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bIgnoreErrors)
 {
-	CComVariant vFrom;
-	CComVariant vTo;
-	CComVariant vFlags;
-	CWixString sFrom;
-	CWixString sTo;
 	SHFILEOPSTRUCT opInfo;
 	HRESULT hr = S_OK;
 	INT nRes = ERROR_SUCCESS;
-	int flags = 0;
-
-	hr = pElem->getAttribute(CComBSTR(L"From"), &vFrom);
-	BreakExitOnFailure(hr, "Failed getting 'From' attribute");
-
-	hr = pElem->getAttribute(CComBSTR(L"To"), &vTo);
-	BreakExitOnFailure(hr, "Failed getting 'To' attribute");
-
-	hr = pElem->getAttribute(CComBSTR(L"Flags"), &vFlags);
-	BreakExitOnFailure(hr, "Failed getting 'Flags' attribute");
-	flags = ::_wtoi(vFlags.bstrVal);
+	LPWSTR szFromNull = nullptr;
 
 	// Ignore if Src doesn't exist?
-	if ((flags & DeletePathAttributes::IgnoreMissingPath) != 0)
+	if (bIgnoreMissing)
 	{
-		if (!::PathFileExists(vFrom.bstrVal))
+		if (!::PathFileExists(szFrom))
 		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping move '%ls' as it doesn't exist and marked to ignore missing", vFrom.bstrVal);
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping copy '%ls' as it doesn't exist and marked to ignore missing", szFrom);
 			ExitFunction1(hr = S_FALSE);
 		}
 	}
 
-	hr = sFrom.Format(L"%s%c%c", (LPCWSTR)vFrom.bstrVal, '\0', '\0');
-	BreakExitOnFailure(hr, "Failed formatting string");
-
-	hr = sTo.Format(L"%s%c%c", (LPCWSTR)vTo.bstrVal, '\0', '\0');
-	BreakExitOnFailure(hr, "Failed formatting string");
-
-	// Prepare 
-	::memset(&opInfo, 0, sizeof(opInfo));
-	opInfo.wFunc = FO_MOVE;
-	opInfo.pFrom = (LPCWSTR)sFrom;
-	opInfo.pTo = (LPCWSTR)sTo;
-	opInfo.fFlags = FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR | FOF_NOERRORUI | FOF_NO_UI;
-
-	nRes = ::SHFileOperation(&opInfo);
-	if ((flags & DeletePathAttributes::IgnoreErrors) == 0)
-	{
-		BreakExitOnNull1((!nRes), hr, E_FAIL, "Failed moving file (Error %i)", nRes);
-		BreakExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed moving file (operation aborted)");
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Moved '%ls' to '%ls'", vFrom.bstrVal, vTo.bstrVal);
-	}
-	else if (nRes != 0)
-	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed moving '%ls' to '%ls'; Ignoring error (%i)", vFrom.bstrVal, vTo.bstrVal, nRes);
-	}
-
-LExit:
-	return hr;
-}
-
-HRESULT CFileOperations::DeletePath(IXMLDOMElement* pElem)
-{
-	CComVariant vPath;
-	CComVariant vFlags;
-	CWixString sPath;
-	SHFILEOPSTRUCT opInfo;
-	HRESULT hr = S_OK;
-	INT nRes = ERROR_SUCCESS;
-	int flags = 0;
-
-	hr = pElem->getAttribute(CComBSTR(L"Path"), &vPath);
-	BreakExitOnFailure(hr, "Failed getting 'Path' attribute");
-
-	hr = pElem->getAttribute(CComBSTR(L"Flags"), &vFlags);
-	BreakExitOnFailure(hr, "Failed getting 'Flags' attribute");
-	flags = ::_wtoi(vFlags.bstrVal);
-
-	// Ignore if Src doesn't exist?
-	if ((flags & DeletePathAttributes::IgnoreMissingPath) != 0)
-	{
-		if (!::PathFileExists(vPath.bstrVal))
-		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping delete '%ls' as it doesn't exist and marked to ignore missing", vPath.bstrVal);
-			ExitFunction1(hr = S_FALSE);
-		}
-	}
-
-	hr = sPath.Format(L"%s%c%c", (LPCWSTR)vPath.bstrVal, '\0', '\0');
+	hr = StrAllocFormatted(&szFromNull, L"%s%c%c", szFrom, L'\0', L'\0');
 	BreakExitOnFailure(hr, "Failed formatting string");
 
 	// Prepare 
 	::memset(&opInfo, 0, sizeof(opInfo));
 	opInfo.wFunc = FO_DELETE;
-	opInfo.pFrom = (LPCWSTR)sPath;
+	opInfo.pFrom = szFromNull;
 	opInfo.fFlags = FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR | FOF_NOERRORUI | FOF_NO_UI;
 
 	nRes = ::SHFileOperation(&opInfo);
-	if ((flags & DeletePathAttributes::IgnoreErrors) == 0)
+	if (bIgnoreErrors)
 	{
 		BreakExitOnNull1((!nRes), hr, E_FAIL, "Failed deleting file (Error %i)", nRes);
 		BreakExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed deleting file (operation aborted)");
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Deleted '%ls'", vPath.bstrVal);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Deleted '%ls'", szFrom);
 	}
 	else if (nRes != 0)
 	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed deleting '%ls'; Ignoring error (%i)", vPath.bstrVal, nRes);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed deleting '%ls'; Ignoring error (%i)", szFrom, nRes);
 	}
 
 LExit:
+	ReleaseStr(szFromNull);
+
 	return hr;
 }
 

@@ -1,9 +1,11 @@
 #pragma once
 #include "stdafx.h"
 #include <windows.h>
-#include <objbase.h>
-#include <msxml.h>
-#include <atlbase.h>
+#include "google\protobuf\message_lite.h"
+#include "command.pb.h"
+#include "customActionData.pb.h"
+
+#define WSTR_BYTE_SIZE(sz)		(sizeof(WCHAR) * (1 + ::wcslen(sz)))
 
 class CDeferredActionBase
 {
@@ -12,24 +14,24 @@ public:
 	virtual ~CDeferredActionBase();
 
 	// Function that maps a receiver name to a CDeferredActionBase inheritor.
-	typedef HRESULT(*ReceiverToExecutorFunc)(LPCWSTR szReceiver, CDeferredActionBase** ppExecutor);
+	typedef HRESULT(*ReceiverToExecutorFunc)(LPCSTR szReceiver, CDeferredActionBase** ppExecutor);
 	static HRESULT DeferredEntryPoint(ReceiverToExecutorFunc mapFunc);
 
 	UINT GetCost() const { return _uCost; }
 
-	HRESULT GetCustomActionData(BSTR* pszCustomActionData);
+	HRESULT GetCustomActionData(LPWSTR *pszCustomActionData);
 
-	HRESULT Prepend( CDeferredActionBase* pOther);
+	HRESULT Prepend(CDeferredActionBase* pOther);
 
 protected:
 
 	// Overriden by inheriting classes. Execute the command object (XML element)
-	virtual HRESULT DeferredExecute(IXMLDOMElement* pElem) = 0;
+	virtual HRESULT DeferredExecute(const ::google::protobuf::Any* pCommand) = 0;
 
-	HRESULT AddElement(LPCWSTR szTag, LPCWSTR szReceiver, UINT uCosting, IXMLDOMElement** ppElem);
+	HRESULT AddCommand(LPCSTR szHandler, ::com::panelsw::ca::Command **ppCommand);
 
 private:
-	CComPtr<IXMLDOMDocument> _pXmlDoc;
+	::com::panelsw::ca::CustomActionData _cad;
 	UINT _uCost;
 };
 

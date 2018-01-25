@@ -47,13 +47,13 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(WIX)sdk\VS2017\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\protobuf\src;$(IntDir)..\Protobuf;$(WIX)sdk\VS2017\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;CUSTOMACTIONTEST_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>msi.lib;dutil.lib;wcautil.lib;Version.lib;Shell32.lib;User32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(WIX)sdk\VS2017\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libprotobuf.lib;msi.lib;dutil.lib;wcautil.lib;Version.lib;Shell32.lib;User32.lib;legacy_stdio_definitions.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(WIX)sdk\VS2017\lib\x86;..\build\protobuf\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
@@ -114,6 +114,27 @@
     <ClCompile Include="Telemetry.cpp" />
     <ClCompile Include="TerminateSuccessfully.cpp" />
     <ClCompile Include="XmlSearch.cpp" />
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\execOnDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\fileOperationsDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\fileRegexDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\servciceConfigDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\shellExecDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\taskSchedulerDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\telemetryDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ExecOnComponent.h" />
@@ -129,8 +150,45 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TaskScheduler.h" />
     <ClInclude Include="Telemetry.h" />
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\execOnDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\fileOperationsDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\fileRegexDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\servciceConfigDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\shellExecDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\taskSchedulerDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\telemetryDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ProtoBuf\backupRestore.proto" />
+    <None Include="ProtoBuf\execOnDetails.proto" />
+    <None Include="ProtoBuf\fileOperationsDetails.proto" />
+    <None Include="ProtoBuf\fileRegexDetails.proto" />
+    <None Include="ProtoBuf\servciceConfigDetails.proto" />
+    <None Include="ProtoBuf\shellExecDetails.proto" />
+    <None Include="ProtoBuf\taskSchedulerDetails.proto" />
+    <None Include="ProtoBuf\telemetryDetails.proto" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <Target Name="BeforeBuild" BeforeTargets="PrepareForBuild">
+    <ItemGroup>
+      <ProtoFiles Include="$(MSBuildThisFileDirectory)Protobuf\*.proto" />
+    </ItemGroup>
+    <Exec Command="&quot;$(SolutionDir)build\protobuf\$(Configuration)\protoc.exe&quot; &quot;--proto_path=$(MSBuildThisFileDirectory)Protobuf&quot; &quot;--proto_path=$(SolutionDir)protobuf\src&quot; &quot;--cpp_out=$(IntDir)..\Protobuf&quot; @(ProtoFiles, ' ')" />
+  </Target>
 </Project>

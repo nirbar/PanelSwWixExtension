@@ -9,6 +9,9 @@
       <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
       <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
     </Filter>
+    <Filter Include="Proto">
+      <UniqueIdentifier>{c0cc41cb-7895-4dcd-a7d3-7c170931e881}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -92,6 +95,24 @@
     <ClCompile Include="SqlSearch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\execOnDetails.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\fileOperationsDetails.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\fileRegexDetails.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\servciceConfigDetails.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\shellExecDetails.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\taskSchedulerDetails.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -133,5 +154,49 @@
     <ClInclude Include="ServiceConfig.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\execOnDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\fileOperationsDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\fileRegexDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\servciceConfigDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\shellExecDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\taskSchedulerDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ProtoBuf\backupRestore.proto">
+      <Filter>Proto</Filter>
+    </None>
+    <None Include="ProtoBuf\execOnDetails.proto">
+      <Filter>Proto</Filter>
+    </None>
+    <None Include="ProtoBuf\fileOperationsDetails.proto">
+      <Filter>Proto</Filter>
+    </None>
+    <None Include="ProtoBuf\fileRegexDetails.proto">
+      <Filter>Proto</Filter>
+    </None>
+    <None Include="ProtoBuf\servciceConfigDetails.proto">
+      <Filter>Proto</Filter>
+    </None>
+    <None Include="ProtoBuf\shellExecDetails.proto">
+      <Filter>Proto</Filter>
+    </None>
+    <None Include="ProtoBuf\taskSchedulerDetails.proto">
+      <Filter>Proto</Filter>
+    </None>
+    <None Include="ProtoBuf\telemetryDetails.proto">
+      <Filter>Proto</Filter>
+    </None>
   </ItemGroup>
 </Project>

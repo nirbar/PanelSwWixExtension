@@ -1,0 +1,11 @@
+syntax = "proto3";
+package com.panelsw.ca;
+
+message TelemetryDetails{
+
+	bytes url = 1;
+	bytes page = 2;
+	bytes method = 3;
+	bytes data = 4;
+	bool secure = 5;
+}

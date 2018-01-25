@@ -1,0 +1,18 @@
+syntax = "proto3";
+package com.panelsw.ca;
+
+message FileRegexDetails{
+
+	enum FileEncoding{
+		None = 0;
+		MultiByte = 1;
+		Unicode = 2;
+		ReverseUnicode = 3;
+	}
+	
+	bytes file = 1;
+	bytes expression = 2;
+	bytes replacement = 3;
+	FileEncoding encoding = 4;
+	bool ignoreCase = 5;
+}

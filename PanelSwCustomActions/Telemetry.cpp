@@ -1,8 +1,10 @@
 #include "Telemetry.h"
 #include "../CaCommon/WixString.h"
+#include "telemetryDetails.pb.h"
 #include <Winhttp.h>
 #pragma comment (lib, "Winhttp.lib")
-
+using namespace ::com::panelsw::ca;
+using namespace google::protobuf;
 
 #define TELEMETRY_QUERY L"SELECT `Id`, `Url`, `Page`, `Method`, `Data`, `Flags`, `Condition` FROM `PSW_Telemetry`"
 enum TelemetryQuery { Id=1, Url=2, Page = 3, Method=4, Data=5, Flags=6, Condition=7 };
@@ -26,7 +28,7 @@ extern "C" __declspec(dllexport) UINT Telemetry(MSIHANDLE hInstall)
 	CTelemetry oRollbackTelemetry;
 	CTelemetry oCommitTelemetry;
 	CTelemetry oDeferredTelemetry;
-	CComBSTR szCustomActionData;
+	LPWSTR szCustomActionData = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");
@@ -121,19 +123,21 @@ extern "C" __declspec(dllexport) UINT Telemetry(MSIHANDLE hInstall)
 	hr = WcaDoDeferredAction(L"Telemetry_rollback", szCustomActionData, oRollbackTelemetry.GetCost());
 	BreakExitOnFailure(hr, "Failed scheduling rollback action.");
 
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = oDeferredTelemetry.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
 	hr = WcaDoDeferredAction(L"Telemetry_deferred", szCustomActionData, oDeferredTelemetry.GetCost());
 	BreakExitOnFailure(hr, "Failed scheduling deferred action.");
 
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = oCommitTelemetry.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for commit action.");
 	hr = WcaDoDeferredAction(L"Telemetry_commit", szCustomActionData, oCommitTelemetry.GetCost());
 	BreakExitOnFailure(hr, "Failed scheduling commit action.");
 
 LExit:
+	ReleaseStr(szCustomActionData);
+
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
 }
@@ -141,73 +145,61 @@ LExit:
 HRESULT CTelemetry::AddPost(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure)
 {
 	HRESULT hr = S_OK;
-	CComPtr<IXMLDOMElement> pElem;
+	::com::panelsw::ca::Command *pCmd = nullptr;
+	TelemetryDetails *pDetails = nullptr;
+	Any *pAny = nullptr;
 
-	hr = AddElement(L"PostTelemetry", L"CTelemetry", 1, &pElem);
+	hr = AddCommand("CTelemetry", &pCmd);
 	BreakExitOnFailure(hr, "Failed to add XML element");
 
-	hr = pElem->setAttribute(CComBSTR("Url"), CComVariant(szUrl));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'Url'");
+	pDetails = new TelemetryDetails();
+	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	hr = pElem->setAttribute(CComBSTR("Page"), CComVariant(szPage));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'Page'");
+	pAny = new Any();
+	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
-	hr = pElem->setAttribute(CComBSTR("Method"), CComVariant(szMethod));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'Method'");
+	pCmd->set_allocated_details(pAny);
+	pDetails->set_url(szUrl, WSTR_BYTE_SIZE(szUrl));
+	pDetails->set_page(szPage, WSTR_BYTE_SIZE(szPage));
+	pDetails->set_method(szMethod, WSTR_BYTE_SIZE(szMethod));
+	pDetails->set_data(szData, WSTR_BYTE_SIZE(szData));
+	pDetails->set_secure(bSecure);
 
-	hr = pElem->setAttribute(CComBSTR("Data"), CComVariant(szData));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'Data'");
-
-	hr = pElem->setAttribute(CComBSTR("Secure"), CComVariant(bSecure));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'Secure'");
+	pAny->PackFrom(*pDetails);
 
 LExit:
 	return hr;
 }
 
 // Execute the command object (XML element)
-HRESULT CTelemetry::DeferredExecute(IXMLDOMElement* pElem)
+HRESULT CTelemetry::DeferredExecute(const ::google::protobuf::Any* pCommand)
 {
 	HRESULT hr = S_OK;
-	CComVariant vTag;
-	CComVariant vUrl;
-	CComVariant vPage;
-	CComVariant vData;
-	CComVariant vMethod;
-	CComVariant vSecure;
-	int nSecure = 0;
+	BOOL bRes = TRUE;
+	LPCWSTR szUrl = nullptr;
+	LPCWSTR szPage = nullptr;
+	LPCWSTR szData = nullptr;
+	LPCWSTR szMethod = nullptr;
+	TelemetryDetails details;
 
-	// Get URL
-	hr = pElem->getAttribute(CComBSTR(L"Url"), &vUrl);
-	BreakExitOnFailure(hr, "Failed to get URL");
+	BreakExitOnNull(pCommand->Is<TelemetryDetails>(), hr, E_INVALIDARG, "Expected command to be TelemetryDetails");
+	bRes = pCommand->UnpackTo(&details);
+	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking TelemetryDetails");
 
-	// Get URL
-	hr = pElem->getAttribute(CComBSTR(L"Page"), &vPage);
-	BreakExitOnFailure(hr, "Failed to get Page");
+	szUrl = (LPCWSTR)details.url().data();
+	szPage = (LPCWSTR)details.page().data();
+	szData = (LPCWSTR)details.data().data();
+	szMethod = (LPCWSTR)details.method().data();
 
-	// Get Method
-	hr = pElem->getAttribute(CComBSTR(L"Method"), &vMethod);
-	BreakExitOnFailure(hr, "Failed to get Method");
+	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Posting telemetry: Url=%ls Page=%ls Method=%ls Data=%ls Secure=%i"
+		, szUrl
+		, szPage
+		, szMethod
+		, szData
+		, details.secure());
 
-	// Get Data
-	hr = pElem->getAttribute(CComBSTR(L"Data"), &vData);
-	BreakExitOnFailure(hr, "Failed to get Data");
-
-	// Get Secure
-	hr = pElem->getAttribute(CComBSTR(L"Secure"), &vSecure);
-	BreakExitOnFailure(hr, "Failed to get Secure");
-	nSecure = _ttoi(vSecure.bstrVal);
-
-
-	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Posting telemetry: Url=%ls Page=%ls Method=%ls Data=%ls Secure=%ls"
-		, vUrl.bstrVal
-		, vPage.bstrVal
-		, vMethod.bstrVal
-		, vData.bstrVal
-		, vSecure.bstrVal);
-
-	hr = Post(vUrl.bstrVal, vPage.bstrVal, vMethod.bstrVal, vData.bstrVal, nSecure != 0);
-	BreakExitOnFailure3(hr, "Failed to post Data '%ls' to URL '%ls%ls'", vData.bstrVal, vUrl.bstrVal, vPage.bstrVal);
+	hr = Post(szUrl, szPage, szMethod, szData, details.secure());
+	BreakExitOnFailure3(hr, "Failed to post Data '%ls' to URL '%ls%ls'", szData, szUrl, szPage);
 
 LExit:
 	return hr;

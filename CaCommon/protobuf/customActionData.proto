@@ -1,0 +1,8 @@
+syntax = "proto3";
+package com.panelsw.ca;
+
+import "command.proto";
+
+message CustomActionData{
+    repeated Command commands = 1;
+}

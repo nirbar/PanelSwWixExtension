@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
+    <Filter Include="Protobuf">
+      <UniqueIdentifier>{20c1b625-9539-43c6-b9fc-3e7db24be2da}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -28,6 +31,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="DeferredActionBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\CaCommon\*.pb.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -56,5 +62,16 @@
     <ClInclude Include="AutoRelease.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\CaCommon\*.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="protobuf\command.proto">
+      <Filter>Protobuf</Filter>
+    </None>
+    <None Include="protobuf\customActionData.proto">
+      <Filter>Protobuf</Filter>
+    </None>
   </ItemGroup>
 </Project>

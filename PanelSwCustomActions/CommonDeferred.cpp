@@ -10,43 +10,42 @@
 #include "ServiceConfig.h"
 
 // ReceiverToExecutorFunc implementation.
-HRESULT ReceiverToExecutor(LPCWSTR szReceiver, CDeferredActionBase** ppExecutor)
+HRESULT ReceiverToExecutor(LPCSTR szReceiver, CDeferredActionBase** ppExecutor)
 {
 	HRESULT hr = S_OK;
-	CWixString szRcvr(szReceiver);
 
-	(*ppExecutor) = NULL;
-	if (szRcvr.Equals(L"CTelemetry"))
+	(*ppExecutor) = nullptr;
+	if (0 == ::strcmp(szReceiver, "CTelemetry"))
 	{
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating Telemetry handler");
 		(*ppExecutor) = new CTelemetry();
 	}
-	else if (szRcvr.Equals(L"CShellExecute"))
+	else if (0 == ::strcmp(szReceiver, "CShellExecute"))
 	{
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating ShellExecute handler");
 		(*ppExecutor) = new CShellExecute();
 	}
-	else if (szRcvr.Equals(L"CFileRegex"))
+	else if (0 == ::strcmp(szReceiver, "CFileRegex"))
 	{
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating FileRegex handler");
 		(*ppExecutor) = new CFileRegex();
 	}
-	else if (szRcvr.Equals(L"CFileOperations"))
+	else if (0 == ::strcmp(szReceiver, "CFileOperations"))
 	{
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating FileOperations handler");
 		(*ppExecutor) = new CFileOperations();
 	}
-	else if (szRcvr.Equals(L"CTaskScheduler"))
+	else if (0 == ::strcmp(szReceiver, "CTaskScheduler"))
 	{
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating TaskScheduler handler");
 		(*ppExecutor) = new CTaskScheduler();
 	}
-	else if (szRcvr.Equals(L"CExecOnComponent"))
+	else if (0 == ::strcmp(szReceiver, "CExecOnComponent"))
 	{
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating ExecOnComponent handler");
 		(*ppExecutor) = new CExecOnComponent();
 	}
-	else if (szRcvr.Equals(L"CServiceConfig"))
+	else if (0 == ::strcmp(szReceiver, "CServiceConfig"))
 	{
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating ServiceConfig handler");
 		(*ppExecutor) = new CServiceConfig();

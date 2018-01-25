@@ -1,0 +1,12 @@
+syntax = "proto3";
+package com.panelsw.ca;
+
+message FileOperationsDetails{
+	
+	bytes from = 1;
+	bytes to = 2;
+
+	bool move = 3;
+	bool ignoreMissing = 4;
+	bool ignoreErrors = 5;
+}

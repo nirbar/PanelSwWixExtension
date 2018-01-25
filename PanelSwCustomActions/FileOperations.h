@@ -14,7 +14,7 @@ public:
 
 protected:
 	// Execute the command object (XML element)
-	virtual HRESULT DeferredExecute(IXMLDOMElement* pElem);
+	HRESULT DeferredExecute(const ::google::protobuf::Any* pCommand) override;
 
 private:
 	enum DeletePathAttributes
@@ -23,8 +23,7 @@ private:
 		, IgnoreErrors = 2 * IgnoreMissingPath
 	};
 
-	HRESULT CopyPath(IXMLDOMElement* pElem);
-	HRESULT MovePath(IXMLDOMElement* pElem);
-	HRESULT DeletePath(IXMLDOMElement* pElem);
+	HRESULT CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool bIgnoreMissing, bool bIgnoreErrors);
+	HRESULT DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bIgnoreErrors);
 };
 

@@ -4,6 +4,8 @@
 #include <regex>
 #include <memutil.h>
 using namespace std;
+using namespace ::com::panelsw::ca;
+using namespace google::protobuf;
 
 #define FileRegex_QUERY L"SELECT `Id`, `FilePath`, `Regex`, `Replacement`, `IgnoreCase`, `Encoding`, `Condition` FROM `PSW_FileRegex` ORDER BY `Order`"
 enum FileRegexQuery { Id = 1, FilePath = 2, Regex = 3, Replacement = 4, IgnoreCase = 5, Encoding = 6, Condition = 7 };
@@ -20,7 +22,7 @@ extern "C" __declspec(dllexport) UINT FileRegex(MSIHANDLE hInstall)
 	CFileOperations commitCAD;
 	WCHAR shortTempPath[MAX_PATH + 1];
 	WCHAR longTempPath[MAX_PATH + 1];
-	CComBSTR szCustomActionData;
+	LPWSTR szCustomActionData = nullptr;
 	DWORD dwRes = 0;
 	DWORD dwUnique = 0;
 
@@ -104,7 +106,7 @@ extern "C" __declspec(dllexport) UINT FileRegex(MSIHANDLE hInstall)
 		hr = deferredFileCAD.AddCopyFile(szFilePath, (LPCWSTR)tempFile);
 		BreakExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
 
-		hr = oDeferredFileRegex.AddFileRegex(szFilePath, szRegex, szReplacement, (CFileRegex::FileEncoding)nEncoding, nIgnoreCase != 0);
+		hr = oDeferredFileRegex.AddFileRegex(szFilePath, szRegex, szReplacement, (FileRegexDetails::FileEncoding)nEncoding, nIgnoreCase != 0);
 		BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
 
 		hr = commitCAD.AddDeleteFile( (LPCWSTR)tempFile);
@@ -116,7 +118,7 @@ extern "C" __declspec(dllexport) UINT FileRegex(MSIHANDLE hInstall)
 	hr = WcaDoDeferredAction(L"FileRegex_rollback", szCustomActionData, rollbackCAD.GetCost());
 	BreakExitOnFailure(hr, "Failed scheduling deferred action.");
 
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = oDeferredFileRegex.Prepend(&deferredFileCAD);
 	BreakExitOnFailure(hr, "Failed getting custom action data for deferred file actions.");
 	hr = oDeferredFileRegex.GetCustomActionData(&szCustomActionData);
@@ -124,82 +126,72 @@ extern "C" __declspec(dllexport) UINT FileRegex(MSIHANDLE hInstall)
 	hr = WcaDoDeferredAction(L"FileRegex_deferred", szCustomActionData, oDeferredFileRegex.GetCost());
 	BreakExitOnFailure(hr, "Failed scheduling deferred action.");
 
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = commitCAD.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
 	hr = WcaDoDeferredAction(L"FileRegex_commit", szCustomActionData, commitCAD.GetCost());
 	BreakExitOnFailure(hr, "Failed scheduling deferred action.");
 
 LExit:
+	ReleaseStr(szCustomActionData);
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
 }
 
-HRESULT CFileRegex::AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, FileEncoding eEncoding, bool bIgnoreCase)
+HRESULT CFileRegex::AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase)
 {
 	HRESULT hr = S_OK;
-	CComPtr<IXMLDOMElement> pElem;
+	::com::panelsw::ca::Command *pCmd = nullptr;
+	FileRegexDetails *pDetails = nullptr;
+	Any *pAny = nullptr;
 
-	hr = AddElement(L"FileRegex", L"CFileRegex", 1, &pElem);
+	hr = AddCommand("CFileRegex", &pCmd);
 	BreakExitOnFailure(hr, "Failed to add XML element");
 
-	hr = pElem->setAttribute(CComBSTR("FilePath"), CComVariant(szFilePath));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'FilePath'");
+	pDetails = new FileRegexDetails();
+	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	hr = pElem->setAttribute(CComBSTR("Regex"), CComVariant(szRegex));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'Regex'");
+	pAny = new Any();
+	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
-	hr = pElem->setAttribute(CComBSTR("Replacement"), CComVariant(szReplacement));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'Replacement'");
-
-	hr = pElem->setAttribute(CComBSTR("Encoding"), CComVariant(eEncoding));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'Encoding'");
-
-	hr = pElem->setAttribute(CComBSTR("IgnoreCase"), CComVariant(bIgnoreCase ? 1 : 0));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'IgnoreCase'");
+	pCmd->set_allocated_details(pAny);
+	pDetails->set_file(szFilePath, WSTR_BYTE_SIZE(szFilePath));
+	pDetails->set_expression(szRegex, WSTR_BYTE_SIZE(szRegex));
+	pDetails->set_replacement(szReplacement, WSTR_BYTE_SIZE(szReplacement));
+	pDetails->set_encoding(eEncoding);
+	pDetails->set_ignorecase(bIgnoreCase);
+	pAny->PackFrom(*pDetails);
 
 LExit:
 	return hr;
 }
 
 // Execute the command object (XML element)
-HRESULT CFileRegex::DeferredExecute(IXMLDOMElement* pElem)
+HRESULT CFileRegex::DeferredExecute(const ::google::protobuf::Any* pCommand)
 {
 	HRESULT hr = S_OK;
-	CComVariant vFilePath;
-	CComVariant vRegex;
-	CComVariant vReplacement;
-	CComVariant vIgnoreCase;
-	CComVariant vEncoding;
-	int nIgnoreCase;
-	int nEncoding;
+	BOOL bRes = TRUE;
+	FileRegexDetails details;
+	LPCWSTR szFile = nullptr;
+	LPCWSTR szExpression = nullptr;
+	LPCWSTR szReplacement = nullptr;
 
-	// Get Parameters:
-	hr = pElem->getAttribute(CComBSTR(L"FilePath"), &vFilePath);
-	BreakExitOnFailure(hr, "Failed to get FilePath");
+	BreakExitOnNull(pCommand->Is<FileRegexDetails>(), hr, E_INVALIDARG, "Expected command to be FileRegexDetails");
+	bRes = pCommand->UnpackTo(&details);
+	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking FileOperationsDetails");
 
-	hr = pElem->getAttribute(CComBSTR(L"Regex"), &vRegex);
-	BreakExitOnFailure(hr, "Failed to get Regex");
+	szFile = (LPCWSTR)details.file().data();
+	szExpression = (LPCWSTR)details.expression().data();
+	szReplacement = (LPCWSTR)details.replacement().data();
 
-	hr = pElem->getAttribute(CComBSTR(L"Replacement"), &vReplacement);
-	BreakExitOnFailure(hr, "Failed to get Replacement");
-
-	hr = pElem->getAttribute(CComBSTR(L"IgnoreCase"), &vIgnoreCase);
-	BreakExitOnFailure(hr, "Failed to get IgnoreCase");
-	nIgnoreCase = ::_wtoi(vIgnoreCase.bstrVal);
-
-	hr = pElem->getAttribute(CComBSTR(L"Encoding"), &vEncoding);
-	BreakExitOnFailure(hr, "Failed to get Encoding");
-	nEncoding = ::_wtoi(vEncoding.bstrVal);
-
-	hr = Execute(vFilePath.bstrVal, vRegex.bstrVal, vReplacement.bstrVal, (FileEncoding)nEncoding, (nIgnoreCase != 0));
+	hr = Execute(szFile, szExpression, szReplacement, details.encoding(), details.ignorecase());
 	BreakExitOnFailure(hr, "Failed to execute file regular expression");
 
 LExit:
 	return hr;
 }
 
-HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, FileEncoding eEncoding, bool bIgnoreCase)
+HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase)
 {
     HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -208,7 +200,7 @@ HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szRepla
 	DWORD dwFileAttr = FILE_ATTRIBUTE_NORMAL;
 	HANDLE hFile = INVALID_HANDLE_VALUE;
 	void* pFileContents = NULL;
-	FileEncoding eDetectedEncoding = FileEncoding::None;
+	FileRegexDetails::FileEncoding eDetectedEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_None;
 
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Replacing matches of regex '%ls' with '%ls' on file '%ls'", szRegex, szReplacement, szFilePath);
 
@@ -231,7 +223,7 @@ HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szRepla
 	hFile = INVALID_HANDLE_VALUE;
 
 	eDetectedEncoding = DetectEncoding(pFileContents, dwFileSize);
-	if (eEncoding != FileEncoding::None)
+	if (eEncoding != FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_None)
 	{
 		if (eDetectedEncoding != eEncoding)
 		{
@@ -240,7 +232,7 @@ HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szRepla
 		}
 	}
 
-	if (eDetectedEncoding == FileEncoding::MultiByte)
+	if (eDetectedEncoding == FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_MultiByte)
 	{
 		hr = ExecuteMultibyte(szFilePath, (LPCSTR)pFileContents, szRegex, szReplacement, bIgnoreCase);
 		ExitOnFailure(hr, "Failed executing regular expression");
@@ -373,16 +365,16 @@ LExit:
 	return hr;
 }
 
-CFileRegex::FileEncoding CFileRegex::DetectEncoding(const void* pFileContent, DWORD dwSize)
+FileRegexDetails::FileEncoding CFileRegex::DetectEncoding(const void* pFileContent, DWORD dwSize)
 {
 	int nTests = IS_TEXT_UNICODE_UNICODE_MASK | IS_TEXT_UNICODE_REVERSE_MASK | IS_TEXT_UNICODE_NOT_UNICODE_MASK | IS_TEXT_UNICODE_NOT_ASCII_MASK;
 	HRESULT hr = S_OK;
-	FileEncoding eEncoding = FileEncoding::None;
+	FileRegexDetails::FileEncoding eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_None;
 
 	if (dwSize < 2)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File is too short to analyze encoding. Assuming multi-byte");
-		eEncoding = FileEncoding::MultiByte;
+		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_MultiByte;
 		ExitFunction();
 	}
 
@@ -392,13 +384,13 @@ CFileRegex::FileEncoding CFileRegex::DetectEncoding(const void* pFileContent, DW
 	if (nTests & IS_TEXT_UNICODE_ILLEGAL_CHARS)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File has illegal UNICODE characters");
-		eEncoding = FileEncoding::MultiByte;
+		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_MultiByte;
 		ExitFunction();
 	}
 	if (nTests & IS_TEXT_UNICODE_ODD_LENGTH)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File has odd length so it cannot be UNICODE");
-		eEncoding = FileEncoding::MultiByte;
+		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_MultiByte;
 		ExitFunction();
 	}
 
@@ -406,13 +398,13 @@ CFileRegex::FileEncoding CFileRegex::DetectEncoding(const void* pFileContent, DW
 	if (nTests & IS_TEXT_UNICODE_SIGNATURE)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File has UNICODE BOM");
-		eEncoding = FileEncoding::Unicode;
+		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_Unicode;
 		ExitFunction();
 	}
 	if (nTests & IS_TEXT_UNICODE_REVERSE_SIGNATURE)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File has reverse UNICODE BOM");
-		eEncoding = FileEncoding::ReverseUnicode;
+		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_ReverseUnicode;
 		ExitFunction();
 	}
 
@@ -420,13 +412,13 @@ CFileRegex::FileEncoding CFileRegex::DetectEncoding(const void* pFileContent, DW
 	if (nTests & IS_TEXT_UNICODE_ASCII16)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File has only ASCII UNICODE characters");
-		eEncoding = FileEncoding::Unicode;
+		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_Unicode;
 		ExitFunction();
 	}
 	if (nTests & IS_TEXT_UNICODE_CONTROLS)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File has UNICODE control characters");
-		eEncoding = FileEncoding::Unicode;
+		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_Unicode;
 		ExitFunction();
 	}
 
@@ -434,13 +426,13 @@ CFileRegex::FileEncoding CFileRegex::DetectEncoding(const void* pFileContent, DW
 	if (nTests & IS_TEXT_UNICODE_REVERSE_ASCII16)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File has only reverse ASCII UNICODE characters");
-		eEncoding = FileEncoding::ReverseUnicode;
+		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_ReverseUnicode;
 		ExitFunction();
 	}
 	if (nTests & IS_TEXT_UNICODE_REVERSE_CONTROLS)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File has reverse UNICODE control characters");
-		eEncoding = FileEncoding::ReverseUnicode;
+		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_ReverseUnicode;
 		ExitFunction();
 	}
 
@@ -448,13 +440,13 @@ CFileRegex::FileEncoding CFileRegex::DetectEncoding(const void* pFileContent, DW
 	if (nTests & IS_TEXT_UNICODE_STATISTICS)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File is probably UNICODE");
-		eEncoding = FileEncoding::Unicode;
+		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_Unicode;
 		ExitFunction();
 	}
 	if (nTests & IS_TEXT_UNICODE_REVERSE_STATISTICS)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File is probably reverse UNICODE");
-		eEncoding = FileEncoding::Unicode;
+		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_Unicode;
 		ExitFunction();
 	}
 
@@ -462,12 +454,12 @@ CFileRegex::FileEncoding CFileRegex::DetectEncoding(const void* pFileContent, DW
 	if (nTests & IS_TEXT_UNICODE_NULL_BYTES)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File has NULL UNICODE characters. Assuming unicode, though, it may as well be reverse unicode");
-		eEncoding = FileEncoding::Unicode;
+		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_Unicode;
 		ExitFunction();
 	}
 
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "All tests failed for UNICODE encoding. Assuming multi-byte");
-	eEncoding = FileEncoding::MultiByte;
+	eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_MultiByte;
 
 LExit:
 	return eEncoding;
