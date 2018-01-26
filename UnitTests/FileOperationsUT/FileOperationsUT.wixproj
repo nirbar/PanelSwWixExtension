@@ -6,7 +6,7 @@
     <ProductVersion>3.8</ProductVersion>
     <ProjectGuid>{2b87572f-9b38-4f39-a213-97c1ac64703e}</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>XmlSearchUT</OutputName>
+    <OutputName>FileOperationsUT</OutputName>
     <OutputType>Package</OutputType>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
@@ -29,7 +29,7 @@
       <Name>WixUtilExtension</Name>
     </WixExtension>
     <WixExtension Include="PanelSwWixExtension">
-      <HintPath>$(SolutionDir)out\bin\$(Configuration)\PanelSwWixExtension.dll</HintPath>
+      <HintPath>$(SolutionDir)build\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</HintPath>
       <Name>PanelSwWixExtension</Name>
     </WixExtension>
   </ItemGroup>

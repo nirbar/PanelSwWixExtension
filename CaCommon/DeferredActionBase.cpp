@@ -15,6 +15,11 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(ReceiverToExecutorFunc mapFunc)
 	// Get CustomActionData
 	hr = WcaGetProperty(L"CustomActionData", (LPWSTR*)szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting CustomActionData");
+	if (szCustomActionData.IsNullOrEmpty())
+	{
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Nothing to do");
+		ExitFunction();
+	}
 
 	hr = StrAllocBase85Decode(szCustomActionData, &pData, &dwDataSize);
 	BreakExitOnFailure(hr, "Failed decoding CustomActionData");
@@ -25,8 +30,14 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(ReceiverToExecutorFunc mapFunc)
 	// Iterate elements
 	for (const Command &cmd : cad.commands())
 	{
+		LPCSTR szHandler = cmd.handler().c_str();
+		if (!(szHandler && *szHandler))
+		{
+			continue;
+		}
+		
 		// Get receiver
-		hr = mapFunc(cmd.handler().c_str(), &pExecutor);
+		hr = mapFunc(szHandler, &pExecutor);
 		BreakExitOnFailure(hr, "Failed to get CDeferredActionBase for '%s'", cmd.handler().c_str());
 
 		// Execute
