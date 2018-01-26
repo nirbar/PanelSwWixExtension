@@ -320,16 +320,14 @@ HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bI
 	opInfo.fFlags = FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR | FOF_NOERRORUI | FOF_NO_UI;
 
 	nRes = ::SHFileOperation(&opInfo);
-	if (bIgnoreErrors)
+	if (bIgnoreErrors && ((nRes != 0) || opInfo.fAnyOperationsAborted))
 	{
-		BreakExitOnNull1((!nRes), hr, E_FAIL, "Failed deleting file (Error %i)", nRes);
-		BreakExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed deleting file (operation aborted)");
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Deleted '%ls'", szFrom);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed deleting '%ls'; Ignoring error (%i)", szFromNull, nRes);
+		ExitFunction();
 	}
-	else if (nRes != 0)
-	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed deleting '%ls'; Ignoring error (%i)", szFrom, nRes);
-	}
+	BreakExitOnNull1((nRes == 0), hr, E_FAIL, "Failed deleting file (Error %i)", nRes);
+	BreakExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed deleting file (operation aborted)");
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Deleted '%ls'", szFrom);
 
 LExit:
 	ReleaseStr(szFromNull);
