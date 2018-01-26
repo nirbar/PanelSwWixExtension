@@ -11,6 +11,11 @@
     </Filter>
     <Filter Include="Proto">
       <UniqueIdentifier>{c0cc41cb-7895-4dcd-a7d3-7c170931e881}</UniqueIdentifier>
+      <Extensions>proto</Extensions>
+    </Filter>
+    <Filter Include="Protobuf-Generated">
+      <UniqueIdentifier>{AE664EA9-746D-4D21-87C1-67CAB0333CFD}</UniqueIdentifier>
+      <Extensions>pb.h;pb.cc</Extensions>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -113,6 +118,14 @@
     <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\taskSchedulerDetails.pb.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\telemetryDetails.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\*.pb.*">
+      <Filter>Protobuf-Generated</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -172,11 +185,11 @@
     <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\taskSchedulerDetails.pb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\telemetryDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ProtoBuf\backupRestore.proto">
-      <Filter>Proto</Filter>
-    </None>
     <None Include="ProtoBuf\execOnDetails.proto">
       <Filter>Proto</Filter>
     </None>

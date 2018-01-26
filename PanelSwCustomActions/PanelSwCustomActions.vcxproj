@@ -173,7 +173,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ProtoBuf\backupRestore.proto" />
     <None Include="ProtoBuf\execOnDetails.proto" />
     <None Include="ProtoBuf\fileOperationsDetails.proto" />
     <None Include="ProtoBuf\fileRegexDetails.proto" />
