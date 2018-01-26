@@ -278,16 +278,14 @@ HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool
 	opInfo.fFlags = FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR | FOF_NOERRORUI | FOF_NO_UI;
 
 	nRes = ::SHFileOperation(&opInfo);
-	if (bIgnoreErrors)
+	if (bIgnoreErrors && ((nRes != 0) || opInfo.fAnyOperationsAborted))
 	{
-		BreakExitOnNull1((!nRes), hr, E_FAIL, "Failed copying file (Error %i)", nRes);
-		BreakExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed copying file (operation aborted)");
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Copied '%ls' to '%ls'", szFrom, szTo);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed Copying '%ls' to '%ls'; Ignoring error (%i)", szFromNull, szToNull, nRes);
+		ExitFunction();
 	}
-	else if (nRes != 0)
-	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed Copying '%ls' to '%ls'; Ignoring error (%i)", szFrom, szTo, nRes);
-	}
+	BreakExitOnNull1((nRes == 0), hr, E_FAIL, "Failed copying file '%ls' to '%ls' (Error %i)", szFromNull, szToNull, nRes);
+	BreakExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed copying file (operation aborted)");
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Copied '%ls' to '%ls'", szFromNull, szToNull);
 
 LExit:
 	ReleaseStr(szFromNull);
