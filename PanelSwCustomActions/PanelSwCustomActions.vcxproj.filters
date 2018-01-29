@@ -121,6 +121,9 @@
     <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\telemetryDetails.pb.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="BackupAndRestore.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\*.pb.*">

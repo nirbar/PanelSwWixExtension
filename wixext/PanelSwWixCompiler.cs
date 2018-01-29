@@ -164,6 +164,10 @@ namespace PanelSw.Wix.Extensions
                             ParseServiceConfigElement(parentElement, element);
                             break;
 
+                        case "BackupAndRestore":
+                            ParseBackupAndRestoreElement(parentElement, element);
+                            break;
+
                         default:
                             Core.UnexpectedElement(parentElement, element);
                             break;
@@ -185,6 +189,86 @@ namespace PanelSw.Wix.Extensions
                 default:
                     Core.UnexpectedElement(parentElement, element);
                     break;
+            }
+        }
+
+        private void ParseBackupAndRestoreElement(XmlElement parentElement, XmlElement element)
+        {
+            SourceLineNumberCollection parentsourceLineNumbers = Preprocessor.GetSourceLineNumbers(parentElement);
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
+            string id = null;
+            string filepath = null;
+            string component = null;
+            DeletePathFlags flags = 0;
+
+            component = Core.GetAttributeValue(parentsourceLineNumbers, parentElement.Attributes["Id"]);
+            if (string.IsNullOrEmpty(component))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(parentsourceLineNumbers, parentElement.Name, "Id"));
+            }
+
+            foreach (XmlAttribute attrib in element.Attributes)
+            {
+                if ((0 != attrib.NamespaceURI.Length) && (attrib.NamespaceURI != schema.TargetNamespace))
+                {
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName.ToLower())
+                    {
+                        case "id":
+                            id = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "path":
+                            filepath = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "ignoremissing":
+                            if (Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            {
+                                flags |= DeletePathFlags.IgnoreMissing;
+                            }
+                            break;
+                        case "ignoreerrors":
+                            if (Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            {
+                                flags |= DeletePathFlags.IgnoreErrors;
+                            }
+                            break;
+
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+                else
+                {
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            if (string.IsNullOrEmpty(id))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.Name, "Id"));
+            }
+            if (string.IsNullOrEmpty(filepath))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "Path"));
+            }
+
+            // reference the Win32_CopyFiles custom actions since nothing will happen without these
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "BackupAndRestore");
+
+            if (!Core.EncounteredError)
+            {
+                // create a row in the Win32_CopyFiles table
+                Core.EnsureTable(sourceLineNumbers, "PSW_BackupAndRestore");
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_BackupAndRestore");
+                row[0] = id;
+                row[1] = component;
+                row[2] = filepath;
+                row[3] = (int)flags;
             }
         }
 

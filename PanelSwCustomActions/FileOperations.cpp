@@ -145,8 +145,8 @@ HRESULT CFileOperations::AddCopyFile(LPCWSTR szFrom, LPCWSTR szTo, int flags)
 	pDetails->set_from(szFrom, WSTR_BYTE_SIZE(szFrom));
 	pDetails->set_to(szTo, WSTR_BYTE_SIZE(szTo));
 
-	pDetails->set_ignoreerrors(flags & DeletePathAttributes::IgnoreErrors);
-	pDetails->set_ignoremissing(flags & DeletePathAttributes::IgnoreMissingPath);
+	pDetails->set_ignoreerrors(flags & FileOperationsAttributes::IgnoreErrors);
+	pDetails->set_ignoremissing(flags & FileOperationsAttributes::IgnoreMissingPath);
 	pAny->PackFrom(*pDetails);
 
 LExit:
@@ -174,8 +174,8 @@ HRESULT CFileOperations::AddMoveFile(LPCWSTR szFrom, LPCWSTR szTo, int flags)
 	pDetails->set_from(szFrom, WSTR_BYTE_SIZE(szFrom));
 	pDetails->set_to(szTo, WSTR_BYTE_SIZE(szTo));
 
-	pDetails->set_ignoreerrors(flags & DeletePathAttributes::IgnoreErrors);
-	pDetails->set_ignoremissing(flags & DeletePathAttributes::IgnoreMissingPath);
+	pDetails->set_ignoreerrors(flags & FileOperationsAttributes::IgnoreErrors);
+	pDetails->set_ignoremissing(flags & FileOperationsAttributes::IgnoreMissingPath);
 	pAny->PackFrom(*pDetails);
 
 LExit:
@@ -200,8 +200,8 @@ HRESULT CFileOperations::AddDeleteFile(LPCWSTR szPath, int flags)
 
 	pCmd->set_allocated_details(pAny);
 	pDetails->set_from(szPath, WSTR_BYTE_SIZE(szPath));
-	pDetails->set_ignoreerrors(flags & DeletePathAttributes::IgnoreErrors);
-	pDetails->set_ignoremissing(flags & DeletePathAttributes::IgnoreMissingPath);
+	pDetails->set_ignoreerrors(flags & FileOperationsAttributes::IgnoreErrors);
+	pDetails->set_ignoremissing(flags & FileOperationsAttributes::IgnoreMissingPath);
 	pAny->PackFrom(*pDetails);
 
 LExit:
