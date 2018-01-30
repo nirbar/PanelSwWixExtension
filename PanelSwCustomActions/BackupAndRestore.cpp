@@ -7,8 +7,6 @@
 using namespace ::com::panelsw::ca;
 using namespace google::protobuf;
 
-static HRESULT CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bIgnoreMissing, bool bIgnoreErrors);
-
 #define BackupAndRestore_QUERY L"SELECT `Id`, `Component_`, `Path`, `Flags` FROM `PSW_BackupAndRestore`"
 enum BackupAndRestoreQuery { Id = 1, Component, Path, Flags, Condition };
 
@@ -24,6 +22,7 @@ extern "C" __declspec(dllexport) UINT BackupAndRestore(MSIHANDLE hInstall)
 	WCHAR shortTempPath[MAX_PATH + 1];
 	WCHAR longTempPath[MAX_PATH + 1];
 	DWORD dwRes = 0;
+	LPWSTR szTempFilesSpec = nullptr;
 	LPWSTR szCustomActionData = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
@@ -58,6 +57,7 @@ extern "C" __declspec(dllexport) UINT BackupAndRestore(MSIHANDLE hInstall)
 		WCHAR szTempFile[MAX_PATH + 1];
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
 		int flags = 0;
+		bool bIgnoreMissing;
 
 		hr = WcaGetRecordString(hRecord, BackupAndRestoreQuery::Id, (LPWSTR*)szId);
 		BreakExitOnFailure(hr, "Failed to get Id.");
@@ -67,6 +67,7 @@ extern "C" __declspec(dllexport) UINT BackupAndRestore(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to get Flags.");
 		hr = WcaGetRecordString(hRecord, BackupAndRestoreQuery::Component, (LPWSTR*)szComponent);
 		BreakExitOnFailure(hr, "Failed to get Condition.");
+		bIgnoreMissing = flags & CFileOperations::FileOperationsAttributes::IgnoreMissingPath;
 
 		// Test condition
 		compAction = WcaGetComponentToDo(szComponent);
@@ -80,18 +81,37 @@ extern "C" __declspec(dllexport) UINT BackupAndRestore(MSIHANDLE hInstall)
 		dwRes = ::GetTempFileName(longTempPath, L"BNR", 0, szTempFile);
 		BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
 
-		hr = rollbackCAD.AddMoveFile(szTempFile, szPath, flags);
-		BreakExitOnFailure(hr, "Failed creating custom action data for rollback action.");
+		hr = deferredCAD.CopyPath(szPath, szTempFile, false, bIgnoreMissing, flags & CFileOperations::FileOperationsAttributes::IgnoreErrors);
+		BreakExitOnFailure(hr, "Failed backing up '%ls'", (LPCWSTR)szPath);
+		if (hr == S_FALSE)
+		{
+			deferredCAD.DeletePath(szTempFile, true, true);
+			continue;
+		}
 
-		hr = deferredCAD.AddCopyFile(szTempFile, szPath, flags);
+		// For folders, we'll copy the contents to target folder. Otherwise, the temp folder will be copied with the content
+		if (::PathIsDirectory(szTempFile))
+		{
+			hr = StrAllocFormatted(&szTempFilesSpec, L"%s\\*", szTempFile);
+			BreakExitOnFailure(hr, "Failed formatting string.");
+
+			hr = rollbackCAD.AddMoveFile(szTempFilesSpec, szPath, flags);
+			BreakExitOnFailure(hr, "Failed creating custom action data for rollback action.");
+
+			hr = rollbackCAD.AddDeleteFile(szTempFile, flags);
+			BreakExitOnFailure(hr, "Failed creating custom action data for rollbak action.");
+		}
+		else
+		{
+			hr = rollbackCAD.AddMoveFile(szTempFile, szPath, flags);
+			BreakExitOnFailure(hr, "Failed creating custom action data for rollback action.");
+		}
+
+		hr = deferredCAD.AddCopyFile(szTempFilesSpec, szPath, flags);
 		BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
 
 		hr = commitCAD.AddDeleteFile(szTempFile, flags);
 		BreakExitOnFailure(hr, "Failed creating custom action data for commit action.");
-
-		// Add deferred data to move file szFilePath -> tempFile.
-		hr = CopyPath(szPath, szTempFile, flags & CFileOperations::FileOperationsAttributes::IgnoreMissingPath, flags & CFileOperations::FileOperationsAttributes::IgnoreErrors);
-		BreakExitOnFailure(hr, "Failed backing up '%ls'", (LPCWSTR)szPath);
 	}
 
 	hr = rollbackCAD.GetCustomActionData(&szCustomActionData);
@@ -115,52 +135,7 @@ extern "C" __declspec(dllexport) UINT BackupAndRestore(MSIHANDLE hInstall)
 
 LExit:
 	ReleaseStr(szCustomActionData);
+	ReleaseStr(szTempFilesSpec);
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
-}
-
-static HRESULT CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bIgnoreMissing, bool bIgnoreErrors)
-{
-	SHFILEOPSTRUCT opInfo;
-	HRESULT hr = S_OK;
-	INT nRes = ERROR_SUCCESS;
-	LPWSTR szFromNull = nullptr;
-	LPWSTR szToNull = nullptr;
-
-	if (bIgnoreMissing)
-	{
-		if (!::PathFileExists(szFrom))
-		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping copy '%ls' as it doesn't exist and marked to ignore missing", szFrom);
-			ExitFunction1(hr = S_FALSE);
-		}
-	}
-
-	hr = StrAllocFormatted(&szFromNull, L"%s%c%c", szFrom, L'\0', L'\0');
-	BreakExitOnFailure(hr, "Failed formatting string");
-
-	hr = StrAllocFormatted(&szToNull, L"%s%c%c", szTo, L'\0', L'\0');
-	BreakExitOnFailure(hr, "Failed formatting string");
-
-	// Prepare 
-	::memset(&opInfo, 0, sizeof(opInfo));
-	opInfo.wFunc = FO_COPY;
-	opInfo.pFrom = szFromNull;
-	opInfo.pTo = szToNull;
-	opInfo.fFlags = FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR | FOF_NOERRORUI | FOF_NO_UI;
-
-	nRes = ::SHFileOperation(&opInfo);
-	if (bIgnoreErrors && ((nRes != 0) || opInfo.fAnyOperationsAborted))
-	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed Copying '%ls' to '%ls'; Ignoring error (%i)", szFromNull, szToNull, nRes);
-		ExitFunction();
-	}
-	BreakExitOnNull1((nRes == 0), hr, E_FAIL, "Failed copying file '%ls' to '%ls' (Error %i)", szFromNull, szToNull, nRes);
-	BreakExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed copying file (operation aborted)");
-	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Copied '%ls' to '%ls'", szFromNull, szToNull);
-
-LExit:
-	ReleaseStr(szFromNull);
-	ReleaseStr(szToNull);
-	return hr;
 }
