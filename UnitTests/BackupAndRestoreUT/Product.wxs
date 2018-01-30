@@ -5,13 +5,13 @@
   <Product Id="*" Name="RegexUT" Language="1033" Version="1.0.0.0" Manufacturer="PoingGrab" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
-    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." AllowSameVersionUpgrades="yes" />
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." AllowSameVersionUpgrades="yes" Schedule="afterInstallInitialize" />
     <MediaTemplate />
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <Component Directory="INSTALLFOLDER" Id="Product.wxs">
         <File Source="$(var.ProjectDir)Product.wxs" />
-        <PanelSW:BackupAndRestore Id="_1" IgnoreMissing="yes" Path="[#Product.wxs]"/>
+        <PanelSW:BackupAndRestore Id="_1" IgnoreMissing="yes" Path="[#Product.wxs]" RestoreScheduling="afterDuplicateFiles"/>
       </Component>
     </Feature>
 
@@ -21,9 +21,9 @@
       </Directory>
     </Directory>
 
-    <Property Id="MSIFASTINSTALL" Value="1"></Property>
+    <Property Id="MSIFASTINSTALL" Value="7"></Property>
 
     <PanelSW:FileRegex Id="_1" FilePath="[#Product.wxs]" Regex="RegularExpression" Replacement="_RegularExpression" IgnoreCase="no"><![CDATA[Not Installed]]></PanelSW:FileRegex>
-
+   
   </Product>
 </Wix>

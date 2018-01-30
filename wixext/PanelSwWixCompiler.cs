@@ -192,6 +192,14 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
+
+        private enum BackupAndRestore_deferred_Schedule
+        {
+            BackupAndRestore_deferred_Before_InstallFiles,
+            BackupAndRestore_deferred_After_DuplicateFiles,
+            BackupAndRestore_deferred_After_RemoveExistingProducts
+        }
+
         private void ParseBackupAndRestoreElement(XmlElement parentElement, XmlElement element)
         {
             SourceLineNumberCollection parentsourceLineNumbers = Preprocessor.GetSourceLineNumbers(parentElement);
@@ -199,6 +207,7 @@ namespace PanelSw.Wix.Extensions
             string id = null;
             string filepath = null;
             string component = null;
+            BackupAndRestore_deferred_Schedule restoreSchedule = BackupAndRestore_deferred_Schedule.BackupAndRestore_deferred_Before_InstallFiles;
             DeletePathFlags flags = 0;
 
             component = Core.GetAttributeValue(parentsourceLineNumbers, parentElement.Attributes["Id"]);
@@ -236,6 +245,27 @@ namespace PanelSw.Wix.Extensions
                                 flags |= DeletePathFlags.IgnoreErrors;
                             }
                             break;
+                        case "restorescheduling":
+                            {
+                                string val = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                                switch (val)
+                                {
+                                    case "beforeInstallFiles":
+                                        restoreSchedule = BackupAndRestore_deferred_Schedule.BackupAndRestore_deferred_Before_InstallFiles;
+                                        break;
+                                    case "afterDuplicateFiles":
+                                        restoreSchedule = BackupAndRestore_deferred_Schedule.BackupAndRestore_deferred_After_DuplicateFiles;
+                                        break;
+                                    case "afterRemoveExistingProducts":
+                                        restoreSchedule = BackupAndRestore_deferred_Schedule.BackupAndRestore_deferred_After_RemoveExistingProducts;
+                                        break;
+                                    default:
+                                    Core.OnMessage(WixErrors.ValueNotSupported(sourceLineNumbers, element.LocalName, attrib.LocalName, val));
+                                        break;
+                                }
+                            }
+                            break;
+
 
                         default:
                             Core.UnexpectedAttribute(sourceLineNumbers, attrib);
@@ -259,6 +289,7 @@ namespace PanelSw.Wix.Extensions
 
             // reference the Win32_CopyFiles custom actions since nothing will happen without these
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "BackupAndRestore");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "Property", restoreSchedule.ToString());
 
             if (!Core.EncounteredError)
             {

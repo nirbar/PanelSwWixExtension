@@ -1,6 +1,6 @@
 #include "FileOperations.h"
-#include "../CaCommon/WixString.h"
 #include <strutil.h>
+#include "../CaCommon/WixString.h"
 #include <Shellapi.h>
 #include <Shlwapi.h>
 #include "FileOperations.h"
@@ -31,8 +31,8 @@ extern "C" __declspec(dllexport) UINT BackupAndRestore(MSIHANDLE hInstall)
 	WcaLog(LOGMSG_STANDARD, "Initialized.");
 
 	// Ensure table PSW_DeletePath exists.
-	hr = WcaTableExists(L"PSW_DeletePath");
-	BreakExitOnFailure(hr, "Table does not exist 'PSW_DeletePath'. Have you authored 'PanelSw:DeletePath' entries in WiX code?");
+	hr = WcaTableExists(L"PSW_BackupAndRestore");
+	BreakExitOnFailure(hr, "Table does not exist 'PSW_BackupAndRestore'. Have you authored 'PanelSw:BackupAndRestore' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(BackupAndRestore_QUERY, &hView);
@@ -55,7 +55,7 @@ extern "C" __declspec(dllexport) UINT BackupAndRestore(MSIHANDLE hInstall)
 
 		// Get fields
 		CWixString szId, szPath, szComponent;
-		CWixString tempFile;
+		WCHAR szTempFile[MAX_PATH + 1];
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
 		int flags = 0;
 
@@ -77,26 +77,22 @@ extern "C" __declspec(dllexport) UINT BackupAndRestore(MSIHANDLE hInstall)
 		}
 
 		// Generate temp file name.
-		hr = tempFile.Allocate(MAX_PATH + 1);
-		BreakExitOnFailure(hr, "Failed allocating memory");
-
-		dwRes = ::GetTempFileName(longTempPath, L"BNR", 0, (LPWSTR)tempFile);
+		dwRes = ::GetTempFileName(longTempPath, L"BNR", 0, szTempFile);
 		BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
 
-		hr = rollbackCAD.AddMoveFile(tempFile, szPath, flags);
+		hr = rollbackCAD.AddMoveFile(szTempFile, szPath, flags);
 		BreakExitOnFailure(hr, "Failed creating custom action data for rollback action.");
 
-		hr = deferredCAD.AddCopyFile(tempFile, szPath, flags);
+		hr = deferredCAD.AddCopyFile(szTempFile, szPath, flags);
 		BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
 
-		hr = commitCAD.AddDeleteFile(tempFile, flags);
+		hr = commitCAD.AddDeleteFile(szTempFile, flags);
 		BreakExitOnFailure(hr, "Failed creating custom action data for commit action.");
 
 		// Add deferred data to move file szFilePath -> tempFile.
-		hr = CopyPath(szPath, tempFile, flags & CFileOperations::FileOperationsAttributes::IgnoreMissingPath, flags & CFileOperations::FileOperationsAttributes::IgnoreErrors);
+		hr = CopyPath(szPath, szTempFile, flags & CFileOperations::FileOperationsAttributes::IgnoreMissingPath, flags & CFileOperations::FileOperationsAttributes::IgnoreErrors);
 		BreakExitOnFailure(hr, "Failed backing up '%ls'", (LPCWSTR)szPath);
 	}
-
 
 	hr = rollbackCAD.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for rollback action.");

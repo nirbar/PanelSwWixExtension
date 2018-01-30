@@ -48,6 +48,11 @@
               <xs:documentation>Do not fail the installation if the operation fails. Default is no.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="RestoreScheduling" type="BackupAndRestore_RestoreScheduling" default="beforeInstallFiles">
+            <xs:annotation>
+              <xs:documentation>Denote when to recover files from backup. Default is beforeInstallFiles.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>
@@ -1136,6 +1141,29 @@ Remove registry values.
       <xs:enumeration value="Unicode" />
       <xs:enumeration value="ReverseUnicode" />
       <xs:enumeration value="MultiByte" />
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="BackupAndRestore_RestoreScheduling">
+    <xs:annotation>
+      <xs:documentation>Scheduling for restoring files from backup.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:NMTOKEN">
+      <xs:enumeration value="beforeInstallFiles">
+        <xs:annotation>
+          <xs:documentation>Restore files before installing new files</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="afterDuplicateFiles">
+        <xs:annotation>
+          <xs:documentation>Restore files after having installed new files</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="afterRemoveExistingProducts">
+        <xs:annotation>
+          <xs:documentation>Restore files after RemoveExistingProducts action. Note that, RemoveExistingProducts must be sequenced beween InstallInitialize and InstallFinalize for this to work.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
 

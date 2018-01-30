@@ -136,7 +136,7 @@
   <Fragment>
     <CustomAction Id="TrimString" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="TrimString" Execute="immediate" Return="check" />
   </Fragment>
-  
+
   <!-- RegularExpression -->
   <Fragment>
     <CustomAction Id="RegularExpression" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="RegularExpression" Execute="firstSequence" Return="check" />
@@ -238,7 +238,7 @@
     </InstallExecuteSequence>
 
   </Fragment>
-  
+
 
   <!-- MsiSqlQuery -->
   <Fragment>
@@ -448,9 +448,8 @@
 
     <InstallExecuteSequence>
       <Custom Action="BackupAndRestore" Before="RemoveExistingProducts" Overridable="yes"/>
-      <Custom Action="BackupAndRestore_rollback" After="InstallInitialize" Overridable="yes"/>
-      <Custom Action="BackupAndRestore_deferred" After="InstallInitialize" Overridable="yes"/>
-      <Custom Action="BackupAndRestore_commit" After="InstallInitialize" Overridable="yes"/>
+      <Custom Action="BackupAndRestore_rollback" Before="ProcessComponents" Overridable="yes"/>
+      <Custom Action="BackupAndRestore_commit" Before="InstallFinalize" Overridable="yes"/>
     </InstallExecuteSequence>
 
     <UI>
@@ -460,5 +459,27 @@
       <ProgressText Action="BackupAndRestore_commit">!(loc.BackupAndRestore)</ProgressText>
     </UI>
   </Fragment>
+
+  <Fragment>
+    <Property Id="BackupAndRestore_deferred_After_DuplicateFiles" Hidden="yes"/>
+    <InstallExecuteSequence>
+      <Custom Action="BackupAndRestore_deferred" After="DuplicateFiles" Overridable="yes"/>
+    </InstallExecuteSequence>
+  </Fragment>
+
+  <Fragment>
+    <Property Id="BackupAndRestore_deferred_Before_InstallFiles" Hidden="yes"/>
+    <InstallExecuteSequence>
+      <Custom Action="BackupAndRestore_deferred" Before="InstallFiles" Overridable="yes"/>
+    </InstallExecuteSequence>
+  </Fragment>
+
+  <Fragment>
+    <Property Id="BackupAndRestore_deferred_After_RemoveExistingProducts" Hidden="yes"/>
+    <InstallExecuteSequence>
+      <Custom Action="BackupAndRestore_deferred" After="RemoveExistingProducts" Overridable="yes"/>
+    </InstallExecuteSequence>
+  </Fragment>
+  
 
 </Wix>
