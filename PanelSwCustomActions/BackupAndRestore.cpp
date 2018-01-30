@@ -85,7 +85,7 @@ extern "C" __declspec(dllexport) UINT BackupAndRestore(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed backing up '%ls'", (LPCWSTR)szPath);
 		if (hr == S_FALSE)
 		{
-			deferredCAD.DeletePath(szTempFile, true, true);
+			deferredCAD.DeletePath(szTempFile, true, true); // Delete the temporay file we created now as we're not going to need it.
 			continue;
 		}
 
@@ -100,15 +100,18 @@ extern "C" __declspec(dllexport) UINT BackupAndRestore(MSIHANDLE hInstall)
 
 			hr = rollbackCAD.AddDeleteFile(szTempFile, flags);
 			BreakExitOnFailure(hr, "Failed creating custom action data for rollbak action.");
+		
+			hr = deferredCAD.AddCopyFile(szTempFilesSpec, szPath, flags);
+			BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
 		}
 		else
 		{
 			hr = rollbackCAD.AddMoveFile(szTempFile, szPath, flags);
 			BreakExitOnFailure(hr, "Failed creating custom action data for rollback action.");
-		}
 
-		hr = deferredCAD.AddCopyFile(szTempFilesSpec, szPath, flags);
-		BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
+			hr = deferredCAD.AddCopyFile(szTempFile, szPath, flags);
+			BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
+		}
 
 		hr = commitCAD.AddDeleteFile(szTempFile, flags);
 		BreakExitOnFailure(hr, "Failed creating custom action data for commit action.");
