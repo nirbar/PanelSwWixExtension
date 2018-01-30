@@ -1,0 +1,19 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <FullVersion>1.1.22</FullVersion>
+    <ProductName>PanelSwWixExxtension</ProductName>
+    <Manufacturer>Panel::Software</Manufacturer>
+
+    <!-- Output folder -->
+    <OutputPath>$(SolutionDir)build\bin\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
+    <IntermediateOutputPath>$(SolutionDir)build\obj\$(Configuration)\$(MSBuildProjectName)\</IntermediateOutputPath>
+    <OutDir>$(OutputPath)</OutDir>
+    <IntDir>$(IntermediateOutputPath)</IntDir>
+    <OutputDirectory>$(OutputPath)</OutputDirectory>
+    <IntermediateDirectory>$(IntermediateOutputPath)</IntermediateDirectory>
+
+    <WixVariables>JetVersion=$(FullVersion);JetProductName=$(ProductName);JetManufacturer=$(Manufacturer)</WixVariables>
+
+  </PropertyGroup>
+</Project>

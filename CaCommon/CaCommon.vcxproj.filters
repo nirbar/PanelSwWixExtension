@@ -36,6 +36,12 @@
     <ClCompile Include="..\build\obj\$(Configuration)\CaCommon\*.pb.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\customActionData.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\command.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -65,13 +71,16 @@
     <ClInclude Include="..\build\obj\$(Configuration)\CaCommon\*.pb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\customActionData.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\command.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="protobuf\command.proto">
-      <Filter>Protobuf</Filter>
-    </None>
-    <None Include="protobuf\customActionData.proto">
-      <Filter>Protobuf</Filter>
-    </None>
+    <None Include="protobuf\*.proto" />
+    <None Include="protobuf\*.proto" />
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>

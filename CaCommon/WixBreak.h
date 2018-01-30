@@ -19,18 +19,18 @@
 
 #else
 
-#define BreakExitOnFailure(x, s)			ExitOnFailure(x, s)				
+#define BreakExitOnFailure(x, s, ...)			ExitOnFailure(x, s, __VA_ARGS__)
 #define BreakExitOnFailure1(x, f, s)		ExitOnFailure1(x, f, s)			
 #define BreakExitOnFailure2(x, f, s, t)		ExitOnFailure2(x, f, s, t)		
 #define BreakExitOnFailure3(x, f, s, t, u)	ExitOnFailure3(x, f, s, t, u)
-#define BreakExitOnNull(p, x, e, s)			ExitOnNull(p, x, e, s)			
+#define BreakExitOnNull(p, x, e, s, ...)			ExitOnNull(p, x, e, s, __VA_ARGS__)
 #define BreakExitOnNull1(p, x, e, f, s)		ExitOnNull1(p, x, e, f, s)		
 #define BreakExitOnNull2(p, x, e, f, s, t)	ExitOnNull2(p, x, e, f, s, t) 
 
-#define BreakExitOnWin32Error(e, x, s)			ExitOnWin32Error(e, x, s)		
+#define BreakExitOnWin32Error(e, x, s, ...)			ExitOnWin32Error(e, x, s, __VA_ARGS__)
 #define BreakExitOnWin32Error1(e, x, f, s)		ExitOnWin32Error1(e, x, f, s)	
 #define BreakExitOnWin32Error2(e, x, f, s, t)	ExitOnWin32Error2(e, x, f, s, t)
 
-#define BreakExitOnNullWithLastError(p, x, s)	ExitOnNullWithLastError(p, x, s)
+#define BreakExitOnNullWithLastError(p, x, s, ...)	ExitOnNullWithLastError(p, x, s, __VA_ARGS__)
 
 #endif

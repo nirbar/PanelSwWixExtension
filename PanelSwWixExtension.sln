@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio 15
+VisualStudioVersion = 15.0.27130.2010
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "PanelSwWixLib", "wixlib\PanelSwWixLib.wixproj", "{B6AC15A8-5EF9-4F89-ACCC-3F5C3FC04BCE}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -46,9 +46,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		Nuget\Install.ps1 = Nuget\Install.ps1
 		PanelSwWixExtension.nuspec = PanelSwWixExtension.nuspec
-		PanelSwWixExtension.props = PanelSwWixExtension.props
 		README.md = README.md
 		Nuget\Remove.psm1 = Nuget\Remove.psm1
+		TidyBuild.custom.props = TidyBuild.custom.props
 		Nuget\Uninstall.ps1 = Nuget\Uninstall.ps1
 	EndProjectSection
 EndProject
@@ -545,5 +545,8 @@ Global
 		{7F31BB12-8494-4A6E-A2B8-ECF9FE25B460} = {B533D9FC-4927-4A05-892D-B90E8BEDCF5D}
 		{4B0E8514-6BEE-41A5-AD4B-DF5F3BFEEFEF} = {B533D9FC-4927-4A05-892D-B90E8BEDCF5D}
 		{21F86B1E-9F55-4CC8-93C7-BD237157B7F5} = {B533D9FC-4927-4A05-892D-B90E8BEDCF5D}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {F5B6389D-77ED-4938-A322-8DFCA4D9FEF5}
 	EndGlobalSection
 EndGlobal

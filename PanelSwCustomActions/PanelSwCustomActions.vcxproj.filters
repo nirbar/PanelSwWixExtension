@@ -214,5 +214,6 @@
     <None Include="ProtoBuf\telemetryDetails.proto">
       <Filter>Proto</Filter>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
