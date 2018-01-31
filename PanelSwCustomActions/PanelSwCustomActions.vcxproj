@@ -187,12 +187,6 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
   </ImportGroup>
-  <Target Name="BeforeBuild" BeforeTargets="PrepareForBuild">
-    <ItemGroup>
-      <ProtoFiles Include="$(MSBuildThisFileDirectory)Protobuf\*.proto" />
-    </ItemGroup>
-    <Exec Command="&quot;$(SolutionDir)build\protobuf\$(Configuration)\protoc.exe&quot; &quot;--proto_path=$(MSBuildThisFileDirectory)Protobuf&quot; &quot;--proto_path=$(SolutionDir)protobuf\src&quot; &quot;--cpp_out=$(IntDir)..\Protobuf&quot; @(ProtoFiles, ' ')" />
-  </Target>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>

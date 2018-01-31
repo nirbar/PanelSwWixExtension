@@ -120,15 +120,11 @@
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
   </ImportGroup>
-  <Target Name="BuildProtobuf" BeforeTargets="PrepareForBuild">
-    <ItemGroup>
-      <ProtoFiles Include="$(MSBuildThisFileDirectory)Protobuf\*.proto" />
-    </ItemGroup>
+  <Target Name="BuildProtobuf" BeforeTargets="ProtoBuffCompile">
     <MakeDir Directories="$(SolutionDir)build\protobuf" />
     <MakeDir Directories="$(IntDir)..\protobuf" />
     <Exec Command="&quot;..\..\..\..\tools\cmake-3.10.2-win32-x86\bin\cmake.exe&quot; -G &quot;Visual Studio 15 2017&quot; -T $(PlatformToolset) ..\..\protobuf\cmake -Dprotobuf_BUILD_TESTS=OFF" WorkingDirectory="$(SolutionDir)build\protobuf" />
     <Exec Command="&quot;..\..\..\..\tools\cmake-3.10.2-win32-x86\bin\cmake.exe&quot; --build . --config $(Configuration)" WorkingDirectory="$(SolutionDir)build\protobuf" />
-    <Exec Command="&quot;$(SolutionDir)build\protobuf\$(Configuration)\protoc.exe&quot; &quot;--proto_path=$(MSBuildThisFileDirectory)Protobuf&quot; &quot;--proto_path=$(SolutionDir)protobuf\src&quot; &quot;--cpp_out=$(IntermediateOutputPath)..\Protobuf&quot; @(ProtoFiles, ' ')" StandardOutputImportance="normal" />
   </Target>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
