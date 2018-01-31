@@ -389,11 +389,11 @@ HRESULT CExecOnComponent::DeferredExecute(const ::google::protobuf::Any* pComman
 
         WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Not logging output on async command");
 
-        hr = ProcExecute(const_cast<LPWSTR>(szCommand), &hProc, NULL, NULL);
+        hr = ProcExecute(const_cast<LPWSTR>(szCommand), &hProc, nullptr, nullptr);
         BreakExitOnFailure1(hr, "Failed to launch command '%ls'", szCommand);
         hr = S_OK;
 
-        if ((hProc != NULL) && (hProc != INVALID_HANDLE_VALUE))
+        if (hProc && (hProc != INVALID_HANDLE_VALUE))
         {
             ::CloseHandle(hProc);
         }

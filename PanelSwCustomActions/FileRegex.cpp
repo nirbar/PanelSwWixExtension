@@ -199,15 +199,15 @@ HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szRepla
 	DWORD dwFileSize = 0;
 	DWORD dwFileAttr = FILE_ATTRIBUTE_NORMAL;
 	HANDLE hFile = INVALID_HANDLE_VALUE;
-	void* pFileContents = NULL;
+	void* pFileContents = nullptr;
 	FileRegexDetails::FileEncoding eDetectedEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_None;
 
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Replacing matches of regex '%ls' with '%ls' on file '%ls'", szRegex, szReplacement, szFilePath);
 
-	hFile = ::CreateFile(szFilePath, GENERIC_READ, FILE_SHARE_READ, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	hFile = ::CreateFile(szFilePath, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 	ExitOnNullWithLastError((hFile != INVALID_HANDLE_VALUE), hr, "Failed opening file");
 
-	dwFileSize = ::GetFileSize(hFile, NULL);
+	dwFileSize = ::GetFileSize(hFile, nullptr);
 	pFileContents = MemAlloc(dwFileSize + 2, FALSE);
 	ExitOnNull(pFileContents, hr, E_FAIL, "Failed allocating memory");
 	
@@ -215,7 +215,7 @@ HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szRepla
 	((BYTE*)pFileContents)[dwFileSize] = NULL;
 	((BYTE*)pFileContents)[dwFileSize + 1] = NULL;
 
-	bRes = ::ReadFile(hFile, pFileContents, dwFileSize, &dwBytesRead, NULL);
+	bRes = ::ReadFile(hFile, pFileContents, dwFileSize, &dwBytesRead, nullptr);
 	ExitOnNullWithLastError(bRes, hr, "Failed reading file");
 	ExitOnNull((dwFileSize == dwBytesRead), hr, E_FAIL, "Failed reading file. Read %i/%i bytes", dwBytesRead, dwFileSize);
 
@@ -264,30 +264,30 @@ HRESULT CFileRegex::ExecuteMultibyte(LPCWSTR szFilePath, LPCSTR szFileContent, L
 	DWORD dwSize = 0;
 	DWORD dwFileAttr = FILE_ATTRIBUTE_NORMAL;
 	HANDLE hFile = INVALID_HANDLE_VALUE;
-	LPSTR szRegexMB = NULL;
-	LPSTR szReplacementMB = NULL;
+	LPSTR szRegexMB = nullptr;
+	LPSTR szReplacementMB = nullptr;
 	regex rx;
 	string szContent;
 	regex_constants::syntax_option_type syntax = std::regex_constants::syntax_option_type::ECMAScript;
 
 	// Convert szRegex to multi-byte.
-	dwSize = ::WideCharToMultiByte(CP_UTF8, 0, szRegex, -1, NULL, 0, NULL, NULL);
+	dwSize = ::WideCharToMultiByte(CP_UTF8, 0, szRegex, -1, nullptr, 0, nullptr, nullptr);
 	ExitOnNullWithLastError(dwSize, hr, "Failed converting WCHAR string to multi-byte");
 
 	szRegexMB = (LPSTR)MemAlloc(dwSize, FALSE);
 	ExitOnNullWithLastError(szRegexMB, hr, "Failed allocating memory");
 
-	dwSize = ::WideCharToMultiByte(CP_UTF8, 0, szRegex, -1, szRegexMB, dwSize, NULL, NULL);
+	dwSize = ::WideCharToMultiByte(CP_UTF8, 0, szRegex, -1, szRegexMB, dwSize, nullptr, nullptr);
 	ExitOnNullWithLastError(dwSize, hr, "Failed converting WCHAR string to multi-byte");
 
 	// Convert szReplacement to multi-byte.
-	dwSize = ::WideCharToMultiByte(CP_UTF8, 0, szReplacement, -1, NULL, 0, NULL, NULL);
+	dwSize = ::WideCharToMultiByte(CP_UTF8, 0, szReplacement, -1, nullptr, 0, nullptr, nullptr);
 	ExitOnNullWithLastError(dwSize, hr, "Failed converting WCHAR string to multi-byte");
 
 	szReplacementMB = (LPSTR)MemAlloc(dwSize, FALSE);
 	ExitOnNullWithLastError(szReplacementMB, hr, "Failed allocating memory");
 
-	dwSize = ::WideCharToMultiByte(CP_UTF8, 0, szReplacement, -1, szReplacementMB, dwSize, NULL, NULL);
+	dwSize = ::WideCharToMultiByte(CP_UTF8, 0, szReplacement, -1, szReplacementMB, dwSize, nullptr, nullptr);
 	ExitOnNullWithLastError(dwSize, hr, "Failed converting WCHAR string to multi-byte");
 
 	if (bIgnoreCase)
@@ -301,10 +301,10 @@ HRESULT CFileRegex::ExecuteMultibyte(LPCWSTR szFilePath, LPCSTR szFileContent, L
 
 	dwFileAttr = ::GetFileAttributes(szFilePath);
 
-	hFile = ::CreateFile(szFilePath, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, dwFileAttr, NULL);
+	hFile = ::CreateFile(szFilePath, GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, dwFileAttr, nullptr);
 	ExitOnNullWithLastError((hFile != INVALID_HANDLE_VALUE), hr, "Failed creating file");
 
-	bRes = ::WriteFile(hFile, szContent.c_str(), dwSize, &dwBytesWritten, NULL);
+	bRes = ::WriteFile(hFile, szContent.c_str(), dwSize, &dwBytesWritten, nullptr);
 	ExitOnNullWithLastError(bRes, hr, "Failed writing file");
 	ExitOnNull((dwSize == dwBytesWritten), hr, E_FAIL, "Failed writing file. Wrote %i/%i bytes", dwBytesWritten, dwSize);
 
@@ -349,10 +349,10 @@ HRESULT CFileRegex::ExecuteUnicode(LPCWSTR szFilePath, LPCWSTR szFileContent, LP
 
 	dwFileAttr = ::GetFileAttributes(szFilePath);
 
-	hFile = ::CreateFile(szFilePath, GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, dwFileAttr, NULL);
+	hFile = ::CreateFile(szFilePath, GENERIC_WRITE, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, dwFileAttr, nullptr);
 	ExitOnNullWithLastError((hFile != INVALID_HANDLE_VALUE), hr, "Failed creating file");
 
-	bRes = ::WriteFile(hFile, szContent.c_str(), dwFileSize, &dwBytesWritten, NULL);
+	bRes = ::WriteFile(hFile, szContent.c_str(), dwFileSize, &dwBytesWritten, nullptr);
 	ExitOnNullWithLastError(bRes, hr, "Failed writing file");
 	ExitOnNull((dwFileSize == dwBytesWritten), hr, E_FAIL, "Failed writing file. Wrote %i/%i bytes", dwBytesWritten, dwFileSize);
 

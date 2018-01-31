@@ -9,7 +9,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(ReceiverToExecutorFunc mapFunc)
 	BYTE *pData = nullptr;
 	DWORD dwDataSize = 0;
 	BOOL bRes = TRUE;
-	CDeferredActionBase* pExecutor = NULL;
+	CDeferredActionBase* pExecutor = nullptr;
 	CustomActionData cad;
 
 	// Get CustomActionData
@@ -49,16 +49,15 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(ReceiverToExecutorFunc mapFunc)
 
 		// Release CDeferredActionBase.
 		delete pExecutor;
-		pExecutor = NULL;
+		pExecutor = nullptr;
 	}
 
 LExit:
 
 	ReleaseMem(pData);
-	if (pExecutor != NULL)
+	if (pExecutor)
 	{
 		delete pExecutor;
-		pExecutor = NULL;
 	}
 
 	return hr;

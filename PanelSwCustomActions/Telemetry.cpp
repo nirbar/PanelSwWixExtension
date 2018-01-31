@@ -211,7 +211,7 @@ HRESULT CTelemetry::Post(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWST
 	DWORD dwSize = 0;
 	DWORD dwPrevSize = 0;
 	DWORD dwDownloaded = 0;
-	LPSTR pszOutBuffer = NULL;
+	LPSTR pszOutBuffer = nullptr;
 	BOOL  bResults = FALSE;
 	HINTERNET hSession = NULL;
 	HINTERNET hConnect = NULL;
@@ -230,22 +230,22 @@ HRESULT CTelemetry::Post(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWST
 	BreakExitOnNullWithLastError(hConnect, hr, "Failed connecting to URL");
 
 	// Create an HTTP request handle.
-	hRequest = ::WinHttpOpenRequest(hConnect, szMethod, szPage, NULL, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES,
+	hRequest = ::WinHttpOpenRequest(hConnect, szMethod, szPage, nullptr, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES,
 		bSecure ? WINHTTP_FLAG_SECURE : 0);
 	BreakExitOnNullWithLastError(hRequest, hr, "Failed opening request");
 
 	// Get data size
-	if(( szData != NULL) && ((*szData) != NULL))
+	if (szData && *szData)
 	{
-		dwSize = ::wcslen( szData);
+		dwSize = ::wcslen(szData);
 	}
-	
+
 	// Send a request.
 	bResults = ::WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, (LPVOID)szData, dwSize, dwSize, 0);
 	BreakExitOnNull(bResults, hr, E_FAIL, "Failed sending HTTP request");
 
 	// End the request.
-	bResults = ::WinHttpReceiveResponse(hRequest, NULL);
+	bResults = ::WinHttpReceiveResponse(hRequest, nullptr);
 	BreakExitOnNull(bResults, hr, E_FAIL, "Failed receiving HTTP response");
 
 	// Keep checking for data until there is nothing left.
@@ -266,12 +266,12 @@ HRESULT CTelemetry::Post(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWST
 		if (dwSize > dwPrevSize)
 		{
 			// Release previous buffer.
-			if( pszOutBuffer != NULL)
+			if (pszOutBuffer)
 			{
 				delete[] pszOutBuffer;
-				pszOutBuffer = NULL;
+				pszOutBuffer = nullptr;
 			}
-		
+
 			pszOutBuffer = new char[dwSize + 1];
 			BreakExitOnNull(pszOutBuffer, hr, E_FAIL, "Failed allocating memory");
 			dwPrevSize = dwSize;
@@ -282,26 +282,26 @@ HRESULT CTelemetry::Post(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWST
 
 		bResults = ::WinHttpReadData(hRequest, (LPVOID)pszOutBuffer, dwSize, &dwDownloaded);
 		BreakExitOnNullWithLastError(bResults, hr, "Failed reading data");
-		BreakExitOnNull(dwDownloaded, hr, E_FAIL,  "Failed reading data (dwDownloaded=0)");
+		BreakExitOnNull(dwDownloaded, hr, E_FAIL, "Failed reading data (dwDownloaded=0)");
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "%s", pszOutBuffer);
 
 	} while (dwSize > 0);
 
 LExit:
 	// Close any open handles.
-	if (hRequest != NULL)
+	if (hRequest)
 	{
 		::WinHttpCloseHandle(hRequest);
 	}
-	if (hConnect != NULL)
+	if (hConnect)
 	{
 		::WinHttpCloseHandle(hConnect);
 	}
-	if (hSession != NULL)
+	if (hSession)
 	{
 		::WinHttpCloseHandle(hSession);
 	}
-	if (pszOutBuffer != NULL)
+	if (pszOutBuffer)
 	{
 		delete[] pszOutBuffer;
 	}

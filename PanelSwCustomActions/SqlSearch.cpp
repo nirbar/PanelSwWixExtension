@@ -55,12 +55,12 @@ extern "C" __declspec(dllexport) UINT SqlSearch(MSIHANDLE hInstall)
 		DBORDINAL nColCount = 0;
 		CComBSTR szColNames;
 		DBBINDING sDbBinding;
-		DBCOLUMNDATA *pColumn = NULL;
+		DBCOLUMNDATA *pColumn = nullptr;
 		HACCESSOR hAccessor = NULL;
 		DBBINDSTATUS nBindStatus = DBBINDSTATUS_OK;
-		unique_ptr<BYTE, void(__stdcall*)(LPVOID)> pRowData(NULL, ::CoTaskMemFree);
-		unique_ptr<DBCOLUMNINFO, void(__stdcall*)(LPVOID)> pColInfo(NULL, ::CoTaskMemFree);
-		unique_ptr<HROW, void(__stdcall*)(LPVOID)> phRow(NULL, ::CoTaskMemFree);
+		unique_ptr<BYTE, void(__stdcall*)(LPVOID)> pRowData(nullptr, ::CoTaskMemFree);
+		unique_ptr<DBCOLUMNINFO, void(__stdcall*)(LPVOID)> pColInfo(nullptr, ::CoTaskMemFree);
+		unique_ptr<HROW, void(__stdcall*)(LPVOID)> phRow(nullptr, ::CoTaskMemFree);
 
 		hr = WcaGetRecordString(hRecord, eSqlSearchQueryQuery::Property_, (LPWSTR*)szProperty);
 		BreakExitOnFailure(hr, "Failed to get Property_.");
@@ -104,7 +104,7 @@ extern "C" __declspec(dllexport) UINT SqlSearch(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed connecting to database");
 		BreakExitOnNull(pDbSession, hr, E_FAIL, "Failed connecting to database (NULL)");
 
-		hr = SqlSessionExecuteQuery(pDbSession, (LPCWSTR)szQuery, &pRowset, NULL, &szError);
+		hr = SqlSessionExecuteQuery(pDbSession, (LPCWSTR)szQuery, &pRowset, nullptr, &szError);
 		BreakExitOnFailure1(hr, "Failed executing query. %ls", (LPCWSTR)(LPWSTR)szError);
 		BreakExitOnNull(pRowset, hr, E_FAIL, "Failed executing query (NULL)");
 
@@ -144,13 +144,13 @@ extern "C" __declspec(dllexport) UINT SqlSearch(MSIHANDLE hInstall)
 		sDbBinding.eParamIO = DBPARAMIO_NOTPARAM;
 		sDbBinding.iOrdinal = pColInfo->iOrdinal;
 		sDbBinding.wType = DBTYPE_WSTR;
-		sDbBinding.pTypeInfo = NULL;
+		sDbBinding.pTypeInfo = nullptr;
 		sDbBinding.obValue = offsetof(DBCOLUMNDATA, bData);
 		sDbBinding.obLength = offsetof(DBCOLUMNDATA, dwLength);
 		sDbBinding.obStatus = offsetof(DBCOLUMNDATA, dwStatus);
 		sDbBinding.cbMaxLen = pColInfo->ulColumnSize;
-		sDbBinding.pObject = NULL;
-		sDbBinding.pBindExt = NULL;
+		sDbBinding.pObject = nullptr;
+		sDbBinding.pBindExt = nullptr;
 		sDbBinding.dwFlags = 0;
 		sDbBinding.dwMemOwner = DBMEMOWNER_CLIENTOWNED;
 		sDbBinding.bPrecision = 0;
@@ -169,7 +169,7 @@ extern "C" __declspec(dllexport) UINT SqlSearch(MSIHANDLE hInstall)
 		hr = pRowset->GetData(phRow.get()[0], hAccessor, pRowData.get());
 		BreakExitOnFailure(hr, "Failed to get row data");
 
-		hr = pAccessor->ReleaseAccessor(hAccessor, NULL);
+		hr = pAccessor->ReleaseAccessor(hAccessor, nullptr);
 		BreakExitOnFailure(hr, "Failed releasing accessor");
 		hAccessor = NULL;
 

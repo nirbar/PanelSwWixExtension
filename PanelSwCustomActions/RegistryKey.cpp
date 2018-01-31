@@ -55,7 +55,7 @@ HRESULT CRegistryKey::Create( RegRoot root, WCHAR* key, RegArea area, RegAccess 
 		BreakExitOnFailure( hr, "Failed to get default registry area");
 	}
 
-	lRes = ::RegCreateKeyExW( hParentKey, key, 0, NULL, 0, _samAccess | _area, NULL, &hKey, NULL);
+	lRes = ::RegCreateKeyExW( hParentKey, key, 0, nullptr, 0, _samAccess | _area, nullptr, &hKey, nullptr);
 	hr = HRESULT_FROM_WIN32( lRes);
 	BreakExitOnFailure( hr, "Failed to create registry key");
 
@@ -164,7 +164,7 @@ HRESULT CRegistryKey::GetValue( WCHAR* name, BYTE** pData, RegValueType* pType, 
 	BreakExitOnNull( pDataSize, hr, E_INVALIDARG, "pDataSize is NULL");
 
 	(*pDataSize) = 0;
-	lRes = ::RegQueryValueEx( _hKey, name, 0, (LPDWORD)pType, NULL, pDataSize);
+	lRes = ::RegQueryValueEx( _hKey, name, 0, (LPDWORD)pType, nullptr, pDataSize);
 	hr = HRESULT_FROM_WIN32( lRes);
 	BreakExitOnFailure( hr, "Failed to query registry value");
 	BreakExitOnNull( (*pDataSize), hr, E_FILENOTFOUND, "Registry value's size is 0.");
@@ -258,34 +258,34 @@ HRESULT CRegistryKey::ParseRoot( LPCWSTR pRootString, RegRoot* peRoot)
 
 	BreakExitOnNull( peRoot, hr, E_INVALIDARG, "Invalid root pointer");
 	
-	if(( pRootString == NULL) || ( wcslen( pRootString) == 0))
+	if(!(pRootString && *pRootString))
 	{
 		(*peRoot) = RegRoot::CurrentUser;
 		ExitFunction();
 	}
 
-	if(( _wcsicmp( pRootString, L"HKLM") == 0)
-		|| ( _wcsicmp( pRootString, L"HKEY_LOCAL_MACHINE") == 0))
+	if((::_wcsicmp( pRootString, L"HKLM") == 0)
+		|| (::_wcsicmp( pRootString, L"HKEY_LOCAL_MACHINE") == 0))
 	{
 		(*peRoot) = RegRoot::LocalMachine;
 	}
-	else if(( _wcsicmp( pRootString, L"HKCR") == 0)
-		|| ( _wcsicmp( pRootString, L"HKEY_CLASSES_ROOT") == 0))
+	else if((::_wcsicmp( pRootString, L"HKCR") == 0)
+		|| (::_wcsicmp( pRootString, L"HKEY_CLASSES_ROOT") == 0))
 	{
 		(*peRoot) = RegRoot::ClassesRoot;
 	}
-	else if(( _wcsicmp( pRootString, L"HKCC") == 0)
-		|| ( _wcsicmp( pRootString, L"HKEY_CURRENT_CONFIG") == 0))
+	else if((::_wcsicmp( pRootString, L"HKCC") == 0)
+		|| (::_wcsicmp( pRootString, L"HKEY_CURRENT_CONFIG") == 0))
 	{
 		(*peRoot) = RegRoot::CurrentConfig;
 	}
-	else if(( _wcsicmp( pRootString, L"HKCU") == 0)
-		|| ( _wcsicmp( pRootString, L"HKEY_CURRENT_USER") == 0))
+	else if((::_wcsicmp( pRootString, L"HKCU") == 0)
+		|| (::_wcsicmp( pRootString, L"HKEY_CURRENT_USER") == 0))
 	{
 		(*peRoot) = RegRoot::CurrentUser;
 	}
-	else if(( _wcsicmp( pRootString, L"HKU") == 0)
-		|| ( _wcsicmp( pRootString, L"HKEY_USERS") == 0))
+	else if((::_wcsicmp( pRootString, L"HKU") == 0)
+		|| (::_wcsicmp( pRootString, L"HKEY_USERS") == 0))
 	{
 		(*peRoot) = RegRoot::Users;
 	}
@@ -305,17 +305,17 @@ HRESULT CRegistryKey::ParseArea( LPCWSTR pAreaString, RegArea* peArea)
 
 	BreakExitOnNull( peArea, hr, E_INVALIDARG, "Invalid area pointer");
 
-	if(( pAreaString == NULL) || ((*pAreaString) == NULL) || ( _wcsicmp( pAreaString, L"default") == 0))
+	if(!pAreaString || !*pAreaString || (::_wcsicmp(pAreaString, L"default") == 0))
 	{
 		hr = GetDefaultArea( peArea);
 		BreakExitOnFailure( hr, "Failed to get default registry area");
 		ExitFunction();
 	}
-	else if( _wcsicmp( pAreaString, L"x86") == 0)
+	else if(::_wcsicmp( pAreaString, L"x86") == 0)
 	{
 		(*peArea) = RegArea::X86;
 	}
-	else if( _wcsicmp( pAreaString, L"x64") == 0)
+	else if(::_wcsicmp( pAreaString, L"x64") == 0)
 	{
 		(*peArea) = RegArea::X64;
 	}
@@ -335,45 +335,45 @@ HRESULT CRegistryKey::ParseValueType(LPCWSTR pTypeString, RegValueType* peType)
 
 	BreakExitOnNull(peType, hr, E_INVALIDARG, "Invalid type pointer");
 
-	if ((pTypeString == NULL) || (wcslen(pTypeString) == 0))
+	if (!pTypeString || !*pTypeString)
 	{
 		(*peType) = RegValueType::String;
 		ExitFunction();
 	}
 
-	if ((_wcsicmp(pTypeString, L"REG_SZ") == 0)
-		|| (_wcsicmp(pTypeString, L"String") == 0)
-		|| (_wcsicmp(pTypeString, L"1") == 0))
+	if ((::_wcsicmp(pTypeString, L"REG_SZ") == 0)
+		|| (::_wcsicmp(pTypeString, L"String") == 0)
+		|| (::_wcsicmp(pTypeString, L"1") == 0))
 	{
 		(*peType) = RegValueType::String;
 	}
-	else if ((_wcsicmp(pTypeString, L"REG_BINARY") == 0)
-		|| (_wcsicmp(pTypeString, L"Binary") == 0)
-		|| (_wcsicmp(pTypeString, L"3") == 0))
+	else if ((::_wcsicmp(pTypeString, L"REG_BINARY") == 0)
+		|| (::_wcsicmp(pTypeString, L"Binary") == 0)
+		|| (::_wcsicmp(pTypeString, L"3") == 0))
 	{
 		(*peType) = RegValueType::Binary;
 	}
-	else if ((_wcsicmp(pTypeString, L"REG_DWORD") == 0)
-		|| (_wcsicmp(pTypeString, L"DWord") == 0)
-		|| (_wcsicmp(pTypeString, L"4") == 0))
+	else if ((::_wcsicmp(pTypeString, L"REG_DWORD") == 0)
+		|| (::_wcsicmp(pTypeString, L"DWord") == 0)
+		|| (::_wcsicmp(pTypeString, L"4") == 0))
 	{
 		(*peType) = RegValueType::DWord;
 	}
-	else if ((_wcsicmp(pTypeString, L"REG_EXPAND_SZ") == 0)
-		|| (_wcsicmp(pTypeString, L"Expandable") == 0)
-		|| (_wcsicmp(pTypeString, L"2") == 0))
+	else if ((::_wcsicmp(pTypeString, L"REG_EXPAND_SZ") == 0)
+		|| (::_wcsicmp(pTypeString, L"Expandable") == 0)
+		|| (::_wcsicmp(pTypeString, L"2") == 0))
 	{
 		(*peType) = RegValueType::Expandable;
 	}
-	else if ((_wcsicmp(pTypeString, L"REG_MULTI_SZ") == 0)
-		|| (_wcsicmp(pTypeString, L"MultiString") == 0)
-		|| (_wcsicmp(pTypeString, L"7") == 0))
+	else if ((::_wcsicmp(pTypeString, L"REG_MULTI_SZ") == 0)
+		|| (::_wcsicmp(pTypeString, L"MultiString") == 0)
+		|| (::_wcsicmp(pTypeString, L"7") == 0))
 	{
 		(*peType) = RegValueType::MultiString;
 	}
-	else if ((_wcsicmp(pTypeString, L"REG_QWORD") == 0)
-		|| (_wcsicmp(pTypeString, L"QWord") == 0)
-		|| (_wcsicmp(pTypeString, L"11") == 0))
+	else if ((::_wcsicmp(pTypeString, L"REG_QWORD") == 0)
+		|| (::_wcsicmp(pTypeString, L"QWord") == 0)
+		|| (::_wcsicmp(pTypeString, L"11") == 0))
 	{
 		(*peType) = RegValueType::QWord;
 	}

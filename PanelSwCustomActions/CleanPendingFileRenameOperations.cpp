@@ -20,7 +20,7 @@ extern "C" __declspec(dllexport) int __cdecl CleanPendingFileRenameOperationsSch
 	DWORD dwSize = 0;
 	DWORD dwStrSize = 0;
 	DWORD dwIndex = 0;
-	LPWSTR szPendingFileRenameOperations = NULL;
+	LPWSTR szPendingFileRenameOperations = nullptr;
 	CWixString szCleanPendingFileRenameOperations;
 	vector<LPCWSTR> vecFiles;
 	list<LPCWSTR> lstDeletedFiles;
@@ -34,7 +34,7 @@ extern "C" __declspec(dllexport) int __cdecl CleanPendingFileRenameOperationsSch
 	hr = RegOpen(HKEY_LOCAL_MACHINE, L"SYSTEM\\CurrentControlSet\\Control\\Session Manager", GENERIC_READ, &hKey);
 	ExitOnFailure(hr, "Failed to open Session Manager registry key");
 
-	er = ::RegQueryValueEx(hKey, L"PendingFileRenameOperations", NULL, NULL, NULL, &dwSize);
+	er = ::RegQueryValueEx(hKey, L"PendingFileRenameOperations", nullptr, nullptr, nullptr, &dwSize);
 	if (er == ERROR_FILE_NOT_FOUND)
 	{
 		WcaLog(LOGMSG_STANDARD, "No pending file rename operations.");
@@ -49,7 +49,7 @@ extern "C" __declspec(dllexport) int __cdecl CleanPendingFileRenameOperationsSch
 	// Ensure terminating NULL's
 	::ZeroMemory(szPendingFileRenameOperations, dwStrSize * sizeof(WCHAR));
 
-	er = ::RegQueryValueEx(hKey, L"PendingFileRenameOperations", NULL, NULL, (LPBYTE)szPendingFileRenameOperations, &dwSize);
+	er = ::RegQueryValueEx(hKey, L"PendingFileRenameOperations", nullptr, nullptr, (LPBYTE)szPendingFileRenameOperations, &dwSize);
 	ExitOnWin32Error(er, hr, "Failed querying value of PendingFileRenameOperations");
 
 	dwIndex = 0;
@@ -158,19 +158,13 @@ extern "C" __declspec(dllexport) int __cdecl CleanPendingFileRenameOperations(MS
 	DWORD dwSize = 0;
 	DWORD dwStrSize = 0;
 	DWORD dwIndex = 0;
-	LPWSTR szPendingFileRenameOperations = NULL;
-	LPWSTR szCleanPendingFileRenameOperations = NULL;
+	LPWSTR szPendingFileRenameOperations = nullptr;
+	LPWSTR szCleanPendingFileRenameOperations = nullptr;
 	CWixString szPreventDelete;
-	LPCWSTR szToken = NULL;
+	LPCWSTR szToken = nullptr;
 	vector<LPCWSTR> vecFiles;
 	BOOL bAnyChange = FALSE;
 	errno_t ern = 0;
-
-	/*
-	::MoveFileEx(L"C:\\Program Files (x86)\\UnitTestSetup\\Product.wxs", L"C:\\Program Files (x86)\\UnitTestSetup\\Product.wxs1", MOVEFILE_DELAY_UNTIL_REBOOT | MOVEFILE_REPLACE_EXISTING);
-	::MoveFileEx(L"C:\\Program Files (x86)\\UnitTestSetup\\Product.wxs1", NULL, MOVEFILE_DELAY_UNTIL_REBOOT | MOVEFILE_REPLACE_EXISTING);
-	return 0;
-	*/
 
 	hr = WcaInitialize(hInstall, "CleanPendingFileRenameOps");
 	ExitOnFailure(hr, "Failed to initialize");
@@ -182,7 +176,7 @@ extern "C" __declspec(dllexport) int __cdecl CleanPendingFileRenameOperations(MS
 	hr = RegOpen(HKEY_LOCAL_MACHINE, L"SYSTEM\\CurrentControlSet\\Control\\Session Manager", GENERIC_ALL, &hKey);
 	ExitOnFailure(hr, "Failed to open Session Manager registry key");
 
-	er = ::RegQueryValueEx(hKey, L"PendingFileRenameOperations", NULL, NULL, NULL, &dwSize);
+	er = ::RegQueryValueEx(hKey, L"PendingFileRenameOperations", nullptr, nullptr, nullptr, &dwSize);
 	if (er == ERROR_FILE_NOT_FOUND)
 	{
 		WcaLog(LOGMSG_STANDARD, "No pending file rename operations.");
@@ -197,7 +191,7 @@ extern "C" __declspec(dllexport) int __cdecl CleanPendingFileRenameOperations(MS
 	// Ensure terminating NULL's
 	::ZeroMemory(szPendingFileRenameOperations, dwStrSize * sizeof(WCHAR));
 
-	er = ::RegQueryValueEx(hKey, L"PendingFileRenameOperations", NULL, NULL, (LPBYTE)szPendingFileRenameOperations, &dwSize);
+	er = ::RegQueryValueEx(hKey, L"PendingFileRenameOperations", nullptr, nullptr, (LPBYTE)szPendingFileRenameOperations, &dwSize);
 	ExitOnWin32Error(er, hr, "Failed querying value of PendingFileRenameOperations");
 
 	dwIndex = 0;
@@ -233,7 +227,7 @@ extern "C" __declspec(dllexport) int __cdecl CleanPendingFileRenameOperations(MS
 			{
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File '%ls' is scheduled to be deleted after reboot. Unscheduling.", szDelete);
 				bAnyChange = TRUE;
-				vecFiles[i - 1] = NULL;
+				vecFiles[i - 1] = nullptr;
 			}
 		}
 	}
@@ -283,7 +277,7 @@ extern "C" __declspec(dllexport) int __cdecl CleanPendingFileRenameOperations(MS
 			{
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File '%ls' is scheduled to be created and deleted after reboot. Keeping the creation only.", szDelete);
 				bAnyChange = TRUE;
-				vecFiles[j] = NULL; // Keep the creation only.
+				vecFiles[j] = nullptr; // Keep the creation only.
 			}
 		}
 	}

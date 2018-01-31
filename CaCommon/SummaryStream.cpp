@@ -11,7 +11,7 @@ CSummaryStream* CSummaryStream::GetInstance()
 }
 
 CSummaryStream::CSummaryStream(void)
-	: _pTemplate( NULL)
+	: _pTemplate( nullptr)
 {
 }
 
@@ -25,16 +25,16 @@ HRESULT CSummaryStream::IsPackageX64( bool *pIsX64)
 
 	BreakExitOnNull( pIsX64, hr, E_INVALIDARG, "pIsX64 is NULL");
 
-	if( _pTemplate == NULL)
+	if (!_pTemplate)
 	{
-		hr = GetProperty( SummaryStreamProperties::PID_TEMPLATE, &_pTemplate);
-		BreakExitOnFailure( hr, "Failed getting template property from summary stream");
-		BreakExitOnNull( _pTemplate, hr, E_FAIL, "Failed getting template property from summary stream");
+		hr = GetProperty(SummaryStreamProperties::PID_TEMPLATE, &_pTemplate);
+		BreakExitOnFailure(hr, "Failed getting template property from summary stream");
+		BreakExitOnNull(_pTemplate, hr, E_FAIL, "Failed getting template property from summary stream");
 	}
 	
 	MsiDebugBreak();
 
-	if(( ::wcsstr( _pTemplate, L"Intel64") != NULL) || ( ::wcsstr( _pTemplate, L"x64") != NULL))
+	if (::wcsstr(_pTemplate, L"Intel64") || ::wcsstr(_pTemplate, L"x64"))
 	{
 		(*pIsX64) = false;
 	}
@@ -64,7 +64,7 @@ HRESULT CSummaryStream::GetProperty( SummaryStreamProperties eProp, LPWSTR *ppPr
 	hDatabase = WcaGetDatabaseHandle();
 	BreakExitOnNull( hDatabase, hr, E_FAIL, "Failed to get MSI database");
 
-	dwRes = ::MsiGetSummaryInformation( hDatabase, NULL, 0, &hSummaryInfo);
+	dwRes = ::MsiGetSummaryInformation( hDatabase, nullptr, 0, &hSummaryInfo);
 	hr = HRESULT_FROM_WIN32( dwRes);
 	BreakExitOnFailure( hr, "Failed to get summary stream");
 

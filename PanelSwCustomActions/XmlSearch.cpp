@@ -31,7 +31,7 @@ extern "C" __declspec( dllexport ) UINT XmlSearch(MSIHANDLE hInstall)
 	BreakExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized.");
 		
-	hr = ::CoInitialize(NULL); 
+	hr = ::CoInitialize(nullptr); 
 	BreakExitOnFailure( hr, "Failed to CoInitialize");
 
 	// Ensure table PSW_XmlSearch exists.
@@ -49,14 +49,14 @@ extern "C" __declspec( dllexport ) UINT XmlSearch(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		WCHAR *Id = NULL;
-		WCHAR *Property = NULL;
-		WCHAR *FilePath = NULL;
-		WCHAR *Expression = NULL;
-		WCHAR *Language = NULL;
-		WCHAR *Namespaces = NULL;
-		WCHAR *Match = NULL;
-		WCHAR *Condition = NULL;
+		LPWSTR Id = nullptr;
+		LPWSTR Property = nullptr;
+		LPWSTR FilePath = nullptr;
+		LPWSTR Expression = nullptr;
+		LPWSTR Language = nullptr;
+		LPWSTR Namespaces = nullptr;
+		LPWSTR Match = nullptr;
+		LPWSTR Condition = nullptr;
 		eXmlMatch eMatch = eXmlMatch::first;
 
 		hr = WcaGetRecordString(hRecord, eXmlSearchQueryQuery::Id, &Id);
@@ -77,7 +77,7 @@ extern "C" __declspec( dllexport ) UINT XmlSearch(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to get Condition.");
 
 		// Test condition
-		if ((Condition != NULL) && (*Condition != NULL))
+		if (Condition && *Condition)
 		{
 			MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, Condition);
 			switch (condRes)
@@ -98,9 +98,9 @@ extern "C" __declspec( dllexport ) UINT XmlSearch(MSIHANDLE hInstall)
 		}
 
 		// Parse 'match' column
-		if(( Match != NULL) && ( wcslen( Match) != 0))
+		if (Match && (::wcslen(Match) != 0))
 		{
-			hr = ParseXmlMatch( Match, &eMatch);
+			hr = ParseXmlMatch(Match, &eMatch);
 			BreakExitOnFailure(hr, "Invalide match field");
 		}
 
@@ -166,7 +166,7 @@ HRESULT QueryXml(LPCWSTR pFile, LPCWSTR pExpression, LPCWSTR szLanguage, LPCWSTR
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Running Expression '%ls' on '%ls'", pExpression, pFile);
 	
 	// Create XML doc.
-	hr = ::CoCreateInstance(CLSID_DOMDocument, NULL, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&pXmlDoc);
+	hr = ::CoCreateInstance(CLSID_DOMDocument, nullptr, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&pXmlDoc);
 	BreakExitOnFailure( hr, "Failed to CoCreateInstance CLSID_DOMDocument");
 
 	// Load XML document
@@ -180,7 +180,7 @@ HRESULT QueryXml(LPCWSTR pFile, LPCWSTR pExpression, LPCWSTR szLanguage, LPCWSTR
 	}
 
 	// Set language.
-	if ((szLanguage != NULL) && (*szLanguage != NULL))
+	if (szLanguage && *szLanguage)
 	{
 		static const CComBSTR SelectionLanguage(L"SelectionLanguage");
 		hr = pXmlDoc->setProperty(SelectionLanguage, CComVariant(szLanguage));
@@ -194,7 +194,7 @@ HRESULT QueryXml(LPCWSTR pFile, LPCWSTR pExpression, LPCWSTR szLanguage, LPCWSTR
 	}
 
 	// Set namespaces.
-	if ((szNamespaces != NULL) && (*szNamespaces != NULL))
+	if (szNamespaces && *szNamespaces)
 	{
 		static const CComBSTR SelectionNamespaces(L"SelectionNamespaces");
 		hr = pXmlDoc->setProperty(SelectionNamespaces, CComVariant(szNamespaces));
