@@ -1161,7 +1161,7 @@ Remove registry values.
       </xs:enumeration>
       <xs:enumeration value="afterRemoveExistingProducts">
         <xs:annotation>
-          <xs:documentation>Restore files after RemoveExistingProducts action. Note that, RemoveExistingProducts must be sequenced beween InstallInitialize and InstallFinalize for this to work.</xs:documentation>
+          <xs:documentation>Restore files after RemoveExistingProducts action. Note that, RemoveExistingProducts must be sequenced between InstallInitialize and InstallFinalize for this to work.</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
     </xs:restriction>
