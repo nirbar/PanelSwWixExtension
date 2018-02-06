@@ -10,13 +10,13 @@ CRegistryXmlParser::CRegistryXmlParser()
 {
 	HRESULT hr = S_OK;
 	CComPtr<IXMLDOMElement> pRoot;
-	IXMLDOMNode *pTmpNode = NULL;
+	IXMLDOMNode *pTmpNode = nullptr;
 		
-	hr = ::CoInitialize(NULL); 
+	hr = ::CoInitialize(nullptr); 
 	BreakExitOnFailure( hr, "Failed to CoInitialize");
 
 	// XML docs.
-	hr = ::CoCreateInstance(CLSID_DOMDocument, NULL, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&_pXmlDoc);
+	hr = ::CoCreateInstance(CLSID_DOMDocument, nullptr, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&_pXmlDoc);
 	BreakExitOnFailure( hr, "Failed to CoCreateInstance CLSID_DOMDocument");
 	
 	// XML root.
@@ -207,7 +207,7 @@ HRESULT CRegistryXmlParser::AddCreateValue(WCHAR* pId, CRegistryKey::RegRoot roo
 	CComPtr<IXMLDOMNode> tmpNode;
 	CComBSTR attName = L"";
 	CComVariant value;
-	void *pArrayData = NULL;
+	void *pArrayData = nullptr;
 	
 	hr = _pXmlDoc->get_documentElement( &xmlRoot);
 	BreakExitOnFailure( hr, "Failed to get XML root");
@@ -269,15 +269,15 @@ HRESULT CRegistryXmlParser::Execute( WCHAR *pCustomActionData)
 	HRESULT hr = S_OK;
 	CComPtr<IXMLDOMDocument> pXmlDoc;
 	CComPtr<IXMLDOMNodeList> pNodes;
-	IXMLDOMNodeList* pTmpNodes = NULL;
-	IXMLDOMNode* pTmpNode = NULL;
-	IXMLDOMElement* pCurrElem = NULL;
+	IXMLDOMNodeList* pTmpNodes = nullptr;
+	IXMLDOMNode* pTmpNode = nullptr;
+	IXMLDOMElement* pCurrElem = nullptr;
 	VARIANT_BOOL isXmlSuccess;
 	LONG nodeCount = 0;
 	DOMNodeType nodeType;
 
 	// XML docs.
-	hr = ::CoCreateInstance(CLSID_DOMDocument, NULL, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&pXmlDoc);
+	hr = ::CoCreateInstance(CLSID_DOMDocument, nullptr, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&pXmlDoc);
 	BreakExitOnFailure( hr, "Failed to CoCreateInstance CLSID_DOMDocument");
 
 	hr = pXmlDoc->loadXML( pCustomActionData, &isXmlSuccess);
@@ -298,7 +298,7 @@ HRESULT CRegistryXmlParser::Execute( WCHAR *pCustomActionData)
 
 	for( LONG i = 0; i < nodeCount; ++i)
 	{
-		pTmpNode = NULL;
+		pTmpNode = nullptr;
 
 		hr = pNodes->get_item( i, &pTmpNode);
 		BreakExitOnFailure( hr, "Failed to get node");
@@ -330,7 +330,7 @@ HRESULT CRegistryXmlParser::XmlExecute( IXMLDOMElement *xmlElem)
 	CComBSTR tag;
 	CComVariant id, root, key, valName, valType, valData, area;
 	DWORD dwArea, dwRoot;
-	BYTE *pData = NULL;
+	BYTE *pData = nullptr;
 	CRegDataSerializer regDataSer;
 
 	// Get common fields.

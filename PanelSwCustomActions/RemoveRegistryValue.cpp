@@ -33,19 +33,19 @@ extern "C" __declspec( dllexport ) UINT RemoveRegistryValue_Immediate(MSIHANDLE 
 		BreakExitOnFailure(hr, "Failed to fetch record");
 		
 		// Get record.
-		WCHAR* pId = NULL;
-		WCHAR* pName = NULL;
-		WCHAR* pRoot = NULL;
-		WCHAR* pKey = NULL;
-		WCHAR* pArea = NULL;
+		LPWSTR pId = nullptr;
+		LPWSTR pName = nullptr;
+		LPWSTR pRoot = nullptr;
+		LPWSTR pKey = nullptr;
+		LPWSTR pArea = nullptr;
 		CRegistryKey::RegRoot eRoot;
 		CRegistryKey::RegArea eArea;
 		CRegistryKey key;
-		WCHAR* pCondition = NULL;
+		LPWSTR pCondition = nullptr;
 
 		// existing value details
-		BYTE* pData = NULL;
-		LPWSTR pDataString = NULL;
+		BYTE* pData = nullptr;
+		LPWSTR pDataString = nullptr;
 		CRegistryKey::RegValueType valueType;
 		DWORD dwValueSize = 0;
 		CRegDataSerializer dataSerialiser;
@@ -123,13 +123,13 @@ extern "C" __declspec( dllexport ) UINT RemoveRegistryValue_Immediate(MSIHANDLE 
 	BreakExitOnFailure(hr, "Failed to read XML as text");
 	hr = WcaDoDeferredAction( L"RemoveRegistryValue_rollback", xmlString, 0);
 	BreakExitOnFailure(hr, "Failed to set property");	
-	xmlString = std::nullptr_t(NULL);
+	xmlString.Empty();
 
 	hr = actionData.GetXmlString( &xmlString);
 	BreakExitOnFailure(hr, "Failed to read XML as text");
 	hr = WcaDoDeferredAction( L"RemoveRegistryValue_deferred", xmlString, 0);
 	BreakExitOnFailure(hr, "Failed to set property");
-	xmlString = std::nullptr_t(NULL);
+	xmlString.Empty();
 
 LExit:
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
@@ -142,7 +142,7 @@ extern "C" __declspec( dllexport ) UINT RemoveRegistryValue_Deferred(MSIHANDLE h
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
 	CRegistryXmlParser action;
-	LPWSTR pActionData = NULL;
+	LPWSTR pActionData = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");

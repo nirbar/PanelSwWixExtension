@@ -22,7 +22,7 @@ extern "C" __declspec(dllexport) UINT ServiceConfig(MSIHANDLE hInstall)
 	CServiceConfig oRollback;
 	SC_HANDLE hManager = NULL;
 	SC_HANDLE hService = NULL;
-	QUERY_SERVICE_CONFIG *pServiceCfg = NULL;
+	QUERY_SERVICE_CONFIG *pServiceCfg = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");
@@ -37,7 +37,7 @@ extern "C" __declspec(dllexport) UINT ServiceConfig(MSIHANDLE hInstall)
 	BreakExitOnFailure1(hr, "Failed to execute SQL query '%ls'.", ServiceConfig_QUERY);
 
 	// Open service.
-	hManager = ::OpenSCManager(NULL, NULL, SC_MANAGER_CONNECT);
+	hManager = ::OpenSCManager(nullptr, nullptr, SC_MANAGER_CONNECT);
 	ExitOnNullWithLastError(hManager, hr, "Failed opening service control manager database");
 
 	// Iterate records
@@ -77,7 +77,7 @@ extern "C" __declspec(dllexport) UINT ServiceConfig(MSIHANDLE hInstall)
 		{
 			DWORD dwSize = 0;
 
-			dwRes = ::QueryServiceConfig(hService, NULL, 0, &dwSize);
+			dwRes = ::QueryServiceConfig(hService, nullptr, 0, &dwSize);
 			ExitOnNullWithLastError((dwRes || (::GetLastError() == ERROR_INSUFFICIENT_BUFFER)) , hr, "Failed querying service '%ls' configuration size", (LPCWSTR)szServiceName);
 
 			pServiceCfg = (QUERY_SERVICE_CONFIG*)new BYTE[dwSize];
@@ -86,14 +86,14 @@ extern "C" __declspec(dllexport) UINT ServiceConfig(MSIHANDLE hInstall)
 			dwRes = ::QueryServiceConfig(hService, pServiceCfg, dwSize, &dwSize);
 			ExitOnNullWithLastError(dwRes, hr, "Failed querying service '%ls' configuration", (LPCWSTR)szServiceName);
 
-			hr = oRollback.AddServiceConfig((LPCWSTR)szServiceName, pServiceCfg->lpServiceStartName, NULL);
+			hr = oRollback.AddServiceConfig((LPCWSTR)szServiceName, pServiceCfg->lpServiceStartName, nullptr);
 			ExitOnFailure(hr, "Failed creating rollback CustomActionData");
 
 			delete[]pServiceCfg;
-			pServiceCfg = NULL;
+			pServiceCfg = nullptr;
 
 			::CloseServiceHandle(hService);
-			hService = NULL;
+			hService = nullptr;
 		}
 	}
 
@@ -185,14 +185,14 @@ HRESULT CServiceConfig::DeferredExecute(const ::google::protobuf::Any* pCommand)
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Changing service '%ls' start account to '%ls'", szServiceName, szAccount);
 
 	// Open service.
-	hManager = ::OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+	hManager = ::OpenSCManager(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
 	ExitOnNullWithLastError(hManager, hr, "Failed opening service control manager database");
 
 	hService = ::OpenService(hManager, szServiceName, SERVICE_ALL_ACCESS);
 	ExitOnNullWithLastError(hService, hr, "Failed opening service '%ls'", szServiceName);
 
 	// Change user.
-	dwRes = ::ChangeServiceConfig(hService, SERVICE_NO_CHANGE, SERVICE_NO_CHANGE, SERVICE_NO_CHANGE, NULL, NULL, NULL, NULL, szAccount, szPassword, NULL);
+	dwRes = ::ChangeServiceConfig(hService, SERVICE_NO_CHANGE, SERVICE_NO_CHANGE, SERVICE_NO_CHANGE, nullptr, nullptr, nullptr, nullptr, szAccount, szPassword, nullptr);
 	ExitOnNullWithLastError(dwRes, hr, "Failed changing service '%ls' login account to '%ls'", szServiceName, szAccount);
 
 LExit:

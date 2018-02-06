@@ -18,14 +18,14 @@ extern "C" __declspec(dllexport) UINT DismSched(MSIHANDLE hInstall)
 	UINT er = ERROR_SUCCESS;
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
-	LPWSTR szMsiLog = NULL;
-	LPWSTR szCAD = NULL;
+	LPWSTR szMsiLog = nullptr;
+	LPWSTR szCAD = nullptr;
 	WCHAR szDismLog[MAX_PATH];
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
-	LPWSTR szId = NULL;
-	LPWSTR szComponent = NULL;
-	LPWSTR szFeature = NULL;
+	LPWSTR szId = nullptr;
+	LPWSTR szComponent = nullptr;
+	LPWSTR szFeature = nullptr;
 	int nVersionNT = 0;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
@@ -101,12 +101,9 @@ extern "C" __declspec(dllexport) UINT DismSched(MSIHANDLE hInstall)
 		}
 
 		// Clean for next iteration
-		ReleaseStr(szId);
-		ReleaseStr(szComponent);
-		ReleaseStr(szFeature);
-		szId = NULL;
-		szComponent = NULL;
-		szFeature = NULL;
+		ReleaseNullStr(szId);
+		ReleaseNullStr(szComponent);
+		ReleaseNullStr(szFeature);
 	}
 
 	hr = WcaSetProperty(L"DismX86", szCAD);

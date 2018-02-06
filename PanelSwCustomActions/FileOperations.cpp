@@ -328,7 +328,7 @@ LExit:
 
 unsigned long long CFileOperations::FileSize(LPCWSTR szPath)
 {
-    FILE* pFile = NULL;
+    FILE* pFile = nullptr;
     unsigned long long size = 0;
     errno_t err = 0;
 
@@ -341,10 +341,9 @@ unsigned long long CFileOperations::FileSize(LPCWSTR szPath)
     size = ::ftell(pFile);
 
 LExit:
-    if (pFile != NULL)
+    if (pFile)
     {
         ::fclose(pFile);
-        pFile = NULL;
     }
 
     return size;

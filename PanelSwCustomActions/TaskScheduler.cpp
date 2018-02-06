@@ -402,10 +402,10 @@ HRESULT CTaskScheduler::BackupTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 	hr = pTask->get_Xml(&xml);
 	BreakExitOnFailure1(hr, "Failed getting existing task '%ls' XML definition", szTaskName);
 
-	hFile = ::CreateFile(szBackupFile, GENERIC_WRITE, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	hFile = ::CreateFile(szBackupFile, GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 	BreakExitOnNullWithLastError((hFile != INVALID_HANDLE_VALUE), hr, "Failed opening backup file");
 
-	dwJunk = ::WriteFile(hFile, (LPWSTR)xml, xml.ByteLength(), &dwJunk, NULL);
+	dwJunk = ::WriteFile(hFile, (LPWSTR)xml, xml.ByteLength(), &dwJunk, nullptr);
 	BreakExitOnNullWithLastError(dwJunk, hr, "Failed writing to backup file");
 
 LExit:
@@ -420,7 +420,7 @@ LExit:
 HRESULT CTaskScheduler::RestoreTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 {
 	HRESULT hr = S_OK;
-	LPWSTR szTaskXml = NULL;
+	LPWSTR szTaskXml = nullptr;
 	HANDLE hFile = INVALID_HANDLE_VALUE;
 	DWORD dwFileSize;
 	DWORD dwStrSize;
@@ -430,10 +430,10 @@ HRESULT CTaskScheduler::RestoreTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 	BreakExitOnNull(pRootFolder_.p, hr, E_FAIL, "Task root folder not set");
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Restoring task '%ls'", szTaskName);
 
-	hFile = ::CreateFile(szBackupFile, GENERIC_READ, 0, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	hFile = ::CreateFile(szBackupFile, GENERIC_READ, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 	BreakExitOnNullWithLastError((hFile != INVALID_HANDLE_VALUE), hr, "Failed opening backup file");
 
-	dwFileSize = ::GetFileSize(hFile, NULL);
+	dwFileSize = ::GetFileSize(hFile, nullptr);
 	BreakExitOnNullWithLastError((dwFileSize != INVALID_FILE_SIZE), hr, "Failed getting backup file size");
 	dwStrSize = (dwFileSize / sizeof(WCHAR));
 
@@ -441,7 +441,7 @@ HRESULT CTaskScheduler::RestoreTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 	BreakExitOnFailure(hr, "Failed allocating memory");
 	szTaskXml[dwStrSize] = 0;
 
-	bRes = ::ReadFile(hFile, szTaskXml, dwFileSize, &dwReadSize, NULL);
+	bRes = ::ReadFile(hFile, szTaskXml, dwFileSize, &dwReadSize, nullptr);
 	BreakExitOnNullWithLastError(bRes, hr, "Failed reading backup file");
 
 	hr = CreateTask(szTaskName, szTaskXml);
@@ -462,11 +462,11 @@ CTaskScheduler::CTaskScheduler()
 {
 	HRESULT hr = S_OK;
 
-	hr = ::CoInitialize(NULL);
+	hr = ::CoInitialize(nullptr);
 	BreakExitOnFailure(hr, "Failed CoInitializeEx");
 	bComInit_ = true;
 
-	hr = ::CoCreateInstance(CLSID_TaskScheduler, NULL, CLSCTX_INPROC_SERVER, IID_ITaskService, (void**)&pService_);
+	hr = ::CoCreateInstance(CLSID_TaskScheduler, nullptr, CLSCTX_INPROC_SERVER, IID_ITaskService, (void**)&pService_);
 	BreakExitOnFailure(hr, "Failed to CoCreate an instance of the TaskService class");
 
 	hr = pService_->Connect(CComVariant(), CComVariant(), CComVariant(), CComVariant());

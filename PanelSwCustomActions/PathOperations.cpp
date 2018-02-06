@@ -30,7 +30,7 @@ extern "C" __declspec(dllexport) UINT SplitPath(MSIHANDLE hInstall)
 	// Get property-to-encrypt name
 	hr = WcaGetProperty(PathToSplitProp, (LPWSTR*)szFullPath);
 	ExitOnFailure1(hr, "Failed getting %ls", PathToSplitProp);
-	if (*(LPCWSTR)szFullPath == NULL)
+	if (szFullPath.IsNullOrEmpty())
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "No path to split...");
 		ExitFunction();
