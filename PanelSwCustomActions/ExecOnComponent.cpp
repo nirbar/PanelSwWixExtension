@@ -346,14 +346,13 @@ HRESULT CExecOnComponent::AddExec(LPCWSTR szCommand, ExitCodeMap* pExitCodeMap, 
 	pDetails = new ExecOnDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	pAny = new Any();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
-	
-	pCmd->set_allocated_details(pAny);
 	pDetails->set_command(szCommand, WSTR_BYTE_SIZE(szCommand));
 	pDetails->set_async(nFlags & Flags::ASync);
 	pDetails->set_ignoreerrors(nFlags & Flags::IgnoreExitCode);
 	pDetails->mutable_exitcoderemap()->insert(pExitCodeMap->begin(), pExitCodeMap->end());
+
+	pAny = pCmd->mutable_details();
+	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 	pAny->PackFrom(*pDetails);
 
 LExit:

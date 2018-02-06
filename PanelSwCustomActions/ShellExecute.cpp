@@ -145,10 +145,6 @@ HRESULT CShellExecute::AddShellExec(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR sz
 	pDetails = new ShellExecDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	pAny = new Any();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
-
-	pCmd->set_allocated_details(pAny);
 	pDetails->set_target(szTarget, WSTR_BYTE_SIZE(szTarget));
 	pDetails->set_args(szArgs, WSTR_BYTE_SIZE(szArgs));
 	pDetails->set_verb(szVerb, WSTR_BYTE_SIZE(szVerb));
@@ -156,6 +152,10 @@ HRESULT CShellExecute::AddShellExec(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR sz
 
 	pDetails->set_wait(bWait);
 	pDetails->set_show(nShow);
+
+	pAny = pCmd->mutable_details();
+	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+
 	pAny->PackFrom(*pDetails);
 
 LExit:

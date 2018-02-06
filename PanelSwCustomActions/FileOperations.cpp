@@ -137,16 +137,16 @@ HRESULT CFileOperations::AddCopyFile(LPCWSTR szFrom, LPCWSTR szTo, int flags)
 	pDetails = new FileOperationsDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	pAny = new Any();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
-
-	pCmd->set_allocated_details(pAny);
 	pDetails->set_move(false);
 	pDetails->set_from(szFrom, WSTR_BYTE_SIZE(szFrom));
 	pDetails->set_to(szTo, WSTR_BYTE_SIZE(szTo));
 
 	pDetails->set_ignoreerrors(flags & FileOperationsAttributes::IgnoreErrors);
 	pDetails->set_ignoremissing(flags & FileOperationsAttributes::IgnoreMissingPath);
+
+	pAny = pCmd->mutable_details();
+	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+
 	pAny->PackFrom(*pDetails);
 
 LExit:
@@ -166,16 +166,16 @@ HRESULT CFileOperations::AddMoveFile(LPCWSTR szFrom, LPCWSTR szTo, int flags)
 	pDetails = new FileOperationsDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	pAny = new Any();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
-
-	pCmd->set_allocated_details(pAny);
 	pDetails->set_move(true);
 	pDetails->set_from(szFrom, WSTR_BYTE_SIZE(szFrom));
 	pDetails->set_to(szTo, WSTR_BYTE_SIZE(szTo));
 
 	pDetails->set_ignoreerrors(flags & FileOperationsAttributes::IgnoreErrors);
 	pDetails->set_ignoremissing(flags & FileOperationsAttributes::IgnoreMissingPath);
+
+	pAny = pCmd->mutable_details();
+	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+
 	pAny->PackFrom(*pDetails);
 
 LExit:
@@ -195,13 +195,13 @@ HRESULT CFileOperations::AddDeleteFile(LPCWSTR szPath, int flags)
 	pDetails = new FileOperationsDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	pAny = new Any();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
-
-	pCmd->set_allocated_details(pAny);
 	pDetails->set_from(szPath, WSTR_BYTE_SIZE(szPath));
 	pDetails->set_ignoreerrors(flags & FileOperationsAttributes::IgnoreErrors);
 	pDetails->set_ignoremissing(flags & FileOperationsAttributes::IgnoreMissingPath);
+
+	pAny = pCmd->mutable_details();
+	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+
 	pAny->PackFrom(*pDetails);
 
 LExit:

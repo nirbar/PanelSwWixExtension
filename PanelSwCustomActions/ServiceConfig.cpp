@@ -142,16 +142,16 @@ HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szAccoun
 	pDetails = new ServciceConfigDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	pAny = new Any();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
-
-	pCmd->set_allocated_details(pAny);
 	pDetails->set_name(szServiceName, WSTR_BYTE_SIZE(szServiceName));
 	pDetails->set_account(szAccount, WSTR_BYTE_SIZE(szAccount));
 	if (szPassword && *szPassword)
 	{
 		pDetails->set_password(szPassword, WSTR_BYTE_SIZE(szPassword));
 	}
+
+	pAny = pCmd->mutable_details();
+	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+
 	pAny->PackFrom(*pDetails);
 
 LExit:

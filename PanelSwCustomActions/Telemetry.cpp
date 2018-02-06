@@ -155,15 +155,14 @@ HRESULT CTelemetry::AddPost(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPC
 	pDetails = new TelemetryDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	pAny = new Any();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
-
-	pCmd->set_allocated_details(pAny);
 	pDetails->set_url(szUrl, WSTR_BYTE_SIZE(szUrl));
 	pDetails->set_page(szPage, WSTR_BYTE_SIZE(szPage));
 	pDetails->set_method(szMethod, WSTR_BYTE_SIZE(szMethod));
 	pDetails->set_data(szData, WSTR_BYTE_SIZE(szData));
 	pDetails->set_secure(bSecure);
+
+	pAny = pCmd->mutable_details();
+	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
 	pAny->PackFrom(*pDetails);
 

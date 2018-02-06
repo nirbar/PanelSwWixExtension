@@ -151,15 +151,15 @@ HRESULT CFileRegex::AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR sz
 	pDetails = new FileRegexDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	pAny = new Any();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
-
-	pCmd->set_allocated_details(pAny);
 	pDetails->set_file(szFilePath, WSTR_BYTE_SIZE(szFilePath));
 	pDetails->set_expression(szRegex, WSTR_BYTE_SIZE(szRegex));
 	pDetails->set_replacement(szReplacement, WSTR_BYTE_SIZE(szReplacement));
 	pDetails->set_encoding(eEncoding);
 	pDetails->set_ignorecase(bIgnoreCase);
+
+	pAny = pCmd->mutable_details();
+	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+
 	pAny->PackFrom(*pDetails);
 
 LExit:

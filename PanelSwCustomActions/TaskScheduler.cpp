@@ -126,13 +126,13 @@ HRESULT CTaskScheduler::AddCreateTask(LPCWSTR szTaskName, LPCWSTR szTaskXml)
 	pDetails = new TaskSchedulerDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	pAny = new Any();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
-
-	pCmd->set_allocated_details(pAny);
 	pDetails->set_name(szTaskName, WSTR_BYTE_SIZE(szTaskName));
 	pDetails->set_taskxml(szTaskXml, WSTR_BYTE_SIZE(szTaskXml));
 	pDetails->set_action(TaskSchedulerDetails_Action::TaskSchedulerDetails_Action_Create);
+
+	pAny = pCmd->mutable_details();
+	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+
 	pAny->PackFrom(*pDetails);
 
 LExit:
@@ -152,12 +152,12 @@ HRESULT CTaskScheduler::AddRemoveTask(LPCWSTR szTaskName)
 	pDetails = new TaskSchedulerDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	pAny = new Any();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
-
-	pCmd->set_allocated_details(pAny);
 	pDetails->set_name(szTaskName, WSTR_BYTE_SIZE(szTaskName));
 	pDetails->set_action(TaskSchedulerDetails_Action::TaskSchedulerDetails_Action_Delete);
+
+	pAny = pCmd->mutable_details();
+	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+
 	pAny->PackFrom(*pDetails);
 
 LExit:
@@ -345,13 +345,13 @@ HRESULT CTaskScheduler::AddBackupTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 	pDetails = new TaskSchedulerDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	pAny = new Any();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
-
-	pCmd->set_allocated_details(pAny);
 	pDetails->set_name(szTaskName, WSTR_BYTE_SIZE(szTaskName));
 	pDetails->set_backupfile(szBackupFile, WSTR_BYTE_SIZE(szBackupFile));
 	pDetails->set_action(TaskSchedulerDetails_Action::TaskSchedulerDetails_Action_Backup);
+
+	pAny = pCmd->mutable_details();
+	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+
 	pAny->PackFrom(*pDetails);
 
 LExit:
@@ -371,13 +371,13 @@ HRESULT CTaskScheduler::AddRestoreTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 	pDetails = new TaskSchedulerDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	pAny = new Any();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
-
-	pCmd->set_allocated_details(pAny);
 	pDetails->set_name(szTaskName, WSTR_BYTE_SIZE(szTaskName));
 	pDetails->set_backupfile(szBackupFile, WSTR_BYTE_SIZE(szBackupFile));
 	pDetails->set_action(TaskSchedulerDetails_Action::TaskSchedulerDetails_Action_Restore);
+
+	pAny = pCmd->mutable_details();
+	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+
 	pAny->PackFrom(*pDetails);
 
 LExit:
