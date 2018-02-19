@@ -10,6 +10,28 @@ namespace PswManagedCA
 {
     public class ZipFile
     {
+        [Serializable]
+        public class ZipFileCatalog
+        {
+            public ZipFileCatalog()
+            {
+                Sources = new List<ZipSource>();
+            }
+
+            [Serializable]
+            public class ZipSource
+            {
+                public string Id { get; set; }
+                public string SrcFolder { get; set; }
+                public string Pattern { get; set; }
+                public bool Recursive { get; set; }
+            }
+
+            public List<ZipSource> Sources { get; set; }
+
+            public string DstZipFile { get; set; }
+        }
+
         private List<ZipFileCatalog> catalogs_ = new List<ZipFileCatalog>();
 
         [CustomAction]

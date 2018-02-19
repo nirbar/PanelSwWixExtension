@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup>
-    <FullVersion>1.1.23</FullVersion>
+    <FullVersion>1.1.24</FullVersion>
     <ProductName>PanelSwWixExxtension</ProductName>
     <Manufacturer>Panel::Software</Manufacturer>
 
@@ -12,6 +12,9 @@
     <IntDir>$(IntermediateOutputPath)</IntDir>
     <OutputDirectory>$(OutputPath)</OutputDirectory>
     <IntermediateDirectory>$(IntermediateOutputPath)</IntermediateDirectory>
+    
+    <!-- CMake path -->
+    <CMakeDir>$(SolutionDir)..\tools\cmake-3.10.2-win64-x64\</CMakeDir>
 
     <WixVariables>JetVersion=$(FullVersion);JetProductName=$(ProductName);JetManufacturer=$(Manufacturer)</WixVariables>
 
