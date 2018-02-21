@@ -27,6 +27,7 @@ extern "C" __declspec(dllexport) UINT DismSched(MSIHANDLE hInstall)
 	LPWSTR szComponent = nullptr;
 	LPWSTR szFeature = nullptr;
 	int nVersionNT = 0;
+	BOOL bAny = FALSE;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
@@ -79,10 +80,11 @@ extern "C" __declspec(dllexport) UINT DismSched(MSIHANDLE hInstall)
 		case WCA_TODO::WCA_TODO_INSTALL:
 		case WCA_TODO::WCA_TODO_REINSTALL:
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will enable features matching pattern '%ls' on component '%ls'", szFeature, szComponent);
+			bAny = TRUE;
 
 			if (nVersionNT <= 601)
 			{
-				ExitOnFailure(hr = E_NOTIMPL, "PanelSwWixExtension Dism is only supported on Windows 8, Windows Server 2008 and newer operating systems");
+				ExitOnFailure(hr = E_NOTIMPL, "PanelSwWixExtension Dism is only supported on Windows 8 / Windows Server 2008 R2 or newer operating systems");
 			}
 
 			szStrLen = ::wcslen(szCAD);
@@ -105,15 +107,19 @@ extern "C" __declspec(dllexport) UINT DismSched(MSIHANDLE hInstall)
 		ReleaseNullStr(szComponent);
 		ReleaseNullStr(szFeature);
 	}
+	hr = S_OK; // We're only getting here on hr = E_NOMOREITEMS.
 
-	hr = WcaSetProperty(L"DismX86", szCAD);
-	ExitOnFailure(hr, "Failed setting CustomActionData");
+	// Since Dism API takes long, we only want to execute it if there's something to do. Conditioning the Dism deferred CA with the property existance will save us time.
+	if (bAny)
+	{
+		hr = WcaSetProperty(L"DismX86", szCAD);
+		ExitOnFailure(hr, "Failed setting CustomActionData");
 
-	hr = WcaSetProperty(L"DismX64", szCAD);
-	ExitOnFailure(hr, "Failed setting CustomActionData");
+		hr = WcaSetProperty(L"DismX64", szCAD);
+		ExitOnFailure(hr, "Failed setting CustomActionData");
+	}
 
 LExit:
-
 	ReleaseStr(szMsiLog);
 	ReleaseStr(szCAD);
 	ReleaseStr(szId);

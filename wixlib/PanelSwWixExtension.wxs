@@ -343,9 +343,9 @@
     <CustomAction Id="DismX64" SuppressModularization="yes" BinaryKey="DismX64.dll" DllEntry="Dism" Execute="deferred" Impersonate="no"/>
 
     <InstallExecuteSequence>
-      <Custom Action="DismSched" Before="StopServices" Overridable="yes"/>
-      <Custom Action="DismX86" After="DismSched" Overridable="yes"><![CDATA[(VersionNT > 601) And Not VersionNT64]]></Custom>
-      <Custom Action="DismX64" After="DismSched" Overridable="yes"><![CDATA[VersionNT64 > 601]]></Custom>
+      <Custom Action="DismSched" Before="StopServices" Overridable="yes"><![CDATA[(VersionNT > 601)]]></Custom>
+      <Custom Action="DismX86" After="DismSched" Overridable="yes"><![CDATA[DismX86 And (VersionNT > 601) And Not VersionNT64]]></Custom>
+      <Custom Action="DismX64" After="DismSched" Overridable="yes"><![CDATA[DismX64 And (VersionNT64 > 601)]]></Custom>
     </InstallExecuteSequence>
   </Fragment>
 
