@@ -21,7 +21,6 @@ extern "C" __declspec(dllexport) UINT DeletePath(MSIHANDLE hInstall)
 	WCHAR shortTempPath[MAX_PATH + 1];
 	WCHAR longTempPath[MAX_PATH + 1];
 	DWORD dwRes = 0;
-	DWORD dwUnique = 0;
 	LPWSTR szCustomActionData = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
@@ -34,7 +33,7 @@ extern "C" __declspec(dllexport) UINT DeletePath(MSIHANDLE hInstall)
 
 	// Execute view
 	hr = WcaOpenExecuteView(DeletePath_QUERY, &hView);
-	BreakExitOnFailure1(hr, "Failed to execute SQL query '%ls'.", DeletePath_QUERY);
+	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", DeletePath_QUERY);
 	WcaLog(LOGMSG_STANDARD, "Executed query.");
 
 	// Get temporay folder
@@ -87,13 +86,16 @@ extern "C" __declspec(dllexport) UINT DeletePath(MSIHANDLE hInstall)
 		hr = tempFile.Allocate(MAX_PATH + 1);
 		BreakExitOnFailure(hr, "Failed allocating memory");
 
-		dwRes = ::GetTempFileName(longTempPath, L"DLT", ++dwUnique, (LPWSTR)tempFile);
+		dwRes = ::GetTempFileName(longTempPath, L"DLT", 0, (LPWSTR)tempFile);
 		BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
 
 		hr = rollbackCAD.AddMoveFile((LPCWSTR)tempFile, szFilePath, flags);
 		BreakExitOnFailure(hr, "Failed creating custom action data for rollback action.");
 
 		// Add deferred data to move file szFilePath -> tempFile.
+		hr = deferredFileCAD.AddDeleteFile((LPCWSTR)tempFile, flags); // Delete the temporary file. Done for case where the source is folder rather than file.
+		BreakExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
+
 		hr = deferredFileCAD.AddMoveFile(szFilePath, (LPCWSTR)tempFile, flags);
 		BreakExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
 
@@ -266,7 +268,7 @@ HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool
 	opInfo.wFunc = bMove ? FO_MOVE : FO_COPY;
 	opInfo.pFrom = szFromNull;
 	opInfo.pTo = szToNull;
-	opInfo.fFlags = FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR | FOF_NOERRORUI | FOF_NO_UI;
+	opInfo.fFlags = FOF_NO_UI;
 
 	nRes = ::SHFileOperation(&opInfo);
 	if (bIgnoreMissing && (nRes == ERROR_FILE_NOT_FOUND) || (nRes == ERROR_PATH_NOT_FOUND))
@@ -279,7 +281,7 @@ HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed Copying '%ls' to '%ls'; Ignoring error (%i)", szFromNull, szToNull, nRes);
 		ExitFunction1(hr = S_FALSE);
 	}
-	BreakExitOnNull1((nRes == 0), hr, E_FAIL, "Failed copying file '%ls' to '%ls' (Error %i)", szFromNull, szToNull, nRes);
+	BreakExitOnNull((nRes == 0), hr, E_FAIL, "Failed copying file '%ls' to '%ls' (Error %i)", szFromNull, szToNull, nRes);
 	BreakExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed copying file (operation aborted)");
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Copied '%ls' to '%ls'", szFromNull, szToNull);
 
@@ -303,7 +305,7 @@ HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bI
 	::memset(&opInfo, 0, sizeof(opInfo));
 	opInfo.wFunc = FO_DELETE;
 	opInfo.pFrom = szFromNull;
-	opInfo.fFlags = FOF_NOCONFIRMATION | FOF_NOCONFIRMMKDIR | FOF_NOERRORUI | FOF_NO_UI;
+	opInfo.fFlags = FOF_NO_UI;
 
 	nRes = ::SHFileOperation(&opInfo);
 	if (bIgnoreMissing && (nRes == ERROR_FILE_NOT_FOUND) || (nRes == ERROR_PATH_NOT_FOUND))
@@ -316,7 +318,7 @@ HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bI
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed deleting '%ls'; Ignoring error (%i)", szFromNull, nRes);
 		ExitFunction1(hr = S_FALSE);
 	}
-	BreakExitOnNull1((nRes == 0), hr, E_FAIL, "Failed deleting file (Error %i)", nRes);
+	BreakExitOnNull((nRes == 0), hr, E_FAIL, "Failed deleting file (Error %i)", nRes);
 	BreakExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed deleting file (operation aborted)");
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Deleted '%ls'", szFrom);
 

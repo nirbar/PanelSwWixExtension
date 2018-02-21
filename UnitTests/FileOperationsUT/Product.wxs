@@ -14,17 +14,21 @@
 
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ProgramFilesFolder">
-        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup">
+          <Directory Id="DeleteMeDir" Name="DeleteMe"/>
+        </Directory>
       </Directory>
     </Directory>
 
-    <PanelSW:DeletePath Id="_1" Path="$(var.TargetPath)" IgnoreErrors="yes" />
+    <PanelSW:DeletePath Id="_1" Path="[DeleteMeDir]" />
 
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
 
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component Id="Test" Guid="*">
-        <File Id="Test" Source="$(var.ProjectDir)Product.wxs" KeyPath="yes"></File>
+        <File Id="Test" Source="$(var.ProjectDir)Product.wxs" KeyPath="yes">
+          <CopyFile Id="DeleteMeDir" DestinationDirectory="DeleteMeDir"/>
+        </File>
       </Component>
     </ComponentGroup>
   </Product>
