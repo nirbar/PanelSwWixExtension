@@ -174,7 +174,14 @@ namespace PswManagedCA
                 try
                 {
                     // (Un)Install the assembly
-                    session.Log($"Applying {ctlg.Action} on assembly '{ctlg.FilePath}' with arguments {ctlg.Arguments.Aggregate((a, c) => $"{a} {c}")}");
+                    if (ctlg.Arguments.Count > 0)
+                    {
+                        session.Log($"Applying {ctlg.Action} on assembly '{ctlg.FilePath}' with arguments {ctlg.Arguments.Aggregate((a, c) => $"{a} {c}")}");
+                    }
+                    else
+                    {
+                        session.Log($"Applying {ctlg.Action} on assembly '{ctlg.FilePath}'");
+                    }
 
                     ctlg.Arguments.Add($"/LogFile={tmpFile}");
                     ctlg.Arguments.Add("/LogToConsole=false");

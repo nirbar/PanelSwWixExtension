@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project>
+  <ItemGroup>
+    <WixExtension Include="PanelSwWixExtension">
+      <HintPath>$(MSBuildThisFileDirectory)..\tools\lib\PanelSwWixExtension.dll</HintPath>
+      <Name>PanelSwWixExtension</Name>
+    </WixExtension>
+  </ItemGroup>
+</Project>
