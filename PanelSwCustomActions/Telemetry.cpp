@@ -40,7 +40,7 @@ extern "C" __declspec(dllexport) UINT Telemetry(MSIHANDLE hInstall)
 
 	// Execute view
 	hr = WcaOpenExecuteView(TELEMETRY_QUERY, &hView);
-	BreakExitOnFailure1(hr, "Failed to execute SQL query '%ls'.", TELEMETRY_QUERY);
+	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", TELEMETRY_QUERY);
 	WcaLog(LOGMSG_STANDARD, "Executed query.");
 
 	// Iterate records
@@ -198,7 +198,7 @@ HRESULT CTelemetry::DeferredExecute(const ::google::protobuf::Any* pCommand)
 		, details.secure());
 
 	hr = Post(szUrl, szPage, szMethod, szData, details.secure());
-	BreakExitOnFailure3(hr, "Failed to post Data '%ls' to URL '%ls%ls'", szData, szUrl, szPage);
+	BreakExitOnFailure(hr, "Failed to post Data '%ls' to URL '%ls%ls'", szData, szUrl, szPage);
 
 LExit:
 	return hr;

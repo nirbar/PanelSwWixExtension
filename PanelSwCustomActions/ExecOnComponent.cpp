@@ -71,7 +71,7 @@ extern "C" __declspec(dllexport) UINT ExecOnComponent(MSIHANDLE hInstall)
 
 	// Execute view
 	hr = WcaOpenExecuteView(ExecOnComponent_QUERY, &hView);
-	BreakExitOnFailure1(hr, "Failed to execute SQL query '%ls'.", ExecOnComponent_QUERY);
+	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", ExecOnComponent_QUERY);
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
@@ -101,7 +101,7 @@ extern "C" __declspec(dllexport) UINT ExecOnComponent(MSIHANDLE hInstall)
         BreakExitOnFailure(hr, "Failed to format string");
 
         hr = WcaOpenExecuteView((LPCWSTR)szExitCodeQuery, &hExitCodeView);
-        BreakExitOnFailure1(hr, "Failed to execute SQL query '%ls'.", (LPCWSTR)szExitCodeQuery);
+        BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", (LPCWSTR)szExitCodeQuery);
 
         // Iterate records
         while ((hr = WcaFetchRecord(hExitCodeView, &hExitCodeRecord)) != E_NOMOREITEMS)
@@ -125,12 +125,12 @@ extern "C" __declspec(dllexport) UINT ExecOnComponent(MSIHANDLE hInstall)
 			if (nFlags & Flags::OnInstall)
 			{
 				hr = ScheduleExecution(szId, szCommand, &exitCodeMap, nFlags, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, &oDeferredBeforeStopImp, &oDeferredAfterStopImp, &oDeferredBeforeStartImp, &oDeferredAfterStartImp);
-				BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
+				BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			if (nFlags & Flags::OnInstallRollback)
 			{
 				hr = ScheduleExecution(szId, szCommand, &exitCodeMap, nFlags, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, &oRollbackBeforeStopImp, &oRollbackAfterStopImp, &oRollbackBeforeStartImp, &oRollbackAfterStartImp);
-				BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
+				BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			break;
 
@@ -138,12 +138,12 @@ extern "C" __declspec(dllexport) UINT ExecOnComponent(MSIHANDLE hInstall)
 			if (nFlags & Flags::OnReinstall)
 			{
 				hr = ScheduleExecution(szId, szCommand, &exitCodeMap, nFlags, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, &oDeferredBeforeStopImp, &oDeferredAfterStopImp, &oDeferredBeforeStartImp, &oDeferredAfterStartImp);
-				BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
+				BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			if (nFlags & Flags::OnReinstallRollback)
 			{
 				hr = ScheduleExecution(szId, szCommand, &exitCodeMap, nFlags, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, &oRollbackBeforeStopImp, &oRollbackAfterStopImp, &oRollbackBeforeStartImp, &oRollbackAfterStartImp);
-				BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
+				BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			break;
 
@@ -151,12 +151,12 @@ extern "C" __declspec(dllexport) UINT ExecOnComponent(MSIHANDLE hInstall)
 			if (nFlags & Flags::OnRemove)
 			{
 				hr = ScheduleExecution(szId, szCommand, &exitCodeMap, nFlags, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, &oDeferredBeforeStopImp, &oDeferredAfterStopImp, &oDeferredBeforeStartImp, &oDeferredAfterStartImp);
-				BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
+				BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			if (nFlags & Flags::OnRemoveRollback)
 			{
 				hr = ScheduleExecution(szId, szCommand, &exitCodeMap, nFlags, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, &oRollbackBeforeStopImp, &oRollbackAfterStopImp, &oRollbackBeforeStartImp, &oRollbackAfterStartImp);
-				BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
+				BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			break;
 
@@ -287,7 +287,7 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, CExecOnComponent::Exi
 		{
 			hr = pBeforeStop->AddExec(szCommand, pExitCodeMap, nFlags);
 		}
-		BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
+		BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
 	if (nFlags & Flags::AfterStopServices)
 	{
@@ -300,7 +300,7 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, CExecOnComponent::Exi
 		{
 			hr = pAfterStop->AddExec(szCommand, pExitCodeMap, nFlags);
 		}
-		BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
+		BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
 	if (nFlags & Flags::BeforeStartServices)
 	{
@@ -313,7 +313,7 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, CExecOnComponent::Exi
 		{
 			hr = pBeforeStart->AddExec(szCommand, pExitCodeMap, nFlags);
 		}
-		BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
+		BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
 	if (nFlags & Flags::AfterStartServices)
 	{
@@ -326,7 +326,7 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, CExecOnComponent::Exi
 		{
 			hr = pAfterStart->AddExec(szCommand, pExitCodeMap, nFlags);
 		}
-		BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
+		BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
 
 LExit:
@@ -389,7 +389,7 @@ HRESULT CExecOnComponent::DeferredExecute(const ::google::protobuf::Any* pComman
         WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Not logging output on async command");
 
         hr = ProcExecute(const_cast<LPWSTR>(szCommand), &hProc, nullptr, nullptr);
-        BreakExitOnFailure1(hr, "Failed to launch command '%ls'", szCommand);
+        BreakExitOnFailure(hr, "Failed to launch command '%ls'", szCommand);
         hr = S_OK;
 
         if (hProc && (hProc != INVALID_HANDLE_VALUE))
@@ -433,7 +433,7 @@ HRESULT CExecOnComponent::DeferredExecute(const ::google::protobuf::Any* pComman
 		WcaLogError(hr, "Ignoring command '%ls' exit code", szCommand);
 		ExitFunction1(hr = S_FALSE);
 	}
-	BreakExitOnFailure1(hr, "Failed to execute command '%ls'", szCommand);
+	BreakExitOnFailure(hr, "Failed to execute command '%ls'", szCommand);
 
 LExit:
 	return hr;
@@ -457,7 +457,7 @@ static HRESULT RefreshEnvironment()
             CWixString szValueData;
 
             hr = envKey.GetStringValue(szValueName, (LPWSTR*)szValueData);
-            BreakExitOnFailure1(hr, "Failed to get environment variable '%ls' from registry key", (LPCWSTR)szValueName);
+            BreakExitOnFailure(hr, "Failed to get environment variable '%ls' from registry key", (LPCWSTR)szValueName);
 
             WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Setting process environment variable '%ls'='%ls'", (LPCWSTR)szValueName, (LPCWSTR)szValueData);
 

@@ -39,7 +39,7 @@ extern "C" __declspec(dllexport) UINT PSW_ShellExecute(MSIHANDLE hInstall)
 
 	// Execute view
 	hr = WcaOpenExecuteView(ShellExecute_QUERY, &hView);
-	BreakExitOnFailure1(hr, "Failed to execute SQL query '%ls'.", ShellExecute_QUERY);
+	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", ShellExecute_QUERY);
 	WcaLog(LOGMSG_STANDARD, "Executed query.");
 
 	// Iterate records
@@ -189,7 +189,7 @@ HRESULT CShellExecute::DeferredExecute(const ::google::protobuf::Any* pCommand)
 		, szTarget, szArgs, szVerb, szWorkingDir, nShow, bWait);
 	
 	hr = Execute(szTarget, szArgs, szVerb, szWorkingDir, nShow, bWait);
-	BreakExitOnFailure2(hr, "Failed to execute \"%ls\" %ls", szTarget, szArgs);
+	BreakExitOnFailure(hr, "Failed to execute \"%ls\" %ls", szTarget, szArgs);
 
 LExit:
 	return hr;

@@ -147,7 +147,7 @@ extern "C" __declspec(dllexport) UINT RegularExpression(MSIHANDLE hInstall)
 				BreakExitOnFailure(hr, "Failed formatting string");
 
 				hr = WcaSetProperty((LPCWSTR)sPropName, curIt->str().c_str());
-				BreakExitOnFailure1(hr, "Failed setting property '%ls'", (LPCWSTR)sPropName);
+				BreakExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)sPropName);
 			}
 		}
 		// Replace

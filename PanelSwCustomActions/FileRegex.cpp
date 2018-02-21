@@ -24,7 +24,6 @@ extern "C" __declspec(dllexport) UINT FileRegex(MSIHANDLE hInstall)
 	WCHAR longTempPath[MAX_PATH + 1];
 	LPWSTR szCustomActionData = nullptr;
 	DWORD dwRes = 0;
-	DWORD dwUnique = 0;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");
@@ -36,7 +35,7 @@ extern "C" __declspec(dllexport) UINT FileRegex(MSIHANDLE hInstall)
 
 	// Execute view
 	hr = WcaOpenExecuteView(FileRegex_QUERY, &hView);
-	BreakExitOnFailure1(hr, "Failed to execute SQL query '%ls'.", FileRegex_QUERY);
+	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", FileRegex_QUERY);
 	WcaLog(LOGMSG_STANDARD, "Executed query.");
 
 	// Get temporary folder
@@ -96,7 +95,7 @@ extern "C" __declspec(dllexport) UINT FileRegex(MSIHANDLE hInstall)
 		hr = tempFile.Allocate(MAX_PATH + 1);
 		BreakExitOnFailure(hr, "Failed allocating memory");
 
-		dwRes = ::GetTempFileName(longTempPath, L"RGX", ++dwUnique, (LPWSTR)tempFile);
+		dwRes = ::GetTempFileName(longTempPath, L"RGX", 0, (LPWSTR)tempFile);
 		BreakExitOnNullWithLastError( dwRes, hr, "Failed getting temporary file name");
 
 		hr = rollbackCAD.AddMoveFile( (LPCWSTR)tempFile, szFilePath);

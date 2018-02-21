@@ -148,7 +148,7 @@ HRESULT CRegistryKey::GetStringValue(LPWSTR szName, LPWSTR* pszData)
     HRESULT hr = S_OK;
 
     hr = RegReadString(_hKey, szName, pszData);
-    BreakExitOnFailure1(hr, "Failed to get registry string value '%ls'", szName);
+    BreakExitOnFailure(hr, "Failed to get registry string value '%ls'", szName);
 
 LExit:
     return hr;

@@ -105,7 +105,7 @@ extern "C" __declspec(dllexport) UINT SqlSearch(MSIHANDLE hInstall)
 		BreakExitOnNull(pDbSession, hr, E_FAIL, "Failed connecting to database (NULL)");
 
 		hr = SqlSessionExecuteQuery(pDbSession, (LPCWSTR)szQuery, &pRowset, nullptr, &szError);
-		BreakExitOnFailure1(hr, "Failed executing query. %ls", (LPCWSTR)(LPWSTR)szError);
+		BreakExitOnFailure(hr, "Failed executing query. %ls", (LPCWSTR)(LPWSTR)szError);
 		BreakExitOnNull(pRowset, hr, E_FAIL, "Failed executing query (NULL)");
 
 		// Requesting 2 rows to ensure one is returned at most.
@@ -119,7 +119,7 @@ extern "C" __declspec(dllexport) UINT SqlSearch(MSIHANDLE hInstall)
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Query returned no results. Clearing property");
 
 			hr = WcaSetProperty((LPCWSTR)szProperty, L"");
-			BreakExitOnFailure1(hr, "Failed clearing property '%ls'", (LPCWSTR)szProperty);
+			BreakExitOnFailure(hr, "Failed clearing property '%ls'", (LPCWSTR)szProperty);
 			continue;
 		}
 
@@ -129,14 +129,14 @@ extern "C" __declspec(dllexport) UINT SqlSearch(MSIHANDLE hInstall)
 
 		hr = pColumnsInfo->GetColumnInfo(&nColCount, &pColInfo._Myptr(), &szColNames);
 		BreakExitOnFailure(hr, "Failed to get result column info");
-		BreakExitOnNull1((nColCount <= 1), hr, E_INVALIDARG, "Query returned %i columns. Can only handle scalar queries", nColCount);
+		BreakExitOnNull((nColCount <= 1), hr, E_INVALIDARG, "Query returned %i columns. Can only handle scalar queries", nColCount);
 
 		if (nColCount == 0)
 		{
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Query returned no results. Clearing property");
 
 			hr = WcaSetProperty((LPCWSTR)szProperty, L"");
-			BreakExitOnFailure1(hr, "Failed clearing property '%ls'", (LPCWSTR)szProperty);
+			BreakExitOnFailure(hr, "Failed clearing property '%ls'", (LPCWSTR)szProperty);
 			continue;
 		}
 
@@ -161,7 +161,7 @@ extern "C" __declspec(dllexport) UINT SqlSearch(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to get result row accessor");
 
 		hr = pAccessor->CreateAccessor(DBACCESSOR_ROWDATA, 1, &sDbBinding, sizeof(DBCOLUMNDATA), &hAccessor, &nBindStatus);
-		BreakExitOnFailure1(hr, "Failed to create column data accessor (DBBINDSTATUS=%i)", nBindStatus);
+		BreakExitOnFailure(hr, "Failed to create column data accessor (DBBINDSTATUS=%i)", nBindStatus);
 
 		pRowData.reset((BYTE*)::CoTaskMemAlloc(sDbBinding.cbMaxLen + sizeof(DBCOLUMNDATA)));
 		BreakExitOnNull(pRowData, hr, E_FAIL, "Failed to allocate memory");
@@ -179,19 +179,19 @@ extern "C" __declspec(dllexport) UINT SqlSearch(MSIHANDLE hInstall)
 		case DBSTATUS_S_ISNULL:
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Query result is null. Clearing property");
 			hr = WcaSetProperty((LPCWSTR)szProperty, L"");
-			BreakExitOnFailure1(hr, "Failed clearing property '%ls'", (LPCWSTR)szProperty);
+			BreakExitOnFailure(hr, "Failed clearing property '%ls'", (LPCWSTR)szProperty);
 			break;
 
 		case DBSTATUS_S_OK:
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Query returned '%ls'", pColumn->bData ? (LPCWSTR)pColumn->bData : L"<null>");
 			hr = WcaSetProperty((LPCWSTR)szProperty, pColumn->bData ? (LPCWSTR)pColumn->bData : L"");
-			BreakExitOnFailure1(hr, "Failed setting property '%ls'", (LPCWSTR)szProperty);
+			BreakExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)szProperty);
 			break;
 
 		case DBSTATUS_S_TRUNCATED:
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Query returned truncated data '%ls'", pColumn->bData ? (LPCWSTR)pColumn->bData : L"<null>");
 			hr = WcaSetProperty((LPCWSTR)szProperty, pColumn->bData ? (LPCWSTR)pColumn->bData : L"");
-			BreakExitOnFailure1(hr, "Failed setting property '%ls'", (LPCWSTR)szProperty);
+			BreakExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)szProperty);
 			break;
 
 		case DBSTATUS_E_BADACCESSOR:

@@ -22,7 +22,7 @@ extern "C" __declspec(dllexport) UINT Log(MSIHANDLE hInstall)
 	}
 
 	hr = WcaGetProperty( szPropName, (LPWSTR*)szMsg);
-	BreakExitOnFailure1(hr, "Failed to get property '%ls'", szPropName);
+	BreakExitOnFailure(hr, "Failed to get property '%ls'", szPropName);
 
 	WcaLog( LOGLEVEL::LOGMSG_STANDARD, "%ls", (LPCWSTR)szMsg);
 
@@ -51,7 +51,7 @@ extern "C" __declspec(dllexport) UINT Warn(MSIHANDLE hInstall)
 	}
 
 	hr = WcaGetProperty( szPropName, (LPWSTR*)szMsg);
-	BreakExitOnFailure1(hr, "Failed to get property '%ls'", szPropName);
+	BreakExitOnFailure(hr, "Failed to get property '%ls'", szPropName);
 
 	hRecord = ::MsiCreateRecord( 1);
 	BreakExitOnNullWithLastError(hRecord, hr, "Failed to create a warning record.");

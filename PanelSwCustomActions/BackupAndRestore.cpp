@@ -35,7 +35,7 @@ extern "C" __declspec(dllexport) UINT BackupAndRestore(MSIHANDLE hInstall)
 
 	// Execute view
 	hr = WcaOpenExecuteView(BackupAndRestore_QUERY, &hView);
-	BreakExitOnFailure1(hr, "Failed to execute SQL query '%ls'.", BackupAndRestore_QUERY);
+	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", BackupAndRestore_QUERY);
 	WcaLog(LOGMSG_STANDARD, "Executed query.");
 
 	// Get temporay folder

@@ -38,7 +38,7 @@ extern "C" __declspec(dllexport) UINT TaskScheduler(MSIHANDLE hInstall)
 
 	// Execute view
 	hr = WcaOpenExecuteView(TaskScheduler_QUERY, &hView);
-	BreakExitOnFailure1(hr, "Failed to execute SQL query '%ls'.", TaskScheduler_QUERY);
+	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", TaskScheduler_QUERY);
 	WcaLog(LOGMSG_STANDARD, "Executed query.");
 
 	// Iterate records
@@ -67,17 +67,17 @@ extern "C" __declspec(dllexport) UINT TaskScheduler(MSIHANDLE hInstall)
 		case WCA_TODO::WCA_TODO_REINSTALL:
 			WcaLog(LOGMSG_STANDARD, "Will create task '%ls'.", (LPCWSTR)szTaskName);
 			hr = oDeferred.AddRollbackTask(szTaskName, &oRollback, &oCommit);
-			BreakExitOnFailure1(hr, "Failed scheduling rollback of task '%ls'", (LPCWSTR)szTaskName);
+			BreakExitOnFailure(hr, "Failed scheduling rollback of task '%ls'", (LPCWSTR)szTaskName);
 			hr = oDeferred.AddCreateTask(szTaskName, szTaskXml);
-			BreakExitOnFailure1(hr, "Failed scheduling creation of task '%ls'", (LPCWSTR)szTaskName);
+			BreakExitOnFailure(hr, "Failed scheduling creation of task '%ls'", (LPCWSTR)szTaskName);
 			break;
 
 		case WCA_TODO::WCA_TODO_UNINSTALL:
 			WcaLog(LOGMSG_STANDARD, "Will delete task '%ls'.", (LPCWSTR)szTaskName);
 			hr = oDeferred.AddRollbackTask(szTaskName, &oRollback, &oCommit);
-			BreakExitOnFailure1(hr, "Failed scheduling rollback of task '%ls'", (LPCWSTR)szTaskName);
+			BreakExitOnFailure(hr, "Failed scheduling rollback of task '%ls'", (LPCWSTR)szTaskName);
 			hr = oDeferred.AddRemoveTask(szTaskName);
-			BreakExitOnFailure1(hr, "Failed scheduling removal of task '%ls'", (LPCWSTR)szTaskName);
+			BreakExitOnFailure(hr, "Failed scheduling removal of task '%ls'", (LPCWSTR)szTaskName);
 			break;
 
 		case WCA_TODO::WCA_TODO_UNKNOWN:
@@ -176,7 +176,7 @@ HRESULT CTaskScheduler::AddRollbackTask(LPCWSTR szTaskName, CTaskScheduler* pRol
 	if ((hr == E_FILENOTFOUND) || (hr == E_PATHNOTFOUND))
 	{
 		hr = pRollback->AddRemoveTask(szTaskName);
-		BreakExitOnFailure1(hr, "Failed scheduling removal of task '%ls' on rollback", szTaskName);
+		BreakExitOnFailure(hr, "Failed scheduling removal of task '%ls' on rollback", szTaskName);
 		ExitFunction();
 	}
 
@@ -184,13 +184,13 @@ HRESULT CTaskScheduler::AddRollbackTask(LPCWSTR szTaskName, CTaskScheduler* pRol
 	if (SUCCEEDED(hr))
 	{
 		CComBSTR xml;
-		BreakExitOnNull1(pTask, hr, E_FAIL, "Failed getting task '%ls'", szTaskName);
+		BreakExitOnNull(pTask, hr, E_FAIL, "Failed getting task '%ls'", szTaskName);
 
 		hr = pTask->get_Xml(&xml);
-		BreakExitOnFailure1(hr, "Failed getting existing task '%ls' XML definition", szTaskName);
+		BreakExitOnFailure(hr, "Failed getting existing task '%ls' XML definition", szTaskName);
 
 		hr = pRollback->AddCreateTask(szTaskName, (LPWSTR)xml);
-		BreakExitOnFailure1(hr, "Failed scheduling re-creation of task '%ls' on rollback", szTaskName);
+		BreakExitOnFailure(hr, "Failed scheduling re-creation of task '%ls' on rollback", szTaskName);
 		ExitFunction();
 	}
 
@@ -252,7 +252,7 @@ HRESULT CTaskScheduler::DeferredExecute(const ::google::protobuf::Any* pCommand)
 		szXml = (LPCWSTR)details.taskxml().data();
 
 		hr = CreateTask(szName, szXml);
-		BreakExitOnFailure1(hr, "Failed to create task '%ls'", szName);
+		BreakExitOnFailure(hr, "Failed to create task '%ls'", szName);
 	}
 	break;
 
@@ -263,7 +263,7 @@ HRESULT CTaskScheduler::DeferredExecute(const ::google::protobuf::Any* pCommand)
 		szName = (LPCWSTR)details.name().data();
 
 		hr = RemoveTask(szName);
-		BreakExitOnFailure1(hr, "Failed to create task '%ls'", szName);
+		BreakExitOnFailure(hr, "Failed to create task '%ls'", szName);
 	}
 	break;
 
@@ -276,7 +276,7 @@ HRESULT CTaskScheduler::DeferredExecute(const ::google::protobuf::Any* pCommand)
 		szBackupFile = (LPCWSTR)details.backupfile().data();
 
 		hr = BackupTask(szName, szBackupFile);
-		BreakExitOnFailure1(hr, "Failed to backup task '%ls'", szName);
+		BreakExitOnFailure(hr, "Failed to backup task '%ls'", szName);
 	}
 	break;
 
@@ -301,13 +301,13 @@ HRESULT CTaskScheduler::CreateTask(LPCWSTR szTaskName, LPCWSTR szTaskXml)
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Creating task '%ls'", szTaskName);
 
 	hr = pService_->NewTask(NULL, &pTask);
-	BreakExitOnFailure1(hr, "Failed creating a new task for '%ls'", szTaskName);
+	BreakExitOnFailure(hr, "Failed creating a new task for '%ls'", szTaskName);
 
 	hr = pTask->put_XmlText(CComBSTR(szTaskXml));
-	BreakExitOnFailure1(hr, "Failed setting task XML for '%ls'", szTaskName);
+	BreakExitOnFailure(hr, "Failed setting task XML for '%ls'", szTaskName);
 
 	hr = pRootFolder_->RegisterTaskDefinition(CComBSTR(szTaskName), pTask, TASK_CREATE_OR_UPDATE, CComVariant(), CComVariant(), TASK_LOGON_NONE, CComVariant(), &pRegTask);
-	BreakExitOnFailure1(hr, "Failed creating task '%ls'", szTaskName);
+	BreakExitOnFailure(hr, "Failed creating task '%ls'", szTaskName);
 
 LExit:
 	return hr;
@@ -326,7 +326,7 @@ HRESULT CTaskScheduler::RemoveTask(LPCWSTR szTaskName)
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Task '%ls' does not exist", szTaskName);
 		ExitFunction1(hr = S_FALSE);
 	}
-	BreakExitOnFailure1(hr, "Failed deleting task '%ls'", szTaskName);
+	BreakExitOnFailure(hr, "Failed deleting task '%ls'", szTaskName);
 
 LExit:
 	return hr;
@@ -396,11 +396,11 @@ HRESULT CTaskScheduler::BackupTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Backing-up task '%ls'", szTaskName);
 
 	hr = pRootFolder_->GetTask(BSTR(szTaskName), &pTask);
-	BreakExitOnFailure1(hr, "Failed getting existing task '%ls'", szTaskName);
-	BreakExitOnNull1(pTask, hr, E_FAIL, "Failed getting task '%ls'", szTaskName);
+	BreakExitOnFailure(hr, "Failed getting existing task '%ls'", szTaskName);
+	BreakExitOnNull(pTask, hr, E_FAIL, "Failed getting task '%ls'", szTaskName);
 
 	hr = pTask->get_Xml(&xml);
-	BreakExitOnFailure1(hr, "Failed getting existing task '%ls' XML definition", szTaskName);
+	BreakExitOnFailure(hr, "Failed getting existing task '%ls' XML definition", szTaskName);
 
 	hFile = ::CreateFile(szBackupFile, GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 	BreakExitOnNullWithLastError((hFile != INVALID_HANDLE_VALUE), hr, "Failed opening backup file");
@@ -445,7 +445,7 @@ HRESULT CTaskScheduler::RestoreTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 	BreakExitOnNullWithLastError(bRes, hr, "Failed reading backup file");
 
 	hr = CreateTask(szTaskName, szTaskXml);
-	BreakExitOnFailure1(hr, "Failed restoring task '%ls'", szTaskName);
+	BreakExitOnFailure(hr, "Failed restoring task '%ls'", szTaskName);
 
 LExit:
 	if (hFile != INVALID_HANDLE_VALUE)

@@ -64,7 +64,7 @@ extern "C" __declspec(dllexport) UINT MsiSqlQuery(MSIHANDLE hInstall)
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing MSI query: %ls", (LPCWSTR)sQuery);
 
 		hr = WcaOpenExecuteView((LPCWSTR)sQuery, &hQueryView);
-		BreakExitOnFailure1(hr, "Failed executing MSI SQL query %ls", (LPCWSTR)sId);
+		BreakExitOnFailure(hr, "Failed executing MSI SQL query %ls", (LPCWSTR)sId);
 	}
 
 	hr = ERROR_SUCCESS;

@@ -81,7 +81,7 @@ HRESULT CSummaryStream::GetProperty( SummaryStreamProperties eProp, LPWSTR *ppPr
 	
 	dwRes = ::MsiSummaryInfoGetProperty( hSummaryInfo, eProp , &uiDataType, &iJunk, &ftJunk, (*ppProp), &dwDataSize);
 	hr = HRESULT_FROM_WIN32( dwRes);
-	BreakExitOnFailure1( hr, "Failed to get summary stream property with PID=%u", eProp);
+	BreakExitOnFailure( hr, "Failed to get summary stream property with PID=%u", eProp);
 	
 LExit:
 	return hr;

@@ -34,7 +34,7 @@ extern "C" __declspec(dllexport) UINT ServiceConfig(MSIHANDLE hInstall)
 
 	// Execute view
 	hr = WcaOpenExecuteView(ServiceConfig_QUERY, &hView);
-	BreakExitOnFailure1(hr, "Failed to execute SQL query '%ls'.", ServiceConfig_QUERY);
+	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", ServiceConfig_QUERY);
 
 	// Open service.
 	hManager = ::OpenSCManager(nullptr, nullptr, SC_MANAGER_CONNECT);

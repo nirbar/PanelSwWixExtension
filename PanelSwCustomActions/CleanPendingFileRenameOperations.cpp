@@ -90,7 +90,7 @@ extern "C" __declspec(dllexport) int __cdecl CleanPendingFileRenameOperationsSch
 
 	// Iterate files to be installed.
 	hr = WcaOpenExecuteView(CleanPendingFileRenameOperationsSched_QUERY, &hView);
-	BreakExitOnFailure1(hr, "Failed to execute SQL query '%ls'.", CleanPendingFileRenameOperationsSched_QUERY);
+	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", CleanPendingFileRenameOperationsSched_QUERY);
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
