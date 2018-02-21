@@ -13,7 +13,7 @@ extern "C" __declspec(dllexport) UINT MsiSqlQuery(MSIHANDLE hInstall)
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_XmlSearch exists.
 	hr = WcaTableExists(L"PSW_MsiSqlQuery");

@@ -18,7 +18,7 @@ extern "C" __declspec(dllexport) UINT SplitString(MSIHANDLE hInstall)
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
 
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Get property-to-split name
 	hr = WcaGetProperty(SplitProp, (LPWSTR*)szPropName);
@@ -93,7 +93,7 @@ extern "C" __declspec(dllexport) UINT TrimString(MSIHANDLE hInstall)
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
 
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Get property-to-trim name
 	hr = WcaGetProperty(TrimProp, (LPWSTR*)szPropName);

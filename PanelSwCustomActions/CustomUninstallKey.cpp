@@ -18,7 +18,7 @@ extern "C" __declspec( dllexport ) UINT CustomUninstallKey_Immediate(MSIHANDLE h
 
 	hr = WcaInitialize(hInstall, "CustomUninstallKey_Immediate");
 	BreakExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 	
 	// Ensure table PSW_CustomUninstallKey exists.
 	hr = WcaTableExists(L"PSW_CustomUninstallKey");
@@ -41,7 +41,7 @@ extern "C" __declspec( dllexport ) UINT CustomUninstallKey_deferred(MSIHANDLE hI
 
 	hr = WcaInitialize(hInstall, "CustomUninstallKey_deferred");
 	BreakExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	hr = data.Execute();
 	BreakExitOnFailure(hr, "Failed");

@@ -30,7 +30,7 @@ extern "C" __declspec(dllexport) UINT DismSched(MSIHANDLE hInstall)
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	hr = WcaGetIntProperty(L"VersionNT", &nVersionNT);
 	ExitOnFailure(hr, "Failed to get VersionNT");

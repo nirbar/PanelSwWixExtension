@@ -25,7 +25,7 @@ extern "C" __declspec(dllexport) UINT SplitPath(MSIHANDLE hInstall)
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
 
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Get property-to-encrypt name
 	hr = WcaGetProperty(PathToSplitProp, (LPWSTR*)szFullPath);
@@ -82,7 +82,7 @@ extern "C" __declspec(dllexport) UINT PathExists(MSIHANDLE hInstall)
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Get full path to test
 	hr = WcaGetProperty(PathExistsProp, (LPWSTR*)szFullPath);

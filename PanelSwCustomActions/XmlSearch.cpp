@@ -29,7 +29,7 @@ extern "C" __declspec( dllexport ) UINT XmlSearch(MSIHANDLE hInstall)
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 		
 	hr = ::CoInitialize(nullptr); 
 	BreakExitOnFailure( hr, "Failed to CoInitialize");

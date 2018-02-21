@@ -31,7 +31,7 @@ extern "C" __declspec(dllexport) UINT PSW_ShellExecute(MSIHANDLE hInstall)
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_ShellExecute exists.
 	hr = WcaTableExists(L"PSW_ShellExecute");

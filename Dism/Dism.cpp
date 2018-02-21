@@ -30,7 +30,7 @@ extern "C" __declspec(dllexport) UINT Dism(MSIHANDLE hInstall)
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	hr = WcaGetProperty(L"CustomActionData", &szCAD);
 	ExitOnFailure(hr, "Failed getting CustomActionData");

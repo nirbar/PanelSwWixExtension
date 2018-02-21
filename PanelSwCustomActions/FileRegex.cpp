@@ -27,7 +27,7 @@ extern "C" __declspec(dllexport) UINT FileRegex(MSIHANDLE hInstall)
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_FileRegex exists.
 	hr = WcaTableExists(L"PSW_FileRegex");

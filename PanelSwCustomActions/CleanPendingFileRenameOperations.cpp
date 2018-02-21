@@ -29,7 +29,7 @@ extern "C" __declspec(dllexport) int __cdecl CleanPendingFileRenameOperationsSch
 
 	hr = WcaInitialize(hInstall, "CleanPendingFileRenameOps");
 	ExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	hr = RegOpen(HKEY_LOCAL_MACHINE, L"SYSTEM\\CurrentControlSet\\Control\\Session Manager", GENERIC_READ, &hKey);
 	ExitOnFailure(hr, "Failed to open Session Manager registry key");
@@ -168,7 +168,7 @@ extern "C" __declspec(dllexport) int __cdecl CleanPendingFileRenameOperations(MS
 
 	hr = WcaInitialize(hInstall, "CleanPendingFileRenameOps");
 	ExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	hr = WcaGetProperty(L"CustomActionData", (LPWSTR*)szPreventDelete);
 	BreakExitOnFailure(hr, "Failed getting 'CustomActionData'");
