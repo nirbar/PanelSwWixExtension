@@ -10,7 +10,7 @@ public:
 
 protected:
 	// Execute the command object (XML element)
-	HRESULT DeferredExecute(const ::google::protobuf::Any* pCommand) override;
+	HRESULT DeferredExecute(const ::std::string& command) override;
 
 private:
 	HRESULT Post(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure);

@@ -51,7 +51,7 @@ extern "C" __declspec(dllexport) UINT DeletePath(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		CWixString szId, szFilePath, szRegex, szReplacement, szCondition;
+		CWixString szId, szFilePath, szCondition;
 		CWixString tempFile;
 		int flags = 0;
 
@@ -65,7 +65,7 @@ extern "C" __declspec(dllexport) UINT DeletePath(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to get Condition.");
 
 		// Test condition
-		MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, szCondition);
+		MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, (LPCWSTR)szCondition);
 		switch (condRes)
 		{
 		case MSICONDITION::MSICONDITION_NONE:
@@ -89,14 +89,17 @@ extern "C" __declspec(dllexport) UINT DeletePath(MSIHANDLE hInstall)
 		dwRes = ::GetTempFileName(longTempPath, L"DLT", 0, (LPWSTR)tempFile);
 		BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
 
-		hr = rollbackCAD.AddMoveFile((LPCWSTR)tempFile, szFilePath, flags);
+		hr = rollbackCAD.AddDeleteFile((LPCWSTR)szFilePath, flags | CFileOperations::FileOperationsAttributes::IgnoreMissingPath); // Delete the target path. Done for case where the source is folder rather than file.
+		BreakExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
+
+		hr = rollbackCAD.AddMoveFile((LPCWSTR)tempFile, (LPCWSTR)szFilePath, flags);
 		BreakExitOnFailure(hr, "Failed creating custom action data for rollback action.");
 
 		// Add deferred data to move file szFilePath -> tempFile.
 		hr = deferredFileCAD.AddDeleteFile((LPCWSTR)tempFile, flags); // Delete the temporary file. Done for case where the source is folder rather than file.
 		BreakExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
 
-		hr = deferredFileCAD.AddMoveFile(szFilePath, (LPCWSTR)tempFile, flags);
+		hr = deferredFileCAD.AddMoveFile((LPCWSTR)szFilePath, (LPCWSTR)tempFile, flags);
 		BreakExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
 
 		hr = commitCAD.AddDeleteFile((LPCWSTR)tempFile, flags);
@@ -131,7 +134,8 @@ HRESULT CFileOperations::AddCopyFile(LPCWSTR szFrom, LPCWSTR szTo, int flags)
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
 	FileOperationsDetails *pDetails = nullptr;
-	Any *pAny = nullptr;
+	::std::string *pAny = nullptr;
+	bool bRes = true;
 
 	hr = AddCommand("CFileOperations", &pCmd);
 	BreakExitOnFailure(hr, "Failed to add XML element");
@@ -149,7 +153,8 @@ HRESULT CFileOperations::AddCopyFile(LPCWSTR szFrom, LPCWSTR szTo, int flags)
 	pAny = pCmd->mutable_details();
 	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
-	pAny->PackFrom(*pDetails);
+	bRes = pDetails->SerializeToString(pAny);
+	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
@@ -160,7 +165,8 @@ HRESULT CFileOperations::AddMoveFile(LPCWSTR szFrom, LPCWSTR szTo, int flags)
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
 	FileOperationsDetails *pDetails = nullptr;
-	Any *pAny = nullptr;
+	::std::string *pAny = nullptr;
+	bool bRes = true;
 
 	hr = AddCommand("CFileOperations", &pCmd);
 	BreakExitOnFailure(hr, "Failed to add XML element");
@@ -178,7 +184,8 @@ HRESULT CFileOperations::AddMoveFile(LPCWSTR szFrom, LPCWSTR szTo, int flags)
 	pAny = pCmd->mutable_details();
 	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
-	pAny->PackFrom(*pDetails);
+	bRes = pDetails->SerializeToString(pAny);
+	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
@@ -189,7 +196,8 @@ HRESULT CFileOperations::AddDeleteFile(LPCWSTR szPath, int flags)
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
 	FileOperationsDetails *pDetails = nullptr;
-	Any *pAny = nullptr;
+	::std::string *pAny = nullptr;
+	bool bRes = true;
 
 	hr = AddCommand("CFileOperations", &pCmd);
 	BreakExitOnFailure(hr, "Failed to add XML element");
@@ -204,14 +212,15 @@ HRESULT CFileOperations::AddDeleteFile(LPCWSTR szPath, int flags)
 	pAny = pCmd->mutable_details();
 	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
-	pAny->PackFrom(*pDetails);
+	bRes = pDetails->SerializeToString(pAny);
+	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
 }
 
 // Execute the command object (XML element)
-HRESULT CFileOperations::DeferredExecute(const ::google::protobuf::Any* pCommand)
+HRESULT CFileOperations::DeferredExecute(const ::std::string& command)
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -219,8 +228,7 @@ HRESULT CFileOperations::DeferredExecute(const ::google::protobuf::Any* pCommand
 	LPCWSTR szFrom = nullptr;
 	LPCWSTR szTo = nullptr;
 
-	BreakExitOnNull(pCommand->Is<FileOperationsDetails>(), hr, E_INVALIDARG, "Expected command to be FileOperationsDetails");
-	bRes = pCommand->UnpackTo(&details);
+	bRes = details.ParseFromString(command);
 	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking FileOperationsDetails");
 
 	if (details.from().size())
@@ -326,27 +334,4 @@ LExit:
 	ReleaseStr(szFromNull);
 
 	return hr;
-}
-
-unsigned long long CFileOperations::FileSize(LPCWSTR szPath)
-{
-    FILE* pFile = nullptr;
-    unsigned long long size = 0;
-    errno_t err = 0;
-
-    err = ::_wfopen_s(&pFile, szPath, L"r");
-    ExitOnNull((err == 0), size, 0, "Failed opening file %ls", szPath);
-
-    err = ::fseek(pFile, 0, SEEK_END);
-    ExitOnNull((err == 0), size, 0, "Failed seeking in file %ls", szPath);
-
-    size = ::ftell(pFile);
-
-LExit:
-    if (pFile)
-    {
-        ::fclose(pFile);
-    }
-
-    return size;
 }

@@ -41,7 +41,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(ReceiverToExecutorFunc mapFunc)
 		BreakExitOnFailure(hr, "Failed to get CDeferredActionBase for '%s'", cmd.handler().c_str());
 
 		// Execute
-		hr = pExecutor->DeferredExecute(&cmd.details());
+		hr = pExecutor->DeferredExecute(cmd.details());
 		BreakExitOnFailure(hr, "Failed");
 
 		hr = WcaProgressMessage(cmd.cost(), FALSE);

@@ -118,7 +118,8 @@ HRESULT CTaskScheduler::AddCreateTask(LPCWSTR szTaskName, LPCWSTR szTaskXml)
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
 	TaskSchedulerDetails *pDetails = nullptr;
-	Any *pAny = nullptr;
+	::std::string *pAny = nullptr;
+	bool bRes = true;
 
 	hr = AddCommand("CTaskScheduler", &pCmd);
 	BreakExitOnFailure(hr, "Failed to add XML element");
@@ -133,7 +134,8 @@ HRESULT CTaskScheduler::AddCreateTask(LPCWSTR szTaskName, LPCWSTR szTaskXml)
 	pAny = pCmd->mutable_details();
 	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
-	pAny->PackFrom(*pDetails);
+	bRes = pDetails->SerializeToString(pAny);
+	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
@@ -144,7 +146,8 @@ HRESULT CTaskScheduler::AddRemoveTask(LPCWSTR szTaskName)
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
 	TaskSchedulerDetails *pDetails = nullptr;
-	Any *pAny = nullptr;
+	::std::string *pAny = nullptr;
+	bool bRes = true;
 
 	hr = AddCommand("CTaskScheduler", &pCmd);
 	BreakExitOnFailure(hr, "Failed to add XML element");
@@ -158,7 +161,8 @@ HRESULT CTaskScheduler::AddRemoveTask(LPCWSTR szTaskName)
 	pAny = pCmd->mutable_details();
 	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
-	pAny->PackFrom(*pDetails);
+	bRes = pDetails->SerializeToString(pAny);
+	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
@@ -228,15 +232,14 @@ LExit:
 }
 
 // Execute the command object
-HRESULT CTaskScheduler::DeferredExecute(const ::google::protobuf::Any* pCommand)
+HRESULT CTaskScheduler::DeferredExecute(const ::std::string& command)
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
 	TaskSchedulerDetails details;
 	TaskSchedulerDetails_Action eAction;
 
-	BreakExitOnNull(pCommand->Is<TaskSchedulerDetails>(), hr, E_INVALIDARG, "Expected command to be TaskSchedulerDetails");
-	bRes = pCommand->UnpackTo(&details);
+	bRes = details.ParseFromString(command);
 	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking TaskSchedulerDetails");
 
 	eAction = details.action();
@@ -337,7 +340,8 @@ HRESULT CTaskScheduler::AddBackupTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
 	TaskSchedulerDetails *pDetails = nullptr;
-	Any *pAny = nullptr;
+	::std::string *pAny = nullptr;
+	bool bRes = true;
 
 	hr = AddCommand("CTaskScheduler", &pCmd);
 	BreakExitOnFailure(hr, "Failed to add XML element");
@@ -352,7 +356,8 @@ HRESULT CTaskScheduler::AddBackupTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 	pAny = pCmd->mutable_details();
 	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
-	pAny->PackFrom(*pDetails);
+	bRes = pDetails->SerializeToString(pAny);
+	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
@@ -363,7 +368,8 @@ HRESULT CTaskScheduler::AddRestoreTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
 	TaskSchedulerDetails *pDetails = nullptr;
-	Any *pAny = nullptr;
+	::std::string *pAny = nullptr;
+	bool bRes = true;
 
 	hr = AddCommand("CTaskScheduler", &pCmd);
 	BreakExitOnFailure(hr, "Failed to add XML element");
@@ -378,7 +384,8 @@ HRESULT CTaskScheduler::AddRestoreTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 	pAny = pCmd->mutable_details();
 	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
-	pAny->PackFrom(*pDetails);
+	bRes = pDetails->SerializeToString(pAny);
+	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;

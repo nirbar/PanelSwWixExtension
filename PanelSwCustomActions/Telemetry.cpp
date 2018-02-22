@@ -147,7 +147,8 @@ HRESULT CTelemetry::AddPost(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPC
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
 	TelemetryDetails *pDetails = nullptr;
-	Any *pAny = nullptr;
+	::std::string *pAny = nullptr;
+	bool bRes = true;
 
 	hr = AddCommand("CTelemetry", &pCmd);
 	BreakExitOnFailure(hr, "Failed to add XML element");
@@ -164,14 +165,15 @@ HRESULT CTelemetry::AddPost(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPC
 	pAny = pCmd->mutable_details();
 	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
-	pAny->PackFrom(*pDetails);
+	bRes = pDetails->SerializeToString(pAny);
+	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
 }
 
 // Execute the command object (XML element)
-HRESULT CTelemetry::DeferredExecute(const ::google::protobuf::Any* pCommand)
+HRESULT CTelemetry::DeferredExecute(const ::std::string& command)
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -181,8 +183,7 @@ HRESULT CTelemetry::DeferredExecute(const ::google::protobuf::Any* pCommand)
 	LPCWSTR szMethod = nullptr;
 	TelemetryDetails details;
 
-	BreakExitOnNull(pCommand->Is<TelemetryDetails>(), hr, E_INVALIDARG, "Expected command to be TelemetryDetails");
-	bRes = pCommand->UnpackTo(&details);
+	bRes = details.ParseFromString(command);
 	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking TelemetryDetails");
 
 	szUrl = (LPCWSTR)details.url().data();

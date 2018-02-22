@@ -134,7 +134,8 @@ HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szAccoun
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
 	ServciceConfigDetails *pDetails = nullptr;
-	Any *pAny = nullptr;
+	::std::string *pAny = nullptr;
+	bool bRes = true;
 
 	hr = AddCommand("CServiceConfig", &pCmd);
 	BreakExitOnFailure(hr, "Failed to add XML element");
@@ -152,14 +153,15 @@ HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szAccoun
 	pAny = pCmd->mutable_details();
 	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
-	pAny->PackFrom(*pDetails);
+	bRes = pDetails->SerializeToString(pAny);
+	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
 }
 
 // Execute the command object (XML element)
-HRESULT CServiceConfig::DeferredExecute(const ::google::protobuf::Any* pCommand)
+HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 {
 	HRESULT hr = S_OK;
 	LPCWSTR szServiceName = nullptr;
@@ -171,8 +173,7 @@ HRESULT CServiceConfig::DeferredExecute(const ::google::protobuf::Any* pCommand)
 	DWORD bRes = TRUE;
 	ServciceConfigDetails details;
 
-	BreakExitOnNull(pCommand->Is<ServciceConfigDetails>(), hr, E_INVALIDARG, "Expected command to be ExecOnDetails");
-	bRes = pCommand->UnpackTo(&details);
+	bRes = details.ParseFromString(command);
 	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ExecOnDetails");
 
 	szServiceName = (LPCWSTR)details.name().data();

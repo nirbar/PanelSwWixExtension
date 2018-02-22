@@ -1,10 +1,9 @@
 syntax = "proto3";
 package com.panelsw.ca;
-
-import "google/protobuf/any.proto";
+option optimize_for = LITE_RUNTIME;
 
 message Command{
     string handler = 1;
 	uint32 cost = 2;
-	google.protobuf.Any details = 3;
+	bytes details = 3;
 }

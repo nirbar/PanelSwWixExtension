@@ -20,7 +20,7 @@
       </Directory>
     </Directory>
 
-    <PanelSW:DeletePath Id="_1" Path="[DeleteMeDir]" />
+    <PanelSW:DeletePath Id="_1" Path="[DeleteMeDir]"><![CDATA[Not Installed]]></PanelSW:DeletePath>
 
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
 

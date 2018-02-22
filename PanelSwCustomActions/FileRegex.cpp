@@ -142,7 +142,8 @@ HRESULT CFileRegex::AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR sz
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
 	FileRegexDetails *pDetails = nullptr;
-	Any *pAny = nullptr;
+	::std::string *pAny = nullptr;
+	bool bRes = true;
 
 	hr = AddCommand("CFileRegex", &pCmd);
 	BreakExitOnFailure(hr, "Failed to add XML element");
@@ -159,14 +160,15 @@ HRESULT CFileRegex::AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR sz
 	pAny = pCmd->mutable_details();
 	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
-	pAny->PackFrom(*pDetails);
+	bRes = pDetails->SerializeToString(pAny);
+	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
 }
 
 // Execute the command object (XML element)
-HRESULT CFileRegex::DeferredExecute(const ::google::protobuf::Any* pCommand)
+HRESULT CFileRegex::DeferredExecute(const ::std::string& command)
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -175,8 +177,7 @@ HRESULT CFileRegex::DeferredExecute(const ::google::protobuf::Any* pCommand)
 	LPCWSTR szExpression = nullptr;
 	LPCWSTR szReplacement = nullptr;
 
-	BreakExitOnNull(pCommand->Is<FileRegexDetails>(), hr, E_INVALIDARG, "Expected command to be FileRegexDetails");
-	bRes = pCommand->UnpackTo(&details);
+	bRes = details.ParseFromString(command);
 	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking FileOperationsDetails");
 
 	szFile = (LPCWSTR)details.file().data();

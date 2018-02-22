@@ -18,7 +18,7 @@ public:
 
 protected:
 	// Execute the command object
-	HRESULT DeferredExecute(const ::google::protobuf::Any* pCommand) override;
+	HRESULT DeferredExecute(const ::std::string& command) override;
 
 private:
 	HRESULT AddBackupTask(LPCWSTR szTaskName, LPCWSTR szBackupFile);

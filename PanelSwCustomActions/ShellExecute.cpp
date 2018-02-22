@@ -137,7 +137,8 @@ HRESULT CShellExecute::AddShellExec(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR sz
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
 	ShellExecDetails *pDetails = nullptr;
-	Any *pAny = nullptr;
+	::std::string *pAny = nullptr;
+	bool bRes = true;
 
 	hr = AddCommand("CShellExecute", &pCmd);
 	BreakExitOnFailure(hr, "Failed to add XML element");
@@ -156,14 +157,15 @@ HRESULT CShellExecute::AddShellExec(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR sz
 	pAny = pCmd->mutable_details();
 	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
-	pAny->PackFrom(*pDetails);
+	bRes = pDetails->SerializeToString(pAny);
+	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
 }
 
 // Execute the command object (XML element)
-HRESULT CShellExecute::DeferredExecute(const ::google::protobuf::Any* pCommand)
+HRESULT CShellExecute::DeferredExecute(const ::std::string& command)
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -175,8 +177,7 @@ HRESULT CShellExecute::DeferredExecute(const ::google::protobuf::Any* pCommand)
 	int nShow;
 	bool bWait;
 
-	BreakExitOnNull(pCommand->Is<ShellExecDetails>(), hr, E_INVALIDARG, "Expected command to be ShellExecDetails");
-	bRes = pCommand->UnpackTo(&details);
+	bRes = details.ParseFromString(command);
 	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ShellExecDetails");
 
 	szTarget = (LPCWSTR)details.target().data();

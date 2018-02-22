@@ -26,7 +26,7 @@ public:
 protected:
 
 	// Overriden by inheriting classes. Execute the command object (XML element)
-	virtual HRESULT DeferredExecute(const ::google::protobuf::Any* pCommand) = 0;
+	virtual HRESULT DeferredExecute(const ::std::string& command) = 0;
 
 	HRESULT AddCommand(LPCSTR szHandler, ::com::panelsw::ca::Command **ppCommand);
 

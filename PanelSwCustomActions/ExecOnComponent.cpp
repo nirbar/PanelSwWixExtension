@@ -338,7 +338,8 @@ HRESULT CExecOnComponent::AddExec(LPCWSTR szCommand, ExitCodeMap* pExitCodeMap, 
     HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
 	ExecOnDetails *pDetails = nullptr;
-	Any *pAny = nullptr;
+	::std::string *pAny = nullptr;
+	bool bRes = true;
 
     hr = AddCommand("CExecOnComponent", &pCmd);
     BreakExitOnFailure(hr, "Failed to add XML element");
@@ -353,14 +354,16 @@ HRESULT CExecOnComponent::AddExec(LPCWSTR szCommand, ExitCodeMap* pExitCodeMap, 
 
 	pAny = pCmd->mutable_details();
 	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
-	pAny->PackFrom(*pDetails);
+
+	bRes = pDetails->SerializeToString(pAny);
+	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
     return hr;
 }
 
 // Execute the command object (XML element)
-HRESULT CExecOnComponent::DeferredExecute(const ::google::protobuf::Any* pCommand)
+HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command)
 {
 	HRESULT hr = S_OK;
     DWORD exitCode = 0;
@@ -375,8 +378,7 @@ HRESULT CExecOnComponent::DeferredExecute(const ::google::protobuf::Any* pComman
         hr = S_OK;
     }
 
-	BreakExitOnNull(pCommand->Is<ExecOnDetails>(), hr, E_INVALIDARG, "Expected command to be ExecOnDetails");
-	bRes = pCommand->UnpackTo(&details);
+	bRes = details.ParseFromString(command);
 	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ExecOnDetails");
 
 	szCommand = (LPCWSTR)details.command().c_str();

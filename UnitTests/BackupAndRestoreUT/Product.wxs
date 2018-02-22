@@ -11,7 +11,7 @@
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <Component Directory="INSTALLFOLDER" Id="Product.wxs">
         <File Source="$(var.ProjectDir)Product.wxs" />
-        <PanelSW:BackupAndRestore Id="_1" IgnoreMissing="yes" Path="[#Product.wxs]" RestoreScheduling="afterDuplicateFiles"/>
+        <PanelSW:BackupAndRestore Id="_1" IgnoreMissing="yes" IgnoreErrors="yes" Path="[#Product.wxs]" RestoreScheduling="afterDuplicateFiles"/>
       </Component>
     </Feature>
 

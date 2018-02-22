@@ -1,5 +1,6 @@
 syntax = "proto3";
 package com.panelsw.ca;
+option optimize_for = LITE_RUNTIME;
 
 message FileRegexDetails{
 
