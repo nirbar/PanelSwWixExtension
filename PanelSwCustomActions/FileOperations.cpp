@@ -271,6 +271,16 @@ HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool
 	hr = StrAllocFormatted(&szToNull, L"%s%c%c", szTo, L'\0', L'\0');
 	BreakExitOnFailure(hr, "Failed formatting string");
 
+	// Remove trailing backslashes (fails on Windows XP)
+	for (DWORD dwLast = ::wcslen(szFromNull) - 1; szFromNull[dwLast] == L'\\'; --dwLast)
+	{
+		szFromNull[dwLast] = NULL;
+	}
+	for (DWORD dwLast = ::wcslen(szToNull) - 1; szToNull[dwLast] == L'\\'; --dwLast)
+	{
+		szToNull[dwLast] = NULL;
+	}
+
 	// Prepare 
 	::memset(&opInfo, 0, sizeof(opInfo));
 	opInfo.wFunc = bMove ? FO_MOVE : FO_COPY;
@@ -309,6 +319,12 @@ HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bI
 	hr = StrAllocFormatted(&szFromNull, L"%s%c%c", szFrom, L'\0', L'\0');
 	BreakExitOnFailure(hr, "Failed formatting string");
 
+	// Remove trailing backslashes (fails on Windows XP)
+	for (DWORD dwLast = ::wcslen(szFromNull) - 1; szFromNull[dwLast] == L'\\'; --dwLast)
+	{
+		szFromNull[dwLast] = NULL;
+	}
+
 	// Prepare 
 	::memset(&opInfo, 0, sizeof(opInfo));
 	opInfo.wFunc = FO_DELETE;
@@ -326,7 +342,7 @@ HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bI
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed deleting '%ls'; Ignoring error (%i)", szFromNull, nRes);
 		ExitFunction1(hr = S_FALSE);
 	}
-	BreakExitOnNull((nRes == 0), hr, E_FAIL, "Failed deleting file (Error %i)", nRes);
+	BreakExitOnNull((nRes == 0), hr, E_FAIL, "Failed deleting '%ls' (Error %i)", szFromNull, nRes);
 	BreakExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed deleting file (operation aborted)");
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Deleted '%ls'", szFrom);
 
