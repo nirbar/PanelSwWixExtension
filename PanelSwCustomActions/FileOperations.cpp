@@ -289,7 +289,7 @@ HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed Copying '%ls' to '%ls'; Ignoring error (%i)", szFromNull, szToNull, nRes);
 		ExitFunction1(hr = S_FALSE);
 	}
-	BreakExitOnNull((nRes == 0), hr, E_FAIL, "Failed copying file '%ls' to '%ls' (Error %i)", szFromNull, szToNull, nRes);
+	BreakExitOnWin32Error(nRes, hr, "Failed copying file '%ls' to '%ls'", szFromNull, szToNull);
 	BreakExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed copying file (operation aborted)");
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Copied '%ls' to '%ls'", szFromNull, szToNull);
 
