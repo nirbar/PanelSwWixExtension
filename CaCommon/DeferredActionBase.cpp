@@ -29,24 +29,24 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(ReceiverToExecutorFunc mapFunc)
 	bRes = cad.ParseFromArray(pData, dwDataSize);
 	BreakExitOnNull(bRes, hr, E_FAIL, "Failed parsing CustomActionData");
 
-	// During rollback, we don't exit on failure before completing cleanup.
+	// During rollback we don't exit on failure before completing cleanup.
 	bIsRollback = ::MsiGetMode(WcaGetInstallHandle(), MSIRUNMODE::MSIRUNMODE_ROLLBACK);
 
 	// Iterate elements
 	for (const Command &cmd : cad.commands())
 	{
-		LPCSTR szHandler = cmd.handler().c_str();
-		if (!(szHandler && *szHandler))
+		if (cmd.handler().empty())
 		{
 			continue;
 		}
 		
 		// Get receiver
-		hr = mapFunc(szHandler, &pExecutor);
+		hr = mapFunc(cmd.handler().c_str(), &pExecutor);
 		if (bIsRollback && FAILED(hr))
 		{
 			WcaLogError(hr, "Failed to get CDeferredActionBase for '%s'", cmd.handler().c_str());
 			hrErr = hr;
+			hr = S_OK;
 			continue;
 		}
 		BreakExitOnFailure(hr, "Failed to get CDeferredActionBase for '%s'", cmd.handler().c_str());
@@ -57,6 +57,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(ReceiverToExecutorFunc mapFunc)
 		{
 			WcaLogError(hr, "Failed");
 			hrErr = hr;
+			hr = S_OK;
 			continue;
 		}
 		BreakExitOnFailure(hr, "Failed");
@@ -66,6 +67,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(ReceiverToExecutorFunc mapFunc)
 		{
 			WcaLogError(hr, "Failed to report progress by cost");
 			hrErr = hr;
+			hr = S_OK;
 			continue;
 		}
 		BreakExitOnFailure(hr, "Failed to report progress by cost");
