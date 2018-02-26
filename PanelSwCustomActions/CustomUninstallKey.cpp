@@ -10,7 +10,7 @@
 #define CustomUninstallKeyQuery L"SELECT `Id`, `Name`, `Data`, `DataType`, `Attributes`, `Condition` FROM `PSW_CustomUninstallKey`"
 enum eCustomUninstallKeyQuery { Id = 1, Name, Data, DataType, Attributes, Condition };
 
-extern "C" __declspec( dllexport ) UINT CustomUninstallKey_Immediate(MSIHANDLE hInstall)
+extern "C" UINT __stdcall CustomUninstallKey_Immediate(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -33,7 +33,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-extern "C" __declspec( dllexport ) UINT CustomUninstallKey_deferred(MSIHANDLE hInstall)
+extern "C" UINT __stdcall CustomUninstallKey_deferred(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
