@@ -1,0 +1,13 @@
+syntax = "proto3";
+package com.panelsw.ca;
+option optimize_for = LITE_RUNTIME;
+
+message FileOperationsDetails{
+	
+	bytes from = 1;
+	bytes to = 2;
+
+	bool move = 3;
+	bool ignoreMissing = 4;
+	bool ignoreErrors = 5;
+}

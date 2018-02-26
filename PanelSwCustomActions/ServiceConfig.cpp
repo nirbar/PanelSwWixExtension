@@ -3,6 +3,10 @@
 #include "../CaCommon/WixString.h"
 #include <wcautil.h>
 #include <procutil.h>
+#include "servciceConfigDetails.pb.h"
+#include "google\protobuf\any.h"
+using namespace com::panelsw::ca;
+using namespace google::protobuf;
 
 #define ServiceConfig_QUERY L"SELECT `Id`, `Component_`, `ServiceName`, `Account`, `Password` FROM `PSW_ServiceConfig`"
 enum ServiceConfigQuery { Id = 1, Component, ServiceName, Account, Password };
@@ -13,16 +17,16 @@ extern "C" __declspec(dllexport) UINT ServiceConfig(MSIHANDLE hInstall)
 	DWORD dwRes = ERROR_SUCCESS;
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
-	CComBSTR szCustomActionData;
+	LPWSTR szCustomActionData = nullptr;
 	CServiceConfig oDeferred;
 	CServiceConfig oRollback;
 	SC_HANDLE hManager = NULL;
 	SC_HANDLE hService = NULL;
-	QUERY_SERVICE_CONFIG *pServiceCfg = NULL;
+	QUERY_SERVICE_CONFIG *pServiceCfg = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure tables exist.
 	hr = WcaTableExists(L"PSW_ServiceConfig");
@@ -30,10 +34,10 @@ extern "C" __declspec(dllexport) UINT ServiceConfig(MSIHANDLE hInstall)
 
 	// Execute view
 	hr = WcaOpenExecuteView(ServiceConfig_QUERY, &hView);
-	BreakExitOnFailure1(hr, "Failed to execute SQL query '%ls'.", ServiceConfig_QUERY);
+	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", ServiceConfig_QUERY);
 
 	// Open service.
-	hManager = ::OpenSCManager(NULL, NULL, SC_MANAGER_CONNECT);
+	hManager = ::OpenSCManager(nullptr, nullptr, SC_MANAGER_CONNECT);
 	ExitOnNullWithLastError(hManager, hr, "Failed opening service control manager database");
 
 	// Iterate records
@@ -73,7 +77,7 @@ extern "C" __declspec(dllexport) UINT ServiceConfig(MSIHANDLE hInstall)
 		{
 			DWORD dwSize = 0;
 
-			dwRes = ::QueryServiceConfig(hService, NULL, 0, &dwSize);
+			dwRes = ::QueryServiceConfig(hService, nullptr, 0, &dwSize);
 			ExitOnNullWithLastError((dwRes || (::GetLastError() == ERROR_INSUFFICIENT_BUFFER)) , hr, "Failed querying service '%ls' configuration size", (LPCWSTR)szServiceName);
 
 			pServiceCfg = (QUERY_SERVICE_CONFIG*)new BYTE[dwSize];
@@ -82,14 +86,14 @@ extern "C" __declspec(dllexport) UINT ServiceConfig(MSIHANDLE hInstall)
 			dwRes = ::QueryServiceConfig(hService, pServiceCfg, dwSize, &dwSize);
 			ExitOnNullWithLastError(dwRes, hr, "Failed querying service '%ls' configuration", (LPCWSTR)szServiceName);
 
-			hr = oRollback.AddServiceConfig((LPCWSTR)szServiceName, pServiceCfg->lpServiceStartName, NULL);
+			hr = oRollback.AddServiceConfig((LPCWSTR)szServiceName, pServiceCfg->lpServiceStartName, nullptr);
 			ExitOnFailure(hr, "Failed creating rollback CustomActionData");
 
 			delete[]pServiceCfg;
-			pServiceCfg = NULL;
+			pServiceCfg = nullptr;
 
 			::CloseServiceHandle(hService);
-			hService = NULL;
+			hService = nullptr;
 		}
 	}
 
@@ -99,13 +103,14 @@ extern "C" __declspec(dllexport) UINT ServiceConfig(MSIHANDLE hInstall)
 	hr = WcaDoDeferredAction(L"PSW_ServiceConfigRlbk", szCustomActionData, oRollback.GetCost());
 	BreakExitOnFailure(hr, "Failed setting rollback action data.");
 
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = oDeferred.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data.");
 	hr = WcaDoDeferredAction(L"PSW_ServiceConfigExec", szCustomActionData, oDeferred.GetCost());
 	BreakExitOnFailure(hr, "Failed setting action data.");
 
 LExit:
+	ReleaseStr(szCustomActionData);
 
 	if (pServiceCfg)
 	{
@@ -127,67 +132,69 @@ LExit:
 HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szAccount, LPCWSTR szPassword)
 {
 	HRESULT hr = S_OK;
-	CComPtr<IXMLDOMElement> pElem;
+	::com::panelsw::ca::Command *pCmd = nullptr;
+	ServciceConfigDetails *pDetails = nullptr;
+	::std::string *pAny = nullptr;
+	bool bRes = true;
 
-	hr = AddElement(L"ServiceConfig", L"CServiceConfig", 1, &pElem);
+	hr = AddCommand("CServiceConfig", &pCmd);
 	BreakExitOnFailure(hr, "Failed to add XML element");
 
-	hr = pElem->setAttribute(CComBSTR("ServiceName"), CComVariant(szServiceName));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'Flags'");
+	pDetails = new ServciceConfigDetails();
+	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	hr = pElem->setAttribute(CComBSTR("Account"), CComVariant(szAccount));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'Account'");
-
+	pDetails->set_name(szServiceName, WSTR_BYTE_SIZE(szServiceName));
+	pDetails->set_account(szAccount, WSTR_BYTE_SIZE(szAccount));
 	if (szPassword && *szPassword)
 	{
-		hr = pElem->setAttribute(CComBSTR("Password"), CComVariant(szPassword));
-		BreakExitOnFailure(hr, "Failed to add XML attribute 'Password'");
+		pDetails->set_password(szPassword, WSTR_BYTE_SIZE(szPassword));
 	}
+
+	pAny = pCmd->mutable_details();
+	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+
+	bRes = pDetails->SerializeToString(pAny);
+	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
 }
 
 // Execute the command object (XML element)
-HRESULT CServiceConfig::DeferredExecute(IXMLDOMElement* pElem)
+HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 {
 	HRESULT hr = S_OK;
-	CComVariant szServiceName;
-	CComVariant szAccount;
-	CComVariant szPassword;
+	LPCWSTR szServiceName = nullptr;
+	LPCWSTR szAccount = nullptr;
+	LPCWSTR szPassword = nullptr;
 	SC_HANDLE hManager = NULL;
 	SC_HANDLE hService = NULL;
-	DWORD dwRes = ERROR_SUCCESS;	
+	DWORD dwRes = ERROR_SUCCESS;
+	DWORD bRes = TRUE;
+	ServciceConfigDetails details;
 
-	hr = pElem->getAttribute(L"ServiceName", &szServiceName);
-	BreakExitOnFailure(hr, "Failed to get XML attribute 'ServiceName'");
-	ExitOnNull(*szServiceName.bstrVal, hr, E_INVALIDARG, "ServiceName is empty");
+	bRes = details.ParseFromString(command);
+	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ExecOnDetails");
 
-	hr = pElem->getAttribute(L"Account", &szAccount);
-	BreakExitOnFailure(hr, "Failed to get XML attribute 'Account'");
-	ExitOnNull(*szAccount.bstrVal, hr, E_INVALIDARG, "Account is empty");
-
-	hr = pElem->getAttribute(L"Password", &szPassword);
-	BreakExitOnFailure(hr, "Failed to get XML attribute 'Password'");
-
-	// No password?
-	if (!szPassword.bstrVal || !(*szPassword.bstrVal))
+	szServiceName = (LPCWSTR)details.name().data();
+	szAccount = (LPCWSTR)details.account().data();
+	if (!details.password().empty())
 	{
-		szPassword.Clear();
+		szPassword = (LPCWSTR)details.password().data();
 	}
 
-	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Changing service '%ls' start account to '%ls'", szServiceName.bstrVal, szAccount.bstrVal);
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Changing service '%ls' start account to '%ls'", szServiceName, szAccount);
 
 	// Open service.
-	hManager = ::OpenSCManager(NULL, NULL, SC_MANAGER_ALL_ACCESS);
+	hManager = ::OpenSCManager(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
 	ExitOnNullWithLastError(hManager, hr, "Failed opening service control manager database");
 
-	hService = ::OpenService(hManager, szServiceName.bstrVal, SERVICE_ALL_ACCESS);
-	ExitOnNullWithLastError(hService, hr, "Failed opening service '%ls'", szServiceName.bstrVal);
+	hService = ::OpenService(hManager, szServiceName, SERVICE_ALL_ACCESS);
+	ExitOnNullWithLastError(hService, hr, "Failed opening service '%ls'", szServiceName);
 
 	// Change user.
-	dwRes = ::ChangeServiceConfig(hService, SERVICE_NO_CHANGE, SERVICE_NO_CHANGE, SERVICE_NO_CHANGE, NULL, NULL, NULL, NULL, szAccount.bstrVal, szPassword.bstrVal, NULL);
-	ExitOnNullWithLastError(dwRes, hr, "Failed changing service '%ls' login account to '%ls'", szServiceName.bstrVal, szAccount.bstrVal);
+	dwRes = ::ChangeServiceConfig(hService, SERVICE_NO_CHANGE, SERVICE_NO_CHANGE, SERVICE_NO_CHANGE, nullptr, nullptr, nullptr, nullptr, szAccount, szPassword, nullptr);
+	ExitOnNullWithLastError(dwRes, hr, "Failed changing service '%ls' login account to '%ls'", szServiceName, szAccount);
 
 LExit:
 

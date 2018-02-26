@@ -31,7 +31,7 @@ extern "C" __declspec( dllexport ) UINT ReadIniValues(MSIHANDLE hInstall)
 
 	hr = WcaInitialize(hInstall, "ReadIniValues");
 	BreakExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_ReadIniValues exists.
 	hr = WcaTableExists(L"PSW_ReadIniValues");
@@ -48,12 +48,12 @@ extern "C" __declspec( dllexport ) UINT ReadIniValues(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		WCHAR *Id = NULL;
-		WCHAR *FilePath = NULL;
-		WCHAR *Section = NULL;
-		WCHAR *Key = NULL;
-		WCHAR *DestProperty = NULL;
-		WCHAR *Condition = NULL;
+		LPWSTR Id = nullptr;
+		LPWSTR FilePath = nullptr;
+		LPWSTR Section = nullptr;
+		LPWSTR Key = nullptr;
+		LPWSTR DestProperty = nullptr;
+		LPWSTR Condition = nullptr;
 		int Attributes;
 		hr = WcaGetRecordString(hRecord, 1, &Id);
 		BreakExitOnFailure(hr, "Failed to get Id.");
@@ -102,7 +102,7 @@ extern "C" __declspec( dllexport ) UINT ReadIniValues(MSIHANDLE hInstall)
 		DWORD dwSize = 1024;
 		CPWCHAR Value(new WCHAR[dwSize]);
 		DWORD dwRes;
-		while ((dwRes = ::GetPrivateProfileStringW(Section, Key, NULL, Value, 1024, FilePath)) == (dwSize - 1))
+		while ((dwRes = ::GetPrivateProfileStringW(Section, Key, nullptr, Value, 1024, FilePath)) == (dwSize - 1))
 		{
 			dwSize += 1024;
 			Value = new WCHAR[dwSize];

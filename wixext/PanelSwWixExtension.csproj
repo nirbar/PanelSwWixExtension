@@ -1,5 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <Import Project="..\packages\TidyBuild.1.0.8\build\TidyBuild.props" Condition="Exists('..\packages\TidyBuild.1.0.8\build\TidyBuild.props')" />
   <PropertyGroup>
     <ProjectGuid>{69972F7F-F1CF-44AA-8F76-B4A5A4F1B309}</ProjectGuid>
     <AssemblyName>PanelSwWixExtension</AssemblyName>
@@ -27,8 +28,9 @@
     <BootstrapperEnabled>true</BootstrapperEnabled>
     <GenerateResourceNeverLockTypeAssemblies>true</GenerateResourceNeverLockTypeAssemblies>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <NuGetPackageImportStamp>
+    </NuGetPackageImportStamp>
   </PropertyGroup>
-  <Import Project="$(MSBuildThisFileDirectory)..\PanelSwWixExtension.props" />
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
@@ -50,10 +52,6 @@
     <Compile Include="AssemblyInfo.cs" />
     <Compile Include="PanelSwWixCompiler.cs" />
     <Compile Include="PanelSwWixExtension.cs" />
-    <Compile Include="$(IntermediateOutputPath)\BuildVersion.cs">
-      <AutoGen>true</AutoGen>
-      <Link>BuildVersion.cs</Link>
-    </Compile>
     <EmbeddedResource Include="Data\tables.xml">
       <LogicalName>$(RootNamespace).Data.tables.xml</LogicalName>
       <SubType>Designer</SubType>
@@ -75,6 +73,7 @@
     </XsdGenSource>
   </ItemGroup>
   <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Xsd\PanelSwWixExtension.xsx">
       <DependentUpon>PanelSwWixExtension.xsd</DependentUpon>
     </None>
@@ -106,7 +105,14 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Target Name="AfterBuild" Condition="'$(Configuration)'=='Release'">
-    <Exec Command="&quot;$(SolutionDir)..\tools\nuget.exe&quot; pack -OutputDirectory &quot;$(SolutionDir)nuget-out&quot;"
-          WorkingDirectory="$(SolutionDir)"/>
+    <Exec Command="&quot;$(SolutionDir)..\tools\nuget.exe&quot; pack -OutputDirectory &quot;$(SolutionDir)nuget-out&quot; -Version $(FullVersion)" WorkingDirectory="$(SolutionDir)" />
+  </Target>
+  <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets'))" />
+    <Error Condition="!Exists('..\packages\TidyBuild.1.0.8\build\TidyBuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.0.8\build\TidyBuild.props'))" />
   </Target>
 </Project>

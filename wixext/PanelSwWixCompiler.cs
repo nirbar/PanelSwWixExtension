@@ -164,6 +164,10 @@ namespace PanelSw.Wix.Extensions
                             ParseServiceConfigElement(parentElement, element);
                             break;
 
+                        case "BackupAndRestore":
+                            ParseBackupAndRestoreElement(parentElement, element);
+                            break;
+
                         default:
                             Core.UnexpectedElement(parentElement, element);
                             break;
@@ -185,6 +189,117 @@ namespace PanelSw.Wix.Extensions
                 default:
                     Core.UnexpectedElement(parentElement, element);
                     break;
+            }
+        }
+
+
+        private enum BackupAndRestore_deferred_Schedule
+        {
+            BackupAndRestore_deferred_Before_InstallFiles,
+            BackupAndRestore_deferred_After_DuplicateFiles,
+            BackupAndRestore_deferred_After_RemoveExistingProducts
+        }
+
+        private void ParseBackupAndRestoreElement(XmlElement parentElement, XmlElement element)
+        {
+            SourceLineNumberCollection parentsourceLineNumbers = Preprocessor.GetSourceLineNumbers(parentElement);
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
+            string id = null;
+            string filepath = null;
+            string component = null;
+            BackupAndRestore_deferred_Schedule restoreSchedule = BackupAndRestore_deferred_Schedule.BackupAndRestore_deferred_Before_InstallFiles;
+            DeletePathFlags flags = 0;
+
+            component = Core.GetAttributeValue(parentsourceLineNumbers, parentElement.Attributes["Id"]);
+            if (string.IsNullOrEmpty(component))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(parentsourceLineNumbers, parentElement.Name, "Id"));
+            }
+
+            foreach (XmlAttribute attrib in element.Attributes)
+            {
+                if ((0 != attrib.NamespaceURI.Length) && (attrib.NamespaceURI != schema.TargetNamespace))
+                {
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName.ToLower())
+                    {
+                        case "id":
+                            id = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "path":
+                            filepath = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "ignoremissing":
+                            if (Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            {
+                                flags |= DeletePathFlags.IgnoreMissing;
+                            }
+                            break;
+                        case "ignoreerrors":
+                            if (Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            {
+                                flags |= DeletePathFlags.IgnoreErrors;
+                            }
+                            break;
+                        case "restorescheduling":
+                            {
+                                string val = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                                switch (val)
+                                {
+                                    case "beforeInstallFiles":
+                                        restoreSchedule = BackupAndRestore_deferred_Schedule.BackupAndRestore_deferred_Before_InstallFiles;
+                                        break;
+                                    case "afterDuplicateFiles":
+                                        restoreSchedule = BackupAndRestore_deferred_Schedule.BackupAndRestore_deferred_After_DuplicateFiles;
+                                        break;
+                                    case "afterRemoveExistingProducts":
+                                        restoreSchedule = BackupAndRestore_deferred_Schedule.BackupAndRestore_deferred_After_RemoveExistingProducts;
+                                        break;
+                                    default:
+                                    Core.OnMessage(WixErrors.ValueNotSupported(sourceLineNumbers, element.LocalName, attrib.LocalName, val));
+                                        break;
+                                }
+                            }
+                            break;
+
+
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+                else
+                {
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            if (string.IsNullOrEmpty(id))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.Name, "Id"));
+            }
+            if (string.IsNullOrEmpty(filepath))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "Path"));
+            }
+
+            // reference the Win32_CopyFiles custom actions since nothing will happen without these
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "BackupAndRestore");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "Property", restoreSchedule.ToString());
+
+            if (!Core.EncounteredError)
+            {
+                // create a row in the Win32_CopyFiles table
+                Core.EnsureTable(sourceLineNumbers, "PSW_BackupAndRestore");
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_BackupAndRestore");
+                row[0] = id;
+                row[1] = component;
+                row[2] = filepath;
+                row[3] = (int)flags;
             }
         }
 
@@ -1696,6 +1811,7 @@ namespace PanelSw.Wix.Extensions
             string prop = null;
             int flags = 0;
             string condition = null;
+            byte order = 0xFF;
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -1724,6 +1840,9 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "extended":
                             flags |= (int)RegexMatchFlags.Extended << 2;
+                            break;
+                        case "order":
+                            order = (byte)Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 0xFF);
                             break;
 
                         default:
@@ -1792,6 +1911,7 @@ namespace PanelSw.Wix.Extensions
                 row[4] = prop;
                 row[5] = flags;
                 row[6] = condition;
+                row[7] = (int)order;
             }
         }
 
@@ -1813,6 +1933,7 @@ namespace PanelSw.Wix.Extensions
             FileEncoding encoding = FileEncoding.AutoDetect;
             bool ignoreCase = false;
             string condition = null;
+            byte order = 0xFF;
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -1838,6 +1959,9 @@ namespace PanelSw.Wix.Extensions
                         case "encoding":
                             string enc = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             encoding = (FileEncoding)Enum.Parse(typeof(FileEncoding), enc);
+                            break;
+                        case "order":
+                            order = (byte)Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 0xFF);
                             break;
 
                         default:
@@ -1898,6 +2022,7 @@ namespace PanelSw.Wix.Extensions
                 row[4] = ignoreCase ? 1 : 0;
                 row[5] = (int)encoding;
                 row[6] = condition;
+                row[7] = (int)order;
             }
         }
 

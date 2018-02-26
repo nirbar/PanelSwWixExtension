@@ -136,7 +136,7 @@
   <Fragment>
     <CustomAction Id="TrimString" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="TrimString" Execute="immediate" Return="check" />
   </Fragment>
-  
+
   <!-- RegularExpression -->
   <Fragment>
     <CustomAction Id="RegularExpression" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="RegularExpression" Execute="firstSequence" Return="check" />
@@ -238,7 +238,7 @@
     </InstallExecuteSequence>
 
   </Fragment>
-  
+
 
   <!-- MsiSqlQuery -->
   <Fragment>
@@ -343,9 +343,9 @@
     <CustomAction Id="DismX64" SuppressModularization="yes" BinaryKey="DismX64.dll" DllEntry="Dism" Execute="deferred" Impersonate="no"/>
 
     <InstallExecuteSequence>
-      <Custom Action="DismSched" Before="StopServices" Overridable="yes"/>
-      <Custom Action="DismX86" After="DismSched" Overridable="yes"><![CDATA[(VersionNT > 601) And Not VersionNT64]]></Custom>
-      <Custom Action="DismX64" After="DismSched" Overridable="yes"><![CDATA[VersionNT64 > 601]]></Custom>
+      <Custom Action="DismSched" Before="StopServices" Overridable="yes"><![CDATA[(VersionNT > 601)]]></Custom>
+      <Custom Action="DismX86" After="DismSched" Overridable="yes"><![CDATA[DismX86 And (VersionNT > 601) And Not VersionNT64]]></Custom>
+      <Custom Action="DismX64" After="DismSched" Overridable="yes"><![CDATA[DismX64 And (VersionNT64 > 601)]]></Custom>
     </InstallExecuteSequence>
   </Fragment>
 
@@ -438,5 +438,48 @@
       <ProgressText Action="SqlSearch">!(loc.SqlSearch)</ProgressText>
     </UI>
   </Fragment>
+
+  <!-- BackupAndRestore -->
+  <Fragment>
+    <CustomAction Id="BackupAndRestore" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="BackupAndRestore" Execute="immediate" Return="check" />
+    <CustomAction Id="BackupAndRestore_rollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" />
+    <CustomAction Id="BackupAndRestore_deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" />
+    <CustomAction Id="BackupAndRestore_commit" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="commit" Return="ignore" Impersonate="no" />
+
+    <InstallExecuteSequence>
+      <Custom Action="BackupAndRestore" Before="RemoveExistingProducts" Overridable="yes"/>
+      <Custom Action="BackupAndRestore_rollback" Before="ProcessComponents" Overridable="yes"/>
+      <Custom Action="BackupAndRestore_commit" Before="InstallFinalize" Overridable="yes"/>
+    </InstallExecuteSequence>
+
+    <UI>
+      <ProgressText Action="BackupAndRestore">!(loc.BackupAndRestore)</ProgressText>
+      <ProgressText Action="BackupAndRestore_rollback">!(loc.BackupAndRestore)</ProgressText>
+      <ProgressText Action="BackupAndRestore_deferred">!(loc.BackupAndRestore)</ProgressText>
+      <ProgressText Action="BackupAndRestore_commit">!(loc.BackupAndRestore)</ProgressText>
+    </UI>
+  </Fragment>
+
+  <Fragment>
+    <Property Id="BackupAndRestore_deferred_After_DuplicateFiles" Hidden="yes"/>
+    <InstallExecuteSequence>
+      <Custom Action="BackupAndRestore_deferred" After="DuplicateFiles" Overridable="yes"/>
+    </InstallExecuteSequence>
+  </Fragment>
+
+  <Fragment>
+    <Property Id="BackupAndRestore_deferred_Before_InstallFiles" Hidden="yes"/>
+    <InstallExecuteSequence>
+      <Custom Action="BackupAndRestore_deferred" Before="InstallFiles" Overridable="yes"/>
+    </InstallExecuteSequence>
+  </Fragment>
+
+  <Fragment>
+    <Property Id="BackupAndRestore_deferred_After_RemoveExistingProducts" Hidden="yes"/>
+    <InstallExecuteSequence>
+      <Custom Action="BackupAndRestore_deferred" After="RemoveExistingProducts" Overridable="yes"/>
+    </InstallExecuteSequence>
+  </Fragment>
   
+
 </Wix>

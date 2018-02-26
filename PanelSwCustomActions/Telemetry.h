@@ -10,7 +10,7 @@ public:
 
 protected:
 	// Execute the command object (XML element)
-	virtual HRESULT DeferredExecute(IXMLDOMElement* pElem);
+	HRESULT DeferredExecute(const ::std::string& command) override;
 
 private:
 	HRESULT Post(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure);

@@ -3,7 +3,7 @@
 #include <regex>
 
 using namespace std;
-#define RegularExpressionQuery L"SELECT `Id`, `Input`, `Expression`, `Replacement`, `DstProperty_`, `Flags`, `Condition` FROM `PSW_RegularExpression`"
+#define RegularExpressionQuery L"SELECT `Id`, `Input`, `Expression`, `Replacement`, `DstProperty_`, `Flags`, `Condition` FROM `PSW_RegularExpression` ORDER BY `Order`"
 enum eRegularExpressionQuery { Id = 1, Input, Expression, Replacement, DstProperty, Flags, Condition };
 enum SearchFlags
 {
@@ -44,7 +44,7 @@ extern "C" __declspec(dllexport) UINT RegularExpression(MSIHANDLE hInstall)
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_XmlSearch exists.
 	hr = WcaTableExists(L"PSW_RegularExpression");
@@ -147,7 +147,7 @@ extern "C" __declspec(dllexport) UINT RegularExpression(MSIHANDLE hInstall)
 				BreakExitOnFailure(hr, "Failed formatting string");
 
 				hr = WcaSetProperty((LPCWSTR)sPropName, curIt->str().c_str());
-				BreakExitOnFailure1(hr, "Failed setting property '%ls'", (LPCWSTR)sPropName);
+				BreakExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)sPropName);
 			}
 		}
 		// Replace

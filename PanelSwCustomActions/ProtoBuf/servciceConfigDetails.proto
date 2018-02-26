@@ -1,0 +1,10 @@
+syntax = "proto3";
+package com.panelsw.ca;
+option optimize_for = LITE_RUNTIME;
+
+message ServciceConfigDetails{
+
+	bytes name = 1;
+	bytes account = 2;
+	bytes password = 3;
+}

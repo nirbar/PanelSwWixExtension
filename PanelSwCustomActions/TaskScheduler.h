@@ -2,6 +2,7 @@
 #include "../CaCommon/DeferredActionBase.h"
 #include "FileOperations.h"
 #include <taskschd.h>
+#include <atlbase.h>
 
 class CTaskScheduler :
 	public CDeferredActionBase
@@ -16,8 +17,8 @@ public:
 	HRESULT AddRollbackTask(LPCWSTR szTaskName, CTaskScheduler* pRollback, CFileOperations* pCommit);
 
 protected:
-	// Execute the command object (XML element)
-	virtual HRESULT DeferredExecute(IXMLDOMElement* pElem);
+	// Execute the command object
+	HRESULT DeferredExecute(const ::std::string& command) override;
 
 private:
 	HRESULT AddBackupTask(LPCWSTR szTaskName, LPCWSTR szBackupFile);

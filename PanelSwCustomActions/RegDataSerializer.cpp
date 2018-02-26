@@ -11,10 +11,10 @@
 #define WI_MULTISTRING_NULL_SIZE 3
 
 CRegDataSerializer::CRegDataSerializer()
-	:_bytes( NULL)
-	, _size( 0)
-	, _bufSize( 0)
-	, _dataType( 0)
+	:_bytes(nullptr)
+	, _size(0)
+	, _bufSize(0)
+	, _dataType(0)
 {
 }
 
@@ -25,11 +25,10 @@ CRegDataSerializer::~CRegDataSerializer()
 
 HRESULT CRegDataSerializer::Release()
 {
-	if (_bytes != NULL)
+	if (_bytes)
 	{
-		free(_bytes);
-
-		_bytes = NULL;
+		::free(_bytes);
+		_bytes = nullptr;
 	}
 
 	_size = 0;
@@ -52,11 +51,7 @@ HRESULT CRegDataSerializer::Allocate(DWORD size)
 
 	_bufSize = 0;
 	_bytes = (BYTE*)realloc(_bytes, size);
-	if (_bytes == NULL)
-	{
-		hr = E_INSUFFICIENT_BUFFER;
-		BreakExitOnFailure(hr, "Failed to allocate buffer");
-	}
+	BreakExitOnNull(_bytes, hr, E_INSUFFICIENT_BUFFER, "Failed to allocate buffer");
 
 	_size = size;
 	_bufSize = size;
@@ -91,8 +86,8 @@ HRESULT CRegDataSerializer::Set(LPCWSTR pDataString, LPCWSTR pDataTypeString)
 	DWORD dwTmpSize = 0;
 	LONG lValue = 0;
 	LONG64 l64Value = 0;
-	BYTE *pData = NULL;
-	LPCWSTR pTmp = NULL;
+	BYTE *pData = nullptr;
+	LPCWSTR pTmp = nullptr;
 	CRegistryKey::RegValueType eType;
 
 	hr = CRegistryKey::ParseValueType(pDataTypeString, &eType);
@@ -120,13 +115,13 @@ HRESULT CRegDataSerializer::Set(LPCWSTR pDataString, LPCWSTR pDataTypeString)
 		break;
 	
 	case CRegistryKey::DWord:
-		lValue = ::wcstol(pDataString, NULL, 0);
+		lValue = ::wcstol(pDataString, nullptr, 0);
 		pData = (BYTE*)&lValue;
 		dwSize = sizeof(lValue);
 		break;
 	
 	case CRegistryKey::QWord:
-		l64Value = ::_wcstoi64(pDataString, NULL, 0);
+		l64Value = ::_wcstoi64(pDataString, nullptr, 0);
 		pData = (BYTE*)&l64Value;
 		dwSize = sizeof(l64Value);
 		break;
@@ -155,7 +150,7 @@ HRESULT CRegDataSerializer::Serialize(LPWSTR* ppDst) const
 	errno_t err = ERROR_SUCCESS;
 	size_t stStrSize = 0;
 	int iStrSize = 0;
-	LPSTR pAnsiStr = NULL;
+	LPSTR pAnsiStr = nullptr;
 
 	stStrSize = 1 + Base64EncodeGetRequiredLength( _size, ATL_BASE64_FLAG_NOCRLF);
 	pAnsiStr = (LPSTR)MemAlloc( stStrSize, TRUE);
@@ -185,10 +180,10 @@ HRESULT CRegDataSerializer::DeSerialize(LPCWSTR pSrc, LPCWSTR sDataType)
 	errno_t err = ERROR_SUCCESS;
 	size_t iStrSize = 0;
 	int iMemSize = 0;
-	LPSTR pAnsiStr = NULL;
+	LPSTR pAnsiStr = nullptr;
 	CRegistryKey::RegValueType eType;
 
-	_dataType = ::wcstol(sDataType, NULL, 10);
+	_dataType = ::wcstol(sDataType, nullptr, 10);
 	hr = CRegistryKey::ParseValueType(sDataType, &eType);
 	BreakExitOnFailure(hr, "Failed to parse data type");
 	_dataType = eType;

@@ -17,29 +17,29 @@ extern "C" __declspec(dllexport) UINT Dism(MSIHANDLE hInstall)
 	UINT er = ERROR_SUCCESS;
 	HRESULT hr = S_OK;
 	DismSession hSession = DISM_SESSION_DEFAULT;
-	DismFeature *pFeatures = NULL;
-	DismString *pErrorString = NULL;
+	DismFeature *pFeatures = nullptr;
+	DismString *pErrorString = nullptr;
 	BOOL bDismInit = FALSE;
 	BOOL bRes = TRUE;
 	UINT uFeatureNum = 0;
 	list<wregex> enableFaetures;
-	LPWSTR szCAD = NULL;
-	LPCWSTR szDismLog = NULL;
-	LPCWSTR szTok = NULL;
-	LPWSTR szTokData = NULL;
+	LPWSTR szCAD = nullptr;
+	LPCWSTR szDismLog = nullptr;
+	LPCWSTR szTok = nullptr;
+	LPWSTR szTokData = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	hr = WcaGetProperty(L"CustomActionData", &szCAD);
 	ExitOnFailure(hr, "Failed getting CustomActionData");
 
 	// Parse CAD
-	for (szTok = ::wcstok_s(szCAD, L";", &szTokData); szTok != NULL; szTok = ::wcstok_s(NULL, L";", &szTokData))
+	for (szTok = ::wcstok_s(szCAD, L";", &szTokData); szTok; szTok = ::wcstok_s(nullptr, L";", &szTokData))
 	{
 		// Dism log?
-		if ((szDismLog == NULL) && (::wcsstr(szTok, DismLogPrefix) != NULL))
+		if (!szDismLog && ::wcsstr(szTok, DismLogPrefix))
 		{
 			szDismLog = szTok + ::wcslen(DismLogPrefix);
 			continue;
@@ -49,7 +49,7 @@ extern "C" __declspec(dllexport) UINT Dism(MSIHANDLE hInstall)
 		enableFaetures.push_back(wregex(szTok, std::regex_constants::syntax_option_type::optimize));
 	}
 
-	hr = ::DismInitialize(DismLogErrorsWarningsInfo, szDismLog, NULL);
+	hr = ::DismInitialize(DismLogErrorsWarningsInfo, szDismLog, nullptr);
 	if (FAILED(hr))
 	{
 		DismGetLastErrorMessage(&pErrorString);
@@ -57,7 +57,7 @@ extern "C" __declspec(dllexport) UINT Dism(MSIHANDLE hInstall)
 	}
 	bDismInit = TRUE;
 
-	hr = ::DismOpenSession(DISM_ONLINE_IMAGE, NULL, NULL, &hSession);
+	hr = ::DismOpenSession(DISM_ONLINE_IMAGE, nullptr, nullptr, &hSession);
 	if (FAILED(hr))
 	{
 		DismGetLastErrorMessage(&pErrorString);
@@ -65,7 +65,7 @@ extern "C" __declspec(dllexport) UINT Dism(MSIHANDLE hInstall)
 	}
 
 	// Enumerate features
-	hr = ::DismGetFeatures(hSession, NULL, DismPackageNone, &pFeatures, &uFeatureNum);
+	hr = ::DismGetFeatures(hSession, nullptr, DismPackageNone, &pFeatures, &uFeatureNum);
 	if (FAILED(hr))
 	{
 		DismGetLastErrorMessage(&pErrorString);
@@ -95,7 +95,7 @@ extern "C" __declspec(dllexport) UINT Dism(MSIHANDLE hInstall)
 				}
 
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Enabling feature '%ls'", pFeatures[i].FeatureName);
-				hr = ::DismEnableFeature(hSession, pFeatures[i].FeatureName, NULL, DismPackageNone, FALSE, NULL, 0, TRUE, NULL, NULL, NULL);
+				hr = ::DismEnableFeature(hSession, pFeatures[i].FeatureName, nullptr, DismPackageNone, FALSE, nullptr, 0, TRUE, nullptr, nullptr, nullptr);
 				if (HRESULT_CODE(hr) == ERROR_SUCCESS_REBOOT_REQUIRED)
 				{
 					hr = S_OK;
@@ -129,11 +129,11 @@ extern "C" __declspec(dllexport) UINT Dism(MSIHANDLE hInstall)
 LExit:
 
 	ReleaseStr(szCAD);
-	if (pFeatures != NULL)
+	if (pFeatures)
 	{
 		::DismDelete(pFeatures);
 	}
-	if (pErrorString != NULL) 
+	if (pErrorString) 
 	{
 		::DismDelete(pErrorString);
 	}

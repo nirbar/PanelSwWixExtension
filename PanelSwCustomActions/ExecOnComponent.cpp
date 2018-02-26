@@ -3,6 +3,10 @@
 #include "../CaCommon/WixString.h"
 #include <wcautil.h>
 #include <procutil.h>
+#include "execOnDetails.pb.h"
+#include "google\protobuf\any.h"
+using namespace com::panelsw::ca;
+using namespace google::protobuf;
 
 #define ExecOnComponent_QUERY L"SELECT `Id`, `Component_`, `Command`, `Flags` FROM `PSW_ExecOnComponent` ORDER BY `Order`"
 enum ExecOnComponentQuery { Id = 1, Component = 2, Command = 3, Flags = 4 };
@@ -49,7 +53,7 @@ extern "C" __declspec(dllexport) UINT ExecOnComponent(MSIHANDLE hInstall)
 	UINT er = ERROR_SUCCESS;
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
-	CComBSTR szCustomActionData;
+	LPWSTR szCustomActionData = nullptr;
 	CExecOnComponent oDeferredBeforeStop, oDeferredAfterStop, oDeferredBeforeStart, oDeferredAfterStart;
 	CExecOnComponent oRollbackBeforeStop, oRollbackAfterStop, oRollbackBeforeStart, oRollbackAfterStart;
 	CExecOnComponent oDeferredBeforeStopImp, oDeferredAfterStopImp, oDeferredBeforeStartImp, oDeferredAfterStartImp;
@@ -57,7 +61,7 @@ extern "C" __declspec(dllexport) UINT ExecOnComponent(MSIHANDLE hInstall)
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure tables exist.
 	hr = WcaTableExists(L"PSW_ExecOnComponent");
@@ -67,7 +71,7 @@ extern "C" __declspec(dllexport) UINT ExecOnComponent(MSIHANDLE hInstall)
 
 	// Execute view
 	hr = WcaOpenExecuteView(ExecOnComponent_QUERY, &hView);
-	BreakExitOnFailure1(hr, "Failed to execute SQL query '%ls'.", ExecOnComponent_QUERY);
+	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", ExecOnComponent_QUERY);
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
@@ -97,7 +101,7 @@ extern "C" __declspec(dllexport) UINT ExecOnComponent(MSIHANDLE hInstall)
         BreakExitOnFailure(hr, "Failed to format string");
 
         hr = WcaOpenExecuteView((LPCWSTR)szExitCodeQuery, &hExitCodeView);
-        BreakExitOnFailure1(hr, "Failed to execute SQL query '%ls'.", (LPCWSTR)szExitCodeQuery);
+        BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", (LPCWSTR)szExitCodeQuery);
 
         // Iterate records
         while ((hr = WcaFetchRecord(hExitCodeView, &hExitCodeRecord)) != E_NOMOREITEMS)
@@ -121,12 +125,12 @@ extern "C" __declspec(dllexport) UINT ExecOnComponent(MSIHANDLE hInstall)
 			if (nFlags & Flags::OnInstall)
 			{
 				hr = ScheduleExecution(szId, szCommand, &exitCodeMap, nFlags, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, &oDeferredBeforeStopImp, &oDeferredAfterStopImp, &oDeferredBeforeStartImp, &oDeferredAfterStartImp);
-				BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
+				BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			if (nFlags & Flags::OnInstallRollback)
 			{
 				hr = ScheduleExecution(szId, szCommand, &exitCodeMap, nFlags, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, &oRollbackBeforeStopImp, &oRollbackAfterStopImp, &oRollbackBeforeStartImp, &oRollbackAfterStartImp);
-				BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
+				BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			break;
 
@@ -134,12 +138,12 @@ extern "C" __declspec(dllexport) UINT ExecOnComponent(MSIHANDLE hInstall)
 			if (nFlags & Flags::OnReinstall)
 			{
 				hr = ScheduleExecution(szId, szCommand, &exitCodeMap, nFlags, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, &oDeferredBeforeStopImp, &oDeferredAfterStopImp, &oDeferredBeforeStartImp, &oDeferredAfterStartImp);
-				BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
+				BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			if (nFlags & Flags::OnReinstallRollback)
 			{
 				hr = ScheduleExecution(szId, szCommand, &exitCodeMap, nFlags, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, &oRollbackBeforeStopImp, &oRollbackAfterStopImp, &oRollbackBeforeStartImp, &oRollbackAfterStartImp);
-				BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
+				BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			break;
 
@@ -147,12 +151,12 @@ extern "C" __declspec(dllexport) UINT ExecOnComponent(MSIHANDLE hInstall)
 			if (nFlags & Flags::OnRemove)
 			{
 				hr = ScheduleExecution(szId, szCommand, &exitCodeMap, nFlags, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, &oDeferredBeforeStopImp, &oDeferredAfterStopImp, &oDeferredBeforeStartImp, &oDeferredAfterStartImp);
-				BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
+				BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			if (nFlags & Flags::OnRemoveRollback)
 			{
 				hr = ScheduleExecution(szId, szCommand, &exitCodeMap, nFlags, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, &oRollbackBeforeStopImp, &oRollbackAfterStopImp, &oRollbackBeforeStartImp, &oRollbackAfterStartImp);
-				BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
+				BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			break;
 
@@ -168,100 +172,102 @@ extern "C" __declspec(dllexport) UINT ExecOnComponent(MSIHANDLE hInstall)
 	hr = WcaSetProperty(L"ExecOnComponent_BeforeStop_rollback", szCustomActionData);
 	BreakExitOnFailure(hr, "Failed setting rollback action data.");
 
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = oRollbackAfterStop.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for rollback.");
 	hr = WcaSetProperty(L"ExecOnComponent_AfterStop_rollback", szCustomActionData);
 	BreakExitOnFailure(hr, "Failed setting rollback action data.");
 
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = oRollbackBeforeStart.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for rollback.");
 	hr = WcaSetProperty(L"ExecOnComponent_BeforeStart_rollback", szCustomActionData);
 	BreakExitOnFailure(hr, "Failed setting rollback action data.");
 
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = oRollbackAfterStart.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for rollback.");
 	hr = WcaSetProperty(L"ExecOnComponent_AfterStart_rollback", szCustomActionData);
 	BreakExitOnFailure(hr, "Failed setting rollback action data.");
 
 	// Deferred actions
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = oDeferredBeforeStop.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for deferred.");
 	hr = WcaSetProperty(L"ExecOnComponent_BeforeStop_deferred", szCustomActionData);
 	BreakExitOnFailure(hr, "Failed setting deferred action data.");
 
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = oDeferredAfterStop.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for deferred.");
 	hr = WcaSetProperty(L"ExecOnComponent_AfterStop_deferred", szCustomActionData);
 	BreakExitOnFailure(hr, "Failed setting deferred action data.");
 
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = oDeferredBeforeStart.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for deferred.");
 	hr = WcaSetProperty(L"ExecOnComponent_BeforeStart_deferred", szCustomActionData);
 	BreakExitOnFailure(hr, "Failed setting deferred action data.");
 
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = oDeferredAfterStart.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for deferred.");
 	hr = WcaSetProperty(L"ExecOnComponent_AfterStart_deferred", szCustomActionData);
 	BreakExitOnFailure(hr, "Failed setting deferred action data.");
 
 	// Rollback actions, impersonated
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = oRollbackBeforeStopImp.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for rollback.");
 	hr = WcaSetProperty(L"ExecOnComponent_Imp_BeforeStop_rollback", szCustomActionData);
 	BreakExitOnFailure(hr, "Failed setting rollback action data.");
 
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = oRollbackAfterStopImp.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for rollback.");
 	hr = WcaSetProperty(L"ExecOnComponent_Imp_AfterStop_rollback", szCustomActionData);
 	BreakExitOnFailure(hr, "Failed setting rollback action data.");
 
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = oRollbackBeforeStartImp.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for rollback.");
 	hr = WcaSetProperty(L"ExecOnComponent_Imp_BeforeStart_rollback", szCustomActionData);
 	BreakExitOnFailure(hr, "Failed setting rollback action data.");
 
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = oRollbackAfterStartImp.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for rollback.");
 	hr = WcaSetProperty(L"ExecOnComponent_Imp_AfterStart_rollback", szCustomActionData);
 	BreakExitOnFailure(hr, "Failed setting rollback action data.");
 
 	// Deferred actions, impersonated
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = oDeferredBeforeStopImp.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for deferred.");
 	hr = WcaSetProperty(L"ExecOnComponent_Imp_BeforeStop_deferred", szCustomActionData);
 	BreakExitOnFailure(hr, "Failed setting deferred action data.");
 
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = oDeferredAfterStopImp.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for deferred.");
 	hr = WcaSetProperty(L"ExecOnComponent_Imp_AfterStop_deferred", szCustomActionData);
 	BreakExitOnFailure(hr, "Failed setting deferred action data.");
 
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = oDeferredBeforeStartImp.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for deferred.");
 	hr = WcaSetProperty(L"ExecOnComponent_Imp_BeforeStart_deferred", szCustomActionData);
 	BreakExitOnFailure(hr, "Failed setting deferred action data.");
 
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = oDeferredAfterStartImp.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for deferred.");
 	hr = WcaSetProperty(L"ExecOnComponent_Imp_AfterStart_deferred", szCustomActionData);
 	BreakExitOnFailure(hr, "Failed setting deferred action data."); 
 
 LExit:
+	ReleaseStr(szCustomActionData);
+
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
 }
@@ -281,7 +287,7 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, CExecOnComponent::Exi
 		{
 			hr = pBeforeStop->AddExec(szCommand, pExitCodeMap, nFlags);
 		}
-		BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
+		BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
 	if (nFlags & Flags::AfterStopServices)
 	{
@@ -294,7 +300,7 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, CExecOnComponent::Exi
 		{
 			hr = pAfterStop->AddExec(szCommand, pExitCodeMap, nFlags);
 		}
-		BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
+		BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
 	if (nFlags & Flags::BeforeStartServices)
 	{
@@ -307,7 +313,7 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, CExecOnComponent::Exi
 		{
 			hr = pBeforeStart->AddExec(szCommand, pExitCodeMap, nFlags);
 		}
-		BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
+		BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
 	if (nFlags & Flags::AfterStartServices)
 	{
@@ -320,7 +326,7 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, CExecOnComponent::Exi
 		{
 			hr = pAfterStart->AddExec(szCommand, pExitCodeMap, nFlags);
 		}
-		BreakExitOnFailure1(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
+		BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
 
 LExit:
@@ -330,56 +336,40 @@ LExit:
 HRESULT CExecOnComponent::AddExec(LPCWSTR szCommand, ExitCodeMap* pExitCodeMap, int nFlags)
 {
     HRESULT hr = S_OK;
-    CComPtr<IXMLDOMElement> pElem;
-    CComPtr<IXMLDOMDocument> pDoc;
-    ExitCodeMapItr itCurr, itEnd;
+	::com::panelsw::ca::Command *pCmd = nullptr;
+	ExecOnDetails *pDetails = nullptr;
+	::std::string *pAny = nullptr;
+	bool bRes = true;
 
-    hr = AddElement(L"ExecOnComponent", L"CExecOnComponent", 1, &pElem);
+    hr = AddCommand("CExecOnComponent", &pCmd);
     BreakExitOnFailure(hr, "Failed to add XML element");
 
-    hr = pElem->setAttribute(CComBSTR("Command"), CComVariant(szCommand));
-    BreakExitOnFailure(hr, "Failed to add XML attribute 'Command'");
+	pDetails = new ExecOnDetails();
+	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-    hr = pElem->setAttribute(CComBSTR("Flags"), CComVariant(nFlags));
-    BreakExitOnFailure(hr, "Failed to add XML attribute 'Flags'");
+	pDetails->set_command(szCommand, WSTR_BYTE_SIZE(szCommand));
+	pDetails->set_async(nFlags & Flags::ASync);
+	pDetails->set_ignoreerrors(nFlags & Flags::IgnoreExitCode);
+	pDetails->mutable_exitcoderemap()->insert(pExitCodeMap->begin(), pExitCodeMap->end());
 
-    hr = pElem->get_ownerDocument(&pDoc);
-    BreakExitOnFailure(hr, "Failed to get XML document");
+	pAny = pCmd->mutable_details();
+	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
-    itEnd = pExitCodeMap->end();
-    for (itCurr = pExitCodeMap->begin(); itCurr != itEnd; ++itCurr)
-    {
-        CComPtr<IXMLDOMElement> child;
-        CComPtr<IXMLDOMNode> tmpNode;
-
-        hr = pDoc->createElement(L"ExitCode", &child);
-        BreakExitOnFailure(hr, "Failed to create XML element 'ExitCode'");
-
-        hr = child->setAttribute(L"From", CComVariant(itCurr->first));
-        BreakExitOnFailure(hr, "Failed to set 'From' attribute");
-
-        hr = child->setAttribute(L"To", CComVariant(itCurr->second));
-        BreakExitOnFailure(hr, "Failed to set 'To' attribute");
-
-        hr = pElem->appendChild(child, &tmpNode);
-        BreakExitOnFailure(hr, "Failed to append XML element");
-    }
+	bRes = pDetails->SerializeToString(pAny);
+	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
     return hr;
 }
 
 // Execute the command object (XML element)
-HRESULT CExecOnComponent::DeferredExecute(IXMLDOMElement* pElem)
+HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command)
 {
 	HRESULT hr = S_OK;
-	CComVariant vCommand;
-    CComVariant vFlags;
-    CComPtr<IXMLDOMNodeList> childNodes;
-    LONG childCount = 0;
-    ExitCodeMap exitCodeMap;
-	int nFlags;
     DWORD exitCode = 0;
+	BOOL bRes = TRUE;
+	ExecOnDetails details;
+	LPCWSTR szCommand = nullptr;
 
     hr = RefreshEnvironment();
     if (FAILED(hr))
@@ -388,78 +378,23 @@ HRESULT CExecOnComponent::DeferredExecute(IXMLDOMElement* pElem)
         hr = S_OK;
     }
 
-	hr = pElem->getAttribute(L"Command", &vCommand);
-	BreakExitOnFailure(hr, "Failed to get XML attribute 'Command'");
+	bRes = details.ParseFromString(command);
+	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ExecOnDetails");
 
-	hr = pElem->getAttribute(L"Flags", &vFlags);
-	BreakExitOnFailure(hr, "Failed to get XML attribute 'Flags'");
-	nFlags = ::_wtoi(vFlags.bstrVal);
+	szCommand = (LPCWSTR)details.command().c_str();
 
-    hr = pElem->get_childNodes(&childNodes);
-    BreakExitOnFailure(hr, "Failed to get XML child nodes");
-
-    hr = childNodes->get_length(&childCount);
-    BreakExitOnFailure(hr, "Failed to get child node count");
-
-    for (LONG i = 0; i < childCount; ++i)
-    {
-        CComPtr<IXMLDOMNode> node;
-        CComPtr<IXMLDOMElement> child;
-        DOMNodeType nodeType;
-        CComVariant vFrom;
-        CComVariant vTo;
-        CComBSTR chileName;
-        DWORD from;
-        DWORD to;
-
-        hr = childNodes->get_item(i, &node);
-        BreakExitOnFailure(hr, "Failed to get node");
-        BreakExitOnNull(node, hr, E_FAIL, "Failed to get node");
-
-        hr = node->get_nodeType(&nodeType);
-        BreakExitOnFailure(hr, "Failed to get node type");
-        if (nodeType != DOMNodeType::NODE_ELEMENT)
-        {
-            hr = E_FAIL;
-            BreakExitOnFailure(hr, "Expected an element");
-        }
-
-        hr = node->QueryInterface(IID_IXMLDOMElement, (void**)&child);
-        BreakExitOnFailure(hr, "Failed quering as IID_IXMLDOMElement");
-        BreakExitOnNull(child, hr, E_FAIL, "Failed to get IID_IXMLDOMElement");
-
-        hr = child->get_nodeName(&chileName);
-        BreakExitOnFailure(hr, "Failed getting child name");
-
-        if (0 != ::wcscmp(L"ExitCode", (LPWSTR)chileName))
-        {
-            hr = E_INVALIDARG;
-            BreakExitOnFailure1(hr, "Unexpected child element '%ls'", (LPWSTR)chileName);
-        }
-
-        hr = child->getAttribute(L"From", &vFrom);
-        BreakExitOnFailure(hr, "Failed to get XML attribute 'From'");
-        from = ::_wtoi(vFrom.bstrVal);
-
-        hr = child->getAttribute(L"To", &vTo);
-        BreakExitOnFailure(hr, "Failed to get XML attribute 'To'");
-        to = ::_wtoi(vTo.bstrVal);
-
-        exitCodeMap[from] = to;
-    }
-
-	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing '%ls'", vCommand.bstrVal);
-    if ((nFlags & Flags::ASync) == Flags::ASync)
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing '%ls'", szCommand);
+    if (details.async())
     {
         HANDLE hProc = NULL;
 
         WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Not logging output on async command");
 
-        hr = ProcExecute(vCommand.bstrVal, &hProc, NULL, NULL);
-        BreakExitOnFailure1(hr, "Failed to launch command '%ls'", vCommand.bstrVal);
+        hr = ProcExecute(const_cast<LPWSTR>(szCommand), &hProc, nullptr, nullptr);
+        BreakExitOnFailure(hr, "Failed to launch command '%ls'", szCommand);
         hr = S_OK;
 
-        if ((hProc != NULL) && (hProc != INVALID_HANDLE_VALUE))
+        if (hProc && (hProc != INVALID_HANDLE_VALUE))
         {
             ::CloseHandle(hProc);
         }
@@ -467,14 +402,15 @@ HRESULT CExecOnComponent::DeferredExecute(IXMLDOMElement* pElem)
     }
     else
     {
-        hr = QuietExec(vCommand.bstrVal, INFINITE);
+        hr = QuietExec(const_cast<LPWSTR>(szCommand), INFINITE);
     }
 
     // Parse exit code.
     exitCode = HRESULT_CODE(hr);
-    if (exitCodeMap.find(exitCode) != exitCodeMap.end())
+	
+    if (details.exitcoderemap().find(exitCode) != details.exitcoderemap().end())
     {
-        exitCode = exitCodeMap[exitCode];
+        exitCode = details.exitcoderemap().at(exitCode);
     }
     switch (exitCode)
     {
@@ -494,12 +430,12 @@ HRESULT CExecOnComponent::DeferredExecute(IXMLDOMElement* pElem)
         break;
     }
 
-	if (FAILED(hr) && (nFlags & Flags::IgnoreExitCode))
+	if (FAILED(hr) && details.ignoreerrors())
 	{
-		WcaLogError(hr, "Ignoring command '%ls' exit code", vCommand.bstrVal);
+		WcaLogError(hr, "Ignoring command '%ls' exit code", szCommand);
 		ExitFunction1(hr = S_FALSE);
 	}
-	BreakExitOnFailure1(hr, "Failed to execute command '%ls'", vCommand.bstrVal);
+	BreakExitOnFailure(hr, "Failed to execute command '%ls'", szCommand);
 
 LExit:
 	return hr;
@@ -523,7 +459,7 @@ static HRESULT RefreshEnvironment()
             CWixString szValueData;
 
             hr = envKey.GetStringValue(szValueName, (LPWSTR*)szValueData);
-            BreakExitOnFailure1(hr, "Failed to get environment variable '%ls' from registry key", (LPCWSTR)szValueName);
+            BreakExitOnFailure(hr, "Failed to get environment variable '%ls' from registry key", (LPCWSTR)szValueName);
 
             WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Setting process environment variable '%ls'='%ls'", (LPCWSTR)szValueName, (LPCWSTR)szValueData);
 

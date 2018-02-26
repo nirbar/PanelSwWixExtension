@@ -1,0 +1,13 @@
+syntax = "proto3";
+package com.panelsw.ca;
+option optimize_for = LITE_RUNTIME;
+
+message ShellExecDetails{
+
+	bytes target = 1;
+	bytes args = 2;
+	bytes verb = 3;
+	bytes workDir = 4;
+	int32 show = 5;
+	bool wait = 6;
+}

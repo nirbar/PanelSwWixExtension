@@ -13,11 +13,11 @@ extern "C" __declspec(dllexport) UINT AccountNames(MSIHANDLE hInstall)
 	map< LPCWSTR, LPCWSTR> mapSid2Property;
 	map< LPCWSTR, LPCWSTR>::iterator itCur;
 	map< LPCWSTR, LPCWSTR>::iterator itEnd;
-	PSID pSid = NULL;
+	PSID pSid = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	mapSid2Property[SDDL_BUILTIN_ADMINISTRATORS] = L"BUILTIN_ADMINISTRATORS";
 	mapSid2Property[SDDL_BUILTIN_GUESTS] = L"BUILTIN_GUESTS";
@@ -86,7 +86,7 @@ extern "C" __declspec(dllexport) UINT AccountNames(MSIHANDLE hInstall)
 			goto LForContinue;
 		}
 
-		bRes = ::LookupAccountSid(NULL, pSid, (LPWSTR)accountName, &dwNameLen, (LPWSTR)domainName, &dwDomainLen, &eUse);
+		bRes = ::LookupAccountSid(nullptr, pSid, (LPWSTR)accountName, &dwNameLen, (LPWSTR)domainName, &dwDomainLen, &eUse);
 		if (!bRes && (::GetLastError() != ERROR_INSUFFICIENT_BUFFER))
 		{
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed getting SID for '%ls': Error %u", itCur->first, ::GetLastError());
@@ -99,7 +99,7 @@ extern "C" __declspec(dllexport) UINT AccountNames(MSIHANDLE hInstall)
 		hr = domainName.Allocate(dwDomainLen);
 		BreakExitOnFailure(hr, "Failed allocating memory");
 
-		bRes = ::LookupAccountSid(NULL, pSid, (LPWSTR)accountName, &dwNameLen, (LPWSTR)domainName, &dwDomainLen, &eUse);
+		bRes = ::LookupAccountSid(nullptr, pSid, (LPWSTR)accountName, &dwNameLen, (LPWSTR)domainName, &dwDomainLen, &eUse);
 		BreakExitOnNullWithLastError(bRes, hr, "Failed looking up SID");
 
 		if (domainName.StrLen() > 0)
@@ -118,19 +118,18 @@ extern "C" __declspec(dllexport) UINT AccountNames(MSIHANDLE hInstall)
 
 LForContinue:
 
-		if (pSid != NULL)
+		if (pSid)
 		{
 			::LocalFree(pSid);
-			pSid = NULL;
+			pSid = nullptr;
 		}
 	}
 
 LExit:
 
-	if (pSid != NULL)
+	if (pSid)
 	{
 		::LocalFree(pSid);
-		pSid = NULL;
 	}
 
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;

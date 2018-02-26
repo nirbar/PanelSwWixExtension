@@ -12,3 +12,4 @@ bin/
 .vs/
 *.ipch
 /packages/
+/build/

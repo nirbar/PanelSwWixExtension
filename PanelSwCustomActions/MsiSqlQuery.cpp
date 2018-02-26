@@ -13,7 +13,7 @@ extern "C" __declspec(dllexport) UINT MsiSqlQuery(MSIHANDLE hInstall)
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_XmlSearch exists.
 	hr = WcaTableExists(L"PSW_MsiSqlQuery");
@@ -64,7 +64,7 @@ extern "C" __declspec(dllexport) UINT MsiSqlQuery(MSIHANDLE hInstall)
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing MSI query: %ls", (LPCWSTR)sQuery);
 
 		hr = WcaOpenExecuteView((LPCWSTR)sQuery, &hQueryView);
-		BreakExitOnFailure1(hr, "Failed executing MSI SQL query %ls", (LPCWSTR)sId);
+		BreakExitOnFailure(hr, "Failed executing MSI SQL query %ls", (LPCWSTR)sId);
 	}
 
 	hr = ERROR_SUCCESS;

@@ -18,7 +18,7 @@ extern "C" __declspec( dllexport ) UINT CustomUninstallKey_Immediate(MSIHANDLE h
 
 	hr = WcaInitialize(hInstall, "CustomUninstallKey_Immediate");
 	BreakExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 	
 	// Ensure table PSW_CustomUninstallKey exists.
 	hr = WcaTableExists(L"PSW_CustomUninstallKey");
@@ -41,7 +41,7 @@ extern "C" __declspec( dllexport ) UINT CustomUninstallKey_deferred(MSIHANDLE hI
 
 	hr = WcaInitialize(hInstall, "CustomUninstallKey_deferred");
 	BreakExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	hr = data.Execute();
 	BreakExitOnFailure(hr, "Failed");
@@ -63,7 +63,7 @@ CCustomUninstallKey::~CCustomUninstallKey(void)
 HRESULT CCustomUninstallKey::Execute()
 {
 	CRegistryXmlParser parser;
-	WCHAR* customActionData = NULL;
+	LPWSTR customActionData = nullptr;
 	HRESULT hr = S_OK;
 
 	hr = WcaGetProperty( L"CustomActionData", &customActionData);
@@ -103,11 +103,11 @@ HRESULT CCustomUninstallKey::CreateCustomActionData()
 		BreakExitOnFailure(hr, "Failed to fetch record");
 		
 		// Get record.
-		WCHAR* pId = NULL;
-		WCHAR* pName = NULL;
-		WCHAR* pData = NULL;
-		WCHAR* pDataType = NULL;
-		WCHAR* pCondition = NULL;
+		LPWSTR pId = nullptr;
+		LPWSTR pName = nullptr;
+		LPWSTR pData = nullptr;
+		LPWSTR pDataType = nullptr;
+		LPWSTR pCondition = nullptr;
 		int nAttrib;
 		
 		hr = WcaGetRecordString( hRec, eCustomUninstallKeyQuery::Id, &pId);
@@ -149,7 +149,7 @@ HRESULT CCustomUninstallKey::CreateCustomActionData()
 		else
 		{
 			CRegDataSerializer dataSer;
-			WCHAR* pDataStr = NULL;
+			LPWSTR pDataStr = nullptr;
 
 			hr = dataSer.Set(pData, pDataType);
 			BreakExitOnFailure(hr, "Failed to create parse registry data");
@@ -174,7 +174,7 @@ HRESULT CCustomUninstallKey::CreateCustomActionData()
 	BreakExitOnFailure(hr, "Failed to read XML as text");
 	hr = WcaDoDeferredAction( CustomUninstallKey_ExecCA, xmlString, 0);
 	BreakExitOnFailure(hr, "Failed to set property");
-	xmlString = std::nullptr_t(NULL);
+	xmlString.Empty();
 
 LExit:
 
@@ -186,8 +186,8 @@ HRESULT CCustomUninstallKey::CreateRollbackCustomActionData( CRegistryXmlParser 
 	HRESULT hr = S_OK;
 	CRegistryKey key;
 	CRegistryKey::RegValueType valType;
-	BYTE* pDataBytes = NULL;
-	WCHAR* pDataStr = NULL;
+	BYTE* pDataBytes = nullptr;
+	LPWSTR pDataStr = nullptr;
 	DWORD dwSize = 0;
 	WCHAR keyName[ MAX_PATH];
 	CRegDataSerializer dataSer;
@@ -223,7 +223,7 @@ HRESULT CCustomUninstallKey::CreateRollbackCustomActionData( CRegistryXmlParser 
 	BreakExitOnFailure( hr, "Failed to create rollback XML element");
 
 LExit:
-	if (pDataBytes != NULL)
+	if (pDataBytes)
 	{
 		delete[] pDataBytes;
 	}
@@ -233,7 +233,7 @@ LExit:
 
 HRESULT CCustomUninstallKey::GetUninstallKey( WCHAR* keyName)
 {
-	WCHAR *prodCode = NULL;
+	LPWSTR prodCode = nullptr;
 	HRESULT hr = S_OK;
 
 	hr = WcaGetProperty( L"ProductCode", &prodCode);

@@ -12,13 +12,13 @@ extern "C" __declspec(dllexport) UINT SplitString(MSIHANDLE hInstall)
 	CWixString szPropName;
 	CWixString szDstPropName;
 	CWixString szToken;
-	LPCWSTR szCurrValue = NULL;
+	LPCWSTR szCurrValue = nullptr;
 	size_t i = 0;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
 
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Get property-to-split name
 	hr = WcaGetProperty(SplitProp, (LPWSTR*)szPropName);
@@ -54,7 +54,7 @@ extern "C" __declspec(dllexport) UINT SplitString(MSIHANDLE hInstall)
 	BreakExitOnFailure(hr, "Failed allocating memory");
 
 	for (hr = szFullString.Tokenize((LPCWSTR)szToken, &szCurrValue);
-		(SUCCEEDED(hr) && (szCurrValue != NULL));
+		(SUCCEEDED(hr) && szCurrValue);
 		++i, hr = szFullString.NextToken((LPCWSTR)szToken, &szCurrValue))
 	{
 		hr = szDstPropName.Format(L"%s_%Iu", (LPCWSTR)szPropName, i);
@@ -87,13 +87,13 @@ extern "C" __declspec(dllexport) UINT TrimString(MSIHANDLE hInstall)
 	BOOL bRes = TRUE;
 	CWixString szPropName;
 	CWixString szFullString;
-	LPCWSTR pFirst = NULL;
+	LPCWSTR pFirst = nullptr;
 	size_t i = 0;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
 
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Get property-to-trim name
 	hr = WcaGetProperty(TrimProp, (LPWSTR*)szPropName);

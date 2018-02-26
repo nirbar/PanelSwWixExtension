@@ -1,6 +1,5 @@
 #pragma once
 #include "../CaCommon/DeferredActionBase.h"
-#include <taskschd.h>
 #include <map>
 
 class CServiceConfig :
@@ -12,6 +11,6 @@ public:
 
 protected:
 	// Execute the command object (XML element)
-	virtual HRESULT DeferredExecute(IXMLDOMElement* pElem);
+	HRESULT DeferredExecute(const ::std::string& command) override;
 };
 

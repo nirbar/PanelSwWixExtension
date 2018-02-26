@@ -1,6 +1,9 @@
 #include "ShellExecute.h"
 #include "../CaCommon/WixString.h"
 #include <Shellapi.h>
+#include "shellExecDetails.pb.h"
+using namespace ::com::panelsw::ca;
+using namespace google::protobuf;
 #pragma comment (lib, "Shell32.lib")
 
 
@@ -24,11 +27,11 @@ extern "C" __declspec(dllexport) UINT PSW_ShellExecute(MSIHANDLE hInstall)
 	CShellExecute oDeferredShellExecute;
 	CShellExecute oRollbackShellExecute;
 	CShellExecute oCommitShellExecute;
-	CComBSTR szCustomActionData;
+	LPWSTR szCustomActionData = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized.");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_ShellExecute exists.
 	hr = WcaTableExists(L"PSW_ShellExecute");
@@ -36,7 +39,7 @@ extern "C" __declspec(dllexport) UINT PSW_ShellExecute(MSIHANDLE hInstall)
 
 	// Execute view
 	hr = WcaOpenExecuteView(ShellExecute_QUERY, &hView);
-	BreakExitOnFailure1(hr, "Failed to execute SQL query '%ls'.", ShellExecute_QUERY);
+	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", ShellExecute_QUERY);
 	WcaLog(LOGMSG_STANDARD, "Executed query.");
 
 	// Iterate records
@@ -110,19 +113,21 @@ extern "C" __declspec(dllexport) UINT PSW_ShellExecute(MSIHANDLE hInstall)
 	hr = WcaDoDeferredAction(L"ShellExecute_rollback", szCustomActionData, oRollbackShellExecute.GetCost());
 	BreakExitOnFailure(hr, "Failed scheduling rollback action.");
 
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = oDeferredShellExecute.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
 	hr = WcaDoDeferredAction(L"ShellExecute_deferred", szCustomActionData, oDeferredShellExecute.GetCost());
 	BreakExitOnFailure(hr, "Failed scheduling deferred action.");
 
-	szCustomActionData.Empty();
+	ReleaseNullStr(szCustomActionData);
 	hr = oCommitShellExecute.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for commit action.");
 	hr = WcaDoDeferredAction(L"ShellExecute_commit", szCustomActionData, oCommitShellExecute.GetCost());
 	BreakExitOnFailure(hr, "Failed scheduling commit action.");
 
 LExit:
+	ReleaseStr(szCustomActionData);
+	
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
 }
@@ -130,78 +135,62 @@ LExit:
 HRESULT CShellExecute::AddShellExec(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR szVerb, LPCWSTR szWorkingDir, int nShow, bool bWait)
 {
 	HRESULT hr = S_OK;
-	CComPtr<IXMLDOMElement> pElem;
+	::com::panelsw::ca::Command *pCmd = nullptr;
+	ShellExecDetails *pDetails = nullptr;
+	::std::string *pAny = nullptr;
+	bool bRes = true;
 
-	hr = AddElement(L"ShellExecute", L"CShellExecute", 1, &pElem);
+	hr = AddCommand("CShellExecute", &pCmd);
 	BreakExitOnFailure(hr, "Failed to add XML element");
 
-	hr = pElem->setAttribute(CComBSTR("Target"), CComVariant(szTarget));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'Target'");
+	pDetails = new ShellExecDetails();
+	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	hr = pElem->setAttribute(CComBSTR("Args"), CComVariant(szArgs));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'Args'");
+	pDetails->set_target(szTarget, WSTR_BYTE_SIZE(szTarget));
+	pDetails->set_args(szArgs, WSTR_BYTE_SIZE(szArgs));
+	pDetails->set_verb(szVerb, WSTR_BYTE_SIZE(szVerb));
+	pDetails->set_workdir(szWorkingDir, WSTR_BYTE_SIZE(szWorkingDir));
 
-	hr = pElem->setAttribute(CComBSTR("Verb"), CComVariant(szVerb));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'Verb'");
+	pDetails->set_wait(bWait);
+	pDetails->set_show(nShow);
 
-	hr = pElem->setAttribute(CComBSTR("WorkingDir"), CComVariant(szWorkingDir));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'WorkingDir'");
+	pAny = pCmd->mutable_details();
+	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
-	hr = pElem->setAttribute(CComBSTR("Show"), CComVariant(nShow));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'Show'");
-
-	hr = pElem->setAttribute(CComBSTR("Wait"), CComVariant(bWait ? 1: 0));
-	BreakExitOnFailure(hr, "Failed to add XML attribute 'Wait'");
+	bRes = pDetails->SerializeToString(pAny);
+	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
 }
 
 // Execute the command object (XML element)
-HRESULT CShellExecute::DeferredExecute(IXMLDOMElement* pElem)
+HRESULT CShellExecute::DeferredExecute(const ::std::string& command)
 {
 	HRESULT hr = S_OK;
-	CComVariant vTarget;
-	CComVariant vArgs;
-	CComVariant vVerb;
-	CComVariant vWorkingDir;
-	CComVariant vShow;
-	CComVariant vWait;
+	BOOL bRes = TRUE;
+	ShellExecDetails details;
+	LPCWSTR szTarget = nullptr;
+	LPCWSTR szArgs = nullptr;
+	LPCWSTR szVerb = nullptr;
+	LPCWSTR szWorkingDir = nullptr;
 	int nShow;
-	int nWait;
+	bool bWait;
 
-	// Get Parameters:
-	hr = pElem->getAttribute(CComBSTR(L"Target"), &vTarget);
-	BreakExitOnFailure(hr, "Failed to get Target");
+	bRes = details.ParseFromString(command);
+	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ShellExecDetails");
 
-	// Get Args
-	hr = pElem->getAttribute(CComBSTR(L"Args"), &vArgs);
-	BreakExitOnFailure(hr, "Failed to get Args");
+	szTarget = (LPCWSTR)details.target().data();
+	szArgs = (LPCWSTR)details.args().data();
+	szVerb = (LPCWSTR)details.verb().data();
+	nShow = details.show();
+	bWait = details.wait();
 
-	// Get Args
-	hr = pElem->getAttribute(CComBSTR(L"Verb"), &vVerb);
-	BreakExitOnFailure(hr, "Failed to get Verb");
-
-	// Get Args
-	hr = pElem->getAttribute(CComBSTR(L"WorkingDir"), &vWorkingDir);
-	BreakExitOnFailure(hr, "Failed to get WorkingDir");
-
-	// Get Args
-	hr = pElem->getAttribute(CComBSTR(L"Show"), &vShow);
-	BreakExitOnFailure(hr, "Failed to get Show");
-
-	// Get Args
-	hr = pElem->getAttribute(CComBSTR(L"Wait"), &vWait);
-	BreakExitOnFailure(hr, "Failed to get Wait");
-
-	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "ShellExecute: Target='%ls' Args='%ls' Verb='%ls' WorkingDir='%ls' Show=%ls Wait=%ls"
-		, vTarget.bstrVal, vArgs.bstrVal, vVerb.bstrVal, vWorkingDir.bstrVal, vShow.bstrVal, vWait.bstrVal);
+	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "ShellExecute: Target='%ls' Args='%ls' Verb='%ls' WorkingDir='%ls' Show=%i Wait=%i"
+		, szTarget, szArgs, szVerb, szWorkingDir, nShow, bWait);
 	
-	nShow = _wtoi( vShow.bstrVal);
-	nWait = _wtoi( vWait.bstrVal);
-	
-	hr = Execute( vTarget.bstrVal, vArgs.bstrVal, vVerb.bstrVal, vWorkingDir.bstrVal, nShow, nWait != 0);
-	BreakExitOnFailure2(hr, "Failed to execute \"%ls\" %ls", vTarget.bstrVal, vArgs.bstrVal);
+	hr = Execute(szTarget, szArgs, szVerb, szWorkingDir, nShow, bWait);
+	BreakExitOnFailure(hr, "Failed to execute \"%ls\" %ls", szTarget, szArgs);
 
 LExit:
 	return hr;
