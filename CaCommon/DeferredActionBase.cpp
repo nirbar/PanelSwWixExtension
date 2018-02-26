@@ -47,7 +47,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(ReceiverToExecutorFunc mapFunc)
 			WcaLogError(hr, "Failed to get CDeferredActionBase for '%s'", cmd.handler().c_str());
 			hrErr = hr;
 			hr = S_OK;
-			continue;
+			goto LContinue;
 		}
 		BreakExitOnFailure(hr, "Failed to get CDeferredActionBase for '%s'", cmd.handler().c_str());
 
@@ -58,7 +58,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(ReceiverToExecutorFunc mapFunc)
 			WcaLogError(hr, "Failed");
 			hrErr = hr;
 			hr = S_OK;
-			continue;
+			goto LContinue;
 		}
 		BreakExitOnFailure(hr, "Failed");
 
@@ -68,13 +68,18 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(ReceiverToExecutorFunc mapFunc)
 			WcaLogError(hr, "Failed to report progress by cost");
 			hrErr = hr;
 			hr = S_OK;
-			continue;
+			goto LContinue;
 		}
 		BreakExitOnFailure(hr, "Failed to report progress by cost");
 
+	LContinue:
+
 		// Release CDeferredActionBase.
-		delete pExecutor;
-		pExecutor = nullptr;
+		if (pExecutor)
+		{
+			delete pExecutor;
+			pExecutor = nullptr;
+		}
 	}
 
 LExit:
