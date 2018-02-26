@@ -1,0 +1,33 @@
+LIBRARY "PanelSwCustomActions"
+EXPORTS 
+
+	AccountNames
+	BackupAndRestore
+	CleanPendingFileRenameOperations
+	CleanPendingFileRenameOperationsSched
+	CommonDeferred
+	CustomUninstallKey_Immediate
+	CustomUninstallKey_deferred
+	DeletePath
+	DismSched
+	ExecOnComponent
+	FileRegex
+	Log
+	MsiSqlQuery
+	PSW_ShellExecute
+	PathExists
+	ReadIniValues
+	RegularExpression
+	RemoveRegistryValue_Deferred
+	RemoveRegistryValue_Immediate
+	Rollback
+	ServiceConfig
+	SplitPath
+	SplitString
+	SqlSearch
+	TaskScheduler
+	Telemetry
+	TerminateSuccessfully
+	TrimString
+	Warn
+	XmlSearch

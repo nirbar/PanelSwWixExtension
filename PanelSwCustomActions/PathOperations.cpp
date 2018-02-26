@@ -11,7 +11,7 @@
 #define SplitFileNameProp			L"SPLIT_FILE_NAME"
 #define SplitFileExtProp			L"SPLIT_FILE_EXTENSION"
 
-extern "C" __declspec(dllexport) UINT SplitPath(MSIHANDLE hInstall)
+extern "C" UINT __stdcall SplitPath(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -73,7 +73,7 @@ LExit:
 #define PathExistsProp				L"FULL_PATH_TO_TEST"
 #define PathExistsResultProp		L"PATH_EXISTS"
 
-extern "C" __declspec(dllexport) UINT PathExists(MSIHANDLE hInstall)
+extern "C" UINT __stdcall PathExists(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

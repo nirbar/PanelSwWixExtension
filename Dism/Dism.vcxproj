@@ -24,7 +24,6 @@
     <RootNamespace>Dism</RootNamespace>
     <Keyword>Win32Proj</Keyword>
     <ProjectName>Dism</ProjectName>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup>
@@ -35,13 +34,13 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141_xp</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v141_xp</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
@@ -72,9 +71,9 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <LibraryPath Condition="'$(Platform)'=='x64'">C:\Program Files %28x86%29\Windows Kits\8.0\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\Lib\amd64;C:\Program Files %28x86%29\Windows Kits\8.1\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\Lib\amd64;$(WIX)SDK\VS2017\lib\x64;$(LibraryPath)</LibraryPath>
-    <LibraryPath Condition="'$(Platform)'=='Win32'">C:\Program Files %28x86%29\Windows Kits\8.0\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\Lib\x86;C:\Program Files %28x86%29\Windows Kits\8.1\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\Lib\x86;$(WIX)SDK\VS2017\lib\x86;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\Program Files %28x86%29\Windows Kits\8.1\Include\shared;C:\Program Files %28x86%29\Windows Kits\8.1\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\Include;C:\Program Files %28x86%29\Windows Kits\8.0\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\Include;$(WIX)SDK\VS2017\inc;$(IncludePath)</IncludePath>
+    <LibraryPath Condition="'$(Platform)'=='x64'">$(DismApiDir)Lib\amd64;$(WIX)SDK\VS2017\lib\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath Condition="'$(Platform)'=='Win32'">$(DismApiDir)Lib\x86;$(WIX)SDK\VS2017\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>C:\Program Files %28x86%29\Windows Kits\8.1\Include\shared;$(DismApiDir)Include;$(WIX)SDK\VS2017\inc;$(IncludePath)</IncludePath>
     <_ProjectFileVersion>14.0.25431.1</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -103,8 +102,7 @@
     <Link>
       <AdditionalDependencies>legacy_stdio_definitions.lib;msi.lib;dutil.lib;wcautil.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(WIX)sdk\VS2017\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ModuleDefinitionFile>
-      </ModuleDefinitionFile>
+      <ModuleDefinitionFile>Dism.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
     </Link>
@@ -124,8 +122,7 @@
     <Link>
       <AdditionalDependencies>legacy_stdio_definitions.lib;msi.lib;dutil.lib;wcautil.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(WIX)sdk\VS2017\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ModuleDefinitionFile>
-      </ModuleDefinitionFile>
+      <ModuleDefinitionFile>Dism.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -146,8 +143,7 @@
     <Link>
       <AdditionalDependencies>legacy_stdio_definitions.lib;msi.lib;dutil.lib;wcautil.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(WIX)sdk\VS2017\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ModuleDefinitionFile>
-      </ModuleDefinitionFile>
+      <ModuleDefinitionFile>Dism.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
     </Link>
@@ -167,8 +163,7 @@
     <Link>
       <AdditionalDependencies>legacy_stdio_definitions.lib;msi.lib;dutil.lib;wcautil.lib;Version.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(WIX)sdk\VS2017\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <ModuleDefinitionFile>
-      </ModuleDefinitionFile>
+      <ModuleDefinitionFile>Dism.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -190,6 +185,7 @@
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Dism.def" />
     <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
@@ -206,5 +202,4 @@
   <Target Name="MakeIntDir" BeforeTargets="PrepareForBuild">
     <MakeDir Directories="$(OutDir);$(IntDir)" />
   </Target>
-
 </Project>

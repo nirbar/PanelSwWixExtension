@@ -14,7 +14,7 @@ static LPCWSTR ACTION_DELETE = L"Remove";
 static LPCWSTR ACTION_BACKUP = L"Backup";
 static LPCWSTR ACTION_RESTORE = L"Restore";
 
-extern "C" __declspec(dllexport) UINT TaskScheduler(MSIHANDLE hInstall)
+extern "C" UINT __stdcall TaskScheduler(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

@@ -9,7 +9,7 @@ using namespace google::protobuf;
 #define DeletePath_QUERY L"SELECT `Id`, `Path`, `Flags`, `Condition` FROM `PSW_DeletePath`"
 enum DeletePathQuery { Id = 1, Path, Flags, Condition };
 
-extern "C" __declspec(dllexport) UINT DeletePath(MSIHANDLE hInstall)
+extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -272,14 +272,8 @@ HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool
 	BreakExitOnFailure(hr, "Failed formatting string");
 
 	// Remove trailing backslashes (fails on Windows XP)
-	for (DWORD dwLast = ::wcslen(szFromNull) - 1; szFromNull[dwLast] == L'\\'; --dwLast)
-	{
-		szFromNull[dwLast] = NULL;
-	}
-	for (DWORD dwLast = ::wcslen(szToNull) - 1; szToNull[dwLast] == L'\\'; --dwLast)
-	{
-		szToNull[dwLast] = NULL;
-	}
+	::PathRemoveBackslash(szFromNull);
+	::PathRemoveBackslash(szToNull);
 
 	// Prepare 
 	::memset(&opInfo, 0, sizeof(opInfo));
@@ -320,10 +314,7 @@ HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bI
 	BreakExitOnFailure(hr, "Failed formatting string");
 
 	// Remove trailing backslashes (fails on Windows XP)
-	for (DWORD dwLast = ::wcslen(szFromNull) - 1; szFromNull[dwLast] == L'\\'; --dwLast)
-	{
-		szFromNull[dwLast] = NULL;
-	}
+	::PathRemoveBackslash(szFromNull);
 
 	// Prepare 
 	::memset(&opInfo, 0, sizeof(opInfo));

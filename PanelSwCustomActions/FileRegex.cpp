@@ -10,7 +10,7 @@ using namespace google::protobuf;
 #define FileRegex_QUERY L"SELECT `Id`, `FilePath`, `Regex`, `Replacement`, `IgnoreCase`, `Encoding`, `Condition` FROM `PSW_FileRegex` ORDER BY `Order`"
 enum FileRegexQuery { Id = 1, FilePath = 2, Regex = 3, Replacement = 4, IgnoreCase = 5, Encoding = 6, Condition = 7 };
 
-extern "C" __declspec(dllexport) UINT FileRegex(MSIHANDLE hInstall)
+extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

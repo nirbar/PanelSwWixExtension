@@ -34,7 +34,7 @@ union RegexFlags
 	} s;
 };
 
-extern "C" __declspec(dllexport) UINT RegularExpression(MSIHANDLE hInstall)
+extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

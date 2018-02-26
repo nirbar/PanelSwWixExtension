@@ -12,7 +12,7 @@ static LPCWSTR DismStateString(DismPackageFeatureState state);
 
 #define DismLogPrefix		L"DismLog="
 
-extern "C" __declspec(dllexport) UINT Dism(MSIHANDLE hInstall)
+extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 {
 	UINT er = ERROR_SUCCESS;
 	HRESULT hr = S_OK;
@@ -30,7 +30,7 @@ extern "C" __declspec(dllexport) UINT Dism(MSIHANDLE hInstall)
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
+	WcaLog(LOGMSG_STANDARD, "Initialized from Dism " FullVersion);
 
 	hr = WcaGetProperty(L"CustomActionData", &szCAD);
 	ExitOnFailure(hr, "Failed getting CustomActionData");

@@ -215,5 +215,11 @@
       <Filter>Proto</Filter>
     </None>
     <None Include="packages.config" />
+    <None Include="PanelSwCustomActions.def">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="$(IntDir)Version.rc" />
   </ItemGroup>
 </Project>
