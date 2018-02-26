@@ -22,7 +22,7 @@
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
       </xs:appinfo>
       <xs:documentation>
-        <![CDATA[Backup file or folder as an immediate custom action and then restore it after DuplicateFiles action]]>
+        <![CDATA[Backup file or folder as an immediate custom action and then restore it on specified schedule]]>
       </xs:documentation>
     </xs:annotation>
     <xs:complexType>

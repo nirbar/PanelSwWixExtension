@@ -5,7 +5,7 @@
 #pragma comment (lib, "Advapi32.lib")
 using namespace std;
 
-extern "C" __declspec(dllexport) UINT AccountNames(MSIHANDLE hInstall)
+extern "C" UINT __stdcall AccountNames(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

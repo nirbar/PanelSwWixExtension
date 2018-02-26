@@ -13,7 +13,7 @@ enum DismQuery { Id = 1, Component = 2, EnableFeatures = 3 };
 #define DismLogPrefix		L"DismLog="
 
 // Immediate custom action
-extern "C" __declspec(dllexport) UINT DismSched(MSIHANDLE hInstall)
+extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 {
 	UINT er = ERROR_SUCCESS;
 	HRESULT hr = S_OK;

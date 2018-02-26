@@ -80,7 +80,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="protobuf\*.proto" />
-    <None Include="protobuf\*.proto" />
     <None Include="packages.config" />
   </ItemGroup>
 </Project>

@@ -16,7 +16,7 @@ struct DBCOLUMNDATA
 	BYTE bData[1];
 };
 
-extern "C" __declspec(dllexport) UINT SqlSearch(MSIHANDLE hInstall)
+extern "C" UINT __stdcall SqlSearch(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

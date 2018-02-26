@@ -18,7 +18,7 @@ enum ShellExecuteFlags
 	OnRollback = 4
 };
 
-extern "C" __declspec(dllexport) UINT PSW_ShellExecute(MSIHANDLE hInstall)
+extern "C" UINT __stdcall PSW_ShellExecute(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

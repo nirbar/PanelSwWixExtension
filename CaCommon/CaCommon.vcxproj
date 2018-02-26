@@ -15,7 +15,6 @@
     <ProjectGuid>{7C6B230A-9186-4C1E-B61D-E803CC36A347}</ProjectGuid>
     <RootNamespace>CaCommon</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Label="Configuration">

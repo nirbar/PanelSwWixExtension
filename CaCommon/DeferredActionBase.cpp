@@ -5,12 +5,14 @@ using namespace ::com::panelsw::ca;
 HRESULT CDeferredActionBase::DeferredEntryPoint(ReceiverToExecutorFunc mapFunc)
 {
 	HRESULT hr = S_OK;
+	HRESULT hrErr = S_OK;
 	CWixString szCustomActionData;
 	BYTE *pData = nullptr;
 	DWORD dwDataSize = 0;
 	BOOL bRes = TRUE;
 	CDeferredActionBase* pExecutor = nullptr;
 	CustomActionData cad;
+	BOOL bIsRollback = FALSE;
 
 	// Get CustomActionData
 	hr = WcaGetProperty(L"CustomActionData", (LPWSTR*)szCustomActionData);
@@ -27,29 +29,57 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(ReceiverToExecutorFunc mapFunc)
 	bRes = cad.ParseFromArray(pData, dwDataSize);
 	BreakExitOnNull(bRes, hr, E_FAIL, "Failed parsing CustomActionData");
 
+	// During rollback we don't exit on failure before completing cleanup.
+	bIsRollback = ::MsiGetMode(WcaGetInstallHandle(), MSIRUNMODE::MSIRUNMODE_ROLLBACK);
+
 	// Iterate elements
 	for (const Command &cmd : cad.commands())
 	{
-		LPCSTR szHandler = cmd.handler().c_str();
-		if (!(szHandler && *szHandler))
+		if (cmd.handler().empty())
 		{
 			continue;
 		}
 		
 		// Get receiver
-		hr = mapFunc(szHandler, &pExecutor);
+		hr = mapFunc(cmd.handler().c_str(), &pExecutor);
+		if (bIsRollback && FAILED(hr))
+		{
+			WcaLogError(hr, "Failed to get CDeferredActionBase for '%s'", cmd.handler().c_str());
+			hrErr = hr;
+			hr = S_OK;
+			goto LContinue;
+		}
 		BreakExitOnFailure(hr, "Failed to get CDeferredActionBase for '%s'", cmd.handler().c_str());
 
 		// Execute
 		hr = pExecutor->DeferredExecute(cmd.details());
+		if (bIsRollback && FAILED(hr))
+		{
+			WcaLogError(hr, "Failed");
+			hrErr = hr;
+			hr = S_OK;
+			goto LContinue;
+		}
 		BreakExitOnFailure(hr, "Failed");
 
 		hr = WcaProgressMessage(cmd.cost(), FALSE);
-		BreakExitOnFailure(hr, "Failed to progress by cost");
+		if (bIsRollback && FAILED(hr))
+		{
+			WcaLogError(hr, "Failed to report progress by cost");
+			hrErr = hr;
+			hr = S_OK;
+			goto LContinue;
+		}
+		BreakExitOnFailure(hr, "Failed to report progress by cost");
+
+	LContinue:
 
 		// Release CDeferredActionBase.
-		delete pExecutor;
-		pExecutor = nullptr;
+		if (pExecutor)
+		{
+			delete pExecutor;
+			pExecutor = nullptr;
+		}
 	}
 
 LExit:
@@ -60,7 +90,7 @@ LExit:
 		delete pExecutor;
 	}
 
-	return hr;
+	return SUCCEEDED(hr) ? hrErr : hr;
 }
 
 CDeferredActionBase::CDeferredActionBase()

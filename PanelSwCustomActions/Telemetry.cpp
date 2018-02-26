@@ -19,7 +19,7 @@ enum TelemetryFlags
 	Secure = 8
 };
 
-extern "C" __declspec(dllexport) UINT Telemetry(MSIHANDLE hInstall)
+extern "C" UINT __stdcall Telemetry(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

@@ -4,7 +4,7 @@
 #define MsiSqlQueryQuery L"SELECT `Id`, `Query`, `Condition` FROM `PSW_MsiSqlQuery`"
 enum eMsiSqlQueryQuery { Id = 1, Query, Condition };
 
-extern "C" __declspec(dllexport) UINT MsiSqlQuery(MSIHANDLE hInstall)
+extern "C" UINT __stdcall MsiSqlQuery(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

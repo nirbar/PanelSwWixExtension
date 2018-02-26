@@ -3,7 +3,7 @@
 #define SplitProp L"PROPERTY_TO_SPLIT"
 #define SplitTokenProp L"STRING_SPLIT_TOKEN"
 
-extern "C" __declspec(dllexport) UINT SplitString(MSIHANDLE hInstall)
+extern "C" UINT __stdcall SplitString(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -80,7 +80,7 @@ LExit:
 
 #define TrimProp L"PROPERTY_TO_TRIM"
 
-extern "C" __declspec(dllexport) UINT TrimString(MSIHANDLE hInstall)
+extern "C" UINT __stdcall TrimString(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

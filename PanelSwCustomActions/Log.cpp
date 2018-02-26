@@ -3,7 +3,7 @@
 #define CustomActionData L"CustomActionData"
 #define LogProperty L"LOGMESSAGE"
 
-extern "C" __declspec(dllexport) UINT Log(MSIHANDLE hInstall)
+extern "C" UINT __stdcall Log(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -31,7 +31,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-extern "C" __declspec(dllexport) UINT Warn(MSIHANDLE hInstall)
+extern "C" UINT __stdcall Warn(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

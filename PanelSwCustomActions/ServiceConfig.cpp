@@ -11,7 +11,7 @@ using namespace google::protobuf;
 #define ServiceConfig_QUERY L"SELECT `Id`, `Component_`, `ServiceName`, `Account`, `Password` FROM `PSW_ServiceConfig`"
 enum ServiceConfigQuery { Id = 1, Component, ServiceName, Account, Password };
 
-extern "C" __declspec(dllexport) UINT ServiceConfig(MSIHANDLE hInstall)
+extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	DWORD dwRes = ERROR_SUCCESS;
