@@ -91,9 +91,9 @@ The following properties hold localized built-in account names. To use them, add
 
 PanelSwWixExtension require the following prerequisites to build:
 - CMake: CMake path can be specified in 'CMakeDir' property in 'TidyBuild.custom.props'
-- ADK installed. Specifically, Dism API should be installed.
+- ADK installed. Specifically, Dism API should be installed. Set DismApi folder path in 'DismApiDir' property in 'TidyBuild.custom.props'
 - Update git submodule protobuf
 
-To build the extension download the code, open the solution PanelSwWixExtension.sln and build it in Visual Studio.
+To build the extension download the code, open the solution PanelSwWixExtension.sln in Visual Studio 2017 and build it.
 
 Unit-test WiX are available in the solution folder 'UnitTests'.
