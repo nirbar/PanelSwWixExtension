@@ -303,9 +303,17 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
+        enum InstallUtil_Bitness
+        {
+            asComponent = 0,
+            x86 = 1,
+            x64 = 2
+        }
+
         private void ParseInstallUtilElement(XmlNode node, XmlElement parentElement)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            InstallUtil_Bitness bitness = InstallUtil_Bitness.asComponent;
 
             string file = parentElement.GetAttribute("Id");
             if (string.IsNullOrEmpty(file))
@@ -320,6 +328,18 @@ namespace PanelSw.Wix.Extensions
                 {
                     switch (attrib.LocalName.ToLower())
                     {
+                        case "bitness":
+                            string b = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            try
+                            {
+                                bitness = (InstallUtil_Bitness)Enum.Parse(typeof(InstallUtil_Bitness), b);
+                            }
+                            catch
+                            {
+                                Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            }
+                            break;
+
                         default:
                             Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                             break;
@@ -340,6 +360,7 @@ namespace PanelSw.Wix.Extensions
                 // create a row in the Win32_CopyFiles table
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_InstallUtil");
                 row[0] = file;
+                row[1] = (int)bitness;
             }
 
             // Iterate child 'Argument' elements

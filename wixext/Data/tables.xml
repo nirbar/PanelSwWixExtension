@@ -151,6 +151,7 @@
 
   <tableDefinition name="PSW_InstallUtil">
     <columnDefinition name="File_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="Bitness" type="number" length="2" minValue="0" maxValue="127" />
   </tableDefinition>
 
   <tableDefinition name="PSW_InstallUtil_Arg">

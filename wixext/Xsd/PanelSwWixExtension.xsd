@@ -117,6 +117,11 @@
       <xs:choice minOccurs="0" maxOccurs="unbounded">
         <xs:element ref="Argument"/>
       </xs:choice>
+      <xs:attribute name="Bitness" use="optional" default="asComponent" type="InstallUtil_Bitness">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The assembly bitness. Defaults to the Component's bitness.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
 
@@ -1167,4 +1172,18 @@ Remove registry values.
     </xs:restriction>
   </xs:simpleType>
 
+  <xs:simpleType name="InstallUtil_Bitness">
+    <xs:annotation>
+      <xs:documentation>Assembly bitness for InstallUtil.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:NMTOKEN">
+      <xs:enumeration value="asComponent">
+        <xs:annotation>
+          <xs:documentation>Use component's bitness</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="x86"></xs:enumeration>
+      <xs:enumeration value="x64"></xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
 </xs:schema>

@@ -13,16 +13,28 @@ namespace PswManagedCA
     public class InstallUtil
     {
         private List<InstallUtilCatalog> catalogs_ = new List<InstallUtilCatalog>();
+        private static readonly int msidbComponentAttributes64bit = 0x100;
+        enum InstallUtil_Bitness
+        {
+            asComponent = 0,
+            x86 = 1,
+            x64 = 2
+        }
 
         [CustomAction]
         public static ActionResult InstallUtilSched(Session session)
         {
             session.Log("Begin InstallUtilSched");
 
-            InstallUtil install = new InstallUtil();
-            InstallUtil remove = new InstallUtil();
+            InstallUtil install_x86 = new InstallUtil();
+            InstallUtil remove_x86 = new InstallUtil();
+            InstallUtil install_x64 = new InstallUtil();
+            InstallUtil remove_x64 = new InstallUtil();
 
-            using (View installUtilView = session.Database.OpenView("SELECT `File_` FROM `PSW_InstallUtil`"))
+            using (View installUtilView = session.Database.OpenView("SELECT `PSW_InstallUtil`.`File_`, `PSW_InstallUtil`.`Bitness`, `File`.`Component_`, `Component`.`Attributes`"
+                + " FROM `PSW_InstallUtil`, `File`, `Component`"
+                + " WHERE `PSW_InstallUtil`.`File_`=`File`.`File` AND `File`.`Component_`=`Component`.`Component`"
+                ))
             {
                 installUtilView.Execute(null);
 
@@ -32,6 +44,12 @@ namespace PswManagedCA
                     {
                         InstallUtilCatalog ctlg = new InstallUtilCatalog();
                         ctlg.FileId = installUtilRec[1] as string;
+                        int explicitBitness = installUtilRec.GetInteger(2);
+                        string component = installUtilRec[3] as string;
+                        int componentAttr = installUtilRec.GetInteger(4);
+
+                        bool x64 = ((explicitBitness == (int)InstallUtil_Bitness.x64) 
+                            || ((explicitBitness == (int)InstallUtil_Bitness.asComponent) && (componentAttr & msidbComponentAttributes64bit) == componentAttr));
 
                         // Sanity checks
                         if (string.IsNullOrWhiteSpace(ctlg.FileId))
@@ -39,7 +57,7 @@ namespace PswManagedCA
                             session.Log("File_ not supplied");
                             return ActionResult.Failure;
                         }
-                        ComponentInfo ci = session.ComponentByFileId(ctlg.FileId);
+                        ComponentInfo ci = session.Components[component];
                         if (ci == null)
                         {
                             session.Log("File '{0}' not present in package", ctlg.FileId);
@@ -78,7 +96,15 @@ namespace PswManagedCA
                                     session.Log("Can't get target path for file '{0}'", ctlg.FileId);
                                     return ActionResult.Failure;
                                 }
-                                remove.catalogs_.Add(ctlg);
+
+                                if (x64)
+                                {
+                                    remove_x64.catalogs_.Add(ctlg);
+                                }
+                                else
+                                {
+                                    remove_x86.catalogs_.Add(ctlg);
+                                }
                                 break;
 
                             case InstallState.Default:
@@ -89,7 +115,14 @@ namespace PswManagedCA
                                     session.Log("Can't get target path for file '{0}'", ctlg.FileId);
                                     return ActionResult.Failure;
                                 }
-                                install.catalogs_.Add(ctlg);
+                                if (x64)
+                                {
+                                    install_x64.catalogs_.Add(ctlg);
+                                }
+                                else
+                                {
+                                    install_x86.catalogs_.Add(ctlg);
+                                }
                                 break;
 
                             default:
@@ -101,36 +134,61 @@ namespace PswManagedCA
             }
 
             // Install
-            install.catalogs_.ForEach((ctlg) => ctlg.Action = InstallUtilCatalog.InstallUtilAction.Install);
-            XmlSerializer srlz = new XmlSerializer(install.catalogs_.GetType());
+            install_x64.catalogs_.ForEach((ctlg) => ctlg.Action = InstallUtilCatalog.InstallUtilAction.Install);
+            XmlSerializer srlz = new XmlSerializer(install_x64.catalogs_.GetType());
             using (StringWriter sw = new StringWriter())
             {
-                srlz.Serialize(sw, install.catalogs_);
-                session["PSW_InstallUtil_InstallExec"] = sw.ToString();
+                srlz.Serialize(sw, install_x64.catalogs_);
+                session["PSW_InstallUtil_InstallExec_x64"] = sw.ToString();
+            }
+            install_x86.catalogs_.ForEach((ctlg) => ctlg.Action = InstallUtilCatalog.InstallUtilAction.Install);
+            srlz = new XmlSerializer(install_x86.catalogs_.GetType());
+            using (StringWriter sw = new StringWriter())
+            {
+                srlz.Serialize(sw, install_x86.catalogs_);
+                session["PSW_InstallUtil_InstallExec_x86"] = sw.ToString();
             }
 
             // Install rollback
-            install.catalogs_.ForEach((ctlg) => ctlg.Action = InstallUtilCatalog.InstallUtilAction.Uninstall);
+            install_x64.catalogs_.ForEach((ctlg) => ctlg.Action = InstallUtilCatalog.InstallUtilAction.Uninstall);
             using (StringWriter sw = new StringWriter())
             {
-                srlz.Serialize(sw, install.catalogs_);
-                session["PSW_InstallUtil_InstallRollback"] = sw.ToString();
+                srlz.Serialize(sw, install_x64.catalogs_);
+                session["PSW_InstallUtil_InstallRollback_x64"] = sw.ToString();
+            }
+            install_x86.catalogs_.ForEach((ctlg) => ctlg.Action = InstallUtilCatalog.InstallUtilAction.Uninstall);
+            using (StringWriter sw = new StringWriter())
+            {
+                srlz.Serialize(sw, install_x86.catalogs_);
+                session["PSW_InstallUtil_InstallRollback_x86"] = sw.ToString();
             }
 
             // Uninstall
-            remove.catalogs_.ForEach((ctlg) => ctlg.Action = InstallUtilCatalog.InstallUtilAction.Uninstall);
+            remove_x64.catalogs_.ForEach((ctlg) => ctlg.Action = InstallUtilCatalog.InstallUtilAction.Uninstall);
             using (StringWriter sw = new StringWriter())
             {
-                srlz.Serialize(sw, remove.catalogs_);
-                session["PSW_InstallUtil_UninstallExec"] = sw.ToString();
+                srlz.Serialize(sw, remove_x64.catalogs_);
+                session["PSW_InstallUtil_UninstallExec_x64"] = sw.ToString();
+            }
+            remove_x86.catalogs_.ForEach((ctlg) => ctlg.Action = InstallUtilCatalog.InstallUtilAction.Uninstall);
+            using (StringWriter sw = new StringWriter())
+            {
+                srlz.Serialize(sw, remove_x86.catalogs_);
+                session["PSW_InstallUtil_UninstallExec_x86"] = sw.ToString();
             }
 
             // Uninstall rollback
-            remove.catalogs_.ForEach((ctlg) => ctlg.Action = InstallUtilCatalog.InstallUtilAction.Install);
+            remove_x64.catalogs_.ForEach((ctlg) => ctlg.Action = InstallUtilCatalog.InstallUtilAction.Install);
             using (StringWriter sw = new StringWriter())
             {
-                srlz.Serialize(sw, remove.catalogs_);
-                session["PSW_InstallUtil_UninstallRollback"] = sw.ToString();
+                srlz.Serialize(sw, remove_x64.catalogs_);
+                session["PSW_InstallUtil_UninstallRollback_x64"] = sw.ToString();
+            }
+            remove_x86.catalogs_.ForEach((ctlg) => ctlg.Action = InstallUtilCatalog.InstallUtilAction.Install);
+            using (StringWriter sw = new StringWriter())
+            {
+                srlz.Serialize(sw, remove_x86.catalogs_);
+                session["PSW_InstallUtil_UninstallRollback_x86"] = sw.ToString();
             }
 
             return ActionResult.Success;
