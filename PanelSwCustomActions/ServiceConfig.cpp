@@ -138,7 +138,7 @@ HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szAccoun
 	bool bRes = true;
 
 	hr = AddCommand("CServiceConfig", &pCmd);
-	BreakExitOnFailure(hr, "Failed to add XML element");
+	BreakExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new ServciceConfigDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");

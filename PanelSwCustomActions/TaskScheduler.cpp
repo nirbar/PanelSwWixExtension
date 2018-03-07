@@ -122,7 +122,7 @@ HRESULT CTaskScheduler::AddCreateTask(LPCWSTR szTaskName, LPCWSTR szTaskXml)
 	bool bRes = true;
 
 	hr = AddCommand("CTaskScheduler", &pCmd);
-	BreakExitOnFailure(hr, "Failed to add XML element");
+	BreakExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new TaskSchedulerDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
@@ -150,7 +150,7 @@ HRESULT CTaskScheduler::AddRemoveTask(LPCWSTR szTaskName)
 	bool bRes = true;
 
 	hr = AddCommand("CTaskScheduler", &pCmd);
-	BreakExitOnFailure(hr, "Failed to add XML element");
+	BreakExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new TaskSchedulerDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
@@ -344,7 +344,7 @@ HRESULT CTaskScheduler::AddBackupTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 	bool bRes = true;
 
 	hr = AddCommand("CTaskScheduler", &pCmd);
-	BreakExitOnFailure(hr, "Failed to add XML element");
+	BreakExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new TaskSchedulerDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
@@ -372,7 +372,7 @@ HRESULT CTaskScheduler::AddRestoreTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 	bool bRes = true;
 
 	hr = AddCommand("CTaskScheduler", &pCmd);
-	BreakExitOnFailure(hr, "Failed to add XML element");
+	BreakExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new TaskSchedulerDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");

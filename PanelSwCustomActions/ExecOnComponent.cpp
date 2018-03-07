@@ -342,7 +342,7 @@ HRESULT CExecOnComponent::AddExec(LPCWSTR szCommand, ExitCodeMap* pExitCodeMap, 
 	bool bRes = true;
 
     hr = AddCommand("CExecOnComponent", &pCmd);
-    BreakExitOnFailure(hr, "Failed to add XML element");
+    BreakExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new ExecOnDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");

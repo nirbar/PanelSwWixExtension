@@ -141,7 +141,7 @@ HRESULT CShellExecute::AddShellExec(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR sz
 	bool bRes = true;
 
 	hr = AddCommand("CShellExecute", &pCmd);
-	BreakExitOnFailure(hr, "Failed to add XML element");
+	BreakExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new ShellExecDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
