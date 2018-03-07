@@ -43,14 +43,6 @@
       <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
       <RefTargetDir>INSTALLFOLDER</RefTargetDir>
     </ProjectReference>
-    <ProjectReference Include="..\PswManagedCA\PswManagedCA.csproj">
-      <Name>PswManagedCA</Name>
-      <Project>{eec82796-3809-4d8b-9f2b-d9f1db044e39}</Project>
-      <Private>True</Private>
-      <DoNotHarvest>True</DoNotHarvest>
-      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
-      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
-    </ProjectReference>
   </ItemGroup>
   <ItemGroup>
     <WixExtension Include="WixUtilExtension">
@@ -95,6 +87,8 @@
   <Target Name="BeforeBuild">
     <MSBuild Projects="$(SolutionDir)Dism\Dism.vcxproj" Targets="Rebuild" Properties="Configuration=$(Configuration);Platform=Win32" />
     <MSBuild Projects="$(SolutionDir)Dism\Dism.vcxproj" Targets="Rebuild" Properties="Configuration=$(Configuration);Platform=x64" />
+    <MSBuild Projects="$(SolutionDir)PswManagedCA\PswManagedCA.csproj" Targets="Rebuild" Properties="Configuration=$(Configuration);Platform=x86" />
+    <MSBuild Projects="$(SolutionDir)PswManagedCA\PswManagedCA.csproj" Targets="Rebuild" Properties="Configuration=$(Configuration);Platform=x64" />
   </Target>
   <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

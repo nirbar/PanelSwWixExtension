@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <Import Project="$(MSBuildThisFileDirectory)TidyBuild.user.props" Condition="Exists('$(MSBuildThisFileDirectory)TidyBuild.user.props')"/>
   <PropertyGroup>
-    <FullVersion>1.1.30</FullVersion>
+    <FullVersion>1.1.31</FullVersion>
     <ProductName>PanelSwWixExxtension</ProductName>
     <Manufacturer>Panel::Software</Manufacturer>
 
