@@ -47,25 +47,25 @@ extern "C" UINT __stdcall TopShelfService(MSIHANDLE hInstall)
 		bool install = true;
 
 		hr = WcaGetRecordFormattedString(hRecord, TopShelfServiceQuery::File_, (LPWSTR*)fileId);
-		BreakExitOnFailure(hr, "Failed to get Path.");
+		BreakExitOnFailure(hr, "Failed to get File ID.");
 		hr = WcaGetRecordFormattedString(hRecord, TopShelfServiceQuery::Component_, (LPWSTR*)component);
-		BreakExitOnFailure(hr, "Failed to get Path.");
+		BreakExitOnFailure(hr, "Failed to get Component ID.");
 		hr = WcaGetRecordFormattedString(hRecord, TopShelfServiceQuery::ServiceName, (LPWSTR*)serviceName);
-		BreakExitOnFailure(hr, "Failed to get Path.");
+		BreakExitOnFailure(hr, "Failed to get ServiceName.");
 		hr = WcaGetRecordFormattedString(hRecord, TopShelfServiceQuery::DisplayName, (LPWSTR*)displayName);
-		BreakExitOnFailure(hr, "Failed to get Path.");
+		BreakExitOnFailure(hr, "Failed to get DisplayName.");
 		hr = WcaGetRecordFormattedString(hRecord, TopShelfServiceQuery::Description, (LPWSTR*)description);
-		BreakExitOnFailure(hr, "Failed to get Path.");
+		BreakExitOnFailure(hr, "Failed to get Description.");
 		hr = WcaGetRecordFormattedString(hRecord, TopShelfServiceQuery::Instance, (LPWSTR*)instance);
-		BreakExitOnFailure(hr, "Failed to get Path.");
+		BreakExitOnFailure(hr, "Failed to get Instance.");
 		hr = WcaGetRecordFormattedString(hRecord, TopShelfServiceQuery::UserName, (LPWSTR*)userName);
-		BreakExitOnFailure(hr, "Failed to get Path.");
+		BreakExitOnFailure(hr, "Failed to get UserName.");
 		hr = WcaGetRecordFormattedString(hRecord, TopShelfServiceQuery::Password, (LPWSTR*)password);
-		BreakExitOnFailure(hr, "Failed to get Path.");
+		BreakExitOnFailure(hr, "Failed to get Password.");
 		hr = WcaGetRecordInteger(hRecord, TopShelfServiceQuery::HowToStart, &howToStart);
-		BreakExitOnFailure(hr, "Failed to get Flags.");
+		BreakExitOnFailure(hr, "Failed to get HowToStart.");
 		hr = WcaGetRecordInteger(hRecord, TopShelfServiceQuery::Account, &account);
-		BreakExitOnFailure(hr, "Failed to get Flags.");
+		BreakExitOnFailure(hr, "Failed to get Account.");
 
 		// Test condition
 		compToDo = WcaGetComponentToDo(component);
@@ -250,7 +250,7 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 	hr = PathEnsureQuoted((LPWSTR*)file, FALSE);
 	BreakExitOnFailure(hr, "Failed ensuring file path is quoted");
 
-	hr = pCommandLine->Format(L"%s -%s"
+	hr = pCommandLine->Format(L"%s %s"
 		, (LPCWSTR)file
 		, pDetails->install() ? L"install" : L"uninstall"
 	);
@@ -259,7 +259,7 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 	instance = (LPCWSTR)pDetails->instance().data();
 	if (instance && *instance)
 	{
-		hr = pCommandLine->AppnedFormat(L"-instance \"%s\"", instance);
+		hr = pCommandLine->AppnedFormat(L" -instance:\"%s\"", instance);
 		BreakExitOnFailure(hr, "Failed formatting string");
 	}
 
@@ -272,19 +272,19 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 	serviceName = (LPCWSTR)pDetails->servicename().data();
 	if (serviceName && *serviceName)
 	{
-		hr = pCommandLine->AppnedFormat(L"-servicename \"%s\"", serviceName);
+		hr = pCommandLine->AppnedFormat(L" -servicename:\"%s\"", serviceName);
 		BreakExitOnFailure(hr, "Failed formatting string");
 	}
 	displayName = (LPCWSTR)pDetails->displayname().data();
 	if (displayName && *displayName)
 	{
-		hr = pCommandLine->AppnedFormat(L"-displayname \"%s\"", displayName);
+		hr = pCommandLine->AppnedFormat(L" -displayname:\"%s\"", displayName);
 		BreakExitOnFailure(hr, "Failed formatting string");
 	}
 	description = (LPCWSTR)pDetails->description().data();
 	if (description && *description)
 	{
-		hr = pCommandLine->AppnedFormat(L"-description \"%s\"", description);
+		hr = pCommandLine->AppnedFormat(L" -description:\"%s\"", description);
 		BreakExitOnFailure(hr, "Failed formatting string");
 	}
 
@@ -294,28 +294,28 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 		userName = (LPCWSTR)pDetails->username().data();
 		password = (LPCWSTR)pDetails->password().data();
 
-		hr = pCommandLine->AppnedFormat(L"-username \"%s\"", userName);
+		hr = pCommandLine->AppnedFormat(L" -username:\"%s\"", userName);
 		BreakExitOnFailure(hr, "Failed formatting string");
 
 		if (password && password)
 		{
-			hr = pCommandLine->AppnedFormat(L"-password \"%s\"", password);
+			hr = pCommandLine->AppnedFormat(L" -password:\"%s\"", password);
 			BreakExitOnFailure(hr, "Failed formatting string");
 		}
 		break;
 
 	case TopShelfServiceDetails_ServiceAccount::TopShelfServiceDetails_ServiceAccount_localservice:
-		hr = pCommandLine->AppnedFormat(L"--localservice");
+		hr = pCommandLine->AppnedFormat(L" --localservice");
 		BreakExitOnFailure(hr, "Failed formatting string");
 		break;
 
 	case TopShelfServiceDetails_ServiceAccount::TopShelfServiceDetails_ServiceAccount_localsystem:
-		hr = pCommandLine->AppnedFormat(L"--localsystem");
+		hr = pCommandLine->AppnedFormat(L" --localsystem");
 		BreakExitOnFailure(hr, "Failed formatting string");
 		break;
 
 	case TopShelfServiceDetails_ServiceAccount::TopShelfServiceDetails_ServiceAccount_networkservice:
-		hr = pCommandLine->AppnedFormat(L"--networkservice");
+		hr = pCommandLine->AppnedFormat(L" --networkservice");
 		BreakExitOnFailure(hr, "Failed formatting string");
 		break;
 
@@ -327,22 +327,22 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 	switch (pDetails->howtostart())
 	{
 	case TopShelfServiceDetails_HowToStart::TopShelfServiceDetails_HowToStart_auto_:
-		hr = pCommandLine->AppnedFormat(L"--autostart");
+		hr = pCommandLine->AppnedFormat(L" --autostart");
 		BreakExitOnFailure(hr, "Failed formatting string");
 		break;
 
 	case TopShelfServiceDetails_HowToStart::TopShelfServiceDetails_HowToStart_delayedAuto:
-		hr = pCommandLine->AppnedFormat(L"--delayed");
+		hr = pCommandLine->AppnedFormat(L" --delayed");
 		BreakExitOnFailure(hr, "Failed formatting string");
 		break;
 
 	case TopShelfServiceDetails_HowToStart::TopShelfServiceDetails_HowToStart_disabled:
-		hr = pCommandLine->AppnedFormat(L"--disabled");
+		hr = pCommandLine->AppnedFormat(L" --disabled");
 		BreakExitOnFailure(hr, "Failed formatting string");
 		break;
 
 	case TopShelfServiceDetails_HowToStart::TopShelfServiceDetails_HowToStart_manual:
-		hr = pCommandLine->AppnedFormat(L"--manual");
+		hr = pCommandLine->AppnedFormat(L" --manual");
 		BreakExitOnFailure(hr, "Failed formatting string");
 		break;
 
