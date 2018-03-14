@@ -22,7 +22,6 @@ extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall)
 	WCHAR shortTempPath[MAX_PATH + 1];
 	WCHAR longTempPath[MAX_PATH + 1];
 	DWORD dwRes = 0;
-	LPWSTR szTempFilesSpec = nullptr;
 	LPWSTR szCustomActionData = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
@@ -92,16 +91,16 @@ extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall)
 		// For folders, we'll copy the contents to target folder. Otherwise, the temp folder will be copied with the content
 		if (::PathIsDirectory(szTempFile))
 		{
-			hr = StrAllocFormatted(&szTempFilesSpec, L"%s\\*", szTempFile);
-			BreakExitOnFailure(hr, "Failed formatting string.");
-
-			hr = rollbackCAD.AddMoveFile(szTempFilesSpec, szPath, flags);
+			hr = rollbackCAD.AddDeleteFile(szPath, flags);
 			BreakExitOnFailure(hr, "Failed creating custom action data for rollback action.");
 
-			hr = rollbackCAD.AddDeleteFile(szTempFile, flags);
-			BreakExitOnFailure(hr, "Failed creating custom action data for rollbak action.");
+			hr = rollbackCAD.AddMoveFile(szTempFile, szPath, flags);
+			BreakExitOnFailure(hr, "Failed creating custom action data for rollback action.");
 		
-			hr = deferredCAD.AddCopyFile(szTempFilesSpec, szPath, flags);
+			hr = deferredCAD.AddDeleteFile(szPath, flags);
+			BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
+
+			hr = deferredCAD.AddCopyFile(szTempFile, szPath, flags);
 			BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
 		}
 		else
@@ -138,7 +137,6 @@ extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall)
 
 LExit:
 	ReleaseStr(szCustomActionData);
-	ReleaseStr(szTempFilesSpec);
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
 }

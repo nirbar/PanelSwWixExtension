@@ -15,6 +15,7 @@
             <PanelSW:Argument Id="_1" Value="1"/>
             <PanelSW:Argument Id="_2" Value="3"/>
           </PanelSW:InstallUtil>
+          <PanelSW:TopShelf Account="custom" Description="MyDesc" Instance="[inst]" ServiceName="qwe" Start="manual" UserName="un" Password="psw" DisplayName="dn" />
         </File>
       </Component>
     </Feature>

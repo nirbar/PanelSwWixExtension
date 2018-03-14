@@ -494,5 +494,29 @@
     </InstallExecuteSequence>
   </Fragment>
   
+  <!-- TopShelf service -->
+  <Fragment>
+    <CustomAction Id="TopShelf" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="TopShelf" Execute="immediate" Return="check" />
+    <CustomAction Id="TopShelfService_InstallRollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" />
+    <CustomAction Id="TopShelfService_Install" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" />
+    <CustomAction Id="TopShelfService_UninstallRollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" />
+    <CustomAction Id="TopShelfService_Uninstall" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" />
+
+    <InstallExecuteSequence>
+      <Custom Action="TopShelf" Before="RemoveExistingProducts" Overridable="yes"/>
+      <Custom Action="TopShelfService_InstallRollback" Before="TopShelfService_Install" Overridable="yes"/>
+      <Custom Action="TopShelfService_Install" Before="InstallServices" Overridable="yes"/>
+      <Custom Action="TopShelfService_UninstallRollback" Before="TopShelfService_Uninstall" Overridable="yes"/>
+      <Custom Action="TopShelfService_Uninstall" Before="DeleteServices" Overridable="yes"/>
+    </InstallExecuteSequence>
+
+    <UI>
+      <ProgressText Action="TopShelf">!(loc.TopShelf)</ProgressText>
+      <ProgressText Action="TopShelfService_InstallRollback">!(loc.TopShelf)</ProgressText>
+      <ProgressText Action="TopShelfService_Install">!(loc.TopShelf)</ProgressText>
+      <ProgressText Action="TopShelfService_UninstallRollback">!(loc.TopShelf)</ProgressText>
+      <ProgressText Action="TopShelfService_Uninstall">!(loc.TopShelf)</ProgressText>
+    </UI>
+  </Fragment>
 
 </Wix>

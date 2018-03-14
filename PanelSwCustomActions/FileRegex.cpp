@@ -146,7 +146,7 @@ HRESULT CFileRegex::AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR sz
 	bool bRes = true;
 
 	hr = AddCommand("CFileRegex", &pCmd);
-	BreakExitOnFailure(hr, "Failed to add XML element");
+	BreakExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new FileRegexDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");

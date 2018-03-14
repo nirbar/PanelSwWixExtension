@@ -151,7 +151,7 @@ HRESULT CTelemetry::AddPost(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPC
 	bool bRes = true;
 
 	hr = AddCommand("CTelemetry", &pCmd);
-	BreakExitOnFailure(hr, "Failed to add XML element");
+	BreakExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new TelemetryDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");

@@ -31,3 +31,4 @@ EXPORTS
 	TrimString
 	Warn
 	XmlSearch
+	TopShelf

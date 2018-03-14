@@ -181,6 +181,10 @@ namespace PanelSw.Wix.Extensions
                             ParseInstallUtilElement(element, parentElement);
                             break;
 
+                        case "TopShelf":
+                            ParseTopShelfElement(element, parentElement);
+                            break;
+
                         default:
                             Core.UnexpectedElement(parentElement, element);
                             break;
@@ -411,6 +415,135 @@ namespace PanelSw.Wix.Extensions
                 row[0] = file;
                 row[1] = argId;
                 row[2] = value;
+            }
+        }
+
+
+        enum TopShelf_Account
+        {
+            custom = 0,
+            localsystem = 1,
+            localservice = 2,
+            networkservice = 3,
+        }
+
+        enum TopShelf_Start
+        {
+            disabled = 0,
+            auto = 1,
+            manual = 2,
+            delayedAuto = 3,
+        }
+
+        private void ParseTopShelfElement(XmlNode node, XmlElement parentElement)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            TopShelf_Account account = TopShelf_Account.localsystem;
+            TopShelf_Start start = TopShelf_Start.auto;
+            string serviceName = null;
+            string displayName = null;
+            string description = null;
+            string instance = null;
+            string userName = null;
+            string password = null;
+
+            string file = parentElement.GetAttribute("Id");
+            if (string.IsNullOrEmpty(file))
+            {
+                file = parentElement.GetAttribute("Source");
+                file = Path.GetFileName(file);
+            }
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName)
+                    {
+                        case "Account":
+                            {
+                                string a = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                                try
+                                {
+                                    account = (TopShelf_Account)Enum.Parse(typeof(TopShelf_Account), a);
+                                }
+                                catch
+                                {
+                                    Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                                }
+                            }
+                            break;
+
+                        case "Start":
+                            {
+                                string a = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                                try
+                                {
+                                    start = (TopShelf_Start)Enum.Parse(typeof(TopShelf_Start), a);
+                                }
+                                catch
+                                {
+                                    Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                                }
+                            }
+                            break;
+
+                        case "ServiceName":
+                            serviceName = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        case "DisplayName":
+                            displayName = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        case "Description":
+                            description = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        case "Instance":
+                            instance = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        case "UserName":
+                            userName = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        case "Password":
+                            password = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(file))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.Name, "Id"));
+            }
+            if (string.IsNullOrEmpty(userName) != (account != TopShelf_Account.custom))
+            {
+                Core.OnMessage(WixErrors.IllegalAttributeValueWithOtherAttribute(sourceLineNumbers, "TopShelf", "Account", "custom", "UserName"));
+            }
+
+            // reference the Win32_CopyFiles custom actions since nothing will happen without these
+            Core.EnsureTable(sourceLineNumbers, "PSW_TopShelf");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "TopShelf");
+
+            if (!Core.EncounteredError)
+            {
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_TopShelf");
+                row[0] = file;
+                row[1] = serviceName;
+                row[2] = displayName;
+                row[3] = description;
+                row[4] = instance;
+                row[5] = (int)account;
+                row[6] = userName;
+                row[7] = password;
+                row[8] = (int)start;
             }
         }
 

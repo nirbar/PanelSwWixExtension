@@ -8,6 +8,7 @@
 #include "TaskScheduler.h"
 #include "ExecOnComponent.h"
 #include "ServiceConfig.h"
+#include "TopShelfService.h"
 
 // ReceiverToExecutorFunc implementation.
 HRESULT ReceiverToExecutor(LPCSTR szReceiver, CDeferredActionBase** ppExecutor)
@@ -49,6 +50,11 @@ HRESULT ReceiverToExecutor(LPCSTR szReceiver, CDeferredActionBase** ppExecutor)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating ServiceConfig handler");
 		(*ppExecutor) = new CServiceConfig();
+	}
+	else if (0 == ::strcmp(szReceiver, "CTopShelfService"))
+	{
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating TopShelfService handler");
+		(*ppExecutor) = new CTopShelfService();
 	}
 	else
 	{

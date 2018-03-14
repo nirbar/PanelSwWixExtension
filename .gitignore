@@ -13,3 +13,4 @@ bin/
 *.ipch
 /packages/
 /build/
+*.user.*

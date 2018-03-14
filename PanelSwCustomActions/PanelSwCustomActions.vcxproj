@@ -116,6 +116,7 @@
     <ClCompile Include="TaskScheduler.cpp" />
     <ClCompile Include="Telemetry.cpp" />
     <ClCompile Include="TerminateSuccessfully.cpp" />
+    <ClCompile Include="TopShelfService.cpp" />
     <ClCompile Include="XmlSearch.cpp" />
     <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\execOnDetails.pb.cc">
       <AutoGen>True</AutoGen>
@@ -136,6 +137,9 @@
       <AutoGen>True</AutoGen>
     </ClCompile>
     <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\telemetryDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\topShelfServiceDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
   </ItemGroup>
@@ -174,6 +178,10 @@
     <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\telemetryDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\topShelfServiceDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="TopShelfService.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -185,6 +193,7 @@
     <None Include="ProtoBuf\shellExecDetails.proto" />
     <None Include="ProtoBuf\taskSchedulerDetails.proto" />
     <None Include="ProtoBuf\telemetryDetails.proto" />
+    <None Include="ProtoBuf\topShelfServiceDetails.proto" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
