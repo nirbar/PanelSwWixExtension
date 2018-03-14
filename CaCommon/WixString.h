@@ -169,15 +169,31 @@ public:
 	{
 		HRESULT hr = S_OK;
 		va_list va;
+		LPWSTR szAppend = nullptr;
+		DWORD dwCapacity = 0;
 		va_start(va, szFormat);
 		
-		hr = StrAllocFormattedArgs(&_pS, szFormat, va);
+		hr = StrAllocFormattedArgs(&szAppend, szFormat, va);
 		if (FAILED(hr))
 		{
 			Release();
 		}
 
+		hr = StrAllocConcat(&_pS, szAppend, _dwCapacity);
+		if (FAILED(hr))
+		{
+			Release();
+		}
+
+		dwCapacity = 1 + ::wcslen(_pS);
+		if (dwCapacity > _dwCapacity)
+		{
+			_dwCapacity = dwCapacity;
+		}
+
 	LExit:
+
+		ReleaseStr(szAppend);
 
 		va_end(va);
 		return hr;
