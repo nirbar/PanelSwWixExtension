@@ -10,5 +10,6 @@
   <String Id="InstallUtil"><![CDATA[Installing .NET service assemblies]]></String>
   <String Id="SqlSearch"><![CDATA[Executing SQL queries]]></String>
   <String Id="BackupAndRestore"><![CDATA[Migrating configurations]]></String>
+  <String Id="TopShelf"><![CDATA[Installing TopShelf services]]></String>
 </WixLocalization>
 

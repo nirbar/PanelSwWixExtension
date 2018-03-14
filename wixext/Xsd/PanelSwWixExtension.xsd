@@ -14,6 +14,60 @@
   </xs:annotation>
   <xs:import namespace="http://schemas.microsoft.com/wix/2006/wi" />
 
+  <xs:element name="TopShelf">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="File" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Install a TopShelf service when the parent component is installed and uninstalls it when the parent component is removed]]>
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:attribute name="ServiceName" use="optional" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Formatted service name.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="DisplayName" use="optional" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Formatted service display name.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Description" use="optional" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Formatted service description.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Instance" use="optional" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Formatted service instance.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="UserName" use="optional" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Formatted service account user name when Account is custom.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Password" use="optional" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Formatted service account password when Account is custom.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Account" use="optional" type="TopShelf_Account" default="custom">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Service account. Defaults to 'localSystem']]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Start" use="optional" type="TopShelf_Start" default="auto">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Service start type. Defaults to 'auto']]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="BackupAndRestore">
     <xs:annotation>
       <xs:appinfo>
@@ -1184,6 +1238,34 @@ Remove registry values.
       </xs:enumeration>
       <xs:enumeration value="x86"></xs:enumeration>
       <xs:enumeration value="x64"></xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="TopShelf_Account">
+    <xs:annotation>
+      <xs:documentation>TopShelf service account.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:NMTOKEN">
+      <xs:enumeration value="custom">
+        <xs:annotation>
+          <xs:documentation>Custom account specified in 'UserName' attribute</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="localSystem"></xs:enumeration>
+      <xs:enumeration value="localService"></xs:enumeration>
+      <xs:enumeration value="networkService"></xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="TopShelf_Start">
+    <xs:annotation>
+      <xs:documentation>TopShelf start type.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:NMTOKEN">
+      <xs:enumeration value="disabled"></xs:enumeration>
+      <xs:enumeration value="auto"></xs:enumeration>
+      <xs:enumeration value="manual"></xs:enumeration>
+      <xs:enumeration value="delayedAuto"></xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

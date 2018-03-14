@@ -23,6 +23,7 @@ PanelSwWixExtension is a [WiX](http://wixtoolset.org/) extension that contains v
   - *ShellExecute*: Call ShellExecuteEx with parameters.
   - *Telemetry*: Send telemetry data to a given URL.
   - *InstallUtil*: Install a .NET assembly service.
+  - *TopShelf*: Install a [TopShelf](http://topshelf-project.com/) based service.
   - *BackupAndRestore*: Backup a file before install or upgarde and restore it after.
 
 ## Custom Actions

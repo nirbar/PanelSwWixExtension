@@ -1,0 +1,36 @@
+syntax = "proto3";
+package com.panelsw.ca;
+option optimize_for = LITE_RUNTIME;
+
+message TopShelfServiceDetails{
+
+	enum HowToStart {
+		disabled = 0;
+		auto = 1;
+		manual = 2;
+		delayedAuto = 3;
+	}
+
+	enum ServiceAccount {
+		custom = 0;
+		localsystem = 1;
+		localservice = 2;
+		networkservice = 3;
+	}
+	
+	bytes file = 1;
+	bytes serviceName = 2;
+	bytes displayName = 3;
+	bytes description = 4;
+	bytes instance = 5;
+
+	// Account
+	ServiceAccount account = 6;
+	bytes userName = 7;
+	bytes password = 8;
+
+	HowToStart howToStart = 9;
+
+	// Install / Uninstall
+	bool install = 10;
+}

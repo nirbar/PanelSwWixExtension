@@ -138,7 +138,7 @@ HRESULT CFileOperations::AddCopyFile(LPCWSTR szFrom, LPCWSTR szTo, int flags)
 	bool bRes = true;
 
 	hr = AddCommand("CFileOperations", &pCmd);
-	BreakExitOnFailure(hr, "Failed to add XML element");
+	BreakExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new FileOperationsDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
@@ -169,7 +169,7 @@ HRESULT CFileOperations::AddMoveFile(LPCWSTR szFrom, LPCWSTR szTo, int flags)
 	bool bRes = true;
 
 	hr = AddCommand("CFileOperations", &pCmd);
-	BreakExitOnFailure(hr, "Failed to add XML element");
+	BreakExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new FileOperationsDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
@@ -200,7 +200,7 @@ HRESULT CFileOperations::AddDeleteFile(LPCWSTR szPath, int flags)
 	bool bRes = true;
 
 	hr = AddCommand("CFileOperations", &pCmd);
-	BreakExitOnFailure(hr, "Failed to add XML element");
+	BreakExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new FileOperationsDetails();
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
