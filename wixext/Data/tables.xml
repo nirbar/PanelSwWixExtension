@@ -9,7 +9,7 @@
     <columnDefinition name="Condition" type="string" length="0" modularize="property" nullable="yes" category="condition" />
   </tableDefinition>
 
-<tableDefinition name="PSW_ReadIniValues">
+  <tableDefinition name="PSW_ReadIniValues">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
     <columnDefinition name="FilePath" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Section" type="string" length="0" modularize="property" category="formatted" />
@@ -175,5 +175,17 @@
     <columnDefinition name="Component_" type="string" length="0" modularize="property" category="identifier" />
     <columnDefinition name="Path" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Flags" type="number" length="2" minValue="0" maxValue="127" />
+  </tableDefinition>
+
+  <tableDefinition name="PSW_TopShelf">
+    <columnDefinition name="File_" primaryKey="yes" type="string" length="72" modularize="column" category="identifier" />
+    <columnDefinition name="ServiceName" type="string" length="0" nullable="yes" category="formatted" modularize="property" />
+    <columnDefinition name="DisplayName" type="string" length="0" nullable="yes" category="formatted" />
+    <columnDefinition name="Description" type="string" length="0" nullable="yes" category="formatted" />
+    <columnDefinition name="Instance" length="0" type="string" nullable="yes" category="formatted" />
+    <columnDefinition name="Account" type="number" minValue="0" maxValue="3" length="2" />
+    <columnDefinition name="UserName" type="string" length="0" nullable="yes" category="formatted" />
+    <columnDefinition name="Password" type="string" length="0" nullable="yes" category="formatted" />
+    <columnDefinition name="HowToStart" type="number" minValue="0" maxValue="3" length="2" />
   </tableDefinition>
 </tableDefinitions>

@@ -226,7 +226,7 @@ HRESULT CTopShelfService::DeferredExecute(const ::std::string& command)
 	hr = BuildCommandLine(&details, &commandLine);
 	BreakExitOnFailure(hr, "Failed to create TopShelf command line");
 
-	hr = QuietExec(commandLine, INFINITE);
+	hr = QuietExecEx(commandLine, INFINITE, FALSE, TRUE);
 	BreakExitOnFailure(hr, "TopShelf command failed");
 
 LExit:
@@ -237,6 +237,7 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 {
 	HRESULT hr = S_OK;
 	CWixString file;
+	CWixString logCommand;
 	LPCWSTR instance = nullptr;
 	LPCWSTR userName = nullptr;
 	LPCWSTR password = nullptr;
@@ -259,32 +260,32 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 	instance = (LPCWSTR)pDetails->instance().data();
 	if (instance && *instance)
 	{
-		hr = pCommandLine->AppnedFormat(L" -instance:\"%s\"", instance);
+		hr = pCommandLine->AppnedFormat(L" -instance \"%s\"", instance);
 		BreakExitOnFailure(hr, "Failed formatting string");
 	}
 
 	// Uninstall - command is ready
 	if (!pDetails->install())
 	{
-		ExitFunction();
+		goto LCommandForLog;
 	}
 
 	serviceName = (LPCWSTR)pDetails->servicename().data();
 	if (serviceName && *serviceName)
 	{
-		hr = pCommandLine->AppnedFormat(L" -servicename:\"%s\"", serviceName);
+		hr = pCommandLine->AppnedFormat(L" -servicename \"%s\"", serviceName);
 		BreakExitOnFailure(hr, "Failed formatting string");
 	}
 	displayName = (LPCWSTR)pDetails->displayname().data();
 	if (displayName && *displayName)
 	{
-		hr = pCommandLine->AppnedFormat(L" -displayname:\"%s\"", displayName);
+		hr = pCommandLine->AppnedFormat(L" -displayname \"%s\"", displayName);
 		BreakExitOnFailure(hr, "Failed formatting string");
 	}
 	description = (LPCWSTR)pDetails->description().data();
 	if (description && *description)
 	{
-		hr = pCommandLine->AppnedFormat(L" -description:\"%s\"", description);
+		hr = pCommandLine->AppnedFormat(L" -description \"%s\"", description);
 		BreakExitOnFailure(hr, "Failed formatting string");
 	}
 
@@ -292,16 +293,11 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 	{
 	case TopShelfServiceDetails_ServiceAccount::TopShelfServiceDetails_ServiceAccount_custom:
 		userName = (LPCWSTR)pDetails->username().data();
-		password = (LPCWSTR)pDetails->password().data();
 
-		hr = pCommandLine->AppnedFormat(L" -username:\"%s\"", userName);
+		hr = pCommandLine->AppnedFormat(L" -username \"%s\"", userName);
 		BreakExitOnFailure(hr, "Failed formatting string");
 
-		if (password && password)
-		{
-			hr = pCommandLine->AppnedFormat(L" -password:\"%s\"", password);
-			BreakExitOnFailure(hr, "Failed formatting string");
-		}
+		// Password will be added later, when formatting command line for log so it will be hidden.
 		break;
 
 	case TopShelfServiceDetails_ServiceAccount::TopShelfServiceDetails_ServiceAccount_localservice:
@@ -350,6 +346,26 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 		BreakExitOnFailure((hr = E_INVALIDARG), "Illegal service start");
 		break;
 	}
+	
+LCommandForLog: // Dump command line to log without password.
+
+	hr = logCommand.Copy(*pCommandLine);
+	BreakExitOnFailure(hr, "Failed copying string");
+
+	if (!pDetails->install() && (pDetails->account() == TopShelfServiceDetails_ServiceAccount::TopShelfServiceDetails_ServiceAccount_custom))
+	{
+		password = (LPCWSTR)pDetails->password().data();
+		if (password && password)
+		{
+			hr = logCommand.AppnedFormat(L" -password \"*********\"");
+			BreakExitOnFailure(hr, "Failed formatting string");
+
+			hr = pCommandLine->AppnedFormat(L" -password \"%s\"", password);
+			BreakExitOnFailure(hr, "Failed formatting string");
+		}
+	}
+
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing TopShelf command '%ls'", (LPCWSTR)logCommand);
 
 LExit:
 
