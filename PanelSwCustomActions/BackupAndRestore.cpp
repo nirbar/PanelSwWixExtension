@@ -57,6 +57,7 @@ extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall)
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
 		int flags = 0;
 		bool bIgnoreMissing;
+		bool bIsFolder = false;
 
 		hr = WcaGetRecordString(hRecord, BackupAndRestoreQuery::Id, (LPWSTR*)szId);
 		BreakExitOnFailure(hr, "Failed to get Id.");
@@ -80,6 +81,13 @@ extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall)
 		dwRes = ::GetTempFileName(longTempPath, L"BNR", 0, szTempFile);
 		BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
 
+		bIsFolder = ::PathIsDirectory(szPath);
+		if (bIsFolder) // For folders, we'll delete the file that holds the same name. For files, we'll simply overwrite.
+		{
+			hr = deferredCAD.DeletePath(szTempFile, true, true); // Delete the temporay file we created now as we're not going to need it.
+			ExitOnFailure(hr, "Failed deleting file");
+		}
+
 		hr = deferredCAD.CopyPath(szPath, szTempFile, false, bIgnoreMissing, flags & CFileOperations::FileOperationsAttributes::IgnoreErrors);
 		BreakExitOnFailure(hr, "Failed backing up '%ls'", (LPCWSTR)szPath);
 		if (hr == S_FALSE)
@@ -89,7 +97,7 @@ extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall)
 		}
 
 		// For folders, we'll copy the contents to target folder. Otherwise, the temp folder will be copied with the content
-		if (::PathIsDirectory(szTempFile))
+		if (bIsFolder)
 		{
 			hr = rollbackCAD.AddDeleteFile(szPath, flags);
 			BreakExitOnFailure(hr, "Failed creating custom action data for rollback action.");
