@@ -12,6 +12,7 @@
       <Component Directory="INSTALLFOLDER" Id="Product.wxs">
         <File Source="$(var.ProjectDir)Product.wxs" />
         <PanelSW:BackupAndRestore Id="_1" IgnoreMissing="yes" IgnoreErrors="yes" Path="[#Product.wxs]" RestoreScheduling="afterDuplicateFiles"/>
+        <PanelSW:BackupAndRestore Id="_2" IgnoreMissing="yes" IgnoreErrors="yes" Path="[INSTALLFOLDER]1\\\\\" RestoreScheduling="afterDuplicateFiles"/>
       </Component>
     </Feature>
 
