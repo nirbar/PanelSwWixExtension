@@ -187,5 +187,6 @@
     <columnDefinition name="UserName" type="string" length="0" nullable="yes" category="formatted" />
     <columnDefinition name="Password" type="string" length="0" nullable="yes" category="formatted" />
     <columnDefinition name="HowToStart" type="number" minValue="0" maxValue="3" length="2" />
+    <columnDefinition name="PromptOnError" type="number" minValue="0" maxValue="1" length="2" />
   </tableDefinition>
 </tableDefinitions>

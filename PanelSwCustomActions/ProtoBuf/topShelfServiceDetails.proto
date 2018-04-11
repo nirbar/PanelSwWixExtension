@@ -33,4 +33,6 @@ message TopShelfServiceDetails{
 
 	// Install / Uninstall
 	bool install = 10;
+
+	bool promptOnError = 11;
 }

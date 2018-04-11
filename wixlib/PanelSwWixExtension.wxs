@@ -511,6 +511,7 @@
     </InstallExecuteSequence>
 
     <UI>
+      <Error Id="27000">!(loc.TopShelfFailure)</Error>
       <ProgressText Action="TopShelf">!(loc.TopShelf)</ProgressText>
       <ProgressText Action="TopShelfService_InstallRollback">!(loc.TopShelf)</ProgressText>
       <ProgressText Action="TopShelfService_Install">!(loc.TopShelf)</ProgressText>

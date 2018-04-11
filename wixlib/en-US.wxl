@@ -11,5 +11,6 @@
   <String Id="SqlSearch"><![CDATA[Executing SQL queries]]></String>
   <String Id="BackupAndRestore"><![CDATA[Migrating configurations]]></String>
   <String Id="TopShelf"><![CDATA[Installing TopShelf services]]></String>
+  <String Id="TopShelfFailure"><![CDATA[Failed configuring service [2]]]></String>
 </WixLocalization>
 

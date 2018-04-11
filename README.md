@@ -36,6 +36,12 @@ PanelSwWixExtension is a [WiX](http://wixtoolset.org/) extension that contains v
   For example, say PROPERTY_TO_SPLIT="MY_PROP", MY_PROP="1,2,3" and STRING_SPLIT_TOKEN=",". Scheduling SplitString custom action will yield properties MY_PROP_0="1", MY_PROP_1="2" and MY_PROP_2="3".
 - *TrimString*: Trim whitespace characters in property with name specified in 'PROPERTY_TO_TRIM'.
 
+## Error codes
+
+PanelSwWixExtension uses error codes in Error table:
+
+- 27000: TopShelf error template for prompting user on errors.
+
 ## Properties
 
 The following properties hold localized built-in account names. To use them, add a [PropertyRef](http://wixtoolset.org/documentation/manual/v3/xsd/wix/propertyref.html) element.

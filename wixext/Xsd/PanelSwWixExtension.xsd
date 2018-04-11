@@ -65,6 +65,11 @@
           <xs:documentation><![CDATA[Service start type. Defaults to 'auto']]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="PromptOnError" use="optional" type="YesNoType" default="no">
+        <xs:annotation>
+          <xs:documentation><![CDATA[On error, prompt user to abort, retry or ignore. Defaults to 'no']]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
 

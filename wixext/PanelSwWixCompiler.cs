@@ -446,6 +446,7 @@ namespace PanelSw.Wix.Extensions
             string instance = null;
             string userName = null;
             string password = null;
+            bool promptOnError = false;
 
             string file = parentElement.GetAttribute("Id");
             if (string.IsNullOrEmpty(file))
@@ -512,6 +513,13 @@ namespace PanelSw.Wix.Extensions
                             password = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
 
+                        case "PromptOnError":
+                            if (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
+                            {
+                                promptOnError = true;
+                            }
+                            break;
+
                         default:
                             Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                             break;
@@ -544,6 +552,7 @@ namespace PanelSw.Wix.Extensions
                 row[6] = userName;
                 row[7] = password;
                 row[8] = (int)start;
+                row[9] = promptOnError ? 1 : 0;
             }
         }
 
