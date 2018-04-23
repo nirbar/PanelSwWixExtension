@@ -189,4 +189,12 @@
     <columnDefinition name="HowToStart" type="number" minValue="0" maxValue="3" length="2" />
     <columnDefinition name="PromptOnError" type="number" minValue="0" maxValue="1" length="2" />
   </tableDefinition>
+
+  <tableDefinition name="PSW_SelfSignCertificate">
+    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="Component_" type="string" length="0" modularize="property" category="identifier" />
+    <columnDefinition name="X500" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Expiry" type="number" length="4" minValue="0" maxValue="65535" />
+    <columnDefinition name="Password" type="string" length="0" modularize="property" category="formatted" />
+  </tableDefinition>
 </tableDefinitions>

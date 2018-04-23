@@ -1,16 +1,11 @@
 namespace PanelSw.Wix.Extensions
 {
+    using Microsoft.Tools.WindowsInstallerXml;
     using System;
-    using System.Collections;
-    using System.Globalization;
+    using System.IO;
     using System.Reflection;
-    using System.Text;
-    using System.Text.RegularExpressions;
     using System.Xml;
     using System.Xml.Schema;
-
-    using Microsoft.Tools.WindowsInstallerXml;
-    using System.IO;
 
     /// <summary>
     /// The compiler for the Windows Installer XML Toolset PanelSwWixExtension Extension.
@@ -168,6 +163,10 @@ namespace PanelSw.Wix.Extensions
                             ParseBackupAndRestoreElement(parentElement, element);
                             break;
 
+                        case "CreateSelfSignCertificate":
+                            ParseCreateSelfSignCertificateElement(parentElement, element);
+                            break;
+
                         default:
                             Core.UnexpectedElement(parentElement, element);
                             break;
@@ -196,7 +195,79 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
+        private void ParseCreateSelfSignCertificateElement(XmlElement parentElement, XmlElement element)
+        {
+            SourceLineNumberCollection parentsourceLineNumbers = Preprocessor.GetSourceLineNumbers(parentElement);
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
+            string id = null;
+            string component = null;
+            string password = null;
+            string x500 = null;
+            int expiry = 0;
 
+            component = Core.GetAttributeValue(parentsourceLineNumbers, parentElement.Attributes["Id"]);
+            if (string.IsNullOrEmpty(component))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(parentsourceLineNumbers, parentElement.Name, "Id"));
+            }
+
+            foreach (XmlAttribute attrib in element.Attributes)
+            {
+                if ((0 != attrib.NamespaceURI.Length) && (attrib.NamespaceURI != schema.TargetNamespace))
+                {
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName.ToLower())
+                    {
+                        case "id":
+                            id = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "password":
+                            password = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "expiry":
+                            expiry = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, int.MaxValue);
+                            break;
+                        case "x500":
+                            x500 = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+              
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+                else
+                {
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            if (string.IsNullOrEmpty(id))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.Name, "Id"));
+            }
+            if (string.IsNullOrEmpty(x500))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "X500"));
+            }
+
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "CreateSelfSignCertificate");
+            if (!Core.EncounteredError)
+            {
+                Core.EnsureTable(sourceLineNumbers, "PSW_SelfSignCertificate");
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_SelfSignCertificate");
+                row[0] = id;
+                row[1] = component;
+                row[2] = x500;
+                row[3] = expiry;
+                row[4] = password;
+            }
+        }
+        
         private enum BackupAndRestore_deferred_Schedule
         {
             BackupAndRestore_deferred_Before_InstallFiles,

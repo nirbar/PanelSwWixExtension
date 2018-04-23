@@ -493,7 +493,7 @@
       <Custom Action="BackupAndRestore_deferred" After="RemoveExistingProducts" Overridable="yes"/>
     </InstallExecuteSequence>
   </Fragment>
-  
+
   <!-- TopShelf service -->
   <Fragment>
     <CustomAction Id="TopShelf" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="TopShelf" Execute="immediate" Return="check" />
@@ -520,4 +520,14 @@
     </UI>
   </Fragment>
 
+  <!-- CreateSelfSignCertificate -->
+  <Fragment>
+    <CustomAction Id="CreateSelfSignCertificate" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CreateSelfSignCertificate" Execute="immediate" Return="check" />
+    <InstallExecuteSequence>
+      <Custom Action="CreateSelfSignCertificate" Before="InstallInitialize" Overridable="yes"/>
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="CreateSelfSignCertificate">!(loc.CreateSelfSignCertificate)</ProgressText>
+    </UI>
+  </Fragment>
 </Wix>

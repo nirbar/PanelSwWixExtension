@@ -14,6 +14,40 @@
   </xs:annotation>
   <xs:import namespace="http://schemas.microsoft.com/wix/2006/wi" />
 
+  <xs:element name="CreateSelfSignCertificate">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Create a self-signed certificate when parent component is installed]]>
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:attribute name="Id" use="required" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Property name in which the path of the newly created PFX file will be saved.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Password" use="optional" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Formatted PFX password.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="X500" use="required" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[X500 string of the certificate.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Expiry" use="required" type="xs:int">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Certificate expiry in days from install.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="TopShelf">
     <xs:annotation>
       <xs:appinfo>

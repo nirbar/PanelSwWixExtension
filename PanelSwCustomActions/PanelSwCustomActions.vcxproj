@@ -93,6 +93,7 @@
     <ClCompile Include="BackupAndRestore.cpp" />
     <ClCompile Include="CleanPendingFileRenameOperations.cpp" />
     <ClCompile Include="CommonDeferred.cpp" />
+    <ClCompile Include="CreateSelfSignCertificate.cpp" />
     <ClCompile Include="DismSched.cpp" />
     <ClCompile Include="ExecOnComponent.cpp" />
     <ClCompile Include="FileOperations.cpp" />

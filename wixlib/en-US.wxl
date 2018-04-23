@@ -12,5 +12,6 @@
   <String Id="BackupAndRestore"><![CDATA[Migrating configurations]]></String>
   <String Id="TopShelf"><![CDATA[Installing TopShelf services]]></String>
   <String Id="TopShelfFailure"><![CDATA[Failed configuring service [2]]]></String>
+  <String Id="CreateSelfSignCertificate"><![CDATA[Creating self-signed certificates]]></String>
 </WixLocalization>
 
