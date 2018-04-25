@@ -160,7 +160,10 @@
       <Custom Action="FileRegex_Immediate" After="DuplicateFiles" Overridable="yes"/>
     </InstallExecuteSequence>
     <UI>
-      <ProgressText Action="ShellExecute_deferred">File search &amp; replace</ProgressText>
+      <ProgressText Action="FileRegex_Immediate">!(loc.FileRegex)</ProgressText>
+      <ProgressText Action="FileRegex_rollback">!(loc.FileRegex)</ProgressText>
+      <ProgressText Action="FileRegex_deferred">!(loc.FileRegex)</ProgressText>
+      <ProgressText Action="FileRegex_commit">!(loc.FileRegex)</ProgressText>
     </UI>
   </Fragment>
 
