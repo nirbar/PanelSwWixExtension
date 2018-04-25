@@ -10,6 +10,7 @@ PanelSwWixExtension is a [WiX](http://wixtoolset.org/) extension that contains v
   - *XmlSearch*: Read XML values.
   - *RegularExpression*: Execute a Regular Expression to replace or find matches in property values.
   - *MsiSqlQuery*: Execute a MSI-SQL query on the MSI database.
+  - *CreateSelfSignCertificate*: Create a self-sign certificate that can then be installed by WixIisExtension.
 - Deferred Actions:
   - *Dism*: Enable Windows Feature using DISM API. Features will be installed when the parent component is being installed or repaired.
   - *ZipFile*: Creates a ZIP archive from selected files.

@@ -121,7 +121,7 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall)
 		bRes = ::FileTimeToSystemTime(&endFileTime, &endTime);
 		BreakExitOnNullWithLastError(bRes, hr, "Failed converting FILETIME");
 
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Creating self-signed certificate '%ls', expired %i-%i-%i %i:%i:%i (%i days from today) (%I64u)", (LPCWSTR)x500, endTime.wYear, endTime.wMonth, endTime.wDay, endTime.wHour, endTime.wMinute, endTime.wSecond, expiryDays, expiry.QuadPart);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Creating self-signed certificate '%ls', expired %i-%i-%i %i:%i:%i (%i days from today)", (LPCWSTR)x500, endTime.wYear, endTime.wMonth, endTime.wDay, endTime.wHour, endTime.wMinute, endTime.wSecond, expiryDays);
 		
 		bRes = ::CertStrToName(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, x500, CERT_X500_NAME_STR, nullptr, nullptr, &nSize, &errStr);
 		BreakExitOnNullWithLastError(bRes, hr, "Failed getting size for converting x500 string to cert name: %ls", errStr);
