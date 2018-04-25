@@ -5,8 +5,8 @@
 #include "FileOperations.h"
 #pragma comment (lib, "Crypt32.lib")
 
-#define SelfSignCertificate_QUERY L"SELECT `Id`, `Component_`, `X500`, `Expiry`, `Password`, `DeleteOnCommit` FROM `PSW_SelfSignCertificate`"
-enum SelfSignCertificateQuery { Id = 1, Component, X500, Expiry, Password, DeleteOnCommit };
+#define SelfSignCertificate_QUERY L"SELECT `Id`, `Component_`, `X500`, `SubjectAltNames`, `Expiry`, `Password`, `DeleteOnCommit` FROM `PSW_SelfSignCertificate`"
+enum SelfSignCertificateQuery { Id = 1, Component, X500, SubjectAltNames, Expiry, Password, DeleteOnCommit };
 
 #define CERT_CONTAINER		L"Panel-SW.co.il"
 
@@ -25,6 +25,11 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall)
 	PCCERT_CONTEXT pCertContext = nullptr;
 	HCERTSTORE hStore = NULL;
 	CRYPT_DATA_BLOB cryptBlob;
+	CERT_ALT_NAME_ENTRY altName;
+	CERT_ALT_NAME_INFO altNameInfo;
+	CRYPT_DATA_BLOB extBlob;
+	CERT_EXTENSION ext;
+	CERT_EXTENSIONS extArray;
 	HANDLE hFile = INVALID_HANDLE_VALUE;
 	DWORD dwRes = ERROR_SUCCESS;
 	WCHAR szTempPath[MAX_PATH + 1];
@@ -37,6 +42,11 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall)
 
 	::ZeroMemory(&nameBlob, sizeof(nameBlob));
 	::ZeroMemory(&keyInfo, sizeof(keyInfo));
+	::ZeroMemory(&ext, sizeof(ext));
+	::ZeroMemory(&extArray, sizeof(extArray));
+	::ZeroMemory(&altName, sizeof(altName));
+	::ZeroMemory(&altNameInfo, sizeof(altNameInfo));
+	::ZeroMemory(&extBlob, sizeof(extBlob));
 
 	keyInfo.pwszProvName = nullptr;
 	keyInfo.dwProvType = PROV_RSA_FULL;
@@ -82,6 +92,7 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall)
 		SYSTEMTIME endTime;
 		FILETIME endFileTime;
 		CWixString x500; // Signed to, i.e. "CN=Panel-SW.com"
+		CWixString subAltNames; // Subject Alternative Name, i.e. "Panel-SW.com"
 		CWixString password;
 		CWixString id; // Property name i.e. "SELF_SIGNED_PFX"
 		CWixString component;
@@ -96,6 +107,8 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to get Component.");
 		hr = WcaGetRecordFormattedString(hRecord, SelfSignCertificateQuery::X500, (LPWSTR*)x500);
 		BreakExitOnFailure(hr, "Failed to get X500.");
+		hr = WcaGetRecordFormattedString(hRecord, SelfSignCertificateQuery::SubjectAltNames, (LPWSTR*)subAltNames);
+		BreakExitOnFailure(hr, "Failed to get SubjectAltNames.");
 		hr = WcaGetRecordFormattedInteger(hRecord, SelfSignCertificateQuery::Expiry, &expiryDays);
 		BreakExitOnFailure(hr, "Failed to get Expiry.");
 		hr = WcaGetRecordFormattedString(hRecord, SelfSignCertificateQuery::Password, (LPWSTR*)password);
@@ -135,7 +148,34 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall)
 		nameBlob.cbData = nSize;
 		nameBlob.pbData = name;
 
-		pCertContext = ::CertCreateSelfSignCertificate(hCrypt, &nameBlob, 0, &keyInfo, nullptr, nullptr, &endTime, nullptr);
+		// Subject Alternative Name
+		if (!subAltNames.IsNullOrEmpty())
+		{
+			altName.dwAltNameChoice = CERT_ALT_NAME_DNS_NAME;
+			altName.pwszDNSName = (LPWSTR)subAltNames;
+
+			altNameInfo.cAltEntry = 1;
+			altNameInfo.rgAltEntry = &altName;
+
+			bRes = ::CryptEncodeObjectEx(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, X509_ALTERNATE_NAME, &altNameInfo, 0, nullptr, nullptr, &extBlob.cbData);
+			BreakExitOnNullWithLastError(bRes, hr, "Failed encoding alternate name");
+
+			extBlob.pbData = (BYTE*)MemAlloc(extBlob.cbData, FALSE);
+			BreakExitOnNull(extBlob.pbData, hr, E_FAIL, "Failed allocating memory");
+
+			bRes = ::CryptEncodeObjectEx(X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, X509_ALTERNATE_NAME, &altNameInfo, 0, nullptr, extBlob.pbData, &extBlob.cbData);
+			BreakExitOnNullWithLastError(bRes, hr, "Failed encoding alternate name");
+
+			ext.fCritical = FALSE;
+			ext.pszObjId = szOID_SUBJECT_ALT_NAME2;
+			ext.Value = extBlob;
+
+			extArray.cExtension = 1;
+			extArray.rgExtension = &ext;
+		}
+
+
+		pCertContext = ::CertCreateSelfSignCertificate(hCrypt, &nameBlob, 0, &keyInfo, nullptr, nullptr, &endTime, extArray.cExtension ? &extArray : nullptr);
 		BreakExitOnNullWithLastError(pCertContext, hr, "Failed creating self signed certificate");
 
 		bRes = ::CertAddCertificateContextToStore(hStore, pCertContext, CERT_STORE_ADD_ALWAYS, nullptr);
@@ -181,12 +221,19 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall)
 		BreakExitOnNullWithLastError(bRes, hr, "Failed releasing certificate");
 		pCertContext = nullptr;
 
-		MemFree(cryptBlob.pbData);
+		ReleaseMem(cryptBlob.pbData);
 		::ZeroMemory(&cryptBlob, sizeof(cryptBlob));
 
-		MemFree(name);
+		ReleaseMem(name);
 		name = nullptr;
 		::ZeroMemory(&nameBlob, sizeof(nameBlob));
+
+		ReleaseMem(extBlob.pbData);
+		::ZeroMemory(&ext, sizeof(ext));
+		::ZeroMemory(&extArray, sizeof(extArray));
+		::ZeroMemory(&altName, sizeof(altName));
+		::ZeroMemory(&altNameInfo, sizeof(altNameInfo));
+		::ZeroMemory(&extBlob, sizeof(extBlob));
 	}
 	hr = S_OK;
 
@@ -217,14 +264,10 @@ LExit:
 		hCrypt = NULL;
 		::CryptAcquireContext(&hCrypt, CERT_CONTAINER, nullptr, PROV_RSA_FULL, CRYPT_DELETEKEYSET | CRYPT_SILENT); // Make sure the container is removed
 	}
-	if (cryptBlob.pbData)
-	{
-		MemFree(cryptBlob.pbData);
-	}
-	if (name)
-	{
-		MemFree(name);
-	}
+
+	ReleaseMem(cryptBlob.pbData);
+	ReleaseMem(name);
+	ReleaseMem(extBlob.pbData);
 
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);

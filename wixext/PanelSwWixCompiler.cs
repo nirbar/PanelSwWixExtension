@@ -203,6 +203,7 @@ namespace PanelSw.Wix.Extensions
             string component = null;
             string password = null;
             string x500 = null;
+            string subjectAltName = null;
             int expiry = 0;
             bool deleteOnCommit = true;
 
@@ -238,7 +239,10 @@ namespace PanelSw.Wix.Extensions
                         case "deleteoncommit":
                             deleteOnCommit = (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes);
                             break;
-                            
+                        case "subjectaltname":
+                            subjectAltName = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
                         default:
                             Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                             break;
@@ -267,9 +271,10 @@ namespace PanelSw.Wix.Extensions
                 row[0] = id;
                 row[1] = component;
                 row[2] = x500;
-                row[3] = expiry;
-                row[4] = password;
-                row[5] = deleteOnCommit ? 1 : 0;
+                row[3] = subjectAltName;
+                row[4] = expiry;
+                row[5] = password;
+                row[6] = deleteOnCommit ? 1 : 0;
             }
         }
         
