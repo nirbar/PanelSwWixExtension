@@ -37,12 +37,17 @@
       </xs:attribute>
       <xs:attribute name="X500" use="required" type="xs:string">
         <xs:annotation>
-          <xs:documentation><![CDATA[X500 string of the certificate.]]></xs:documentation>
+          <xs:documentation><![CDATA[Formatted X500 string of the certificate.]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="Expiry" use="required" type="xs:int">
         <xs:annotation>
           <xs:documentation><![CDATA[Certificate expiry in days from install.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="DeleteOnCommit" use="optional" type="YesNoType" default="yes">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Whether or not the certificate file will be deleted on commit. Defaults to 'yes']]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
     </xs:complexType>

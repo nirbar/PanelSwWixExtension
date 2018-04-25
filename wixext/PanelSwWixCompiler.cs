@@ -204,6 +204,7 @@ namespace PanelSw.Wix.Extensions
             string password = null;
             string x500 = null;
             int expiry = 0;
+            bool deleteOnCommit = true;
 
             component = Core.GetAttributeValue(parentsourceLineNumbers, parentElement.Attributes["Id"]);
             if (string.IsNullOrEmpty(component))
@@ -234,7 +235,10 @@ namespace PanelSw.Wix.Extensions
                         case "x500":
                             x500 = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-              
+                        case "deleteoncommit":
+                            deleteOnCommit = (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes);
+                            break;
+                            
                         default:
                             Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                             break;
@@ -265,6 +269,7 @@ namespace PanelSw.Wix.Extensions
                 row[2] = x500;
                 row[3] = expiry;
                 row[4] = password;
+                row[5] = deleteOnCommit ? 1 : 0;
             }
         }
         

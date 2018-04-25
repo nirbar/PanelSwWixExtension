@@ -196,5 +196,6 @@
     <columnDefinition name="X500" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Expiry" type="number" length="4" minValue="0" maxValue="65535" />
     <columnDefinition name="Password" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="DeleteOnCommit" type="number" minValue="0" maxValue="1" length="2" />
   </tableDefinition>
 </tableDefinitions>

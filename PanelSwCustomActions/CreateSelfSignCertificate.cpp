@@ -2,11 +2,13 @@
 #include <WixString.h>
 #include <memutil.h>
 #include <Wincrypt.h>
+#include "FileOperations.h"
 #pragma comment (lib, "Crypt32.lib")
 
-#define SelfSignCertificate_QUERY L"SELECT `Id`, `Component_`, `X500`, `Expiry`, `Password` FROM `PSW_SelfSignCertificate`"
-enum SelfSignCertificateQuery { Id = 1, Component, X500, Expiry, Password };
+#define SelfSignCertificate_QUERY L"SELECT `Id`, `Component_`, `X500`, `Expiry`, `Password`, `DeleteOnCommit` FROM `PSW_SelfSignCertificate`"
+enum SelfSignCertificateQuery { Id = 1, Component, X500, Expiry, Password, DeleteOnCommit };
 
+#define CERT_CONTAINER		L"Panel-SW.co.il"
 
 extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall)
 {
@@ -17,7 +19,7 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall)
 	HCRYPTKEY hKey = NULL;
 	DWORD nSize = 0;
 	LPCWSTR errStr = nullptr;
-	BYTE *name;
+	BYTE *name = nullptr;
 	CERT_NAME_BLOB nameBlob;
 	CRYPT_KEY_PROV_INFO keyInfo;
 	PCCERT_CONTEXT pCertContext = nullptr;
@@ -26,20 +28,21 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall)
 	HANDLE hFile = INVALID_HANDLE_VALUE;
 	DWORD dwRes = ERROR_SUCCESS;
 	WCHAR szTempPath[MAX_PATH + 1];
-	SYSTEMTIME startTime;
-	FILETIME startFileTime;
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
+	SYSTEMTIME startTime;
+	FILETIME startFileTime;
+	CFileOperations commitActions;
+	CWixString szCustomActionData;
 
-	::ZeroMemory(&startTime, sizeof(startTime));
-	::ZeroMemory(&cryptBlob, sizeof(cryptBlob));
 	::ZeroMemory(&nameBlob, sizeof(nameBlob));
 	::ZeroMemory(&keyInfo, sizeof(keyInfo));
 
 	keyInfo.pwszProvName = nullptr;
 	keyInfo.dwProvType = PROV_RSA_FULL;
 	keyInfo.dwKeySpec = AT_KEYEXCHANGE;
-	keyInfo.dwFlags = CRYPT_SILENT;
+	keyInfo.dwFlags = CRYPT_EXPORTABLE;
+	keyInfo.pwszContainerName = CERT_CONTAINER;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");
@@ -59,10 +62,12 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall)
 	dwRes = ::GetTempPath(MAX_PATH, szTempPath);
 	BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary folder");
 
-	bRes = ::CryptAcquireContext(&hCrypt, nullptr, nullptr, PROV_RSA_FULL, CRYPT_NEWKEYSET | CRYPT_VERIFYCONTEXT | CRYPT_SILENT);
+	::CryptAcquireContext(&hCrypt, CERT_CONTAINER, nullptr, PROV_RSA_FULL, CRYPT_DELETEKEYSET | CRYPT_SILENT); // Make sure the container is removed
+
+	bRes = ::CryptAcquireContext(&hCrypt, CERT_CONTAINER, nullptr, PROV_RSA_FULL, CRYPT_NEWKEYSET | CRYPT_SILENT);
 	BreakExitOnNullWithLastError(bRes, hr, "Failed acquiring crypto context");
 
-	bRes = ::CryptGenKey(hCrypt, AT_KEYEXCHANGE, CRYPT_EXPORTABLE, &hKey);
+	bRes = ::CryptGenKey(hCrypt, AT_KEYEXCHANGE, 0x08000000 | CRYPT_EXPORTABLE, &hKey);
 	BreakExitOnNullWithLastError(bRes, hr, "Failed generating crypto key");
 
 	hStore = ::CertOpenStore(CERT_STORE_PROV_MEMORY, 0, NULL, CERT_STORE_CREATE_NEW_FLAG, nullptr);
@@ -73,15 +78,15 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall)
 	{
 		BreakExitOnFailure(hr, "Failed to fetch record.");
 		
-		//TODO: From query
 		WCHAR szFile[MAX_PATH + 1];
 		SYSTEMTIME endTime;
 		FILETIME endFileTime;
-		CWixString x500; // "CN=Panel-SW.com"
+		CWixString x500; // Signed to, i.e. "CN=Panel-SW.com"
 		CWixString password;
-		CWixString id; // "SELF_SIGNED_PFX"
+		CWixString id; // Property name i.e. "SELF_SIGNED_PFX"
 		CWixString component;
 		int expiryDays = 0;
+		int deleteOnCommit = 0;
 		ULARGE_INTEGER expiry{ 0, 0 };
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
 
@@ -95,6 +100,8 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to get Expiry.");
 		hr = WcaGetRecordFormattedString(hRecord, SelfSignCertificateQuery::Password, (LPWSTR*)password);
 		BreakExitOnFailure(hr, "Failed to get Password.");
+		hr = WcaGetRecordFormattedInteger(hRecord, SelfSignCertificateQuery::DeleteOnCommit, &deleteOnCommit);
+		BreakExitOnFailure(hr, "Failed to get DeleteOnCommit.");
 
 		// Test condition
 		compAction = WcaGetComponentToDo(component);
@@ -128,22 +135,30 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall)
 		nameBlob.cbData = nSize;
 		nameBlob.pbData = name;
 
-		pCertContext = ::CertCreateSelfSignCertificate(hCrypt, &nameBlob, 0, &keyInfo, nullptr, &startTime, &endTime, nullptr);
+		pCertContext = ::CertCreateSelfSignCertificate(hCrypt, &nameBlob, 0, &keyInfo, nullptr, nullptr, &endTime, nullptr);
 		BreakExitOnNullWithLastError(pCertContext, hr, "Failed creating self signed certificate");
 
 		bRes = ::CertAddCertificateContextToStore(hStore, pCertContext, CERT_STORE_ADD_ALWAYS, nullptr);
 		BreakExitOnNullWithLastError(bRes, hr, "Failed adding certificate to store");
 
-		bRes = ::PFXExportCertStoreEx(hStore, &cryptBlob, password, nullptr, EXPORT_PRIVATE_KEYS | PKCS12_INCLUDE_EXTENDED_PROPERTIES);
+		::ZeroMemory(&cryptBlob, sizeof(cryptBlob));
+		bRes = ::PFXExportCertStoreEx(hStore, &cryptBlob, password, nullptr, EXPORT_PRIVATE_KEYS | REPORT_NOT_ABLE_TO_EXPORT_PRIVATE_KEY | REPORT_NO_PRIVATE_KEY);
 		BreakExitOnNullWithLastError(bRes, hr, "Failed exporting certificate memory store");
 
 		cryptBlob.pbData = (BYTE*)MemAlloc(cryptBlob.cbData, FALSE);
+		BreakExitOnNullWithLastError(cryptBlob.pbData, hr, "Failed allocating memory");
 
-		bRes = ::PFXExportCertStoreEx(hStore, &cryptBlob, password, nullptr, EXPORT_PRIVATE_KEYS | PKCS12_INCLUDE_EXTENDED_PROPERTIES);
+		bRes = ::PFXExportCertStoreEx(hStore, &cryptBlob, password, nullptr, EXPORT_PRIVATE_KEYS | REPORT_NOT_ABLE_TO_EXPORT_PRIVATE_KEY | REPORT_NO_PRIVATE_KEY);
 		BreakExitOnNullWithLastError(bRes, hr, "Failed exporting certificate memory store");
 
 		dwRes = ::GetTempFileName(szTempPath, L"PFX", 0, szFile);
 		BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
+
+		if (deleteOnCommit)
+		{
+			hr = commitActions.AddDeleteFile(szFile, CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath);
+			BreakExitOnFailure(hr, "Failed adding commit action");
+		}
 
 		hFile = ::CreateFile(szFile, GENERIC_READ | GENERIC_WRITE, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		BreakExitOnNullWithLastError((hFile != INVALID_HANDLE_VALUE), hr, "Failed creating file");
@@ -175,6 +190,11 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall)
 	}
 	hr = S_OK;
 
+	hr = commitActions.GetCustomActionData((LPWSTR*)szCustomActionData);
+	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
+	hr = WcaSetProperty(L"CreateSelfSignCertificate_commit", szCustomActionData);
+	BreakExitOnFailure(hr, "Failed setting property.");
+
 LExit:
 	if (hFile != INVALID_HANDLE_VALUE)
 	{
@@ -194,6 +214,8 @@ LExit:
 	if (hCrypt)
 	{
 		::CryptReleaseContext(hCrypt, 0);
+		hCrypt = NULL;
+		::CryptAcquireContext(&hCrypt, CERT_CONTAINER, nullptr, PROV_RSA_FULL, CRYPT_DELETEKEYSET | CRYPT_SILENT); // Make sure the container is removed
 	}
 	if (cryptBlob.pbData)
 	{
