@@ -3,7 +3,7 @@
   <Import Project="$(MSBuildThisFileDirectory)TidyBuild.user.props" Condition="Exists('$(MSBuildThisFileDirectory)TidyBuild.user.props')"/>
   <PropertyGroup>
     <FullVersion>1.1.36</FullVersion>
-    <ProductName>PanelSwWixExxtension</ProductName>
+    <ProductName>PanelSwWixExtension</ProductName>
     <Manufacturer>Panel::Software</Manufacturer>
 
     <!-- Output folder -->
