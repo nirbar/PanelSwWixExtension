@@ -183,10 +183,10 @@
     <columnDefinition name="DisplayName" type="string" length="0" nullable="yes" category="formatted" />
     <columnDefinition name="Description" type="string" length="0" nullable="yes" category="formatted" />
     <columnDefinition name="Instance" length="0" type="string" nullable="yes" category="formatted" />
-    <columnDefinition name="Account" type="number" minValue="0" maxValue="3" length="2" />
+    <columnDefinition name="Account" type="number" minValue="0" maxValue="4" length="2" />
     <columnDefinition name="UserName" type="string" length="0" nullable="yes" category="formatted" />
     <columnDefinition name="Password" type="string" length="0" nullable="yes" category="formatted" />
-    <columnDefinition name="HowToStart" type="number" minValue="0" maxValue="3" length="2" />
+    <columnDefinition name="HowToStart" type="number" minValue="0" maxValue="4" length="2" />
     <columnDefinition name="PromptOnError" type="number" minValue="0" maxValue="1" length="2" />
   </tableDefinition>
 

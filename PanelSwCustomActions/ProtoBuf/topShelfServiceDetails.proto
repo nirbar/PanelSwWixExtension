@@ -9,6 +9,7 @@ message TopShelfServiceDetails{
 		auto = 1;
 		manual = 2;
 		delayedAuto = 3;
+		noStart = 4;
 	}
 
 	enum ServiceAccount {
@@ -16,6 +17,7 @@ message TopShelfServiceDetails{
 		localsystem = 1;
 		localservice = 2;
 		networkservice = 3;
+		noAccount = 4;
 	}
 	
 	bytes file = 1;

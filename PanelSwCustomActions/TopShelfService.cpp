@@ -384,6 +384,9 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 		BreakExitOnFailure(hr, "Failed formatting string");
 		break;
 
+	case TopShelfServiceDetails_ServiceAccount::TopShelfServiceDetails_ServiceAccount_noAccount:
+		break;
+
 	default:
 		BreakExitOnFailure((hr = E_INVALIDARG), "Illegal service account");
 		break;
@@ -409,6 +412,9 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 	case TopShelfServiceDetails_HowToStart::TopShelfServiceDetails_HowToStart_manual:
 		hr = pCommandLine->AppnedFormat(L" --manual");
 		BreakExitOnFailure(hr, "Failed formatting string");
+		break;
+
+	case TopShelfServiceDetails_HowToStart::TopShelfServiceDetails_HowToStart_noStart:
 		break;
 
 	default:

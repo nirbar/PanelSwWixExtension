@@ -506,6 +506,7 @@ namespace PanelSw.Wix.Extensions
             localsystem = 1,
             localservice = 2,
             networkservice = 3,
+            none = 4,
         }
 
         enum TopShelf_Start
@@ -514,13 +515,14 @@ namespace PanelSw.Wix.Extensions
             auto = 1,
             manual = 2,
             delayedAuto = 3,
+            none = 4,
         }
 
         private void ParseTopShelfElement(XmlNode node, XmlElement parentElement)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
-            TopShelf_Account account = TopShelf_Account.localsystem;
-            TopShelf_Start start = TopShelf_Start.auto;
+            TopShelf_Account account = TopShelf_Account.none;
+            TopShelf_Start start = TopShelf_Start.none;
             string serviceName = null;
             string displayName = null;
             string description = null;
