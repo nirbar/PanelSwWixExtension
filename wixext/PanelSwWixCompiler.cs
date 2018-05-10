@@ -518,6 +518,13 @@ namespace PanelSw.Wix.Extensions
             none = 4,
         }
 
+        enum TopShelf_ErrorHandling
+        {
+            fail = 0,
+            ignore = 1,
+            prompt = 2
+        }
+
         private void ParseTopShelfElement(XmlNode node, XmlElement parentElement)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
@@ -529,7 +536,7 @@ namespace PanelSw.Wix.Extensions
             string instance = null;
             string userName = null;
             string password = null;
-            bool promptOnError = false;
+            TopShelf_ErrorHandling promptOnError = TopShelf_ErrorHandling.fail;
 
             string file = parentElement.GetAttribute("Id");
             if (string.IsNullOrEmpty(file))
@@ -572,6 +579,20 @@ namespace PanelSw.Wix.Extensions
                             }
                             break;
 
+                        case "ErrorHandling":
+                            {
+                                string a = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                                try
+                                {
+                                    promptOnError = (TopShelf_ErrorHandling)Enum.Parse(typeof(TopShelf_ErrorHandling), a);
+                                }
+                                catch
+                                {
+                                    Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                                }
+                            }
+                            break;
+
                         case "ServiceName":
                             serviceName = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
@@ -594,13 +615,6 @@ namespace PanelSw.Wix.Extensions
 
                         case "Password":
                             password = Core.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
-
-                        case "PromptOnError":
-                            if (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
-                            {
-                                promptOnError = true;
-                            }
                             break;
 
                         default:
@@ -635,7 +649,7 @@ namespace PanelSw.Wix.Extensions
                 row[6] = userName;
                 row[7] = password;
                 row[8] = (int)start;
-                row[9] = promptOnError ? 1 : 0;
+                row[9] = (int)promptOnError;
             }
         }
 

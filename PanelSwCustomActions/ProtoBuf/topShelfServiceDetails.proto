@@ -19,6 +19,12 @@ message TopShelfServiceDetails{
 		networkservice = 3;
 		noAccount = 4;
 	}
+
+	enum ErrorHandling {
+		fail = 0;
+		ignore = 1;
+		prompt = 2;
+	}
 	
 	bytes file = 1;
 	bytes serviceName = 2;
@@ -36,5 +42,5 @@ message TopShelfServiceDetails{
 	// Install / Uninstall
 	bool install = 10;
 
-	bool promptOnError = 11;
+	ErrorHandling errorHandling = 11;
 }
