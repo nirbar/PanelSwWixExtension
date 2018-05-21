@@ -2,7 +2,7 @@
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
      xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
      >
-  <Product Id="{162B3494-45A1-45F9-9F3B-0AC4D19D75DB}" Name="RemoveRegistryValueUT" Language="1033" Version="1.0.0.0" Manufacturer="PoingGrab" UpgradeCode="{F419BD1C-AFC0-41D3-9400-757E2256322B}">
+  <Product Id="{162B3494-45A1-45F9-9F3B-0AC4D19D75DB}" Name="RemoveRegistryValueUT" Language="1033" Version="1.0.0.0" Manufacturer="Panel::Software" UpgradeCode="{F419BD1C-AFC0-41D3-9400-757E2256322B}">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
