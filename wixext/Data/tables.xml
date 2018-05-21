@@ -199,4 +199,8 @@
     <columnDefinition name="Password" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="DeleteOnCommit" type="number" minValue="0" maxValue="1" length="2" />
   </tableDefinition>
+
+  <tableDefinition name="PSW_AlwaysOverwriteFile">
+    <columnDefinition name="File" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+  </tableDefinition>
 </tableDefinitions>

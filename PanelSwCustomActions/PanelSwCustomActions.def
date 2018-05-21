@@ -33,3 +33,4 @@ EXPORTS
 	XmlSearch
 	TopShelf
 	CreateSelfSignCertificate
+	AlwaysOverwriteFile

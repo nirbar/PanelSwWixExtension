@@ -14,5 +14,6 @@
   <String Id="TopShelfFailure"><![CDATA[Failed configuring service [2]]]></String>
   <String Id="CreateSelfSignCertificate"><![CDATA[Creating self-signed certificates]]></String>
   <String Id="FileRegex"><![CDATA[Find & replace in file]]></String>
+  <String Id="AlwaysOverwriteFile"><![CDATA[Ensuring files will overwrite existing]]></String>
 </WixLocalization>
 

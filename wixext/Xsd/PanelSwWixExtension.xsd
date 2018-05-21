@@ -14,6 +14,17 @@
   </xs:annotation>
   <xs:import namespace="http://schemas.microsoft.com/wix/2006/wi" />
 
+  <xs:element name="AlwaysOverwriteFile">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="File" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Sets the highest possible version on a file row (65535.65535.65535.65535) to ensure it overwrites existing file]]>
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>
+
   <xs:element name="CreateSelfSignCertificate">
     <xs:annotation>
       <xs:appinfo>

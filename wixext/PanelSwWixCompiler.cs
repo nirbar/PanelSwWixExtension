@@ -184,6 +184,10 @@ namespace PanelSw.Wix.Extensions
                             ParseTopShelfElement(element, parentElement);
                             break;
 
+                        case "AlwaysOverwriteFile":
+                            ParseAlwaysOverwriteFileElement(element, parentElement);
+                            break;
+
                         default:
                             Core.UnexpectedElement(parentElement, element);
                             break;
@@ -499,6 +503,40 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
+        private void ParseAlwaysOverwriteFileElement(XmlNode node, XmlElement parentElement)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+
+            string file = parentElement.GetAttribute("Id");
+            if (string.IsNullOrEmpty(file))
+            {
+                file = parentElement.GetAttribute("Source");
+                file = Path.GetFileName(file);
+            }
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
+                {
+                    Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            if (string.IsNullOrEmpty(file))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.Name, "Id"));
+            }
+
+            // reference the Win32_CopyFiles custom actions since nothing will happen without these
+            Core.EnsureTable(sourceLineNumbers, "PSW_AlwaysOverwriteFile");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "AlwaysOverwriteFile");
+
+            if (!Core.EncounteredError)
+            {
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_AlwaysOverwriteFile");
+                row[0] = file;
+            }
+        }
 
         enum TopShelf_Account
         {
