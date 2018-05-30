@@ -541,9 +541,9 @@ namespace PanelSw.Wix.Extensions
         enum TopShelf_Account
         {
             custom = 0,
-            localsystem = 1,
-            localservice = 2,
-            networkservice = 3,
+            localSystem = 1,
+            localService = 2,
+            networkService = 3,
             none = 4,
         }
 
