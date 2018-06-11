@@ -16,6 +16,7 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PanelSwCustomActions", "PanelSwCustomActions\PanelSwCustomActions.vcxproj", "{0C3A56AA-8073-44E1-8DE4-C257D581BFF0}"
 	ProjectSection(ProjectDependencies) = postProject
 		{7C6B230A-9186-4C1E-B61D-E803CC36A347} = {7C6B230A-9186-4C1E-B61D-E803CC36A347}
+		{46D02BC4-720A-4B33-AA27-4103E7349F02} = {46D02BC4-720A-4B33-AA27-4103E7349F02}
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{B533D9FC-4927-4A05-892D-B90E8BEDCF5D}"
@@ -29,6 +30,9 @@ EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "XmlSearchUT", "UnitTests\XmlSearchUT\XmlSearchUT.wixproj", "{0631B7FA-D5A5-4B4B-8289-E0415420D6C7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CaCommon", "CaCommon\CaCommon.vcxproj", "{7C6B230A-9186-4C1E-B61D-E803CC36A347}"
+	ProjectSection(ProjectDependencies) = postProject
+		{46D02BC4-720A-4B33-AA27-4103E7349F02} = {46D02BC4-720A-4B33-AA27-4103E7349F02}
+	EndProjectSection
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "TelemetryUT", "UnitTests\TelemetryUT\TelemetryUT.wixproj", "{12C34100-BC94-48E7-AE28-8B62CAD23155}"
 EndProject
@@ -73,6 +77,8 @@ EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "CreateSelfSignCertificateUT", "UnitTests\CreateSelfSignCertificateUT\CreateSelfSignCertificateUT.wixproj", "{95697A34-1519-42EC-A96B-3090AE6EAE2A}"
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "AlwaysOverwriteFileUT", "UnitTests\AlwaysOverwriteFileUT\AlwaysOverwriteFileUT.wixproj", "{F773F85B-CD8B-4FDD-ABFC-B74C018AB900}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtoCaLib", "ProtoCaLib\ProtoCaLib.vcxproj", "{46D02BC4-720A-4B33-AA27-4103E7349F02}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -560,6 +566,24 @@ Global
 		{F773F85B-CD8B-4FDD-ABFC-B74C018AB900}.Release|x64.ActiveCfg = Release|x86
 		{F773F85B-CD8B-4FDD-ABFC-B74C018AB900}.Release|x86.ActiveCfg = Release|x86
 		{F773F85B-CD8B-4FDD-ABFC-B74C018AB900}.Release|x86.Build.0 = Release|x86
+		{46D02BC4-720A-4B33-AA27-4103E7349F02}.Debug|Any CPU.ActiveCfg = Debug|Win32
+		{46D02BC4-720A-4B33-AA27-4103E7349F02}.Debug|ARM.ActiveCfg = Debug|Win32
+		{46D02BC4-720A-4B33-AA27-4103E7349F02}.Debug|Mixed Platforms.ActiveCfg = Debug|Win32
+		{46D02BC4-720A-4B33-AA27-4103E7349F02}.Debug|Mixed Platforms.Build.0 = Debug|Win32
+		{46D02BC4-720A-4B33-AA27-4103E7349F02}.Debug|Win32.ActiveCfg = Debug|Win32
+		{46D02BC4-720A-4B33-AA27-4103E7349F02}.Debug|Win32.Build.0 = Debug|Win32
+		{46D02BC4-720A-4B33-AA27-4103E7349F02}.Debug|x64.ActiveCfg = Debug|Win32
+		{46D02BC4-720A-4B33-AA27-4103E7349F02}.Debug|x86.ActiveCfg = Debug|Win32
+		{46D02BC4-720A-4B33-AA27-4103E7349F02}.Debug|x86.Build.0 = Debug|Win32
+		{46D02BC4-720A-4B33-AA27-4103E7349F02}.Release|Any CPU.ActiveCfg = Release|Win32
+		{46D02BC4-720A-4B33-AA27-4103E7349F02}.Release|ARM.ActiveCfg = Release|Win32
+		{46D02BC4-720A-4B33-AA27-4103E7349F02}.Release|Mixed Platforms.ActiveCfg = Release|Win32
+		{46D02BC4-720A-4B33-AA27-4103E7349F02}.Release|Mixed Platforms.Build.0 = Release|Win32
+		{46D02BC4-720A-4B33-AA27-4103E7349F02}.Release|Win32.ActiveCfg = Release|Win32
+		{46D02BC4-720A-4B33-AA27-4103E7349F02}.Release|Win32.Build.0 = Release|Win32
+		{46D02BC4-720A-4B33-AA27-4103E7349F02}.Release|x64.ActiveCfg = Release|Win32
+		{46D02BC4-720A-4B33-AA27-4103E7349F02}.Release|x86.ActiveCfg = Release|Win32
+		{46D02BC4-720A-4B33-AA27-4103E7349F02}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
