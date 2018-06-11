@@ -81,6 +81,9 @@
     <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\command.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\setPropertyFromPipeDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
     <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\execOnDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
@@ -114,6 +117,9 @@
       <AutoGen>True</AutoGen>
     </ClInclude>
     <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\execOnDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\setPropertyFromPipeDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
     <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\fileOperationsDetails.pb.h">
