@@ -36,7 +36,7 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <LibraryPath>$(OutDir)..\CaCommon\;$(WIX)SDK\VS2017\lib\x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath>$(OutDir)..\CaCommon\;$(OutDir)..\ProtoCaLib\;$(WIX)SDK\VS2017\lib\x86;$(LibraryPath)</LibraryPath>
     <IncludePath>$(SolutionDir)CaCommon;$(WIX)SDK\VS2017\inc;$(IncludePath)</IncludePath>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
@@ -52,7 +52,7 @@
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>libprotobuf-lite.lib;msi.lib;dutil.lib;wcautil.lib;Version.lib;Shell32.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libprotobuf-lite.lib;ProtoCaLib.lib;msi.lib;dutil.lib;wcautil.lib;Version.lib;Shell32.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(WIX)sdk\VS2017\lib\x86;..\build\protobuf\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -110,6 +110,7 @@
     <ClCompile Include="RemoveRegistryValue.cpp" />
     <ClCompile Include="Rollback.cpp" />
     <ClCompile Include="ServiceConfig.cpp" />
+    <ClCompile Include="SetPropertyFromPipe.cpp" />
     <ClCompile Include="ShellExecute.cpp" />
     <ClCompile Include="PathOperations.cpp" />
     <ClCompile Include="SqlSearch.cpp" />
@@ -120,30 +121,6 @@
     <ClCompile Include="TerminateSuccessfully.cpp" />
     <ClCompile Include="TopShelfService.cpp" />
     <ClCompile Include="XmlSearch.cpp" />
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\execOnDetails.pb.cc">
-      <AutoGen>True</AutoGen>
-    </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\fileOperationsDetails.pb.cc">
-      <AutoGen>True</AutoGen>
-    </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\fileRegexDetails.pb.cc">
-      <AutoGen>True</AutoGen>
-    </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\servciceConfigDetails.pb.cc">
-      <AutoGen>True</AutoGen>
-    </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\shellExecDetails.pb.cc">
-      <AutoGen>True</AutoGen>
-    </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\taskSchedulerDetails.pb.cc">
-      <AutoGen>True</AutoGen>
-    </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\telemetryDetails.pb.cc">
-      <AutoGen>True</AutoGen>
-    </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\topShelfServiceDetails.pb.cc">
-      <AutoGen>True</AutoGen>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ExecOnComponent.h" />
@@ -183,19 +160,14 @@
     <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\topShelfServiceDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\setPropertyFromPipeDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
     <ClInclude Include="TopShelfService.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="PanelSwCustomActions.def" />
-    <None Include="ProtoBuf\execOnDetails.proto" />
-    <None Include="ProtoBuf\fileOperationsDetails.proto" />
-    <None Include="ProtoBuf\fileRegexDetails.proto" />
-    <None Include="ProtoBuf\servciceConfigDetails.proto" />
-    <None Include="ProtoBuf\shellExecDetails.proto" />
-    <None Include="ProtoBuf\taskSchedulerDetails.proto" />
-    <None Include="ProtoBuf\telemetryDetails.proto" />
-    <None Include="ProtoBuf\topShelfServiceDetails.proto" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -203,4 +203,10 @@
   <tableDefinition name="PSW_AlwaysOverwriteFile">
     <columnDefinition name="File" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
   </tableDefinition>
+
+  <tableDefinition name="PSW_SetPropertyFromPipe">
+    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="PipeName" type="string" length="72" primaryKey="yes" modularize="column" category="formatted" />
+    <columnDefinition name="Timeout" type="number" length="4" />
+  </tableDefinition>
 </tableDefinitions>

@@ -100,31 +100,7 @@
     <ClCompile Include="SqlSearch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\execOnDetails.pb.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\fileOperationsDetails.pb.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\fileRegexDetails.pb.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\servciceConfigDetails.pb.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\shellExecDetails.pb.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\taskSchedulerDetails.pb.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\telemetryDetails.pb.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="BackupAndRestore.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\topShelfServiceDetails.pb.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="TopShelfService.cpp">
@@ -134,6 +110,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AlwaysOverwriteFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SetPropertyFromPipe.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -206,38 +185,17 @@
     <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\topShelfServiceDetails.pb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\setPropertyFromPipeDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="TopShelfService.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="ProtoBuf\execOnDetails.proto">
-      <Filter>Proto</Filter>
-    </None>
-    <None Include="ProtoBuf\fileOperationsDetails.proto">
-      <Filter>Proto</Filter>
-    </None>
-    <None Include="ProtoBuf\fileRegexDetails.proto">
-      <Filter>Proto</Filter>
-    </None>
-    <None Include="ProtoBuf\servciceConfigDetails.proto">
-      <Filter>Proto</Filter>
-    </None>
-    <None Include="ProtoBuf\shellExecDetails.proto">
-      <Filter>Proto</Filter>
-    </None>
-    <None Include="ProtoBuf\taskSchedulerDetails.proto">
-      <Filter>Proto</Filter>
-    </None>
-    <None Include="ProtoBuf\telemetryDetails.proto">
-      <Filter>Proto</Filter>
-    </None>
     <None Include="packages.config" />
     <None Include="PanelSwCustomActions.def">
       <Filter>Source Files</Filter>
-    </None>
-    <None Include="ProtoBuf\topShelfServiceDetails.proto">
-      <Filter>Proto</Filter>
     </None>
   </ItemGroup>
   <ItemGroup>

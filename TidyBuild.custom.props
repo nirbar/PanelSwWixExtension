@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <Import Project="$(MSBuildThisFileDirectory)TidyBuild.user.props" Condition="Exists('$(MSBuildThisFileDirectory)TidyBuild.user.props')"/>
   <PropertyGroup>
-    <FullVersion>1.3.1</FullVersion>
+    <FullVersion>1.4.0</FullVersion>
     <ProductName>PanelSwWixExtension</ProductName>
     <Manufacturer>Panel::Software</Manufacturer>
 
@@ -15,17 +15,10 @@
     <IntermediateDirectory>$(IntermediateOutputPath)</IntermediateDirectory>
     
     <!-- CMake path -->
-    <CMakeDir Condition="'$(CMakeDir)'==''">$(SolutionDir)..\..\tools\cmake-3.10.2-win32-x86\</CMakeDir>
+    <CMakeDir Condition="'$(CMakeDir)'==''">$(SolutionDir)..\..\Tools\cmake-3.11.3-win32-x86\</CMakeDir>
     <DismApiDir Condition="'$(DismApiDir)'==''">C:\Program Files (x86)\Windows Kits\8.0\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\</DismApiDir>
 
     <WixVariables>JetVersion=$(FullVersion);JetProductName=$(ProductName);JetManufacturer=$(Manufacturer)</WixVariables>
 
   </PropertyGroup>
-
-  <ItemGroup>
-    <ProtoFiles Include="$(MSBuildProjectDirectory)\Protobuf\*.proto" />
-  </ItemGroup>
-  <Target Name="ProtoBuffCompile" BeforeTargets="PrepareForBuild" Inputs="@(ProtoFiles)" Outputs="$(IntDir)..\Protobuf\%(ProtoFiles.FileName).pb.h;$(IntDir)..\Protobuf\%(ProtoFiles.FileName).pb.cc">
-    <Exec Command="&quot;$(SolutionDir)build\protobuf\$(Configuration)\protoc.exe&quot; &quot;--proto_path=$(MSBuildProjectDirectory)\Protobuf&quot; &quot;--proto_path=$(SolutionDir)protobuf\src&quot; &quot;--cpp_out=$(IntDir)..\Protobuf&quot; @(ProtoFiles, ' ')" />
-  </Target>
 </Project>

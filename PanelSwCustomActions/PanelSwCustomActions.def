@@ -34,3 +34,4 @@ EXPORTS
 	TopShelf
 	CreateSelfSignCertificate
 	AlwaysOverwriteFile
+	SetPropertyFromPipe

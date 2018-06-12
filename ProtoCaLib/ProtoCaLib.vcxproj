@@ -1,0 +1,174 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="..\packages\TidyBuild.1.0.8\build\TidyBuild.props" Condition="Exists('..\packages\TidyBuild.1.0.8\build\TidyBuild.props')" />
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{46D02BC4-720A-4B33-AA27-4103E7349F02}</ProjectGuid>
+    <RootNamespace>ProtoCaLib</RootNamespace>
+    <Keyword>Win32Proj</Keyword>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Label="Configuration">
+    <_ProjectFileVersion>11.0.50727.1</_ProjectFileVersion>
+    <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</WholeProgramOptimization>
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <PlatformToolset>v141_xp</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfAtl>Static</UseOfAtl>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup>
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup>
+    <LinkIncremental>true</LinkIncremental>
+    <TargetExt>.lib</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>..\protobuf\src;$(IntDir)..\Protobuf;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;CUSTOMACTIONTEST_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>libprotobuf-lite.lib;Version.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\build\protobuf\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine>MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <MinimalRebuild>true</MinimalRebuild>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
+    </ClCompile>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\customActionData.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\command.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\setPropertyFromPipeDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\execOnDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\fileOperationsDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\fileRegexDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\servciceConfigDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\shellExecDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\taskSchedulerDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\telemetryDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\topShelfServiceDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\customActionData.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\command.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\execOnDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\setPropertyFromPipeDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\fileOperationsDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\fileRegexDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\servciceConfigDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\shellExecDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\taskSchedulerDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\telemetryDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\topShelfServiceDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
+    <None Include="*.proto" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
+  </ImportGroup>
+  <Target Name="BuildProtobuf" BeforeTargets="ProtoBuffCompile">
+    <MakeDir Directories="$(SolutionDir)build\protobuf" />
+    <MakeDir Directories="$(IntDir)..\protobuf" />
+    <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; -G &quot;Visual Studio 15 2017&quot; -T $(PlatformToolset) ..\..\protobuf\cmake -Dprotobuf_BUILD_TESTS=OFF" WorkingDirectory="$(SolutionDir)build\protobuf" />
+    <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; --build . --config $(Configuration)" WorkingDirectory="$(SolutionDir)build\protobuf" />
+  </Target>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets'))" />
+    <Error Condition="!Exists('..\packages\TidyBuild.1.0.8\build\TidyBuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.0.8\build\TidyBuild.props'))" />
+  </Target>
+  <ItemGroup>
+    <ProtoFiles Include="*.proto" />
+  </ItemGroup>
+  <Target Name="ProtoBuffCompile" BeforeTargets="PrepareForBuild" Inputs="@(ProtoFiles)" Outputs="$(IntDir)..\Protobuf\%(ProtoFiles.FileName).pb.h;$(IntDir)..\Protobuf\%(ProtoFiles.FileName).pb.cc">
+    <Exec Command="&quot;$(SolutionDir)build\protobuf\$(Configuration)\protoc.exe&quot; &quot;--proto_path=$(MSBuildProjectDirectory)&quot; &quot;--proto_path=$(SolutionDir)protobuf\src&quot; &quot;--cpp_out=$(IntDir)..\Protobuf&quot; @(ProtoFiles, ' ')" />
+  </Target>
+</Project>

@@ -35,20 +35,18 @@
     <LinkIncremental>true</LinkIncremental>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <IncludePath>$(WIX)SDK\VS2017\inc;$(IncludePath)</IncludePath>
-    <LibraryPath>$(WIX)SDK\VS2017\lib\x86;$(LibraryPath)</LibraryPath>
+  <PropertyGroup>
+    <IncludePath>$(WIX)SDK\VS2017\inc;$(IntDir)..\Protobuf;..\protobuf\src;$(IncludePath)</IncludePath>
+    <LibraryPath>$(WIX)SDK\VS2017\lib\x86;..\build\protobuf\$(Configuration);$(OutDir)..\ProtoCaLib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>..\protobuf\src;$(IntDir)..\Protobuf;$(WIX)sdk\VS2017\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;CUSTOMACTIONTEST_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>libprotobuf-lite.lib;msi.lib;dutil.lib;wcautil.lib;Version.lib;msxml2.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\build\protobuf\$(Configuration);$(WIX)sdk\VS2017\lib\x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libprotobuf-lite.lib;ProtoCaLib.lib;msi.lib;dutil.lib;wcautil.lib;Version.lib;msxml2.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>CustomAction.def</ModuleDefinitionFile>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -88,12 +86,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="SummaryStream.cpp" />
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\customActionData.pb.cc">
-      <AutoGen>True</AutoGen>
-    </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\command.pb.cc">
-      <AutoGen>True</AutoGen>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\customActionData.pb.h">
