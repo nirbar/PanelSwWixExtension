@@ -14,6 +14,32 @@
   </xs:annotation>
   <xs:import namespace="http://schemas.microsoft.com/wix/2006/wi" />
 
+  <xs:element name="SetPropertyFromPipe">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Reads property values from a pipe.]]>
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:attribute name="PipeName" use="required" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Formatted pipe name. If empty, pipe will not be read from.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Timeout" use="optional" type="xs:int" default="0">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Timeout in seconds. Value of zero, the default, means wait indefinitely.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="AlwaysOverwriteFile">
     <xs:annotation>
       <xs:appinfo>

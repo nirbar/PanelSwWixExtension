@@ -116,6 +116,10 @@ namespace PanelSw.Wix.Extensions
                             ParseUnzip(element);
                             break;
 
+                        case "SetPropertyFromPipe":
+                            ParseSetPropertyFromPipe(element);
+                            break;
+
                         default:
                             Core.UnexpectedElement(parentElement, element);
                             break;
@@ -196,6 +200,53 @@ namespace PanelSw.Wix.Extensions
                 default:
                     Core.UnexpectedElement(parentElement, element);
                     break;
+            }
+        }
+
+        private void ParseSetPropertyFromPipe(XmlElement element)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
+            string id = "_" + Guid.NewGuid().ToString("N"); // Don't care about id.
+            string pipe = null;
+            int timeout = 0;
+
+            foreach (XmlAttribute attrib in element.Attributes)
+            {
+                if ((0 != attrib.NamespaceURI.Length) && (attrib.NamespaceURI != schema.TargetNamespace))
+                {
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName)
+                    {
+                        case "PipeName":
+                            pipe = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Timeout":
+                            timeout = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, int.MaxValue);
+                            break;
+
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+                else
+                {
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "SetPropertyFromPipe");
+            if (!Core.EncounteredError)
+            {
+                Core.EnsureTable(sourceLineNumbers, "PSW_SetPropertyFromPipe");
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_SetPropertyFromPipe");
+                row[0] = id;
+                row[1] = pipe;
+                row[2] = timeout;
             }
         }
 

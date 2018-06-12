@@ -110,6 +110,7 @@
     <ClCompile Include="RemoveRegistryValue.cpp" />
     <ClCompile Include="Rollback.cpp" />
     <ClCompile Include="ServiceConfig.cpp" />
+    <ClCompile Include="SetPropertyFromPipe.cpp" />
     <ClCompile Include="ShellExecute.cpp" />
     <ClCompile Include="PathOperations.cpp" />
     <ClCompile Include="SqlSearch.cpp" />
@@ -157,6 +158,9 @@
       <AutoGen>True</AutoGen>
     </ClInclude>
     <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\topShelfServiceDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\setPropertyFromPipeDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
     <ClInclude Include="TopShelfService.h" />

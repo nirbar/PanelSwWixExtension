@@ -546,4 +546,16 @@
       <ProgressText Action="AlwaysOverwriteFile">!(loc.AlwaysOverwriteFile)</ProgressText>
     </UI>
   </Fragment>
+  
+  <!-- SetPropertyFromPipe -->
+  <Fragment>
+    <CustomAction Id="SetPropertyFromPipe" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="SetPropertyFromPipe" Execute="immediate"/>
+    <InstallExecuteSequence>
+      <Custom Action="SetPropertyFromPipe" Before="InstallInitialize" Overridable="yes"/>
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="SetPropertyFromPipe">!(loc.SetPropertyFromPipe)</ProgressText>
+    </UI>
+  </Fragment>
+
 </Wix>
