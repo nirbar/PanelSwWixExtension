@@ -16,7 +16,7 @@
     <RootNamespace>BaFunctions</RootNamespace>
     <Keyword>Win32Proj</Keyword>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
-    <CharacterSet>MultiByte</CharacterSet>
+    <CharacterSet>Unicode</CharacterSet>
     <ProjectName>SetPropertyFromPipeBAF</ProjectName>
     <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -61,16 +61,16 @@
       <AdditionalIncludeDirectories>$(SolutionDir)CaCommon;$(WIX)SDK\VS2017\inc;$(SolutionDir)protobuf\src;$(IntDir)..\Protobuf;$(SolutionDir)protobuf\src;$(IntDir)..\Protobuf;$(WIX)sdk\VS2017\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_LIB;DEBUG;%(PreprocessorDefinitions);$(ExtraDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <ProgramDataBaseFileName>$(IntDir)$(ProjectName).pdb</ProgramDataBaseFileName>
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <CallingConvention>StdCall</CallingConvention>
-      <TreatWarningAsError>true</TreatWarningAsError>
+      <CallingConvention>Cdecl</CallingConvention>
+      <TreatWarningAsError>false</TreatWarningAsError>
     </ClCompile>
     <ResourceCompile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -89,16 +89,16 @@
       <AdditionalIncludeDirectories>$(SolutionDir)CaCommon;$(WIX)SDK\VS2017\inc;$(SolutionDir)protobuf\src;$(IntDir)..\Protobuf;$(SolutionDir)protobuf\src;$(IntDir)..\Protobuf;$(WIX)sdk\VS2017\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions);$(ExtraDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <ProgramDataBaseFileName>$(IntDir)$(ProjectName).pdb</ProgramDataBaseFileName>
       <WarningLevel>Level4</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <CallingConvention>StdCall</CallingConvention>
-      <TreatWarningAsError>true</TreatWarningAsError>
+      <CallingConvention>Cdecl</CallingConvention>
+      <TreatWarningAsError>false</TreatWarningAsError>
     </ClCompile>
     <ResourceCompile>
       <AdditionalIncludeDirectories>%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
