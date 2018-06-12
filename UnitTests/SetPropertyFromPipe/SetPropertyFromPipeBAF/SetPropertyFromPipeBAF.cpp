@@ -30,9 +30,8 @@ public:
 		prop = details.add_properties();
 		BalExitOnNullWithLastError(prop, hr, "Failed allocating property for pipe message");
 
-		prop->set_name(PROP_NAME, ARRAYSIZE(PROP_NAME));
-		prop->set_value(PROP_VAL, ARRAYSIZE(PROP_VAL));
-		BalLog(BOOTSTRAPPER_LOG_LEVEL::BOOTSTRAPPER_LOG_LEVEL_STANDARD, "Sending name %ls, value %ls", (LPCWSTR)prop->name().data(), (LPCWSTR)prop->value().data());
+		prop->set_name(PROP_NAME, (1 + ::wcslen(PROP_NAME)) * sizeof(WCHAR));
+		prop->set_value(PROP_VAL, (1 + ::wcslen(PROP_VAL)) * sizeof(WCHAR));
 
 		bRes = details.SerializeToString(&buffer);
 		BalExitOnNullWithLastError(bRes, hr, "Failed serializing message");

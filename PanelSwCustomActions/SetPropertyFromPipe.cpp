@@ -92,8 +92,9 @@ static HRESULT ReadPropertiesFromPipe(LPCWSTR szPipeName, UINT nTimeout)
 	} while ((hPipe == INVALID_HANDLE_VALUE) && (::GetLastError() == ERROR_PIPE_BUSY));
 	ExitOnNullWithLastError((hPipe != INVALID_HANDLE_VALUE), hr, "Failed openning pipe");
 
-	bRes = ::SetNamedPipeHandleState(hPipe, &dwPipeMode, nullptr, nullptr);
-	ExitOnNullWithLastError(bRes, hr, "Failed setting mode for pipe");
+	//TODO: Figure out why this results in ERROR_ACCESS_DENIED. Anyways, it seems to work OK without it.
+//	bRes = ::SetNamedPipeHandleState(hPipe, &dwPipeMode, nullptr, nullptr);
+//	ExitOnNullWithLastError(bRes, hr, "Failed setting mode for pipe");
 
 	// Wait for server to write message.
 	do {
