@@ -57,10 +57,7 @@ public:
 
 		// Pipe name
 		hr = ::UuidCreateSequential(&pipeId);
-		if ((hr != RPC_S_OK) && (hr != RPC_S_UUID_LOCAL_ONLY))
-		{
-			BalExitOnFailure(hr, "Failed creating pipe ID");
-		}
+		BalExitOnFailure(hr, "Failed creating pipe ID");
 
 		hr = ::UuidToString(&pipeId, &szPipeUuid);
 		BalExitOnFailure(hr, "Failed converting pipe ID to string");
