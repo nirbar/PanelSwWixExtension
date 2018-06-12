@@ -22,7 +22,7 @@
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
       </xs:appinfo>
       <xs:documentation>
-        <![CDATA[Reads property values from a pipe.]]>
+        <![CDATA[Reads property values from a pipe. Property values are send to a pipe in a Protobuf message. Proto file is .\ProtoCaLib\setPropertyFromPipeDetails.proto, included in the Nuget package.]]>
       </xs:documentation>
     </xs:annotation>
 
