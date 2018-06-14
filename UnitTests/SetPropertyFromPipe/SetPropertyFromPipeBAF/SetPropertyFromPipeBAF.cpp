@@ -39,6 +39,9 @@ public:
 		bRes = ::ConnectNamedPipe(hPipe_, nullptr);
 		BalExitOnNullWithLastError(bRes, hr, "Failed connecting client to pipe");
 
+		// Enable testing 'Cancel' functionality.
+		::Sleep(60 * 1000);
+
 		bRes = ::WriteFile(hPipe_, buffer.data(), buffer.size(), &dwSize, nullptr);
 		BalExitOnNullWithLastError(bRes, hr, "Failed writing to pipe");
 		BalExitOnNullWithLastError((dwSize == buffer.size()), hr, "Failed writing to pipe (incompatible size)");

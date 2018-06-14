@@ -77,6 +77,7 @@ static HRESULT ReadPropertiesFromPipe(LPCWSTR szPipeName, UINT nTimeout)
 	DWORD dwRes = ERROR_SUCCESS;
 	BYTE *msgBuffer = nullptr;
 	SetPropertyFromPipeDetails details;
+	PMSIHANDLE hDummy;
 
 	// Based on https://stackoverflow.com/questions/2084535/how-to-get-the-length-of-data-to-be-read-reliably-in-named-pipes
 
@@ -101,7 +102,21 @@ static HRESULT ReadPropertiesFromPipe(LPCWSTR szPipeName, UINT nTimeout)
 		bRes = ::PeekNamedPipe(hPipe, nullptr, 0, nullptr, &dwSize, nullptr);
 		ExitOnNullWithLastError(bRes, hr, "Failed getting message size for pipe");
 
-		// Should I check timeout here? We already know that server has created the pipe.
+		// Test if user cancelled.
+		if (!dwSize)
+		{
+			if (!hDummy)
+			{
+				hDummy = ::MsiCreateRecord(1);
+				ExitOnNull(hDummy, hr, E_FAIL, "Failed creating record");
+
+				hr = WcaSetRecordInteger(hDummy, 0, 0);
+				ExitOnFailure(hr, "Failed setting record");
+			}
+
+			dwRes = WcaProcessMessage(INSTALLMESSAGE::INSTALLMESSAGE_ACTIONDATA, hDummy);
+			ExitOnWin32Error(dwRes, hr, "Instructed to cancel");
+		}
 	} while (dwSize == 0);
 
 	msgBuffer = (BYTE*)MemAlloc(dwSize, FALSE);
