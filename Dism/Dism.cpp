@@ -9,6 +9,7 @@
 using namespace std;
 
 static LPCWSTR DismStateString(DismPackageFeatureState state);
+static void ProgressCallback(UINT Current, UINT Total, PVOID UserData);
 
 #define DismLogPrefix		L"DismLog="
 
@@ -27,6 +28,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 	LPCWSTR szDismLog = nullptr;
 	LPCWSTR szTok = nullptr;
 	LPWSTR szTokData = nullptr;
+	HANDLE hCancel = NULL;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
@@ -48,6 +50,9 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 		// Next feature
 		enableFaetures.push_back(wregex(szTok, std::regex_constants::syntax_option_type::optimize));
 	}
+
+	hCancel = ::CreateEvent(nullptr, TRUE, FALSE, nullptr);
+	ExitOnNullWithLastError(hCancel, hr, "Failed creating event");
 
 	hr = ::DismInitialize(DismLogErrorsWarningsInfo, szDismLog, nullptr);
 	if (FAILED(hr))
@@ -95,7 +100,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 				}
 
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Enabling feature '%ls'", pFeatures[i].FeatureName);
-				hr = ::DismEnableFeature(hSession, pFeatures[i].FeatureName, nullptr, DismPackageNone, FALSE, nullptr, 0, TRUE, nullptr, nullptr, nullptr);
+				hr = ::DismEnableFeature(hSession, pFeatures[i].FeatureName, nullptr, DismPackageNone, FALSE, nullptr, 0, TRUE, hCancel, ProgressCallback, hCancel);
 				if (HRESULT_CODE(hr) == ERROR_SUCCESS_REBOOT_REQUIRED)
 				{
 					hr = S_OK;
@@ -129,6 +134,10 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 LExit:
 
 	ReleaseStr(szCAD);
+	if (hCancel)
+	{
+		::CloseHandle(hCancel);
+	}
 	if (pFeatures)
 	{
 		::DismDelete(pFeatures);
@@ -183,5 +192,18 @@ static LPCWSTR DismStateString(DismPackageFeatureState state)
 	
 	default:
 		return Invalid;
+	}
+}
+
+static void ProgressCallback(UINT Current, UINT Total, PVOID UserData)
+{
+	HRESULT hr = S_OK;
+	PMSIHANDLE hRec;
+	HANDLE hCancel = (HANDLE)UserData;
+
+	hr = WcaProgressMessage(0, FALSE);
+	if (FAILED(hr))
+	{
+		::SetEvent(hCancel);
 	}
 }
