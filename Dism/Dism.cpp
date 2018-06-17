@@ -75,7 +75,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 	for (UINT i = 0; i < uFeatureNum; ++i)
 	{
 		// Print feature state
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Feature '%ls', state=%u", pFeatures[i].FeatureName, DismStateString(pFeatures[i].State));
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Feature '%ls', state=%ls", pFeatures[i].FeatureName, DismStateString(pFeatures[i].State));
 
 		switch (pFeatures[i].State)
 		{
