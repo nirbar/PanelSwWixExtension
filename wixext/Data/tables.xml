@@ -100,13 +100,13 @@
 
   <tableDefinition name="PSW_TaskScheduler">
     <columnDefinition name="TaskName" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Component_" type="string" length="0" modularize="property" category="identifier" />
+    <columnDefinition name="Component_" type="string" length="72" modularize="column" keyTable="Component" keyColumn="1" category="identifier"/>
     <columnDefinition name="TaskXml" type="string" length="0" modularize="property" category="formatted" />
   </tableDefinition>
 
   <tableDefinition name="PSW_ExecOnComponent">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Component_" type="string" length="0" modularize="property" category="identifier" />
+    <columnDefinition name="Component_" type="string" length="72" modularize="column" keyTable="Component" keyColumn="1" category="identifier"/>
     <columnDefinition name="Command" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Flags" type="number" length="4" minValue="0" maxValue="65535" />
     <columnDefinition name="Order" type="number" length="2" minValue="0" maxValue="127" />
@@ -120,7 +120,7 @@
 
   <tableDefinition name="PSW_Dism">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Component_" type="string" length="0" modularize="property" category="identifier" />
+    <columnDefinition name="Component_" type="string" length="72" modularize="column" keyTable="Component" keyColumn="1" category="identifier"/>
     <columnDefinition name="EnableFeatures" type="string" length="0" modularize="property" category="formatted" />
   </tableDefinition>
 
@@ -143,7 +143,7 @@
 
   <tableDefinition name="PSW_ServiceConfig">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Component_" type="string" length="0" modularize="property" category="identifier" />
+    <columnDefinition name="Component_" type="string" length="72" modularize="column" keyTable="Component" keyColumn="1" category="identifier"/>
     <columnDefinition name="ServiceName" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Account" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Password" type="string" length="0" modularize="property" nullable="yes" category="formatted" />
@@ -172,7 +172,7 @@
 
   <tableDefinition name="PSW_BackupAndRestore">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Component_" type="string" length="0" modularize="property" category="identifier" />
+    <columnDefinition name="Component_" type="string" length="72" modularize="column" keyTable="Component" keyColumn="1" category="identifier"/>
     <columnDefinition name="Path" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Flags" type="number" length="2" minValue="0" maxValue="127" />
   </tableDefinition>
@@ -192,7 +192,7 @@
 
   <tableDefinition name="PSW_SelfSignCertificate">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Component_" type="string" length="0" modularize="property" category="identifier" />
+    <columnDefinition name="Component_" type="string" length="72" modularize="column" keyTable="Component" keyColumn="1" category="identifier"/>
     <columnDefinition name="X500" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="SubjectAltNames" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
     <columnDefinition name="Expiry" type="number" length="4" minValue="0" maxValue="65535" />
