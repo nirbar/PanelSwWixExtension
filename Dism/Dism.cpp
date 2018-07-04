@@ -9,7 +9,7 @@
 using namespace std;
 
 static LPCWSTR DismStateString(DismPackageFeatureState state);
-static void ProgressCallback(UINT Current, UINT Total, PVOID UserData);
+static void CALLBACK ProgressCallback(UINT Current, UINT Total, PVOID UserData);
 
 #define DismLogPrefix		L"DismLog="
 
@@ -195,14 +195,14 @@ static LPCWSTR DismStateString(DismPackageFeatureState state)
 	}
 }
 
-static void ProgressCallback(UINT Current, UINT Total, PVOID UserData)
+static void CALLBACK ProgressCallback(UINT Current, UINT Total, PVOID UserData)
 {
 	HRESULT hr = S_OK;
 	PMSIHANDLE hRec;
 	HANDLE hCancel = (HANDLE)UserData;
 
 	hr = WcaProgressMessage(0, FALSE);
-	if (FAILED(hr))
+	if (hr == S_FALSE)
 	{
 		::SetEvent(hCancel);
 	}
