@@ -89,6 +89,8 @@ Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "SetPropertyFromPipeBootstra
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "SetPropertyFromPipeSetup", "UnitTests\SetPropertyFromPipe\SetPropertyFromPipeSetup\SetPropertyFromPipeSetup.wixproj", "{C3F36939-174F-4A7C-880E-B25875B7ABDC}"
 EndProject
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "EvaluateExpressionUT", "UnitTests\EvaluateExpressionUT\EvaluateExpressionUT.wixproj", "{CBA21767-A300-4048-BCD4-4757F6FD0BEA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -647,6 +649,24 @@ Global
 		{C3F36939-174F-4A7C-880E-B25875B7ABDC}.Release|x64.ActiveCfg = Release|x86
 		{C3F36939-174F-4A7C-880E-B25875B7ABDC}.Release|x86.ActiveCfg = Release|x86
 		{C3F36939-174F-4A7C-880E-B25875B7ABDC}.Release|x86.Build.0 = Release|x86
+		{CBA21767-A300-4048-BCD4-4757F6FD0BEA}.Debug|Any CPU.ActiveCfg = Debug|x86
+		{CBA21767-A300-4048-BCD4-4757F6FD0BEA}.Debug|ARM.ActiveCfg = Debug|x86
+		{CBA21767-A300-4048-BCD4-4757F6FD0BEA}.Debug|Mixed Platforms.ActiveCfg = Debug|x86
+		{CBA21767-A300-4048-BCD4-4757F6FD0BEA}.Debug|Mixed Platforms.Build.0 = Debug|x86
+		{CBA21767-A300-4048-BCD4-4757F6FD0BEA}.Debug|Win32.ActiveCfg = Debug|x86
+		{CBA21767-A300-4048-BCD4-4757F6FD0BEA}.Debug|Win32.Build.0 = Debug|x86
+		{CBA21767-A300-4048-BCD4-4757F6FD0BEA}.Debug|x64.ActiveCfg = Debug|x86
+		{CBA21767-A300-4048-BCD4-4757F6FD0BEA}.Debug|x86.ActiveCfg = Debug|x86
+		{CBA21767-A300-4048-BCD4-4757F6FD0BEA}.Debug|x86.Build.0 = Debug|x86
+		{CBA21767-A300-4048-BCD4-4757F6FD0BEA}.Release|Any CPU.ActiveCfg = Release|x86
+		{CBA21767-A300-4048-BCD4-4757F6FD0BEA}.Release|ARM.ActiveCfg = Release|x86
+		{CBA21767-A300-4048-BCD4-4757F6FD0BEA}.Release|Mixed Platforms.ActiveCfg = Release|x86
+		{CBA21767-A300-4048-BCD4-4757F6FD0BEA}.Release|Mixed Platforms.Build.0 = Release|x86
+		{CBA21767-A300-4048-BCD4-4757F6FD0BEA}.Release|Win32.ActiveCfg = Release|x86
+		{CBA21767-A300-4048-BCD4-4757F6FD0BEA}.Release|Win32.Build.0 = Release|x86
+		{CBA21767-A300-4048-BCD4-4757F6FD0BEA}.Release|x64.ActiveCfg = Release|x86
+		{CBA21767-A300-4048-BCD4-4757F6FD0BEA}.Release|x86.ActiveCfg = Release|x86
+		{CBA21767-A300-4048-BCD4-4757F6FD0BEA}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -676,6 +696,7 @@ Global
 		{EB0A7D51-2133-4EE7-B6CA-87DBEAC67E02} = {9414286E-4E14-4836-99BE-7C6AB7B14538}
 		{F37B5C48-DD17-4FF6-AF58-1BD697C2C1D7} = {9414286E-4E14-4836-99BE-7C6AB7B14538}
 		{C3F36939-174F-4A7C-880E-B25875B7ABDC} = {9414286E-4E14-4836-99BE-7C6AB7B14538}
+		{CBA21767-A300-4048-BCD4-4757F6FD0BEA} = {B533D9FC-4927-4A05-892D-B90E8BEDCF5D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F5B6389D-77ED-4938-A322-8DFCA4D9FEF5}

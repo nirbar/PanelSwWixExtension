@@ -558,4 +558,15 @@
     </UI>
   </Fragment>
 
+  <!-- EvaluateExpression -->
+  <Fragment>
+    <CustomAction Id="EvaluateExpression" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="EvaluateExpression" Execute="immediate"/>
+    <InstallExecuteSequence>
+      <Custom Action="EvaluateExpression" Before="InstallInitialize" Overridable="yes"/>
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="EvaluateExpression">!(loc.EvaluateExpression)</ProgressText>
+    </UI>
+  </Fragment>
+
 </Wix>

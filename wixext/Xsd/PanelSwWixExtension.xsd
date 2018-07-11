@@ -14,6 +14,30 @@
   </xs:annotation>
   <xs:import namespace="http://schemas.microsoft.com/wix/2006/wi" />
 
+  <xs:element name="Evaluate">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Evaluates mathematical expressions using ExprTk library.]]>
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:attribute name="Expression" use="required" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Expression to evaluate. The field is formatted.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Order" use="optional" type="xs:int" default="0">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Order of execution, defaults to 0.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="SetPropertyFromPipe">
     <xs:annotation>
       <xs:appinfo>

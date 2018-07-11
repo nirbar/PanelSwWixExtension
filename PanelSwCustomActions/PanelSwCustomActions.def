@@ -35,3 +35,4 @@ EXPORTS
 	CreateSelfSignCertificate
 	AlwaysOverwriteFile
 	SetPropertyFromPipe
+	EvaluateExpression

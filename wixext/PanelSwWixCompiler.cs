@@ -137,6 +137,10 @@ namespace PanelSw.Wix.Extensions
                             ParseSqlSearchElement(element);
                             break;
 
+                        case "Evaluate":
+                            ParseEvaluateElement(element);
+                            break;
+
                         default:
                             Core.UnexpectedElement(parentElement, element);
                             break;
@@ -1579,6 +1583,77 @@ namespace PanelSw.Wix.Extensions
                 row[4] = area.ToString();
                 row[5] = 0;
                 row[6] = condition;
+            }
+        }
+
+        private void ParseEvaluateElement(XmlNode node)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string id = "_" + Guid.NewGuid().ToString("N");
+            string property = null;
+            string expression = null;
+            int order = 0;
+
+            if (node.ParentNode.LocalName != "Property")
+            {
+                Core.UnexpectedElement(node.ParentNode, node);
+            }
+            property = node.ParentNode.Attributes["Id"].Value;
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName)
+                    {
+                        case "Expression":
+                            expression = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Order":
+                            order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 255);
+                            break;
+
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+                else
+                {
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            if (string.IsNullOrEmpty(property))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.Name, "Id"));
+            }
+            if (string.IsNullOrEmpty(expression))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Expression"));
+            }
+
+            // find unexpected child elements
+            foreach (XmlNode child in node.ChildNodes)
+            {
+                if (child.NamespaceURI == schema.TargetNamespace)
+                {
+                    Core.UnexpectedElement(node, child);
+                }
+            }
+
+            // reference the Win32_CopyFiles custom actions since nothing will happen without these
+            Core.EnsureTable(sourceLineNumbers, "PSW_EvaluateExpression");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "EvaluateExpression");
+
+            if (!Core.EncounteredError)
+            {
+                // create a row in the ReadIniValues table
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_EvaluateExpression");
+                row[0] = id;
+                row[1] = property;
+                row[2] = expression;
+                row[3] = order;
             }
         }
 

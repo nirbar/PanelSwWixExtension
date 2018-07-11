@@ -2,3 +2,6 @@
 	path = protobuf
 	url = https://github.com/google/protobuf.git
 	branch = 3.5.1.1
+[submodule "exprtk"]
+	path = exprtk
+	url = https://github.com/ArashPartow/exprtk.git

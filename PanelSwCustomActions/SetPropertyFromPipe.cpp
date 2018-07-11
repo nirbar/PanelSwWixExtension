@@ -138,7 +138,7 @@ static HRESULT ReadPropertiesFromPipe(LPCWSTR szPipeName, UINT nTimeout)
 
 	// Parse message.
 	bRes = details.ParseFromArray(msgBuffer, dwSize);
-	ExitOnNull(msgBuffer, hr, E_FAIL, "Failed parsing message");
+	ExitOnNull(bRes, hr, E_FAIL, "Failed parsing message");
 
 	for (int i = 0; i < details.properties_size(); ++i)
 	{

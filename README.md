@@ -5,6 +5,7 @@ PanelSwWixExtension is a [WiX](http://wixtoolset.org/) extension that contains v
 ## WiX Elements
 
 - Immediate Actions:
+  - *Evaluate*: Evaluate mathematical expressions and store result in property.
   - *SetPropertyFromPipe*: Allows setting property from a pipe.
   - *SqlSearch*: Execute a SQL query and place result in a property.
   - *ReadIniValues*: Reads .INI file values.

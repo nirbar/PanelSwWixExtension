@@ -199,6 +199,12 @@ public:
 		return hr;
 	}
 
+	HRESULT ToAnsiString(LPSTR *pszStr)
+	{
+		HRESULT hr = StrAnsiAllocFormatted(pszStr, "%ls", _pS);
+		return hr;
+	}
+
 	#pragma region Tokenize
 	
 	HRESULT Tokenize(LPCWSTR delimiters, LPCWSTR* firstToken)
