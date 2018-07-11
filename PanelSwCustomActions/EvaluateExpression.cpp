@@ -23,8 +23,8 @@ extern "C" UINT __stdcall EvaluateExpression(MSIHANDLE hInstall)
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_DeletePath exists.
-	hr = WcaTableExists(L"PSW_BackupAndRestore");
-	BreakExitOnFailure(hr, "Table does not exist 'PSW_BackupAndRestore'. Have you authored 'PanelSw:BackupAndRestore' entries in WiX code?");
+	hr = WcaTableExists(L"PSW_EvaluateExpression");
+	BreakExitOnFailure(hr, "Table does not exist 'PSW_BackupAndRestore'. Have you authored 'PanelSw:Evaluate' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(QUERY, &hView);
