@@ -461,12 +461,9 @@ static HRESULT RefreshEnvironment()
             hr = envKey.GetStringValue(szValueName, (LPWSTR*)szValueData);
             BreakExitOnFailure(hr, "Failed to get environment variable '%ls' from registry key", (LPCWSTR)szValueName);
 
-            WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Setting process environment variable '%ls'='%ls'", (LPCWSTR)szValueName, (LPCWSTR)szValueData);
-
             bRes = ::SetEnvironmentVariable(szValueName, szValueData);
-            BreakExitOnNullWithLastError(bRes, hr, "Failed setting environment variable");
+            BreakExitOnNullWithLastError(bRes, hr, "Failed setting environment variable '%ls'", (LPCWSTR)szValueName);
         }
-
         szValueName.Release();
     }
     BreakExitOnFailure(hr, "Failed enumerating environment registry key");

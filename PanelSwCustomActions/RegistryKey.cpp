@@ -81,8 +81,6 @@ HRESULT CRegistryKey::Open(RegRoot root, WCHAR* key, RegArea area, RegAccess acc
 	hParentKey = Root2Handle(root);
 	BreakExitOnNull(hParentKey, hr, E_INVALIDARG, "Parent key is NULL");
 
-	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Attempting to open registry key %ls", key);
-
 	_samAccess = access;
 	_area = area;
 	if (_area == RegArea::Default)

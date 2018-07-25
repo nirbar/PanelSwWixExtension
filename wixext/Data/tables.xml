@@ -113,7 +113,7 @@
   </tableDefinition>
 
   <tableDefinition name="PSW_ExecOnComponent_ExitCode">
-    <columnDefinition primaryKey="yes" name="ExecOnId_" type="string" length="0" modularize="property" category="identifier" />
+    <columnDefinition primaryKey="yes" name="ExecOnId_" type="string" length="0" modularize="column" category="identifier" />
     <columnDefinition primaryKey="yes" name="From" type="number" length="4" minValue="0" maxValue="65535" />
     <columnDefinition name="To" type="number" length="4" minValue="0" maxValue="65535" />
   </tableDefinition>
