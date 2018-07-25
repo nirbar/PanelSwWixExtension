@@ -47,6 +47,7 @@ extern "C" UINT __stdcall CertificateHashSearch(MSIHANDLE hInstall)
 		pCertContext = ::CertFindCertificateInStore(hMachineStore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0, CERT_FIND_SUBJECT_STR, (LPCWSTR)certName, pCertContext);
 		if (!pCertContext && (HRESULT_FROM_WIN32(::GetLastError()) == CRYPT_E_NOT_FOUND))
 		{
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Did not find certificate with sybject '%ls' in machine MY store.", (LPCWSTR)certName);
 			continue;
 		}
 		BreakExitOnNullWithLastError(pCertContext, hr, "Failed finding certificate with name '%ls'", (LPCWSTR)certName);

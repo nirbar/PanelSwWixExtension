@@ -213,12 +213,12 @@
   <tableDefinition name="PSW_EvaluateExpression">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
     <columnDefinition name="Property_" type="string" length="0" modularize="column" category="identifier" />
-    <columnDefinition name="Expression" type="string" length="72" modularize="column" category="formatted" />
+    <columnDefinition name="Expression" type="string" length="72" modularize="property" category="formatted" />
     <columnDefinition name="Order" type="number" length="2" minValue="0" maxValue="255" />
   </tableDefinition>
 
   <tableDefinition name="PSW_CertificateHashSearch">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="CertName" type="string" length="72" modularize="column" category="formatted" />
+    <columnDefinition name="CertName" type="string" length="72" modularize="property" category="formatted" />
   </tableDefinition>
 </tableDefinitions>
