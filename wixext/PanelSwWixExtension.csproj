@@ -105,7 +105,7 @@
     </BootstrapperPackage>
   </ItemGroup>
   <Target Name="AfterBuild" Condition="'$(Configuration)'=='Release'">
-    <Exec Command="&quot;$(SolutionDir)..\..\Tools\nuget.exe&quot; pack -OutputDirectory &quot;$(SolutionDir)nuget-out&quot; -Version $(FullVersion)" WorkingDirectory="$(SolutionDir)" />
+    <Exec Command="&quot;$(SolutionDir)..\Tools\nuget.exe&quot; pack -OutputDirectory &quot;$(SolutionDir)nuget-out&quot; -Version $(FullVersion)" WorkingDirectory="$(SolutionDir)" />
   </Target>
   <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

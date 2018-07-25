@@ -141,6 +141,10 @@ namespace PanelSw.Wix.Extensions
                             ParseEvaluateElement(element);
                             break;
 
+                        case "CertificateHashSearch":
+                            ParseCertificateHashSearchElement(element);
+                            break;
+
                         default:
                             Core.UnexpectedElement(parentElement, element);
                             break;
@@ -1583,6 +1587,70 @@ namespace PanelSw.Wix.Extensions
                 row[4] = area.ToString();
                 row[5] = 0;
                 row[6] = condition;
+            }
+        }
+
+        private void ParseCertificateHashSearchElement(XmlNode node)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string property = null;
+            string certName = null;
+
+            if (node.ParentNode.LocalName != "Property")
+            {
+                Core.UnexpectedElement(node.ParentNode, node);
+            }
+            property = node.ParentNode.Attributes["Id"].Value;
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName)
+                    {
+                        case "CertName":
+                            certName = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+                else
+                {
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            if (string.IsNullOrEmpty(property))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.Name, "Id"));
+            }
+            if (string.IsNullOrEmpty(certName))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "CertName"));
+            }
+
+            // find unexpected child elements
+            foreach (XmlNode child in node.ChildNodes)
+            {
+                if (child.NamespaceURI == schema.TargetNamespace)
+                {
+                    Core.UnexpectedElement(node, child);
+                }
+            }
+
+            // reference the Win32_CopyFiles custom actions since nothing will happen without these
+            Core.EnsureTable(sourceLineNumbers, "PSW_CertificateHashSearch");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "CertificateHashSearch");
+
+            if (!Core.EncounteredError)
+            {
+                // create a row in the ReadIniValues table
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_CertificateHashSearch");
+                row[0] = property;
+                row[1] = certName;
             }
         }
 

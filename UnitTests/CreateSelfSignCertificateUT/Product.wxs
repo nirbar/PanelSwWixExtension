@@ -22,5 +22,11 @@
     </Directory>
 
     <Property Id="MSIFASTINSTALL" Value="7"></Property>
+    <Property Id="CERT_HASH">
+      <PanelSW:CertificateHashSearch CertName="WMSvc-SHA2-SBUSXTIP4X"/>
+    </Property>
+    <Condition Message="Bad Cert">
+      <![CDATA[Installed OR CERT_HASH]]>
+    </Condition>
   </Product>
 </Wix>

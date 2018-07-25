@@ -92,6 +92,7 @@
     <ClCompile Include="AccountNames.cpp" />
     <ClCompile Include="AlwaysOverwriteFile.cpp" />
     <ClCompile Include="BackupAndRestore.cpp" />
+    <ClCompile Include="CertificateHashSearch.cpp" />
     <ClCompile Include="CleanPendingFileRenameOperations.cpp" />
     <ClCompile Include="CommonDeferred.cpp" />
     <ClCompile Include="CreateSelfSignCertificate.cpp" />

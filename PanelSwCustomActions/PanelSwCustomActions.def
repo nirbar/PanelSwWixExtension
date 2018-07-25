@@ -36,3 +36,4 @@ EXPORTS
 	AlwaysOverwriteFile
 	SetPropertyFromPipe
 	EvaluateExpression
+	CertificateHashSearch

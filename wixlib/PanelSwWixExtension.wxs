@@ -569,4 +569,18 @@
     </UI>
   </Fragment>
 
+  <!-- EvaluateExpression -->
+  <Fragment>
+    <CustomAction Id="CertificateHashSearch" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CertificateHashSearch" Execute="firstSequence"/>
+    <InstallExecuteSequence>
+      <Custom Action="CertificateHashSearch" Before="LaunchConditions" Overridable="yes"/>
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="CertificateHashSearch" Before="LaunchConditions" Overridable="yes"/>
+    </InstallUISequence>
+    <UI>
+      <ProgressText Action="CertificateHashSearch">!(loc.CertificateHashSearch)</ProgressText>
+    </UI>
+  </Fragment>
+
 </Wix>
