@@ -12,6 +12,8 @@ static LPCWSTR DismStateString(DismPackageFeatureState state);
 static void ProgressCallback(UINT Current, UINT Total, PVOID UserData);
 
 #define DismLogPrefix		L"DismLog="
+#define IncludeFeatures		L"IncludeFeatures="
+#define ExcludeFeatures		L"ExcludeFeatures="
 
 extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 {
@@ -24,11 +26,13 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 	BOOL bRes = TRUE;
 	UINT uFeatureNum = 0;
 	list<wregex> enableFaetures;
+	list<wregex> excludeFaetures;
 	LPWSTR szCAD = nullptr;
 	LPCWSTR szDismLog = nullptr;
 	LPCWSTR szTok = nullptr;
 	LPWSTR szTokData = nullptr;
 	HANDLE hCancel = NULL;
+	bool bInclude = true;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
@@ -46,9 +50,26 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 			szDismLog = szTok + ::wcslen(DismLogPrefix);
 			continue;
 		}
+		else if (::wcsstr(szTok, IncludeFeatures))
+		{
+			bInclude = true;
+			szTok += ::wcslen(IncludeFeatures);
+		}
+		else if (::wcsstr(szTok, ExcludeFeatures))
+		{
+			bInclude = false;
+			szTok += ::wcslen(ExcludeFeatures);
+		}
 
 		// Next feature
-		enableFaetures.push_back(wregex(szTok, std::regex_constants::syntax_option_type::optimize));
+		if (bInclude)
+		{
+			enableFaetures.push_back(wregex(szTok, std::regex_constants::syntax_option_type::optimize));
+		}
+		else
+		{
+			excludeFaetures.push_back(wregex(szTok, std::regex_constants::syntax_option_type::optimize));
+		}
 	}
 
 	hCancel = ::CreateEvent(nullptr, TRUE, FALSE, nullptr);
@@ -98,6 +119,25 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 				{
 					continue;
 				}
+
+				// Feature included. Was it explictly excluded?
+				bool excluded = false;
+				for (const wregex& exRx : excludeFaetures)
+				{
+					match_results<LPCWSTR> exResults;
+
+					bRes = regex_search(pFeatures[i].FeatureName, exResults, exRx);
+					if (bRes && (results.length() > 0))
+					{
+						excluded = true;
+						break;
+					}
+				}
+				if (excluded)
+				{
+					continue;
+				}
+
 
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Enabling feature '%ls'", pFeatures[i].FeatureName);
 				hr = ::DismEnableFeature(hSession, pFeatures[i].FeatureName, nullptr, DismPackageNone, FALSE, nullptr, 0, TRUE, hCancel, ProgressCallback, hCancel);
