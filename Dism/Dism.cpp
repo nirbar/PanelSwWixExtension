@@ -135,6 +135,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 				}
 				if (excluded)
 				{
+					WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Feature '%ls' excluded", pFeatures[i].FeatureName);
 					continue;
 				}
 

@@ -46,7 +46,6 @@ namespace PanelSw.Wix.Extensions
             Core.EnsureTable(null, "PSW_TaskScheduler");
             Core.EnsureTable(null, "PSW_ExecOnComponent");
             Core.EnsureTable(null, "PSW_ExecOnComponent_ExitCode");
-            Core.EnsureTable(null, "PSW_Dism"); 
             Core.EnsureTable(null, "PSW_ZipFile"); 
             Core.EnsureTable(null, "PSW_Unzip"); 
             Core.EnsureTable(null, "PSW_ServiceConfig");
@@ -1102,6 +1101,7 @@ namespace PanelSw.Wix.Extensions
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
             string id = null;
             string features = null;
+            string exclude = null;
             string component = null;
 
             component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
@@ -1117,6 +1117,10 @@ namespace PanelSw.Wix.Extensions
                 {
                     case "EnableFeature":
                         features = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "ExcludeFeatures":
+                        exclude = Core.GetAttributeValue(sourceLineNumbers, attrib);
                         break;
 
                     case "Id":
@@ -1151,11 +1155,12 @@ namespace PanelSw.Wix.Extensions
 
             if (!Core.EncounteredError)
             {
-                // create a row in the Win32_CopyFiles table
+                Core.EnsureTable(null, "PSW_Dism");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_Dism");
                 row[0] = id;
                 row[1] = component;
                 row[2] = features;
+                row[3] = exclude;
             }
         }
 

@@ -3,14 +3,14 @@
 #include <strutil.h>
 #include <list>
 #include <string>
+#include "..\CaCommon\WixString.h"
 #include <Shlwapi.h>
 #pragma comment (lib, "Shlwapi.lib")
 using namespace std;
 
-#define Dism_QUERY L"SELECT `Id`, `Component_`, `EnableFeatures` FROM `PSW_Dism`"
-enum DismQuery { Id = 1, Component = 2, EnableFeatures = 3 };
-
 #define DismLogPrefix		L"DismLog="
+#define IncludeFeatures		L"IncludeFeatures="
+#define ExcludeFeatures		L"ExcludeFeatures="
 
 // Immediate custom action
 extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
@@ -19,15 +19,10 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
 	LPWSTR szMsiLog = nullptr;
-	LPWSTR szCAD = nullptr;
 	WCHAR szDismLog[MAX_PATH];
-	PMSIHANDLE hView;
-	PMSIHANDLE hRecord;
-	LPWSTR szId = nullptr;
-	LPWSTR szComponent = nullptr;
-	LPWSTR szFeature = nullptr;
+	PMSIHANDLE hView, hRecord;
+	CWixString allInclude, allExclude, cad;
 	int nVersionNT = 0;
-	BOOL bAny = FALSE;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
@@ -48,13 +43,13 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 		bRes = ::PathRenameExtension(szDismLog, L".dism.log");
 		ExitOnNullWithLastError1(bRes, hr, "Failed renaming file extension: '%ls'", szMsiLog);
 
-		hr = StrAllocFormatted(&szCAD, DismLogPrefix L"%s", szDismLog);
+		hr = cad.Format(DismLogPrefix L"%s;", szDismLog);
 		ExitOnFailure(hr, "Failed formatting string for DISM log file");
 	}
 
 	// Execute view
-	hr = WcaOpenExecuteView(Dism_QUERY, &hView);
-	ExitOnFailure(hr, "Failed to execute SQL query '%ls'.", Dism_QUERY);
+	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `EnableFeatures`, `ExcludeFeatures` FROM `PSW_Dism`", &hView);
+	ExitOnFailure(hr, "Failed to execute SQL query");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
@@ -62,69 +57,70 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		PMSIHANDLE hExitCodeView;
-		PMSIHANDLE hExitCodeRecord;
+		CWixString id, exclude, include, component;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
-		DWORD_PTR szStrLen = 0;
 
-		hr = WcaGetRecordString(hRecord, DismQuery::Id, &szId);
+		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)id);
 		ExitOnFailure(hr, "Failed to get Id.");
-		hr = WcaGetRecordString(hRecord, DismQuery::Component, &szComponent);
+		hr = WcaGetRecordString(hRecord, 2, (LPWSTR*)component);
 		ExitOnFailure(hr, "Failed to get Component.");
-		hr = WcaGetRecordFormattedString(hRecord, DismQuery::EnableFeatures, &szFeature);
+		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)include);
 		ExitOnFailure(hr, "Failed to get EnableFeatures.");
+		ExitOnNull(!include.IsNullOrEmpty(), hr, E_INVALIDARG, "EnableFeatures is empty");
+		hr = WcaGetRecordFormattedString(hRecord, 4, (LPWSTR*)exclude);
+		ExitOnFailure(hr, "Failed to get ExcludeFeatures.");
 
-		compAction = WcaGetComponentToDo(szComponent);
+		compAction = WcaGetComponentToDo((LPCWSTR)component);
 		switch (compAction)
 		{
 		case WCA_TODO::WCA_TODO_INSTALL:
 		case WCA_TODO::WCA_TODO_REINSTALL:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will enable features matching pattern '%ls' on component '%ls'", szFeature, szComponent);
-			bAny = TRUE;
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will enable features matching pattern '%ls', excluding pattern '%ls' on component '%ls'", (LPCWSTR)include, (LPCWSTR)exclude, (LPCWSTR)component);
 
 			if (nVersionNT <= 601)
 			{
 				ExitOnFailure(hr = E_NOTIMPL, "PanelSwWixExtension Dism is only supported on Windows 8 / Windows Server 2008 R2 or newer operating systems");
 			}
 
-			szStrLen = ::wcslen(szCAD);
-			hr = StrAllocConcat(&szCAD, L";", szStrLen);
-			ExitOnFailure(hr, "Failed to build CustomActionData");
+			hr = allInclude.AppnedFormat(L"%s;", (LPCWSTR)include);
+			ExitOnFailure(hr, "Failed appending formatted string");
 
-			++szStrLen;
-			hr = StrAllocConcat(&szCAD, szFeature, szStrLen);
-			ExitOnFailure(hr, "Failed to build CustomActionData");
+			if (!exclude.IsNullOrEmpty())
+			{
+				hr = allExclude.AppnedFormat(L"%s;", (LPCWSTR)exclude);
+				ExitOnFailure(hr, "Failed appending formatted string");
+			}
 			break;
 
 		case WCA_TODO::WCA_TODO_UNINSTALL:
 		case WCA_TODO::WCA_TODO_UNKNOWN:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping DISM for feature '%ls' as component '%ls' is not installed or repaired", szId, szComponent);
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping DISM for feature '%ls' as component '%ls' is not installed or repaired", (LPCWSTR)id, (LPCWSTR)component);
 			break;
 		}
-
-		// Clean for next iteration
-		ReleaseNullStr(szId);
-		ReleaseNullStr(szComponent);
-		ReleaseNullStr(szFeature);
 	}
 	hr = S_OK; // We're only getting here on hr = E_NOMOREITEMS.
 
 	// Since Dism API takes long, we only want to execute it if there's something to do. Conditioning the Dism deferred CA with the property existance will save us time.
-	if (bAny)
+	if (!allInclude.IsNullOrEmpty())
 	{
-		hr = WcaSetProperty(L"DismX86", szCAD);
+		hr = cad.AppnedFormat(IncludeFeatures L"%s", (LPCWSTR)allInclude);
+		ExitOnFailure(hr, "Failed appending formatted string");
+
+		if (!allExclude.IsNullOrEmpty())
+		{
+			hr = cad.AppnedFormat(ExcludeFeatures L"%s", (LPCWSTR)allExclude);
+			ExitOnFailure(hr, "Failed appending formatted string");
+		}
+
+		hr = WcaSetProperty(L"DismX86", (LPCWSTR)cad);
 		ExitOnFailure(hr, "Failed setting CustomActionData");
 
-		hr = WcaSetProperty(L"DismX64", szCAD);
+		hr = WcaSetProperty(L"DismX64", (LPCWSTR)cad);
 		ExitOnFailure(hr, "Failed setting CustomActionData");
 	}
 
 LExit:
 	ReleaseStr(szMsiLog);
-	ReleaseStr(szCAD);
-	ReleaseStr(szId);
-	ReleaseStr(szComponent);
-	ReleaseStr(szFeature);
 
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);

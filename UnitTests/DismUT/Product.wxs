@@ -23,7 +23,8 @@
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component Id="Test" Guid="*">
         <File Source="$(var.ProjectDir)Product.wxs" />
-        <PanelSW:Dism Id="_1" EnableFeature="IIS"/>
+        <PanelSW:Dism Id="iis" EnableFeature="IIS" ExcludeFeatures="FTP"/>
+        <PanelSW:Dism Id="msmq" EnableFeature="MSMQ" />
       </Component>
     </ComponentGroup>
   </Product>
