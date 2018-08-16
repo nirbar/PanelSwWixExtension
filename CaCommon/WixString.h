@@ -156,7 +156,6 @@ public:
 			szNew = NULL;
 		}
 
-	LExit:
 		if (szNew)
 		{
 			StrFree(szNew);
@@ -190,8 +189,6 @@ public:
 		{
 			_dwCapacity = dwCapacity;
 		}
-
-	LExit:
 
 		ReleaseStr(szAppend);
 

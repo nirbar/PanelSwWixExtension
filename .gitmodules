@@ -5,3 +5,6 @@
 [submodule "exprtk"]
 	path = exprtk
 	url = https://github.com/ArashPartow/exprtk.git
+[submodule "poco"]
+	path = poco
+	url = https://github.com/pocoproject/poco.git

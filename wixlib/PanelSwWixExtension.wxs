@@ -366,13 +366,17 @@
 
   <!-- Unzip -->
   <Fragment>
-    <CustomAction Id="UnzipSched" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="UnzipSched" Execute="immediate"/>
-    <CustomAction Id="UnzipExec" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="UnzipExec" Execute="deferred" Impersonate="no"/>
+    <CustomAction Id="UnzipSched" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="Unzip" Execute="immediate"/>
+    <CustomAction Id="UnzipExec" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" />
 
     <InstallExecuteSequence>
       <Custom Action="UnzipSched" After="DuplicateFiles" Overridable="yes"/>
       <Custom Action="UnzipExec" After="UnzipSched" Overridable="yes"/>
     </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="UnzipSched">!(loc.Unzip)</ProgressText>
+      <ProgressText Action="UnzipExec">!(loc.Unzip)</ProgressText>
+    </UI>
   </Fragment>
 
   <!-- ServiceConfig (account only for now) -->

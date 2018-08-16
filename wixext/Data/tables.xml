@@ -138,7 +138,6 @@
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
     <columnDefinition name="ZipFile" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="TargetFolder" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Flags" type="number" length="4" minValue="0" maxValue="65535" />
     <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
   </tableDefinition>
 

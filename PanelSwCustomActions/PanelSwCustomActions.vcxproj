@@ -37,7 +37,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <LibraryPath>$(OutDir)..\CaCommon\;$(OutDir)..\ProtoCaLib\;$(WIX)SDK\VS2017\lib\x86;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SolutionDir)CaCommon;$(WIX)SDK\VS2017\inc;$(IncludePath)</IncludePath>
+    <IncludePath>$(SolutionDir)CaCommon;$(SolutionDir)poco\Zip\include;$(SolutionDir)poco\Foundation\include;$(WIX)SDK\VS2017\inc;$(IncludePath)</IncludePath>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>
@@ -53,7 +53,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>libprotobuf-lite.lib;ProtoCaLib.lib;msi.lib;dutil.lib;wcautil.lib;Version.lib;Shell32.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(WIX)sdk\VS2017\lib\x86;..\build\protobuf\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(WIX)sdk\VS2017\lib\x86;..\build\protobuf\$(Configuration);..\build\poco\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
@@ -122,6 +122,7 @@
     <ClCompile Include="Telemetry.cpp" />
     <ClCompile Include="TerminateSuccessfully.cpp" />
     <ClCompile Include="TopShelfService.cpp" />
+    <ClCompile Include="Unzip.cpp" />
     <ClCompile Include="XmlSearch.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -165,13 +166,23 @@
     <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\setPropertyFromPipeDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\unzipDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
     <ClInclude Include="TopShelfService.h" />
+    <ClInclude Include="Unzip.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="PanelSwCustomActions.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Target Name="BuildPoco" BeforeTargets="PrepareForBuild">
+    <MakeDir Directories="$(SolutionDir)build\poco;$(IntDir)..\poco" />
+    <MakeDir Directories="" />
+    <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; -G &quot;Visual Studio 15 2017&quot; -T $(PlatformToolset) -DPOCO_STATIC=ON -DPOCO_MT=ON ..\..\poco" WorkingDirectory="$(SolutionDir)build\poco" />
+    <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; --build . --config $(Configuration)" WorkingDirectory="$(SolutionDir)build\poco" />
+  </Target>
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
   </ImportGroup>

@@ -67,7 +67,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="InstallUtil.cs" />
-    <Compile Include="Unzip.cs" />
     <Compile Include="Util\SessionEx.cs" />
     <Compile Include="ZipFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

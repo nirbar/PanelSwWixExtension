@@ -37,3 +37,4 @@ EXPORTS
 	SetPropertyFromPipe
 	EvaluateExpression
 	CertificateHashSearch
+	Unzip

@@ -18,5 +18,6 @@
   <String Id="SetPropertyFromPipe"><![CDATA[Reading properties from pipe]]></String>
   <String Id="EvaluateExpression"><![CDATA[Evaluating expressions]]></String>
   <String Id="CertificateHashSearch"><![CDATA[Find certificate hash]]></String>
+  <String Id="Unzip"><![CDATA[Extracting ZIP archive]]></String>
 </WixLocalization>
 

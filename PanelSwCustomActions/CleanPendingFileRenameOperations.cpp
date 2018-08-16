@@ -120,7 +120,7 @@ extern "C" UINT __stdcall CleanPendingFileRenameOperationsSched(MSIHANDLE hInsta
 
 		for (LPCWSTR szDelete : lstDeletedFiles)
 		{
-			if (::wcsicmp(szDelete, (LPCWSTR)szFilePath) == 0)
+			if (::_wcsicmp(szDelete, (LPCWSTR)szFilePath) == 0)
 			{
 				hr = szCleanPendingFileRenameOperations.AppnedFormat(L"%s;", szDelete);
 				BreakExitOnFailure(hr, "Failed to append string.");
@@ -223,7 +223,7 @@ extern "C" UINT __stdcall CleanPendingFileRenameOperations(MSIHANDLE hInstall)
 				szDelete += 4;
 			}
 
-			if (::wcsicmp(szToken, szDelete) == 0)
+			if (::_wcsicmp(szToken, szDelete) == 0)
 			{
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File '%ls' is scheduled to be deleted after reboot. Unscheduling.", szDelete);
 				bAnyChange = TRUE;
@@ -273,7 +273,7 @@ extern "C" UINT __stdcall CleanPendingFileRenameOperations(MSIHANDLE hInstall)
 			}
 
 			// Same file is to be both created and deleted?
-			if (::wcsicmp(szRename, szDelete) == 0)
+			if (::_wcsicmp(szRename, szDelete) == 0)
 			{
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File '%ls' is scheduled to be created and deleted after reboot. Keeping the creation only.", szDelete);
 				bAnyChange = TRUE;
