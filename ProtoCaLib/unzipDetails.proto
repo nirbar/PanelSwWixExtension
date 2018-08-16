@@ -6,4 +6,5 @@ message UnzipDetails{
 
     bytes zipFile = 1;
     bytes targetFolder = 2;
+	bool overwrite = 3;
 }

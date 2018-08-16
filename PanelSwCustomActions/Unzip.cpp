@@ -1,13 +1,29 @@
 #include "Unzip.h"
 #include "..\CaCommon\WixString.h"
-#include "..\poco\Zip\include\Poco\Zip\Decompress.h"
+#include "..\poco\Zip\include\Poco\Zip\ZipArchive.h"
+#include "..\poco\Zip\include\Poco\Zip\ZipStream.h"
 #include "..\poco\Foundation\include\Poco\UnicodeConverter.h"
 #include "..\poco\Foundation\include\Poco\Delegate.h"
+#include "..\poco\Foundation\include\Poco\StreamCopier.h"
 #include "unzipDetails.pb.h"
 #include <fstream>
+#include <shlwapi.h>
 #pragma comment (lib, "Iphlpapi.lib")
+#pragma comment (lib, "Shlwapi.lib")
 using namespace ::com::panelsw::ca;
 using namespace google::protobuf;
+using namespace Poco::Zip;
+
+/*TODO
+- Migrate Zip to native code
+- Support rollback (copy current target-folder to temp before decompressing over it).
+*/
+
+enum UnzipFlags
+{
+	None = 0,
+	Overwrite = 1
+};
 
 extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall)
 {
@@ -28,7 +44,7 @@ extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall)
 	BreakExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_Unzip'. Have you authored 'PanelSw:Unzip' entries in WiX code?");
 
 	// Execute view
-	hr = WcaOpenExecuteView(L"SELECT `ZipFile`, `TargetFolder`, `Condition` FROM `PSW_Unzip`", &hView);
+	hr = WcaOpenExecuteView(L"SELECT `ZipFile`, `TargetFolder`, `Flags`, `Condition` FROM `PSW_Unzip`", &hView);
 	BreakExitOnFailure(hr, "Failed to execute SQL query");
 
 	// Iterate records
@@ -38,12 +54,15 @@ extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall)
 
 		// Get fields
 		CWixString zip, folder, condition;
+		int flags = 0;
 
 		hr = WcaGetRecordFormattedString(hRecord, 1, (LPWSTR*)zip);
 		BreakExitOnFailure(hr, "Failed to get zip file.");
 		hr = WcaGetRecordFormattedString(hRecord, 2, (LPWSTR*)folder);
 		BreakExitOnFailure(hr, "Failed to get folder.");
-		hr = WcaGetRecordString(hRecord, 3, (LPWSTR*)condition);
+		hr = WcaGetRecordFormattedInteger(hRecord, 3, &flags);
+		BreakExitOnFailure(hr, "Failed to get flags.");
+		hr = WcaGetRecordString(hRecord, 4, (LPWSTR*)condition);
 		BreakExitOnFailure(hr, "Failed to get condition.");
 
 		MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, (LPCWSTR)condition);
@@ -65,7 +84,7 @@ extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall)
 		ExitOnNull(!zip.IsNullOrEmpty(), hr, E_INVALIDARG, "ZIP file path is empty");
 		ExitOnNull(!folder.IsNullOrEmpty(), hr, E_INVALIDARG, "ZIP target path is empty");
 
-		hr = cad.AddUnzip(zip, folder);
+		hr = cad.AddUnzip(zip, folder, flags & UnzipFlags::Overwrite);
 		BreakExitOnFailure(hr, "Failed scheduling zip file extraction");
 	}
 
@@ -80,7 +99,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-HRESULT CUnzip::AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder)
+HRESULT CUnzip::AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, bool overwrite)
 {
 	HRESULT hr = S_OK;
 	Command *pCmd = nullptr;
@@ -96,6 +115,7 @@ HRESULT CUnzip::AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder)
 
 	pDetails->set_zipfile(zipFile, WSTR_BYTE_SIZE(zipFile));
 	pDetails->set_targetfolder(targetFolder, WSTR_BYTE_SIZE(targetFolder));
+	pDetails->set_overwrite(overwrite);
 
 	pAny = pCmd->mutable_details();
 	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
@@ -112,7 +132,7 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 	HRESULT hr = S_OK;
 	bool bRes = true;
 	UnzipDetails details;
-	Poco::Zip::Decompress *zip = nullptr;
+	ZipArchive *archive = nullptr;
 	LPCWSTR zipFileW = nullptr;
 	LPCWSTR targetFolderW = nullptr;
 	std::string zipFileA;
@@ -130,27 +150,49 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Extracting zip file '%s' to '%s'", zipFileA.c_str(), targetFolderA.c_str());
 
 	zipFileStream = new std::ifstream(zipFileA, std::ios::binary);
+	BreakExitOnNull(zipFileStream, hr, E_FAIL, "Failed allocating file stream");
 
-	zip = new Poco::Zip::Decompress(*zipFileStream, targetFolderA);
-	zip->EError += Poco::Delegate<CUnzip, std::pair<const Poco::Zip::ZipLocalFileHeader, const std::string>>(this, &CUnzip::OnDecompressError);
+	archive = new ZipArchive(*zipFileStream);
+	BreakExitOnNull(zipFileStream, hr, E_FAIL, "Failed allocating ZIP archive");
 
-	zip->decompressAllFiles();
-	BreakExitOnNull(!hadErrors_, hr, E_FAIL, "Failed decompressing '%ls' to '%ls'", zipFileW, targetFolderW);
+	for (ZipArchive::FileHeaders::const_iterator it = archive->headerBegin(), endIt = archive->headerEnd(); it != endIt; ++it)
+	{
+		std::string file = it->second.getFileName();
+		Poco::Path path(targetFolderA);
+		path.append(file);
+		std::string pathA = path.toString(Poco::Path::Style::PATH_WINDOWS).c_str();
+
+		if (details.overwrite() && ::PathFileExistsA(pathA.c_str()))
+		{
+			WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Deleting '%s'", pathA.c_str());
+
+			bRes = ::SetFileAttributesA(pathA.c_str(), FILE_ATTRIBUTE_NORMAL);
+			BreakExitOnNullWithLastError(bRes, hr, "Failed clearing attributes of '%s'", pathA.c_str());
+
+			bRes = ::DeleteFileA(pathA.c_str());
+			BreakExitOnNullWithLastError(bRes, hr, "Failed deleting '%s'", pathA.c_str());
+		}
+
+		if (!::PathFileExistsA(pathA.c_str()))
+		{
+			WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Extracting '%s'", pathA.c_str());
+			
+			ZipInputStream zipin(*zipFileStream, it->second);
+			std::ofstream out(pathA.c_str(), std::ios::binary);
+			
+			std::streamsize bytes = Poco::StreamCopier::copyStream(zipin, out);
+			BreakExitOnNull((bytes == it->second.getUncompressedSize()), hr, E_FAIL, "Error extracting file '%s' from zip '%ls': %i / %i bytes written", file.c_str(), zipFileW, bytes, it->second.getUncompressedSize());
+		}
+	}
 
 LExit:
-	if (zip)
+	if (archive)
 	{
-		delete zip;
+		delete archive;
 	}
 	if (zipFileStream)
 	{
 		delete zipFileStream;
 	}
 	return hr;
-}
-
-void CUnzip::OnDecompressError(const void* pSender, std::pair<const Poco::Zip::ZipLocalFileHeader, const std::string>& info)
-{
-	hadErrors_ = true;
-	WcaLogError(E_FAIL, "Failed decompressing ZIP file '%s': %s", info.first.getFileName().c_str(), info.second.c_str());
 }

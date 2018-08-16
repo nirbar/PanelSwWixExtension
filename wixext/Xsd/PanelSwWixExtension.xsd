@@ -435,6 +435,11 @@
               <xs:documentation><![CDATA[Folder to extract the archive into.]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="Overwrite" type="YesNoType" use="optional" default="no">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Whether or not to overwrite existing files. Defaults to 'no'.]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>

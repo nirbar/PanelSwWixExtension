@@ -8,14 +8,9 @@ class CUnzip :
 {
 public:
 
-	HRESULT AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder);
+	HRESULT AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, bool overwrite);
 
 protected:
 	HRESULT DeferredExecute(const ::std::string& command) override;
-
-private:
-	void OnDecompressError(const void* pSender, std::pair<const Poco::Zip::ZipLocalFileHeader, const std::string>& info);
-
-	bool hadErrors_ = false;
 };
 

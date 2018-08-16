@@ -23,7 +23,7 @@
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
 
     <PanelSW:ZipFile Id="_1" SourceFolder="[INSTALLFOLDER]" TargetZipFile="[INSTALLFOLDER]\1.zip"><![CDATA[Not Installed]]></PanelSW:ZipFile>
-    <PanelSW:Unzip Id="_1" TargetFolder="[INSTALLFOLDER]123" ZipFile="[INSTALLFOLDER]1.zip"><![CDATA[Not Installed]]></PanelSW:Unzip>
+    <PanelSW:Unzip Id="_1" TargetFolder="[INSTALLFOLDER]" ZipFile="[INSTALLFOLDER]\1.zip" Overwrite="yes"><![CDATA[Not Installed]]></PanelSW:Unzip>
 
     <ComponentGroup Id="ProductComponents">
       <Component Directory="INSTALLFOLDER">
