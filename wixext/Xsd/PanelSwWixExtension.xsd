@@ -20,14 +20,24 @@
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
       </xs:appinfo>
       <xs:documentation>
-        <![CDATA[Find a certificate has in local machine MY store.]]>
+        <![CDATA[Find a certificate hash in local machine MY store. Either CertName or both Issuer and SerialNumber should be specified]]>
       </xs:documentation>
     </xs:annotation>
 
     <xs:complexType>
-      <xs:attribute name="CertName" use="required" type="xs:string">
+      <xs:attribute name="CertName" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Certificate subject name. The field is formatted.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Issuer" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Certificate issuer name in binary format as returned by RegistrySearch. The field is formatted.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="SerialNumber" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Certificate serial number in binary format as returned by RegistrySearch. The field is formatted.]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
     </xs:complexType>

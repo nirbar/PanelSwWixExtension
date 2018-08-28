@@ -1600,6 +1600,8 @@ namespace PanelSw.Wix.Extensions
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
             string property = null;
             string certName = null;
+            string issuer = null;
+            string serial = null;
 
             if (node.ParentNode.LocalName != "Property")
             {
@@ -1617,6 +1619,14 @@ namespace PanelSw.Wix.Extensions
                             certName = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
 
+                        case "Issuer":
+                            issuer = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        case "SerialNumber":
+                            serial = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
                         default:
                             Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                             break;
@@ -1632,9 +1642,15 @@ namespace PanelSw.Wix.Extensions
             {
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.Name, "Id"));
             }
-            if (string.IsNullOrEmpty(certName))
+
+            // Either CertName OR (Issuer AND Serial)
+            if (string.IsNullOrEmpty(issuer) != string.IsNullOrEmpty(serial))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "CertName"));
+                Core.OnMessage(WixErrors.ExpectedAttributes(sourceLineNumbers, node.Name, "Issuer", "SerialNumber"));
+            }
+            if (string.IsNullOrEmpty(certName) == string.IsNullOrEmpty(issuer))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttributesWithoutOtherAttribute(sourceLineNumbers, node.Name, "Issuer", "SerialNumber", "CertName"));
             }
 
             // find unexpected child elements
@@ -1646,16 +1662,16 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            // reference the Win32_CopyFiles custom actions since nothing will happen without these
-            Core.EnsureTable(sourceLineNumbers, "PSW_CertificateHashSearch");
-            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "CertificateHashSearch");
-
             if (!Core.EncounteredError)
             {
-                // create a row in the ReadIniValues table
+                Core.EnsureTable(sourceLineNumbers, "PSW_CertificateHashSearch");
+                Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "CertificateHashSearch");
+
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_CertificateHashSearch");
                 row[0] = property;
                 row[1] = certName;
+                row[2] = issuer;
+                row[3] = serial;
             }
         }
 

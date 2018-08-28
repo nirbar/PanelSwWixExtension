@@ -220,6 +220,8 @@
 
   <tableDefinition name="PSW_CertificateHashSearch">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="CertName" type="string" length="72" modularize="property" category="formatted" />
+    <columnDefinition name="CertName" type="string" length="72" modularize="property" category="formatted" nullable="yes" />
+    <columnDefinition name="Issuer" type="string" length="72" modularize="property" category="formatted" nullable="yes" />
+    <columnDefinition name="SerialNumber" type="string" length="72" modularize="property" category="formatted" nullable="yes" />
   </tableDefinition>
 </tableDefinitions>

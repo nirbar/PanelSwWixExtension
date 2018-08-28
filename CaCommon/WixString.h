@@ -116,6 +116,17 @@ public:
 		return hr;
 	}
 
+	HRESULT ReplaceAll(LPCWSTR from, LPCWSTR to)
+	{
+		HRESULT hr = S_OK;
+
+		hr = StrReplaceStringAll(&_pS, from, to);
+		BreakExitOnFailure(hr, "Failed to replace in string");
+
+	LExit:
+		return hr;
+	}
+
 	HRESULT Format(LPCWSTR stFormat, ...)
 	{
 		HRESULT hr = S_OK;
@@ -291,6 +302,24 @@ public:
 		}
 
 		return (::_wcsicmp(_pS, szOther) == 0);
+	}
+
+	DWORD Count(WCHAR c) const
+	{
+		DWORD cnt = 0;
+		LPCWSTR pos = _pS;
+
+		if (IsNullOrEmpty())
+		{
+			return cnt;
+		}
+
+		while (pos = ::wcschr(pos, c))
+		{
+			++cnt;
+		}
+
+		return cnt;
 	}
 
 	DWORD Find(LPCWSTR szOther) const

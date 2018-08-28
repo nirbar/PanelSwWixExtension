@@ -115,7 +115,6 @@ HRESULT CDeferredActionBase::AddCommand(LPCSTR szHandler, Command **ppCommand)
 	*ppCommand = pCmd;
 	pCmd = nullptr;
 
-LExit:
 	if (pCmd)
 	{
 		_cad.mutable_commands()->RemoveLast();
