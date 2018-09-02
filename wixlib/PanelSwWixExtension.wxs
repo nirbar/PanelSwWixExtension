@@ -510,7 +510,7 @@
     <CustomAction Id="TopShelfService_Uninstall" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" />
 
     <InstallExecuteSequence>
-      <Custom Action="TopShelf" Before="RemoveExistingProducts" Overridable="yes"/>
+      <Custom Action="TopShelf" Before="TopShelfService_UninstallRollback" Overridable="yes"/>
       <Custom Action="TopShelfService_InstallRollback" Before="TopShelfService_Install" Overridable="yes"/>
       <Custom Action="TopShelfService_Install" Before="InstallServices" Overridable="yes"/>
       <Custom Action="TopShelfService_UninstallRollback" Before="TopShelfService_Uninstall" Overridable="yes"/>
