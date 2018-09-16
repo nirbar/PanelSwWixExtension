@@ -573,7 +573,7 @@
     </UI>
   </Fragment>
 
-  <!-- EvaluateExpression -->
+  <!-- CertificateHashSearch -->
   <Fragment>
     <CustomAction Id="CertificateHashSearch" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CertificateHashSearch" Execute="firstSequence"/>
     <InstallExecuteSequence>
