@@ -3,6 +3,7 @@
 #include "CustomUninstallKey.h"
 #include "RegistryKey.h"
 #include "RegDataSerializer.h"
+#include "registryValueDetails.pb.h"
 #include <strutil.h>
 
 #define CustomUninstallKey_ExecCA L"CustomUninstallKey_deferred"

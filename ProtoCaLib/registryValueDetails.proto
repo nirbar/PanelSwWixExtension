@@ -1,0 +1,19 @@
+syntax = "proto3";
+package com.panelsw.ca;
+option optimize_for = LITE_RUNTIME;
+
+message RegistryValueDetails{
+
+	bytes name = 1;
+	bytes data = 2;
+	int32 datatype = 3;
+}
+
+message RegistryKeyDetails {
+
+    int32 root = 1;
+	bool is64 = 2;	
+    bytes key = 3;
+
+	repeated RegistryValueDetails values = 4;
+}

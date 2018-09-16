@@ -169,6 +169,9 @@
     <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\unzipDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\registryValueDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
     <ClInclude Include="TopShelfService.h" />
     <ClInclude Include="Unzip.h" />
   </ItemGroup>
