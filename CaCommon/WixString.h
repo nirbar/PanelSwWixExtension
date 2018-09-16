@@ -152,10 +152,53 @@ public:
 		return hr;
 	}
 
-	HRESULT MsiFormat(LPCWSTR stFormat)
+	// Expand MSI-formatted string.
+	// stFormat: MSI format string
+	// szObfuscated: If not NULL, will receive the expanded string with hidden properties obfuscated.
+	HRESULT MsiFormat(LPCWSTR stFormat, LPWSTR *pszObfuscated = nullptr)
 	{
 		HRESULT hr = S_OK;
-		LPWSTR szNew = NULL;
+		LPWSTR szNew = nullptr;
+		LPWSTR szStripped = nullptr;
+		LPWSTR szObfuscated = nullptr;
+		LPWSTR szMsiHiddenProperties = nullptr;
+		LPWSTR szHideMe = nullptr;
+
+		if (pszObfuscated)
+		{
+			hr = StrAllocString(&szStripped, stFormat, 0);
+			if (SUCCEEDED(hr))
+			{
+				hr = WcaGetProperty(L"MsiHiddenProperties", &szMsiHiddenProperties);
+				if (SUCCEEDED(hr) && szMsiHiddenProperties && *szMsiHiddenProperties)
+				{
+					for (LPWSTR szContext = nullptr, szProp = ::wcstok_s(szMsiHiddenProperties, L";", &szContext); SUCCEEDED(hr) && szProp; szProp = ::wcstok_s(nullptr, L";", &szContext))
+					{
+						if (szProp && *szProp)
+						{
+							hr = StrAllocFormatted(&szHideMe, L"[%s]", szProp);
+							if (SUCCEEDED(hr))
+							{
+								hr = StrReplaceStringAll(&szStripped, szHideMe, L"******");
+
+								StrFree(szHideMe);
+								szHideMe = nullptr;
+							}
+						}
+					}
+
+					if (SUCCEEDED(hr))
+					{
+						hr = WcaGetFormattedString(szStripped, &szObfuscated);
+						if (SUCCEEDED(hr))
+						{
+							*pszObfuscated = szObfuscated;
+							szObfuscated = nullptr;
+						}
+					}
+				}
+			}
+		}
 
 		hr = WcaGetFormattedString(stFormat, &szNew);
 		if (SUCCEEDED(hr))
@@ -164,12 +207,28 @@ public:
 			_pS = szNew;
 			_dwCapacity = 1 + ::wcslen(szNew);
 
-			szNew = NULL;
+			szNew = nullptr;
 		}
 
 		if (szNew)
 		{
 			StrFree(szNew);
+		}
+		if (szStripped)
+		{
+			StrFree(szStripped);
+		}
+		if (szObfuscated)
+		{
+			StrFree(szObfuscated);
+		}
+		if (szMsiHiddenProperties)
+		{
+			StrFree(szMsiHiddenProperties);
+		}
+		if (szHideMe)
+		{
+			StrFree(szHideMe);
 		}
 
 		return hr;

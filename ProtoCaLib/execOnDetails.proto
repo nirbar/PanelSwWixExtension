@@ -5,9 +5,10 @@ option optimize_for = LITE_RUNTIME;
 message ExecOnDetails{
 	
 	bytes command = 1;
+	bytes obfuscatedcommand = 2;
 	
-	map<int32, int32> exitCodeRemap = 2;
+	map<int32, int32> exitCodeRemap = 3;
 
-	bool async = 3;
-	bool ignoreErrors = 4;
+	bool async = 4;
+	bool ignoreErrors = 5;
 }
