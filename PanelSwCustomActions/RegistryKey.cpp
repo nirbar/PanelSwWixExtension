@@ -118,7 +118,7 @@ HRESULT CRegistryKey::Delete()
 
 	// Delete key
 	hr = RegDelete(rootKey, keyName, (_area == RegArea::X64 ? REG_KEY_BITNESS::REG_KEY_64BIT : (_area == RegArea::X86) ? REG_KEY_BITNESS::REG_KEY_32BIT : REG_KEY_BITNESS::REG_KEY_DEFAULT), TRUE);
-	BreakExitOnFailure(hr, "Failed to delete registry key");
+	BreakExitOnFailure(hr, "Failed to delete registry key '%ls'", keyName);
 
 LExit:
 	return hr;
