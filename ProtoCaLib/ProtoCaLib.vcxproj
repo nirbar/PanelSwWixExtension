@@ -111,9 +111,6 @@
     <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\unzipDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\registryValueDetails.pb.cc">
-      <AutoGen>True</AutoGen>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\customActionData.pb.h">
@@ -150,9 +147,6 @@
       <AutoGen>True</AutoGen>
     </ClInclude>
     <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\unzipDetails.pb.h">
-      <AutoGen>True</AutoGen>
-    </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\registryValueDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
   </ItemGroup>

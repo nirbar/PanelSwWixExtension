@@ -3,13 +3,12 @@
 #include "CustomUninstallKey.h"
 #include "RegistryKey.h"
 #include "RegDataSerializer.h"
-#include "registryValueDetails.pb.h"
 #include <strutil.h>
 
 #define CustomUninstallKey_ExecCA L"CustomUninstallKey_deferred"
 #define CustomUninstallKey_RollbackCA L"CustomUninstallKey_rollback"
-#define CustomUninstallKeyQuery L"SELECT `Id`, `Name`, `Data`, `DataType`, `Attributes`, `Condition` FROM `PSW_CustomUninstallKey`"
-enum eCustomUninstallKeyQuery { Id = 1, Name, Data, DataType, Attributes, Condition };
+#define CustomUninstallKeyQuery L"SELECT `Id`, `ProductCode`, `Name`, `Data`, `DataType`, `Attributes`, `Condition` FROM `PSW_CustomUninstallKey`"
+enum eCustomUninstallKeyQuery { Id = 1, ProductCode, Name, Data, DataType, Attributes, Condition };
 
 extern "C" UINT __stdcall CustomUninstallKey_Immediate(MSIHANDLE hInstall)
 {
@@ -75,6 +74,7 @@ HRESULT CCustomUninstallKey::Execute()
 	BreakExitOnFailure( hr, "Failed to get parse-execute CustomActionData");
 
 LExit:
+	ReleaseStr(customActionData);
 	return hr;
 }
 
@@ -83,14 +83,16 @@ HRESULT CCustomUninstallKey::CreateCustomActionData()
 	PMSIHANDLE hView;
     PMSIHANDLE hRec;
 	CRegistryXmlParser xmlParser, xmlRollbackParser;
-	WCHAR uninstallKey[ MAX_PATH];
 	CComBSTR xmlString = L"";
 	HRESULT hr = S_OK;
 	bool bRemoving = false;
+	LPWSTR pId = nullptr;
+	LPWSTR szProductCode = nullptr;
+	LPWSTR pName = nullptr;
+	LPWSTR pData = nullptr;
+	LPWSTR pDataType = nullptr;
+	LPWSTR pCondition = nullptr;
 
-	hr = GetUninstallKey( uninstallKey);
-	BreakExitOnFailure(hr, "Failed to get uninstall registry key");
-	
 	hr = WcaOpenExecuteView( CustomUninstallKeyQuery, &hView);
 	BreakExitOnFailure(hr, "Failed to execute view");
 
@@ -104,15 +106,13 @@ HRESULT CCustomUninstallKey::CreateCustomActionData()
 		BreakExitOnFailure(hr, "Failed to fetch record");
 		
 		// Get record.
-		LPWSTR pId = nullptr;
-		LPWSTR pName = nullptr;
-		LPWSTR pData = nullptr;
-		LPWSTR pDataType = nullptr;
-		LPWSTR pCondition = nullptr;
+		WCHAR uninstallKey[MAX_PATH];
 		int nAttrib;
 		
 		hr = WcaGetRecordString( hRec, eCustomUninstallKeyQuery::Id, &pId);
 		BreakExitOnFailure(hr, "Failed to get Id");
+		hr = WcaGetRecordFormattedString(hRec, eCustomUninstallKeyQuery::ProductCode, &szProductCode);
+		BreakExitOnFailure(hr, "Failed to get ProductCode");
 		hr = WcaGetRecordString( hRec, eCustomUninstallKeyQuery::Name, &pName);
 		BreakExitOnFailure(hr, "Failed to get Name");
 		hr = WcaGetRecordString( hRec, eCustomUninstallKeyQuery::Data, &pData);
@@ -123,6 +123,9 @@ HRESULT CCustomUninstallKey::CreateCustomActionData()
 		BreakExitOnFailure(hr, "Failed to get Attributes");
 		hr = WcaGetRecordString( hRec, eCustomUninstallKeyQuery::Condition, &pCondition);
 		BreakExitOnFailure(hr, "Failed to get Condition");
+
+		hr = GetUninstallKey(szProductCode, uninstallKey);
+		BreakExitOnFailure(hr, "Failed to get uninstall registry key");
 
 		MSICONDITION cond = ::MsiEvaluateCondition( _hInstall, pCondition);
 		switch( cond)
@@ -162,8 +165,15 @@ HRESULT CCustomUninstallKey::CreateCustomActionData()
 			BreakExitOnFailure(hr, "Failed to create XML element");
 		}
 
-		hr = CreateRollbackCustomActionData( &xmlRollbackParser, pId, pName);
+		hr = CreateRollbackCustomActionData(&xmlRollbackParser, szProductCode, pId, pName);
 		BreakExitOnFailure(hr, "Failed to create rollback XML element");
+	
+		ReleaseNullStr(pId);
+		ReleaseNullStr(szProductCode);
+		ReleaseNullStr(pName);
+		ReleaseNullStr(pData);
+		ReleaseNullStr(pDataType);
+		ReleaseNullStr(pCondition);
 	}
 	
 	hr = xmlRollbackParser.GetXmlString( &xmlString);
@@ -178,11 +188,17 @@ HRESULT CCustomUninstallKey::CreateCustomActionData()
 	xmlString.Empty();
 
 LExit:
+	ReleaseStr(pId);
+	ReleaseStr(szProductCode);
+	ReleaseStr(pName);
+	ReleaseStr(pData);
+	ReleaseStr(pDataType);
+	ReleaseStr(pCondition);
 
 	return hr;
 }
 
-HRESULT CCustomUninstallKey::CreateRollbackCustomActionData( CRegistryXmlParser *pRollbackParser, WCHAR* pId, WCHAR* pName)
+HRESULT CCustomUninstallKey::CreateRollbackCustomActionData(CRegistryXmlParser *pRollbackParser, LPCWSTR szProductCode, LPWSTR pId, LPWSTR pName)
 {
 	HRESULT hr = S_OK;
 	CRegistryKey key;
@@ -193,7 +209,7 @@ HRESULT CCustomUninstallKey::CreateRollbackCustomActionData( CRegistryXmlParser 
 	WCHAR keyName[ MAX_PATH];
 	CRegDataSerializer dataSer;
 
-	hr = GetUninstallKey( keyName);
+	hr = GetUninstallKey(szProductCode, keyName);
 	BreakExitOnFailure( hr, "Failed to get Uninstall key");
 
 	hr = key.Open( CRegistryKey::RegRoot::LocalMachine, keyName, CRegistryKey::RegArea::Default, CRegistryKey::RegAccess::ReadOnly);
@@ -232,13 +248,20 @@ LExit:
 	return hr;
 }
 
-HRESULT CCustomUninstallKey::GetUninstallKey( WCHAR* keyName)
+HRESULT CCustomUninstallKey::GetUninstallKey(LPCWSTR szProductCode, LPWSTR keyName)
 {
 	LPWSTR prodCode = nullptr;
 	HRESULT hr = S_OK;
 
-	hr = WcaGetProperty( L"ProductCode", &prodCode);
-	BreakExitOnFailure( hr, "Failed to get ProductCode");
+	if (szProductCode && *szProductCode)
+	{
+		prodCode = const_cast<LPWSTR>(szProductCode);
+	}
+	else
+	{
+		hr = WcaGetProperty(L"ProductCode", &prodCode);
+		BreakExitOnFailure(hr, "Failed to get ProductCode");
+	}
 
 	wsprintfW( keyName, L"Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\%ls", prodCode);
 

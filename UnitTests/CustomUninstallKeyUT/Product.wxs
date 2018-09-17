@@ -20,6 +20,7 @@
 
     <PanelSW:CustomUninstallKey Id="Test1" Data="1" DataType="REG_DWORD">1=1</PanelSW:CustomUninstallKey>
     <PanelSW:CustomUninstallKey Id="Test2" Data="1" DataType="REG_SZ"></PanelSW:CustomUninstallKey>
+    <PanelSW:CustomUninstallKey Id="Test3" ProductCode="{050d4fc8-5d48-4b8f-8972-47c82c46020f}" Data="1" DataType="REG_SZ"></PanelSW:CustomUninstallKey>
 
   </Fragment>
 

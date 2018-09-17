@@ -2,6 +2,7 @@
 <tableDefinitions xmlns="http://schemas.microsoft.com/wix/2006/tables">
   <tableDefinition name="PSW_CustomUninstallKey">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="ProductCode" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
     <columnDefinition name="Name" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Data" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="DataType" type="string" length="0" modularize="property" nullable="yes" category="text" />

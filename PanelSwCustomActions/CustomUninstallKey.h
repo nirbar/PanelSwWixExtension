@@ -22,9 +22,9 @@ private:
         Delete = 2
     };
 
-	HRESULT CreateRollbackCustomActionData( CRegistryXmlParser *pRollbackParser, WCHAR* pId, WCHAR* pName);
+	HRESULT CreateRollbackCustomActionData( CRegistryXmlParser *pRollbackParser, LPCWSTR szProductCode, LPWSTR pId, LPWSTR pName);
 
-	HRESULT GetUninstallKey( WCHAR* keyName);
+	HRESULT GetUninstallKey(LPCWSTR szProductCode, LPWSTR keyName);
 
 	MSIHANDLE _hInstall;
 };
