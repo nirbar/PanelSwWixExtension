@@ -18,8 +18,9 @@
 
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
 
-    <PanelSW:CustomUninstallKey Id="Test1" Data="1" DataType="REG_DWORD">1=1</PanelSW:CustomUninstallKey>
-    <PanelSW:CustomUninstallKey Id="Test2" Data="1" DataType="REG_SZ"></PanelSW:CustomUninstallKey>
+    <PanelSW:CustomUninstallKey Id="Test1" Data="1" DataType="REG_DWORD"/>
+    <PanelSW:CustomUninstallKey Id="Test2" Data="1" DataType="REG_SZ"/>
+    <PanelSW:CustomUninstallKey Id="Test3" ProductCode="AddressBook" Data="1" DataType="REG_SZ"/>
 
   </Fragment>
 

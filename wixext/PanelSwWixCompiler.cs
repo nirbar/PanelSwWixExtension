@@ -33,7 +33,6 @@ namespace PanelSw.Wix.Extensions
 
         public override void FinalizeCompile()
         {
-            Core.EnsureTable(null, "PSW_CustomUninstallKey");
             Core.EnsureTable(null, "PSW_ReadIniValues");
             Core.EnsureTable(null, "PSW_RemoveRegistryValue");
             Core.EnsureTable(null, "PSW_XmlSearch");
@@ -1248,6 +1247,7 @@ namespace PanelSw.Wix.Extensions
         private void ParseCustomUninstallKeyElement(XmlNode node)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string productCode = null;
             string name = null;
             string data = null;
             string datatype = "REG_SZ";
@@ -1267,6 +1267,9 @@ namespace PanelSw.Wix.Extensions
                             {
                                 name = id;
                             }
+                            break;
+                        case "productcode":
+                            productCode = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "name":
                             name = Core.GetAttributeValue(sourceLineNumbers, attrib);
@@ -1352,13 +1355,15 @@ namespace PanelSw.Wix.Extensions
             if (!Core.EncounteredError)
             {
                 // create a row in the Win32_CopyFiles table
+                Core.EnsureTable(null, "PSW_CustomUninstallKey");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_CustomUninstallKey");
                 row[0] = id;
-                row[1] = name;
-                row[2] = data;
-                row[3] = datatype;
-                row[4] = (int)attributes;
-                row[5] = condition;
+                row[1] = productCode;
+                row[2] = name;
+                row[3] = data;
+                row[4] = datatype;
+                row[5] = (int)attributes;
+                row[6] = condition;
             }
         }
 

@@ -1057,6 +1057,11 @@ Overwrite or create registry values in Software\Microsoft\Windows\CurrentVersion
               <xs:documentation>Identifier for the value (primary key).</xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="ProductCode" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>ProductCode of the product. This field is formatted. If not specified, Current ProductCode is used</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
           <xs:attribute name="Name" type="xs:string" use="optional">
             <xs:annotation>
               <xs:documentation>Name of the registry value. Deafult is same as Id attribute.</xs:documentation>

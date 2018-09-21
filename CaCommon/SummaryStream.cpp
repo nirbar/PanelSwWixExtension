@@ -30,17 +30,18 @@ HRESULT CSummaryStream::IsPackageX64( bool *pIsX64)
 		hr = GetProperty(SummaryStreamProperties::PID_TEMPLATE, &_pTemplate);
 		BreakExitOnFailure(hr, "Failed getting template property from summary stream");
 		BreakExitOnNull(_pTemplate, hr, E_FAIL, "Failed getting template property from summary stream");
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Template summary stream value is '%ls'", _pTemplate);
 	}
 	
 	MsiDebugBreak();
 
-	if (::wcsstr(_pTemplate, L"Intel64") || ::wcsstr(_pTemplate, L"x64"))
+	if ((::wcscmp(_pTemplate, L"Intel64") == 0) || (::wcscmp(_pTemplate, L"x64") == 0))
 	{
-		(*pIsX64) = false;
+		(*pIsX64) = true;
 	}
 	else
 	{
-		(*pIsX64) = true;
+		(*pIsX64) = false;
 	}
 
 LExit:

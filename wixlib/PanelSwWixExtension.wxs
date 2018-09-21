@@ -40,7 +40,7 @@
     <CustomAction Id="CustomUninstallKey_rollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CustomUninstallKey_deferred" Execute="rollback" Return="check" Impersonate="no" />
 
     <InstallExecuteSequence>
-      <Custom Action="CustomUninstallKey_Immediate" After="PublishProduct" Overridable="yes"/>
+      <Custom Action="CustomUninstallKey_Immediate" Before="PublishProduct" Overridable="yes"/>
     </InstallExecuteSequence>
 
     <UI>

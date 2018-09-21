@@ -351,7 +351,7 @@ HRESULT CRegistryXmlParser::XmlExecute( IXMLDOMElement *xmlElem)
 	if( wcscmp( tag, L"DeleteKey") == 0)
 	{
 		hr = DeleteKey( (CRegistryKey::RegRoot)dwRoot, key.bstrVal, (CRegistryKey::RegArea)dwArea);
-		BreakExitOnFailure( hr, "Failed to delete key");
+		BreakExitOnFailure(hr, "Failed to delete key '%ls', root '%i', area '%i'", key.bstrVal, dwRoot, dwArea);
 		ExitFunction();
 	}
 	else if( wcscmp( tag, L"CreateKey") == 0)
