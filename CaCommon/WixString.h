@@ -210,6 +210,12 @@ public:
 			szNew = nullptr;
 		}
 
+		// Nothing needed obfuscation (MsiHiddenProperties was empty)?
+		if (pszObfuscated && !*pszObfuscated)
+		{
+			StrAllocString(pszObfuscated, _pS, 0);
+		}
+
 		if (szNew)
 		{
 			StrFree(szNew);
