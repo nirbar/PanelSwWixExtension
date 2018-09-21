@@ -92,6 +92,7 @@ HRESULT CCustomUninstallKey::CreateCustomActionData()
 	LPWSTR pData = nullptr;
 	LPWSTR pDataType = nullptr;
 	LPWSTR pCondition = nullptr;
+	LPWSTR pDataStr = nullptr;
 
 	hr = WcaOpenExecuteView( CustomUninstallKeyQuery, &hView);
 	BreakExitOnFailure(hr, "Failed to execute view");
@@ -107,6 +108,7 @@ HRESULT CCustomUninstallKey::CreateCustomActionData()
 		
 		// Get record.
 		WCHAR uninstallKey[MAX_PATH];
+		CRegDataSerializer dataSer;
 		int nAttrib;
 		
 		hr = WcaGetRecordString( hRec, eCustomUninstallKeyQuery::Id, &pId);
@@ -147,14 +149,11 @@ HRESULT CCustomUninstallKey::CreateCustomActionData()
 		// Install / UnInstall ?
 		if (bRemoving)
 		{
-			hr = xmlParser.AddDeleteKey(pId, CRegistryKey::RegRoot::LocalMachine, uninstallKey, CRegistryKey::RegArea::Default);
+			hr = xmlParser.AddDeleteValue(pId, CRegistryKey::RegRoot::LocalMachine, uninstallKey, CRegistryKey::RegArea::Default, pName);
 			BreakExitOnFailure(hr, "Failed to create XML element");
 		}
 		else
 		{
-			CRegDataSerializer dataSer;
-			LPWSTR pDataStr = nullptr;
-
 			hr = dataSer.Set(pData, pDataType);
 			BreakExitOnFailure(hr, "Failed to create parse registry data");
 
@@ -174,6 +173,7 @@ HRESULT CCustomUninstallKey::CreateCustomActionData()
 		ReleaseNullStr(pData);
 		ReleaseNullStr(pDataType);
 		ReleaseNullStr(pCondition);
+		ReleaseNullStr(pDataStr);
 	}
 	
 	hr = xmlRollbackParser.GetXmlString( &xmlString);
@@ -194,6 +194,7 @@ LExit:
 	ReleaseStr(pData);
 	ReleaseStr(pDataType);
 	ReleaseStr(pCondition);
+	ReleaseStr(pDataStr);
 
 	return hr;
 }
