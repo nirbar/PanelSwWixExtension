@@ -173,6 +173,22 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 			BreakExitOnNullWithLastError(bRes, hr, "Failed deleting '%s'", pathA.c_str());
 		}
 
+		// Create missing folders
+		while (!::PathIsDirectoryA(path.parent().toString(Poco::Path::Style::PATH_WINDOWS).c_str()))
+		{
+			// Find first missing folder.
+			Poco::Path dir = path.parent();
+			while (!::PathIsDirectoryA(dir.parent().toString(Poco::Path::Style::PATH_WINDOWS).c_str()) && !::PathIsRootA(dir.parent().toString(Poco::Path::Style::PATH_WINDOWS).c_str()))
+			{
+				dir = dir.parent();
+			}
+
+			std::string dirA = dir.toString(Poco::Path::Style::PATH_WINDOWS);
+			WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating sub-folder '%s'", dirA.c_str());
+			bRes = ::CreateDirectoryA(dirA.c_str(), nullptr);
+			BreakExitOnNullWithLastError((bRes || (::GetLastError() == ERROR_ALREADY_EXISTS)), hr, "Failed creating folder '%s'", dirA.c_str());
+		}
+
 		if (!::PathFileExistsA(pathA.c_str()))
 		{
 			WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Extracting '%s'", pathA.c_str());

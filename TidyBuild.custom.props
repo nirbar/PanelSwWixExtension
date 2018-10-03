@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <Import Project="$(MSBuildThisFileDirectory)TidyBuild.user.props" Condition="Exists('$(MSBuildThisFileDirectory)TidyBuild.user.props')"/>
   <PropertyGroup>
-    <FullVersion>1.9.1</FullVersion>
+    <FullVersion>1.9.2</FullVersion>
     <ProductName>PanelSwWixExtension</ProductName>
     <Manufacturer>Panel::Software</Manufacturer>
 
@@ -17,6 +17,7 @@
     <!-- CMake path -->
     <CMakeDir Condition="'$(CMakeDir)'==''">$(SolutionDir)..\..\Tools\cmake-3.11.3-win32-x86\</CMakeDir>
     <DismApiDir Condition="'$(DismApiDir)'==''">C:\Program Files (x86)\Windows Kits\8.0\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\</DismApiDir>
+    <NugetDir Condition="'$(NugetDir)'==''">$(SolutionDir)..\..\Tools\</NugetDir>
 
     <WixVariables>JetVersion=$(FullVersion);JetProductName=$(ProductName);JetManufacturer=$(Manufacturer)</WixVariables>
 
