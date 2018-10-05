@@ -14,6 +14,20 @@
   </xs:annotation>
   <xs:import namespace="http://schemas.microsoft.com/wix/2006/wi" />
 
+  <xs:element name="DiskSpace">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Directory" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Calculate disk free space for a directory. The free space is set to property '*DirectoryId*_DISK_FREE_SPACE'.
+        By default, the action executes after CostFinalize. You can author an Error custom action to execute after custom action 'DiskSpace' to condition install on available space.
+        Note that, the action does not reserve space for costing. Directories in the same drive are expected to return the same value.
+        ]]>
+      </xs:documentation>
+    </xs:annotation>
+  </xs:element>  
+  
   <xs:element name="CertificateHashSearch">
     <xs:annotation>
       <xs:appinfo>

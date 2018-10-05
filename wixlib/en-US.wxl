@@ -19,5 +19,6 @@
   <String Id="EvaluateExpression"><![CDATA[Evaluating expressions]]></String>
   <String Id="CertificateHashSearch"><![CDATA[Find certificate hash]]></String>
   <String Id="Unzip"><![CDATA[Extracting ZIP archive]]></String>
+  <String Id="DiskSpace"><![CDATA[Calculating available disk space]]></String>
 </WixLocalization>
 

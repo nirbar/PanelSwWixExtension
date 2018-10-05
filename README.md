@@ -5,6 +5,7 @@ PanelSwWixExtension is a [WiX](http://wixtoolset.org/) extension that contains v
 ## WiX Elements
 
 - Immediate Actions:
+  - *DiskSpace*: Calculate available disk space for a target directory
   - *CertificateHashSearch*: Find a certificate has in local system MY store.
   - *Evaluate*: Evaluate mathematical expressions and store result in property.
   - *SetPropertyFromPipe*: Allows setting property from a pipe.

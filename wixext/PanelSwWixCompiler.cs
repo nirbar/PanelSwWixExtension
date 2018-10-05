@@ -124,6 +124,19 @@ namespace PanelSw.Wix.Extensions
                     }
                     break;
 
+                case "Directory":
+                    switch (element.LocalName)
+                    {
+                        case "DiskSpace":
+                            ParseDiskSpaceElement(element);
+                            break;
+
+                        default:
+                            Core.UnexpectedElement(parentElement, element);
+                            break;
+                    }
+                    break;
+
                 case "Property":
                     switch (element.LocalName)
                     {
@@ -206,6 +219,20 @@ namespace PanelSw.Wix.Extensions
                 default:
                     Core.UnexpectedElement(parentElement, element);
                     break;
+            }
+        }
+
+        private void ParseDiskSpaceElement(XmlElement element)
+        {
+            SourceLineNumberCollection srcLines = Preprocessor.GetSourceLineNumbers(element);
+            string directory = element.ParentNode.Attributes["Id"].Value;
+
+            Core.CreateWixSimpleReferenceRow(srcLines, "CustomAction", "DiskSpace");
+            if (!Core.EncounteredError)
+            {
+                Core.EnsureTable(srcLines, "PSW_DiskSpace");
+                Row row = Core.CreateRow(srcLines, "PSW_DiskSpace");
+                row[0] = directory;
             }
         }
 

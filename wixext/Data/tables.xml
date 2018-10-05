@@ -225,4 +225,8 @@
     <columnDefinition name="Issuer" type="string" length="72" modularize="property" category="formatted" nullable="yes" />
     <columnDefinition name="SerialNumber" type="string" length="72" modularize="property" category="formatted" nullable="yes" />
   </tableDefinition>
+
+  <tableDefinition name="PSW_DiskSpace">
+    <columnDefinition name="Directory_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" keyTable="Directory" keyColumn="1"/>
+  </tableDefinition>
 </tableDefinitions>

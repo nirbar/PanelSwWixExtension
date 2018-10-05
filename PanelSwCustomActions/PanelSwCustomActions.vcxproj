@@ -96,6 +96,7 @@
     <ClCompile Include="CleanPendingFileRenameOperations.cpp" />
     <ClCompile Include="CommonDeferred.cpp" />
     <ClCompile Include="CreateSelfSignCertificate.cpp" />
+    <ClCompile Include="DiskSpace.cpp" />
     <ClCompile Include="DismSched.cpp" />
     <ClCompile Include="EvaluateExpression.cpp" />
     <ClCompile Include="ExecOnComponent.cpp" />

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
+     >
+  <Product Id="{769C11E5-D811-4CE3-BE79-CC23725E6B38}" Name="$(var.ProjectName)" Language="1033" Version="1.0.0.0" Manufacturer="Panel::Software" UpgradeCode="{8DC7207F-59B4-45E6-90B0-75769F8040B8}">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate />
+
+    <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <PanelSW:DiskSpace/>
+        <Directory Id="INSTALLFOLDER" Name="$(var.ProjectName)"/>
+      </Directory>
+    </Directory>
+
+    <Property Id="MSIFASTINSTALL" Value="1"></Property>
+
+    <ComponentGroup Id="ProductComponents">
+      <Component Directory="INSTALLFOLDER">
+        <File Source="$(var.ProjectDir)Product.wxs" ReadOnly="yes" />
+      </Component>
+    </ComponentGroup>
+
+    <CustomAction Error="30000" Id="DiskSpaceCheck"/>
+    <InstallExecuteSequence>
+      <Custom Action="DiskSpaceCheck" After="DiskSpace"><![CDATA[Not Installed And (ProgramFilesFolder_DISK_FREE_SPACE < 21474836480)]]></Custom>
+    </InstallExecuteSequence>
+    <UI>
+      <Error Id="30000"><![CDATA[20GB Disk Free Space Required]]></Error>
+    </UI>
+    
+  </Product>
+</Wix>

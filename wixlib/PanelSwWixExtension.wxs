@@ -587,4 +587,15 @@
     </UI>
   </Fragment>
 
+  <!-- DiskSpace -->
+  <Fragment>
+    <CustomAction Id="DiskSpace" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="DiskSpace" Execute="immediate"/>
+    <InstallExecuteSequence>
+      <Custom Action="DiskSpace" After="CostFinalize" Overridable="yes"/>
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="DiskSpace">!(loc.DiskSpace)</ProgressText>
+    </UI>    
+  </Fragment>
+
 </Wix>
