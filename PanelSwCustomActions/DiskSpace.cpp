@@ -1,4 +1,6 @@
 #include "..\CaCommon\WixString.h"
+#include <Shlwapi.h>
+#pragma comment(lib, "Shlwapi.lib")
 
 extern "C" UINT __stdcall DiskSpace(MSIHANDLE hInstall)
 {
@@ -38,6 +40,9 @@ extern "C" UINT __stdcall DiskSpace(MSIHANDLE hInstall)
 		hr = WcaGetProperty(dirName, (LPWSTR*)dirPath);
 		BreakExitOnFailure(hr, "Failed getting value of '%ls' directory", (LPCWSTR)dirName);
 		ExitOnNull(!dirPath.IsNullOrEmpty(), hr, E_INVALIDARG, "Directory path is empty");
+
+		dwRes = ::PathStripToRoot((LPWSTR)dirPath);
+		BreakExitOnNullWithLastError(dwRes, hr, "Failed getting disk root from folder '%ls'", (LPCWSTR)dirPath);
 
 		dwRes = ::GetDiskFreeSpaceEx((LPCWSTR)dirPath, nullptr, nullptr, &diskSpace);
 		BreakExitOnNullWithLastError(dwRes, hr, "Failed getting disk free space for '%ls'", (LPCWSTR)dirPath);
