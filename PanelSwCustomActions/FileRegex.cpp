@@ -36,7 +36,6 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 	// Execute view
 	hr = WcaOpenExecuteView(FileRegex_QUERY, &hView);
 	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", FileRegex_QUERY);
-	WcaLog(LOGMSG_STANDARD, "Executed query.");
 
 	// Get temporary folder
 	dwRes = ::GetTempPath(MAX_PATH, shortTempPath);
@@ -53,7 +52,8 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		CWixString szId, szFilePath, szRegex, szReplacement, szCondition;
+		CWixString szId, szFilePath, szRegexUnformatted, szReplacementUnformatted, szCondition;
+		CWixString szRegex, szRegexObfuscated, szReplacement, szReplacementObfuscated;
 		CWixString tempFile;
 		int nIgnoreCase = 0;
 		int nEncoding = 0;
@@ -62,9 +62,9 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to get Id.");
 		hr = WcaGetRecordFormattedString(hRecord, FileRegexQuery::FilePath, (LPWSTR*)szFilePath);
 		BreakExitOnFailure(hr, "Failed to get FilePath.");
-		hr = WcaGetRecordFormattedString(hRecord, FileRegexQuery::Regex, (LPWSTR*)szRegex);
+		hr = WcaGetRecordString(hRecord, FileRegexQuery::Regex, (LPWSTR*)szRegexUnformatted);
 		BreakExitOnFailure(hr, "Failed to get Regex.");
-		hr = WcaGetRecordFormattedString(hRecord, FileRegexQuery::Replacement, (LPWSTR*)szReplacement);
+		hr = WcaGetRecordString(hRecord, FileRegexQuery::Replacement, (LPWSTR*)szReplacementUnformatted);
 		BreakExitOnFailure(hr, "Failed to get Replacement.");
 		hr = WcaGetRecordInteger(hRecord, FileRegexQuery::IgnoreCase, &nIgnoreCase);
 		BreakExitOnFailure(hr, "Failed to get IgnoreCase.");
@@ -90,6 +90,14 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 			hr = E_FAIL;
 			BreakExitOnFailure(hr, "Bad Condition field");
 		}
+
+		hr = szRegex.MsiFormat((LPCWSTR)szRegexUnformatted, (LPWSTR*)szRegexObfuscated);
+		BreakExitOnFailure(hr, "Failed formatting string");
+
+		hr = szReplacement.MsiFormat((LPCWSTR)szReplacementUnformatted, (LPWSTR*)szReplacementObfuscated);
+		BreakExitOnFailure(hr, "Failed formatting string");
+
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will replace matches of regex '%ls' with '%ls' on file '%ls'", (LPCWSTR)szRegexObfuscated, (LPCWSTR)szReplacementObfuscated, (LPCWSTR)szFilePath);
 
 		// Generate temp file name.
 		hr = tempFile.Allocate(MAX_PATH + 1);
@@ -201,8 +209,6 @@ HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szRepla
 	HANDLE hFile = INVALID_HANDLE_VALUE;
 	void* pFileContents = nullptr;
 	FileRegexDetails::FileEncoding eDetectedEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_None;
-
-	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Replacing matches of regex '%ls' with '%ls' on file '%ls'", szRegex, szReplacement, szFilePath);
 
 	hFile = ::CreateFile(szFilePath, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 	ExitOnNullWithLastError((hFile != INVALID_HANDLE_VALUE), hr, "Failed opening file");
