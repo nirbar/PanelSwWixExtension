@@ -11,6 +11,7 @@ using namespace std;
 #define DismLogPrefix		L"DismLog="
 #define IncludeFeatures		L"IncludeFeatures="
 #define ExcludeFeatures		L"ExcludeFeatures="
+#define TOTOAL_TICKS			(1024.0 * 1024 * 1024) // Same value as in Dism.cpp
 
 // Immediate custom action
 extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
@@ -117,6 +118,9 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 
 		hr = WcaSetProperty(L"DismX64", (LPCWSTR)cad);
 		ExitOnFailure(hr, "Failed setting CustomActionData");
+
+		hr = WcaProgressMessage(TOTOAL_TICKS, TRUE);
+		ExitOnFailure(hr, "Failed perdicting ticks");
 	}
 
 LExit:
