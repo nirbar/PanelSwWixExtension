@@ -3,13 +3,12 @@
 #include "../CaCommon/WixString.h"
 #include <wcautil.h>
 #include <procutil.h>
-#include "execOnDetails.pb.h"
 #include "google\protobuf\any.h"
 using namespace com::panelsw::ca;
 using namespace google::protobuf;
 
-#define ExecOnComponent_QUERY L"SELECT `Id`, `Component_`, `Command`, `Flags` FROM `PSW_ExecOnComponent` ORDER BY `Order`"
-enum ExecOnComponentQuery { Id = 1, Component = 2, Command = 3, Flags = 4 };
+#define ExecOnComponent_QUERY L"SELECT `Id`, `Component_`, `Command`, `WorkingDirectory`, `Flags` FROM `PSW_ExecOnComponent` ORDER BY `Order`"
+enum ExecOnComponentQuery { Id = 1, Component = 2, Command = 3, WorkingDirectory = 4, Flags = 5 };
 
 #define ExecOnComponentExitCode_QUERY_Fmt L"SELECT `From`, `To` FROM `PSW_ExecOnComponent_ExitCode` WHERE `ExecOnId_`='%s'"
 enum ExecOnComponentExitCodeQuery { From = 1, To = 2 };
@@ -44,8 +43,7 @@ enum Flags
 	Impersonate = 2 * ASync,
 };
 
-static HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedCommand, CExecOnComponent::ExitCodeMap *pExitCodeMap, int nFlags, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart, CExecOnComponent* pBeforeStopImp, CExecOnComponent* pAfterStopImp, CExecOnComponent* pBeforeStartImp, CExecOnComponent* pAfterStartImp);
-static HRESULT RefreshEnvironment();
+static HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedCommand, LPCWSTR szWorkingDirectory, CExecOnComponent::ExitCodeMap *pExitCodeMap, CExecOnComponent::EnvironmentMap *pEnv, int nFlags, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart, CExecOnComponent* pBeforeStopImp, CExecOnComponent* pAfterStopImp, CExecOnComponent* pBeforeStartImp, CExecOnComponent* pAfterStartImp);
 
 extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 {
@@ -66,9 +64,11 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 
 	// Ensure tables exist.
 	hr = WcaTableExists(L"PSW_ExecOnComponent");
-	BreakExitOnFailure(hr, "Table does not exist 'PSW_ExecOnComponent'. Have you authored 'PanelSw:ExecOnComponent' entries in WiX code?");
+	BreakExitOnFailure((hr == S_OK), "Table does not exist 'PSW_ExecOnComponent'. Have you authored 'PanelSw:ExecOnComponent' entries in WiX code?");
     hr = WcaTableExists(L"PSW_ExecOnComponent_ExitCode");
-    BreakExitOnFailure(hr, "Table does not exist 'PSW_ExecOnComponent_ExitCode'. Have you authored 'PanelSw:ExecOnComponent' entries in WiX code?");
+    BreakExitOnFailure((hr == S_OK), "Table does not exist 'PSW_ExecOnComponent_ExitCode'. Have you authored 'PanelSw:ExecOnComponent' entries in WiX code?");
+	hr = WcaTableExists(L"PSW_ExecOnComponent_Environment");
+	BreakExitOnFailure((hr == S_OK), "Table does not exist 'PSW_ExecOnComponent_Environment'. Have you authored 'PanelSw:ExecOnComponent' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(ExecOnComponent_QUERY, &hView);
@@ -81,13 +81,14 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		ReleaseNullStr(szObfuscatedCommand);
 
 		// Get fields
-        PMSIHANDLE hExitCodeView;
-        PMSIHANDLE hExitCodeRecord;
-		CWixString szId, szComponent, szCommand, szCommandFormat;
-        CWixString szExitCodeQuery;
+        PMSIHANDLE hSubView;
+        PMSIHANDLE hSubRecord;
+		CWixString szId, szComponent, szCommand, szCommandFormat, workDir;
+        CWixString szSubQuery;
 		int nFlags = 0;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
-        CExecOnComponent::ExitCodeMap exitCodeMap;
+		CExecOnComponent::ExitCodeMap exitCodeMap;
+		std::map<std::string, std::string> environment;		
 
 		hr = WcaGetRecordString(hRecord, ExecOnComponentQuery::Id, (LPWSTR*)szId);
 		BreakExitOnFailure(hr, "Failed to get Id.");
@@ -95,32 +96,59 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to get Component.");
 		hr = WcaGetRecordString(hRecord, ExecOnComponentQuery::Command, (LPWSTR*)szCommandFormat);
 		BreakExitOnFailure(hr, "Failed to get Command.");
-        hr = WcaGetRecordInteger(hRecord, ExecOnComponentQuery::Flags, &nFlags);
+		hr = WcaGetRecordFormattedString(hRecord, ExecOnComponentQuery::WorkingDirectory, (LPWSTR*)workDir);
+		BreakExitOnFailure(hr, "Failed to get WorkingDirectory.");
+		hr = WcaGetRecordInteger(hRecord, ExecOnComponentQuery::Flags, &nFlags);
         BreakExitOnFailure(hr, "Failed to get Flags.");
-
-        // Get exit code map (i.e. map exit code 1 to success)
-        hr = szExitCodeQuery.Format(ExecOnComponentExitCode_QUERY_Fmt, (LPCWSTR)szId);
-        BreakExitOnFailure(hr, "Failed to format string");
 
 		hr = szCommand.MsiFormat((LPCWSTR)szCommandFormat, &szObfuscatedCommand);
 		BreakExitOnFailure(hr, "Failed expanding command");
 
-        hr = WcaOpenExecuteView((LPCWSTR)szExitCodeQuery, &hExitCodeView);
-        BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", (LPCWSTR)szExitCodeQuery);
+        // Get exit code map (i.e. map exit code 1 to success)
+        hr = szSubQuery.Format(ExecOnComponentExitCode_QUERY_Fmt, (LPCWSTR)szId);
+        BreakExitOnFailure(hr, "Failed to format string");
+
+        hr = WcaOpenExecuteView((LPCWSTR)szSubQuery, &hSubView);
+        BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", (LPCWSTR)szSubQuery);
 
         // Iterate records
-        while ((hr = WcaFetchRecord(hExitCodeView, &hExitCodeRecord)) != E_NOMOREITEMS)
+        while ((hr = WcaFetchRecord(hSubView, &hSubRecord)) != E_NOMOREITEMS)
         {
             BreakExitOnFailure(hr, "Failed to fetch record.");
             int nFrom, nTo;
 
-            hr = WcaGetRecordInteger(hExitCodeRecord, ExecOnComponentExitCodeQuery::From, &nFrom);
+            hr = WcaGetRecordInteger(hSubRecord, ExecOnComponentExitCodeQuery::From, &nFrom);
             BreakExitOnFailure(hr, "Failed to get From.");
-            hr = WcaGetRecordInteger(hExitCodeRecord, ExecOnComponentExitCodeQuery::To, &nTo);
+            hr = WcaGetRecordInteger(hSubRecord, ExecOnComponentExitCodeQuery::To, &nTo);
             BreakExitOnFailure(hr, "Failed to get To.");
 
             exitCodeMap[nFrom] = nTo;
         }
+
+		// Custom environment variables
+		hr = szSubQuery.Format(L"SELECT `Name`, `Value` FROM `PSW_ExecOnComponent_Environment` WHERE `ExecOnId_`='%s'", (LPCWSTR)szId);
+		BreakExitOnFailure(hr, "Failed to format string");
+
+		hr = WcaOpenExecuteView((LPCWSTR)szSubQuery, &hSubView);
+		BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", (LPCWSTR)szSubQuery);
+
+		// Iterate records
+		while ((hr = WcaFetchRecord(hSubView, &hSubRecord)) != E_NOMOREITEMS)
+		{
+			BreakExitOnFailure(hr, "Failed to fetch record.");
+			CWixString name, value;
+			std::string nameA, valueA;
+
+			hr = WcaGetRecordFormattedString(hSubRecord, 1, (LPWSTR*)name);
+			BreakExitOnFailure(hr, "Failed to get From.");
+			hr = WcaGetRecordFormattedString(hSubRecord, 2, (LPWSTR*)value);
+			BreakExitOnFailure(hr, "Failed to get To.");
+
+			nameA.assign((LPCSTR)(LPCWSTR)name, WSTR_BYTE_SIZE((LPCWSTR)name));
+			valueA.assign((LPCSTR)(LPCWSTR)value, WSTR_BYTE_SIZE((LPCWSTR)value));
+			environment[nameA] = valueA;
+		}
+		hr = S_OK;
 
 		// Test condition
 		compAction = WcaGetComponentToDo(szComponent);
@@ -129,12 +157,12 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		case WCA_TODO::WCA_TODO_INSTALL:
 			if (nFlags & Flags::OnInstall)
 			{
-				hr = ScheduleExecution(szId, szCommand, szObfuscatedCommand, &exitCodeMap, nFlags, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, &oDeferredBeforeStopImp, &oDeferredAfterStopImp, &oDeferredBeforeStartImp, &oDeferredAfterStartImp);
+				hr = ScheduleExecution(szId, szCommand, szObfuscatedCommand, workDir, &exitCodeMap, &environment, nFlags, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, &oDeferredBeforeStopImp, &oDeferredAfterStopImp, &oDeferredBeforeStartImp, &oDeferredAfterStartImp);
 				BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			if (nFlags & Flags::OnInstallRollback)
 			{
-				hr = ScheduleExecution(szId, szCommand, szObfuscatedCommand, &exitCodeMap, nFlags, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, &oRollbackBeforeStopImp, &oRollbackAfterStopImp, &oRollbackBeforeStartImp, &oRollbackAfterStartImp);
+				hr = ScheduleExecution(szId, szCommand, szObfuscatedCommand, workDir, &exitCodeMap, &environment, nFlags, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, &oRollbackBeforeStopImp, &oRollbackAfterStopImp, &oRollbackBeforeStartImp, &oRollbackAfterStartImp);
 				BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			break;
@@ -142,12 +170,12 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		case WCA_TODO::WCA_TODO_REINSTALL:
 			if (nFlags & Flags::OnReinstall)
 			{
-				hr = ScheduleExecution(szId, szCommand, szObfuscatedCommand, &exitCodeMap, nFlags, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, &oDeferredBeforeStopImp, &oDeferredAfterStopImp, &oDeferredBeforeStartImp, &oDeferredAfterStartImp);
+				hr = ScheduleExecution(szId, szCommand, szObfuscatedCommand, workDir, &exitCodeMap, &environment, nFlags, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, &oDeferredBeforeStopImp, &oDeferredAfterStopImp, &oDeferredBeforeStartImp, &oDeferredAfterStartImp);
 				BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			if (nFlags & Flags::OnReinstallRollback)
 			{
-				hr = ScheduleExecution(szId, szCommand, szObfuscatedCommand, &exitCodeMap, nFlags, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, &oRollbackBeforeStopImp, &oRollbackAfterStopImp, &oRollbackBeforeStartImp, &oRollbackAfterStartImp);
+				hr = ScheduleExecution(szId, szCommand, szObfuscatedCommand, workDir, &exitCodeMap, &environment, nFlags, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, &oRollbackBeforeStopImp, &oRollbackAfterStopImp, &oRollbackBeforeStartImp, &oRollbackAfterStartImp);
 				BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			break;
@@ -155,12 +183,12 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		case WCA_TODO::WCA_TODO_UNINSTALL:
 			if (nFlags & Flags::OnRemove)
 			{
-				hr = ScheduleExecution(szId, szCommand, szObfuscatedCommand, &exitCodeMap, nFlags, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, &oDeferredBeforeStopImp, &oDeferredAfterStopImp, &oDeferredBeforeStartImp, &oDeferredAfterStartImp);
+				hr = ScheduleExecution(szId, szCommand, szObfuscatedCommand, workDir, &exitCodeMap, &environment, nFlags, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, &oDeferredBeforeStopImp, &oDeferredAfterStopImp, &oDeferredBeforeStartImp, &oDeferredAfterStartImp);
 				BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			if (nFlags & Flags::OnRemoveRollback)
 			{
-				hr = ScheduleExecution(szId, szCommand, szObfuscatedCommand, &exitCodeMap, nFlags, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, &oRollbackBeforeStopImp, &oRollbackAfterStopImp, &oRollbackBeforeStartImp, &oRollbackAfterStartImp);
+				hr = ScheduleExecution(szId, szCommand, szObfuscatedCommand, workDir, &exitCodeMap, &environment, nFlags, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, &oRollbackBeforeStopImp, &oRollbackAfterStopImp, &oRollbackBeforeStartImp, &oRollbackAfterStartImp);
 				BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			break;
@@ -278,7 +306,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedCommand, CExecOnComponent::ExitCodeMap* pExitCodeMap, int nFlags, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart, CExecOnComponent* pBeforeStopImp, CExecOnComponent* pAfterStopImp, CExecOnComponent* pBeforeStartImp, CExecOnComponent* pAfterStartImp)
+HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedCommand, LPCWSTR szWorkingDirectory, CExecOnComponent::ExitCodeMap* pExitCodeMap, CExecOnComponent::EnvironmentMap *pEnv, int nFlags, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart, CExecOnComponent* pBeforeStopImp, CExecOnComponent* pAfterStopImp, CExecOnComponent* pBeforeStartImp, CExecOnComponent* pAfterStartImp)
 {
 	HRESULT hr = S_OK;
 
@@ -287,11 +315,11 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedC
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' before StopServices", szObfuscatedCommand);
 		if (nFlags & Flags::Impersonate)
 		{
-			hr = pBeforeStopImp->AddExec(szCommand, szObfuscatedCommand, pExitCodeMap, nFlags);
+			hr = pBeforeStopImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags);
 		}
 		else
 		{
-			hr = pBeforeStop->AddExec(szCommand, szObfuscatedCommand, pExitCodeMap, nFlags);
+			hr = pBeforeStop->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags);
 		}
 		BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
@@ -300,11 +328,11 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedC
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' after StopServices", szObfuscatedCommand);
 		if (nFlags & Flags::Impersonate)
 		{
-			hr = pAfterStopImp->AddExec(szCommand, szObfuscatedCommand, pExitCodeMap, nFlags);
+			hr = pAfterStopImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags);
 		}
 		else
 		{
-			hr = pAfterStop->AddExec(szCommand, szObfuscatedCommand, pExitCodeMap, nFlags);
+			hr = pAfterStop->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags);
 		}
 		BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
@@ -313,11 +341,11 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedC
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' before StartServices", szObfuscatedCommand);
 		if (nFlags & Flags::Impersonate)
 		{
-			hr = pBeforeStartImp->AddExec(szCommand, szObfuscatedCommand, pExitCodeMap, nFlags);
+			hr = pBeforeStartImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags);
 		}
 		else
 		{
-			hr = pBeforeStart->AddExec(szCommand, szObfuscatedCommand, pExitCodeMap, nFlags);
+			hr = pBeforeStart->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags);
 		}
 		BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
@@ -326,11 +354,11 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedC
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' after StartServices", szObfuscatedCommand);
 		if (nFlags & Flags::Impersonate)
 		{
-			hr = pAfterStartImp->AddExec(szCommand, szObfuscatedCommand, pExitCodeMap, nFlags);
+			hr = pAfterStartImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags);
 		}
 		else
 		{
-			hr = pAfterStart->AddExec(szCommand, szObfuscatedCommand, pExitCodeMap, nFlags);
+			hr = pAfterStart->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags);
 		}
 		BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
@@ -339,7 +367,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CExecOnComponent::AddExec(LPCWSTR szCommand, LPCWSTR szObfuscatedCommand, ExitCodeMap* pExitCodeMap, int nFlags)
+HRESULT CExecOnComponent::AddExec(LPCWSTR szCommand, LPCWSTR szObfuscatedCommand, LPCWSTR szWorkingDirectory, ExitCodeMap* pExitCodeMap, EnvironmentMap *pEnv, int nFlags)
 {
     HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
@@ -355,9 +383,14 @@ HRESULT CExecOnComponent::AddExec(LPCWSTR szCommand, LPCWSTR szObfuscatedCommand
 
 	pDetails->set_command(szCommand, WSTR_BYTE_SIZE(szCommand));
 	pDetails->set_obfuscatedcommand(szObfuscatedCommand, WSTR_BYTE_SIZE(szObfuscatedCommand));
+	if (szWorkingDirectory && *szWorkingDirectory)
+	{
+		pDetails->set_workingdirectory(szWorkingDirectory, WSTR_BYTE_SIZE(szWorkingDirectory));
+	}
 	pDetails->set_async(nFlags & Flags::ASync);
 	pDetails->set_ignoreerrors(nFlags & Flags::IgnoreExitCode);
 	pDetails->mutable_exitcoderemap()->insert(pExitCodeMap->begin(), pExitCodeMap->end());
+	pDetails->mutable_environment()->insert(pEnv->begin(), pEnv->end());
 
 	pAny = pCmd->mutable_details();
 	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
@@ -378,19 +411,27 @@ HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command)
 	ExecOnDetails details;
 	LPCWSTR szCommand = nullptr;
 	LPCWSTR szObfuscatedCommand = nullptr;
-
-    hr = RefreshEnvironment();
-    if (FAILED(hr))
-    {
-        WcaLogError(hr, "Failed refreshing environment. Ignoring error.");
-        hr = S_OK;
-    }
+	LPCWSTR szWorkingDirectory = nullptr;
 
 	bRes = details.ParseFromString(command);
 	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ExecOnDetails");
 
 	szCommand = (LPCWSTR)details.command().c_str();
 	szObfuscatedCommand = (LPCWSTR)details.obfuscatedcommand().c_str();
+	szWorkingDirectory = (LPCWSTR)details.workingdirectory().c_str();
+
+	hr = SetEnvironment(details.environment());
+	if (FAILED(hr))
+	{
+		WcaLogError(hr, "Failed refreshing environment. Ignoring error.");
+		hr = S_OK;
+	}
+
+	if (szWorkingDirectory && *szWorkingDirectory)
+	{
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Setting working directory to '%ls'", szWorkingDirectory);
+		::SetCurrentDirectory(szWorkingDirectory);
+	}
 
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing '%ls'", szObfuscatedCommand);
     if (details.async())
@@ -450,7 +491,7 @@ LExit:
 	return hr;
 }
 
-static HRESULT RefreshEnvironment()
+HRESULT CExecOnComponent::SetEnvironment(const ::google::protobuf::Map<std::string, std::string> &customEnv)
 {
     HRESULT hr = S_OK;
     BOOL bRes = TRUE;
@@ -476,6 +517,20 @@ static HRESULT RefreshEnvironment()
         szValueName.Release();
     }
     BreakExitOnFailure(hr, "Failed enumerating environment registry key");
+
+	for (::google::protobuf::Map<std::string, std::string>::const_iterator itCurr = customEnv.begin(), itEnd = customEnv.end(); itCurr != itEnd; ++itCurr)
+	{
+		LPCWSTR szName = (LPCWSTR)itCurr->first.c_str();
+		LPCWSTR szValue = (LPCWSTR)itCurr->second.c_str();
+
+		if (szName && *szName && szValue && *szValue)
+		{
+			WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Setting custom environment variable '%ls'", szName);
+
+			bRes = ::SetEnvironmentVariable(szName, szValue);
+			BreakExitOnNullWithLastError(bRes, hr, "Failed setting environment variable '%ls'", (LPCWSTR)szName);
+		}
+	}
 
 LExit:
     return hr;

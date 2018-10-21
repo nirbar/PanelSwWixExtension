@@ -43,8 +43,6 @@ namespace PanelSw.Wix.Extensions
             Core.EnsureTable(null, "PSW_FileRegex");
             Core.EnsureTable(null, "PSW_DeletePath"); 
             Core.EnsureTable(null, "PSW_TaskScheduler");
-            Core.EnsureTable(null, "PSW_ExecOnComponent");
-            Core.EnsureTable(null, "PSW_ExecOnComponent_ExitCode");
             Core.EnsureTable(null, "PSW_ZipFile"); 
             Core.EnsureTable(null, "PSW_Unzip"); 
             Core.EnsureTable(null, "PSW_ServiceConfig");
@@ -816,6 +814,7 @@ namespace PanelSw.Wix.Extensions
             string id = null;
             string component = null;
             string command = null;
+            string workDir = null;
             ExecOnComponentFlags flags = ExecOnComponentFlags.None;
             int order = 0;
             YesNoType aye;
@@ -837,6 +836,10 @@ namespace PanelSw.Wix.Extensions
 
                     case "Command":
                         command = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "WorkingDirectory":
+                        workDir = Core.GetAttributeValue(sourceLineNumbers, attrib);
                         break;
 
                     case "Order":
@@ -982,46 +985,89 @@ namespace PanelSw.Wix.Extensions
                     switch(child.LocalName)
                     {
                         case "ExitCode":
-                            ushort from = 0, to = 0;
-                            foreach (XmlAttribute a in child.Attributes)
                             {
-                                if ((0 != a.NamespaceURI.Length) && (a.NamespaceURI != schema.TargetNamespace))
+                                ushort from = 0, to = 0;
+                                foreach (XmlAttribute a in child.Attributes)
                                 {
-                                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, a);
+                                    if ((0 != a.NamespaceURI.Length) && (a.NamespaceURI != schema.TargetNamespace))
+                                    {
+                                        Core.UnsupportedExtensionAttribute(sourceLineNumbers, a);
+                                    }
+
+                                    switch (a.LocalName)
+                                    {
+                                        case "Value":
+                                            from = (ushort)Core.GetAttributeIntegerValue(sourceLineNumbers, a, 0, 0xffff);
+                                            break;
+
+                                        case "Behavior":
+                                            switch (Core.GetAttributeValue(sourceLineNumbers, a))
+                                            {
+                                                case "success":
+                                                    to = 0;
+                                                    break;
+                                                case "scheduleReboot":
+                                                    to = 3010;
+                                                    break;
+                                                case "error":
+                                                    to = 0x4005;
+                                                    break;
+                                                default:
+                                                    to = (ushort)Core.GetAttributeIntegerValue(sourceLineNumbers, a, 0, 0xffff);
+                                                    break;
+                                            }
+                                            break;
+                                    }
                                 }
 
-                                switch (a.LocalName)
-                                {
-                                    case "Value":
-                                        from = (ushort)Core.GetAttributeIntegerValue(sourceLineNumbers, a, 0, 0xffff);
-                                        break;
-
-                                    case "Behavior":
-                                        switch (Core.GetAttributeValue(sourceLineNumbers, a))
-                                        {
-                                            case "success":
-                                                to = 0;
-                                                break;
-                                            case "scheduleReboot":
-                                                to = 3010;
-                                                break;
-                                            case "error":
-                                                to = 0x4005;
-                                                break;
-                                            default:
-                                                to = (ushort)Core.GetAttributeIntegerValue(sourceLineNumbers, a, 0, 0xffff);
-                                                break;
-                                        }
-                                        break;
-                                }
+                                Core.EnsureTable(null, "PSW_ExecOnComponent_ExitCode");
+                                Row row = Core.CreateRow(sourceLineNumbers, "PSW_ExecOnComponent_ExitCode");
+                                row[0] = id;
+                                row[1] = (int)from;
+                                row[2] = (int)to;
                             }
-
-                            Row row = Core.CreateRow(sourceLineNumbers, "PSW_ExecOnComponent_ExitCode");
-                            row[0] = id;
-                            row[1] = (int)from;
-                            row[2] = (int)to;
                             break;
 
+                        case "Environment":
+                            {
+                                string name = null, value = null;
+
+                                foreach (XmlAttribute a in child.Attributes)
+                                {
+                                    if ((0 != a.NamespaceURI.Length) && (a.NamespaceURI != schema.TargetNamespace))
+                                    {
+                                        Core.UnsupportedExtensionAttribute(sourceLineNumbers, a);
+                                    }
+
+                                    switch (a.LocalName)
+                                    {
+                                        case "Value":
+                                            value = Core.GetAttributeValue(sourceLineNumbers, a);
+                                            break;
+
+                                        case "Name":
+                                            name = Core.GetAttributeValue(sourceLineNumbers, a);
+                                            break;
+
+                                        default:
+                                            Core.UnsupportedExtensionAttribute(sourceLineNumbers, a);
+                                            break;
+                                    }
+                                }
+
+                                if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(value))
+                                {
+                                    Core.OnMessage(WixErrors.ExpectedAttributes(sourceLineNumbers, child.LocalName, "Name", "Value"));
+                                    break;
+                                }
+
+                                Core.EnsureTable(null, "PSW_ExecOnComponent_Environment");
+                                Row row = Core.CreateRow(sourceLineNumbers, "PSW_ExecOnComponent_Environment");
+                                row[0] = id;
+                                row[1] = name;
+                                row[2] = value;
+                            }
+                            break;
 
                         default:
                             Core.UnexpectedElement(element, child);
@@ -1030,6 +1076,9 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
+            Core.EnsureTable(null, "PSW_ExecOnComponent");
+            Core.EnsureTable(null, "PSW_ExecOnComponent_ExitCode");
+            Core.EnsureTable(null, "PSW_ExecOnComponent_Environment");
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "ExecOnComponent");
 
             if (!Core.EncounteredError)
@@ -1039,8 +1088,9 @@ namespace PanelSw.Wix.Extensions
                 row[0] = id;
                 row[1] = component;
                 row[2] = command;
-                row[3] = (int)flags;
-                row[4] = order;
+                row[3] = workDir;
+                row[4] = (int)flags;
+                row[5] = order;
             }
         }
 

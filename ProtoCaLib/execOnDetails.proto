@@ -6,9 +6,11 @@ message ExecOnDetails{
 	
 	bytes command = 1;
 	bytes obfuscatedcommand = 2;
+	bytes workingdirectory = 3;
 	
-	map<int32, int32> exitCodeRemap = 3;
+	map<int32, int32> exitCodeRemap = 4;
+	map<string, bytes> environment = 5;
 
-	bool async = 4;
-	bool ignoreErrors = 5;
+	bool async = 6;
+	bool ignoreErrors = 7;
 }

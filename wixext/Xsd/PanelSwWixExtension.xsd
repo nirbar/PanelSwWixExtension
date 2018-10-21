@@ -510,6 +510,7 @@
     <xs:complexType>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
         <xs:element ref="ExitCode" />
+        <xs:element ref="Environment" />
       </xs:choice>
       <xs:attribute name="Id" type="xs:string" use="required">
         <xs:annotation>
@@ -519,6 +520,11 @@
       <xs:attribute name="Command" type="xs:string" use="required">
         <xs:annotation>
           <xs:documentation><![CDATA[Command line to execute. The executable to run should be enclosed with double-quotes. This field is formatted.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="WorkingDirectory" type="xs:string" use="optional">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Working directory for the command. This field is formatted.]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
 
@@ -627,6 +633,31 @@
           </xs:restriction>
         </xs:simpleType>
       </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Environment">
+    <xs:annotation>
+      <xs:documentation>Custom environment variables for a command</xs:documentation>
+      <xs:appinfo>
+        <xse:parent ref="ExecOn" />
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Name" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Environment variable name.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Value" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Environment variable value. This field is formatted.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
     </xs:complexType>
   </xs:element>
 
