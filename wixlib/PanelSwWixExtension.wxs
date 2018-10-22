@@ -321,6 +321,7 @@
     </InstallExecuteSequence>
 
     <UI>
+      <Error Id="27001">!(loc.ExecOnFailure)</Error>
       <ProgressText Action="ExecOnComponent_BeforeStop_rollback">!(loc.ExecOnComponent)</ProgressText>
       <ProgressText Action="ExecOnComponent_BeforeStop_deferred">!(loc.ExecOnComponent)</ProgressText>
       <ProgressText Action="ExecOnComponent_Imp_BeforeStop_rollback">!(loc.ExecOnComponent)</ProgressText>
@@ -550,7 +551,7 @@
       <ProgressText Action="AlwaysOverwriteFile">!(loc.AlwaysOverwriteFile)</ProgressText>
     </UI>
   </Fragment>
-  
+
   <!-- SetPropertyFromPipe -->
   <Fragment>
     <CustomAction Id="SetPropertyFromPipe" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="SetPropertyFromPipe" Execute="immediate"/>
@@ -595,7 +596,7 @@
     </InstallExecuteSequence>
     <UI>
       <ProgressText Action="DiskSpace">!(loc.DiskSpace)</ProgressText>
-    </UI>    
+    </UI>
   </Fragment>
 
 </Wix>

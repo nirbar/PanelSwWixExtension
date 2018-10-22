@@ -584,11 +584,16 @@
 
       <xs:attribute name="IgnoreExitCode" type="YesNoType">
         <xs:annotation>
-          <xs:documentation><![CDATA['yes' to ignore exit code.]]></xs:documentation>
+          <xs:documentation><![CDATA['yes' to ignore exit code. Use of this attribute is deprecated. Instead, use ErrorHandling]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
+		<xs:attribute name="ErrorHandling" use="optional" type="ErrorHandlingType" default="fail">
+			<xs:annotation>
+				<xs:documentation><![CDATA[On error fail, ignore, or prompt user to abort, retry or ignore. Defaults to 'fail']]></xs:documentation>
+			</xs:annotation>
+		</xs:attribute>
 
-      <xs:attribute name="Wait" type="YesNoType" default="yes">
+		<xs:attribute name="Wait" type="YesNoType" default="yes">
         <xs:annotation>
           <xs:documentation><![CDATA[Whether or not to wait for the command to terminate. Defaults to 'yes'.]]></xs:documentation>
         </xs:annotation>

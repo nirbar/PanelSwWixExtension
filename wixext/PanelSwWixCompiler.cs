@@ -41,10 +41,10 @@ namespace PanelSw.Wix.Extensions
             Core.EnsureTable(null, "PSW_MsiSqlQuery");
             Core.EnsureTable(null, "PSW_RegularExpression");
             Core.EnsureTable(null, "PSW_FileRegex");
-            Core.EnsureTable(null, "PSW_DeletePath"); 
+            Core.EnsureTable(null, "PSW_DeletePath");
             Core.EnsureTable(null, "PSW_TaskScheduler");
-            Core.EnsureTable(null, "PSW_ZipFile"); 
-            Core.EnsureTable(null, "PSW_Unzip"); 
+            Core.EnsureTable(null, "PSW_ZipFile");
+            Core.EnsureTable(null, "PSW_Unzip");
             Core.EnsureTable(null, "PSW_ServiceConfig");
             Core.EnsureTable(null, "PSW_InstallUtil");
             Core.EnsureTable(null, "PSW_InstallUtil_Arg");
@@ -363,7 +363,7 @@ namespace PanelSw.Wix.Extensions
                 row[6] = deleteOnCommit ? 1 : 0;
             }
         }
-        
+
         private enum BackupAndRestore_deferred_Schedule
         {
             BackupAndRestore_deferred_Before_InstallFiles,
@@ -431,7 +431,7 @@ namespace PanelSw.Wix.Extensions
                                         restoreSchedule = BackupAndRestore_deferred_Schedule.BackupAndRestore_deferred_After_RemoveExistingProducts;
                                         break;
                                     default:
-                                    Core.OnMessage(WixErrors.ValueNotSupported(sourceLineNumbers, element.LocalName, attrib.LocalName, val));
+                                        Core.OnMessage(WixErrors.ValueNotSupported(sourceLineNumbers, element.LocalName, attrib.LocalName, val));
                                         break;
                                 }
                             }
@@ -773,6 +773,7 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
+        // Definition must match ExeOnComponent.cpp
         [Flags]
         enum ExecOnComponentFlags
         {
@@ -798,11 +799,8 @@ namespace PanelSw.Wix.Extensions
 
             AnyTiming = BeforeStopServices | AfterStopServices | BeforeStartServices | AfterStartServices,
 
-            // Return
-            IgnoreExitCode = 2 * AfterStartServices,
-
             // Not waiting
-            ASync = 2 * IgnoreExitCode,
+            ASync = 2 * AfterStartServices,
 
             // Impersonate
             Impersonate = 2 * ASync,
@@ -816,10 +814,17 @@ namespace PanelSw.Wix.Extensions
             string command = null;
             string workDir = null;
             ExecOnComponentFlags flags = ExecOnComponentFlags.None;
+            TopShelf_ErrorHandling errorHandling = TopShelf_ErrorHandling.fail;
             int order = 0;
             YesNoType aye;
 
             component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
+
+            if (element.HasAttribute("IgnoreExitCode") && element.HasAttribute("ErrorHandling"))
+            {
+                Core.OnMessage(WixErrors.IllegalAttributeWithOtherAttribute(sourceLineNumbers, element.LocalName, "IgnoreExitCode", "ErrorHandling"));
+                return;
+            }
 
             foreach (XmlAttribute attrib in element.Attributes)
             {
@@ -855,10 +860,23 @@ namespace PanelSw.Wix.Extensions
                         break;
 
                     case "IgnoreExitCode":
+                        Core.OnMessage(WixWarnings.DeprecatedAttribute(sourceLineNumbers, element.LocalName, attrib.LocalName));
                         aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
                         if (aye == YesNoType.Yes)
                         {
-                            flags |= ExecOnComponentFlags.IgnoreExitCode;                                
+                            errorHandling = TopShelf_ErrorHandling.ignore;
+                        }
+                        break;
+
+                    case "ErrorHandling":
+                        string a = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        try
+                        {
+                            errorHandling = (TopShelf_ErrorHandling)Enum.Parse(typeof(TopShelf_ErrorHandling), a);
+                        }
+                        catch
+                        {
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                         }
                         break;
 
@@ -867,6 +885,12 @@ namespace PanelSw.Wix.Extensions
                         if (aye == YesNoType.No)
                         {
                             flags |= ExecOnComponentFlags.ASync;
+                            errorHandling = TopShelf_ErrorHandling.ignore; // Really isn't checked on async, but just to be on the safe side.
+                        }
+
+                        if (element.HasAttribute("ErrorHandling") || element.HasAttribute("IgnoreExitCode"))
+                        {
+                            Core.OnMessage(WixErrors.IllegalAttributeWithOtherAttributes(sourceLineNumbers, element.LocalName, attrib.LocalName, "ErrorHandling", "IgnoreExitCode"));
                         }
                         break;
 
@@ -982,7 +1006,7 @@ namespace PanelSw.Wix.Extensions
             {
                 if (child.NamespaceURI == schema.TargetNamespace)
                 {
-                    switch(child.LocalName)
+                    switch (child.LocalName)
                     {
                         case "ExitCode":
                             {
@@ -1090,7 +1114,8 @@ namespace PanelSw.Wix.Extensions
                 row[2] = command;
                 row[3] = workDir;
                 row[4] = (int)flags;
-                row[5] = order;
+                row[5] = (int)errorHandling;
+                row[6] = order;
             }
         }
 
@@ -1268,7 +1293,7 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-           foreach (XmlNode child in element.ChildNodes)
+            foreach (XmlNode child in element.ChildNodes)
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
@@ -1449,7 +1474,7 @@ namespace PanelSw.Wix.Extensions
             None = 0,
             IgnoreErrors = 1
         }
-        
+
         private void ParseReadIniValuesElement(XmlNode node)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
@@ -2080,21 +2105,21 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "onsuccess":
                             tmp = Core.GetAttributeValue(sourceLineNumbers, attrib);
-                            if( tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
                             {
                                 flags |= ExecutePhase.OnCommit;
                             }
                             break;
                         case "onstart":
                             tmp = Core.GetAttributeValue(sourceLineNumbers, attrib);
-                            if( tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
                             {
                                 flags |= ExecutePhase.OnExecute;
                             }
                             break;
                         case "onfailure":
                             tmp = Core.GetAttributeValue(sourceLineNumbers, attrib);
-                            if( tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
                             {
                                 flags |= ExecutePhase.OnRollback;
                             }
@@ -2842,7 +2867,7 @@ namespace PanelSw.Wix.Extensions
                             aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
                             if (aye == YesNoType.Yes)
                             {
-                                flags |= UnzipFlags.Overwrite;                                    
+                                flags |= UnzipFlags.Overwrite;
                             }
                             break;
 

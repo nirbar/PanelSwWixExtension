@@ -11,7 +11,7 @@ public:
 	typedef std::map<std::string, std::string> EnvironmentMap;
 	typedef EnvironmentMap::const_iterator EnvironmentMapItr;
 
-	HRESULT AddExec(LPCWSTR szCommand, LPCWSTR szObfuscatedCommand, LPCWSTR szWorkingDirectory, ExitCodeMap *pExitCodeMap, EnvironmentMap *pEnv, int nFlags);
+	HRESULT AddExec(LPCWSTR szCommand, LPCWSTR szObfuscatedCommand, LPCWSTR szWorkingDirectory, ExitCodeMap *pExitCodeMap, EnvironmentMap *pEnv, int nFlags, com::panelsw::ca::ExecOnDetails_ErrorHandling errorHandling);
 
 protected:
 	// Execute the command object (XML element)

@@ -247,7 +247,7 @@ LRetry:
 	hr = commandLineCopy.Copy(commandLine);
 	BreakExitOnFailure(hr, "Failed to copy string");
 
-	hr = QuietExecEx(commandLine, INFINITE, FALSE, TRUE); 
+	hr = QuietExecEx(commandLineCopy, INFINITE, FALSE, TRUE);
 	if (FAILED(hr) && isDeferred)
 	{
 		switch (details.errorhandling())

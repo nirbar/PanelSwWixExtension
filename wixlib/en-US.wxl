@@ -6,6 +6,7 @@
   <String Id="ShellExecute">Executing command "[1]" [2] in "[3]" with verb [4]</String>
   <String Id="TaskScheduler">Configuring Scheduled Tasks</String>
   <String Id="ExecOnComponent"><![CDATA[Executing custom actions]]></String>
+  <String Id="ExecOnFailure"><![CDATA[Failed executing command [2]]]></String>
   <String Id="ServiceConfig"><![CDATA[Configuring Services]]></String>
   <String Id="InstallUtil"><![CDATA[Installing .NET service assemblies]]></String>
   <String Id="SqlSearch"><![CDATA[Executing SQL queries]]></String>
@@ -21,4 +22,3 @@
   <String Id="Unzip"><![CDATA[Extracting ZIP archive]]></String>
   <String Id="DiskSpace"><![CDATA[Calculating available disk space]]></String>
 </WixLocalization>
-

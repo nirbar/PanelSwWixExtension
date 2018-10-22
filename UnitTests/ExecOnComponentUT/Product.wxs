@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
-     xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
-     >
+     xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension">
   <Product Id="{769C11E5-D811-4CE3-BE79-CC23725E6B38}" Name="$(var.ProjectName)" Language="1033" Version="1.0.0.0" Manufacturer="Panel::Software" UpgradeCode="{8DC7207F-59B4-45E6-90B0-75769F8040B8}">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
@@ -20,20 +19,23 @@
 
     <Property Id="MSIFASTINSTALL" Value="1"/>
     <Property Id="UNUSED" Hidden="yes"/>
+    <Property Id="FULL_PRODUCT.WXS" Hidden="yes"/>
     <Property Id="PRODUCT.WXS" Hidden="yes" Value="Product.wxs"/>
-    
+    <SetProperty Id="FULL_PRODUCT.WXS" Value="[#Product.wxs]" Before="InstallInitialize" Sequence="execute"/>
+
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component Id="Test" Guid="*">
         <File Source="$(var.ProjectDir)Product.wxs" />
-        <PanelSW:ExecOn Id="_1" Command='"notepad.exe" "[PRODUCT.WXS]"' IgnoreExitCode='yes' OnInstall='yes' OnInstallRollback='yes' OnReinstall='yes' OnReinstallRollback='yes' OnUninstall='yes' OnUninstallRollback='yes'
-                        BeforeStopServices='yes' AfterStopServices='yes' BeforeStartServices='yes' AfterStartServices='yes' Wait='no' WorkingDirectory='[INSTALLFOLDER]'
-                        >
+        <PanelSW:ExecOn Id="_1" Command='"notepad.exe" "[PRODUCT.WXS]"' OnInstall='yes' OnInstallRollback='yes' OnReinstall='yes' OnReinstallRollback='yes' OnUninstall='yes' OnUninstallRollback='yes'
+                        BeforeStopServices='yes' AfterStopServices='yes' BeforeStartServices='yes' AfterStartServices='yes' Wait='no' WorkingDirectory='[INSTALLFOLDER]'>
           <PanelSW:ExitCode Value='0' Behavior='scheduleReboot'/>
         </PanelSW:ExecOn>
-        <PanelSW:ExecOn Id="_2" Command='"notepad.exe" "[PRODUCT.WXS]"' IgnoreExitCode='yes' OnInstall='yes' OnInstallRollback='yes' OnReinstall='yes' OnReinstallRollback='yes' OnUninstall='yes' OnUninstallRollback='yes'
+        <PanelSW:ExecOn Id="_2" Command='"notepad.exe" "[PRODUCT.WXS]"' OnInstall='yes' OnInstallRollback='yes' OnReinstall='yes' OnReinstallRollback='yes' OnUninstall='yes' OnUninstallRollback='yes'
                         BeforeStopServices='yes' AfterStopServices='yes' BeforeStartServices='yes' AfterStartServices='yes' Impersonate='yes' Wait='no' WorkingDirectory='[INSTALLFOLDER]'>
           <PanelSW:Environment Name='ABC' Value='NIR'/>
         </PanelSW:ExecOn>
+
+        <PanelSW:ExecOn Id="_3" Command='"[FULL_PRODUCT.WXS]"' OnInstall='yes' BeforeStartServices='yes' ErrorHandling='prompt'/>
       </Component>
     </ComponentGroup>
   </Product>

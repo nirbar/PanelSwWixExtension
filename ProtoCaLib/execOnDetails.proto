@@ -4,6 +4,12 @@ option optimize_for = LITE_RUNTIME;
 
 message ExecOnDetails{
 	
+	enum ErrorHandling {
+		fail = 0;
+		ignore = 1;
+		prompt = 2;
+	}
+
 	bytes command = 1;
 	bytes obfuscatedcommand = 2;
 	bytes workingdirectory = 3;
@@ -12,5 +18,5 @@ message ExecOnDetails{
 	map<string, bytes> environment = 5;
 
 	bool async = 6;
-	bool ignoreErrors = 7;
+	ErrorHandling errorHandling = 7;
 }

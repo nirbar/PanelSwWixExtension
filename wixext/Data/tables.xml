@@ -111,6 +111,7 @@
     <columnDefinition name="Command" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="WorkingDirectory" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
     <columnDefinition name="Flags" type="number" length="4" minValue="0" maxValue="65535" />
+    <columnDefinition name="ErrorHandling" type="number" minValue="0" maxValue="2" length="2" />
     <columnDefinition name="Order" type="number" length="2" minValue="0" maxValue="127" />
   </tableDefinition>
 

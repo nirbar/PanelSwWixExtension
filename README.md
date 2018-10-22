@@ -47,6 +47,7 @@ PanelSwWixExtension is a [WiX](http://wixtoolset.org/) extension that contains v
 PanelSwWixExtension uses error codes in Error table:
 
 - 27000: TopShelf error template for prompting user on errors.
+- 27001: ExecOn error template for prompting user on errors.
 
 ## Properties
 
