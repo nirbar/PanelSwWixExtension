@@ -352,6 +352,10 @@
       <Custom Action="DismX86" After="DismSched" Overridable="yes"><![CDATA[DismX86 And (VersionNT > 601) And Not VersionNT64]]></Custom>
       <Custom Action="DismX64" After="DismSched" Overridable="yes"><![CDATA[DismX64 And (VersionNT64 > 601)]]></Custom>
     </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="DismX86">!(loc.Dism)</ProgressText>
+      <ProgressText Action="DismX64">!(loc.Dism)</ProgressText>
+    </UI>
   </Fragment>
 
   <!-- ZipFile -->
