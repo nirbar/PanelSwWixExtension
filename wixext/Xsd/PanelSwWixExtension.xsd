@@ -225,9 +225,7 @@
   <xs:element name="BackupAndRestore">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Backup file or folder as an immediate custom action and then restore it on specified schedule]]>
