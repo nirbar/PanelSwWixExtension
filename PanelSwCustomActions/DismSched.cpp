@@ -11,6 +11,7 @@ using namespace std;
 #define DismLogPrefix		L"DismLog="
 #define IncludeFeatures		L"IncludeFeatures="
 #define ExcludeFeatures		L"ExcludeFeatures="
+#define Packages			L"Packages="
 
 // Immediate custom action
 extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
@@ -21,7 +22,7 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 	LPWSTR szMsiLog = nullptr;
 	WCHAR szDismLog[MAX_PATH];
 	PMSIHANDLE hView, hRecord;
-	CWixString allInclude, allExclude, cad;
+	CWixString allInclude, allExclude, allPackages, cad;
 	int nVersionNT = 0;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
@@ -48,7 +49,7 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 	}
 
 	// Execute view
-	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `EnableFeatures`, `ExcludeFeatures` FROM `PSW_Dism`", &hView);
+	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `EnableFeatures`, `ExcludeFeatures`, `PackagePath` FROM `PSW_Dism`", &hView);
 	ExitOnFailure(hr, "Failed to execute SQL query");
 
 	// Iterate records
@@ -57,7 +58,7 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		CWixString id, exclude, include, component;
+		CWixString id, exclude, include, package, component;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)id);
@@ -69,6 +70,8 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 		ExitOnNull(!include.IsNullOrEmpty(), hr, E_INVALIDARG, "EnableFeatures is empty");
 		hr = WcaGetRecordFormattedString(hRecord, 4, (LPWSTR*)exclude);
 		ExitOnFailure(hr, "Failed to get ExcludeFeatures.");
+		hr = WcaGetRecordFormattedString(hRecord, 5, (LPWSTR*)package);
+		ExitOnFailure(hr, "Failed to get PackagePath.");
 
 		compAction = WcaGetComponentToDo((LPCWSTR)component);
 		switch (compAction)
@@ -90,6 +93,12 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 				hr = allExclude.AppnedFormat(L"%s;", (LPCWSTR)exclude);
 				ExitOnFailure(hr, "Failed appending formatted string");
 			}
+
+			if (!package.IsNullOrEmpty())
+			{
+				hr = allPackages.AppnedFormat(L"%s;", (LPCWSTR)exclude);
+				ExitOnFailure(hr, "Failed appending formatted string");
+			}
 			break;
 
 		case WCA_TODO::WCA_TODO_UNINSTALL:
@@ -101,7 +110,7 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 	hr = S_OK; // We're only getting here on hr = E_NOMOREITEMS.
 
 	// Since Dism API takes long, we only want to execute it if there's something to do. Conditioning the Dism deferred CA with the property existance will save us time.
-	if (!allInclude.IsNullOrEmpty())
+	if (!allInclude.IsNullOrEmpty() || !allPackages.IsNullOrEmpty())
 	{
 		hr = cad.AppnedFormat(IncludeFeatures L"%s", (LPCWSTR)allInclude);
 		ExitOnFailure(hr, "Failed appending formatted string");
@@ -111,6 +120,9 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 			hr = cad.AppnedFormat(ExcludeFeatures L"%s", (LPCWSTR)allExclude);
 			ExitOnFailure(hr, "Failed appending formatted string");
 		}
+
+		hr = cad.AppnedFormat(Packages L"%s", (LPCWSTR)allPackages);
+		ExitOnFailure(hr, "Failed appending formatted string");
 
 		hr = WcaSetProperty(L"DismX86", (LPCWSTR)cad);
 		ExitOnFailure(hr, "Failed setting CustomActionData");

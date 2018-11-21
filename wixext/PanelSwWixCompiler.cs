@@ -1204,6 +1204,7 @@ namespace PanelSw.Wix.Extensions
             string features = null;
             string exclude = null;
             string component = null;
+            string package = null;
 
             component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
 
@@ -1222,6 +1223,10 @@ namespace PanelSw.Wix.Extensions
 
                     case "ExcludeFeatures":
                         exclude = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "PackagePath":
+                        package = Core.GetAttributeValue(sourceLineNumbers, attrib);
                         break;
 
                     case "Id":
@@ -1243,9 +1248,9 @@ namespace PanelSw.Wix.Extensions
             {
                 Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, parentElement.Name, "Id", ""));
             }
-            if (string.IsNullOrEmpty(features))
+            if (string.IsNullOrEmpty(features) && string.IsNullOrEmpty(package))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "EnableFeature"));
+                Core.OnMessage(WixErrors.ExpectedAttributes(sourceLineNumbers, element.Name, "EnableFeature", "PackagePath"));
             }
             if (string.IsNullOrEmpty(id))
             {
@@ -1262,6 +1267,7 @@ namespace PanelSw.Wix.Extensions
                 row[1] = component;
                 row[2] = features;
                 row[3] = exclude;
+                row[4] = package;
             }
         }
 

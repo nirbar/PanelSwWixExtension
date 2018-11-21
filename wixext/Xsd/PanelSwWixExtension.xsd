@@ -493,6 +493,11 @@
               <xs:documentation><![CDATA[Feature Regex pattern. Any Windows Feature matching the regular expression will not be enabled. For example, IIS will match all feature that contain 'IIS' in their name, while '^IIS$' will only match a feature whose full name is IIS.]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="PackagePath" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Path to package file to add. Packages are added regardless of feature include / exclude matches.]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>

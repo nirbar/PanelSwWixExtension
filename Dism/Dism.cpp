@@ -1,11 +1,13 @@
 #include "stdafx.h"
 #include <wcautil.h>
 #include <strutil.h>
+#include <shlwapi.h>
 #include <DismApi.h>
 #include <list>
 #include <string>
 #include <regex>
 #pragma comment (lib, "dismapi.lib")
+#pragma comment (lib, "Shlwapi.lib")
 using namespace std;
 
 static LPCWSTR DismStateString(DismPackageFeatureState state);
@@ -14,6 +16,15 @@ static void ProgressCallback(UINT Current, UINT Total, PVOID UserData);
 #define DismLogPrefix		L"DismLog="
 #define IncludeFeatures		L"IncludeFeatures="
 #define ExcludeFeatures		L"ExcludeFeatures="
+#define Packages			L"Packages="
+
+enum CadToken
+{
+	None,
+	CadToken_Include_Feature,
+	CadToken_Exclude_Feature,
+	CadToken_Package
+};
 
 extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 {
@@ -27,12 +38,13 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 	UINT uFeatureNum = 0;
 	list<wregex> enableFaetures;
 	list<wregex> excludeFaetures;
+	list<LPCWSTR> packages;
 	LPWSTR szCAD = nullptr;
 	LPCWSTR szDismLog = nullptr;
 	LPCWSTR szTok = nullptr;
 	LPWSTR szTokData = nullptr;
 	HANDLE hCancel = NULL;
-	bool bInclude = true;
+	CadToken tokenType = CadToken::None;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
@@ -52,23 +64,33 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 		}
 		else if (::wcsstr(szTok, IncludeFeatures))
 		{
-			bInclude = true;
+			tokenType = CadToken::CadToken_Include_Feature;
 			szTok += ::wcslen(IncludeFeatures);
 		}
 		else if (::wcsstr(szTok, ExcludeFeatures))
 		{
-			bInclude = false;
+			tokenType = CadToken::CadToken_Exclude_Feature;
 			szTok += ::wcslen(ExcludeFeatures);
 		}
-
-		// Next feature
-		if (bInclude)
+		else if (::wcsstr(szTok, Packages))
 		{
-			enableFaetures.push_back(wregex(szTok, std::regex_constants::syntax_option_type::optimize));
+			tokenType = CadToken::CadToken_Package;
+			szTok += ::wcslen(Packages);
 		}
-		else
+
+		switch (tokenType)
 		{
+		case CadToken::CadToken_Include_Feature:
+			enableFaetures.push_back(wregex(szTok, std::regex_constants::syntax_option_type::optimize));
+			break;
+
+		case CadToken::CadToken_Exclude_Feature:
 			excludeFaetures.push_back(wregex(szTok, std::regex_constants::syntax_option_type::optimize));
+			break;
+
+		case CadToken::CadToken_Package:
+			packages.push_back(szTok);
+			break;
 		}
 	}
 
@@ -90,12 +112,26 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed opening DISM online session. %ls",  (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 	}
 
-	// Enumerate features
+	// Add packages
+	for (LPCWSTR pkgPath : packages)
+	{
+		bRes = ::PathFileExists(pkgPath);
+		ExitOnNullWithLastError(bRes, hr, "DISM package file not found: '%ls'", pkgPath);
+
+		hr = ::DismAddPackage(hSession, pkgPath, FALSE, FALSE, hCancel, ProgressCallback, hCancel);
+		if (FAILED(hr))
+		{
+			DismGetLastErrorMessage(&pErrorString);
+			ExitOnFailure(hr, "Failed adding DISM package '%ls'. %ls", pkgPath, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+		}
+	}
+
+	// Enumerate features and evaluate include/exclude regex.
 	hr = ::DismGetFeatures(hSession, nullptr, DismPackageNone, &pFeatures, &uFeatureNum);
 	if (FAILED(hr))
 	{
 		DismGetLastErrorMessage(&pErrorString);
-		ExitOnFailure(hr, "Failed querying DISM features. %ls",  (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+		ExitOnFailure(hr, "Failed querying DISM features. %ls", (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 	}
 
 	for (UINT i = 0; i < uFeatureNum; ++i)
