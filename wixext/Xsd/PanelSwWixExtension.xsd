@@ -438,7 +438,7 @@
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
       </xs:appinfo>
-      <xs:documentation><![CDATA[Extract a ZIP archive to selected folder.]]></xs:documentation>
+      <xs:documentation><![CDATA[Extract a ZIP archive to selected folder. If the archive was created by PanelSW:ZipFile, preserve file creation, access, and modification times.]]></xs:documentation>
     </xs:annotation>
     <xs:complexType>
       <xs:simpleContent>

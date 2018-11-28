@@ -173,6 +173,12 @@ namespace PswManagedCA
                 newEntry.DateTime = fi.LastWriteTime;
                 newEntry.Size = fi.Length;
 
+                List<byte> fileTimes = new List<byte>();
+                fileTimes.AddRange(BitConverter.GetBytes(fi.CreationTime.ToFileTime()));
+                fileTimes.AddRange(BitConverter.GetBytes(fi.LastAccessTime.ToFileTime()));
+                fileTimes.AddRange(BitConverter.GetBytes(fi.LastWriteTime.ToFileTime()));
+                newEntry.ExtraData = fileTimes.ToArray();
+
                 zipStream.PutNextEntry(newEntry);
 
                 byte[] buffer = new byte[4096];

@@ -6,6 +6,7 @@
 #include "..\poco\Foundation\include\Poco\Delegate.h"
 #include "..\poco\Foundation\include\Poco\StreamCopier.h"
 #include "unzipDetails.pb.h"
+#include <Windows.h>
 #include <fstream>
 #include <shlwapi.h>
 #pragma comment (lib, "Iphlpapi.lib")
@@ -192,12 +193,40 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 		if (!::PathFileExistsA(pathA.c_str()))
 		{
 			WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Extracting '%s'", pathA.c_str());
-			
-			ZipInputStream zipin(*zipFileStream, it->second);
-			std::ofstream out(pathA.c_str(), std::ios::binary);
-			
-			std::streamsize bytes = Poco::StreamCopier::copyStream(zipin, out);
-			BreakExitOnNull((bytes == it->second.getUncompressedSize()), hr, E_FAIL, "Error extracting file '%s' from zip '%ls': %i / %i bytes written", file.c_str(), zipFileW, bytes, it->second.getUncompressedSize());
+
+			{ // Scope ZipInputStream to release the file
+				ZipInputStream zipin(*zipFileStream, it->second);
+				std::ofstream out(pathA.c_str(), std::ios::binary);
+
+				std::streamsize bytes = Poco::StreamCopier::copyStream(zipin, out);
+				BreakExitOnNull((bytes == it->second.getUncompressedSize()), hr, E_FAIL, "Error extracting file '%s' from zip '%ls': %i / %i bytes written", file.c_str(), zipFileW, bytes, it->second.getUncompressedSize());
+			}
+
+			// Set file times, if created by panelsw:Zip custom action
+			if (it->second.hasExtraField())
+			{
+				const std::string times = it->second.getExtraField();
+				if (times.size() == (3 * sizeof(FILETIME)))
+				{
+					HANDLE hFile = INVALID_HANDLE_VALUE;
+					const FILETIME *fileTimes = (const FILETIME*)times.c_str(); // Create, access, write
+
+					hFile = ::CreateFileA(pathA.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE | FILE_SHARE_READ | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+					if ((hFile == NULL) || (hFile == INVALID_HANDLE_VALUE))
+					{
+						WcaLogError(HRESULT_FROM_WIN32(::GetLastError()), "Failed openning file '%s' to set create/access/modify times", pathA.c_str());
+						continue;
+					}
+
+					bRes = ::SetFileTime(hFile, fileTimes, fileTimes + 1, fileTimes + 2);
+					if (!bRes)
+					{
+						WcaLogError(HRESULT_FROM_WIN32(::GetLastError()), "Failed to set create/access/modify times on '%s'", pathA.c_str());
+					}
+
+					::CloseHandle(hFile);
+				}
+			}
 		}
 	}
 
