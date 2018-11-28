@@ -121,8 +121,11 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 			ExitOnFailure(hr, "Failed appending formatted string");
 		}
 
-		hr = cad.AppnedFormat(Packages L"%s", (LPCWSTR)allPackages);
-		ExitOnFailure(hr, "Failed appending formatted string");
+		if (!allPackages.IsNullOrEmpty())
+		{
+			hr = cad.AppnedFormat(Packages L"%s", (LPCWSTR)allPackages);
+			ExitOnFailure(hr, "Failed appending formatted string");
+		}
 
 		hr = WcaSetProperty(L"DismX86", (LPCWSTR)cad);
 		ExitOnFailure(hr, "Failed setting CustomActionData");
