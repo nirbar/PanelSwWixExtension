@@ -6,10 +6,12 @@ PanelSwWixExtension is a [WiX](http://wixtoolset.org/) extension that contains v
 
 - Preprocessor
   - Support preprocessor tuple variables
+    - pragma tuple defines a variable-collection by key whose values can be accesses by preprocessor function in the forms $(tuple.KEY(<index>))), or $(tuple.KEY.<index>)
+    - tuple_range can be utilized in 'foreach' directives in the forms $(tuple_range.KEY()) or $(tuple_range.KEY)
     ~~~~~~~~~~~~
       <?pragma tuple.NIR a;b;c?>
       <?pragma tuple.BAR x;y;z?>
-      <?foreach i in 0;1;2?>
+      <?foreach i in $(tuple_range.BAR())?>
       <Component>
         <File Source="$(sys.SOURCEFILEPATH)" Name="Product.$(tuple.NIR($(var.i))).$(tuple.BAR($(var.i))).wxs"/>
       </Component>

@@ -8,7 +8,7 @@ namespace PanelSw.Wix.Extensions
 {
     class PanelSwPreProcessor : PreprocessorExtension
     {
-        private string[] prefixes_ = new string[] { "tuple", "endtuple" };
+        private string[] prefixes_ = new string[] { "tuple", "endtuple", "tuple_range" };
         public override string[] Prefixes => prefixes_;
 
         Dictionary<string, List<string>> tuples_ = new Dictionary<string, List<string>>();
@@ -55,47 +55,67 @@ namespace PanelSw.Wix.Extensions
 
         public override string EvaluateFunction(string prefix, string key, string[] args)
         {
-            if (!prefix.Equals("tuple"))
-            {
-                return null;
-            }
-
-            if (!tuples_.ContainsKey(key))
-            {
-                return null;
-            }
-
-            if (args.Length != 1)
-            {
-                return null;
-            }
-
             int i;
-            if (!int.TryParse(args[0], out i) || (i < 0) || (i >= tuples_[key].Count))
+            switch (prefix)
             {
-                return null;
-            }
+                case "tuple":
+                    if (!tuples_.ContainsKey(key))
+                    {
+                        return null;
+                    }
+                    if (args.Length != 1)
+                    {
+                        return null;
+                    }
+                    if (!int.TryParse(args[0], out i) || (i < 0) || (i >= tuples_[key].Count))
+                    {
+                        return null;
+                    }
+                    return tuples_[key][i];
 
-            return tuples_[key][i];
+                case "tuple_range":
+                    if (!tuples_.ContainsKey(key))
+                    {
+                        return null;
+                    }
+                    string range = "";
+                    for (i = 0; i < tuples_[key].Count; ++i)
+                    {
+                        if (i > 0)
+                        {
+                            range += ";";
+                        }
+                        range += i.ToString();
+                    }
+                    return range;
+
+                default:
+                    return null;
+
+            }
         }
 
         public override string GetVariableValue(string prefix, string name)
         {
-            if (!prefix.Equals("tuple"))
+            switch (prefix)
             {
-                return null;
+                case "tuple":
+                    int i = name.LastIndexOf('.');
+                    if (i <= 1)
+                    {
+                        return null;
+                    }
+                    string key = name.Substring(0, i);
+                    string arg = name.Substring(i + 1);
+                    return EvaluateFunction(prefix, key, new string[] { arg });
+
+                case "tuple_range":
+                    return EvaluateFunction(prefix, name, null);
+
+                default:
+                    return null;
+
             }
-
-            int i = name.LastIndexOf('.');
-            if (i <= 1)
-            {
-                return null;
-            }
-
-            string key = name.Substring(0, i);
-            string arg = name.Substring(i + 1);
-
-            return EvaluateFunction(prefix, key, new string[] { arg });
         }
     }
 }
