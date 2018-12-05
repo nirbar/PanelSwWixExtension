@@ -71,7 +71,7 @@ namespace PanelSw.Wix.Extensions
             }
 
             int i;
-            if (!int.TryParse(args[0], out i) || (i < 0) || (i > tuples_[key].Count))
+            if (!int.TryParse(args[0], out i) || (i < 0) || (i >= tuples_[key].Count))
             {
                 return null;
             }
