@@ -13,6 +13,9 @@ namespace PanelSw.Wix.Extensions
         private Library library;
         private PanelSwWixCompiler compilerExtension;
         private TableDefinitionCollection tableDefinitions;
+        private PanelSwPreProcessor preprocessor_;
+
+        public override PreprocessorExtension PreprocessorExtension => preprocessor_ ?? (preprocessor_ = new PanelSwPreProcessor());
 
         /// <summary>
         /// Gets the optional compiler extension.

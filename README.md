@@ -4,6 +4,19 @@ PanelSwWixExtension is a [WiX](http://wixtoolset.org/) extension that contains v
 
 ## WiX Elements
 
+- Preprocessor
+  - Support preprocessor tuple variables
+    ~~~~~~~~~~~~
+      <?pragma tuple.NIR a;b;c?>
+      <?pragma tuple.BAR x;y;z?>
+      <?foreach i in 0;1;2?>
+      <Component>
+        <File Source="$(sys.SOURCEFILEPATH)" Name="Product.$(tuple.NIR($(var.i))).$(tuple.BAR($(var.i))).wxs"/>
+      </Component>
+      <?endforeach?>
+      <?pragma endtuple.BAR?>
+      <?pragma endtuple.NIR?>
+    ~~~~~~~~~~~~
 - Immediate Actions:
   - *DiskSpace*: Calculate available disk space for a target directory
   - *CertificateHashSearch*: Find a certificate has in local system MY store.
