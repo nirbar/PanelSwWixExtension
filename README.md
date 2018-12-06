@@ -32,6 +32,7 @@ PanelSwWixExtension is a [WiX](http://wixtoolset.org/) extension that contains v
   - *CreateSelfSignCertificate*: Create a self-sign certificate that can then be installed by WixIisExtension.
   - *AlwaysOverwriteFile*: Sets the highest possible version on a file row (65535.65535.65535.65535) to ensure it overwrites existing file
 - Deferred Actions:
+  - *JsonJPath*: Set values in JSON-formatted file.
   - *Dism*: Enable Windows Feature using DISM API. Features will be installed when the parent component is being installed or repaired.
   - *ZipFile*: Creates a ZIP archive from selected files.
   - *Unzip*: Extract a ZIP archive to selected folder.

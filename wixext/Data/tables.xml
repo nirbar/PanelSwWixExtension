@@ -238,4 +238,10 @@
   <tableDefinition name="PSW_DiskSpace">
     <columnDefinition name="Directory_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" keyTable="Directory" keyColumn="1"/>
   </tableDefinition>
+
+  <tableDefinition name="PSW_JsonJPath">
+    <columnDefinition name="File_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="JPath" type="string" length="0" nullable="no" category="formatted" />
+    <columnDefinition name="Value" type="string" length="0" nullable="no" category="formatted" />
+  </tableDefinition>
 </tableDefinitions>

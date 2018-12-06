@@ -603,4 +603,18 @@
     </UI>
   </Fragment>
 
+  <!-- JsonJpath -->
+  <Fragment>
+    <CustomAction Id="JsonJpathSched" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="JsonJpathSched" Execute="immediate"/>
+    <CustomAction Id="JsonJpathExec" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="JsonJpathExec" Execute="deferred" Impersonate="no"/>
+    <InstallExecuteSequence>
+      <Custom Action="JsonJpathSched" Before="JsonJpathExec" Overridable="yes"/>
+      <Custom Action="JsonJpathExec" After="DuplicateFiles" Overridable="yes"><![CDATA[JsonJpathExec]]></Custom>
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="JsonJpathSched">!(loc.JsonJpath)</ProgressText>
+      <ProgressText Action="JsonJpathExec">!(loc.JsonJpath)</ProgressText>
+    </UI>
+  </Fragment>
+
 </Wix>
