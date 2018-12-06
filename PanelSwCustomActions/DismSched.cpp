@@ -96,7 +96,7 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 
 			if (!package.IsNullOrEmpty())
 			{
-				hr = allPackages.AppnedFormat(L"%s;", (LPCWSTR)exclude);
+				hr = allPackages.AppnedFormat(L"%s;", (LPCWSTR)package);
 				ExitOnFailure(hr, "Failed appending formatted string");
 			}
 			break;

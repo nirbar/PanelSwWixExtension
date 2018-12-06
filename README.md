@@ -126,3 +126,9 @@ PanelSwWixExtension require the following prerequisites to build:
 To build the extension download the code, open the solution PanelSwWixExtension.sln in Visual Studio 2017 and build it.
 
 Unit-test WiX are available in the solution folder 'UnitTests'.
+After building a unit test project, you'll need to shutdown Visual Studio before you can build PanelSwWixExtension project again. 
+This is due to the unfortunate habit of Visual Studio to hold the extension file in use.
+You may find it convenient to build unit test projects from a command prompt to workaround this limitation
+~~~~~~~~~~~~
+MSBuild DismUT.wixproj /p:Configuration=Release /p:Platform=x86
+~~~~~~~~~~~~
