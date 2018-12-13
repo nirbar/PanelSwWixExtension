@@ -8,6 +8,7 @@ using System.IO;
 using System.Xml.Serialization;
 using System.Linq;
 using System.ComponentModel;
+using System.Reflection;
 
 namespace PswManagedCA
 {
@@ -32,7 +33,8 @@ namespace PswManagedCA
         [CustomAction]
         public static ActionResult InstallUtilSched(Session session)
         {
-            session.Log("Begin InstallUtilSched");
+            AssemblyName me = typeof(JsonJPath).Assembly.GetName();
+            session.Log($"Initialized from {me.Name} v{me.Version}");
 
             InstallUtil all = new InstallUtil();
 
@@ -257,7 +259,8 @@ namespace PswManagedCA
         [CustomAction]
         public static ActionResult InstallUtilExec(Session session)
         {
-            session.Log("Begin InstallUtilExec");
+            AssemblyName me = typeof(JsonJPath).Assembly.GetName();
+            session.Log($"Initialized from {me.Name} v{me.Version}");
 
             InstallUtil executer = new InstallUtil();
 

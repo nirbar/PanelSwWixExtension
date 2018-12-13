@@ -617,4 +617,18 @@
     </UI>
   </Fragment>
 
+  <!-- JsonJpath -->
+  <Fragment>
+    <CustomAction Id="JsonJpathSearch" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="JsonJpathSearch" Execute="immediate"/>
+    <InstallExecuteSequence>
+      <Custom Action="JsonJpathSearch" After="AppSearch" Overridable="yes"/>
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="JsonJpathSearch" After="AppSearch" Overridable="yes"/>
+    </InstallUISequence>
+    <UI>
+      <ProgressText Action="JsonJpathSearch">!(loc.JsonJpathSearch)</ProgressText>
+    </UI>
+  </Fragment>
+
 </Wix>

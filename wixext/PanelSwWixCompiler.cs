@@ -33,6 +33,7 @@ namespace PanelSw.Wix.Extensions
 
         public override void FinalizeCompile()
         {
+            Core.EnsureTable(null, "PSW_JsonJpathSearch");
             Core.EnsureTable(null, "PSW_JsonJPath");
             Core.EnsureTable(null, "PSW_EvaluateExpression");
             Core.EnsureTable(null, "PSW_CertificateHashSearch");
@@ -168,6 +169,10 @@ namespace PanelSw.Wix.Extensions
                             ParseCertificateHashSearchElement(element);
                             break;
 
+                        case "JsonJpathSearch":
+                            ParseJsonJpathSearchElement(element);
+                            break;
+
                         default:
                             Core.UnexpectedElement(parentElement, element);
                             break;
@@ -235,6 +240,80 @@ namespace PanelSw.Wix.Extensions
                 default:
                     Core.UnexpectedElement(parentElement, element);
                     break;
+            }
+        }
+
+        private void ParseJsonJpathSearchElement(XmlNode node)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string id = "_" + Guid.NewGuid().ToString("N");
+            string property = null;
+            string expression = null;
+            string file = null;
+
+            if (node.ParentNode.LocalName != "Property")
+            {
+                Core.UnexpectedElement(node.ParentNode, node);
+            }
+            property = node.ParentNode.Attributes["Id"].Value;
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName)
+                    {
+                        case "JPath":
+                            expression = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "FilePath":
+                            file = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+                else
+                {
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            if (string.IsNullOrEmpty(property))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.Name, "Id"));
+            }
+            if (string.IsNullOrEmpty(expression))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "JPath"));
+            }
+            if (string.IsNullOrEmpty(file))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "FilePath"));
+            }
+
+            // find unexpected child elements
+            foreach (XmlNode child in node.ChildNodes)
+            {
+                if (child.NamespaceURI == schema.TargetNamespace)
+                {
+                    Core.UnexpectedElement(node, child);
+                }
+            }
+
+            // reference the Win32_CopyFiles custom actions since nothing will happen without these
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "JsonJpathSearch");
+
+            if (!Core.EncounteredError)
+            {
+                // create a row in the ReadIniValues table
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_JsonJpathSearch");
+                row[0] = id;
+                row[1] = property;
+                row[2] = expression;
+                row[3] = file;
             }
         }
 

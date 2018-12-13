@@ -4,6 +4,7 @@ using Microsoft.Deployment.WindowsInstaller;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Reflection;
 using System.Xml.Serialization;
 
 namespace PswManagedCA
@@ -37,7 +38,9 @@ namespace PswManagedCA
         [CustomAction]
         public static ActionResult ZipFileSched(Session session)
         {
-            session.Log("Begin ZipFileSched");
+            AssemblyName me = typeof(JsonJPath).Assembly.GetName();
+            session.Log($"Initialized from {me.Name} v{me.Version}");
+
             ZipFile zipper = new ZipFile();
 
             IList<string> results = session.Database.ExecuteStringQuery("SELECT `Id`, `ZipFile`, `CompressFolder`, `FilePattern`, `Recursive`, `Condition` FROM `PSW_ZipFile`");
@@ -103,7 +106,8 @@ namespace PswManagedCA
         [CustomAction]
         public static ActionResult ZipFileExec(Session session)
         {
-            session.Log("Begin ZipFileExec");
+            AssemblyName me = typeof(JsonJPath).Assembly.GetName();
+            session.Log($"Initialized from {me.Name} v{me.Version}");
 
             ZipFile zipper = new ZipFile();
             XmlSerializer srlz = new XmlSerializer(zipper.catalogs_.GetType());

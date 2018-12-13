@@ -16,6 +16,17 @@
       </Component>
     </Feature>
 
+    <Property Id='JSON_TEST'>
+      <PanelSW:JsonJpathSearch JPath="$.Manufacturers[\[]?(@.Name == 'Acme Co')[\]].Products[\[]0[\]].Name" FilePath="$(var.ProjectDir)JsonObject.json"/>
+    </Property>
+    <Property Id="Anvil" Value='"Anvil"'/>
+    <Condition Message="Expected JSON_TEST=Anvil"><![CDATA[Installed Or (JSON_TEST=Anvil)]]></Condition>
+
+    <Property Id='JSON_NULL_TEST'>
+      <PanelSW:JsonJpathSearch JPath="$.Manufacturers[\[]?(@.Name == 'UnAcme Co')[\]].Products[\[]0[\]].Name" FilePath="$(var.ProjectDir)JsonObject.json"/>
+    </Property>
+    <Condition Message="Expected JSON_NULL_TEST=&lt;nothing&gt;"><![CDATA[Installed Or Not JSON_NULL_TEST]]></Condition>
+
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ProgramFilesFolder">
         <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />

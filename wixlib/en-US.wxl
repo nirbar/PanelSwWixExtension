@@ -23,4 +23,5 @@
   <String Id="DiskSpace"><![CDATA[Calculating available disk space]]></String>
   <String Id="Dism"><![CDATA[Enable Windows roles and features]]></String>
   <String Id="JsonJpath"><![CDATA[Editing Json files]]></String>
+  <String Id="JsonJpathSearch"><![CDATA[Searching in Json files]]></String>
 </WixLocalization>

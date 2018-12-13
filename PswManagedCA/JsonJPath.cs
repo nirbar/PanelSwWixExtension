@@ -4,8 +4,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
+using System.Reflection;
 using System.Xml.Serialization;
 
 namespace PswManagedCA
@@ -15,8 +14,54 @@ namespace PswManagedCA
         List<JsonJPathCatalog> catalogs_ = new List<JsonJPathCatalog>();
 
         [CustomAction]
+        public static ActionResult JsonJpathSearch(Session session)
+        {
+            AssemblyName me = typeof(JsonJPath).Assembly.GetName();
+            session.Log($"Initialized from {me.Name} v{me.Version}");
+
+            using (View jsonView = session.Database.OpenView("SELECT `Property_`, `FilePath`, `JPath` FROM `PSW_JsonJpathSearch`"))
+            {
+                jsonView.Execute(null);
+
+                foreach (Record rec in jsonView)
+                {
+                    using (rec)
+                    {
+                        string property = rec[1] as string;
+                        string file = session.Format(rec[2] as string);
+                        string jpath = session.Format(rec[3] as string);
+
+                        // Sanity checks
+                        if (string.IsNullOrWhiteSpace(property))
+                        {
+                            session.Log("Property_ not supplied");
+                            return ActionResult.Failure;
+                        }
+                        session.Log($"Running Expression '{jpath}' on '{file}'");
+                        if (string.IsNullOrWhiteSpace(file) || !File.Exists(file))
+                        {
+                            session.Log($"File not found: '{file}'");
+                            continue;
+                        }
+
+                        JObject jo = JObject.Parse(File.ReadAllText(file));
+                        JToken token = jo.SelectToken(jpath, false);
+                        if ((token != null) && (token.Type != JTokenType.Null))
+                        {
+                            session[property] = token.ToString(Formatting.None);
+                        }
+                    }
+                }
+            }
+            return ActionResult.Success;
+        }
+
+        [CustomAction]
         public static ActionResult JsonJpathSched(Session session)
         {
+            AssemblyName me = typeof(JsonJPath).Assembly.GetName();
+            session.Log($"Initialized from {me.Name} v{me.Version}");
+
             List<JsonJPathCatalog> catalogs = new List<JsonJPathCatalog>(); ;
 
             using (View jsonView = session.Database.OpenView("SELECT `PSW_JsonJPath`.`File_`, `File`.`Component_`, `PSW_JsonJPath`.`JPath`, `PSW_JsonJPath`.`Value`"
@@ -92,7 +137,8 @@ namespace PswManagedCA
         [CustomAction]
         public static ActionResult JsonJpathExec(Session session)
         {
-            session.Log("Begin InstallUtilExec");
+            AssemblyName me = typeof(JsonJPath).Assembly.GetName();
+            session.Log($"Initialized from {me.Name} v{me.Version}");
 
             JsonJPath executer = new JsonJPath();
             XmlSerializer srlz = new XmlSerializer(executer.catalogs_.GetType());
