@@ -35,10 +35,12 @@
 
     <!-- XPath with namespace -->
     <!-- fn:substring-before(/wix:Wix/wix:Product[\[]@Name='[ProductName]'[\]]/@Id,'[\}]') -->
+    <Property Id="HiddenProductName" Hidden="yes"/>
+    <SetProperty Id="HiddenProductName" Value="[ProductName]" Sequence="both" Before="XmlSearch"/>
     <Property Id="XPathTest">
       <PanelSW:XmlSearch Id="Test2"
                          FilePath="$(var.ProjectDir)Product.wxs"
-                         XPath="/wix:Wix/wix:Product[\[]@Name='[ProductName]'[\]]/@Id"
+                         XPath="/wix:Wix/wix:Product[\[]@Name='[HiddenProductName]'[\]]/@Id"
                          Language="XPath"
                          Namespaces="xmlns:wix='http://schemas.microsoft.com/wix/2006/wi' xmlns:fn='http://www.w3.org/2005/xpath-functions'"
                          Match="enforceSingle"/>
@@ -57,6 +59,15 @@
     </Property>
     <Condition Message="Expected XPathTest2=[ProductCode]"><![CDATA[XPathTest2=ProductCode]]></Condition>
 
+    <!-- Not failing on no-match -->
+    <Property Id="XPathTest3">
+      <PanelSW:XmlSearch Id="Test4"
+                         FilePath="$(var.ProjectDir)Product.wxs"
+                         XPath="/wix:Wix/wix:NoProduct[\[]contains( ./@Name,'[ProductName]')[\]]/@Id"
+                         Language="XPath"
+                         Namespaces="xmlns:wix='http://schemas.microsoft.com/wix/2006/wi' xmlns:fn='http://www.w3.org/2005/xpath-functions'"
+                         Match="first"/>
+    </Property>
 
     <!-- Terminate after validating result. -->
     <InstallUISequence>

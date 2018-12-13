@@ -2039,9 +2039,8 @@ namespace PanelSw.Wix.Extensions
                 row[3] = xpath;
                 row[4] = lang;
                 row[5] = namespaces;
-                row[6] = match.ToString();
-                row[7] = 0;
-                row[8] = condition;
+                row[6] = (int)match;
+                row[7] = condition;
             }
         }
 
