@@ -34,7 +34,6 @@ extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
 	// Execute view
 	hr = WcaOpenExecuteView(DeletePath_QUERY, &hView);
 	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", DeletePath_QUERY);
-	WcaLog(LOGMSG_STANDARD, "Executed query.");
 
 	// Get temporay folder
 	dwRes = ::GetTempPath(MAX_PATH, shortTempPath);

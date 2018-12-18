@@ -40,7 +40,6 @@ extern "C" UINT __stdcall ReadIniValues(MSIHANDLE hInstall)
 	// Execute view
 	hr = WcaOpenExecuteView(READINIVALUES_QUERY, &hView);
 	BreakExitOnFailure(hr, "Failed to execute SQL query on 'ReadIniValues'.");
-	WcaLog(LOGMSG_STANDARD, "Executed query.");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
@@ -134,7 +133,6 @@ extern "C" UINT __stdcall ReadIniValues(MSIHANDLE hInstall)
 	}
 
 	hr = ERROR_SUCCESS;
-	WcaLog(LOGMSG_STANDARD, "Done.");
 
 LExit:
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;

@@ -39,7 +39,6 @@ extern "C" UINT __stdcall TaskScheduler(MSIHANDLE hInstall)
 	// Execute view
 	hr = WcaOpenExecuteView(TaskScheduler_QUERY, &hView);
 	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", TaskScheduler_QUERY);
-	WcaLog(LOGMSG_STANDARD, "Executed query.");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)

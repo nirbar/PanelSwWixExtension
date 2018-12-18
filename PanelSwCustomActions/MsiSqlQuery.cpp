@@ -22,7 +22,6 @@ extern "C" UINT __stdcall MsiSqlQuery(MSIHANDLE hInstall)
 	// Execute view
 	hr = WcaOpenExecuteView(MsiSqlQueryQuery, &hView);
 	BreakExitOnFailure(hr, "Failed to execute SQL query on 'PSW_MsiSqlQuery'.");
-	WcaLog(LOGMSG_STANDARD, "Executed query.");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)

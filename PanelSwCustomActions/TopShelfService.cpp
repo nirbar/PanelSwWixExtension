@@ -32,7 +32,6 @@ extern "C" UINT __stdcall TopShelf(MSIHANDLE hInstall)
 	// Execute view
 	hr = WcaOpenExecuteView(TopShelfService_QUERY, &hView);
 	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", TopShelfService_QUERY);
-	WcaLog(LOGMSG_STANDARD, "Executed query.");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)

@@ -35,7 +35,6 @@ extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall)
 	// Execute view
 	hr = WcaOpenExecuteView(BackupAndRestore_QUERY, &hView);
 	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", BackupAndRestore_QUERY);
-	WcaLog(LOGMSG_STANDARD, "Executed query.");
 
 	// Get temporay folder
 	dwRes = ::GetTempPath(MAX_PATH, shortTempPath);

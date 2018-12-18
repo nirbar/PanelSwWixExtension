@@ -164,7 +164,6 @@ extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 	}
 
 	hr = ERROR_SUCCESS;
-	WcaLog(LOGMSG_STANDARD, "Done.");
 
 LExit:
 

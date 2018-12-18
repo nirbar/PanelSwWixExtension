@@ -41,7 +41,6 @@ extern "C" UINT __stdcall Telemetry(MSIHANDLE hInstall)
 	// Execute view
 	hr = WcaOpenExecuteView(TELEMETRY_QUERY, &hView);
 	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", TELEMETRY_QUERY);
-	WcaLog(LOGMSG_STANDARD, "Executed query.");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)

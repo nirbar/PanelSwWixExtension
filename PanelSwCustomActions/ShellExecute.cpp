@@ -40,7 +40,6 @@ extern "C" UINT __stdcall PSW_ShellExecute(MSIHANDLE hInstall)
 	// Execute view
 	hr = WcaOpenExecuteView(ShellExecute_QUERY, &hView);
 	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", ShellExecute_QUERY);
-	WcaLog(LOGMSG_STANDARD, "Executed query.");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
