@@ -16,8 +16,9 @@
       </Component>
     </Feature>
 
+    <Property Id='HiddenTest' Value='Acme Co' Hidden='yes'/>
     <Property Id='JSON_TEST'>
-      <PanelSW:JsonJpathSearch JPath="$.Manufacturers[\[]?(@.Name == 'Acme Co')[\]].Products[\[]0[\]].Name" FilePath="$(var.ProjectDir)JsonObject.json"/>
+      <PanelSW:JsonJpathSearch JPath="$.Manufacturers[\[]?(@.Name == '[HiddenTest]')[\]].Products[\[]0[\]].Name" FilePath="$(var.ProjectDir)JsonObject.json"/>
     </Property>
     <Property Id="Anvil" Value='"Anvil"'/>
     <Condition Message="Expected JSON_TEST=Anvil"><![CDATA[Installed Or (JSON_TEST=Anvil)]]></Condition>

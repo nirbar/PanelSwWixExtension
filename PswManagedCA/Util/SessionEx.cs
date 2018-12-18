@@ -1,4 +1,5 @@
 ﻿using Microsoft.Deployment.WindowsInstaller;
+using System;
 
 namespace PswManagedCA.Util
 {
@@ -21,6 +22,18 @@ namespace PswManagedCA.Util
             }
 
             return null;
+        }
+
+        public static void LogObfuscated(this Session session, string msg)
+        {
+            string[] hiddenProps = session["MsiHiddenProperties"].Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string p in hiddenProps)
+            {
+                msg = msg.Replace($"[{p}]", "*******");
+            }
+            msg = session.Format(msg);
+            msg = msg.Replace("[", @"[\[]");
+            session.Log(msg);
         }
     }
 }

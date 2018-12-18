@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Xml.Serialization;
+using PswManagedCA.Util;
 
 namespace PswManagedCA
 {
@@ -29,7 +30,8 @@ namespace PswManagedCA
                     {
                         string property = rec[1] as string;
                         string file = session.Format(rec[2] as string);
-                        string jpath = session.Format(rec[3] as string);
+                        string jpathUnformatted = rec[3] as string;
+                        string jpath = session.Format(jpathUnformatted);
 
                         // Sanity checks
                         if (string.IsNullOrWhiteSpace(property))
@@ -37,7 +39,7 @@ namespace PswManagedCA
                             session.Log("Property_ not supplied");
                             return ActionResult.Failure;
                         }
-                        session.Log($"Running Expression '{jpath}' on '{file}'");
+                        session.LogObfuscated($"Running Expression '{jpathUnformatted}' on '{file}'");
                         if (string.IsNullOrWhiteSpace(file) || !File.Exists(file))
                         {
                             session.Log($"File not found: '{file}'");
@@ -109,7 +111,7 @@ namespace PswManagedCA
                                     return ActionResult.Failure;
                                 }
 
-                                session.Log($"Will replace JSON token matching JPath '{jpath}' with '{value}' in file '{ctlg.FilePath}'");
+                                session.LogObfuscated($"Will replace JSON token matching JPath '{jpath}' with '{value}' in file '{ctlg.FilePath}'");
                                 catalogs.Add(ctlg);
                                 break;
 
