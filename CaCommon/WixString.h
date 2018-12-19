@@ -186,18 +186,18 @@ public:
 							}
 						}
 					}
+				}
 
+				if (SUCCEEDED(hr))
+				{
+					hr = WcaGetFormattedString(szStripped, &szObfuscated);
 					if (SUCCEEDED(hr))
 					{
-						hr = WcaGetFormattedString(szStripped, &szObfuscated);
+						hr = StrReplaceStringAll(&szObfuscated, L"[", L"[\\[]"); // Since obfuscated is re-formatted on logging, we want to re-escape '['.
 						if (SUCCEEDED(hr))
 						{
-							hr = StrReplaceStringAll(&szObfuscated, L"[", L"[\\[]"); // Since obfuscated is used for logging, we want to re-escape '['.
-							if (SUCCEEDED(hr))
-							{
-								*pszObfuscated = szObfuscated;
-								szObfuscated = nullptr;
-							}
+							*pszObfuscated = szObfuscated;
+							szObfuscated = nullptr;
 						}
 					}
 				}
