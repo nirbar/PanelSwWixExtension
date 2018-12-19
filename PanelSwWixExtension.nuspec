@@ -11,6 +11,8 @@
     <description>A WiX extension with various actions including- File regular expressions; XmlSearch; TaskScheduler; ExecOnComponent</description>
     <summary>A WiX extension with various actions</summary>
     <tags>WiX MSI Installer WixToolset XML</tags>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <license type="expression">Apache-2.0</license>
   </metadata>
 
   <files>
