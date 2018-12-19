@@ -27,13 +27,21 @@ namespace PswManagedCA.Util
         public static void LogObfuscated(this Session session, string msg)
         {
             string[] hiddenProps = session["MsiHiddenProperties"].Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-            foreach (string p in hiddenProps)
+            if (hiddenProps != null)
             {
-                msg = msg.Replace($"[{p}]", "*******");
+                foreach (string p in hiddenProps)
+                {
+                    msg = msg.Replace($"[{p}]", "******");
+                }
             }
             msg = session.Format(msg);
-            msg = msg.Replace("[", @"[\[]");
-            session.Log(msg);
+
+            using (Record rec = new Record(1))
+            {
+                rec.FormatString = "[1]";
+                rec[1] = msg;
+                session.Message(InstallMessage.Info, rec);
+            }
         }
     }
 }
