@@ -110,7 +110,7 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 	hr = S_OK; // We're only getting here on hr = E_NOMOREITEMS.
 
 	// Since Dism API takes long, we only want to execute it if there's something to do. Conditioning the Dism deferred CA with the property existance will save us time.
-	if (!allInclude.IsNullOrEmpty() || !allPackages.IsNullOrEmpty())
+	if (!allInclude.IsNullOrEmpty())
 	{
 		hr = cad.AppnedFormat(IncludeFeatures L"%s", (LPCWSTR)allInclude);
 		ExitOnFailure(hr, "Failed appending formatted string");

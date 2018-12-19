@@ -78,6 +78,11 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 			szTok += ::wcslen(Packages);
 		}
 
+		if (!(szTok && *szTok)) // Skip empty.
+		{
+			continue;
+		}
+
 		switch (tokenType)
 		{
 		case CadToken::CadToken_Include_Feature:

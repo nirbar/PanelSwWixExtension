@@ -251,18 +251,12 @@ public:
 		LPWSTR szAppend = nullptr;
 		DWORD dwCapacity = 0;
 		va_start(va, szFormat);
-		
-		hr = StrAllocFormattedArgs(&szAppend, szFormat, va);
-		if (FAILED(hr))
-		{
-			Release();
-		}
 
-		hr = StrAllocConcat(&_pS, szAppend, _dwCapacity);
-		if (FAILED(hr))
-		{
-			Release();
-		}
+		hr = StrAllocFormattedArgs(&szAppend, szFormat, va);
+		ExitOnFailure(hr, "Failed formatting string");
+
+		hr = StrAllocConcat(&_pS, szAppend, 0);
+		ExitOnFailure(hr, "Failed appenfing string");
 
 		dwCapacity = 1 + ::wcslen(_pS);
 		if (dwCapacity > _dwCapacity)
@@ -270,9 +264,14 @@ public:
 			_dwCapacity = dwCapacity;
 		}
 
-		ReleaseStr(szAppend);
+	LExit:
+		if (FAILED(hr))
+		{
+			Release();
+		}
 
 		va_end(va);
+		ReleaseStr(szAppend);
 		return hr;
 	}
 

@@ -2,22 +2,22 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <Import Project="$(MSBuildThisFileDirectory)TidyBuild.user.props" Condition="Exists('$(MSBuildThisFileDirectory)TidyBuild.user.props')"/>
   <PropertyGroup>
-    <FullVersion>1.16.1</FullVersion>
+    <FullVersion>1.16.2</FullVersion>
     <ProductName>PanelSwWixExtension</ProductName>
     <Manufacturer>Panel::Software</Manufacturer>
 
     <!-- Output folder -->
-    <OutputPath>$(SolutionDir)build\bin\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
-    <IntermediateOutputPath>$(SolutionDir)build\obj\$(Configuration)\$(MSBuildProjectName)\</IntermediateOutputPath>
+    <OutputPath>$(MSBuildThisFileDirectory)build\bin\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
+    <IntermediateOutputPath>$(MSBuildThisFileDirectory)build\obj\$(Configuration)\$(MSBuildProjectName)\</IntermediateOutputPath>
     <OutDir>$(OutputPath)</OutDir>
     <IntDir>$(IntermediateOutputPath)</IntDir>
     <OutputDirectory>$(OutputPath)</OutputDirectory>
     <IntermediateDirectory>$(IntermediateOutputPath)</IntermediateDirectory>
     
     <!-- CMake path -->
-    <CMakeDir Condition="'$(CMakeDir)'==''">$(SolutionDir)..\..\Tools\cmake-3.11.3-win32-x86\</CMakeDir>
+    <CMakeDir Condition="'$(CMakeDir)'==''">$(MSBuildThisFileDirectory)..\..\Tools\cmake-3.11.3-win32-x86\</CMakeDir>
     <DismApiDir Condition="'$(DismApiDir)'==''">C:\Program Files (x86)\Windows Kits\8.0\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\</DismApiDir>
-    <NugetDir Condition="'$(NugetDir)'==''">$(SolutionDir)..\..\Tools\</NugetDir>
+    <NugetDir Condition="'$(NugetDir)'==''">$(MSBuildThisFileDirectory)..\..\Tools\</NugetDir>
 
     <WixVariables>JetVersion=$(FullVersion);JetProductName=$(ProductName);JetManufacturer=$(Manufacturer)</WixVariables>
 
