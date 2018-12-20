@@ -79,7 +79,7 @@ namespace PanelSw.Wix.Extensions
                 args = Core.PreprocessString(sourceLineNumbers, args);
                 Core.OnMessage(new WixGenericMessageEventArgs(sourceLineNumbers, 0, MessageLevel.Information, $"Executing heat command: \"{heatPath}\" {args}"));
 
-                // Set temp output file and apply transform
+                // Set temp output file
                 outPath = Path.GetTempFileName();
                 args += $" -o \"{outPath}\"";
 
@@ -87,23 +87,25 @@ namespace PanelSw.Wix.Extensions
                 heatArgs.UseShellExecute = false;
                 heatArgs.RedirectStandardError = true;
                 heatArgs.RedirectStandardOutput = true;
+                heatArgs.CreateNoWindow = true;
                 Process heat = Process.Start(heatArgs);
                 heat.WaitForExit();
+
+                string std = heat.StandardOutput.ReadToEnd();
+                Core.OnMessage(new WixGenericMessageEventArgs(sourceLineNumbers, 0, MessageLevel.Information, std));
                 if (heat.ExitCode != 0)
                 {
-                    string err = heat.StandardOutput.ReadToEnd();
-                    err += heat.StandardError.ReadToEnd();
-                    Core.OnMessage(WixErrors.PreprocessorError(sourceLineNumbers, err));
+                    std = heat.StandardError.ReadToEnd();
+                    Core.OnMessage(WixErrors.PreprocessorError(sourceLineNumbers, std));
                     return;
                 }
 
-                // Include heat file
+                // Copy heat-document with line number indications.
                 XmlDocument doc = new XmlDocument();
                 doc.Load(outPath);
                 foreach (XmlNode e in doc.DocumentElement.ChildNodes)
                 {
-                    writer.WriteProcessingInstruction(Preprocessor.LineNumberElementName, sourceLineNumbers.EncodedSourceLineNumbers);
-                    writer.WriteRaw(e.OuterXml);
+                    CopyNode(sourceLineNumbers, e, writer);
                 }
             }
             catch (Exception ex)
@@ -116,6 +118,34 @@ namespace PanelSw.Wix.Extensions
                 {
                     File.Delete(outPath);
                 }
+            }
+        }
+
+        // Copy heat-generated WiX elements, with line number indications.
+        private void CopyNode(SourceLineNumberCollection sourceLineNumbers, XmlNode node, XmlWriter writer)
+        {
+            switch (node.NodeType)
+            {
+                case XmlNodeType.Element:
+                    writer.WriteProcessingInstruction(Preprocessor.LineNumberElementName, sourceLineNumbers.EncodedSourceLineNumbers);
+                    writer.WriteStartElement(node.LocalName, node.NamespaceURI);
+                    foreach (XmlAttribute a in node.Attributes)
+                    {
+                        writer.WriteAttributeString(a.LocalName, a.NamespaceURI, a.Value);
+                    }
+                    break;
+
+                default:
+                    node.WriteTo(writer);
+                    break;
+            }
+            foreach (XmlNode c in node.ChildNodes)
+            {
+                CopyNode(sourceLineNumbers, c, writer);
+            }
+            if (node.NodeType == XmlNodeType.Element)
+            {
+                writer.WriteEndElement();
             }
         }
 
