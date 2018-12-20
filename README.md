@@ -4,34 +4,6 @@ PanelSwWixExtension is a [WiX](http://wixtoolset.org/) extension that contains v
 
 ## WiX Elements
 
-- Preprocessor
-  - Collection variables
-    - pragma tuple defines a variable-collection by key whose values can be accesses by preprocessor function in the forms $(tuple.KEY(_index_))), or $(tuple.KEY._index_)
-    - tuple_range can be utilized in 'foreach' directives in the forms $(tuple_range.KEY()) or $(tuple_range.KEY)
-    ~~~~~~~~~~~~
-      <?pragma tuple.NIR a;b;c?>
-      <?pragma tuple.BAR x;y;z?>
-      <?foreach i in $(tuple_range.BAR())?>
-      <Component>
-        <File Source="$(sys.SOURCEFILEPATH)" Name="Product.$(tuple.NIR($(var.i))).$(tuple.BAR($(var.i))).wxs"/>
-      </Component>
-      <?endforeach?>
-      <?pragma endtuple.BAR?>
-      <?pragma endtuple.NIR?>
-    ~~~~~~~~~~~~
-  - Harvest using heat command
-	- Place the pragma nested under a Wix element
-    - Preprocessor variables are not supported for the '-var' argument. Use a xslt transform or a WiX variable instead.
-	- Use of preprocessor variables is supported for the heat target
-    ~~~~~~~~~~~~
-    <Wix>
-	  <Product ...>
-	  ...
-      <WixVariable Id="SOURCEFILEDIR" Value="$(sys.SOURCEFILEDIR)"/>
-    </Product>
-	<?pragma heat.dir "$(sys.SOURCEFILEDIR)\" -cg MyComponent -ag -var wix.SOURCEFILEDIR -dr INSTALLFOLDER -srd -suid -sfrag ?>
-    </Wix>
-    ~~~~~~~~~~~~
 - Immediate Actions:
   - *JsonJpathSearch*: Read JSON values
   - *DiskSpace*: Calculate available disk space for a target directory
