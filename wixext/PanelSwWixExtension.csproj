@@ -105,6 +105,9 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Data\WixToInclude.xslt" />
+  </ItemGroup>
   <Target Name="AfterBuild" Condition="'$(Configuration)'=='Release'">
     <Exec Command="&quot;$(NugetDir)nuget.exe&quot; pack -OutputDirectory &quot;$(SolutionDir)nuget-out&quot; -Version $(FullVersion)" WorkingDirectory="$(SolutionDir)" />
   </Target>
