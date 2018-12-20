@@ -29,7 +29,7 @@ PanelSwWixExtension is a [WiX](http://wixtoolset.org/) extension that contains v
 	  ...
       <WixVariable Id="SOURCEFILEDIR" Value="$(sys.SOURCEFILEDIR)"/>
     </Product>
-	<?pragma heat.dir "$(sys.SOURCEFILEDIR)\" -o test.wxs -cg MyComponent -ag -var wix.SOURCEFILEDIR -dr INSTALLFOLDER -srd -suid ?>
+	<?pragma heat.dir "$(sys.SOURCEFILEDIR)\" -cg MyComponent -ag -var wix.SOURCEFILEDIR -dr INSTALLFOLDER -srd -suid -sfrag ?>
     </Wix>
     ~~~~~~~~~~~~
 - Immediate Actions:

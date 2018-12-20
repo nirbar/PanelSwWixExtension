@@ -62,7 +62,6 @@ namespace PanelSw.Wix.Extensions
 
         private void ProcessHeat(SourceLineNumberCollection sourceLineNumbers, string pragma, string args, XmlWriter writer)
         {
-            string xsltPath = null;
             string outPath = null;
             try
             {
@@ -80,22 +79,9 @@ namespace PanelSw.Wix.Extensions
                 args = Core.PreprocessString(sourceLineNumbers, args);
                 Core.OnMessage(new WixGenericMessageEventArgs(sourceLineNumbers, 0, MessageLevel.Information, $"Executing heat command: \"{heatPath}\" {args}"));
 
-                // Load xslt from resource
-                xsltPath = Path.GetTempFileName();
-                Assembly me = Assembly.GetExecutingAssembly();
-                using (Stream xslt = me.GetManifestResourceStream("PanelSw.Wix.Extensions.Data.WixToInclude.xslt"))
-                {
-                    using (FileStream fs = File.OpenWrite(xsltPath))
-                    {
-                        byte[] data = new byte[xslt.Length];
-                        xslt.Read(data, 0, data.Length);
-                        fs.Write(data, 0, data.Length);
-                    }
-                }
-
                 // Set temp output file and apply transform
                 outPath = Path.GetTempFileName();
-                args += $" -t \"{xsltPath}\" -o \"{outPath}\"";
+                args += $" -o \"{outPath}\"";
 
                 ProcessStartInfo heatArgs = new ProcessStartInfo(heatPath, $"{pragma} {args}");
                 heatArgs.UseShellExecute = false;
@@ -129,10 +115,6 @@ namespace PanelSw.Wix.Extensions
                 if (!string.IsNullOrEmpty(outPath) && File.Exists(outPath))
                 {
                     File.Delete(outPath);
-                }
-                if (!string.IsNullOrEmpty(xsltPath) && File.Exists(xsltPath))
-                {
-                    File.Delete(xsltPath);
                 }
             }
         }
