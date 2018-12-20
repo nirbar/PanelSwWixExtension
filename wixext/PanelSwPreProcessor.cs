@@ -129,15 +129,15 @@ namespace PanelSw.Wix.Extensions
                 case XmlNodeType.Element:
                     writer.WriteProcessingInstruction(Preprocessor.LineNumberElementName, sourceLineNumbers.EncodedSourceLineNumbers);
                     writer.WriteStartElement(node.LocalName, node.NamespaceURI);
-                    foreach (XmlAttribute a in node.Attributes)
-                    {
-                        writer.WriteAttributeString(a.LocalName, a.NamespaceURI, a.Value);
-                    }
                     break;
 
                 default:
                     node.WriteTo(writer);
                     break;
+            }
+            foreach (XmlAttribute a in node.Attributes)
+            {
+                writer.WriteAttributeString(a.LocalName, a.NamespaceURI, a.Value);
             }
             foreach (XmlNode c in node.ChildNodes)
             {
