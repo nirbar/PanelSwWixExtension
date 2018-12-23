@@ -93,9 +93,18 @@ namespace PanelSw.Wix.Extensions
 
                 string std = heat.StandardOutput.ReadToEnd();
                 Core.OnMessage(new WixGenericMessageEventArgs(sourceLineNumbers, 0, MessageLevel.Information, std));
-                if (heat.ExitCode != 0)
+
+                // Error / warning
+                std = heat.StandardError.ReadToEnd();
+                if (heat.ExitCode == 0)
                 {
-                    std = heat.StandardError.ReadToEnd();
+                    if (!string.IsNullOrEmpty(std))
+                    {
+                        Core.OnMessage(new WixGenericMessageEventArgs(sourceLineNumbers, 0, MessageLevel.Warning, std));
+                    }
+                }
+                else
+                {
                     Core.OnMessage(WixErrors.PreprocessorError(sourceLineNumbers, std));
                     return;
                 }
@@ -137,7 +146,9 @@ namespace PanelSw.Wix.Extensions
             }
             foreach (XmlAttribute a in node.Attributes)
             {
-                writer.WriteAttributeString(a.LocalName, a.NamespaceURI, a.Value);
+                // For attributes- expand preprocessor variables
+                string val = Core.PreprocessString(sourceLineNumbers, a.Value);
+                writer.WriteAttributeString(a.LocalName, a.NamespaceURI, val);
             }
             foreach (XmlNode c in node.ChildNodes)
             {
