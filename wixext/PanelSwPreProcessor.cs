@@ -155,7 +155,7 @@ namespace PanelSw.Wix.Extensions
             }
             if (node.Attributes != null)
             {
-                foreach (XmlAttribute a in node?.Attributes)
+                foreach (XmlAttribute a in node.Attributes)
                 {
                     // For attributes- expand preprocessor variables
                     string val = Core.PreprocessString(sourceLineNumbers, a.Value);
@@ -183,21 +183,32 @@ namespace PanelSw.Wix.Extensions
                 case "tuple":
                     if (!tuples_.ContainsKey(key))
                     {
+                        Core.OnMessage(WixErrors.InvalidPreprocessorVariable(null, $"{prefix}.${key}"));
                         return null;
                     }
                     if (args.Length != 1)
                     {
+                        Core.OnMessage(WixErrors.PreprocessorError(null, "Tuple variable function must have a single argument"));
                         return null;
                     }
-                    if (!int.TryParse(args[0], out i) || (i < 0) || (i >= tuples_[key].Count))
+                    if (!int.TryParse(args[0], out i))
                     {
+                        Core.OnMessage(WixErrors.PreprocessorExtensionEvaluateFunctionFailed(null, prefix, key, args[0], "Expecting an index as argument"));
                         return null;
                     }
+
+                    if ((i < 0) || (i >= tuples_[key].Count))
+                    {
+                        Core.OnMessage(WixErrors.PreprocessorExtensionEvaluateFunctionFailed(null, prefix, key, args[0], $"Argument out of range. Expected values 0..{tuples_[key].Count - 1}"));
+                        return null;
+                    }
+
                     return tuples_[key][i];
 
                 case "tuple_range":
                     if (!tuples_.ContainsKey(key))
                     {
+                        Core.OnMessage(WixErrors.InvalidPreprocessorVariable(null, $"{prefix}.${key}"));
                         return null;
                     }
                     string range = "";
@@ -211,9 +222,10 @@ namespace PanelSw.Wix.Extensions
                     }
                     return range;
 
+                    //TODO Define function to assert tuples have equal size.
+
                 default:
                     return null;
-
             }
         }
 
@@ -236,7 +248,6 @@ namespace PanelSw.Wix.Extensions
 
                 default:
                     return null;
-
             }
         }
     }
