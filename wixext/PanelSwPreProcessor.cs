@@ -140,19 +140,31 @@ namespace PanelSw.Wix.Extensions
                     writer.WriteStartElement(node.LocalName, node.NamespaceURI);
                     break;
 
+                case XmlNodeType.CDATA:
+                case XmlNodeType.Text:
+                    string val = Core.PreprocessString(sourceLineNumbers, node.Value);
+                    writer.WriteValue(val);
+                    break;
+
                 default:
                     node.WriteTo(writer);
                     break;
             }
-            foreach (XmlAttribute a in node.Attributes)
+            if (node.Attributes != null)
             {
-                // For attributes- expand preprocessor variables
-                string val = Core.PreprocessString(sourceLineNumbers, a.Value);
-                writer.WriteAttributeString(a.LocalName, a.NamespaceURI, val);
+                foreach (XmlAttribute a in node?.Attributes)
+                {
+                    // For attributes- expand preprocessor variables
+                    string val = Core.PreprocessString(sourceLineNumbers, a.Value);
+                    writer.WriteAttributeString(a.LocalName, a.NamespaceURI, val);
+                }
             }
-            foreach (XmlNode c in node.ChildNodes)
+            if (node.ChildNodes != null)
             {
-                CopyNode(sourceLineNumbers, c, writer);
+                foreach (XmlNode c in node.ChildNodes)
+                {
+                    CopyNode(sourceLineNumbers, c, writer);
+                }
             }
             if (node.NodeType == XmlNodeType.Element)
             {

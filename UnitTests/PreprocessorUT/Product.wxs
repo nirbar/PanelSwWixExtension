@@ -34,5 +34,5 @@
   </Product>
 
   <!-- ==== Harvest using heat command -->
-  <?pragma heat.dir "$(sys.SOURCEFILEDIR)\" -cg MyComponents -ag -var sys.SOURCEFILEDIR -dr INSTALLFOLDER -srd -suid -sfrag ?>
+  <?pragma heat.dir "$(sys.SOURCEFILEDIR)\" -cg MyComponents -ag -var sys.SOURCEFILEDIR -dr INSTALLFOLDER -srd -suid -sfrag -t Test.xslt?>
 </Wix>
