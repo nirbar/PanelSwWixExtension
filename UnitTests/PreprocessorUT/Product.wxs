@@ -22,7 +22,7 @@
     - pragma tuple defines a variable-collection by key whose values can be accesses by preprocessor function in the forms $(tuple.KEY(_index_))), or $(tuple.KEY._index_)
     - tuple_range can be utilized in 'foreach' directives in the forms $(tuple_range.KEY()) or $(tuple_range.KEY)
     -->
-    <?pragma tuple.NIR a;b;c?>
+    <?pragma tuple.NIR a;   b;       c?>
     <?pragma tuple.BAR x;y;z?>
     <?foreach i in $(tuple_range.BAR())?>
     <Component Feature="ProductFeature" Directory="INSTALLFOLDER">

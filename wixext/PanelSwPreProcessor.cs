@@ -35,12 +35,15 @@ namespace PanelSw.Wix.Extensions
                         throw new WixException(WixErrors.PreprocessorExtensionPragmaFailed(sourceLineNumbers, pragma, "Pragma is nested within same pragma"));
                     }
 
-                    List<string> values = new List<string>(args.Split(';'));
-                    if (values.Count == 0)
+                    string[] untrimmed = args.Split(';');
+                    List<string> values = new List<string>();
+                    if (untrimmed != null)
                     {
-                        throw new WixException(WixErrors.PreprocessorExtensionPragmaFailed(sourceLineNumbers, pragma, "No values specified. Expected '<?pragma tuple.KEY val1;val2;...;valX?>'"));
+                        foreach (string s in untrimmed)
+                        {
+                            values.Add(s.Trim());
+                        }
                     }
-
                     tuples_[pragma] = values;
                     return true;
 
