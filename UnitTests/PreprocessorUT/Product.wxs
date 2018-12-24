@@ -40,6 +40,8 @@
     <?pragma endtuple.NIR?>
   </Product>
 
-  <!-- ==== Harvest using heat command -->
+  <!-- ==== Harvest using heat command
+  - Heat target must be available during preprocessing. Use absolute or relative paths, environment variabels, or preprocessor variables.
+  -->
   <?pragma heat.dir "$(sys.SOURCEFILEDIR)\" -cg MyComponents -ag -var sys.SOURCEFILEDIR -dr INSTALLFOLDER -srd -suid -sfrag -t Test.xslt?>
 </Wix>
