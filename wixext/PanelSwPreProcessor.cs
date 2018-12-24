@@ -30,34 +30,16 @@ namespace PanelSw.Wix.Extensions
             switch (prefix)
             {
                 case "tuple":
-                    if (tuples_.ContainsKey(pragma))
-                    {
-                        throw new WixException(WixErrors.PreprocessorExtensionPragmaFailed(sourceLineNumbers, pragma, "Pragma is nested within same pragma"));
-                    }
-
-                    string[] untrimmed = args.Split(';');
-                    List<string> values = new List<string>();
-                    if (untrimmed != null)
-                    {
-                        foreach (string s in untrimmed)
-                        {
-                            values.Add(s.Trim());
-                        }
-                    }
-                    tuples_[pragma] = values;
+                    CreateTuple(sourceLineNumbers, pragma, args);
                     return true;
 
                 case "endtuple":
-                    if (!tuples_.Remove(pragma))
-                    {
-                        throw new WixException(WixErrors.PreprocessorExtensionPragmaFailed(sourceLineNumbers, pragma, $"endtuple pragma for undefined tuple"));
-                    }
+                    DeleteTuple(sourceLineNumbers, pragma);
                     return true;
 
                 case "tuple_assert":
                     TupleAssert(sourceLineNumbers, pragma, args);
                     return true;
-
 
                 case "heat":
                     ProcessHeat(sourceLineNumbers, pragma, args, writer);
@@ -66,6 +48,33 @@ namespace PanelSw.Wix.Extensions
                 default:
                     return false;
             }
+        }
+
+        private void DeleteTuple(SourceLineNumberCollection sourceLineNumbers, string pragma)
+        {
+            if (!tuples_.Remove(pragma))
+            {
+                throw new WixException(WixErrors.PreprocessorExtensionPragmaFailed(sourceLineNumbers, pragma, $"endtuple pragma for undefined tuple"));
+            }
+        }
+
+        private void CreateTuple(SourceLineNumberCollection sourceLineNumbers, string pragma, string args)
+        {
+            if (tuples_.ContainsKey(pragma))
+            {
+                throw new WixException(WixErrors.PreprocessorExtensionPragmaFailed(sourceLineNumbers, pragma, "Pragma is nested within same pragma"));
+            }
+
+            string[] untrimmed = args.Split(';');
+            List<string> values = new List<string>();
+            if (untrimmed != null)
+            {
+                foreach (string s in untrimmed)
+                {
+                    values.Add(s.Trim());
+                }
+            }
+            tuples_[pragma] = values;
         }
 
         private void ProcessHeat(SourceLineNumberCollection sourceLineNumbers, string pragma, string args, XmlWriter writer)
@@ -182,54 +191,65 @@ namespace PanelSw.Wix.Extensions
 
         public override string EvaluateFunction(string prefix, string key, string[] args)
         {
-            int i;
             switch (prefix)
             {
                 case "tuple":
-                    if (!tuples_.ContainsKey(key))
-                    {
-                        Core.OnMessage(WixErrors.InvalidPreprocessorVariable(null, $"{prefix}.${key}"));
-                        return null;
-                    }
-                    if (args.Length != 1)
-                    {
-                        Core.OnMessage(WixErrors.PreprocessorError(null, "Tuple variable function must have a single argument"));
-                        return null;
-                    }
-                    if (!int.TryParse(args[0], out i))
-                    {
-                        Core.OnMessage(WixErrors.PreprocessorExtensionEvaluateFunctionFailed(null, prefix, key, args[0], "Expecting an index as argument"));
-                        return null;
-                    }
-
-                    if ((i < 0) || (i >= tuples_[key].Count))
-                    {
-                        Core.OnMessage(WixErrors.PreprocessorExtensionEvaluateFunctionFailed(null, prefix, key, args[0], $"Argument out of range. Expected values 0..{tuples_[key].Count - 1}"));
-                        return null;
-                    }
-
-                    return tuples_[key][i];
+                    return GetTupleElement(prefix, key, args);
 
                 case "tuple_range":
-                    if (!tuples_.ContainsKey(key))
-                    {
-                        Core.OnMessage(WixErrors.InvalidPreprocessorVariable(null, $"{prefix}.${key}"));
-                        return null;
-                    }
-                    string range = "";
-                    for (i = 0; i < tuples_[key].Count; ++i)
-                    {
-                        if (i > 0)
-                        {
-                            range += ";";
-                        }
-                        range += i.ToString();
-                    }
-                    return range;
+                    return CreateTupleRange(prefix, key);
 
                 default:
                     return null;
             }
+        }
+
+        private string CreateTupleRange(string prefix, string key)
+        {
+            int i;
+            if (!tuples_.ContainsKey(key))
+            {
+                Core.OnMessage(WixErrors.InvalidPreprocessorVariable(null, $"{prefix}.${key}"));
+                return null;
+            }
+            string range = "";
+            for (i = 0; i < tuples_[key].Count; ++i)
+            {
+                if (i > 0)
+                {
+                    range += ";";
+                }
+                range += i.ToString();
+            }
+            return range;
+        }
+
+        private string GetTupleElement(string prefix, string key, string[] args)
+        {
+            int i;
+            if (!tuples_.ContainsKey(key))
+            {
+                Core.OnMessage(WixErrors.InvalidPreprocessorVariable(null, $"{prefix}.${key}"));
+                return null;
+            }
+            if (args.Length != 1)
+            {
+                Core.OnMessage(WixErrors.PreprocessorError(null, "Tuple variable function must have a single argument"));
+                return null;
+            }
+            if (!int.TryParse(args[0], out i))
+            {
+                Core.OnMessage(WixErrors.PreprocessorExtensionEvaluateFunctionFailed(null, prefix, key, args[0], "Expecting an index as argument"));
+                return null;
+            }
+
+            if ((i < 0) || (i >= tuples_[key].Count))
+            {
+                Core.OnMessage(WixErrors.PreprocessorExtensionEvaluateFunctionFailed(null, prefix, key, args[0], $"Argument out of range. Expected values 0..{tuples_[key].Count - 1}"));
+                return null;
+            }
+
+            return tuples_[key][i];
         }
 
         private void TupleAssert(SourceLineNumberCollection sourceLineNumbers, string pragma, string args)
