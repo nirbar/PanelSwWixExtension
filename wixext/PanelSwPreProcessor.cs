@@ -11,7 +11,7 @@ namespace PanelSw.Wix.Extensions
 {
     class PanelSwPreProcessor : PreprocessorExtension
     {
-        private string[] prefixes_ = new string[] { "tuple", "endtuple", "tuple_range", "heat" };
+        private string[] prefixes_ = new string[] { "tuple", "endtuple", "tuple_range", "tuple_assert", "heat" };
         public override string[] Prefixes => prefixes_;
 
         Dictionary<string, List<string>> tuples_ = new Dictionary<string, List<string>>();
@@ -53,6 +53,11 @@ namespace PanelSw.Wix.Extensions
                         throw new WixException(WixErrors.PreprocessorExtensionPragmaFailed(sourceLineNumbers, pragma, $"endtuple pragma for undefined tuple"));
                     }
                     return true;
+
+                case "tuple_assert":
+                    TupleAssert(sourceLineNumbers, pragma, args);
+                    return true;
+
 
                 case "heat":
                     ProcessHeat(sourceLineNumbers, pragma, args, writer);
@@ -222,10 +227,44 @@ namespace PanelSw.Wix.Extensions
                     }
                     return range;
 
-                    //TODO Define function to assert tuples have equal size.
-
                 default:
                     return null;
+            }
+        }
+
+        private void TupleAssert(SourceLineNumberCollection sourceLineNumbers, string pragma, string args)
+        {
+            string[] untrimmed = args.Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
+            if ((untrimmed == null) || (untrimmed.Length == 0))
+            {
+                Core.OnMessage(WixErrors.PreprocessorExtensionPragmaFailed(sourceLineNumbers, pragma, "Expected tuple list as argument"));
+                return;
+            }
+
+            List<string> assertOn = new List<string>();
+            foreach (string a in untrimmed)
+            {
+                string t = a.Trim();
+                if (!tuples_.ContainsKey(t))
+                {
+                    Core.OnMessage(WixErrors.PreprocessorExtensionPragmaFailed(sourceLineNumbers, pragma, $"tuple '{t}' is undefined"));
+                    return;
+                }
+                assertOn.Add(t);
+            }
+
+            switch (pragma)
+            {
+                case "EQUAL_SIZE":
+                    int size = tuples_[assertOn[0]].Count;
+                    if (! assertOn.TrueForAll((t) => tuples_[t].Count == size))
+                    {
+                        Core.OnMessage(WixErrors.PreprocessorExtensionPragmaFailed(sourceLineNumbers, pragma, $"Not all tuples have equal size"));
+                    }
+                    return;
+
+                default:
+                    return;
             }
         }
 

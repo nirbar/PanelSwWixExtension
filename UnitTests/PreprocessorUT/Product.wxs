@@ -20,15 +20,22 @@
 
     <!-- ==== Collection variables
     - pragma tuple defines a variable-collection by key whose values can be accesses by preprocessor function in the forms $(tuple.KEY(_index_))), or $(tuple.KEY._index_)
-    - tuple_range can be utilized in 'foreach' directives in the forms $(tuple_range.KEY()) or $(tuple_range.KEY)
     -->
     <?pragma tuple.NIR a;   b;       c?>
     <?pragma tuple.BAR x;y;z?>
+
+    <!-- tuple_assert.EQUAL_SIZE: Assert that supplied tuple variables have equal number of elements --> 
+    <?pragma tuple_assert.EQUAL_SIZE NIR; BAR?>
+
+    <!-- $(tuple_range.KEY()): Create range of indices for 'foreach' directive on tuple KEY -->
     <?foreach i in $(tuple_range.BAR())?>
+    
     <Component Feature="ProductFeature" Directory="INSTALLFOLDER">
       <File Source="$(sys.SOURCEFILEPATH)" Name="Product.$(tuple.NIR($(var.i))).$(tuple.BAR($(var.i))).wxs"/>
     </Component>
+    
     <?endforeach?>
+    <!-- Optional endtuple.KEY to delete a tuple variable -->
     <?pragma endtuple.BAR?>
     <?pragma endtuple.NIR?>
   </Product>
