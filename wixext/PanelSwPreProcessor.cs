@@ -276,6 +276,11 @@ namespace PanelSw.Wix.Extensions
             switch (pragma)
             {
                 case "EQUAL_SIZE":
+                    if (assertOn.Count <= 1)
+                    {
+                        Core.OnMessage(WixErrors.PreprocessorExtensionPragmaFailed(sourceLineNumbers, pragma, "Expected at least two tuples in list"));
+                        return;
+                    }
                     int size = tuples_[assertOn[0]].Count;
                     if (! assertOn.TrueForAll((t) => tuples_[t].Count == size))
                     {
