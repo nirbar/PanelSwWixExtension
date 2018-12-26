@@ -161,7 +161,7 @@
   <Target Name="BuildProtobuf" BeforeTargets="ProtoBuffCompile">
     <MakeDir Directories="$(SolutionDir)build\protobuf" />
     <MakeDir Directories="$(IntDir)..\protobuf" />
-    <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; -G &quot;Visual Studio 15 2017&quot; -T $(PlatformToolset) ..\..\protobuf\cmake -Dprotobuf_BUILD_TESTS=OFF" WorkingDirectory="$(SolutionDir)build\protobuf" />
+    <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; -G &quot;$(CMakeVsVersion)&quot; -T $(PlatformToolset) ..\..\protobuf\cmake -Dprotobuf_BUILD_TESTS=OFF" WorkingDirectory="$(SolutionDir)build\protobuf" />
     <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; --build . --config $(Configuration)" WorkingDirectory="$(SolutionDir)build\protobuf" />
   </Target>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

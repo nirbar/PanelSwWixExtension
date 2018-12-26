@@ -14,8 +14,10 @@
     <OutputDirectory>$(OutputPath)</OutputDirectory>
     <IntermediateDirectory>$(IntermediateOutputPath)</IntermediateDirectory>
     
-    <!-- CMake path -->
+    <!-- CMake -->
     <CMakeDir Condition="'$(CMakeDir)'==''">$(MSBuildThisFileDirectory)..\..\Tools\cmake-3.11.3-win32-x86\</CMakeDir>
+    <CMakeVsVersion Condition="'$(CMakeVsVersion)'==''">Visual Studio 15 2017</CMakeVsVersion>
+
     <DismApiDir Condition="'$(DismApiDir)'==''">C:\Program Files (x86)\Windows Kits\8.0\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\</DismApiDir>
     <NugetDir Condition="'$(NugetDir)'==''">$(MSBuildThisFileDirectory)..\..\Tools\</NugetDir>
 

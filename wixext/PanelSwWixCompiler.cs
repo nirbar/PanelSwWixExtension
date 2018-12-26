@@ -761,9 +761,6 @@ namespace PanelSw.Wix.Extensions
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.Name, "Id"));
             }
 
-            // reference the Win32_CopyFiles custom actions since nothing will happen without these
-            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "AlwaysOverwriteFile");
-
             if (!Core.EncounteredError)
             {
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_AlwaysOverwriteFile");

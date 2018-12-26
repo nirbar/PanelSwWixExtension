@@ -210,7 +210,7 @@
     <columnDefinition name="DeleteOnCommit" type="number" minValue="0" maxValue="1" length="2" />
   </tableDefinition>
 
-  <tableDefinition name="PSW_AlwaysOverwriteFile">
+  <tableDefinition name="PSW_AlwaysOverwriteFile" unreal="yes">
     <columnDefinition name="File" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
   </tableDefinition>
 

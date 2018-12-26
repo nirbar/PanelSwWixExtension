@@ -545,17 +545,6 @@
     </UI>
   </Fragment>
 
-  <!-- AlwaysOverwriteFile -->
-  <Fragment>
-    <CustomAction Id="AlwaysOverwriteFile" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="AlwaysOverwriteFile" Execute="immediate"/>
-    <InstallExecuteSequence>
-      <Custom Action="AlwaysOverwriteFile" Before="CostInitialize" Overridable="yes"/>
-    </InstallExecuteSequence>
-    <UI>
-      <ProgressText Action="AlwaysOverwriteFile">!(loc.AlwaysOverwriteFile)</ProgressText>
-    </UI>
-  </Fragment>
-
   <!-- SetPropertyFromPipe -->
   <Fragment>
     <CustomAction Id="SetPropertyFromPipe" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="SetPropertyFromPipe" Execute="immediate"/>
