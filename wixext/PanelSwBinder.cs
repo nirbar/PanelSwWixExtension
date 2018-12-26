@@ -45,7 +45,7 @@ namespace PanelSw.Wix.Extensions
                         {
                             f.Data = "65535.65535.65535.65535";
                         }
-                        if (f.Column.Name.Equals("Attributes"))
+                        if (f.Column.Name.Equals("Attributes")) // Remove file from MsiFileHash table, ICE60
                         {
                             int attr = (int)f.Data;
                             attr &= ~0x000200; //msidbFileAttributesChecksum

@@ -746,6 +746,7 @@ namespace PanelSw.Wix.Extensions
             {
                 file = parentElement.GetAttribute("Source");
                 file = Path.GetFileName(file);
+                file = file.Replace(' ', '_');
             }
 
             foreach (XmlAttribute attrib in node.Attributes)
