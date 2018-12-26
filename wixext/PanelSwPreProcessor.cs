@@ -3,14 +3,45 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Reflection;
-using System.Text;
 using System.Xml;
 using Microsoft.Tools.WindowsInstallerXml;
+using System.Runtime.InteropServices;
 
 namespace PanelSw.Wix.Extensions
 {
     class PanelSwPreProcessor : PreprocessorExtension
     {
+        #region Split command line to arguments
+
+        [DllImport("shell32.dll", SetLastError = true)]
+        static extern IntPtr CommandLineToArgvW([MarshalAs(UnmanagedType.LPWStr)] string lpCmdLine, out int pNumArgs);
+
+        private static string[] CommandLineToArgs(string commandLine)
+        {
+            int argc;
+            var argv = CommandLineToArgvW(commandLine, out argc);
+            if (argv == IntPtr.Zero)
+            {
+                throw new System.ComponentModel.Win32Exception();
+            }
+            try
+            {
+                var args = new string[argc];
+                for (var i = 0; i < args.Length; i++)
+                {
+                    var p = Marshal.ReadIntPtr(argv, i * IntPtr.Size);
+                    args[i] = Marshal.PtrToStringUni(p);
+                }
+                return args;
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(argv);
+            }
+        }
+
+        #endregion
+
         private string[] prefixes_ = new string[] { "tuple", "endtuple", "tuple_range", "tuple_assert", "heat" };
         public override string[] Prefixes => prefixes_;
 
@@ -100,12 +131,12 @@ namespace PanelSw.Wix.Extensions
                 outPath = Path.GetTempFileName();
                 args += $" -o \"{outPath}\"";
 
-                ProcessStartInfo heatArgs = new ProcessStartInfo(heatPath, $"{pragma} {args}");
-                heatArgs.UseShellExecute = false;
-                heatArgs.RedirectStandardError = true;
-                heatArgs.RedirectStandardOutput = true;
-                heatArgs.CreateNoWindow = true;
-                Process heat = Process.Start(heatArgs);
+                ProcessStartInfo heatPI = new ProcessStartInfo(heatPath, $"{pragma} {args}");
+                heatPI.UseShellExecute = false;
+                heatPI.RedirectStandardError = true;
+                heatPI.RedirectStandardOutput = true;
+                heatPI.CreateNoWindow = true;
+                Process heat = Process.Start(heatPI);
                 heat.WaitForExit();
 
                 string std = heat.StandardOutput.ReadToEnd();
@@ -126,12 +157,39 @@ namespace PanelSw.Wix.Extensions
                     return;
                 }
 
+                // Attempt to figure out the harvest target.
+                string[] heatArgs = CommandLineToArgs(heatPI.Arguments);
+                string heatTargetPath = null;
+                if ((heatArgs != null) && (heatArgs.Length >= 2) && pragma.Equals("dir", StringComparison.OrdinalIgnoreCase) && Directory.Exists(heatArgs[1]))
+                {
+                    // If '-var' is specified, no need to set target path
+                    bool hasVar = false;
+                    foreach (string a in heatArgs)
+                    {
+                        if (a.Equals("-var", StringComparison.OrdinalIgnoreCase) || a.Equals("/var", StringComparison.OrdinalIgnoreCase))
+                        {
+                            hasVar = true;
+                            break;
+                        }
+                    }
+
+                    if (!hasVar)
+                    {
+                        heatTargetPath = heatArgs[1];
+                        if (heatTargetPath.LastIndexOfAny(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }) != heatTargetPath.Length - 1)
+                        {
+                            heatTargetPath += Path.DirectorySeparatorChar;
+                        }
+                        Core.OnMessage(new WixGenericMessageEventArgs(sourceLineNumbers, 0, MessageLevel.Information, $"Will replace File/@Source='SourceDir\\' with '{heatTargetPath}'"));
+                    }
+                }
+
                 // Copy heat-document with line number indications.
                 XmlDocument doc = new XmlDocument();
                 doc.Load(outPath);
                 foreach (XmlNode e in doc.DocumentElement.ChildNodes)
                 {
-                    CopyNode(sourceLineNumbers, e, writer);
+                    CopyNode(sourceLineNumbers, e, heatTargetPath, writer);
                 }
             }
             catch (Exception ex)
@@ -148,7 +206,7 @@ namespace PanelSw.Wix.Extensions
         }
 
         // Copy heat-generated WiX elements, with line number indications.
-        private void CopyNode(SourceLineNumberCollection sourceLineNumbers, XmlNode node, XmlWriter writer)
+        private void CopyNode(SourceLineNumberCollection sourceLineNumbers, XmlNode node, string heatTargetPath, XmlWriter writer)
         {
             switch (node.NodeType)
             {
@@ -173,6 +231,14 @@ namespace PanelSw.Wix.Extensions
                 {
                     // For attributes- expand preprocessor variables
                     string val = Core.PreprocessString(sourceLineNumbers, a.Value);
+
+                    // Set target path, if not already handled by -var or a transform
+                    if (!string.IsNullOrEmpty(heatTargetPath) 
+                        && a.LocalName.Equals("Source") && val.StartsWith("SourceDir\\")
+                        && a.OwnerElement.LocalName.Equals("File") && a.OwnerElement.NamespaceURI.Equals("http://schemas.microsoft.com/wix/2006/wi"))
+                    {
+                        val = heatTargetPath + val.Substring("SourceDir\\".Length);
+                    }
                     writer.WriteAttributeString(a.LocalName, a.NamespaceURI, val);
                 }
             }
@@ -180,7 +246,7 @@ namespace PanelSw.Wix.Extensions
             {
                 foreach (XmlNode c in node.ChildNodes)
                 {
-                    CopyNode(sourceLineNumbers, c, writer);
+                    CopyNode(sourceLineNumbers, c, heatTargetPath, writer);
                 }
             }
             if (node.NodeType == XmlNodeType.Element)
