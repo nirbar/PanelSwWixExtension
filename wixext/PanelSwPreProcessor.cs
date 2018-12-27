@@ -232,10 +232,12 @@ namespace PanelSw.Wix.Extensions
                     // For attributes- expand preprocessor variables
                     string val = Core.PreprocessString(sourceLineNumbers, a.Value);
 
-                    // Set target path, if not already handled by -var or a transform
+                    // Set target path, if not already handled by -var or a transform. Match File/@Source or Payload/@SourceFile
                     if (!string.IsNullOrEmpty(heatTargetPath) 
-                        && a.LocalName.Equals("Source") && val.StartsWith("SourceDir\\")
+                        && (a.LocalName.Equals("Source") && val.StartsWith("SourceDir\\")
                         && a.OwnerElement.LocalName.Equals("File") && a.OwnerElement.NamespaceURI.Equals("http://schemas.microsoft.com/wix/2006/wi"))
+                        || (a.LocalName.Equals("SourceFile") && val.StartsWith("SourceDir\\")
+                        && a.OwnerElement.LocalName.Equals("Payload") && a.OwnerElement.NamespaceURI.Equals("http://schemas.microsoft.com/wix/2006/wi")))
                     {
                         val = heatTargetPath + val.Substring("SourceDir\\".Length);
                     }
