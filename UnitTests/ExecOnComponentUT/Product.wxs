@@ -23,6 +23,8 @@
     <Property Id="PRODUCT.WXS" Hidden="yes" Value="Product.wxs"/>
     <SetProperty Id="FULL_PRODUCT.WXS" Value="[#Product.wxs]" Before="InstallInitialize" Sequence="execute"/>
 
+    <Binary Id="TestBinary" SourceFile="..\..\build\protobuf\$(var.Configuration)\protoc.exe"/>
+
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component Id="Test" Guid="*">
         <File Source="$(var.ProjectDir)Product.wxs" />
@@ -36,6 +38,8 @@
         </PanelSW:ExecOn>
 
         <PanelSW:ExecOn Id="_3" Command='"[FULL_PRODUCT.WXS]"' OnInstall='yes' BeforeStartServices='yes' ErrorHandling='prompt'/>
+
+        <PanelSW:ExecOn Id='TestBinary' BinaryKey='TestBinary' Command='--version' BeforeStartServices='yes' OnInstall='yes'/>
       </Component>
     </ComponentGroup>
   </Product>

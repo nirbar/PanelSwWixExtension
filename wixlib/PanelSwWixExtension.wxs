@@ -279,6 +279,8 @@
   <!-- ExecOnComponent -->
   <Fragment>
     <CustomAction Id="ExecOnComponent" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="ExecOnComponent" Execute="immediate" Return="check" />
+    <CustomAction Id="ExecOnComponentRollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" />
+    <CustomAction Id="ExecOnComponentCommit" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="commit" Return="ignore" />
     <CustomAction Id="ExecOnComponent_BeforeStop_rollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" />
     <CustomAction Id="ExecOnComponent_BeforeStop_deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" />
     <CustomAction Id="ExecOnComponent_AfterStop_rollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" />
@@ -298,7 +300,9 @@
     <CustomActionRef Id="WixCheckRebootRequired"/>
 
     <InstallExecuteSequence>
-      <Custom Action="ExecOnComponent" After="InstallInitialize" Overridable="yes"/>
+      <Custom Action="ExecOnComponent" Before="InstallInitialize" Overridable="yes"/>
+      <Custom Action="ExecOnComponentRollback" After="InstallInitialize" Overridable="yes"/>
+      <Custom Action="ExecOnComponentCommit" Before="InstallFinalize" Overridable="yes"/>
       <Custom Action="ExecOnComponent_BeforeStop_rollback" Before="ExecOnComponent_BeforeStop_deferred" Overridable="yes"/>
       <Custom Action="ExecOnComponent_BeforeStop_deferred" Before="StopServices" Overridable="yes"/>
       <Custom Action="ExecOnComponent_Imp_BeforeStop_rollback" Before="ExecOnComponent_Imp_BeforeStop_deferred" Overridable="yes"/>

@@ -570,7 +570,12 @@
       </xs:attribute>
       <xs:attribute name="Command" type="xs:string" use="required">
         <xs:annotation>
-          <xs:documentation><![CDATA[Command line to execute. The executable to run should be enclosed with double-quotes. This field is formatted.]]></xs:documentation>
+          <xs:documentation><![CDATA[Command line to execute. The executable to run should be enclosed with double-quotes, unless BinaryKey is specified. This field is formatted.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="BinaryKey" type="xs:string" use="optional">
+        <xs:annotation>
+          <xs:documentation><![CDATA[If specified, extract the binary and execute it with the arguments specified on 'Command' field.]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="WorkingDirectory" type="xs:string" use="optional">

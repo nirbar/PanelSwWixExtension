@@ -967,6 +967,7 @@ namespace PanelSw.Wix.Extensions
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
             string id = null;
             string component = null;
+            string binary = null;
             string command = null;
             string workDir = null;
             ExecOnComponentFlags flags = ExecOnComponentFlags.None;
@@ -997,6 +998,10 @@ namespace PanelSw.Wix.Extensions
 
                     case "Command":
                         command = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "BinaryKey":
+                        binary = Core.GetAttributeValue(sourceLineNumbers, attrib);
                         break;
 
                     case "WorkingDirectory":
@@ -1262,11 +1267,12 @@ namespace PanelSw.Wix.Extensions
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_ExecOnComponent");
                 row[0] = id;
                 row[1] = component;
-                row[2] = command;
-                row[3] = workDir;
-                row[4] = (int)flags;
-                row[5] = (int)errorHandling;
-                row[6] = order;
+                row[2] = binary;
+                row[3] = command;
+                row[4] = workDir;
+                row[5] = (int)flags;
+                row[6] = (int)errorHandling;
+                row[7] = order;
             }
         }
 

@@ -1,17 +1,13 @@
 #include "ExecOnComponent.h"
 #include "RegistryKey.h"
+#include "FileOperations.h"
 #include "../CaCommon/WixString.h"
 #include <wcautil.h>
+#include <memutil.h>
 #include <procutil.h>
 #include "google\protobuf\any.h"
 using namespace com::panelsw::ca;
 using namespace google::protobuf;
-
-#define ExecOnComponent_QUERY L"SELECT `Id`, `Component_`, `Command`, `WorkingDirectory`, `Flags`, `ErrorHandling` FROM `PSW_ExecOnComponent` ORDER BY `Order`"
-enum ExecOnComponentQuery { Id = 1, Component = 2, Command = 3, WorkingDirectory = 4, Flags = 5, ErrorHandling };
-
-#define ExecOnComponentExitCode_QUERY_Fmt L"SELECT `From`, `To` FROM `PSW_ExecOnComponent_ExitCode` WHERE `ExecOnId_`='%s'"
-enum ExecOnComponentExitCodeQuery { From = 1, To = 2 };
 
 enum Flags
 {
@@ -54,6 +50,15 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 	CExecOnComponent oRollbackBeforeStop, oRollbackAfterStop, oRollbackBeforeStart, oRollbackAfterStart;
 	CExecOnComponent oDeferredBeforeStopImp, oDeferredAfterStopImp, oDeferredBeforeStartImp, oDeferredAfterStartImp;
 	CExecOnComponent oRollbackBeforeStopImp, oRollbackAfterStopImp, oRollbackBeforeStartImp, oRollbackAfterStartImp;
+	CFileOperations rollbackCAD;
+	CFileOperations commitCAD;
+	BYTE* pbData = nullptr;
+	DWORD cbData = 0;
+	WCHAR shortTempPath[MAX_PATH + 1];
+	WCHAR longTempPath[MAX_PATH + 1];
+	DWORD dwRes = 0;
+	WCHAR szTempFile[MAX_PATH + 1];
+	HANDLE hFile = INVALID_HANDLE_VALUE;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");
@@ -66,10 +71,19 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
     BreakExitOnFailure((hr == S_OK), "Table does not exist 'PSW_ExecOnComponent_ExitCode'. Have you authored 'PanelSw:ExecOnComponent' entries in WiX code?");
 	hr = WcaTableExists(L"PSW_ExecOnComponent_Environment");
 	BreakExitOnFailure((hr == S_OK), "Table does not exist 'PSW_ExecOnComponent_Environment'. Have you authored 'PanelSw:ExecOnComponent' entries in WiX code?");
+	
+	// Get temporay folder
+	dwRes = ::GetTempPath(MAX_PATH, shortTempPath);
+	BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary folder");
+	BreakExitOnNull((dwRes <= MAX_PATH), hr, E_FAIL, "Temporary folder path too long");
+
+	dwRes = ::GetLongPathName(shortTempPath, longTempPath, MAX_PATH + 1);
+	BreakExitOnNullWithLastError(dwRes, hr, "Failed expanding temporary folder");
+	BreakExitOnNull((dwRes <= MAX_PATH), hr, E_FAIL, "Temporary folder expanded path too long");
 
 	// Execute view
-	hr = WcaOpenExecuteView(ExecOnComponent_QUERY, &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", ExecOnComponent_QUERY);
+	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `Binary_`, `Command`, `WorkingDirectory`, `Flags`, `ErrorHandling` FROM `PSW_ExecOnComponent` ORDER BY `Order`", &hView);
+	BreakExitOnFailure(hr, "Failed to execute SQL query.");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
@@ -80,7 +94,7 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		// Get fields
         PMSIHANDLE hSubView;
         PMSIHANDLE hSubRecord;
-		CWixString szId, szComponent, szCommand, szCommandFormat, workDir;
+		CWixString szId, szComponent, szBinary, szCommand, szCommandFormat, workDir;
         CWixString szSubQuery;
 		int nFlags = 0;
 		int errorHandling = ExecOnDetails_ErrorHandling::ExecOnDetails_ErrorHandling_fail;
@@ -88,24 +102,68 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		CExecOnComponent::ExitCodeMap exitCodeMap;
 		std::map<std::string, std::string> environment;		
 
-		hr = WcaGetRecordString(hRecord, ExecOnComponentQuery::Id, (LPWSTR*)szId);
+		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szId);
 		BreakExitOnFailure(hr, "Failed to get Id.");
-		hr = WcaGetRecordString(hRecord, ExecOnComponentQuery::Component, (LPWSTR*)szComponent);
+		hr = WcaGetRecordString(hRecord, 2, (LPWSTR*)szComponent);
 		BreakExitOnFailure(hr, "Failed to get Component.");
-		hr = WcaGetRecordString(hRecord, ExecOnComponentQuery::Command, (LPWSTR*)szCommandFormat);
+		hr = WcaGetRecordString(hRecord, 3, (LPWSTR*)szBinary);
+		BreakExitOnFailure(hr, "Failed to get Binary_.");
+		hr = WcaGetRecordString(hRecord, 4, (LPWSTR*)szCommandFormat);
 		BreakExitOnFailure(hr, "Failed to get Command.");
-		hr = WcaGetRecordFormattedString(hRecord, ExecOnComponentQuery::WorkingDirectory, (LPWSTR*)workDir);
+		hr = WcaGetRecordFormattedString(hRecord, 5, (LPWSTR*)workDir);
 		BreakExitOnFailure(hr, "Failed to get WorkingDirectory.");
-		hr = WcaGetRecordInteger(hRecord, ExecOnComponentQuery::Flags, &nFlags);
+		hr = WcaGetRecordInteger(hRecord, 6, &nFlags);
         BreakExitOnFailure(hr, "Failed to get Flags.");
-		hr = WcaGetRecordInteger(hRecord, ExecOnComponentQuery::ErrorHandling, &errorHandling);
+		hr = WcaGetRecordInteger(hRecord, 7, &errorHandling);
 		BreakExitOnFailure(hr, "Failed to get ErrorHandling.");
+
+		// Execute from binary
+		if (!szBinary.IsNullOrEmpty())
+		{
+			CWixString szNewCommand(szCommandFormat);
+
+			hr = szSubQuery.Format(L"SELECT `Data` FROM `Binary` WHERE `Name`='%s'", (LPCWSTR)szBinary);
+			BreakExitOnFailure(hr, "Failed to format string");
+
+			hr = WcaOpenExecuteView((LPCWSTR)szSubQuery, &hSubView);
+			BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", (LPCWSTR)szSubQuery);
+
+			hr = WcaFetchSingleRecord(hSubView, &hSubRecord);
+			BreakExitOnFailure(hr, "Failed to fetch binary record.");
+
+			hr = WcaGetRecordStream(hSubRecord, 1, &pbData, &cbData);
+			ExitOnFailure(hr, "Failed to ready Binary.Data for certificate.");
+
+			dwRes = ::GetTempFileName(longTempPath, L"EXE", 0, szTempFile);
+			BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
+
+			hr = szCommandFormat.Format(L"\"%s\" %s", szTempFile, (LPCWSTR)szNewCommand);
+			BreakExitOnFailure(hr, "Failed to format string");
+
+			hFile = ::CreateFile(szTempFile, GENERIC_ALL, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+			ExitOnNullWithLastError((hFile != INVALID_HANDLE_VALUE), hr, "Failed opening file");
+
+			dwRes = ::WriteFile(hFile, pbData, cbData, &cbData, nullptr);
+			ExitOnNullWithLastError(dwRes, hr, "Failed writing to file");
+
+			// Don't care if this is going to fail- just deleting a temporary file
+			rollbackCAD.AddDeleteFile(szTempFile, CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath);
+			commitCAD.AddDeleteFile(szTempFile, CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath);
+
+			ReleaseNullMem(pbData);
+			cbData = 0;
+			if ((hFile != INVALID_HANDLE_VALUE) && (hFile != NULL))
+			{
+				::CloseHandle(hFile);
+				hFile = INVALID_HANDLE_VALUE;
+			}
+		}
 
 		hr = szCommand.MsiFormat((LPCWSTR)szCommandFormat, &szObfuscatedCommand);
 		BreakExitOnFailure(hr, "Failed expanding command");
 
         // Get exit code map (i.e. map exit code 1 to success)
-        hr = szSubQuery.Format(ExecOnComponentExitCode_QUERY_Fmt, (LPCWSTR)szId);
+        hr = szSubQuery.Format(L"SELECT `From`, `To` FROM `PSW_ExecOnComponent_ExitCode` WHERE `ExecOnId_`='%s'", (LPCWSTR)szId);
         BreakExitOnFailure(hr, "Failed to format string");
 
         hr = WcaOpenExecuteView((LPCWSTR)szSubQuery, &hSubView);
@@ -117,9 +175,9 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
             BreakExitOnFailure(hr, "Failed to fetch record.");
             int nFrom, nTo;
 
-            hr = WcaGetRecordInteger(hSubRecord, ExecOnComponentExitCodeQuery::From, &nFrom);
+            hr = WcaGetRecordInteger(hSubRecord, 1, &nFrom);
             BreakExitOnFailure(hr, "Failed to get From.");
-            hr = WcaGetRecordInteger(hSubRecord, ExecOnComponentExitCodeQuery::To, &nTo);
+            hr = WcaGetRecordInteger(hSubRecord, 2, &nTo);
             BreakExitOnFailure(hr, "Failed to get To.");
 
             exitCodeMap[nFrom] = nTo;
@@ -298,9 +356,26 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 	hr = WcaSetProperty(L"ExecOnComponent_Imp_AfterStart_deferred", szCustomActionData);
 	BreakExitOnFailure(hr, "Failed setting deferred action data."); 
 
+	ReleaseNullStr(szCustomActionData);
+	hr = rollbackCAD.GetCustomActionData(&szCustomActionData);
+	BreakExitOnFailure(hr, "Failed getting custom action data for rollback.");
+	hr = WcaSetProperty(L"ExecOnComponentRollback", szCustomActionData);
+	BreakExitOnFailure(hr, "Failed setting rollback action data.");
+
+	ReleaseNullStr(szCustomActionData);
+	hr = commitCAD.GetCustomActionData(&szCustomActionData);
+	BreakExitOnFailure(hr, "Failed getting custom action data for commit.");
+	hr = WcaSetProperty(L"ExecOnComponentCommit", szCustomActionData);
+	BreakExitOnFailure(hr, "Failed setting commit action data.");
+
 LExit:
+	ReleaseMem(pbData);
 	ReleaseStr(szCustomActionData);
 	ReleaseStr(szObfuscatedCommand);
+	if ((hFile != INVALID_HANDLE_VALUE) && (hFile != NULL))
+	{
+		::CloseHandle(hFile);
+	}
 
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);

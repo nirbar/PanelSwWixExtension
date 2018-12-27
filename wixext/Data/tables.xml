@@ -107,6 +107,7 @@
   <tableDefinition name="PSW_ExecOnComponent">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
     <columnDefinition name="Component_" type="string" length="72" modularize="column" keyTable="Component" keyColumn="1" category="identifier"/>
+    <columnDefinition name="Binary_" type="string" length="72" modularize="column" keyTable="Binary" keyColumn="1" category="identifier" nullable="yes"/>
     <columnDefinition name="Command" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="WorkingDirectory" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
     <columnDefinition name="Flags" type="number" length="4" minValue="0" maxValue="65535" />
