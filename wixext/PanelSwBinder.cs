@@ -71,7 +71,8 @@ namespace PanelSw.Wix.Extensions
 
             foreach (Row overR in overwriteT.Rows)
             {
-                SourceLineNumberCollection srcLines = new SourceLineNumberCollection(overR[1]?.ToString());
+                string srcLineStr = overR[1]?.ToString();
+                SourceLineNumberCollection srcLines = (srcLineStr == null) ? new SourceLineNumberCollection("") : new SourceLineNumberCollection(srcLineStr);
                 string fileId = overR[0].ToString();
                 if (string.IsNullOrEmpty(fileId))
                 {
