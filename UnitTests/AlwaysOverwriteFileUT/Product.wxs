@@ -24,9 +24,9 @@
   </Fragment>
 
   <Fragment>
-    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-      <Component Id="Test" Guid="*">
-        <File Id="Test" Source="$(var.ProjectDir)Product.wxs" KeyPath="yes">
+    <ComponentGroup Id="ProductComponents">
+      <Component Directory="INSTALLFOLDER">
+        <File Source="$(var.ProjectDir)Product.wxs">
           <PanelSW:AlwaysOverwriteFile />
         </File>
       </Component>

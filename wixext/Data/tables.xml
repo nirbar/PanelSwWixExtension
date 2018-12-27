@@ -212,6 +212,7 @@
 
   <tableDefinition name="PSW_AlwaysOverwriteFile" unreal="yes">
     <columnDefinition name="File" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="SourceLineNumber" type="string" length="0" />
   </tableDefinition>
 
   <tableDefinition name="PSW_SetPropertyFromPipe">

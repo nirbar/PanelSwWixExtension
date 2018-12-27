@@ -742,11 +742,13 @@ namespace PanelSw.Wix.Extensions
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
 
             string file = parentElement.GetAttribute("Id");
+            string srcFile = null;
+
             if (string.IsNullOrEmpty(file))
             {
                 file = parentElement.GetAttribute("Source");
                 file = Path.GetFileName(file);
-                file = file.Replace(' ', '_');
+                file = CompilerCore.GetIdentifierFromName(file);
             }
 
             foreach (XmlAttribute attrib in node.Attributes)
@@ -762,10 +764,16 @@ namespace PanelSw.Wix.Extensions
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.Name, "Id"));
             }
 
+            if ((sourceLineNumbers != null) && (sourceLineNumbers.Count > 0))
+            {
+                srcFile = sourceLineNumbers[0].QualifiedFileName;
+            }
+
             if (!Core.EncounteredError)
             {
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_AlwaysOverwriteFile");
                 row[0] = file;
+                row[1] = srcFile;
             }
         }
 

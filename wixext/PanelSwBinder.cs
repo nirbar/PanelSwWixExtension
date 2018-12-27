@@ -14,19 +14,49 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
+        private int ColumnByName(Table tbl, string name)
+        {
+            for (int i = 0; i < tbl.Definition.Columns.Count; ++i)
+            {
+                ColumnDefinition col = tbl.Definition.Columns[i];
+                if (col.Name.Equals(name))
+                {
+                    return i;
+                }
+            }
+            throw new KeyNotFoundException($"Did not find column '{name}' in table '{tbl.Name}'");
+        }
+
+        private Row RowByKey(Table tbl, int keyCol, string keyVal)
+        {
+            foreach (Row r in tbl.Rows)
+            {
+                if (r[keyCol].Equals(keyVal))
+                {
+                    return r;
+                }
+            }
+            return null;
+        }
+
+        private int RowIndexByKey(Table tbl, int keyCol, string keyVal)
+        {
+            for (int i = tbl.Rows.Count - 1; i >= 0; --i)
+            {
+                if (tbl.Rows[i][keyCol].Equals(keyVal))
+                {
+                    return i;
+                }
+            }
+            return -1;
+        }
+
         private void AlwaysOverwriteFiles(Output output)
         {
-            List<string> overwriteFiles = new List<string>();
-
             Table overwriteT = output.Tables["PSW_AlwaysOverwriteFile"];
             if (overwriteT == null)
             {
                 return;
-            }
-
-            foreach (Row r in overwriteT.Rows)
-            {
-                overwriteFiles.Add(r.Fields[0].Data.ToString());
             }
 
             Table fileT = output.Tables["File"];
@@ -34,39 +64,46 @@ namespace PanelSw.Wix.Extensions
             {
                 return;
             }
-            foreach (Row r in fileT.Rows)
+
+            int fileKeyCol = ColumnByName(fileT, "File");
+            int fileVersionCol = ColumnByName(fileT, "Version");
+            int fileLanguageCol = ColumnByName(fileT, "Language");
+
+            foreach (Row overR in overwriteT.Rows)
             {
-                string id = r.Fields[0].Data.ToString();
-                if (overwriteFiles.Contains(id))
+                SourceLineNumberCollection srcLines = new SourceLineNumberCollection(overR[1]?.ToString());
+                string fileId = overR[0].ToString();
+                if (string.IsNullOrEmpty(fileId))
                 {
-                    foreach (Field f in r.Fields)
+                    Core.OnMessage(WixErrors.IdentifierNotFound("AlwaysOverwriteFile", ""));
+                    continue;
+                }
+                Row fileR = RowByKey(fileT, fileKeyCol, fileId);
+                if (fileR == null)
+                {
+                    Core.OnMessage(WixErrors.FileIdentifierNotFound(srcLines, fileId));
+                    continue;
+                }
+
+                fileR[fileVersionCol] = "65535.65535.65535.65535";
+
+                // Remove file from MsiFileHash table, ICE60
+                Table hashT = output.Tables["MsiFileHash"];
+                if (hashT != null)
+                {
+                    int hashKeyCol = ColumnByName(hashT, "File_");
+                    int hashRow = RowIndexByKey(hashT, hashKeyCol, fileId);
+                    if (hashRow >= 0)
                     {
-                        if (f.Column.Name.Equals("Version"))
-                        {
-                            f.Data = "65535.65535.65535.65535";
-                        }
-                        if (f.Column.Name.Equals("Attributes")) // Remove file from MsiFileHash table, ICE60
-                        {
-                            int attr = (int)f.Data;
-                            attr &= ~0x000200; //msidbFileAttributesChecksum
-                            f.Data = attr;
-                        }
+                        hashT.Rows.RemoveAt(hashRow);
                     }
                 }
-            }
 
-            // Remove file from MsiFileHash table, ICE60
-            Table hashT = output.Tables["MsiFileHash"];
-            if (hashT == null)
-            {
-                return;
-            }
-            for (int i = hashT.Rows.Count - 1; i >= 0; --i)
-            {
-                string id = hashT.Rows[i].Fields[0].Data.ToString();
-                if (overwriteFiles.Contains(id))
+                // Language
+                object lang = fileR[fileLanguageCol];
+                if (string.IsNullOrEmpty(lang?.ToString()))
                 {
-                    hashT.Rows.RemoveAt(i);
+                    fileR[fileLanguageCol] = "0";
                 }
             }
         }
