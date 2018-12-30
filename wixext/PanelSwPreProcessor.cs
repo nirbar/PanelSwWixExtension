@@ -180,7 +180,7 @@ namespace PanelSw.Wix.Extensions
                         {
                             heatTargetPath += Path.DirectorySeparatorChar;
                         }
-                        Core.OnMessage(new WixGenericMessageEventArgs(sourceLineNumbers, 0, MessageLevel.Information, $"Will replace File/@Source='SourceDir\\' with '{heatTargetPath}'"));
+                        Core.OnMessage(new WixGenericMessageEventArgs(sourceLineNumbers, 0, MessageLevel.Information, $"Will replace File/@Source and Payload/@SourceFile 'SourceDir\\' with '{heatTargetPath}'"));
                     }
                 }
 
