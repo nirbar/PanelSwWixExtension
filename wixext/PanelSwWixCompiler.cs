@@ -1276,6 +1276,16 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
+        enum ServiceStart : int
+        {
+            boot = 0,
+            unchanged = -1,
+            auto = 2,
+            demand = 3,
+            disabled = 4,
+            system = 1
+        }
+
         private void ParseServiceConfigElement(XmlElement parentElement, XmlElement element)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
@@ -1284,6 +1294,7 @@ namespace PanelSw.Wix.Extensions
             string account = null;
             string password = null;
             string component = null;
+            ServiceStart start = ServiceStart.unchanged;
 
             component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
 
@@ -1310,6 +1321,10 @@ namespace PanelSw.Wix.Extensions
 
                     case "Password":
                         password = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "Start":
+                        start = (ServiceStart)Enum.Parse(typeof(ServiceStart), Core.GetAttributeValue(sourceLineNumbers, attrib));
                         break;
 
                     default:
@@ -1351,6 +1366,7 @@ namespace PanelSw.Wix.Extensions
                 row[2] = service;
                 row[3] = account;
                 row[4] = password;
+                row[5] = (int)start;
             }
         }
 

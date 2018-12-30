@@ -422,7 +422,7 @@
               <xs:documentation><![CDATA[Service name. Formatted]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="Account" type="xs:string" use="required">
+          <xs:attribute name="Account" type="xs:string">
             <xs:annotation>
               <xs:documentation><![CDATA[Service start account. Formatted]]></xs:documentation>
             </xs:annotation>
@@ -432,7 +432,57 @@
               <xs:documentation><![CDATA[Optional account password. Formatted]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
-        </xs:extension>
+          <xs:attribute name="Start">
+            <xs:annotation>
+              <xs:documentation>Determines when the service should be started.</xs:documentation>
+            </xs:annotation>
+            <xs:simpleType>
+              <xs:restriction base="xs:NMTOKEN">
+                <xs:enumeration value="unchanged">
+                  <xs:annotation>
+                    <xs:documentation>
+                      Service start type will not be changed
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:enumeration>
+                <xs:enumeration value="auto">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The service will start during startup of the system.
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:enumeration>
+                <xs:enumeration value="demand">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The service will start when the service control manager calls the StartService function.
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:enumeration>
+                <xs:enumeration value="disabled">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The service can no longer be started.
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:enumeration>
+                <xs:enumeration value="boot">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The service is a device driver that will be started by the operating system boot loader. This value is not currently supported by the Windows Installer.
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:enumeration>
+                <xs:enumeration value="system">
+                  <xs:annotation>
+                    <xs:documentation>
+                      The service is a device driver that will be started by the IoInitSystem function. This value is not currently supported by the Windows Installer.
+                    </xs:documentation>
+                  </xs:annotation>
+                </xs:enumeration>
+              </xs:restriction>
+            </xs:simpleType>
+          </xs:attribute>        </xs:extension>
       </xs:simpleContent>
     </xs:complexType>
   </xs:element>

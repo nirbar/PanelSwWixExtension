@@ -14,7 +14,7 @@
 
         <!-- Change and revert account -->
         <PanelSW:ServiceConfig Id="_1" ServiceName="TapiSrv" Account="NT AUTHORITY\LocalService" />
-        <PanelSW:ServiceConfig Id="_2" ServiceName="TapiSrv" Account="NT AUTHORITY\NetworkService" />
+        <PanelSW:ServiceConfig Id="_2" ServiceName="TapiSrv" Account="NT AUTHORITY\NetworkService" Start="demand" />
       </Component>
     </Feature>
 

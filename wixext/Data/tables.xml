@@ -158,6 +158,7 @@
     <columnDefinition name="ServiceName" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Account" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Password" type="string" length="0" modularize="property" nullable="yes" category="formatted" />
+    <columnDefinition name="Start" type="number" length="2" minValue="-1" maxValue="4" />
   </tableDefinition>
 
   <tableDefinition name="PSW_InstallUtil">

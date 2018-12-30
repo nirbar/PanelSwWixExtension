@@ -8,8 +8,8 @@
 using namespace com::panelsw::ca;
 using namespace google::protobuf;
 
-#define ServiceConfig_QUERY L"SELECT `Id`, `Component_`, `ServiceName`, `Account`, `Password` FROM `PSW_ServiceConfig`"
-enum ServiceConfigQuery { Id = 1, Component, ServiceName, Account, Password };
+#define ServiceConfig_QUERY L"SELECT `Id`, `Component_`, `ServiceName`, `Account`, `Password`, `Start` FROM `PSW_ServiceConfig`"
+enum ServiceConfigQuery { Id = 1, Component, ServiceName, Account, Password, Start};
 
 extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 {
@@ -47,6 +47,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 
 		// Get fields
 		CWixString szId, szComponent, szServiceName, szAccount, szPassword;
+		int start = -1;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
 
 		hr = WcaGetRecordString(hRecord, ServiceConfigQuery::Id, (LPWSTR*)szId);
@@ -59,6 +60,8 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to get Account.");
 		hr = WcaGetRecordFormattedString(hRecord, ServiceConfigQuery::Password, (LPWSTR*)szPassword);
 		BreakExitOnFailure(hr, "Failed to get Password.");
+		hr = WcaGetRecordInteger(hRecord, ServiceConfigQuery::Start, &start);
+		BreakExitOnFailure(hr, "Failed to get Start.");
 
 		// Test condition
 		compAction = WcaGetComponentToDo(szComponent);
@@ -68,7 +71,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 			continue;
 		}
 
-		hr = oDeferred.AddServiceConfig(szServiceName, szAccount, szPassword);
+		hr = oDeferred.AddServiceConfig(szServiceName, szAccount, szPassword, start);
 		ExitOnFailure(hr, "Failed creating CustomActionData");
 
 		// Get current service account.
@@ -86,7 +89,12 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 			dwRes = ::QueryServiceConfig(hService, pServiceCfg, dwSize, &dwSize);
 			ExitOnNullWithLastError(dwRes, hr, "Failed querying service '%ls' configuration", (LPCWSTR)szServiceName);
 
-			hr = oRollback.AddServiceConfig((LPCWSTR)szServiceName, pServiceCfg->lpServiceStartName, nullptr);
+			if (start == (ServciceConfigDetails::ServiceStart::ServciceConfigDetails_ServiceStart_unchanged))
+			{
+				pServiceCfg->dwStartType = SERVICE_NO_CHANGE;
+			}
+
+			hr = oRollback.AddServiceConfig((LPCWSTR)szServiceName, pServiceCfg->lpServiceStartName, nullptr, pServiceCfg->dwStartType);
 			ExitOnFailure(hr, "Failed creating rollback CustomActionData");
 
 			delete[]pServiceCfg;
@@ -129,7 +137,7 @@ LExit:
 	return WcaFinalize(dwRes);
 }
 
-HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szAccount, LPCWSTR szPassword)
+HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szAccount, LPCWSTR szPassword, int start)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
@@ -144,11 +152,15 @@ HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szAccoun
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
 	pDetails->set_name(szServiceName, WSTR_BYTE_SIZE(szServiceName));
-	pDetails->set_account(szAccount, WSTR_BYTE_SIZE(szAccount));
-	if (szPassword && *szPassword)
+	if (szServiceName && *szServiceName)
 	{
-		pDetails->set_password(szPassword, WSTR_BYTE_SIZE(szPassword));
+		pDetails->set_account(szAccount, WSTR_BYTE_SIZE(szAccount));
+		if (szPassword && *szPassword)
+		{
+			pDetails->set_password(szPassword, WSTR_BYTE_SIZE(szPassword));
+		}
 	}
+	pDetails->set_start((ServciceConfigDetails::ServiceStart)start);
 
 	pAny = pCmd->mutable_details();
 	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
@@ -177,10 +189,13 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ExecOnDetails");
 
 	szServiceName = (LPCWSTR)details.name().data();
-	szAccount = (LPCWSTR)details.account().data();
-	if (!details.password().empty())
+	if (!details.account().empty())
 	{
-		szPassword = (LPCWSTR)details.password().data();
+		szAccount = (LPCWSTR)details.account().data();
+		if (!details.password().empty())
+		{
+			szPassword = (LPCWSTR)details.password().data();
+		}
 	}
 
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Changing service '%ls' start account to '%ls'", szServiceName, szAccount);
@@ -193,7 +208,7 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 	ExitOnNullWithLastError(hService, hr, "Failed opening service '%ls'", szServiceName);
 
 	// Change user.
-	dwRes = ::ChangeServiceConfig(hService, SERVICE_NO_CHANGE, SERVICE_NO_CHANGE, SERVICE_NO_CHANGE, nullptr, nullptr, nullptr, nullptr, szAccount, szPassword, nullptr);
+	dwRes = ::ChangeServiceConfig(hService, SERVICE_NO_CHANGE, details.start(), SERVICE_NO_CHANGE, nullptr, nullptr, nullptr, nullptr, szAccount, szPassword, nullptr);
 	ExitOnNullWithLastError(dwRes, hr, "Failed changing service '%ls' login account to '%ls'", szServiceName, szAccount);
 
 LExit:

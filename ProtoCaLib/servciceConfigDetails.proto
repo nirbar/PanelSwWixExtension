@@ -4,7 +4,17 @@ option optimize_for = LITE_RUNTIME;
 
 message ServciceConfigDetails{
 
+	enum ServiceStart {
+		boot = 0;
+		unchanged = -1;
+		auto = 2;
+		demand = 3;
+		disabled = 4;
+		system = 1;
+	}
+
 	bytes name = 1;
 	bytes account = 2;
 	bytes password = 3;
+	ServiceStart start = 4;
 }
