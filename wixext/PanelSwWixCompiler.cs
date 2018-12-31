@@ -965,6 +965,22 @@ namespace PanelSw.Wix.Extensions
             Impersonate = 2 * ASync,
         }
 
+        private int GetLineNumber(SourceLineNumberCollection sourceLineNumbers)
+        {
+            int order = 0;
+            if ((sourceLineNumbers != null) && (sourceLineNumbers.Count > 0))
+            {
+                foreach (SourceLineNumber line in sourceLineNumbers)
+                {
+                    if (line.HasLineNumber)
+                    {
+                        order = line.LineNumber;
+                    }
+                }
+            }
+            return order;
+        }
+
         private void ParseExecOnComponentElement(XmlElement parentElement, XmlElement element)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
@@ -975,7 +991,7 @@ namespace PanelSw.Wix.Extensions
             string workDir = null;
             ExecOnComponentFlags flags = ExecOnComponentFlags.None;
             TopShelf_ErrorHandling errorHandling = TopShelf_ErrorHandling.fail;
-            int order = 0;
+            int order = GetLineNumber(sourceLineNumbers);
             YesNoType aye;
 
             component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
@@ -1012,7 +1028,7 @@ namespace PanelSw.Wix.Extensions
                         break;
 
                     case "Order":
-                        order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 127);
+                        order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, int.MaxValue);
                         break;
 
                     case "Impersonate":
@@ -1967,7 +1983,7 @@ namespace PanelSw.Wix.Extensions
             string id = "_" + Guid.NewGuid().ToString("N");
             string property = null;
             string expression = null;
-            int order = 0;
+            int order = GetLineNumber(sourceLineNumbers);
 
             if (node.ParentNode.LocalName != "Property")
             {
@@ -2608,7 +2624,7 @@ namespace PanelSw.Wix.Extensions
             string prop = null;
             int flags = 0;
             string condition = null;
-            byte order = 0xFF;
+            int order = GetLineNumber(sourceLineNumbers);
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -2730,7 +2746,7 @@ namespace PanelSw.Wix.Extensions
             FileEncoding encoding = FileEncoding.AutoDetect;
             bool ignoreCase = false;
             string condition = null;
-            byte order = 0xFF;
+            int order = GetLineNumber(sourceLineNumbers);
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
