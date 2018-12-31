@@ -283,15 +283,15 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(property))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(expression))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "JPath"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "JPath"));
             }
             if (string.IsNullOrEmpty(file))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "FilePath"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "FilePath"));
             }
 
             // find unexpected child elements
@@ -327,6 +327,7 @@ namespace PanelSw.Wix.Extensions
             {
                 file = parentElement.GetAttribute("Source");
                 file = Path.GetFileName(file);
+                file = CompilerCore.GetIdentifierFromName(file);
             }
 
             foreach (XmlAttribute attrib in node.Attributes)
@@ -352,15 +353,15 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(file))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(jpath))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "JPath"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "JPath"));
             }
             if (string.IsNullOrEmpty(value))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Value"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Value"));
             }
 
             // reference the Win32_CopyFiles custom actions since nothing will happen without these
@@ -450,7 +451,7 @@ namespace PanelSw.Wix.Extensions
             component = Core.GetAttributeValue(parentsourceLineNumbers, parentElement.Attributes["Id"]);
             if (string.IsNullOrEmpty(component))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(parentsourceLineNumbers, parentElement.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(parentsourceLineNumbers, parentElement.LocalName, "Id"));
             }
 
             foreach (XmlAttribute attrib in element.Attributes)
@@ -496,11 +497,11 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(x500))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "X500"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "X500"));
             }
 
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "CreateSelfSignCertificate");
@@ -537,7 +538,7 @@ namespace PanelSw.Wix.Extensions
             component = Core.GetAttributeValue(parentsourceLineNumbers, parentElement.Attributes["Id"]);
             if (string.IsNullOrEmpty(component))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(parentsourceLineNumbers, parentElement.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(parentsourceLineNumbers, parentElement.LocalName, "Id"));
             }
 
             foreach (XmlAttribute attrib in element.Attributes)
@@ -604,11 +605,11 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(filepath))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "Path"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "Path"));
             }
 
             // reference the Win32_CopyFiles custom actions since nothing will happen without these
@@ -643,6 +644,7 @@ namespace PanelSw.Wix.Extensions
             {
                 file = parentElement.GetAttribute("Source");
                 file = Path.GetFileName(file);
+                file = CompilerCore.GetIdentifierFromName(file);
             }
 
             foreach (XmlAttribute attrib in node.Attributes)
@@ -672,7 +674,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(file))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Id"));
             }
 
             // reference the Win32_CopyFiles custom actions since nothing will happen without these
@@ -720,12 +722,12 @@ namespace PanelSw.Wix.Extensions
 
                 if (string.IsNullOrEmpty(argId))
                 {
-                    Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, child.Name, "Id"));
+                    Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, child.LocalName, "Id"));
                     continue;
                 }
                 if (string.IsNullOrEmpty(value))
                 {
-                    Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, child.Name, "Value"));
+                    Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, child.LocalName, "Value"));
                     continue;
                 }
 
@@ -761,7 +763,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(file))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Id"));
             }
 
             if ((sourceLineNumbers != null) && (sourceLineNumbers.Count > 0))
@@ -820,6 +822,7 @@ namespace PanelSw.Wix.Extensions
             {
                 file = parentElement.GetAttribute("Source");
                 file = Path.GetFileName(file);
+                file = CompilerCore.GetIdentifierFromName(file);
             }
 
             foreach (XmlAttribute attrib in node.Attributes)
@@ -903,7 +906,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(file))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(userName) != (account != TopShelf_Account.custom))
             {
@@ -1143,23 +1146,23 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(component))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(command))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "Command"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "Command"));
             }
             if ((flags & ExecOnComponentFlags.AnyAction) == ExecOnComponentFlags.None)
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "OnXXX"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "OnXXX"));
             }
             if ((flags & ExecOnComponentFlags.AnyTiming) == ExecOnComponentFlags.None)
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "BeforeXXX or AfterXXX"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "BeforeXXX or AfterXXX"));
             }
 
             // ExitCode mapping
@@ -1340,19 +1343,19 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(component))
             {
-                Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, parentElement.Name, "Id", ""));
+                Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, parentElement.LocalName, "Id", parentElement.LocalName));
             }
             if (string.IsNullOrEmpty(service))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "ServiceName"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "ServiceName"));
             }
-            if (string.IsNullOrEmpty(account))
+            if (string.IsNullOrEmpty(account) && !string.IsNullOrEmpty(password))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "Account"));
+                Core.OnMessage(WixErrors.ExpectedAttributesWithOtherAttribute(sourceLineNumbers, element.LocalName, "Password", "Account"));
             }
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "Id"));
             }
 
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "PSW_ServiceConfig");
@@ -1419,15 +1422,15 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(component))
             {
-                Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, parentElement.Name, "Id", ""));
+                Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, parentElement.LocalName, "Id", ""));
             }
             if (string.IsNullOrEmpty(features) && string.IsNullOrEmpty(package))
             {
-                Core.OnMessage(WixErrors.ExpectedAttributes(sourceLineNumbers, element.Name, "EnableFeature", "PackagePath"));
+                Core.OnMessage(WixErrors.ExpectedAttributes(sourceLineNumbers, element.LocalName, "EnableFeature", "PackagePath"));
             }
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "Id"));
             }
 
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "DismSched");
@@ -1493,15 +1496,15 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(component))
             {
-                Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, parentElement.Name, "Id", ""));
+                Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, parentElement.LocalName, "Id", ""));
             }
             if (string.IsNullOrEmpty(taskXml))
             {
-                Core.OnMessage(WixErrors.ExpectedElement(sourceLineNumbers, element.Name, "Text or CDATA"));
+                Core.OnMessage(WixErrors.ExpectedElement(sourceLineNumbers, element.LocalName, "Text or CDATA"));
             }
             if (string.IsNullOrEmpty(taskName))
             {
-                Core.OnMessage(WixErrors.ExpectedElement(sourceLineNumbers, element.Name, "TaskName"));
+                Core.OnMessage(WixErrors.ExpectedElement(sourceLineNumbers, element.LocalName, "TaskName"));
             }
 
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "TaskScheduler");
@@ -1584,22 +1587,22 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Id"));
             }
 
             if (string.IsNullOrEmpty(name))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Name"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Name"));
             }
 
             if (string.IsNullOrEmpty(data))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Data"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Data"));
             }
 
             if (string.IsNullOrEmpty(datatype))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "DataType"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "DataType"));
             }
 
             if (attributes == CustomUninstallKeyAttributes.None)
@@ -1701,27 +1704,27 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Id"));
             }
 
             if (string.IsNullOrEmpty(DestProperty))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "DestProperty"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "DestProperty"));
             }
 
             if (string.IsNullOrEmpty(FilePath))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "FilePath"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "FilePath"));
             }
 
             if (string.IsNullOrEmpty(Key))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Key"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Key"));
             }
 
             if (string.IsNullOrEmpty(Section))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Section"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Section"));
             }
 
             // Attributes
@@ -1810,7 +1813,7 @@ namespace PanelSw.Wix.Extensions
                             }
                             catch
                             {
-                                Core.OnMessage(WixErrors.ValueNotSupported(sourceLineNumbers, node.Name, "Area", Core.GetAttributeValue(sourceLineNumbers, attrib)));
+                                Core.OnMessage(WixErrors.ValueNotSupported(sourceLineNumbers, node.LocalName, "Area", Core.GetAttributeValue(sourceLineNumbers, attrib)));
                             }
                             break;
 
@@ -1827,19 +1830,19 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(key))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Key"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Key"));
             }
             if (string.IsNullOrEmpty(root))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Root"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Root"));
             }
             if (string.IsNullOrEmpty(name))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Name"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Name"));
             }
 
             // find unexpected child elements
@@ -1924,17 +1927,17 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(property))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.LocalName, "Id"));
             }
 
             // Either CertName OR (Issuer AND Serial)
             if (string.IsNullOrEmpty(issuer) != string.IsNullOrEmpty(serial))
             {
-                Core.OnMessage(WixErrors.ExpectedAttributes(sourceLineNumbers, node.Name, "Issuer", "SerialNumber"));
+                Core.OnMessage(WixErrors.ExpectedAttributes(sourceLineNumbers, node.LocalName, "Issuer", "SerialNumber"));
             }
             if (string.IsNullOrEmpty(certName) == string.IsNullOrEmpty(issuer))
             {
-                Core.OnMessage(WixErrors.ExpectedAttributesWithoutOtherAttribute(sourceLineNumbers, node.Name, "Issuer", "SerialNumber", "CertName"));
+                Core.OnMessage(WixErrors.ExpectedAttributesWithoutOtherAttribute(sourceLineNumbers, node.LocalName, "Issuer", "SerialNumber", "CertName"));
             }
 
             // find unexpected child elements
@@ -1998,11 +2001,11 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(property))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(expression))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Expression"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Expression"));
             }
 
             // find unexpected child elements
@@ -2081,7 +2084,7 @@ namespace PanelSw.Wix.Extensions
                             }
                             catch
                             {
-                                Core.OnMessage(WixErrors.ValueNotSupported(sourceLineNumbers, node.Name, "Match", Core.GetAttributeValue(sourceLineNumbers, attrib)));
+                                Core.OnMessage(WixErrors.ValueNotSupported(sourceLineNumbers, node.LocalName, "Match", Core.GetAttributeValue(sourceLineNumbers, attrib)));
                             }
                             break;
 
@@ -2098,19 +2101,19 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(property))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(filePath))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "FilePath"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "FilePath"));
             }
             if (string.IsNullOrEmpty(xpath))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "XPath"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "XPath"));
             }
 
             // find unexpected child elements
@@ -2206,15 +2209,15 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(server))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "FilePath"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "FilePath"));
             }
             if (string.IsNullOrEmpty(query))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "XPath"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "XPath"));
             }
 
             // reference the Win32_CopyFiles custom actions since nothing will happen without these
@@ -2319,15 +2322,15 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(url))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Url"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Url"));
             }
             if (string.IsNullOrEmpty(method))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Method"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Method"));
             }
 
             // find unexpected child elements
@@ -2448,11 +2451,11 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(target))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Target"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Target"));
             }
 
             // find unexpected child elements
@@ -2534,12 +2537,12 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Id"));
             }
 
             if (string.IsNullOrEmpty(query))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Query"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Query"));
             }
 
             // find unexpected child elements
@@ -2652,23 +2655,23 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(input))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Input"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Input"));
             }
             if (string.IsNullOrEmpty(regex))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Expression"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Expression"));
             }
             if (string.IsNullOrEmpty(prop))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "DstProperty"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "DstProperty"));
             }
             if (string.IsNullOrEmpty(input))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Input"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Input"));
             }
 
             // find unexpected child elements
@@ -2771,15 +2774,15 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(filepath))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "FilePath"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "FilePath"));
             }
             if (string.IsNullOrEmpty(regex))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Regex"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Regex"));
             }
 
             // find unexpected child elements
@@ -2873,11 +2876,11 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(filepath))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Path"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Path"));
             }
 
             // find unexpected child elements
@@ -2959,15 +2962,15 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(dstZipFile))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "TargetZipFile"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "TargetZipFile"));
             }
             if (string.IsNullOrEmpty(srcDir))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "SourceFolder"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "SourceFolder"));
             }
 
             // find unexpected child elements
@@ -3058,15 +3061,15 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(zipFile))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "ZipFile"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "ZipFile"));
             }
             if (string.IsNullOrEmpty(dstDir))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.Name, "TargetFolder"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "TargetFolder"));
             }
 
             // find unexpected child elements
