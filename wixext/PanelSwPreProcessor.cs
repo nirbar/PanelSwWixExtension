@@ -141,7 +141,7 @@ namespace PanelSw.Wix.Extensions
                             hasVar = true;
                         }
                         // If '-o' is specified, keep the ouput file.
-                        if ((a.Equals("-o", StringComparison.OrdinalIgnoreCase) || a.Equals("/o", StringComparison.OrdinalIgnoreCase) || a.Equals("-out", StringComparison.OrdinalIgnoreCase) || a.Equals("/out", StringComparison.OrdinalIgnoreCase)) && (i < (heatArgs.Length - 1)))
+                        if (!keepOutput && (a.Equals("-o", StringComparison.OrdinalIgnoreCase) || a.Equals("/o", StringComparison.OrdinalIgnoreCase) || a.Equals("-out", StringComparison.OrdinalIgnoreCase) || a.Equals("/out", StringComparison.OrdinalIgnoreCase)) && (i < (heatArgs.Length - 1)))
                         {
                             keepOutput = true;
                             outPath = heatArgs[i + 1];
