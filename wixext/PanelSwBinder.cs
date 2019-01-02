@@ -69,6 +69,8 @@ namespace PanelSw.Wix.Extensions
             int fileVersionCol = ColumnByName(fileT, "Version");
             int fileLanguageCol = ColumnByName(fileT, "Language");
 
+            Table hashT = output.Tables["MsiFileHash"];
+
             foreach (Row overR in overwriteT.Rows)
             {
                 string srcLineStr = overR[1]?.ToString();
@@ -89,7 +91,6 @@ namespace PanelSw.Wix.Extensions
                 fileR[fileVersionCol] = "65535.65535.65535.65535";
 
                 // Remove file from MsiFileHash table, ICE60
-                Table hashT = output.Tables["MsiFileHash"];
                 if (hashT != null)
                 {
                     int hashKeyCol = ColumnByName(hashT, "File_");
@@ -106,6 +107,11 @@ namespace PanelSw.Wix.Extensions
                 {
                     fileR[fileLanguageCol] = "0";
                 }
+            }
+
+            if ((hashT != null) && (hashT.Rows.Count == 0))
+            {
+                output.Tables.Remove(hashT.Name);
             }
         }
     }
