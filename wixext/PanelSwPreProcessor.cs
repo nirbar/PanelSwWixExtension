@@ -111,6 +111,7 @@ namespace PanelSw.Wix.Extensions
         private void ProcessHeat(SourceLineNumberCollection sourceLineNumbers, string pragma, string args, XmlWriter writer)
         {
             string outPath = null;
+            bool keepOutput = false;
             try
             {
                 Assembly caller = Assembly.GetAssembly(typeof(PreprocessorExtension));
@@ -128,8 +129,44 @@ namespace PanelSw.Wix.Extensions
                 Core.OnMessage(new WixGenericMessageEventArgs(sourceLineNumbers, 0, MessageLevel.Information, $"Executing heat command: \"{heatPath}\" {args}"));
 
                 // Set temp output file
-                outPath = Path.GetTempFileName();
-                args += $" -o \"{outPath}\"";
+                string[] heatArgs = CommandLineToArgs(args);
+                bool hasVar = false;
+                if ((heatArgs != null) && (heatArgs.Length >= 2))
+                {
+                    for (int i = heatArgs.Length - 1; i >= 0; --i)
+                    {
+                        string a = heatArgs[i];
+                        // If '-var' is specified, no need to set target path
+                        if (a.Equals("-var", StringComparison.OrdinalIgnoreCase) || a.Equals("/var", StringComparison.OrdinalIgnoreCase))
+                        {
+                            hasVar = true;
+                        }
+                        // If '-o' is specified, keep the ouput file.
+                        if ((a.Equals("-o", StringComparison.OrdinalIgnoreCase) || a.Equals("/o", StringComparison.OrdinalIgnoreCase)) && (i < (heatArgs.Length - 1)))
+                        {
+                            keepOutput = true;
+                            outPath = heatArgs[i + 1];
+                        }
+                    }
+                }
+
+                // Attempt to figure out the harvest target.
+                string heatTargetPath = null;
+                if (!hasVar && pragma.Equals("dir", StringComparison.OrdinalIgnoreCase) && Directory.Exists(heatArgs[0]))
+                {
+                    heatTargetPath = heatArgs[0];
+                    if (heatTargetPath.LastIndexOfAny(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }) != heatTargetPath.Length - 1)
+                    {
+                        heatTargetPath += Path.DirectorySeparatorChar;
+                    }
+                    Core.OnMessage(new WixGenericMessageEventArgs(sourceLineNumbers, 0, MessageLevel.Information, $"Will replace File/@Source and Payload/@SourceFile 'SourceDir\\' with '{heatTargetPath}'"));
+                }
+
+                if (!keepOutput)
+                {
+                    outPath = Path.GetTempFileName();
+                    args += $" -o \"{outPath}\"";
+                }
 
                 ProcessStartInfo heatPI = new ProcessStartInfo(heatPath, $"{pragma} {args}");
                 heatPI.UseShellExecute = false;
@@ -157,33 +194,6 @@ namespace PanelSw.Wix.Extensions
                     return;
                 }
 
-                // Attempt to figure out the harvest target.
-                string[] heatArgs = CommandLineToArgs(heatPI.Arguments);
-                string heatTargetPath = null;
-                if ((heatArgs != null) && (heatArgs.Length >= 2) && pragma.Equals("dir", StringComparison.OrdinalIgnoreCase) && Directory.Exists(heatArgs[1]))
-                {
-                    // If '-var' is specified, no need to set target path
-                    bool hasVar = false;
-                    foreach (string a in heatArgs)
-                    {
-                        if (a.Equals("-var", StringComparison.OrdinalIgnoreCase) || a.Equals("/var", StringComparison.OrdinalIgnoreCase))
-                        {
-                            hasVar = true;
-                            break;
-                        }
-                    }
-
-                    if (!hasVar)
-                    {
-                        heatTargetPath = heatArgs[1];
-                        if (heatTargetPath.LastIndexOfAny(new char[] { Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar }) != heatTargetPath.Length - 1)
-                        {
-                            heatTargetPath += Path.DirectorySeparatorChar;
-                        }
-                        Core.OnMessage(new WixGenericMessageEventArgs(sourceLineNumbers, 0, MessageLevel.Information, $"Will replace File/@Source and Payload/@SourceFile 'SourceDir\\' with '{heatTargetPath}'"));
-                    }
-                }
-
                 // Copy heat-document with line number indications.
                 XmlDocument doc = new XmlDocument();
                 doc.Load(outPath);
@@ -198,7 +208,7 @@ namespace PanelSw.Wix.Extensions
             }
             finally
             {
-                if (!string.IsNullOrEmpty(outPath) && File.Exists(outPath))
+                if (!keepOutput && !string.IsNullOrEmpty(outPath) && File.Exists(outPath))
                 {
                     File.Delete(outPath);
                 }

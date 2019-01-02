@@ -43,6 +43,7 @@
   <!-- ==== Harvest using heat command
   - Heat target must be available during preprocessing. Use absolute or relative paths, environment variabels, or preprocessor variables.
   - If '-var' argument is omitted, 'SourceDir\' prefix to File/@Source attributes will be replaced with the heat target dir.
+  - If '-o' argument is omitted, a temporary file will be used and immediately deleted.
   -->
-  <?pragma heat.dir .. -cg MyComponents -ag -dr INSTALLFOLDER -srd -suid -sfrag -t Test.xslt?>
+  <?pragma heat.dir .. -cg MyComponents -ag -dr INSTALLFOLDER -srd -suid -sfrag -t Test.xslt -o $(var.IntDir)Heated.xml ?>
 </Wix>
