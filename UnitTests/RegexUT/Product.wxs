@@ -26,27 +26,23 @@
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
 
     <Property Id="MY_INPUT" Value="Test Text" />
-    <PanelSW:RegularExpression Id="_1"
-                               Input="My Input is [MY_INPUT]"
+    <PanelSW:RegularExpression Input="My Input is [MY_INPUT]"
                                DstProperty="REGEX_MATCH"
                                Expression="is (.*)"
                                />
-    <PanelSW:RegularExpression Id="_2"
-                               Input="My Input is [MY_INPUT]"
+    <PanelSW:RegularExpression Input="My Input is [MY_INPUT]"
                                DstProperty="REGEX_REPLACE"
                                Replacement="IS YOUR INPUT"
                                IgnoreCase="yes"
                                Expression="\bIS\b\s+(.*)" Order="0"
                                />
-    <PanelSW:RegularExpression Id="_3"
-                               Input="My Input is [MY_INPUT]"
+    <PanelSW:RegularExpression Input="My Input is [MY_INPUT]"
                                DstProperty="REGEX_REPLACE_3"
                                Replacement="IS YOUR INPUT"
                                IgnoreCase="yes"
                                Expression="\bS\b\s+(.*)"
                                />
-    <PanelSW:RegularExpression Id="_4"
-                               Input="[REGEX_REPLACE]"
+    <PanelSW:RegularExpression Input="[REGEX_REPLACE]"
                                DstProperty="REGEX_REPLACE"
                                Replacement="OUR"
                                Expression="YOUR" Order="1"
@@ -60,15 +56,15 @@
       <Custom Action="TextRegexReplace2" After="TextRegexMatch"><![CDATA[REGEX_REPLACE_3<>"My Input is Test Text"]]></Custom>
     </InstallUISequence>
 
-    <PanelSW:FileRegex Id="_1" FilePath="[#Product.wxs]" Regex="\bRegularExpressio(\w)\b" Replacement="$1_RegularExpressio" IgnoreCase="no"><![CDATA[Not Installed]]></PanelSW:FileRegex>
-    <PanelSW:FileRegex Id="_2" FilePath="[#Product.wxs]" Regex="&lt;!-(-.*-)-&gt;" Replacement="- Hi $1 -" IgnoreCase="no"><![CDATA[Not Installed]]></PanelSW:FileRegex>
+    <PanelSW:FileRegex FilePath="[#Product.wxs]" Regex="\bRegularExpressio(\w)\b" Replacement="$1_RegularExpressio" IgnoreCase="no"><![CDATA[Not Installed]]></PanelSW:FileRegex>
+    <PanelSW:FileRegex FilePath="[#Product.wxs]" Regex="&lt;!-(-.*-)-&gt;" Replacement="- Hi $1 -" IgnoreCase="no"><![CDATA[Not Installed]]></PanelSW:FileRegex>
 
     <Property Id="MB460" Value="MB460=" Hidden="yes"/>
     <Property Id="BSMALL" Value="bSmall" Hidden="yes"/>
     <Property Id="NEWMAPPINGFILE" Value="NewMappingFile=" />
     
-    <PanelSW:FileRegex Id="_3" FilePath="[#Unicode.ini]" Regex="\[BSMALL]=" Replacement="[MB460]" Encoding="AutoDetect"><![CDATA[Not Installed]]></PanelSW:FileRegex>
-    <PanelSW:FileRegex Id="_4" FilePath="[#Unicode.ini]" Regex="\bCurrentMappingFile=" Replacement="[NEWMAPPINGFILE]" Encoding="Unicode"><![CDATA[Not Installed]]></PanelSW:FileRegex>
+    <PanelSW:FileRegex FilePath="[#Unicode.ini]" Regex="\[BSMALL]=" Replacement="[MB460]" Encoding="AutoDetect"><![CDATA[Not Installed]]></PanelSW:FileRegex>
+    <PanelSW:FileRegex FilePath="[#Unicode.ini]" Regex="\bCurrentMappingFile=" Replacement="[NEWMAPPINGFILE]" Encoding="Unicode"><![CDATA[Not Installed]]></PanelSW:FileRegex>
 
   </Product>
 </Wix>

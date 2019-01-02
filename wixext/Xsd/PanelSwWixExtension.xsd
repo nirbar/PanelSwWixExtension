@@ -178,7 +178,7 @@
     </xs:annotation>
 
     <xs:complexType>
-      <xs:attribute name="Id" use="required" type="xs:string">
+      <xs:attribute name="Id" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Property name in which the path of the newly created PFX file will be saved.]]></xs:documentation>
         </xs:annotation>
@@ -282,7 +282,7 @@
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string" use="required">
+          <xs:attribute name="Id" type="xs:string">
             <xs:annotation>
               <xs:documentation>Identifier for the value (primary key).</xs:documentation>
             </xs:annotation>
@@ -389,7 +389,7 @@
       </xs:documentation>
     </xs:annotation>
     <xs:complexType>
-      <xs:attribute name="Id" use="required">
+      <xs:attribute name="Id">
         <xs:annotation>
           <xs:documentation><![CDATA[Primary key for the argument.]]></xs:documentation>
         </xs:annotation>
@@ -412,7 +412,7 @@
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string" use="required">
+          <xs:attribute name="Id" type="xs:string">
             <xs:annotation>
               <xs:documentation>Identifier for the value (primary key).</xs:documentation>
             </xs:annotation>
@@ -499,7 +499,7 @@
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string" use="required">
+          <xs:attribute name="Id" type="xs:string">
             <xs:annotation>
               <xs:documentation>Identifier for the value (primary key).</xs:documentation>
             </xs:annotation>
@@ -541,7 +541,7 @@
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string" use="required">
+          <xs:attribute name="Id" type="xs:string">
             <xs:annotation>
               <xs:documentation>Identifier for the value (primary key).</xs:documentation>
             </xs:annotation>
@@ -576,7 +576,7 @@
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string" use="required">
+          <xs:attribute name="Id" type="xs:string">
             <xs:annotation>
               <xs:documentation>Identifier for the value (primary key).</xs:documentation>
             </xs:annotation>
@@ -613,7 +613,7 @@
         <xs:element ref="ExitCode" />
         <xs:element ref="Environment" />
       </xs:choice>
-      <xs:attribute name="Id" type="xs:string" use="required">
+      <xs:attribute name="Id" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Primary key.]]></xs:documentation>
         </xs:annotation>
@@ -817,7 +817,7 @@ Delete folder or file specified by a path.
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string" use="required">
+          <xs:attribute name="Id" type="xs:string">
             <xs:annotation>
               <xs:documentation>Identifier for the value (primary key).</xs:documentation>
             </xs:annotation>
@@ -867,7 +867,7 @@ Execute a Regular Expression to perform find & replace operations within files.
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string" use="required">
+          <xs:attribute name="Id" type="xs:string">
             <xs:annotation>
               <xs:documentation>Identifier for the value (primary key).</xs:documentation>
             </xs:annotation>
@@ -932,7 +932,7 @@ Execute a Regular Expression to replace or find matches in property values.
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string" use="required">
+          <xs:attribute name="Id" type="xs:string">
             <xs:annotation>
               <xs:documentation>Identifier for the value (primary key).</xs:documentation>
             </xs:annotation>
@@ -1002,7 +1002,7 @@ Execute a MSI-SQL query on the MSI database.
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string" use="required">
+          <xs:attribute name="Id" type="xs:string">
             <xs:annotation>
               <xs:documentation>Identifier for the value (primary key).</xs:documentation>
             </xs:annotation>
@@ -1034,7 +1034,7 @@ Call ShellExecuteEx with parameters
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string" use="required">
+          <xs:attribute name="Id" type="xs:string">
             <xs:annotation>
               <xs:documentation>Identifier for the value (primary key).</xs:documentation>
             </xs:annotation>
@@ -1115,7 +1115,7 @@ Send telemetry data to a given URL
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string" use="required">
+          <xs:attribute name="Id" type="xs:string">
             <xs:annotation>
               <xs:documentation>Identifier for the value (primary key).</xs:documentation>
             </xs:annotation>
@@ -1209,7 +1209,7 @@ Overwrite or create registry values in Software\Microsoft\Windows\CurrentVersion
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string" use="required">
+          <xs:attribute name="Id" type="xs:string">
             <xs:annotation>
               <xs:documentation>Identifier for the value (primary key).</xs:documentation>
             </xs:annotation>
@@ -1264,7 +1264,7 @@ Read values from a .INI file
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string" use="required">
+          <xs:attribute name="Id" type="xs:string">
             <xs:annotation>
               <xs:documentation>Identifier for the value (primary key).</xs:documentation>
             </xs:annotation>
@@ -1322,7 +1322,7 @@ Read values from a XML file
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string" use="required">
+          <xs:attribute name="Id" type="xs:string">
             <xs:annotation>
               <xs:documentation>Identifier for the value (primary key).</xs:documentation>
             </xs:annotation>
@@ -1415,7 +1415,7 @@ Remove registry values.
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string" use="required">
+          <xs:attribute name="Id" type="xs:string">
             <xs:annotation>
               <xs:documentation>Identifier for the value (primary key).</xs:documentation>
             </xs:annotation>

@@ -497,7 +497,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Id"));
+                id = "pfx" + Guid.NewGuid().ToString("N");
             }
             if (string.IsNullOrEmpty(x500))
             {
@@ -605,7 +605,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Id"));
+                id = "bnr" + Guid.NewGuid().ToString("N");
             }
             if (string.IsNullOrEmpty(filepath))
             {
@@ -1166,7 +1166,7 @@ namespace PanelSw.Wix.Extensions
             }
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "Id"));
+                id = "exc" + Guid.NewGuid().ToString("N");
             }
             if (string.IsNullOrEmpty(command))
             {
@@ -1371,7 +1371,7 @@ namespace PanelSw.Wix.Extensions
             }
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "Id"));
+                id = "svc" + Guid.NewGuid().ToString("N");
             }
 
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "PSW_ServiceConfig");
@@ -1446,7 +1446,7 @@ namespace PanelSw.Wix.Extensions
             }
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "Id"));
+                id = "dsm" + Guid.NewGuid().ToString("N");
             }
 
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "DismSched");
@@ -1603,7 +1603,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Id"));
+                id = "uni" + Guid.NewGuid().ToString("N");
             }
 
             if (string.IsNullOrEmpty(name))
@@ -1720,7 +1720,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Id"));
+                id = "ini" + Guid.NewGuid().ToString("N");
             }
 
             if (string.IsNullOrEmpty(DestProperty))
@@ -1846,7 +1846,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Id"));
+                id = "reg" + Guid.NewGuid().ToString("N");
             }
             if (string.IsNullOrEmpty(key))
             {
@@ -2121,7 +2121,7 @@ namespace PanelSw.Wix.Extensions
             }
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Id"));
+                id = "xms" + Guid.NewGuid().ToString("N");
             }
             if (string.IsNullOrEmpty(filePath))
             {
@@ -2225,7 +2225,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.LocalName, "Id"));
+                id = "sql" + Guid.NewGuid().ToString("N");
             }
             if (string.IsNullOrEmpty(server))
             {
@@ -2338,7 +2338,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.LocalName, "Id"));
+                id = "tlm" + Guid.NewGuid().ToString("N");
             }
             if (string.IsNullOrEmpty(url))
             {
@@ -2467,7 +2467,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.LocalName, "Id"));
+                id = "shl" + Guid.NewGuid().ToString("N");
             }
             if (string.IsNullOrEmpty(target))
             {
@@ -2553,7 +2553,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Id"));
+                id = "msq" + Guid.NewGuid().ToString("N");
             }
 
             if (string.IsNullOrEmpty(query))
@@ -2671,7 +2671,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Id"));
+                id = "rgx" + Guid.NewGuid().ToString("N");
             }
             if (string.IsNullOrEmpty(input))
             {
@@ -2790,7 +2790,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Id"));
+                id = "frx" + Guid.NewGuid().ToString("N");
             }
             if (string.IsNullOrEmpty(filepath))
             {
@@ -2892,7 +2892,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Id"));
+                id = "dlt" + Guid.NewGuid().ToString("N");
             }
             if (string.IsNullOrEmpty(filepath))
             {
@@ -2978,7 +2978,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Id"));
+                id = "zip" + Guid.NewGuid().ToString("N");
             }
             if (string.IsNullOrEmpty(dstZipFile))
             {
@@ -3077,7 +3077,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Id"));
+                id = "uzp" + Guid.NewGuid().ToString("N");
             }
             if (string.IsNullOrEmpty(zipFile))
             {
