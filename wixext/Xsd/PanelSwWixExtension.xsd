@@ -124,7 +124,7 @@
       </xs:attribute>
       <xs:attribute name="Order" use="optional" type="xs:int" default="0">
         <xs:annotation>
-          <xs:documentation><![CDATA[Order of execution, defaults to 0.]]></xs:documentation>
+          <xs:documentation><![CDATA[Order of execution, defaults to line number. Expressions with explicit order field will be executed before expressions with implicit order]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
     </xs:complexType>
@@ -713,7 +713,7 @@
 
       <xs:attribute name="Order" type="xs:integer">
         <xs:annotation>
-          <xs:documentation><![CDATA[Order of command execution. When absent, execution order is indeterminate. Note, that ordering applies to commands executed on the same event and context.]]></xs:documentation>
+          <xs:documentation><![CDATA[Order of command execution, defaults to line number. Commands with explicit order field will be executed before commands with implicit order]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
     </xs:complexType>
@@ -899,7 +899,7 @@ Execute a Regular Expression to perform find & replace operations within files.
           </xs:attribute>
           <xs:attribute name="Order" type="xs:integer" default="255">
             <xs:annotation>
-              <xs:documentation><![CDATA[Order of regex execution, in range 0-255. Default is 255. Execution order is indeterminate accross expressions with the same order number.]]></xs:documentation>
+              <xs:documentation><![CDATA[Order of regex execution, defaults to line number. Expressions with explicit order field will be executed before expressions with implicit order.]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>
@@ -969,7 +969,7 @@ Execute a Regular Expression to replace or find matches in property values.
           </xs:attribute>
           <xs:attribute name="Order" type="xs:integer" default="255">
             <xs:annotation>
-              <xs:documentation><![CDATA[Order of regex execution, in range 0-255. Default is 255. Execution order is indeterminate accross expressions with the same order number.]]></xs:documentation>
+              <xs:documentation><![CDATA[Order of regex execution, defaults to line number. Expressions with explicit order field will be executed before expressions with implicit order.]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>

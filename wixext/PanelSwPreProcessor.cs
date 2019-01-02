@@ -128,7 +128,6 @@ namespace PanelSw.Wix.Extensions
                 args = Core.PreprocessString(sourceLineNumbers, args);
                 Core.OnMessage(new WixGenericMessageEventArgs(sourceLineNumbers, 0, MessageLevel.Information, $"Executing heat command: \"{heatPath}\" {args}"));
 
-                // Set temp output file
                 string[] heatArgs = CommandLineToArgs(args);
                 bool hasVar = false;
                 if ((heatArgs != null) && (heatArgs.Length >= 2))
@@ -142,7 +141,7 @@ namespace PanelSw.Wix.Extensions
                             hasVar = true;
                         }
                         // If '-o' is specified, keep the ouput file.
-                        if ((a.Equals("-o", StringComparison.OrdinalIgnoreCase) || a.Equals("/o", StringComparison.OrdinalIgnoreCase)) && (i < (heatArgs.Length - 1)))
+                        if ((a.Equals("-o", StringComparison.OrdinalIgnoreCase) || a.Equals("/o", StringComparison.OrdinalIgnoreCase) || a.Equals("-out", StringComparison.OrdinalIgnoreCase) || a.Equals("/out", StringComparison.OrdinalIgnoreCase)) && (i < (heatArgs.Length - 1)))
                         {
                             keepOutput = true;
                             outPath = heatArgs[i + 1];
@@ -162,6 +161,7 @@ namespace PanelSw.Wix.Extensions
                     Core.OnMessage(new WixGenericMessageEventArgs(sourceLineNumbers, 0, MessageLevel.Information, $"Will replace File/@Source and Payload/@SourceFile 'SourceDir\\' with '{heatTargetPath}'"));
                 }
 
+                // Use temp output file
                 if (!keepOutput)
                 {
                     outPath = Path.GetTempFileName();

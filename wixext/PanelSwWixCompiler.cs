@@ -991,7 +991,7 @@ namespace PanelSw.Wix.Extensions
             string workDir = null;
             ExecOnComponentFlags flags = ExecOnComponentFlags.None;
             TopShelf_ErrorHandling errorHandling = TopShelf_ErrorHandling.fail;
-            int order = GetLineNumber(sourceLineNumbers);
+            int order = 1000000000 + GetLineNumber(sourceLineNumbers);
             YesNoType aye;
 
             component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
@@ -1028,7 +1028,7 @@ namespace PanelSw.Wix.Extensions
                         break;
 
                     case "Order":
-                        order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, int.MaxValue);
+                        order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
                         break;
 
                     case "Impersonate":
@@ -1983,7 +1983,7 @@ namespace PanelSw.Wix.Extensions
             string id = "_" + Guid.NewGuid().ToString("N");
             string property = null;
             string expression = null;
-            int order = GetLineNumber(sourceLineNumbers);
+            int order = 1000000000 + GetLineNumber(sourceLineNumbers);
 
             if (node.ParentNode.LocalName != "Property")
             {
@@ -2001,7 +2001,7 @@ namespace PanelSw.Wix.Extensions
                             expression = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Order":
-                            order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 255);
+                            order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
                             break;
 
                         default:
@@ -2624,7 +2624,7 @@ namespace PanelSw.Wix.Extensions
             string prop = null;
             int flags = 0;
             string condition = null;
-            int order = GetLineNumber(sourceLineNumbers);
+            int order = 1000000000 + GetLineNumber(sourceLineNumbers);
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -2655,7 +2655,7 @@ namespace PanelSw.Wix.Extensions
                             flags |= (int)RegexMatchFlags.Extended << 2;
                             break;
                         case "order":
-                            order = (byte)Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 0xFF);
+                            order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
                             break;
 
                         default:
@@ -2724,7 +2724,7 @@ namespace PanelSw.Wix.Extensions
                 row[4] = prop;
                 row[5] = flags;
                 row[6] = condition;
-                row[7] = (int)order;
+                row[7] = order;
             }
         }
 
@@ -2746,7 +2746,7 @@ namespace PanelSw.Wix.Extensions
             FileEncoding encoding = FileEncoding.AutoDetect;
             bool ignoreCase = false;
             string condition = null;
-            int order = GetLineNumber(sourceLineNumbers);
+            int order = 1000000000 + GetLineNumber(sourceLineNumbers);
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -2774,7 +2774,7 @@ namespace PanelSw.Wix.Extensions
                             encoding = (FileEncoding)Enum.Parse(typeof(FileEncoding), enc);
                             break;
                         case "order":
-                            order = (byte)Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 0xFF);
+                            order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
                             break;
 
                         default:
@@ -2835,7 +2835,7 @@ namespace PanelSw.Wix.Extensions
                 row[4] = ignoreCase ? 1 : 0;
                 row[5] = (int)encoding;
                 row[6] = condition;
-                row[7] = (int)order;
+                row[7] = order;
             }
         }
 

@@ -49,7 +49,7 @@
     <columnDefinition name="DstProperty_" type="string" length="0" modularize="property" category="text" />
     <columnDefinition name="Flags" type="number" length="2" nullable="yes" minValue="0" maxValue="127" />
     <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
-    <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="268435455" />
+    <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
   </tableDefinition>
 
   <tableDefinition name="PSW_FileRegex">
@@ -60,7 +60,7 @@
     <columnDefinition name="IgnoreCase" type="number" length="2" nullable="yes" minValue="0" maxValue="127" />
     <columnDefinition name="Encoding" type="number" length="2" nullable="no" minValue="0" maxValue="127" />
     <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
-    <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="268435455" />
+    <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
   </tableDefinition>
 
   <tableDefinition name="PSW_Telemetry">
@@ -112,7 +112,7 @@
     <columnDefinition name="WorkingDirectory" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
     <columnDefinition name="Flags" type="number" length="4" minValue="0" maxValue="65535" />
     <columnDefinition name="ErrorHandling" type="number" minValue="0" maxValue="2" length="2" />
-    <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="268435455" />
+    <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
   </tableDefinition>
 
   <tableDefinition name="PSW_ExecOnComponent_ExitCode">
@@ -227,7 +227,7 @@
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
     <columnDefinition name="Property_" type="string" length="0" modularize="column" category="identifier" />
     <columnDefinition name="Expression" type="string" length="72" modularize="property" category="formatted" />
-    <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="268435455" />
+    <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
   </tableDefinition>
 
   <tableDefinition name="PSW_CertificateHashSearch">
