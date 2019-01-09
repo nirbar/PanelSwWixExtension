@@ -983,6 +983,7 @@ Execute a Regular Expression to replace or find matches in property values.
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[
@@ -1010,6 +1011,11 @@ Execute a MSI-SQL query on the MSI database.
           <xs:attribute name="Query" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation>Query to execute against the MSI database.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Condition" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Condition on executing the query. May be specified in this attribute or as inner text.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>

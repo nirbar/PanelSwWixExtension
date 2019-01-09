@@ -87,6 +87,7 @@
 
   <tableDefinition name="PSW_MsiSqlQuery">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="Property_" type="string" length="0" modularize="property" nullable="yes" category="identifier" />
     <columnDefinition name="Query" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
   </tableDefinition>

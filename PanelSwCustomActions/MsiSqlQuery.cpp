@@ -1,9 +1,6 @@
 #include "stdafx.h"
 #include "../CaCommon/WixString.h"
 
-#define MsiSqlQueryQuery L"SELECT `Id`, `Query`, `Condition` FROM `PSW_MsiSqlQuery`"
-enum eMsiSqlQueryQuery { Id = 1, Query, Condition };
-
 extern "C" UINT __stdcall MsiSqlQuery(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
@@ -20,7 +17,7 @@ extern "C" UINT __stdcall MsiSqlQuery(MSIHANDLE hInstall)
 	BreakExitOnFailure(hr, "Table does not exist 'PSW_MsiSqlQuery'. Have you authored 'PanelSw:MsiSqlQuery' entries in WiX code?");
 
 	// Execute view
-	hr = WcaOpenExecuteView(MsiSqlQueryQuery, &hView);
+	hr = WcaOpenExecuteView(L"SELECT `Id`, `Property_`, `Query`, `Condition` FROM `PSW_MsiSqlQuery`", &hView);
 	BreakExitOnFailure(hr, "Failed to execute SQL query on 'PSW_MsiSqlQuery'.");
 
 	// Iterate records
@@ -29,14 +26,16 @@ extern "C" UINT __stdcall MsiSqlQuery(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		CWixString sId, sQuery, sCondition;
+		CWixString sId, dstProperty, sQuery, sCondition;
 		PMSIHANDLE hQueryView;
 
-		hr = WcaGetRecordString(hRecord, eMsiSqlQueryQuery::Id, (LPWSTR*)sId);
+		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)sId);
 		BreakExitOnFailure(hr, "Failed to get Id.");
-		hr = WcaGetRecordFormattedString(hRecord, eMsiSqlQueryQuery::Query, (LPWSTR*)sQuery);
+		hr = WcaGetRecordString(hRecord, 2, (LPWSTR*)dstProperty);
+		BreakExitOnFailure(hr, "Failed to get Property_.");
+		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)sQuery);
 		BreakExitOnFailure(hr, "Failed to get Query.");
-		hr = WcaGetRecordString(hRecord, eMsiSqlQueryQuery::Condition, (LPWSTR*)sCondition);
+		hr = WcaGetRecordString(hRecord, 4, (LPWSTR*)sCondition);
 		BreakExitOnFailure(hr, "Failed to get Condition.");
 
 		// Test condition
@@ -64,6 +63,22 @@ extern "C" UINT __stdcall MsiSqlQuery(MSIHANDLE hInstall)
 
 		hr = WcaOpenExecuteView((LPCWSTR)sQuery, &hQueryView);
 		BreakExitOnFailure(hr, "Failed executing MSI SQL query %ls", (LPCWSTR)sId);
+
+		// Store result to a property?
+		if (!dstProperty.IsNullOrEmpty())
+		{
+			PMSIHANDLE hQueryRec;
+			CWixString value;
+			
+			hr = WcaFetchRecord(hQueryView, &hQueryRec);
+			BreakExitOnFailure(hr, "Failed fetching query result");
+
+			hr = WcaGetRecordString(hQueryRec, 1, (LPWSTR*)value);
+			BreakExitOnFailure(hr, "Failed to get query result.");
+
+			hr = WcaSetProperty(dstProperty, value);
+			BreakExitOnFailure(hr, "Failed to set query result to property.");
+		}
 	}
 
 	hr = ERROR_SUCCESS;

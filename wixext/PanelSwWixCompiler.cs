@@ -104,7 +104,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         case "MsiSqlQuery":
-                            ParseMsiSqlQuery(element);
+                            ParseMsiSqlQuery(element, parentElement);
                             break;
 
                         case "RegularExpression":
@@ -171,6 +171,10 @@ namespace PanelSw.Wix.Extensions
 
                         case "JsonJpathSearch":
                             ParseJsonJpathSearchElement(element);
+                            break;
+
+                        case "MsiSqlQuery":
+                            ParseMsiSqlQuery(element, parentElement);
                             break;
 
                         default:
@@ -2520,24 +2524,28 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseMsiSqlQuery(XmlNode node)
+        private void ParseMsiSqlQuery(XmlNode node, XmlNode parent)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
             string id = null;
             string query = null;
             string condition = null;
+            string property = null;
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
                 if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
                 {
-                    switch (attrib.LocalName.ToLower())
+                    switch (attrib.LocalName)
                     {
-                        case "id":
+                        case "Id":
                             id = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "query":
+                        case "Query":
                             query = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Condition":
+                            condition = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
 
                         default:
@@ -2549,6 +2557,11 @@ namespace PanelSw.Wix.Extensions
                 {
                     Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
                 }
+            }
+
+            if ((parent != null) && parent.LocalName.Equals("Property"))
+            {
+                property = parent.Attributes["Id"]?.Value;
             }
 
             if (string.IsNullOrEmpty(id))
@@ -2589,8 +2602,9 @@ namespace PanelSw.Wix.Extensions
                 // create a row in the Win32_CopyFiles table
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_MsiSqlQuery");
                 row[0] = id;
-                row[1] = query;
-                row[2] = condition;
+                row[1] = property;
+                row[2] = query;
+                row[3] = condition;
             }
         }
 

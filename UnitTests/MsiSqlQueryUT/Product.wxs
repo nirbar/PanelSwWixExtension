@@ -38,6 +38,9 @@
     </PanelSW:MsiSqlQuery>
 
     <!-- Terminate after validating result. -->
+    <Property Id="MSI_SQL_VALUE">
+      <PanelSW:MsiSqlQuery Query="SELECT `FileKey` FROM `RemoveFile` WHERE `FileName`='junk'"/>
+    </Property>
 
   </Fragment>
 
