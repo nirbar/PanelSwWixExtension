@@ -994,7 +994,7 @@ namespace PanelSw.Wix.Extensions
             string command = null;
             string workDir = null;
             ExecOnComponentFlags flags = ExecOnComponentFlags.None;
-            TopShelf_ErrorHandling errorHandling = TopShelf_ErrorHandling.fail;
+            TopShelf_ErrorHandling? errorHandling = null;
             int order = 1000000000 + GetLineNumber(sourceLineNumbers);
             YesNoType aye;
 
@@ -1062,6 +1062,11 @@ namespace PanelSw.Wix.Extensions
                         {
                             Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                         }
+
+                        if (element.HasAttribute("IgnoreExitCode"))
+                        {
+                            Core.OnMessage(WixErrors.IllegalAttributeWithOtherAttribute(sourceLineNumbers, element.LocalName, attrib.LocalName, "IgnoreExitCode"));
+                        }
                         break;
 
                     case "Wait":
@@ -1069,12 +1074,10 @@ namespace PanelSw.Wix.Extensions
                         if (aye == YesNoType.No)
                         {
                             flags |= ExecOnComponentFlags.ASync;
-                            errorHandling = TopShelf_ErrorHandling.ignore; // Really isn't checked on async, but just to be on the safe side.
-                        }
-
-                        if (element.HasAttribute("ErrorHandling") || element.HasAttribute("IgnoreExitCode"))
-                        {
-                            Core.OnMessage(WixErrors.IllegalAttributeWithOtherAttributes(sourceLineNumbers, element.LocalName, attrib.LocalName, "ErrorHandling", "IgnoreExitCode"));
+                            if (errorHandling == null)
+                            {
+                                errorHandling = TopShelf_ErrorHandling.ignore; // Really isn't checked on async, but just to be on the safe side.
+                            }
                         }
                         break;
 
@@ -1183,6 +1186,10 @@ namespace PanelSw.Wix.Extensions
             if ((flags & ExecOnComponentFlags.AnyTiming) == ExecOnComponentFlags.None)
             {
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "BeforeXXX or AfterXXX"));
+            }
+            if (((flags & ExecOnComponentFlags.ASync) == ExecOnComponentFlags.ASync) && (errorHandling != TopShelf_ErrorHandling.ignore))
+            {
+                Core.OnMessage(WixErrors.IllegalAttributeValueWithOtherAttribute(sourceLineNumbers, element.LocalName, "Wait", "no", "ErrorHandling"));
             }
 
             // ExitCode mapping
@@ -1294,7 +1301,7 @@ namespace PanelSw.Wix.Extensions
                 row[3] = command;
                 row[4] = workDir;
                 row[5] = (int)flags;
-                row[6] = (int)errorHandling;
+                row[6] = (int)(errorHandling ?? TopShelf_ErrorHandling.fail);
                 row[7] = order;
             }
         }
