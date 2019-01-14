@@ -117,13 +117,13 @@
   </tableDefinition>
 
   <tableDefinition name="PSW_ExecOnComponent_ExitCode">
-    <columnDefinition primaryKey="yes" name="ExecOnId_" type="string" length="0" modularize="column" category="identifier" keyTable="PSW_ExecOnComponent" keyColumn="1" />
+    <columnDefinition primaryKey="yes" name="ExecOnId_" type="string" length="72" modularize="column" category="identifier" keyTable="PSW_ExecOnComponent" keyColumn="1" />
     <columnDefinition primaryKey="yes" name="From" type="number" length="4" minValue="0" maxValue="65535" />
     <columnDefinition name="To" type="number" length="4" minValue="0" maxValue="65535" />
   </tableDefinition>
 
   <tableDefinition name="PSW_ExecOnComponent_Environment">
-    <columnDefinition primaryKey="yes" name="ExecOnId_" type="string" length="0" modularize="column" category="identifier" keyTable="PSW_ExecOnComponent" keyColumn="1" />
+    <columnDefinition primaryKey="yes" name="ExecOnId_" type="string" length="72" modularize="column" category="identifier" keyTable="PSW_ExecOnComponent" keyColumn="1" />
     <columnDefinition primaryKey="yes" name="Name" type="string" length="0" />
     <columnDefinition name="Value" type="string" length="0" modularize="property" category="formatted" />
   </tableDefinition>

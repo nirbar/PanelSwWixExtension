@@ -71,6 +71,15 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 			continue;
 		}
 
+		if (!szAccount.IsNullOrEmpty());
+		{
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will change service '%ls' start account to '%ls'", (LPCWSTR)szServiceName, (LPCWSTR)szAccount);
+		}
+		if (start != ServciceConfigDetails_ServiceStart::ServciceConfigDetails_ServiceStart_unchanged)
+		{
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will change service '%ls' start type to %i", (LPCWSTR)szServiceName, start);
+		}
+
 		hr = oDeferred.AddServiceConfig(szServiceName, szAccount, szPassword, start);
 		ExitOnFailure(hr, "Failed creating CustomActionData");
 
@@ -152,7 +161,7 @@ HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szAccoun
 	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
 	pDetails->set_name(szServiceName, WSTR_BYTE_SIZE(szServiceName));
-	if (szServiceName && *szServiceName)
+	if (szAccount && *szAccount)
 	{
 		pDetails->set_account(szAccount, WSTR_BYTE_SIZE(szAccount));
 		if (szPassword && *szPassword)
@@ -189,16 +198,14 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ExecOnDetails");
 
 	szServiceName = (LPCWSTR)details.name().data();
-	if (!details.account().empty())
+	if (details.account().size() > sizeof(WCHAR)) // Larger than NULL
 	{
 		szAccount = (LPCWSTR)details.account().data();
-		if (!details.password().empty())
+		if (!details.password().size() > sizeof(WCHAR))// Larger than NULL
 		{
 			szPassword = (LPCWSTR)details.password().data();
 		}
 	}
-
-	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Changing service '%ls' start account to '%ls'", szServiceName, szAccount);
 
 	// Open service.
 	hManager = ::OpenSCManager(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
@@ -209,7 +216,7 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 
 	// Change user.
 	dwRes = ::ChangeServiceConfig(hService, SERVICE_NO_CHANGE, details.start(), SERVICE_NO_CHANGE, nullptr, nullptr, nullptr, nullptr, szAccount, szPassword, nullptr);
-	ExitOnNullWithLastError(dwRes, hr, "Failed changing service '%ls' login account to '%ls'", szServiceName, szAccount);
+	ExitOnNullWithLastError(dwRes, hr, "Failed configuring service '%ls'", szServiceName, szAccount);
 
 LExit:
 
