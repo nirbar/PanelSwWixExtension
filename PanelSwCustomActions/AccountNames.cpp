@@ -77,6 +77,7 @@ extern "C" UINT __stdcall AccountNames(MSIHANDLE hInstall)
 		DWORD dwDomainLen = 0;
 		SID_NAME_USE eUse;
 		CWixString fullName;
+		CWixString property;
 
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Converting SID '%ls'", itCur->first);
 		bRes = ::ConvertStringSidToSid(itCur->first, &pSid);
@@ -106,12 +107,24 @@ extern "C" UINT __stdcall AccountNames(MSIHANDLE hInstall)
 		{
 			hr = fullName.Format(L"%s\\%s", (LPCWSTR)domainName, (LPCWSTR)accountName);
 			BreakExitOnFailure(hr, "Failed formatting string");
+
+			hr = property.Format(L"%s_DOMAIN", itCur->second);
+			BreakExitOnFailure(hr, "Failed formatting string");
+
+			hr = WcaSetProperty(property, (LPCWSTR)domainName);
+			BreakExitOnFailure(hr, "Failed setting property");
 		}
 		else
 		{
 			hr = fullName.Copy(accountName);
 			BreakExitOnFailure(hr, "Failed copying string");
 		}
+
+		hr = property.Format(L"%s_NAME", itCur->second);
+		BreakExitOnFailure(hr, "Failed formatting string");
+
+		hr = WcaSetProperty(property, (LPCWSTR)accountName);
+		BreakExitOnFailure(hr, "Failed setting property");
 
 		hr = WcaSetProperty(itCur->second, (LPCWSTR)fullName);
 		BreakExitOnFailure(hr, "Failed setting property");

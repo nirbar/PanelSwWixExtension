@@ -240,9 +240,7 @@
     <InstallExecuteSequence>
       <Custom Action="AccountNames" Before="AppSearch" Overridable="yes" />
     </InstallExecuteSequence>
-
   </Fragment>
-
 
   <!-- MsiSqlQuery -->
   <Fragment>
