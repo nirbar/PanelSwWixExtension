@@ -70,6 +70,11 @@ namespace PanelSw.Wix.Extensions
             int fileLanguageCol = ColumnByName(fileT, "Language");
 
             Table hashT = output.Tables["MsiFileHash"];
+            int hashKeyCol = -1;
+            if (hashT != null)
+            {
+                hashKeyCol = ColumnByName(hashT, "File_");
+            }
 
             foreach (Row overR in overwriteT.Rows)
             {
@@ -93,7 +98,6 @@ namespace PanelSw.Wix.Extensions
                 // Remove file from MsiFileHash table, ICE60
                 if (hashT != null)
                 {
-                    int hashKeyCol = ColumnByName(hashT, "File_");
                     int hashRow = RowIndexByKey(hashT, hashKeyCol, fileId);
                     if (hashRow >= 0)
                     {
