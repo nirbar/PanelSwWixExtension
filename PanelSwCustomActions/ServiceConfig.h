@@ -7,7 +7,7 @@ class CServiceConfig :
 {
 public:
 
-	HRESULT AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szAccount, LPCWSTR szPassword, int start);
+	HRESULT AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start);
 
 protected:
 	// Execute the command object (XML element)

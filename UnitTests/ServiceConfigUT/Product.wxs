@@ -13,13 +13,13 @@
         <File Source="$(var.ProjectDir)Product.wxs" />
 
         <!-- Change and revert account -->
-        <PanelSW:ServiceConfig Id="_1" ServiceName="TapiSrv" Account="NT AUTHORITY\LocalService" />
-        <PanelSW:ServiceConfig Id="_2" ServiceName="TapiSrv" Account="NT AUTHORITY\NetworkService" Start="demand" />
+        <PanelSW:ServiceConfig ServiceName="TapiSrv" Account="NT AUTHORITY\LocalService" CommandLine="[System64Folder]svchost.exe -k tapisrv 123" Start="auto" />
+        <PanelSW:ServiceConfig ServiceName="TapiSrv" Account="NT AUTHORITY\NetworkService" CommandLine="[System64Folder]svchost.exe -k tapisrv" Start="demand" />
       </Component>
     </Feature>
 
     <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder">
+      <Directory Id="ProgramFiles64Folder">
         <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
       </Directory>
     </Directory>

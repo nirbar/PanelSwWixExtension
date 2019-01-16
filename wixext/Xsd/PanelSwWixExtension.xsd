@@ -422,6 +422,11 @@
               <xs:documentation><![CDATA[Service name. Formatted]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="CommandLine" type="xs:string">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Service command line. Formatted.]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
           <xs:attribute name="Account" type="xs:string">
             <xs:annotation>
               <xs:documentation><![CDATA[Service start account. Formatted]]></xs:documentation>

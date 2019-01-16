@@ -14,7 +14,8 @@ message ServciceConfigDetails{
 	}
 
 	bytes name = 1;
-	bytes account = 2;
-	bytes password = 3;
-	ServiceStart start = 4;
+	bytes commandLine = 2;
+	bytes account = 3;
+	bytes password = 4;
+	ServiceStart start = 5;
 }

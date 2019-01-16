@@ -1321,6 +1321,7 @@ namespace PanelSw.Wix.Extensions
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
             string id = null;
             string service = null;
+            string commandLine = null;
             string account = null;
             string password = null;
             string component = null;
@@ -1343,6 +1344,10 @@ namespace PanelSw.Wix.Extensions
 
                     case "ServiceName":
                         service = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "CommandLine":
+                        commandLine = Core.GetAttributeValue(sourceLineNumbers, attrib);
                         break;
 
                     case "Account":
@@ -1394,9 +1399,10 @@ namespace PanelSw.Wix.Extensions
                 row[0] = id;
                 row[1] = component;
                 row[2] = service;
-                row[3] = account;
-                row[4] = password;
-                row[5] = (int)start;
+                row[3] = commandLine;
+                row[4] = account;
+                row[5] = password;
+                row[6] = (int)start;
             }
         }
 

@@ -8,8 +8,8 @@
 using namespace com::panelsw::ca;
 using namespace google::protobuf;
 
-#define ServiceConfig_QUERY L"SELECT `Id`, `Component_`, `ServiceName`, `Account`, `Password`, `Start` FROM `PSW_ServiceConfig`"
-enum ServiceConfigQuery { Id = 1, Component, ServiceName, Account, Password, Start};
+#define ServiceConfig_QUERY L"SELECT `Id`, `Component_`, `ServiceName`, `CommandLine`, `Account`, `Password`, `Start` FROM `PSW_ServiceConfig`"
+enum ServiceConfigQuery { Id = 1, Component, ServiceName, CommandLine, Account, Password, Start};
 
 extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 {
@@ -46,7 +46,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
         BreakExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		CWixString szId, szComponent, szServiceName, szAccount, szPassword;
+		CWixString szId, szComponent, szServiceName, commandLine, szAccount, szPassword;
 		int start = -1;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
 
@@ -56,6 +56,8 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to get Component.");
 		hr = WcaGetRecordFormattedString(hRecord, ServiceConfigQuery::ServiceName, (LPWSTR*)szServiceName);
 		BreakExitOnFailure(hr, "Failed to get ServiceName.");
+		hr = WcaGetRecordFormattedString(hRecord, ServiceConfigQuery::CommandLine, (LPWSTR*)commandLine);
+		BreakExitOnFailure(hr, "Failed to get CommandLine.");
 		hr = WcaGetRecordFormattedString(hRecord, ServiceConfigQuery::Account, (LPWSTR*)szAccount);
 		BreakExitOnFailure(hr, "Failed to get Account.");
 		hr = WcaGetRecordFormattedString(hRecord, ServiceConfigQuery::Password, (LPWSTR*)szPassword);
@@ -79,7 +81,10 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 		{
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will change service '%ls' start type to %i", (LPCWSTR)szServiceName, start);
 		}
-
+		if (!commandLine.IsNullOrEmpty())
+		{
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will configure service '%ls' to execute command line '%ls'", (LPCWSTR)szServiceName, (LPCWSTR)commandLine);
+		}
 		hr = oDeferred.AddServiceConfig(szServiceName, szAccount, szPassword, start);
 		ExitOnFailure(hr, "Failed creating CustomActionData");
 
@@ -103,7 +108,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 				pServiceCfg->dwStartType = SERVICE_NO_CHANGE;
 			}
 
-			hr = oRollback.AddServiceConfig((LPCWSTR)szServiceName, pServiceCfg->lpServiceStartName, nullptr, pServiceCfg->dwStartType);
+			hr = oRollback.AddServiceConfig((LPCWSTR)szServiceName, pServiceCfg->lpBinaryPathName, pServiceCfg->lpServiceStartName, nullptr, pServiceCfg->dwStartType);
 			ExitOnFailure(hr, "Failed creating rollback CustomActionData");
 
 			delete[]pServiceCfg;
@@ -146,7 +151,7 @@ LExit:
 	return WcaFinalize(dwRes);
 }
 
-HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szAccount, LPCWSTR szPassword, int start)
+HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
@@ -169,6 +174,10 @@ HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szAccoun
 			pDetails->set_password(szPassword, WSTR_BYTE_SIZE(szPassword));
 		}
 	}
+	if (szCommandLine && *szCommandLine)
+	{
+		pDetails->set_commandline(szCommandLine, WSTR_BYTE_SIZE(szCommandLine));
+	}
 	pDetails->set_start((ServciceConfigDetails::ServiceStart)start);
 
 	pAny = pCmd->mutable_details();
@@ -186,6 +195,7 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 {
 	HRESULT hr = S_OK;
 	LPCWSTR szServiceName = nullptr;
+	LPCWSTR szCommandLine = nullptr;
 	LPCWSTR szAccount = nullptr;
 	LPCWSTR szPassword = nullptr;
 	SC_HANDLE hManager = NULL;
@@ -206,6 +216,10 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 			szPassword = (LPCWSTR)details.password().data();
 		}
 	}
+	if (details.commandline().size() > 2)
+	{
+		szCommandLine = (LPCWSTR)details.commandline().data();
+	}
 
 	// Open service.
 	hManager = ::OpenSCManager(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
@@ -214,8 +228,8 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 	hService = ::OpenService(hManager, szServiceName, SERVICE_ALL_ACCESS);
 	ExitOnNullWithLastError(hService, hr, "Failed opening service '%ls'", szServiceName);
 
-	// Change user.
-	dwRes = ::ChangeServiceConfig(hService, SERVICE_NO_CHANGE, details.start(), SERVICE_NO_CHANGE, nullptr, nullptr, nullptr, nullptr, szAccount, szPassword, nullptr);
+	// Configure.
+	dwRes = ::ChangeServiceConfig(hService, SERVICE_NO_CHANGE, details.start(), SERVICE_NO_CHANGE, szCommandLine, nullptr, nullptr, nullptr, szAccount, szPassword, nullptr);
 	ExitOnNullWithLastError(dwRes, hr, "Failed configuring service '%ls'", szServiceName, szAccount);
 
 LExit:
