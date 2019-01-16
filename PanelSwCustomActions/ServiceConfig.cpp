@@ -46,7 +46,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
         BreakExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		CWixString szId, szComponent, szServiceName, commandLine, szAccount, szPassword;
+		CWixString szId, szComponent, szServiceName, szCommand, szCommandFormat, szCommandObfuscated, szAccount, szPassword;
 		int start = -1;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
 
@@ -56,7 +56,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to get Component.");
 		hr = WcaGetRecordFormattedString(hRecord, ServiceConfigQuery::ServiceName, (LPWSTR*)szServiceName);
 		BreakExitOnFailure(hr, "Failed to get ServiceName.");
-		hr = WcaGetRecordFormattedString(hRecord, ServiceConfigQuery::CommandLine, (LPWSTR*)commandLine);
+		hr = WcaGetRecordString(hRecord, ServiceConfigQuery::CommandLine, (LPWSTR*)szCommandFormat);
 		BreakExitOnFailure(hr, "Failed to get CommandLine.");
 		hr = WcaGetRecordFormattedString(hRecord, ServiceConfigQuery::Account, (LPWSTR*)szAccount);
 		BreakExitOnFailure(hr, "Failed to get Account.");
@@ -73,6 +73,12 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 			continue;
 		}
 
+		{
+			hr = szCommand.MsiFormat(szCommandFormat, (LPWSTR*)szCommandObfuscated);
+			ExitOnFailure(hr, "Failed formatting string");
+
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will configure service '%ls' to execute command line '%ls'", (LPCWSTR)szServiceName, (LPCWSTR)szCommandObfuscated);
+		}
 		if (!szAccount.IsNullOrEmpty());
 		{
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will change service '%ls' start account to '%ls'", (LPCWSTR)szServiceName, (LPCWSTR)szAccount);
@@ -81,11 +87,6 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 		{
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will change service '%ls' start type to %i", (LPCWSTR)szServiceName, start);
 		}
-		if (!commandLine.IsNullOrEmpty())
-		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will configure service '%ls' to execute command line '%ls'", (LPCWSTR)szServiceName, (LPCWSTR)commandLine);
-		}
-		hr = oDeferred.AddServiceConfig(szServiceName, szAccount, szPassword, start);
 		ExitOnFailure(hr, "Failed creating CustomActionData");
 
 		// Get current service account.
@@ -216,7 +217,7 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 			szPassword = (LPCWSTR)details.password().data();
 		}
 	}
-	if (details.commandline().size() > 2)
+	if (details.commandline().size() > sizeof(WCHAR))
 	{
 		szCommandLine = (LPCWSTR)details.commandline().data();
 	}

@@ -7,13 +7,14 @@
 
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
     <MediaTemplate />
+    <Property Id="HIDE_ME" Hidden="yes" Value="123"/>
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <Component Id="Test" Directory="INSTALLFOLDER">
         <File Source="$(var.ProjectDir)Product.wxs" />
 
         <!-- Change and revert account -->
-        <PanelSW:ServiceConfig ServiceName="TapiSrv" Account="NT AUTHORITY\LocalService" CommandLine="[System64Folder]svchost.exe -k tapisrv 123" Start="auto" />
+        <PanelSW:ServiceConfig ServiceName="TapiSrv" Account="NT AUTHORITY\LocalService" CommandLine="[System64Folder]svchost.exe -k tapisrv [HIDE_ME]" Start="auto" />
         <PanelSW:ServiceConfig ServiceName="TapiSrv" Account="NT AUTHORITY\NetworkService" CommandLine="[System64Folder]svchost.exe -k tapisrv" Start="demand" />
       </Component>
     </Feature>
