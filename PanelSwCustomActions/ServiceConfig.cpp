@@ -73,6 +73,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 			continue;
 		}
 
+		if (!szCommandFormat.IsNullOrEmpty())
 		{
 			hr = szCommand.MsiFormat(szCommandFormat, (LPWSTR*)szCommandObfuscated);
 			ExitOnFailure(hr, "Failed formatting string");
@@ -87,6 +88,8 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 		{
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will change service '%ls' start type to %i", (LPCWSTR)szServiceName, start);
 		}
+
+		hr = oDeferred.AddServiceConfig(szServiceName, szCommand, szAccount, szPassword, start);
 		ExitOnFailure(hr, "Failed creating CustomActionData");
 
 		// Get current service account.
