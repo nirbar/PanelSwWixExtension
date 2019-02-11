@@ -1,7 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
-     xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
-     >
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension">
   <Product Id="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}" Name="RegexUT" Language="1033" Version="1.0.0.0" Manufacturer="Panel::Software" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
@@ -10,10 +8,16 @@
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <Component Directory="INSTALLFOLDER">
-        <File Source="$(var.ProjectDir)Product.wxs" />
+        <File Source="$(var.ProjectDir)Product.wxs">
+          <PanelSW:FileRegex Regex="\bRegularExpressio(\w)\b" Replacement="$1_RegularExpressio" IgnoreCase="no"/>
+          <PanelSW:FileRegex Regex="&lt;!-(-.*-)-&gt;" Replacement="- Hi $1 -" IgnoreCase="no"/>
+        </File>
       </Component>
       <Component Directory="INSTALLFOLDER">
-        <File Source="$(var.ProjectDir)Unicode.ini" />
+        <File Source="$(var.ProjectDir)Unicode.ini">
+          <PanelSW:FileRegex Regex="\[BSMALL]=" Replacement="[MB460]" Encoding="AutoDetect"/>
+          <PanelSW:FileRegex Regex="\bCurrentMappingFile=" Replacement="[NEWMAPPINGFILE]" Encoding="Unicode"/>
+        </File>
       </Component>
     </Feature>
 
@@ -56,15 +60,8 @@
       <Custom Action="TextRegexReplace2" After="TextRegexMatch"><![CDATA[REGEX_REPLACE_3<>"My Input is Test Text"]]></Custom>
     </InstallUISequence>
 
-    <PanelSW:FileRegex FilePath="[#Product.wxs]" Regex="\bRegularExpressio(\w)\b" Replacement="$1_RegularExpressio" IgnoreCase="no"><![CDATA[Not Installed]]></PanelSW:FileRegex>
-    <PanelSW:FileRegex FilePath="[#Product.wxs]" Regex="&lt;!-(-.*-)-&gt;" Replacement="- Hi $1 -" IgnoreCase="no"><![CDATA[Not Installed]]></PanelSW:FileRegex>
-
     <Property Id="MB460" Value="MB460=" Hidden="yes"/>
     <Property Id="BSMALL" Value="bSmall" Hidden="yes"/>
     <Property Id="NEWMAPPINGFILE" Value="NewMappingFile=" />
-    
-    <PanelSW:FileRegex FilePath="[#Unicode.ini]" Regex="\[BSMALL]=" Replacement="[MB460]" Encoding="AutoDetect"><![CDATA[Not Installed]]></PanelSW:FileRegex>
-    <PanelSW:FileRegex FilePath="[#Unicode.ini]" Regex="\bCurrentMappingFile=" Replacement="[NEWMAPPINGFILE]" Encoding="Unicode"><![CDATA[Not Installed]]></PanelSW:FileRegex>
-
   </Product>
 </Wix>

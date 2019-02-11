@@ -851,23 +851,10 @@ Delete folder or file specified by a path.
   <xs:element name="FileRegex">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="File" />
       </xs:appinfo>
       <xs:documentation>
-        <![CDATA[
-Execute a Regular Expression to perform find & replace operations within files.
-
-\par Example:
-\code
-<Wix ... xmlns:PanelSw="http://schemas.panel-sw.co.il/wix/WixExtension">
-<Product ...>
- <PanelSw:FileRegex Id="Q1" FilePath="[#someFile]" Regex="([\[]a-z[\]]+)" Replacement="Text was $1" IgnoreCase="yes">MY_CONDITION</PanelSw:FileRegex>
-</Product>
-</Wix>
-\endcode
-        ]]>
+        <![CDATA[Execute a Regular Expression to perform find & replace operations within files.]]>
       </xs:documentation>
     </xs:annotation>
     <xs:complexType>
@@ -876,11 +863,6 @@ Execute a Regular Expression to perform find & replace operations within files.
           <xs:attribute name="Id" type="xs:string">
             <xs:annotation>
               <xs:documentation>Identifier for the value (primary key).</xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="FilePath" type="xs:string" use="required">
-            <xs:annotation>
-              <xs:documentation>Full file path to perform find &amp; replace in. This field is formatted.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="Regex" type="xs:string" use="required">

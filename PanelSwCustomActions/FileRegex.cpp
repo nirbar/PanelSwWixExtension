@@ -7,8 +7,10 @@ using namespace std;
 using namespace ::com::panelsw::ca;
 using namespace google::protobuf;
 
-#define FileRegex_QUERY L"SELECT `Id`, `FilePath`, `Regex`, `Replacement`, `IgnoreCase`, `Encoding`, `Condition` FROM `PSW_FileRegex` ORDER BY `Order`"
-enum FileRegexQuery { Id = 1, FilePath = 2, Regex = 3, Replacement = 4, IgnoreCase = 5, Encoding = 6, Condition = 7 };
+#define FileRegex_QUERY L"SELECT `File`.`Component_`, `PSW_FileRegex`.`File_`, `PSW_FileRegex`.`Regex`, `PSW_FileRegex`.`Replacement`, `PSW_FileRegex`.`IgnoreCase`, `PSW_FileRegex`.`Encoding` " \
+							  L"FROM `PSW_FileRegex`, `File` " \
+							  L"WHERE `PSW_FileRegex`.`File_` = `File`.`File` " \
+							  L"ORDER BY `PSW_FileRegex`.`Order`"
 
 extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 {
@@ -31,7 +33,7 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 
 	// Ensure table PSW_FileRegex exists.
 	hr = WcaTableExists(L"PSW_FileRegex");
-	BreakExitOnFailure(hr, "Table does not exist 'PSW_FileRegex'. Have you authored 'PanelSw:FileRegex' entries in WiX code?");
+	BreakExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_FileRegex'. Have you authored 'PanelSw:FileRegex' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(FileRegex_QUERY, &hView);
@@ -52,43 +54,52 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		CWixString szId, szFilePath, szRegexUnformatted, szReplacementUnformatted, szCondition;
+		CWixString szComponent, szFileId, szFileFormat, szFilePath, szRegexUnformatted, szReplacementUnformatted;
 		CWixString szRegex, szRegexObfuscated, szReplacement, szReplacementObfuscated;
 		CWixString tempFile;
+		WCA_TODO compToDo = WCA_TODO::WCA_TODO_UNKNOWN;
 		int nIgnoreCase = 0;
 		int nEncoding = 0;
 
-		hr = WcaGetRecordString(hRecord, FileRegexQuery::Id, (LPWSTR*)szId);
+		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szComponent);
 		BreakExitOnFailure(hr, "Failed to get Id.");
-		hr = WcaGetRecordFormattedString(hRecord, FileRegexQuery::FilePath, (LPWSTR*)szFilePath);
+		hr = WcaGetRecordFormattedString(hRecord, 2, (LPWSTR*)szFileId);
 		BreakExitOnFailure(hr, "Failed to get FilePath.");
-		hr = WcaGetRecordString(hRecord, FileRegexQuery::Regex, (LPWSTR*)szRegexUnformatted);
+		hr = WcaGetRecordString(hRecord, 3, (LPWSTR*)szRegexUnformatted);
 		BreakExitOnFailure(hr, "Failed to get Regex.");
-		hr = WcaGetRecordString(hRecord, FileRegexQuery::Replacement, (LPWSTR*)szReplacementUnformatted);
+		hr = WcaGetRecordString(hRecord, 4, (LPWSTR*)szReplacementUnformatted);
 		BreakExitOnFailure(hr, "Failed to get Replacement.");
-		hr = WcaGetRecordInteger(hRecord, FileRegexQuery::IgnoreCase, &nIgnoreCase);
+		hr = WcaGetRecordInteger(hRecord, 5, &nIgnoreCase);
 		BreakExitOnFailure(hr, "Failed to get IgnoreCase.");
-		hr = WcaGetRecordInteger(hRecord, FileRegexQuery::Encoding, &nEncoding);
+		hr = WcaGetRecordInteger(hRecord, 6, &nEncoding);
 		BreakExitOnFailure(hr, "Failed to get Encoding.");
-		hr = WcaGetRecordString(hRecord, FileRegexQuery::Condition, (LPWSTR*)szCondition);
-		BreakExitOnFailure(hr, "Failed to get Condition.");
 
 		// Test condition
-		MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, szCondition);
-		switch (condRes)
+		compToDo = WcaGetComponentToDo(szComponent);
+		switch (compToDo)
 		{
-		case MSICONDITION::MSICONDITION_NONE:
-		case MSICONDITION::MSICONDITION_TRUE:
-			WcaLog(LOGMSG_STANDARD, "Condition evaluated to true / none.");
+		case WCA_TODO::WCA_TODO_INSTALL:
+		case WCA_TODO::WCA_TODO_REINSTALL:
 			break;
 
-		case MSICONDITION::MSICONDITION_FALSE:
-			WcaLog(LOGMSG_STANDARD, "Skipping. Condition evaluated to false");
+		case WCA_TODO::WCA_TODO_UNINSTALL:
+		case WCA_TODO::WCA_TODO_UNKNOWN:
+		default:
+			WcaLog(LOGMSG_STANDARD, "Will skip regex for file '%ls'.", (LPCWSTR)szFileId);
 			continue;
+		}
 
-		case MSICONDITION::MSICONDITION_ERROR:
-			hr = E_FAIL;
-			BreakExitOnFailure(hr, "Bad Condition field");
+		hr = szFileFormat.Format(L"[#%s]", (LPCWSTR)szFileId);
+		BreakExitOnFailure(hr, "Failed formatting string");
+
+		hr = szFilePath.MsiFormat(szFileFormat);
+		BreakExitOnFailure(hr, "Failed MSI-formatting string");
+
+		// Component condition is false
+		if (szFilePath.IsNullOrEmpty())
+		{
+			WcaLog(LOGMSG_STANDARD, "Will skip regex for file '%ls'.", (LPCWSTR)szFileId);
+			continue;
 		}
 
 		hr = szRegex.MsiFormat((LPCWSTR)szRegexUnformatted, (LPWSTR*)szRegexObfuscated);

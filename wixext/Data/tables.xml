@@ -54,12 +54,11 @@
 
   <tableDefinition name="PSW_FileRegex">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="FilePath" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="File_" type="string" length="72" modularize="column" category="identifier" keyTable="File" keyColumn="1" />
     <columnDefinition name="Regex" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Replacement" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="IgnoreCase" type="number" length="2" nullable="yes" minValue="0" maxValue="127" />
     <columnDefinition name="Encoding" type="number" length="2" nullable="no" minValue="0" maxValue="127" />
-    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
     <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
   </tableDefinition>
 
@@ -164,12 +163,12 @@
   </tableDefinition>
 
   <tableDefinition name="PSW_InstallUtil">
-    <columnDefinition name="File_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" keyTable="Component" keyColumn="1" />
+    <columnDefinition name="File_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" keyTable="File" keyColumn="1" />
     <columnDefinition name="Bitness" type="number" length="2" minValue="0" maxValue="127" />
   </tableDefinition>
 
   <tableDefinition name="PSW_InstallUtil_Arg">
-    <columnDefinition name="File_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" keyTable="Component" keyColumn="1" />
+    <columnDefinition name="File_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" keyTable="File" keyColumn="1" />
     <columnDefinition name="Id" primaryKey="yes" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Value" type="string" length="0" modularize="property" category="formatted" />
   </tableDefinition>
@@ -192,7 +191,7 @@
   </tableDefinition>
 
   <tableDefinition name="PSW_TopShelf">
-    <columnDefinition name="File_" primaryKey="yes" type="string" length="72" modularize="column" category="identifier" keyTable="Component" keyColumn="1" />
+    <columnDefinition name="File_" primaryKey="yes" type="string" length="72" modularize="column" category="identifier" keyTable="File" keyColumn="1" />
     <columnDefinition name="ServiceName" type="string" length="0" nullable="yes" category="formatted" modularize="property" />
     <columnDefinition name="DisplayName" type="string" length="0" nullable="yes" category="formatted" />
     <columnDefinition name="Description" type="string" length="0" nullable="yes" category="formatted" />
@@ -244,7 +243,7 @@
   </tableDefinition>
 
   <tableDefinition name="PSW_JsonJPath">
-    <columnDefinition name="File_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" keyTable="Component" keyColumn="1" />
+    <columnDefinition name="File_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" keyTable="File" keyColumn="1" />
     <columnDefinition name="JPath" type="string" length="0" nullable="no" category="formatted" />
     <columnDefinition name="Value" type="string" length="0" nullable="no" category="formatted" />
   </tableDefinition>
