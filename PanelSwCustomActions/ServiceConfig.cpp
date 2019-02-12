@@ -234,7 +234,7 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 
 	// Configure.
 	dwRes = ::ChangeServiceConfig(hService, SERVICE_NO_CHANGE, details.start(), SERVICE_NO_CHANGE, szCommandLine, nullptr, nullptr, nullptr, szAccount, szPassword, nullptr);
-	ExitOnNullWithLastError(dwRes, hr, "Failed configuring service '%ls'", szServiceName, szAccount);
+	ExitOnNullWithLastError(dwRes, hr, "Failed configuring service '%ls'", szServiceName);
 
 LExit:
 
