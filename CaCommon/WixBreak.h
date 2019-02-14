@@ -3,10 +3,10 @@
 
 #ifdef _DEBUG
 
-#define BreakExitOnFailure(x, s)				if (FAILED(x)) { MsiDebugBreak(); } ExitOnFailure(x, s)				 
-#define BreakExitOnNull(p, x, e, s)				if (NULL == p) { MsiDebugBreak(); } ExitOnNull(p, x, e, s)			 
-#define BreakExitOnWin32Error(e, x, s)			if (ERROR_SUCCESS != e) { MsiDebugBreak(); } ExitOnWin32Error(e, x, s)		
-#define BreakExitOnNullWithLastError(p, x, s)	if (NULL == p) { DWORD Dutil_er = ::GetLastError(); x = HRESULT_FROM_WIN32(Dutil_er); if (!FAILED(x)) { x = E_FAIL; } MsiDebugBreak(); Dutil_RootFailure(__FILE__, __LINE__, x); ExitTrace(x, s); goto LExit; }
+#define BreakExitOnFailure(x, s, ...)				if (FAILED(x)) { MsiDebugBreak(); } ExitOnFailure(x, s, __VA_ARGS__)				 
+#define BreakExitOnNull(p, x, e, s, ...)			if (NULL == p) { MsiDebugBreak(); } ExitOnNull(p, x, e, s, __VA_ARGS__)			 
+#define BreakExitOnWin32Error(e, x, s, ...)			if (ERROR_SUCCESS != e) { MsiDebugBreak(); } ExitOnWin32Error(e, x, s, __VA_ARGS__)		
+#define BreakExitOnNullWithLastError(p, x, s, ...)	if (NULL == p) { DWORD Dutil_er = ::GetLastError(); x = HRESULT_FROM_WIN32(Dutil_er); if (!FAILED(x)) { x = E_FAIL; } MsiDebugBreak(); Dutil_RootFailure(__FILE__, __LINE__, x); ExitTrace(x, s, __VA_ARGS__); goto LExit; }
 
 #else
 

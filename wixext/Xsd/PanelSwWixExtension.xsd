@@ -852,9 +852,12 @@ Delete folder or file specified by a path.
     <xs:annotation>
       <xs:appinfo>
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="File" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
       </xs:appinfo>
       <xs:documentation>
-        <![CDATA[Execute a Regular Expression to perform find & replace operations within files.]]>
+        <![CDATA[Execute a Regular Expression to perform find & replace operations within files. This element can be nested under File element, or specify a FilePath explictly]]>
       </xs:documentation>
     </xs:annotation>
     <xs:complexType>
@@ -863,6 +866,11 @@ Delete folder or file specified by a path.
           <xs:attribute name="Id" type="xs:string">
             <xs:annotation>
               <xs:documentation>Identifier for the value (primary key).</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="FilePath" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Explicit file path if not nested under a File element. This field is formatted.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="Regex" type="xs:string" use="required">
@@ -883,6 +891,11 @@ Delete folder or file specified by a path.
           <xs:attribute name="IgnoreCase" type="YesNoType" use="optional">
             <xs:annotation>
               <xs:documentation>Set to yes to ignore case in matches. Default is no.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Condition" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Condition on executing the query. May be specified in this attribute or as inner text.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="Order" type="xs:integer" default="255">

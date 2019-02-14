@@ -87,6 +87,10 @@ namespace PanelSw.Wix.Extensions
                             ParseCustomUninstallKeyElement(element);
                             break;
 
+                        case "FileRegex":
+                            ParseFileRegex(element, parentElement);
+                            break;
+
                         case "ReadIniValues":
                             ParseReadIniValuesElement(element);
                             break;
@@ -2767,18 +2771,31 @@ namespace PanelSw.Wix.Extensions
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
             string id = null;
+            string fileId  = null;
+            string component = null;
+            string filepath = null;
+            string condition = null;
             string regex = null;
             string replacement = null;
             FileEncoding encoding = FileEncoding.AutoDetect;
             bool ignoreCase = false;
             int order = 1000000000 + GetLineNumber(sourceLineNumbers);
 
-            string file = parentElement.GetAttribute("Id");
-            if (string.IsNullOrEmpty(file))
+            if (parentElement.LocalName.Equals("File"))
             {
-                file = parentElement.GetAttribute("Source");
-                file = Path.GetFileName(file);
-                file = CompilerCore.GetIdentifierFromName(file);
+                fileId = parentElement.GetAttribute("Id");
+                if (string.IsNullOrEmpty(fileId))
+                {
+                    fileId = parentElement.GetAttribute("Source");
+                    fileId = Path.GetFileName(fileId);
+                    fileId = CompilerCore.GetIdentifierFromName(fileId);
+                }
+
+                component = ((XmlElement)parentElement.ParentNode).GetAttribute("Id");
+                if (string.IsNullOrEmpty(component))
+                {
+                    component = fileId;
+                }
             }
 
             foreach (XmlAttribute attrib in node.Attributes)
@@ -2789,6 +2806,12 @@ namespace PanelSw.Wix.Extensions
                     {
                         case "Id":
                             id = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "FilePath":
+                            filepath = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Condition":
+                            condition = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Regex":
                             regex = Core.GetAttributeValue(sourceLineNumbers, attrib);
@@ -2826,6 +2849,11 @@ namespace PanelSw.Wix.Extensions
             {
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Regex"));
             }
+            if (string.IsNullOrEmpty(fileId) == string.IsNullOrEmpty(filepath))
+            {
+                // Either under File or specify FilePath, not both!
+                Core.OnMessage(WixErrors.ExpectedAttributeInElementOrParent(sourceLineNumbers, node.LocalName, "FilePath", parentElement.LocalName));
+            }
 
             // find unexpected child elements
             foreach (XmlNode child in node.ChildNodes)
@@ -2843,7 +2871,12 @@ namespace PanelSw.Wix.Extensions
                 }
                 else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
                 {
-                    Core.UnexpectedElement(node, child);
+                    if (!string.IsNullOrEmpty(condition))
+                    {
+                        // Can't specify condition both ways
+                        Core.UnexpectedElement(node, child);
+                    }
+                    condition = child.Value.Trim();
                 }
             }
 
@@ -2855,12 +2888,15 @@ namespace PanelSw.Wix.Extensions
                 // create a row in the Win32_CopyFiles table
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_FileRegex");
                 row[0] = id;
-                row[1] = file;
-                row[2] = regex;
-                row[3] = replacement ?? "";
-                row[4] = ignoreCase ? 1 : 0;
-                row[5] = (int)encoding;
-                row[6] = order;
+                row[1] = component;
+                row[2] = fileId;
+                row[3] = filepath;
+                row[4] = regex;
+                row[5] = replacement ?? "";
+                row[6] = ignoreCase ? 1 : 0;
+                row[7] = (int)encoding;
+                row[8] = condition;
+                row[9] = order;
             }
         }
 
