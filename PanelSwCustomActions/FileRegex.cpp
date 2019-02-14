@@ -7,10 +7,7 @@ using namespace std;
 using namespace ::com::panelsw::ca;
 using namespace google::protobuf;
 
-#define FileRegex_QUERY L"SELECT `File`.`Component_`, `PSW_FileRegex`.`File_`, `PSW_FileRegex`.`Regex`, `PSW_FileRegex`.`Replacement`, `PSW_FileRegex`.`IgnoreCase`, `PSW_FileRegex`.`Encoding` " \
-							  L"FROM `PSW_FileRegex`, `File` " \
-							  L"WHERE `PSW_FileRegex`.`File_` = `File`.`File` " \
-							  L"ORDER BY `PSW_FileRegex`.`Order`"
+static HRESULT IsInstall(LPCWSTR szComponent, LPCWSTR szFileId, LPCWSTR szCondition);
 
 extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 {
@@ -35,10 +32,6 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 	hr = WcaTableExists(L"PSW_FileRegex");
 	BreakExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_FileRegex'. Have you authored 'PanelSw:FileRegex' entries in WiX code?");
 
-	// Execute view
-	hr = WcaOpenExecuteView(FileRegex_QUERY, &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", FileRegex_QUERY);
-
 	// Get temporary folder
 	dwRes = ::GetTempPath(MAX_PATH, shortTempPath);
 	BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary folder");
@@ -48,58 +41,57 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 	BreakExitOnNullWithLastError(dwRes, hr, "Failed expanding temporary folder");
 	BreakExitOnNull((dwRes <= MAX_PATH), hr, E_FAIL, "Temporary folder expanded path too long");
 
+	// Execute view
+	hr = WcaOpenExecuteView(L"SELECT `Component_`, `File_`, `FilePath`, `Regex`, `Replacement`, `IgnoreCase`, `Encoding`, `Condition` FROM `PSW_FileRegex` ORDER BY `Order`", &hView);
+	BreakExitOnFailure(hr, "Failed to execute SQL query.");
+
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
 		BreakExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		CWixString szComponent, szFileId, szFileFormat, szFilePath, szRegexUnformatted, szReplacementUnformatted;
+		CWixString szComponent, szFileId, szFileFormat, szFilePath, szRegexUnformatted, szReplacementUnformatted, szCondition;
 		CWixString szRegex, szRegexObfuscated, szReplacement, szReplacementObfuscated;
 		CWixString tempFile;
-		WCA_TODO compToDo = WCA_TODO::WCA_TODO_UNKNOWN;
 		int nIgnoreCase = 0;
 		int nEncoding = 0;
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szComponent);
 		BreakExitOnFailure(hr, "Failed to get Id.");
-		hr = WcaGetRecordFormattedString(hRecord, 2, (LPWSTR*)szFileId);
+		hr = WcaGetRecordString(hRecord, 2, (LPWSTR*)szFileId);
+		BreakExitOnFailure(hr, "Failed to get File_.");
+		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)szFilePath);
 		BreakExitOnFailure(hr, "Failed to get FilePath.");
-		hr = WcaGetRecordString(hRecord, 3, (LPWSTR*)szRegexUnformatted);
+		hr = WcaGetRecordString(hRecord, 4, (LPWSTR*)szRegexUnformatted);
 		BreakExitOnFailure(hr, "Failed to get Regex.");
-		hr = WcaGetRecordString(hRecord, 4, (LPWSTR*)szReplacementUnformatted);
+		hr = WcaGetRecordString(hRecord, 5, (LPWSTR*)szReplacementUnformatted);
 		BreakExitOnFailure(hr, "Failed to get Replacement.");
-		hr = WcaGetRecordInteger(hRecord, 5, &nIgnoreCase);
+		hr = WcaGetRecordInteger(hRecord, 6, &nIgnoreCase);
 		BreakExitOnFailure(hr, "Failed to get IgnoreCase.");
-		hr = WcaGetRecordInteger(hRecord, 6, &nEncoding);
+		hr = WcaGetRecordInteger(hRecord, 7, &nEncoding);
 		BreakExitOnFailure(hr, "Failed to get Encoding.");
+		hr = WcaGetRecordString(hRecord, 8, (LPWSTR*)szCondition);
+		BreakExitOnFailure(hr, "Failed to get Condition.");
 
-		// Test condition
-		compToDo = WcaGetComponentToDo(szComponent);
-		switch (compToDo)
+		// Sanity
+		ExitOnNull((szFileId.IsNullOrEmpty() != szFilePath.IsNullOrEmpty()), hr, E_INVALIDARG, "Both FilePath and File_ have values or both empty");
+
+		// Test condition(s)
+		hr = IsInstall(szComponent, szFileId, szCondition);
+		BreakExitOnFailure(hr, "Failed to evaluate conditions.");
+		if (hr == S_FALSE)
 		{
-		case WCA_TODO::WCA_TODO_INSTALL:
-		case WCA_TODO::WCA_TODO_REINSTALL:
-			break;
-
-		case WCA_TODO::WCA_TODO_UNINSTALL:
-		case WCA_TODO::WCA_TODO_UNKNOWN:
-		default:
-			WcaLog(LOGMSG_STANDARD, "Will skip regex for file '%ls'.", (LPCWSTR)szFileId);
 			continue;
 		}
 
-		hr = szFileFormat.Format(L"[#%s]", (LPCWSTR)szFileId);
-		BreakExitOnFailure(hr, "Failed formatting string");
-
-		hr = szFilePath.MsiFormat(szFileFormat);
-		BreakExitOnFailure(hr, "Failed MSI-formatting string");
-
-		// Component condition is false
 		if (szFilePath.IsNullOrEmpty())
 		{
-			WcaLog(LOGMSG_STANDARD, "Will skip regex for file '%ls'.", (LPCWSTR)szFileId);
-			continue;
+			hr = szFileFormat.Format(L"[#%s]", (LPCWSTR)szFileId);
+			BreakExitOnFailure(hr, "Failed formatting string");
+
+			hr = szFilePath.MsiFormat(szFileFormat);
+			BreakExitOnFailure(hr, "Failed MSI-formatting string");
 		}
 
 		hr = szRegex.MsiFormat((LPCWSTR)szRegexUnformatted, (LPWSTR*)szRegexObfuscated);
@@ -154,6 +146,64 @@ LExit:
 	ReleaseStr(szCustomActionData);
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
+}
+
+static HRESULT IsInstall(LPCWSTR szComponent, LPCWSTR szFileId, LPCWSTR szCondition)
+{
+	HRESULT hr = S_OK;
+
+	if (szComponent && *szComponent)
+	{
+		WCA_TODO compToDo = WCA_TODO::WCA_TODO_UNKNOWN;
+
+		compToDo = WcaGetComponentToDo(szComponent);
+		switch (compToDo)
+		{
+		case WCA_TODO::WCA_TODO_INSTALL:
+		case WCA_TODO::WCA_TODO_REINSTALL:
+			break;
+
+		case WCA_TODO::WCA_TODO_UNINSTALL:
+		case WCA_TODO::WCA_TODO_UNKNOWN:
+		default:
+			WcaLog(LOGMSG_STANDARD, "Will skip regex for file '%ls'.", (LPCWSTR)szFileId);
+			hr = S_FALSE;
+			ExitFunction();
+		}
+	}
+
+	if (szFileId && *szFileId)
+	{
+		CWixString szFileFormat, szFilePath;
+		
+		hr = szFileFormat.Format(L"[#%s]", (LPCWSTR)szFileId);
+		BreakExitOnFailure(hr, "Failed formatting string");
+
+		hr = szFilePath.MsiFormat(szFileFormat);
+		BreakExitOnFailure(hr, "Failed MSI-formatting string");
+
+		// Component condition is false
+		if (szFilePath.IsNullOrEmpty())
+		{
+			WcaLog(LOGMSG_STANDARD, "Will skip regex for file '%ls'.", (LPCWSTR)szFileId);
+			hr = S_FALSE;
+			ExitFunction();
+		}
+	}
+
+	if (szCondition && *szCondition)
+	{
+		MSICONDITION condRes = MSICONDITION::MSICONDITION_NONE;
+		
+		condRes = ::MsiEvaluateCondition(WcaGetInstallHandle(), szCondition);
+		BreakExitOnNullWithLastError((condRes != MSICONDITION::MSICONDITION_ERROR), hr, "Failed evaluating condition '%ls'", szCondition);
+
+		hr = (condRes == MSICONDITION::MSICONDITION_FALSE) ? S_FALSE : S_OK;
+		WcaLog(LOGMSG_STANDARD, "Condition evaluated to %i", (1 - (int)hr));
+	}
+
+LExit:
+	return hr;
 }
 
 HRESULT CFileRegex::AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase)

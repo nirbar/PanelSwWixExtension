@@ -10,16 +10,16 @@
       <Component Directory="INSTALLFOLDER">
         <File Source="$(var.ProjectDir)Product.wxs">
           <PanelSW:FileRegex Regex="\bRegularExpressio(\w)\b" Replacement="$1_RegularExpressio" IgnoreCase="no"/>
-          <PanelSW:FileRegex Regex="&lt;!-(-.*-)-&gt;" Replacement="- Hi $1 -" IgnoreCase="no"/>
+          <PanelSW:FileRegex Regex="&lt;!-(-.*-)-&gt;" Replacement="- Hi $1 -" IgnoreCase="no" Condition="SKIP_ME"/>
         </File>
       </Component>
       <Component Directory="INSTALLFOLDER">
         <File Source="$(var.ProjectDir)Unicode.ini">
           <PanelSW:FileRegex Regex="\[BSMALL]=" Replacement="[MB460]" Encoding="AutoDetect"/>
-          <PanelSW:FileRegex Regex="\bCurrentMappingFile=" Replacement="[NEWMAPPINGFILE]" Encoding="Unicode"/>
         </File>
       </Component>
     </Feature>
+    <PanelSW:FileRegex FilePath="[#Unicode.ini]" Regex="\bCurrentMappingFile=" Replacement="[NEWMAPPINGFILE]" Encoding="Unicode" Condition="$Unicode.ini >= 3"/>
 
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ProgramFilesFolder">
