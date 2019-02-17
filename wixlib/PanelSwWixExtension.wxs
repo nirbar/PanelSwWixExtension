@@ -24,7 +24,7 @@
     <CustomAction Id="ShellExecute_commit" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="commit" Return="check" Impersonate="no" />
 
     <InstallExecuteSequence>
-      <Custom Action="ShellExecute_Immediate" After="InstallInitialize" Overridable="yes"/>
+      <Custom Action="ShellExecute_Immediate" Before="ProcessComponents" Overridable="yes"/>
     </InstallExecuteSequence>
     <UI>
       <ProgressText Action="ShellExecute_deferred">Executing commands</ProgressText>
@@ -95,7 +95,7 @@
     <CustomAction Id="Telemetry_commit" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="commit" Return="ignore" Impersonate="no" />
 
     <InstallExecuteSequence>
-      <Custom Action="Telemetry" After="InstallInitialize" Overridable="yes"/>
+      <Custom Action="Telemetry" Before="ProcessComponents" Overridable="yes"/>
     </InstallExecuteSequence>
 
     <UI>
@@ -299,7 +299,7 @@
 
     <InstallExecuteSequence>
       <Custom Action="ExecOnComponent" Before="InstallInitialize" Overridable="yes"/>
-      <Custom Action="ExecOnComponentRollback" After="InstallInitialize" Overridable="yes"/>
+      <Custom Action="ExecOnComponentRollback" Before="ProcessComponents" Overridable="yes"/>
       <Custom Action="ExecOnComponentCommit" Before="InstallFinalize" Overridable="yes"/>
       <Custom Action="ExecOnComponent_BeforeStop_rollback" Before="ExecOnComponent_BeforeStop_deferred" Overridable="yes"/>
       <Custom Action="ExecOnComponent_BeforeStop_deferred" Before="StopServices" Overridable="yes"/>
@@ -428,7 +428,7 @@
     <CustomAction Id="PSW_InstallUtil_UninstallRollback_x64" SuppressModularization="yes" BinaryKey="PswManagedCA.X64.dll" DllEntry="InstallUtilExec" Execute="rollback" Impersonate="no"/>
 
     <InstallExecuteSequence>
-      <Custom Action="PSW_InstallUtilSched" After="InstallInitialize" Overridable="yes"/>
+      <Custom Action="PSW_InstallUtilSched" Before="ProcessComponents" Overridable="yes"/>
 
       <Custom Action="PSW_InstallUtil_InstallRollback_x64" Before="PSW_InstallUtil_InstallExec_x64" Overridable="yes"><![CDATA[VersionNT64]]></Custom>
       <Custom Action="PSW_InstallUtil_InstallExec_x64" Before="InstallServices" Overridable="yes"><![CDATA[VersionNT64]]></Custom>
