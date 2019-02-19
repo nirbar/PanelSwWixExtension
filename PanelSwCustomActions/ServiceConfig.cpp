@@ -215,7 +215,7 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 	if (details.account().size() > sizeof(WCHAR)) // Larger than NULL
 	{
 		szAccount = (LPCWSTR)details.account().data();
-		if (!details.password().size() > sizeof(WCHAR))// Larger than NULL
+		if (details.password().size() > sizeof(WCHAR))// Larger than NULL
 		{
 			szPassword = (LPCWSTR)details.password().data();
 		}
