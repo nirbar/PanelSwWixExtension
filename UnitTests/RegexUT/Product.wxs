@@ -11,6 +11,7 @@
         <File Source="$(var.ProjectDir)Product.wxs">
           <PanelSW:FileRegex Regex="\bRegularExpressio(\w)\b" Replacement="$1_RegularExpressio" IgnoreCase="no"/>
           <PanelSW:FileRegex Regex="&lt;!-(-.*-)-&gt;" Replacement="- Hi $1 -" IgnoreCase="no" Condition="SKIP_ME"/>
+          <PanelSW:FileRegex Regex="$$(?![\[]\r\n[\]])" Replacement="new file end"/>
         </File>
       </Component>
       <Component Directory="INSTALLFOLDER">
