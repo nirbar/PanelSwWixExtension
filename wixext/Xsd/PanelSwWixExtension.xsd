@@ -203,7 +203,7 @@
           <xs:documentation><![CDATA[Certificate expiry in days from install.]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="DeleteOnCommit" use="optional" type="YesNoType" default="yes">
+      <xs:attribute name="DeleteOnCommit" use="optional" type="wix:YesNoType" default="yes">
         <xs:annotation>
           <xs:documentation><![CDATA[Whether or not the certificate file will be deleted on commit. Defaults to 'yes']]></xs:documentation>
         </xs:annotation>
@@ -292,12 +292,12 @@
               <xs:documentation>Full file or folder path to backup and restore. This field is formatted.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="IgnoreMissing" type="YesNoType" use="optional">
+          <xs:attribute name="IgnoreMissing" type="wix:YesNoType" use="optional">
             <xs:annotation>
               <xs:documentation>Skip is source is missing. Default is no.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="IgnoreErrors" type="YesNoType" use="optional">
+          <xs:attribute name="IgnoreErrors" type="wix:YesNoType" use="optional">
             <xs:annotation>
               <xs:documentation>Do not fail the installation if the operation fails. Default is no.</xs:documentation>
             </xs:annotation>
@@ -525,7 +525,7 @@
               <xs:documentation><![CDATA[Optional file patterns to add to the archive. Defaults to '*.*']]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="Recursive" type="YesNoType">
+          <xs:attribute name="Recursive" type="wix:YesNoType">
             <xs:annotation>
               <xs:documentation><![CDATA[Whether or not file pattern will be applied recusrsively on the source folder. Defaults to 'yes']]></xs:documentation>
             </xs:annotation>
@@ -562,7 +562,7 @@
               <xs:documentation><![CDATA[Folder to extract the archive into.]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="Overwrite" type="YesNoType" use="optional" default="no">
+          <xs:attribute name="Overwrite" type="wix:YesNoType" use="optional" default="no">
             <xs:annotation>
               <xs:documentation><![CDATA[Whether or not to overwrite existing files. Defaults to 'no'.]]></xs:documentation>
             </xs:annotation>
@@ -641,60 +641,60 @@
       </xs:attribute>
 
       <!-- On Component Action -->
-      <xs:attribute name="OnInstall" type="YesNoType">
+      <xs:attribute name="OnInstall" type="wix:YesNoType">
         <xs:annotation>
           <xs:documentation><![CDATA['yes' to execute on component installation. Default is 'no']]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="OnInstallRollback" type="YesNoType">
+      <xs:attribute name="OnInstallRollback" type="wix:YesNoType">
         <xs:annotation>
           <xs:documentation><![CDATA['yes' to execute on component installation rollback. Default is 'no']]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="OnReinstall" type="YesNoType">
+      <xs:attribute name="OnReinstall" type="wix:YesNoType">
         <xs:annotation>
           <xs:documentation><![CDATA['yes' to execute on component reinstallation. Default is 'no']]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="OnReinstallRollback" type="YesNoType">
+      <xs:attribute name="OnReinstallRollback" type="wix:YesNoType">
         <xs:annotation>
           <xs:documentation><![CDATA['yes' to execute on component reinstallation rollback. Default is 'no']]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="OnUninstall" type="YesNoType">
+      <xs:attribute name="OnUninstall" type="wix:YesNoType">
         <xs:annotation>
           <xs:documentation><![CDATA['yes' to execute on component removal. Default is 'no']]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="OnUninstallRollback" type="YesNoType">
+      <xs:attribute name="OnUninstallRollback" type="wix:YesNoType">
         <xs:annotation>
           <xs:documentation><![CDATA['yes' to execute on component removal rollback. Default is 'no']]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
 
       <!-- Timing -->
-      <xs:attribute name="BeforeStopServices" type="YesNoType">
+      <xs:attribute name="BeforeStopServices" type="wix:YesNoType">
         <xs:annotation>
           <xs:documentation><![CDATA['yes' to execute before StopServices action. Default is 'no']]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="AfterStopServices" type="YesNoType">
+      <xs:attribute name="AfterStopServices" type="wix:YesNoType">
         <xs:annotation>
           <xs:documentation><![CDATA['yes' to execute after StopServices action. Default is 'no']]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="BeforeStartServices" type="YesNoType">
+      <xs:attribute name="BeforeStartServices" type="wix:YesNoType">
         <xs:annotation>
           <xs:documentation><![CDATA['yes' to execute before StartServices action. Default is 'no']]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="AfterStartServices" type="YesNoType">
+      <xs:attribute name="AfterStartServices" type="wix:YesNoType">
         <xs:annotation>
           <xs:documentation><![CDATA['yes' to execute after StartServices action. Default is 'no']]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
 
-      <xs:attribute name="IgnoreExitCode" type="YesNoType">
+      <xs:attribute name="IgnoreExitCode" type="wix:YesNoType">
         <xs:annotation>
           <xs:documentation><![CDATA['yes' to ignore exit code. Use of this attribute is deprecated. Instead, use ErrorHandling]]></xs:documentation>
         </xs:annotation>
@@ -705,13 +705,13 @@
         </xs:annotation>
       </xs:attribute>
 
-      <xs:attribute name="Wait" type="YesNoType" default="yes">
+      <xs:attribute name="Wait" type="wix:YesNoType" default="yes">
         <xs:annotation>
           <xs:documentation><![CDATA[Whether or not to wait for the command to terminate. Defaults to 'yes'.]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
 
-      <xs:attribute name="Impersonate" type="YesNoType" default="no">
+      <xs:attribute name="Impersonate" type="wix:YesNoType" default="no">
         <xs:annotation>
           <xs:documentation><![CDATA['yes' to execute in user context; 'no' to execute as LocalSystem. Default is 'no'.]]></xs:documentation>
         </xs:annotation>
@@ -833,12 +833,12 @@ Delete folder or file specified by a path.
               <xs:documentation>Full file or folder path to delete. This field is formatted.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="IgnoreMissing" type="YesNoType" use="optional">
+          <xs:attribute name="IgnoreMissing" type="wix:YesNoType" use="optional">
             <xs:annotation>
               <xs:documentation>Skip is source is missing. Default is no.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="IgnoreErrors" type="YesNoType" use="optional">
+          <xs:attribute name="IgnoreErrors" type="wix:YesNoType" use="optional">
             <xs:annotation>
               <xs:documentation>Do not fail the installation if the file operation fails. Default is no.</xs:documentation>
             </xs:annotation>
@@ -888,7 +888,7 @@ Delete folder or file specified by a path.
               <xs:documentation>File encoding. Default is 'AutoDetect'.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="IgnoreCase" type="YesNoType" use="optional">
+          <xs:attribute name="IgnoreCase" type="wix:YesNoType" use="optional">
             <xs:annotation>
               <xs:documentation>Set to yes to ignore case in matches. Default is no.</xs:documentation>
             </xs:annotation>
@@ -963,12 +963,12 @@ Execute a Regular Expression to replace or find matches in property values.
               <xs:documentation>Target property. For matches, this will be used as a base property name and results will be placed in property names like DSTPROP_0, DSTPROP_1; Result count will be placed in property DSTPROP_COUNT. For replace operations this will be the name of the target property.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="IgnoreCase" type="YesNoType" use="optional">
+          <xs:attribute name="IgnoreCase" type="wix:YesNoType" use="optional">
             <xs:annotation>
               <xs:documentation>Set to yes to ignore case in matches. Default is no.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="Extended" type="YesNoType" use="optional">
+          <xs:attribute name="Extended" type="wix:YesNoType" use="optional">
             <xs:annotation>
               <xs:documentation>Set to yes for extended regex syntax. Default is no.</xs:documentation>
             </xs:annotation>
@@ -1071,7 +1071,7 @@ Call ShellExecuteEx with parameters
               <xs:documentation>ShellExecuteEx lpVerb parameter. This field is Formatted. Default is empty ("").</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="Wait" use="optional" default="no" type="YesNoType">
+          <xs:attribute name="Wait" use="optional" default="no" type="wix:YesNoType">
             <xs:annotation>
               <xs:documentation>Whether or not to wait for the ShellExecute target to terminate. Defaults to 'no'</xs:documentation>
             </xs:annotation>
@@ -1081,17 +1081,17 @@ Call ShellExecuteEx with parameters
               <xs:documentation>ShellExecuteEx nShow parameter. Default is 0 (SW_HIDE).</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="OnRollback" use="optional" default="no" type="YesNoType">
+          <xs:attribute name="OnRollback" use="optional" default="no" type="wix:YesNoType">
             <xs:annotation>
               <xs:documentation>Whether or not to post this data during rollback.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="OnCommit" use="optional" default="no" type="YesNoType">
+          <xs:attribute name="OnCommit" use="optional" default="no" type="wix:YesNoType">
             <xs:annotation>
               <xs:documentation>Whether or not to post this data during commit.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="OnExecute" use="optional" default="no" type="YesNoType">
+          <xs:attribute name="OnExecute" use="optional" default="no" type="wix:YesNoType">
             <xs:annotation>
               <xs:documentation>Whether or not to post this data during execute sequence (deferred, right after InstallInitialize). If neither OnXXX attribute is pecified as 'yes' then OnExecute='yes' will be the default.</xs:documentation>
             </xs:annotation>
@@ -1161,7 +1161,7 @@ Send telemetry data to a given URL
               </xs:restriction>
             </xs:simpleType>
           </xs:attribute>
-          <xs:attribute name="Secure" use="optional" default="no" type="YesNoType">
+          <xs:attribute name="Secure" use="optional" default="no" type="wix:YesNoType">
             <xs:annotation>
               <xs:documentation>Use HTTP or HTTPS protocol.</xs:documentation>
             </xs:annotation>
@@ -1176,17 +1176,17 @@ Send telemetry data to a given URL
               <xs:documentation>Telemetry data. This field is Formatted</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="OnFailure" use="optional" default="no" type="YesNoType">
+          <xs:attribute name="OnFailure" use="optional" default="no" type="wix:YesNoType">
             <xs:annotation>
               <xs:documentation>Whether or not to post this data during rollback.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="OnSuccess" use="optional" default="no" type="YesNoType">
+          <xs:attribute name="OnSuccess" use="optional" default="no" type="wix:YesNoType">
             <xs:annotation>
               <xs:documentation>Whether or not to post this data during commit.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="OnStart" use="optional" default="no" type="YesNoType">
+          <xs:attribute name="OnStart" use="optional" default="no" type="wix:YesNoType">
             <xs:annotation>
               <xs:documentation>Whether or not to post this data during execute sequence (right after InstallInitialize).</xs:documentation>
             </xs:annotation>
@@ -1301,7 +1301,7 @@ Read values from a .INI file
               <xs:documentation>Property name in which the value will be placed.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="IgnoreErrors" type="YesNoType" use="optional" default="no">
+          <xs:attribute name="IgnoreErrors" type="wix:YesNoType" use="optional" default="no">
             <xs:annotation>
               <xs:documentation>Property name in which the value will be placed.</xs:documentation>
             </xs:annotation>
@@ -1432,7 +1432,7 @@ Remove registry values.
               <xs:documentation>Identifier for the value (primary key).</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="Root" use="required" type="RegistryRootType">
+          <xs:attribute name="Root" use="required" type="wix:RegistryRootType">
             <xs:annotation>
               <xs:documentation>Root of the registry hive.</xs:documentation>
             </xs:annotation>
@@ -1464,40 +1464,6 @@ Remove registry values.
     </xs:complexType>
   </xs:element>
 
-  <xs:simpleType name="YesNoType">
-    <xs:annotation>
-      <xs:documentation>Values of this type will either be "yes" or "no".</xs:documentation>
-    </xs:annotation>
-    <xs:restriction base="xs:NMTOKEN">
-      <xs:enumeration value="yes" />
-      <xs:enumeration value="no" />
-    </xs:restriction>
-  </xs:simpleType>
-
-  <xs:simpleType name="YesNoDefaultType">
-    <xs:annotation>
-      <xs:documentation>Values of this type will either be "yes" or "no".</xs:documentation>
-    </xs:annotation>
-    <xs:restriction base="xs:NMTOKEN">
-      <xs:enumeration value="yes" />
-      <xs:enumeration value="no" />
-      <xs:enumeration value="default" />
-    </xs:restriction>
-  </xs:simpleType>
-
-  <xs:simpleType name="RegistryRootType">
-    <xs:annotation>
-      <xs:documentation>Windows registry roots.</xs:documentation>
-    </xs:annotation>
-    <xs:restriction base="xs:NMTOKEN">
-      <xs:enumeration value="HKLM" />
-      <xs:enumeration value="HKCU" />
-      <xs:enumeration value="HKCR" />
-      <xs:enumeration value="HKCC" />
-      <xs:enumeration value="HKPD" />
-      <xs:enumeration value="HKU" />
-    </xs:restriction>
-  </xs:simpleType>
 
   <xs:simpleType name="RegistryValueType">
     <xs:annotation>
