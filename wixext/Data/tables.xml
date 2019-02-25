@@ -43,7 +43,8 @@
 
   <tableDefinition name="PSW_RegularExpression">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Input" type="string" length="0" modularize="property" category="text" />
+    <columnDefinition name="FilePath" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
+    <columnDefinition name="Input" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
     <columnDefinition name="Expression" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Replacement" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
     <columnDefinition name="DstProperty_" type="string" length="0" modularize="property" category="text" />

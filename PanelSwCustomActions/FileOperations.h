@@ -1,5 +1,6 @@
 #pragma once
 #include "../CaCommon/DeferredActionBase.h"
+#include "fileRegexDetails.pb.h"
 
 class CFileOperations :
 	public CDeferredActionBase
@@ -17,6 +18,8 @@ public:
 
 	HRESULT CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool bIgnoreMissing, bool bIgnoreErrors);
 	HRESULT DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bIgnoreErrors);
+
+	static ::com::panelsw::ca::FileRegexDetails::FileEncoding DetectEncoding(const void* pFileContent, DWORD dwSize);
 
 protected:
 	// Execute the command object (XML element)

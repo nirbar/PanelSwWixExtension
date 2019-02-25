@@ -938,7 +938,12 @@ Execute a Regular Expression to replace or find matches in property values.
               <xs:documentation>Identifier for the value (primary key).</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="Input" type="xs:string" use="required">
+          <xs:attribute name="FilePath" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>File path. File contents will be used as input. This field is formatted.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Input" type="xs:string" use="optional">
             <xs:annotation>
               <xs:documentation>Input text. This field is formatted.</xs:documentation>
             </xs:annotation>
@@ -955,7 +960,7 @@ Execute a Regular Expression to replace or find matches in property values.
           </xs:attribute>
           <xs:attribute name="DstProperty" type="xs:string" use="optional">
             <xs:annotation>
-              <xs:documentation>Target property. For matches, this will be used as a base property name and results will be placed in property names like DSTPROP_0, DSTPROP_1. For replace operations this will be the name of the target property.</xs:documentation>
+              <xs:documentation>Target property. For matches, this will be used as a base property name and results will be placed in property names like DSTPROP_0, DSTPROP_1; Result count will be placed in property DSTPROP_COUNT. For replace operations this will be the name of the target property.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="IgnoreCase" type="YesNoType" use="optional">

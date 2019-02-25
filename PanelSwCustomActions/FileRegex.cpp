@@ -289,7 +289,7 @@ HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szRepla
 	::CloseHandle(hFile);
 	hFile = INVALID_HANDLE_VALUE;
 
-	eDetectedEncoding = DetectEncoding(pFileContents, dwFileSize);
+	eDetectedEncoding = CFileOperations::DetectEncoding(pFileContents, dwFileSize);
 	if (eEncoding != FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_None)
 	{
 		if (eDetectedEncoding != eEncoding)
@@ -430,104 +430,4 @@ LExit:
 	}
 
 	return hr;
-}
-
-FileRegexDetails::FileEncoding CFileRegex::DetectEncoding(const void* pFileContent, DWORD dwSize)
-{
-	int nTests = IS_TEXT_UNICODE_UNICODE_MASK | IS_TEXT_UNICODE_REVERSE_MASK | IS_TEXT_UNICODE_NOT_UNICODE_MASK | IS_TEXT_UNICODE_NOT_ASCII_MASK;
-	HRESULT hr = S_OK;
-	FileRegexDetails::FileEncoding eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_None;
-
-	if (dwSize < 2)
-	{
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "File is too short to analyze encoding. Assuming multi-byte");
-		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_MultiByte;
-		ExitFunction();
-	}
-
-	::IsTextUnicode(pFileContent, dwSize, &nTests);
-
-	// Multi-byte
-	if (nTests & IS_TEXT_UNICODE_ILLEGAL_CHARS)
-	{
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "File has illegal UNICODE characters");
-		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_MultiByte;
-		ExitFunction();
-	}
-	if (nTests & IS_TEXT_UNICODE_ODD_LENGTH)
-	{
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "File has odd length so it cannot be UNICODE");
-		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_MultiByte;
-		ExitFunction();
-	}
-
-	// Unicode BOM
-	if (nTests & IS_TEXT_UNICODE_SIGNATURE)
-	{
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "File has UNICODE BOM");
-		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_Unicode;
-		ExitFunction();
-	}
-	if (nTests & IS_TEXT_UNICODE_REVERSE_SIGNATURE)
-	{
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "File has reverse UNICODE BOM");
-		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_ReverseUnicode;
-		ExitFunction();
-	}
-
-	// Unicode
-	if (nTests & IS_TEXT_UNICODE_ASCII16)
-	{
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "File has only ASCII UNICODE characters");
-		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_Unicode;
-		ExitFunction();
-	}
-	if (nTests & IS_TEXT_UNICODE_CONTROLS)
-	{
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "File has UNICODE control characters");
-		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_Unicode;
-		ExitFunction();
-	}
-
-	// Reverse unicode
-	if (nTests & IS_TEXT_UNICODE_REVERSE_ASCII16)
-	{
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "File has only reverse ASCII UNICODE characters");
-		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_ReverseUnicode;
-		ExitFunction();
-	}
-	if (nTests & IS_TEXT_UNICODE_REVERSE_CONTROLS)
-	{
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "File has reverse UNICODE control characters");
-		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_ReverseUnicode;
-		ExitFunction();
-	}
-
-	// Stat tests
-	if (nTests & IS_TEXT_UNICODE_STATISTICS)
-	{
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "File is probably UNICODE");
-		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_Unicode;
-		ExitFunction();
-	}
-	if (nTests & IS_TEXT_UNICODE_REVERSE_STATISTICS)
-	{
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "File is probably reverse UNICODE");
-		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_Unicode;
-		ExitFunction();
-	}
-
-	// Unicode NULL (can't tell if it strait or reverse).
-	if (nTests & IS_TEXT_UNICODE_NULL_BYTES)
-	{
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "File has NULL UNICODE characters. Assuming unicode, though, it may as well be reverse unicode");
-		eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_Unicode;
-		ExitFunction();
-	}
-
-	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "All tests failed for UNICODE encoding. Assuming multi-byte");
-	eEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_MultiByte;
-
-LExit:
-	return eEncoding;
 }

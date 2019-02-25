@@ -52,6 +52,10 @@
                                Replacement="OUR"
                                Expression="YOUR" Order="1"
                                />
+    <PanelSW:RegularExpression FilePath="[System64Folder]drivers\etc\hosts"
+                               DstProperty="HOSTS"
+                               Expression=".*127\.0\.0\.1.*"
+                               />
     <CustomAction Id="TextRegexMatch" Error="REGEX_MATCH_0 Should be '[MY_INPUT]'" Execute="immediate" />
     <CustomAction Id="TextRegexReplace" Error="REGEX_REPLACE Should be 'My Input is YOUR INPUT'" Execute="immediate" />
     <CustomAction Id="TextRegexReplace2" Error="REGEX_REPLACE_3 Should be undefined" Execute="immediate" />

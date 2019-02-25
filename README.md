@@ -13,7 +13,7 @@ PanelSwWixExtension is a [WiX](http://wixtoolset.org/) extension that contains v
   - *SqlSearch*: Execute a SQL query and place result in a property.
   - *ReadIniValues*: Reads .INI file values.
   - *XmlSearch*: Read XML values.
-  - *RegularExpression*: Execute a Regular Expression to replace or find matches in property values.
+  - *RegularExpression*: Execute a Regular Expression to replace or find matches in property values and in file contents.
   - *MsiSqlQuery*: Execute a MSI-SQL query on the MSI database.
   - *CreateSelfSignCertificate*: Create a self-sign certificate that can then be installed by WixIisExtension.
   - *AlwaysOverwriteFile*: Sets the highest possible version on a file row (65535.65535.65535.65535) to ensure it overwrites existing file

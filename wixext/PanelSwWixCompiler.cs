@@ -2649,6 +2649,7 @@ namespace PanelSw.Wix.Extensions
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
             string id = null;
+            string filepath = null;
             string input = null;
             string regex = null;
             string replacement = null;
@@ -2661,31 +2662,34 @@ namespace PanelSw.Wix.Extensions
             {
                 if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
                 {
-                    switch (attrib.LocalName.ToLower())
+                    switch (attrib.LocalName)
                     {
-                        case "id":
+                        case "Id":
                             id = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "input":
+                        case "FilePath":
+                            filepath = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Input":
                             input = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "expression":
+                        case "Expression":
                             regex = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "replacement":
+                        case "Replacement":
                             replacement = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             flags |= (int)RegexSearchFlags.Replace;
                             break;
-                        case "dstproperty":
+                        case "DstProperty":
                             prop = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "ignorecase":
+                        case "IgnoreCase":
                             flags |= (int)RegexMatchFlags.IgnoreCare << 2;
                             break;
-                        case "extended":
+                        case "Extended":
                             flags |= (int)RegexMatchFlags.Extended << 2;
                             break;
-                        case "order":
+                        case "Order":
                             order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
                             break;
 
@@ -2704,10 +2708,6 @@ namespace PanelSw.Wix.Extensions
             {
                 id = "rgx" + Guid.NewGuid().ToString("N");
             }
-            if (string.IsNullOrEmpty(input))
-            {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Input"));
-            }
             if (string.IsNullOrEmpty(regex))
             {
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Expression"));
@@ -2716,9 +2716,9 @@ namespace PanelSw.Wix.Extensions
             {
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "DstProperty"));
             }
-            if (string.IsNullOrEmpty(input))
+            if (string.IsNullOrEmpty(input) == string.IsNullOrEmpty(filepath))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Input"));
+                Core.OnMessage(WixErrors.IllegalAttributeWithOtherAttribute(sourceLineNumbers, node.LocalName, "Input", "FilePath"));
             }
 
             // find unexpected child elements
@@ -2749,13 +2749,14 @@ namespace PanelSw.Wix.Extensions
                 // create a row in the Win32_CopyFiles table
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_RegularExpression");
                 row[0] = id;
-                row[1] = input;
-                row[2] = regex;
-                row[3] = replacement;
-                row[4] = prop;
-                row[5] = flags;
-                row[6] = condition;
-                row[7] = order;
+                row[1] = filepath;
+                row[2] = input;
+                row[3] = regex;
+                row[4] = replacement;
+                row[5] = prop;
+                row[6] = flags;
+                row[7] = condition;
+                row[8] = order;
             }
         }
 
