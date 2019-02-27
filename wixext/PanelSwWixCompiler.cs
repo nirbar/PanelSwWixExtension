@@ -1924,6 +1924,7 @@ namespace PanelSw.Wix.Extensions
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
             string property = null;
             string certName = null;
+            string friendlyName = null;
             string issuer = null;
             string serial = null;
 
@@ -1941,6 +1942,10 @@ namespace PanelSw.Wix.Extensions
                     {
                         case "CertName":
                             certName = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        case "FriendlyName":
+                            friendlyName = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
 
                         case "Issuer":
@@ -1967,14 +1972,14 @@ namespace PanelSw.Wix.Extensions
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.LocalName, "Id"));
             }
 
-            // Either CertName OR (Issuer AND Serial)
+            // At least CertName OR (Issuer AND Serial) OR FriendlyName
             if (string.IsNullOrEmpty(issuer) != string.IsNullOrEmpty(serial))
             {
                 Core.OnMessage(WixErrors.ExpectedAttributes(sourceLineNumbers, node.LocalName, "Issuer", "SerialNumber"));
             }
-            if (string.IsNullOrEmpty(certName) == string.IsNullOrEmpty(issuer))
+            if (string.IsNullOrEmpty(certName) && string.IsNullOrEmpty(issuer) && string.IsNullOrEmpty(friendlyName))
             {
-                Core.OnMessage(WixErrors.ExpectedAttributesWithoutOtherAttribute(sourceLineNumbers, node.LocalName, "Issuer", "SerialNumber", "CertName"));
+                Core.OnMessage(WixErrors.ExpectedAttributes(sourceLineNumbers, node.LocalName, "Issuer", "SerialNumber", "CertName", "FriendlyName"));
             }
 
             // find unexpected child elements
@@ -1993,8 +1998,9 @@ namespace PanelSw.Wix.Extensions
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_CertificateHashSearch");
                 row[0] = property;
                 row[1] = certName;
-                row[2] = issuer;
-                row[3] = serial;
+                row[2] = friendlyName;
+                row[3] = issuer;
+                row[4] = serial;
             }
         }
 

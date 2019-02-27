@@ -93,6 +93,11 @@
           <xs:documentation><![CDATA[Certificate subject name. The field is formatted.]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="FriendlyName" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Certificate friendly name. The field is formatted.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
       <xs:attribute name="Issuer" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Certificate issuer name in binary format as returned by RegistrySearch. The field is formatted.]]></xs:documentation>
