@@ -505,7 +505,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(id))
             {
-                id = "pfx" + Guid.NewGuid().ToString("N");
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(x500))
             {

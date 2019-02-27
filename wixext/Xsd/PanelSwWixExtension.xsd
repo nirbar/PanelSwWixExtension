@@ -178,7 +178,7 @@
     </xs:annotation>
 
     <xs:complexType>
-      <xs:attribute name="Id" type="xs:string">
+      <xs:attribute name="Id" use="required" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[Property name in which the path of the newly created PFX file will be saved.]]></xs:documentation>
         </xs:annotation>
