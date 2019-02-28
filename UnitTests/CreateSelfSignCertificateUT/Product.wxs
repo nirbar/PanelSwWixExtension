@@ -23,7 +23,7 @@
 
     <Property Id="MSIFASTINSTALL" Value="7"></Property>
     <Property Id="CERT_HASH">
-      <PanelSW:CertificateHashSearch FriendlyName="VeriSign Class 3 Public Primary CA"/>
+      <PanelSW:CertificateHashSearch FriendlyName="IIS Express Development Certificate"/>
     </Property>
     <Condition Message="Bad Cert">
       <![CDATA[Installed OR CERT_HASH]]>

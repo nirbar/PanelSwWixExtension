@@ -65,7 +65,7 @@ extern "C" UINT __stdcall CertificateHashSearch(MSIHANDLE hInstall)
 
 		if (!certName.IsNullOrEmpty())
 		{
-			WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Searching certificate with subject '%ls'", (LPCWSTR)certName);
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Searching certificate with subject '%ls'", (LPCWSTR)certName);
 			pCertContext = ::CertFindCertificateInStore(hMachineStore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0, CERT_FIND_SUBJECT_STR, (LPCWSTR)certName, pCertContext);
 			if (!pCertContext)
 			{
@@ -128,7 +128,7 @@ static HRESULT SearchIssuerAndSerial(HCERTSTORE hMachineStore, CWixString &issue
 	BYTE *buffer1 = nullptr;
 	BYTE *buffer2 = nullptr;
 
-	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Searching certificate with issuer '%ls' and serial '%ls'", (LPCWSTR)issuer, (LPCWSTR)serial);
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Searching certificate with issuer '%ls' and serial '%ls'", (LPCWSTR)issuer, (LPCWSTR)serial);
 
 	::ZeroMemory(&certInfo, sizeof(certInfo));
 
@@ -171,7 +171,7 @@ static HRESULT SearchByFriendlyName(HCERTSTORE hMachineStore, LPCWSTR friendlyNa
 	WCHAR wzFriendlyName[256] = { 0 };
 	DWORD cbFriendlyName = sizeof(wzFriendlyName);
 
-	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Searching certificate with friendly name '%ls' and serial '%ls'", friendlyName);
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Searching certificate with friendly name '%ls'", friendlyName);
 	while (NULL != (pCertContext = ::CertFindCertificateInStore(hMachineStore, PKCS_7_ASN_ENCODING | X509_ASN_ENCODING, 0, CERT_FIND_ANY, NULL, pCertContext)))
 	{
 		wzFriendlyName[0] = NULL;
