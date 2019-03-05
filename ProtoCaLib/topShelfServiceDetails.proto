@@ -1,6 +1,7 @@
 syntax = "proto3";
 package com.panelsw.ca;
 option optimize_for = LITE_RUNTIME;
+import "ErrorHandling.proto";
 
 message TopShelfServiceDetails{
 
@@ -18,12 +19,6 @@ message TopShelfServiceDetails{
 		localservice = 2;
 		networkservice = 3;
 		noAccount = 4;
-	}
-
-	enum ErrorHandling {
-		fail = 0;
-		ignore = 1;
-		prompt = 2;
 	}
 	
 	bytes file = 1;

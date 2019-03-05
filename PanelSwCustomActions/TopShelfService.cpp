@@ -110,14 +110,14 @@ extern "C" UINT __stdcall TopShelf(MSIHANDLE hInstall)
 			hr = installRollbackCAD.AddUninstall((LPCWSTR)file, (LPCWSTR)instance);
 			BreakExitOnFailure(hr, "Failed scheduling service install-rollback");
 
-			hr = installCAD.AddInstall((LPCWSTR)file, (LPCWSTR)serviceName, (LPCWSTR)displayName, (LPCWSTR)description, (LPCWSTR)instance, (LPCWSTR)userName, (LPCWSTR)password, (TopShelfServiceDetails_HowToStart)howToStart, (TopShelfServiceDetails_ServiceAccount)account, (TopShelfServiceDetails_ErrorHandling)promptOnError);
+			hr = installCAD.AddInstall((LPCWSTR)file, (LPCWSTR)serviceName, (LPCWSTR)displayName, (LPCWSTR)description, (LPCWSTR)instance, (LPCWSTR)userName, (LPCWSTR)password, (TopShelfServiceDetails_HowToStart)howToStart, (TopShelfServiceDetails_ServiceAccount)account, (com::panelsw::ca::ErrorHandling)promptOnError);
 			BreakExitOnFailure(hr, "Failed scheduling service install");
 		}
 		else
 		{
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will uninstall TopShelf service '%ls'", (LPCWSTR)file);
 			
-			hr = uninstallRollbackCAD.AddInstall((LPCWSTR)file, (LPCWSTR)serviceName, (LPCWSTR)displayName, (LPCWSTR)description, (LPCWSTR)instance, (LPCWSTR)userName, (LPCWSTR)password, (TopShelfServiceDetails_HowToStart)howToStart, (TopShelfServiceDetails_ServiceAccount)account, (TopShelfServiceDetails_ErrorHandling)promptOnError);
+			hr = uninstallRollbackCAD.AddInstall((LPCWSTR)file, (LPCWSTR)serviceName, (LPCWSTR)displayName, (LPCWSTR)description, (LPCWSTR)instance, (LPCWSTR)userName, (LPCWSTR)password, (TopShelfServiceDetails_HowToStart)howToStart, (TopShelfServiceDetails_ServiceAccount)account, (com::panelsw::ca::ErrorHandling)promptOnError);
 			BreakExitOnFailure(hr, "Failed scheduling service uninstall-rollback");
 
 			hr = uninstallCAD.AddUninstall((LPCWSTR)file, (LPCWSTR)instance);
@@ -154,7 +154,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-HRESULT CTopShelfService::AddInstall(LPCWSTR file, LPCWSTR serviceName, LPCWSTR displayName, LPCWSTR description, LPCWSTR instance, LPCWSTR userName, LPCWSTR passowrd, TopShelfServiceDetails_HowToStart howToStart, TopShelfServiceDetails_ServiceAccount account, TopShelfServiceDetails_ErrorHandling promptOnError)
+HRESULT CTopShelfService::AddInstall(LPCWSTR file, LPCWSTR serviceName, LPCWSTR displayName, LPCWSTR description, LPCWSTR instance, LPCWSTR userName, LPCWSTR passowrd, TopShelfServiceDetails_HowToStart howToStart, TopShelfServiceDetails_ServiceAccount account, com::panelsw::ca::ErrorHandling promptOnError)
 {
 	HRESULT hr = S_OK;
 	Command *pCmd = nullptr;
@@ -251,17 +251,17 @@ LRetry:
 	{
 		switch (details.errorhandling())
 		{
-		case TopShelfServiceDetails_ErrorHandling::TopShelfServiceDetails_ErrorHandling_fail:
+		case ErrorHandling::fail:
 		default:
 			// Will fail downstairs.
 			break;
 
-		case TopShelfServiceDetails_ErrorHandling::TopShelfServiceDetails_ErrorHandling_ignore:
+		case ErrorHandling::ignore:
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Ignoring TopShelf command failure 0x%08X", hr);
 			hr = S_OK;
 			break;
 
-		case TopShelfServiceDetails_ErrorHandling::TopShelfServiceDetails_ErrorHandling_prompt:
+		case ErrorHandling::prompt:
 		{
 			HRESULT hrOp = hr;
 			PMSIHANDLE hRec;

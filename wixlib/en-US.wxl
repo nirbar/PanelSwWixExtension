@@ -8,6 +8,7 @@
   <String Id="ExecOnComponent"><![CDATA[Executing custom actions]]></String>
   <String Id="ExecOnFailure"><![CDATA[Failed executing command [2]]]></String>
   <String Id="ServiceConfig"><![CDATA[Configuring Services]]></String>
+  <String Id="ServiceConfigFailure"><![CDATA[Failed configuring service [2]]]></String>
   <String Id="InstallUtil"><![CDATA[Installing .NET service assemblies]]></String>
   <String Id="SqlSearch"><![CDATA[Executing SQL queries]]></String>
   <String Id="BackupAndRestore"><![CDATA[Migrating configurations]]></String>

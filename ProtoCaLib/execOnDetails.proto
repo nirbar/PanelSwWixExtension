@@ -1,14 +1,9 @@
 syntax = "proto3";
 package com.panelsw.ca;
 option optimize_for = LITE_RUNTIME;
+import "ErrorHandling.proto";
 
 message ExecOnDetails{
-	
-	enum ErrorHandling {
-		fail = 0;
-		ignore = 1;
-		prompt = 2;
-	}
 
 	bytes command = 1;
 	bytes obfuscatedcommand = 2;

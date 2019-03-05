@@ -97,7 +97,7 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		CWixString szId, szComponent, szBinary, szCommand, szCommandFormat, workDir;
         CWixString szSubQuery;
 		int nFlags = 0;
-		int errorHandling = ExecOnDetails_ErrorHandling::ExecOnDetails_ErrorHandling_fail;
+		int errorHandling = ErrorHandling::fail;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
 		CExecOnComponent::ExitCodeMap exitCodeMap;
 		std::map<std::string, std::string> environment;		
@@ -390,11 +390,11 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedC
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' before StopServices", szObfuscatedCommand);
 		if (nFlags & Flags::Impersonate)
 		{
-			hr = pBeforeStopImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags, (ExecOnDetails_ErrorHandling)errorHandling);
+			hr = pBeforeStopImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags, (ErrorHandling)errorHandling);
 		}
 		else
 		{
-			hr = pBeforeStop->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags, (ExecOnDetails_ErrorHandling)errorHandling);
+			hr = pBeforeStop->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags, (ErrorHandling)errorHandling);
 		}
 		BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
@@ -403,37 +403,37 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedC
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' after StopServices", szObfuscatedCommand);
 		if (nFlags & Flags::Impersonate)
 		{
-			hr = pAfterStopImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags, (ExecOnDetails_ErrorHandling)errorHandling);
+			hr = pAfterStopImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags, (ErrorHandling)errorHandling);
 		}
 		else
 		{
-			hr = pAfterStop->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags, (ExecOnDetails_ErrorHandling)errorHandling);
+			hr = pAfterStop->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags, (ErrorHandling)errorHandling);
 		}
 		BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
 	if (nFlags & Flags::BeforeStartServices)
 	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' before StartServices", szObfuscatedCommand, (ExecOnDetails_ErrorHandling)errorHandling);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' before StartServices", szObfuscatedCommand, (ErrorHandling)errorHandling);
 		if (nFlags & Flags::Impersonate)
 		{
-			hr = pBeforeStartImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags, (ExecOnDetails_ErrorHandling)errorHandling);
+			hr = pBeforeStartImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags, (ErrorHandling)errorHandling);
 		}
 		else
 		{
-			hr = pBeforeStart->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags, (ExecOnDetails_ErrorHandling)errorHandling);
+			hr = pBeforeStart->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags, (ErrorHandling)errorHandling);
 		}
 		BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
 	if (nFlags & Flags::AfterStartServices)
 	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' after StartServices", szObfuscatedCommand, (ExecOnDetails_ErrorHandling)errorHandling);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' after StartServices", szObfuscatedCommand, (ErrorHandling)errorHandling);
 		if (nFlags & Flags::Impersonate)
 		{
-			hr = pAfterStartImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags, (ExecOnDetails_ErrorHandling)errorHandling);
+			hr = pAfterStartImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags, (ErrorHandling)errorHandling);
 		}
 		else
 		{
-			hr = pAfterStart->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags, (ExecOnDetails_ErrorHandling)errorHandling);
+			hr = pAfterStart->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pEnv, nFlags, (ErrorHandling)errorHandling);
 		}
 		BreakExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
@@ -442,7 +442,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CExecOnComponent::AddExec(LPCWSTR szCommand, LPCWSTR szObfuscatedCommand, LPCWSTR szWorkingDirectory, ExitCodeMap* pExitCodeMap, EnvironmentMap *pEnv, int nFlags, ExecOnDetails_ErrorHandling errorHandling)
+HRESULT CExecOnComponent::AddExec(LPCWSTR szCommand, LPCWSTR szObfuscatedCommand, LPCWSTR szWorkingDirectory, ExitCodeMap* pExitCodeMap, EnvironmentMap *pEnv, int nFlags, ErrorHandling errorHandling)
 {
     HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
@@ -561,17 +561,17 @@ LRetry:
 	{
 		switch (details.errorhandling())
 		{
-		case ExecOnDetails_ErrorHandling::ExecOnDetails_ErrorHandling_fail:
+		case ErrorHandling::fail:
 		default:
 			// Will fail downstairs.
 			break;
 
-		case ExecOnDetails_ErrorHandling::ExecOnDetails_ErrorHandling_ignore:
+		case ErrorHandling::ignore:
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Ignoring command failure 0x%08X", hr);
 			hr = S_OK;
 			break;
 
-		case ExecOnDetails_ErrorHandling::ExecOnDetails_ErrorHandling_prompt:
+		case ErrorHandling::prompt:
 		{
 			HRESULT hrOp = hr;
 			PMSIHANDLE hRec;

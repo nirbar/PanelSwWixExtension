@@ -8,7 +8,7 @@ class CTopShelfService :
 {
 public:
 
-	HRESULT AddInstall(LPCWSTR file, LPCWSTR serviceName, LPCWSTR displayName, LPCWSTR description, LPCWSTR instance, LPCWSTR userName, LPCWSTR passowrd, ::com::panelsw::ca::TopShelfServiceDetails_HowToStart howToStart, ::com::panelsw::ca::TopShelfServiceDetails_ServiceAccount account, ::com::panelsw::ca::TopShelfServiceDetails_ErrorHandling promptOnError);
+	HRESULT AddInstall(LPCWSTR file, LPCWSTR serviceName, LPCWSTR displayName, LPCWSTR description, LPCWSTR instance, LPCWSTR userName, LPCWSTR passowrd, ::com::panelsw::ca::TopShelfServiceDetails_HowToStart howToStart, ::com::panelsw::ca::TopShelfServiceDetails_ServiceAccount account, ::com::panelsw::ca::ErrorHandling promptOnError);
 	HRESULT AddUninstall(LPCWSTR file, LPCWSTR instance);
 
 protected:

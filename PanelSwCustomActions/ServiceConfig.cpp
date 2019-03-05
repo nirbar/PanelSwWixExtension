@@ -8,9 +8,6 @@
 using namespace com::panelsw::ca;
 using namespace google::protobuf;
 
-#define ServiceConfig_QUERY L"SELECT `Id`, `Component_`, `ServiceName`, `CommandLine`, `Account`, `Password`, `Start` FROM `PSW_ServiceConfig`"
-enum ServiceConfigQuery { Id = 1, Component, ServiceName, CommandLine, Account, Password, Start};
-
 extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
@@ -33,8 +30,8 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 	BreakExitOnFailure(hr, "Table does not exist 'PSW_ServiceConfig'. Have you authored 'PanelSw:ServiceConfig' entries in WiX code?");
 
 	// Execute view
-	hr = WcaOpenExecuteView(ServiceConfig_QUERY, &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", ServiceConfig_QUERY);
+	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `ServiceName`, `CommandLine`, `Account`, `Password`, `Start`, `ErrorHandling` FROM `PSW_ServiceConfig`", &hView);
+	BreakExitOnFailure(hr, "Failed to execute SQL query.");
 
 	// Open service.
 	hManager = ::OpenSCManager(nullptr, nullptr, SC_MANAGER_CONNECT);
@@ -48,22 +45,25 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 		// Get fields
 		CWixString szId, szComponent, szServiceName, szCommand, szCommandFormat, szCommandObfuscated, szAccount, szPassword;
 		int start = -1;
+		int errorHandling = -1;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
 
-		hr = WcaGetRecordString(hRecord, ServiceConfigQuery::Id, (LPWSTR*)szId);
+		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szId);
 		BreakExitOnFailure(hr, "Failed to get Id.");
-		hr = WcaGetRecordString(hRecord, ServiceConfigQuery::Component, (LPWSTR*)szComponent);
+		hr = WcaGetRecordString(hRecord, 2, (LPWSTR*)szComponent);
 		BreakExitOnFailure(hr, "Failed to get Component.");
-		hr = WcaGetRecordFormattedString(hRecord, ServiceConfigQuery::ServiceName, (LPWSTR*)szServiceName);
+		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)szServiceName);
 		BreakExitOnFailure(hr, "Failed to get ServiceName.");
-		hr = WcaGetRecordString(hRecord, ServiceConfigQuery::CommandLine, (LPWSTR*)szCommandFormat);
+		hr = WcaGetRecordString(hRecord, 4, (LPWSTR*)szCommandFormat);
 		BreakExitOnFailure(hr, "Failed to get CommandLine.");
-		hr = WcaGetRecordFormattedString(hRecord, ServiceConfigQuery::Account, (LPWSTR*)szAccount);
+		hr = WcaGetRecordFormattedString(hRecord, 5, (LPWSTR*)szAccount);
 		BreakExitOnFailure(hr, "Failed to get Account.");
-		hr = WcaGetRecordFormattedString(hRecord, ServiceConfigQuery::Password, (LPWSTR*)szPassword);
+		hr = WcaGetRecordFormattedString(hRecord, 6, (LPWSTR*)szPassword);
 		BreakExitOnFailure(hr, "Failed to get Password.");
-		hr = WcaGetRecordInteger(hRecord, ServiceConfigQuery::Start, &start);
+		hr = WcaGetRecordInteger(hRecord, 7, &start);
 		BreakExitOnFailure(hr, "Failed to get Start.");
+		hr = WcaGetRecordInteger(hRecord, 8, &errorHandling);
+		BreakExitOnFailure(hr, "Failed to get ErrorHandling.");
 
 		// Test condition
 		compAction = WcaGetComponentToDo(szComponent);
@@ -89,7 +89,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will change service '%ls' start type to %i", (LPCWSTR)szServiceName, start);
 		}
 
-		hr = oDeferred.AddServiceConfig(szServiceName, szCommand, szAccount, szPassword, start);
+		hr = oDeferred.AddServiceConfig(szServiceName, szCommand, szAccount, szPassword, start, (ErrorHandling)errorHandling);
 		ExitOnFailure(hr, "Failed creating CustomActionData");
 
 		// Get current service account.
@@ -112,7 +112,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 				pServiceCfg->dwStartType = SERVICE_NO_CHANGE;
 			}
 
-			hr = oRollback.AddServiceConfig((LPCWSTR)szServiceName, pServiceCfg->lpBinaryPathName, pServiceCfg->lpServiceStartName, nullptr, pServiceCfg->dwStartType);
+			hr = oRollback.AddServiceConfig((LPCWSTR)szServiceName, pServiceCfg->lpBinaryPathName, pServiceCfg->lpServiceStartName, nullptr, pServiceCfg->dwStartType, ErrorHandling::ignore);
 			ExitOnFailure(hr, "Failed creating rollback CustomActionData");
 
 			delete[]pServiceCfg;
@@ -155,7 +155,7 @@ LExit:
 	return WcaFinalize(dwRes);
 }
 
-HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start)
+HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, ErrorHandling errorHandling)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
@@ -183,6 +183,7 @@ HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szComman
 		pDetails->set_commandline(szCommandLine, WSTR_BYTE_SIZE(szCommandLine));
 	}
 	pDetails->set_start((ServciceConfigDetails::ServiceStart)start);
+	pDetails->set_errorhandling((ErrorHandling)errorHandling);
 
 	pAny = pCmd->mutable_details();
 	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
@@ -202,9 +203,6 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 	LPCWSTR szCommandLine = nullptr;
 	LPCWSTR szAccount = nullptr;
 	LPCWSTR szPassword = nullptr;
-	SC_HANDLE hManager = NULL;
-	SC_HANDLE hService = NULL;
-	DWORD dwRes = ERROR_SUCCESS;
 	DWORD bRes = TRUE;
 	ServciceConfigDetails details;
 
@@ -225,6 +223,29 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 		szCommandLine = (LPCWSTR)details.commandline().data();
 	}
 
+LRetry:
+	hr = ExecuteOne(szServiceName, szCommandLine, szAccount, szPassword, details.start());
+	if (FAILED(hr))
+	{
+		hr = PromptError(szServiceName, details.errorhandling());
+		if (hr == E_RETRY)
+		{
+			goto LRetry;
+		}
+	}
+	ExitOnFailure(hr, "Failed configuring service '%ls'", szServiceName);
+
+LExit:
+	return hr;
+}
+
+HRESULT CServiceConfig::ExecuteOne(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, DWORD dwStart)
+{
+	HRESULT hr = S_OK;
+	SC_HANDLE hManager = NULL;
+	SC_HANDLE hService = NULL;
+	DWORD dwRes = ERROR_SUCCESS;
+
 	// Open service.
 	hManager = ::OpenSCManager(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
 	ExitOnNullWithLastError(hManager, hr, "Failed opening service control manager database");
@@ -233,7 +254,7 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 	ExitOnNullWithLastError(hService, hr, "Failed opening service '%ls'", szServiceName);
 
 	// Configure.
-	dwRes = ::ChangeServiceConfig(hService, SERVICE_NO_CHANGE, details.start(), SERVICE_NO_CHANGE, szCommandLine, nullptr, nullptr, nullptr, szAccount, szPassword, nullptr);
+	dwRes = ::ChangeServiceConfig(hService, SERVICE_NO_CHANGE, dwStart, SERVICE_NO_CHANGE, szCommandLine, nullptr, nullptr, nullptr, szAccount, szPassword, nullptr);
 	ExitOnNullWithLastError(dwRes, hr, "Failed configuring service '%ls'", szServiceName);
 
 LExit:
@@ -246,5 +267,69 @@ LExit:
 	{
 		::CloseServiceHandle(hManager);
 	}
+	return hr;
+}
+
+HRESULT CServiceConfig::PromptError(LPCWSTR szServiceName, ::com::panelsw::ca::ErrorHandling errorHandling)
+{
+	HRESULT hr = S_OK;
+
+	switch (errorHandling)
+	{
+	case ErrorHandling::fail:
+	default:
+		hr = E_FAIL;
+		break;
+
+	case ErrorHandling::ignore:
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Ignoring service configuration failure");
+		break;
+
+	case ErrorHandling::prompt:
+	{
+		PMSIHANDLE hRec;
+		UINT promptResult = IDOK;
+
+		hRec = ::MsiCreateRecord(2);
+		BreakExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
+
+		hr = WcaSetRecordInteger(hRec, 1, 27002);
+		BreakExitOnFailure(hr, "Failed setting record integer");
+
+		hr = WcaSetRecordString(hRec, 2, szServiceName);
+		BreakExitOnFailure(hr, "Failed setting record string");
+
+		promptResult = WcaProcessMessage((INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_ERROR | MB_ABORTRETRYIGNORE | MB_DEFBUTTON1 | MB_ICONERROR), hRec);
+		switch (promptResult)
+		{
+		case IDABORT:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User aborted on failure to configure '%ls' service", szServiceName);
+			hr = E_FAIL;
+			break;
+
+		case IDRETRY:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose to retry on failure to configure '%ls' service", szServiceName);
+			hr = E_RETRY;
+			break;
+
+		case IDIGNORE:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User ignored failure to configure '%ls' service", szServiceName);
+			break;
+
+		case IDCANCEL:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User canceled on failure to configure '%ls' service", szServiceName);
+			BreakExitOnWin32Error(ERROR_INSTALL_USEREXIT, hr, "Cancelling");
+			break;
+
+		default: // Probably silent (result 0)
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failure to configure '%ls' service. Prompt result is 0x%08X", szServiceName, promptResult);
+			hr = E_FAIL;
+			break;
+		}
+		break;
+	}
+	}
+
+LExit:
 	return hr;
 }

@@ -77,6 +77,9 @@
     <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\customActionData.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\ErrorHandling.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
     <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\command.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
@@ -113,6 +116,9 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\customActionData.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\ErrorHandling.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
     <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\command.pb.h">

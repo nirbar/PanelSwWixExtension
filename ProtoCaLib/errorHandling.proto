@@ -1,0 +1,9 @@
+syntax = "proto3";
+package com.panelsw.ca;
+option optimize_for = LITE_RUNTIME;
+
+enum ErrorHandling {
+	fail = 0;
+	ignore = 1;
+	prompt = 2;
+}

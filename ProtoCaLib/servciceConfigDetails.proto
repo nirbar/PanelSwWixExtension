@@ -1,6 +1,7 @@
 syntax = "proto3";
 package com.panelsw.ca;
 option optimize_for = LITE_RUNTIME;
+import "ErrorHandling.proto";
 
 message ServciceConfigDetails{
 
@@ -18,4 +19,5 @@ message ServciceConfigDetails{
 	bytes account = 3;
 	bytes password = 4;
 	ServiceStart start = 5;
+	ErrorHandling errorHandling = 6;
 }

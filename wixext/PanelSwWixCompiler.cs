@@ -805,7 +805,7 @@ namespace PanelSw.Wix.Extensions
             none = 4,
         }
 
-        enum TopShelf_ErrorHandling
+        enum ErrorHandling
         {
             fail = 0,
             ignore = 1,
@@ -823,7 +823,7 @@ namespace PanelSw.Wix.Extensions
             string instance = null;
             string userName = null;
             string password = null;
-            TopShelf_ErrorHandling promptOnError = TopShelf_ErrorHandling.fail;
+            ErrorHandling promptOnError = ErrorHandling.fail;
 
             string file = parentElement.GetAttribute("Id");
             if (string.IsNullOrEmpty(file))
@@ -872,7 +872,7 @@ namespace PanelSw.Wix.Extensions
                                 string a = Core.GetAttributeValue(sourceLineNumbers, attrib);
                                 try
                                 {
-                                    promptOnError = (TopShelf_ErrorHandling)Enum.Parse(typeof(TopShelf_ErrorHandling), a);
+                                    promptOnError = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
                                 }
                                 catch
                                 {
@@ -998,7 +998,7 @@ namespace PanelSw.Wix.Extensions
             string command = null;
             string workDir = null;
             ExecOnComponentFlags flags = ExecOnComponentFlags.None;
-            TopShelf_ErrorHandling? errorHandling = null;
+            ErrorHandling? errorHandling = null;
             int order = 1000000000 + GetLineNumber(sourceLineNumbers);
             YesNoType aye;
 
@@ -1052,7 +1052,7 @@ namespace PanelSw.Wix.Extensions
                         aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
                         if (aye == YesNoType.Yes)
                         {
-                            errorHandling = TopShelf_ErrorHandling.ignore;
+                            errorHandling = ErrorHandling.ignore;
                         }
                         break;
 
@@ -1060,7 +1060,7 @@ namespace PanelSw.Wix.Extensions
                         string a = Core.GetAttributeValue(sourceLineNumbers, attrib);
                         try
                         {
-                            errorHandling = (TopShelf_ErrorHandling)Enum.Parse(typeof(TopShelf_ErrorHandling), a);
+                            errorHandling = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
                         }
                         catch
                         {
@@ -1080,7 +1080,7 @@ namespace PanelSw.Wix.Extensions
                             flags |= ExecOnComponentFlags.ASync;
                             if (errorHandling == null)
                             {
-                                errorHandling = TopShelf_ErrorHandling.ignore; // Really isn't checked on async, but just to be on the safe side.
+                                errorHandling = ErrorHandling.ignore; // Really isn't checked on async, but just to be on the safe side.
                             }
                         }
                         break;
@@ -1191,7 +1191,7 @@ namespace PanelSw.Wix.Extensions
             {
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "BeforeXXX or AfterXXX"));
             }
-            if (((flags & ExecOnComponentFlags.ASync) == ExecOnComponentFlags.ASync) && (errorHandling != TopShelf_ErrorHandling.ignore))
+            if (((flags & ExecOnComponentFlags.ASync) == ExecOnComponentFlags.ASync) && (errorHandling != ErrorHandling.ignore))
             {
                 Core.OnMessage(WixErrors.IllegalAttributeValueWithOtherAttribute(sourceLineNumbers, element.LocalName, "Wait", "no", "ErrorHandling"));
             }
@@ -1305,7 +1305,7 @@ namespace PanelSw.Wix.Extensions
                 row[3] = command;
                 row[4] = workDir;
                 row[5] = (int)flags;
-                row[6] = (int)(errorHandling ?? TopShelf_ErrorHandling.fail);
+                row[6] = (int)(errorHandling ?? ErrorHandling.fail);
                 row[7] = order;
             }
         }
@@ -1330,6 +1330,7 @@ namespace PanelSw.Wix.Extensions
             string password = null;
             string component = null;
             ServiceStart start = ServiceStart.unchanged;
+            ErrorHandling errorHandling = ErrorHandling.fail;
 
             component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
 
@@ -1364,6 +1365,20 @@ namespace PanelSw.Wix.Extensions
 
                     case "Start":
                         start = (ServiceStart)Enum.Parse(typeof(ServiceStart), Core.GetAttributeValue(sourceLineNumbers, attrib));
+                        break;
+
+                    case "ErrorHandling":
+                        {
+                            string a = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            try
+                            {
+                                errorHandling = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
+                            }
+                            catch
+                            {
+                                Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            }
+                        }
                         break;
 
                     default:
@@ -1407,6 +1422,7 @@ namespace PanelSw.Wix.Extensions
                 row[4] = account;
                 row[5] = password;
                 row[6] = (int)start;
+                row[7] = (int)errorHandling;
             }
         }
 
