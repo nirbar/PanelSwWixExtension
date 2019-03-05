@@ -396,6 +396,7 @@
       <Custom Action="PSW_ServiceConfig" After="InstallServices" Overridable="yes"/>
     </InstallExecuteSequence>
     <UI>
+      <Error Id="27002">!(loc.ServiceConfigFailure)</Error>
       <ProgressText Action="PSW_ServiceConfig">!(loc.ServiceConfig)</ProgressText>
       <ProgressText Action="PSW_ServiceConfigRlbk">!(loc.ServiceConfig)</ProgressText>
       <ProgressText Action="PSW_ServiceConfigExec">!(loc.ServiceConfig)</ProgressText>

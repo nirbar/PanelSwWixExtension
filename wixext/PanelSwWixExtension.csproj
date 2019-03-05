@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
-  <Import Project="..\packages\TidyBuild.1.0.8\build\TidyBuild.props" Condition="Exists('..\packages\TidyBuild.1.0.8\build\TidyBuild.props')" />
+  <Import Project="..\packages\TidyBuild.1.0.9\build\TidyBuild.props" Condition="Exists('..\packages\TidyBuild.1.0.9\build\TidyBuild.props')" />
   <PropertyGroup>
     <ProjectGuid>{69972F7F-F1CF-44AA-8F76-B4A5A4F1B309}</ProjectGuid>
     <AssemblyName>PanelSwWixExtension</AssemblyName>
@@ -114,6 +114,6 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets'))" />
-    <Error Condition="!Exists('..\packages\TidyBuild.1.0.8\build\TidyBuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.0.8\build\TidyBuild.props'))" />
+    <Error Condition="!Exists('..\packages\TidyBuild.1.0.9\build\TidyBuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.0.9\build\TidyBuild.props'))" />
   </Target>
 </Project>
