@@ -803,6 +803,16 @@
               <xs:documentation><![CDATA[Task name in Windows Task Scheduler (primary key).]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="User" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Optional user for task logon.]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Password" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Optional user's password for task logon.]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>

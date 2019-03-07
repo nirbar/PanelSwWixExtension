@@ -106,6 +106,8 @@
     <columnDefinition name="TaskName" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
     <columnDefinition name="Component_" type="string" length="72" modularize="column" keyTable="Component" keyColumn="1" category="identifier"/>
     <columnDefinition name="TaskXml" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="User" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
+    <columnDefinition name="Password" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
   </tableDefinition>
 
   <tableDefinition name="PSW_ExecOnComponent">

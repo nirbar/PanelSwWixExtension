@@ -17,4 +17,6 @@ message TaskSchedulerDetails{
 	bytes taskXml = 2;
 	bytes backupFile = 3;
 	Action action = 4;
+	bytes user = 5;
+	bytes password = 6;
 }

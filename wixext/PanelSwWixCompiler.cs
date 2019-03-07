@@ -1505,6 +1505,8 @@ namespace PanelSw.Wix.Extensions
             string taskXml = null;
             string taskName = null;
             string component = null;
+            string user = null;
+            string password = null;
 
             component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
 
@@ -1519,6 +1521,14 @@ namespace PanelSw.Wix.Extensions
                 {
                     case "TaskName":
                         taskName = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "User":
+                        user = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "Password":
+                        password = Core.GetAttributeValue(sourceLineNumbers, attrib);
                         break;
 
                     default:
@@ -1559,6 +1569,10 @@ namespace PanelSw.Wix.Extensions
             {
                 Core.OnMessage(WixErrors.ExpectedElement(sourceLineNumbers, element.LocalName, "TaskName"));
             }
+            if (string.IsNullOrEmpty(user) && !string.IsNullOrEmpty(password))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttributesWithOtherAttribute(sourceLineNumbers, element.LocalName, "User", "Password"));
+            }
 
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "TaskScheduler");
 
@@ -1569,6 +1583,8 @@ namespace PanelSw.Wix.Extensions
                 row[0] = taskName;
                 row[1] = component;
                 row[2] = taskXml;
+                row[3] = user;
+                row[4] = password;
             }
         }
 
