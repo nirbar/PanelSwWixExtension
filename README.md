@@ -1,8 +1,30 @@
-# README
+PanelSwWixExtension is the most comprehensive open source [WiX](http://wixtoolset.org/) extension. 
+It features dozens of actions from querying XML, JSON and text files to installing [ServiceBase](https://docs.microsoft.com/en-us/dotnet/api/system.serviceprocess.servicebase)-based and [TopShelf](http://topshelf-project.com/) services.
 
-PanelSwWixExtension is a [WiX](http://wixtoolset.org/) extension that contains various addition to the build-in WiX toolset:
+The commercial extension- [JetWixExtension](https://github.com/nirbar/JetBA-Showcase)- complements PanelSwWixExtension with the following features:
+- JetBA: The most comprehensive, fully customizable, extensible, WPF-based BootstrapperApplication.
+- JetBA++: The only native fully customizable, extensible, Qt-based BootstrapperApplication.
+- Preprocessor extension:
+  - Harvest directly from WiX source code by executing Heat commands
+    ~~~~~~~
+    <?pragma heat.dir "$(sys.SOURCEFILEDIR)..\bin\Release" -cg BIN -dr INSTALLFOLDER -ag?>
+    ~~~~~~~
+  - Collection variables
+    ~~~~~~~
+    <?pragma tuple.NIR a; b; c?>
+    <?pragma tuple.BAR x; y; z?>
+    <?foreach i in $(tuple_range.BAR())?>
+    <Component Feature="ProductFeature" Directory="INSTALLFOLDER">
+      <File Source="$(sys.SOURCEFILEPATH)" Name="Product.$(tuple.NIR($(var.i))).$(tuple.BAR($(var.i))).wxs"/>
+    </Component>
+    <?endforeach?>
+    <?pragma endtuple.BAR?>
+    <?pragma endtuple.NIR?>
+    ~~~~~~~
+Contact the owner to obtain a license for [JetWixExtension](https://github.com/nirbar/JetBA-Showcase)
 
-## WiX Elements
+
+## PanelSwWixExtension WiX Elements
 
 - Immediate Actions:
   - *JsonJpathSearch*: Read JSON values
