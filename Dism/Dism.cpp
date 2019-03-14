@@ -14,7 +14,6 @@ static LPCWSTR DismStateString(DismPackageFeatureState state);
 static void CALLBACK ProgressCallback(UINT Current, UINT Total, PVOID UserData);
 
 // Will report 1GB for all features.
-#define TOTOAL_TICKS			1073741824 // Same value as in DismShced.cpp
 struct ProgressReportState
 {
 	HANDLE hCancel_ = NULL;
@@ -22,14 +21,18 @@ struct ProgressReportState
 	// Number of features to be enabled.
 	UINT nFeatureCount_ = 0;
 
-	// Index of currently executing feature.
-	UINT nCurrentFeature_ = 0;
-
 	// Number of ticks so far reported
 	ULONGLONG nTotalTicksReported_ = 0;
 
 	// Number of ticks so far reported for current feature
 	ULONGLONG nTicksReportedInFeature_ = 0;
+
+	static const UINT TOTOAL_TICKS = 1073741824; // 1GB
+
+	UINT TickPerFeatureAllowance()
+	{
+		return (nFeatureCount_ == 0) ? 0 : (TOTOAL_TICKS / nFeatureCount_);
+	}
 };
 
 #define DismLogPrefix		L"DismLog="
@@ -232,6 +235,22 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 			hr = S_FALSE;
 			ExitFunction();
 		}
+
+		// Report unused ticks for this package
+		if (state.nTicksReportedInFeature_ < state.TickPerFeatureAllowance())
+		{
+			UINT delta = (state.TickPerFeatureAllowance() - state.nTicksReportedInFeature_);
+			hr = WcaProgressMessage(delta, FALSE);
+			if (hr == S_FALSE)
+			{
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Seems like DISM was canceled.");
+				ExitFunction();
+			}
+			state.nTotalTicksReported_ += delta;
+			state.nTicksReportedInFeature_ += delta;
+		}
+
+		state.nTicksReportedInFeature_ = 0;
 	}
 
 	for (const DismFeature* pFtr : resolvedFeatures)
@@ -259,14 +278,27 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 			ExitFunction();
 		}
 
-		++state.nCurrentFeature_;
+		// Report unused ticks for this feature
+		if (state.nTicksReportedInFeature_ < state.TickPerFeatureAllowance())
+		{
+			UINT delta = (state.TickPerFeatureAllowance() - state.nTicksReportedInFeature_);
+			hr = WcaProgressMessage(delta, FALSE);
+			if (hr == S_FALSE)
+			{
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Seems like DISM was canceled.");
+				ExitFunction();
+			}
+			state.nTotalTicksReported_ += delta;
+			state.nTicksReportedInFeature_ += delta;
+		}
+
 		state.nTicksReportedInFeature_ = 0;
 	}
 
 	// Report any left-over ticks.
-	if (state.nTotalTicksReported_ < TOTOAL_TICKS)
+	if (state.nTotalTicksReported_ < ProgressReportState::TOTOAL_TICKS)
 	{
-		WcaProgressMessage(TOTOAL_TICKS - state.nTotalTicksReported_, FALSE);
+		WcaProgressMessage(ProgressReportState::TOTOAL_TICKS - state.nTotalTicksReported_, FALSE);
 	}
 
 LExit:
@@ -339,8 +371,7 @@ static void CALLBACK ProgressCallback(UINT Current, UINT Total, PVOID UserData)
 	PMSIHANDLE hRec;
 	ProgressReportState *state = (ProgressReportState*)UserData;
 
-	double featurePortion = (TOTOAL_TICKS / state->nFeatureCount_);
-	double tickDelta = ((((double)(Current - state->nTicksReportedInFeature_)) / Total) * featurePortion);
+	double tickDelta = ((((double)(Current - state->nTicksReportedInFeature_)) / Total) * state->TickPerFeatureAllowance());
 	state->nTicksReportedInFeature_ = Current; // Tick reported for this feature
 	state->nTotalTicksReported_ += tickDelta; // Ticks reported to MSI, normalized to 1GB total.
 

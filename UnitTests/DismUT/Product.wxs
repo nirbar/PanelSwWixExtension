@@ -6,7 +6,7 @@
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
-    <MediaTemplate />
+    <MediaTemplate EmbedCab="yes" />
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
@@ -21,8 +21,8 @@
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
     
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-      <Component Id="MSMQ_IIS" Guid="">
-        <CreateFolder/>
+      <Component Id="MSMQ_IIS">
+        <File Source="$(sys.SOURCEFILEPATH)"/>
         <PanelSW:Dism Id="IIS_DefaultDocument" EnableFeature="IIS-DefaultDocument" />
         <PanelSW:Dism Id="NetFx3" EnableFeature="NetFx3" />
         <PanelSW:Dism Id="WMISnmpProvider" EnableFeature="WMISnmpProvider" />
