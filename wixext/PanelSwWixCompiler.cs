@@ -61,6 +61,7 @@ namespace PanelSw.Wix.Extensions
             Core.EnsureTable(null, "PSW_ZipFile");
             Core.EnsureTable(null, "PSW_Unzip");
             Core.EnsureTable(null, "PSW_ServiceConfig");
+            Core.EnsureTable(null, "PSW_ServiceConfig_Dependency");
             Core.EnsureTable(null, "PSW_InstallUtil");
             Core.EnsureTable(null, "PSW_InstallUtil_Arg");
             Core.EnsureTable(null, "PSW_SqlSearch");
@@ -1392,11 +1393,6 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            foreach (XmlNode child in element.ChildNodes)
-            {
-                Core.UnsupportedExtensionElement(element, child);
-            }
-
             if (string.IsNullOrEmpty(component))
             {
                 Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, parentElement.LocalName, "Id", parentElement.LocalName));
@@ -1429,6 +1425,59 @@ namespace PanelSw.Wix.Extensions
                 row[6] = (int)start;
                 row[7] = loadOrderGroup;
                 row[8] = (int)errorHandling;
+            }
+
+            foreach (XmlNode child in element.ChildNodes)
+            {
+                if (child.NamespaceURI != element.NamespaceURI)
+                {
+                    continue;
+                }
+
+                if (!child.LocalName.Equals("Dependency"))
+                {
+                    Core.UnsupportedExtensionElement(element, child);
+                    continue;
+                }
+
+                foreach (XmlAttribute attrib in child.Attributes)
+                {
+                    if ((0 != attrib.NamespaceURI.Length) && (attrib.NamespaceURI != schema.TargetNamespace))
+                    {
+                        Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                    }
+                    string depService = null;
+                    string group = null;
+
+                    switch (attrib.LocalName)
+                    {
+                        case "Service":
+                            depService = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        case "Group":
+                            group = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+
+                    if (string.IsNullOrEmpty(depService) && string.IsNullOrEmpty(group))
+                    {
+                        Core.OnMessage(WixErrors.ExpectedAttributes(sourceLineNumbers, child.LocalName, "Service", "Group"));
+                    }
+
+                    if (!Core.EncounteredError)
+                    {
+                        // create a row in the Win32_CopyFiles table
+                        Row row = Core.CreateRow(sourceLineNumbers, "PSW_ServiceConfig_Dependency");
+                        row[0] = id;
+                        row[1] = depService;
+                        row[2] = group;
+                    }
+                }
             }
         }
 

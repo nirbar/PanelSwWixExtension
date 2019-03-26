@@ -20,6 +20,6 @@ message ServciceConfigDetails{
 	bytes password = 4;
 	ServiceStart start = 5;
 	bytes loadOrderGroup = 6;
-	bytes depndencies = 7;
+	bytes dependencies = 7;
 	ErrorHandling errorHandling = 8;
 }

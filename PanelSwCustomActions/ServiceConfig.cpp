@@ -20,6 +20,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 	SC_HANDLE hManager = NULL;
 	SC_HANDLE hService = NULL;
 	QUERY_SERVICE_CONFIG *pServiceCfg = nullptr;
+	LPWSTR szDependencies = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	BreakExitOnFailure(hr, "Failed to initialize");
@@ -27,7 +28,9 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 
 	// Ensure tables exist.
 	hr = WcaTableExists(L"PSW_ServiceConfig");
-	BreakExitOnFailure(hr, "Table does not exist 'PSW_ServiceConfig'. Have you authored 'PanelSw:ServiceConfig' entries in WiX code?");
+	BreakExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ServiceConfig'. Have you authored 'PanelSw:ServiceConfig' entries in WiX code?");
+	hr = WcaTableExists(L"PSW_ServiceConfig_Dependency");
+	BreakExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ServiceConfig_Dependency'. Have you authored 'PanelSw:ServiceConfig' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `ServiceName`, `CommandLine`, `Account`, `Password`, `Start`, `LoadOrderGroup`, `ErrorHandling` FROM `PSW_ServiceConfig`", &hView);
@@ -44,6 +47,8 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 
 		// Get fields
 		CWixString szId, szComponent, szServiceName, szCommand, szCommandFormat, szCommandObfuscated, szAccount, szPassword, szLoadOrderGroupFmt, szLoadOrderGroup;
+		CWixString szSubQuery;
+		PMSIHANDLE hSubView, hSubRecord;
 		int start = -1;
 		int errorHandling = -1;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
@@ -105,7 +110,66 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 			}
 		}
 
-		hr = oDeferred.AddServiceConfig(szServiceName, szCommand, szAccount, szPassword, start, szLoadOrderGroup, (ErrorHandling)errorHandling);
+		// Dependencies
+		hr = szSubQuery.Format(L"SELECT `Service`, `Group` FROM `PSW_ServiceConfig_Dependency` WHERE `ServiceConfig_`='%s'", (LPCWSTR)szId);
+		BreakExitOnFailure(hr, "Failed to format string");
+
+		hr = WcaOpenExecuteView((LPCWSTR)szSubQuery, &hSubView);
+		BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", (LPCWSTR)szSubQuery);
+
+		// Iterate records
+		while ((hr = WcaFetchRecord(hSubView, &hSubRecord)) != E_NOMOREITEMS)
+		{
+			BreakExitOnFailure(hr, "Failed to fetch record.");
+			CWixString szServiceFmt, szGroup;
+
+			hr = WcaGetRecordString(hSubRecord, 1, (LPWSTR*)szServiceFmt);
+			BreakExitOnFailure(hr, "Failed to get Dependency.");
+			hr = WcaGetRecordFormattedString(hSubRecord, 2, (LPWSTR*)szGroup);
+			BreakExitOnFailure(hr, "Failed to get Group.");
+
+			if (!szGroup.IsNullOrEmpty())
+			{
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will add to service '%ls' dependency on group '%ls'", (LPCWSTR)szServiceName, (LPCWSTR)szGroup);
+				if (szDependencies == nullptr)
+				{
+					hr = StrAllocFormatted(&szDependencies, L"%c%s%c", SC_GROUP_IDENTIFIER, (LPCWSTR)szGroup, NULL);
+					BreakExitOnFailure(hr, "Failed creating multstring.");
+				}
+				else
+				{
+					CWixString szTmp;
+
+					hr = szTmp.Format(L"%c%s", SC_GROUP_IDENTIFIER, (LPCWSTR)szGroup);
+					BreakExitOnFailure(hr, "Failed formatting string");
+
+					hr = MultiSzInsertString(&szDependencies, nullptr, 0, (LPCWSTR)szTmp);
+					BreakExitOnFailure(hr, "Failed inserting to multi-string");
+				}
+			}
+
+			if (!szServiceFmt.IsNullOrEmpty())
+			{
+				CWixString szService;
+
+				hr = szService.MsiFormat(szServiceFmt, nullptr);
+				BreakExitOnFailure(hr, "Failed to format string");
+				
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will add to service '%ls' dependency on service '%ls'", (LPCWSTR)szServiceName, (LPCWSTR)szService);
+				if (szDependencies == nullptr)
+				{
+					hr = StrAllocFormatted(&szDependencies, L"%s%c", (LPCWSTR)szService, NULL);
+					BreakExitOnFailure(hr, "Failed creating multstring.");
+				}
+				else
+				{
+					hr = MultiSzInsertString(&szDependencies, nullptr, 0, (LPCWSTR)szService);
+					BreakExitOnFailure(hr, "Failed inserting to multi-string");
+				}
+			}
+		}
+
+		hr = oDeferred.AddServiceConfig(szServiceName, szCommand, szAccount, szPassword, start, szLoadOrderGroup, szDependencies, (ErrorHandling)errorHandling);
 		ExitOnFailure(hr, "Failed creating CustomActionData");
 
 		// Get current service account.
@@ -128,7 +192,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 				pServiceCfg->dwStartType = SERVICE_NO_CHANGE;
 			}
 
-			hr = oRollback.AddServiceConfig((LPCWSTR)szServiceName, pServiceCfg->lpBinaryPathName, pServiceCfg->lpServiceStartName, nullptr, pServiceCfg->dwStartType, pServiceCfg->lpLoadOrderGroup, ErrorHandling::ignore);
+			hr = oRollback.AddServiceConfig((LPCWSTR)szServiceName, pServiceCfg->lpBinaryPathName, pServiceCfg->lpServiceStartName, nullptr, pServiceCfg->dwStartType, pServiceCfg->lpLoadOrderGroup, szDependencies, ErrorHandling::ignore);
 			ExitOnFailure(hr, "Failed creating rollback CustomActionData");
 
 			delete[]pServiceCfg;
@@ -136,6 +200,8 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 
 			::CloseServiceHandle(hService);
 			hService = nullptr;
+
+			ReleaseNullStr(szDependencies);
 		}
 	}
 
@@ -153,6 +219,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 
 LExit:
 	ReleaseStr(szCustomActionData);
+	ReleaseStr(szDependencies);
 
 	if (pServiceCfg)
 	{
@@ -171,7 +238,7 @@ LExit:
 	return WcaFinalize(dwRes);
 }
 
-HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, LPCWSTR szLoadOrderGroup, ErrorHandling errorHandling)
+HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, LPCWSTR szLoadOrderGroup, LPCWSTR szDependencies, ErrorHandling errorHandling)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
@@ -202,6 +269,15 @@ HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szComman
 	{
 		pDetails->set_loadordergroup(szLoadOrderGroup, WSTR_BYTE_SIZE(szLoadOrderGroup));
 	}
+	if (szDependencies)
+	{
+		DWORD dwLen = 0;
+		hr = ::MultiSzLen(szDependencies, &dwLen);
+		BreakExitOnFailure(hr, "Failed getting multi-string length");
+		dwLen *= sizeof(WCHAR);
+		
+		pDetails->set_dependencies(szDependencies, dwLen);
+	}
 	pDetails->set_start((ServciceConfigDetails::ServiceStart)start);
 	pDetails->set_errorhandling((ErrorHandling)errorHandling);
 
@@ -224,6 +300,7 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 	LPCWSTR szAccount = nullptr;
 	LPCWSTR szPassword = nullptr;
 	LPCWSTR szLoadOrderGroup = nullptr;
+	LPCWSTR szDependencies = nullptr;
 	DWORD bRes = TRUE;
 	ServciceConfigDetails details;
 
@@ -247,9 +324,13 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 	{
 		szLoadOrderGroup = (LPCWSTR)details.loadordergroup().data();
 	}
+	if (details.dependencies().size() > 0) // May be empty
+	{
+		szDependencies = (LPCWSTR)details.dependencies().data();
+	}
 
 LRetry:
-	hr = ExecuteOne(szServiceName, szCommandLine, szAccount, szPassword, details.start(), szLoadOrderGroup);
+	hr = ExecuteOne(szServiceName, szCommandLine, szAccount, szPassword, details.start(), szLoadOrderGroup, szDependencies);
 	if (FAILED(hr))
 	{
 		hr = PromptError(szServiceName, details.errorhandling());
@@ -264,7 +345,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CServiceConfig::ExecuteOne(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, DWORD dwStart, LPCWSTR szLoadOrderGroup)
+HRESULT CServiceConfig::ExecuteOne(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, DWORD dwStart, LPCWSTR szLoadOrderGroup, LPCWSTR szDependencies)
 {
 	HRESULT hr = S_OK;
 	SC_HANDLE hManager = NULL;
@@ -279,7 +360,7 @@ HRESULT CServiceConfig::ExecuteOne(LPCWSTR szServiceName, LPCWSTR szCommandLine,
 	ExitOnNullWithLastError(hService, hr, "Failed opening service '%ls'", szServiceName);
 
 	// Configure.
-	dwRes = ::ChangeServiceConfig(hService, SERVICE_NO_CHANGE, dwStart, SERVICE_NO_CHANGE, szCommandLine, szLoadOrderGroup, nullptr, nullptr, szAccount, szPassword, nullptr);
+	dwRes = ::ChangeServiceConfig(hService, SERVICE_NO_CHANGE, dwStart, SERVICE_NO_CHANGE, szCommandLine, szLoadOrderGroup, nullptr, szDependencies, szAccount, szPassword, nullptr);
 	ExitOnNullWithLastError(dwRes, hr, "Failed configuring service '%ls'", szServiceName);
 
 LExit:
