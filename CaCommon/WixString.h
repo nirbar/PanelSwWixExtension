@@ -309,7 +309,7 @@ public:
 
 		if (_pS != NULL)
 		{
-			return ::wcslen(_pS);
+			return (1 + ::wcslen(_pS));
 		}
 
 		return 0;

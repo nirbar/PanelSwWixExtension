@@ -30,7 +30,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 	BreakExitOnFailure(hr, "Table does not exist 'PSW_ServiceConfig'. Have you authored 'PanelSw:ServiceConfig' entries in WiX code?");
 
 	// Execute view
-	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `ServiceName`, `CommandLine`, `Account`, `Password`, `Start`, `ErrorHandling` FROM `PSW_ServiceConfig`", &hView);
+	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `ServiceName`, `CommandLine`, `Account`, `Password`, `Start`, `LoadOrderGroup`, `ErrorHandling` FROM `PSW_ServiceConfig`", &hView);
 	BreakExitOnFailure(hr, "Failed to execute SQL query.");
 
 	// Open service.
@@ -43,7 +43,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
         BreakExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		CWixString szId, szComponent, szServiceName, szCommand, szCommandFormat, szCommandObfuscated, szAccount, szPassword;
+		CWixString szId, szComponent, szServiceName, szCommand, szCommandFormat, szCommandObfuscated, szAccount, szPassword, szLoadOrderGroupFmt, szLoadOrderGroup;
 		int start = -1;
 		int errorHandling = -1;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
@@ -62,7 +62,9 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to get Password.");
 		hr = WcaGetRecordInteger(hRecord, 7, &start);
 		BreakExitOnFailure(hr, "Failed to get Start.");
-		hr = WcaGetRecordInteger(hRecord, 8, &errorHandling);
+		hr = WcaGetRecordString(hRecord, 8, (LPWSTR*)szLoadOrderGroupFmt);
+		BreakExitOnFailure(hr, "Failed to get LoadOrderGroup.");
+		hr = WcaGetRecordInteger(hRecord, 9, &errorHandling);
 		BreakExitOnFailure(hr, "Failed to get ErrorHandling.");
 
 		// Test condition
@@ -80,7 +82,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will configure service '%ls' to execute command line '%ls'", (LPCWSTR)szServiceName, (LPCWSTR)szCommandObfuscated);
 		}
-		if (!szAccount.IsNullOrEmpty());
+		if (!szAccount.IsNullOrEmpty())
 		{
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will change service '%ls' start account to '%ls'", (LPCWSTR)szServiceName, (LPCWSTR)szAccount);
 		}
@@ -88,8 +90,22 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 		{
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will change service '%ls' start type to %i", (LPCWSTR)szServiceName, start);
 		}
+		if (!szLoadOrderGroupFmt.IsNullOrEmpty())
+		{
+			hr = szLoadOrderGroup.MsiFormat(szLoadOrderGroupFmt);
+			ExitOnFailure(hr, "Failed formatting string");
 
-		hr = oDeferred.AddServiceConfig(szServiceName, szCommand, szAccount, szPassword, start, (ErrorHandling)errorHandling);
+			if (szLoadOrderGroup.IsNullOrEmpty())
+			{
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will clear service '%ls' load order group", (LPCWSTR)szServiceName);
+			}
+			else
+			{
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will change service '%ls' load order group to '%ls'", (LPCWSTR)szServiceName, (LPCWSTR)szLoadOrderGroup);
+			}
+		}
+
+		hr = oDeferred.AddServiceConfig(szServiceName, szCommand, szAccount, szPassword, start, szLoadOrderGroup, (ErrorHandling)errorHandling);
 		ExitOnFailure(hr, "Failed creating CustomActionData");
 
 		// Get current service account.
@@ -112,7 +128,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 				pServiceCfg->dwStartType = SERVICE_NO_CHANGE;
 			}
 
-			hr = oRollback.AddServiceConfig((LPCWSTR)szServiceName, pServiceCfg->lpBinaryPathName, pServiceCfg->lpServiceStartName, nullptr, pServiceCfg->dwStartType, ErrorHandling::ignore);
+			hr = oRollback.AddServiceConfig((LPCWSTR)szServiceName, pServiceCfg->lpBinaryPathName, pServiceCfg->lpServiceStartName, nullptr, pServiceCfg->dwStartType, pServiceCfg->lpLoadOrderGroup, ErrorHandling::ignore);
 			ExitOnFailure(hr, "Failed creating rollback CustomActionData");
 
 			delete[]pServiceCfg;
@@ -155,7 +171,7 @@ LExit:
 	return WcaFinalize(dwRes);
 }
 
-HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, ErrorHandling errorHandling)
+HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, LPCWSTR szLoadOrderGroup, ErrorHandling errorHandling)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
@@ -182,6 +198,10 @@ HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szComman
 	{
 		pDetails->set_commandline(szCommandLine, WSTR_BYTE_SIZE(szCommandLine));
 	}
+	if (szLoadOrderGroup) // May be empty
+	{
+		pDetails->set_loadordergroup(szLoadOrderGroup, WSTR_BYTE_SIZE(szLoadOrderGroup));
+	}
 	pDetails->set_start((ServciceConfigDetails::ServiceStart)start);
 	pDetails->set_errorhandling((ErrorHandling)errorHandling);
 
@@ -203,6 +223,7 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 	LPCWSTR szCommandLine = nullptr;
 	LPCWSTR szAccount = nullptr;
 	LPCWSTR szPassword = nullptr;
+	LPCWSTR szLoadOrderGroup = nullptr;
 	DWORD bRes = TRUE;
 	ServciceConfigDetails details;
 
@@ -222,9 +243,13 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 	{
 		szCommandLine = (LPCWSTR)details.commandline().data();
 	}
+	if (details.loadordergroup().size() > 0) // May be empty
+	{
+		szLoadOrderGroup = (LPCWSTR)details.loadordergroup().data();
+	}
 
 LRetry:
-	hr = ExecuteOne(szServiceName, szCommandLine, szAccount, szPassword, details.start());
+	hr = ExecuteOne(szServiceName, szCommandLine, szAccount, szPassword, details.start(), szLoadOrderGroup);
 	if (FAILED(hr))
 	{
 		hr = PromptError(szServiceName, details.errorhandling());
@@ -239,7 +264,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CServiceConfig::ExecuteOne(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, DWORD dwStart)
+HRESULT CServiceConfig::ExecuteOne(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, DWORD dwStart, LPCWSTR szLoadOrderGroup)
 {
 	HRESULT hr = S_OK;
 	SC_HANDLE hManager = NULL;
@@ -254,7 +279,7 @@ HRESULT CServiceConfig::ExecuteOne(LPCWSTR szServiceName, LPCWSTR szCommandLine,
 	ExitOnNullWithLastError(hService, hr, "Failed opening service '%ls'", szServiceName);
 
 	// Configure.
-	dwRes = ::ChangeServiceConfig(hService, SERVICE_NO_CHANGE, dwStart, SERVICE_NO_CHANGE, szCommandLine, nullptr, nullptr, nullptr, szAccount, szPassword, nullptr);
+	dwRes = ::ChangeServiceConfig(hService, SERVICE_NO_CHANGE, dwStart, SERVICE_NO_CHANGE, szCommandLine, szLoadOrderGroup, nullptr, nullptr, szAccount, szPassword, nullptr);
 	ExitOnNullWithLastError(dwRes, hr, "Failed configuring service '%ls'", szServiceName);
 
 LExit:

@@ -1329,6 +1329,7 @@ namespace PanelSw.Wix.Extensions
             string account = null;
             string password = null;
             string component = null;
+            string loadOrderGroup = null;
             ServiceStart start = ServiceStart.unchanged;
             ErrorHandling errorHandling = ErrorHandling.fail;
 
@@ -1365,6 +1366,10 @@ namespace PanelSw.Wix.Extensions
 
                     case "Start":
                         start = (ServiceStart)Enum.Parse(typeof(ServiceStart), Core.GetAttributeValue(sourceLineNumbers, attrib));
+                        break;
+
+                    case "LoadOrderGroup":
+                        loadOrderGroup = Core.GetAttributeValue(sourceLineNumbers, attrib);
                         break;
 
                     case "ErrorHandling":
@@ -1422,7 +1427,8 @@ namespace PanelSw.Wix.Extensions
                 row[4] = account;
                 row[5] = password;
                 row[6] = (int)start;
-                row[7] = (int)errorHandling;
+                row[7] = loadOrderGroup;
+                row[8] = (int)errorHandling;
             }
         }
 

@@ -442,6 +442,11 @@
               <xs:documentation><![CDATA[Optional account password. Formatted]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="LoadOrderGroup" type="xs:string">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Optional load order group. To skip configuring load order group, omit this attribute. To clear existing load order group, specify null string: LoadOrderGroup="[~]". This field is formatted]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
           <xs:attribute name="Start">
             <xs:annotation>
               <xs:documentation>Determines when the service should be started.</xs:documentation>

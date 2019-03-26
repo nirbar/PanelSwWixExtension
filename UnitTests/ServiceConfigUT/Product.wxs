@@ -13,9 +13,10 @@
       <Component Id="Test" Directory="INSTALLFOLDER">
         <File Source="$(var.ProjectDir)Product.wxs" />
 
-        <!-- Change and revert account -->
+        <!-- Change and revert service configuration -->
         <PanelSW:ServiceConfig ServiceName="TapiSrv" Account="NT AUTHORITY\LocalService" CommandLine="[System64Folder]svchost.exe -k tapisrv [HIDE_ME]" Start="auto" />
-        <PanelSW:ServiceConfig ServiceName="TapiSrv" Account="NT AUTHORITY\NetworkService" CommandLine="[System64Folder]svchost.exe -k tapisrv" Start="demand" />
+        <PanelSW:ServiceConfig ServiceName="TapiSrv" Account="NT AUTHORITY\LocalService" CommandLine="[System64Folder]svchost.exe -k tapisrv [HIDE_ME]" LoadOrderGroup="ab" Start="auto" />
+        <PanelSW:ServiceConfig ServiceName="TapiSrv" Account="NT AUTHORITY\NetworkService" CommandLine="[System64Folder]svchost.exe -k tapisrv" LoadOrderGroup="[~]" Start="demand" />
         
         <!-- Non-existant service -->
         <PanelSW:ServiceConfig ServiceName="NO_SERVICE_NAMED_LIKE_THAT" Start="demand" ErrorHandling="prompt" />
@@ -23,7 +24,7 @@
     </Feature>
 
     <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFiles64Folder">
+      <Directory Id="ProgramFilesFolder">
         <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
       </Directory>
     </Directory>

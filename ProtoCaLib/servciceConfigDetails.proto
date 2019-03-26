@@ -19,5 +19,7 @@ message ServciceConfigDetails{
 	bytes account = 3;
 	bytes password = 4;
 	ServiceStart start = 5;
-	ErrorHandling errorHandling = 6;
+	bytes loadOrderGroup = 6;
+	bytes depndencies = 7;
+	ErrorHandling errorHandling = 8;
 }
