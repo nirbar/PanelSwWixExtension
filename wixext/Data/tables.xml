@@ -166,6 +166,7 @@
     <columnDefinition name="Account" type="string" length="0" modularize="property" nullable="yes" category="formatted" />
     <columnDefinition name="Password" type="string" length="0" modularize="property" nullable="yes" category="formatted" />
     <columnDefinition name="Start" type="number" length="2" minValue="-1" maxValue="4" />
+    <columnDefinition name="DelayStart" type="number" length="2" minValue="-1" maxValue="1" />
     <columnDefinition name="LoadOrderGroup" type="string" length="0" modularize="property" nullable="yes" category="formatted" />
     <columnDefinition name="ErrorHandling" type="number" minValue="0" maxValue="2" length="2" />
   </tableDefinition>

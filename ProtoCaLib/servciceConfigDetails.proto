@@ -7,11 +7,18 @@ message ServciceConfigDetails{
 
 	enum ServiceStart {
 		boot = 0;
-		unchanged = -1;
+		system = 1;
 		auto = 2;
 		demand = 3;
 		disabled = 4;
-		system = 1;
+
+		unchanged = -1;
+	}
+
+	enum DelayStart {
+		no = 0;
+		yes = 1;
+		unchanged1 = -1;	
 	}
 
 	bytes name = 1;
@@ -22,4 +29,5 @@ message ServciceConfigDetails{
 	bytes loadOrderGroup = 6;
 	bytes dependencies = 7;
 	ErrorHandling errorHandling = 8;
+	DelayStart delayStart = 9;
 }

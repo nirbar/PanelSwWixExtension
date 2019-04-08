@@ -3,7 +3,6 @@
 #include "../CaCommon/WixString.h"
 #include <wcautil.h>
 #include <procutil.h>
-#include "servciceConfigDetails.pb.h"
 #include "google\protobuf\any.h"
 using namespace com::panelsw::ca;
 using namespace google::protobuf;
@@ -33,7 +32,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 	BreakExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ServiceConfig_Dependency'. Have you authored 'PanelSw:ServiceConfig' entries in WiX code?");
 
 	// Execute view
-	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `ServiceName`, `CommandLine`, `Account`, `Password`, `Start`, `LoadOrderGroup`, `ErrorHandling` FROM `PSW_ServiceConfig`", &hView);
+	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `ServiceName`, `CommandLine`, `Account`, `Password`, `Start`, `DelayStart`, `LoadOrderGroup`, `ErrorHandling` FROM `PSW_ServiceConfig`", &hView);
 	BreakExitOnFailure(hr, "Failed to execute SQL query.");
 
 	// Open service.
@@ -50,6 +49,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 		CWixString szSubQuery;
 		PMSIHANDLE hSubView, hSubRecord;
 		int start = -1;
+		int nDelayStart = -1;
 		int errorHandling = -1;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
 
@@ -67,9 +67,11 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to get Password.");
 		hr = WcaGetRecordInteger(hRecord, 7, &start);
 		BreakExitOnFailure(hr, "Failed to get Start.");
-		hr = WcaGetRecordString(hRecord, 8, (LPWSTR*)szLoadOrderGroupFmt);
+		hr = WcaGetRecordInteger(hRecord, 8, &nDelayStart);
+		BreakExitOnFailure(hr, "Failed to get DelayStart.");
+		hr = WcaGetRecordString(hRecord, 9, (LPWSTR*)szLoadOrderGroupFmt);
 		BreakExitOnFailure(hr, "Failed to get LoadOrderGroup.");
-		hr = WcaGetRecordInteger(hRecord, 9, &errorHandling);
+		hr = WcaGetRecordInteger(hRecord, 10, &errorHandling);
 		BreakExitOnFailure(hr, "Failed to get ErrorHandling.");
 
 		// Test condition
@@ -169,7 +171,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 			}
 		}
 
-		hr = oDeferred.AddServiceConfig(szServiceName, szCommand, szAccount, szPassword, start, szLoadOrderGroup, szDependencies, (ErrorHandling)errorHandling);
+		hr = oDeferred.AddServiceConfig(szServiceName, szCommand, szAccount, szPassword, start, szLoadOrderGroup, szDependencies, (ErrorHandling)errorHandling, (ServciceConfigDetails_DelayStart)nDelayStart);
 		ExitOnFailure(hr, "Failed creating CustomActionData");
 
 		// Get current service account.
@@ -177,6 +179,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 		if (hService) // Won't fail if service doesn't exist
 		{
 			DWORD dwSize = 0;
+			ServciceConfigDetails_DelayStart rlbkDelayStart = ServciceConfigDetails_DelayStart::ServciceConfigDetails_DelayStart_unchanged1;
 
 			dwRes = ::QueryServiceConfig(hService, nullptr, 0, &dwSize);
 			ExitOnNullWithLastError((dwRes || (::GetLastError() == ERROR_INSUFFICIENT_BUFFER)) , hr, "Failed querying service '%ls' configuration size", (LPCWSTR)szServiceName);
@@ -187,12 +190,22 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 			dwRes = ::QueryServiceConfig(hService, pServiceCfg, dwSize, &dwSize);
 			ExitOnNullWithLastError(dwRes, hr, "Failed querying service '%ls' configuration", (LPCWSTR)szServiceName);
 
-			if (start == (ServciceConfigDetails::ServiceStart::ServciceConfigDetails_ServiceStart_unchanged))
+			if (start == ServciceConfigDetails::ServiceStart::ServciceConfigDetails_ServiceStart_unchanged)
 			{
 				pServiceCfg->dwStartType = SERVICE_NO_CHANGE;
 			}
+			if (start == ServciceConfigDetails::ServiceStart::ServciceConfigDetails_ServiceStart_auto_)
+			{
+				SERVICE_DELAYED_AUTO_START_INFO delayStart;
+				DWORD dwJunk = 0;
 
-			hr = oRollback.AddServiceConfig((LPCWSTR)szServiceName, pServiceCfg->lpBinaryPathName, pServiceCfg->lpServiceStartName, nullptr, pServiceCfg->dwStartType, pServiceCfg->lpLoadOrderGroup, szDependencies, ErrorHandling::ignore);
+				dwRes = ::QueryServiceConfig2(hService, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, (LPBYTE)&delayStart, sizeof(delayStart), &dwJunk);
+				ExitOnNullWithLastError(dwRes, hr, "Failed querying service '%ls' delay-start info", (LPCWSTR)szServiceName);
+
+				rlbkDelayStart = delayStart.fDelayedAutostart ? ServciceConfigDetails_DelayStart::ServciceConfigDetails_DelayStart_yes : ServciceConfigDetails_DelayStart::ServciceConfigDetails_DelayStart_no;
+			}
+
+			hr = oRollback.AddServiceConfig((LPCWSTR)szServiceName, pServiceCfg->lpBinaryPathName, pServiceCfg->lpServiceStartName, nullptr, pServiceCfg->dwStartType, pServiceCfg->lpLoadOrderGroup, szDependencies, ErrorHandling::ignore, rlbkDelayStart);
 			ExitOnFailure(hr, "Failed creating rollback CustomActionData");
 
 			delete[]pServiceCfg;
@@ -238,7 +251,7 @@ LExit:
 	return WcaFinalize(dwRes);
 }
 
-HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, LPCWSTR szLoadOrderGroup, LPCWSTR szDependencies, ErrorHandling errorHandling)
+HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, LPCWSTR szLoadOrderGroup, LPCWSTR szDependencies, ErrorHandling errorHandling, ServciceConfigDetails_DelayStart delayStart)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
@@ -279,6 +292,7 @@ HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szComman
 		pDetails->set_dependencies(szDependencies, dwLen);
 	}
 	pDetails->set_start((ServciceConfigDetails::ServiceStart)start);
+	pDetails->set_delaystart(delayStart);
 	pDetails->set_errorhandling((ErrorHandling)errorHandling);
 
 	pAny = pCmd->mutable_details();
@@ -330,7 +344,7 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 	}
 
 LRetry:
-	hr = ExecuteOne(szServiceName, szCommandLine, szAccount, szPassword, details.start(), szLoadOrderGroup, szDependencies);
+	hr = ExecuteOne(szServiceName, szCommandLine, szAccount, szPassword, details.start(), szLoadOrderGroup, szDependencies, details.delaystart());
 	if (FAILED(hr))
 	{
 		hr = PromptError(szServiceName, details.errorhandling());
@@ -345,7 +359,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CServiceConfig::ExecuteOne(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, DWORD dwStart, LPCWSTR szLoadOrderGroup, LPCWSTR szDependencies)
+HRESULT CServiceConfig::ExecuteOne(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, DWORD dwStart, LPCWSTR szLoadOrderGroup, LPCWSTR szDependencies, ServciceConfigDetails_DelayStart nDelayStart)
 {
 	HRESULT hr = S_OK;
 	SC_HANDLE hManager = NULL;
@@ -362,6 +376,15 @@ HRESULT CServiceConfig::ExecuteOne(LPCWSTR szServiceName, LPCWSTR szCommandLine,
 	// Configure.
 	dwRes = ::ChangeServiceConfig(hService, SERVICE_NO_CHANGE, dwStart, SERVICE_NO_CHANGE, szCommandLine, szLoadOrderGroup, nullptr, szDependencies, szAccount, szPassword, nullptr);
 	ExitOnNullWithLastError(dwRes, hr, "Failed configuring service '%ls'", szServiceName);
+
+	if ((dwStart == SERVICE_AUTO_START) && (nDelayStart != ServciceConfigDetails_DelayStart::ServciceConfigDetails_DelayStart_unchanged1))
+	{
+		SERVICE_DELAYED_AUTO_START_INFO delayStart;
+		delayStart.fDelayedAutostart = (nDelayStart == ServciceConfigDetails_DelayStart::ServciceConfigDetails_DelayStart_yes) ? TRUE : FALSE;
+
+		dwRes = ::ChangeServiceConfig2(hService, SERVICE_CONFIG_DELAYED_AUTO_START_INFO, &delayStart);
+		ExitOnNullWithLastError(dwRes, hr, "Failed setting service '%ls' delay-start mode", szServiceName);
+	}
 
 LExit:
 

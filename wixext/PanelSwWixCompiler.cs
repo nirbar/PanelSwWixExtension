@@ -1318,7 +1318,9 @@ namespace PanelSw.Wix.Extensions
             auto = 2,
             demand = 3,
             disabled = 4,
-            system = 1
+            system = 1,
+
+            autoDelayed = 5
         }
 
         private void ParseServiceConfigElement(XmlElement parentElement, XmlElement element)
@@ -1422,9 +1424,10 @@ namespace PanelSw.Wix.Extensions
                 row[3] = commandLine;
                 row[4] = account;
                 row[5] = password;
-                row[6] = (int)start;
-                row[7] = loadOrderGroup;
-                row[8] = (int)errorHandling;
+                row[6] = (start == ServiceStart.autoDelayed) ? (int)ServiceStart.auto : (int)start;
+                row[7] = (start == ServiceStart.autoDelayed) ? 1 : (start == ServiceStart.auto) ? 0: -1;
+                row[8] = loadOrderGroup;
+                row[9] = (int)errorHandling;
             }
 
             foreach (XmlNode child in element.ChildNodes)

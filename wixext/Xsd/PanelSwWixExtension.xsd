@@ -468,6 +468,13 @@
                 </xs:documentation>
               </xs:annotation>
             </xs:enumeration>
+            <xs:enumeration value="autoDelayed">
+              <xs:annotation>
+                <xs:documentation>
+                  The service will start during startup of the system.
+                </xs:documentation>
+              </xs:annotation>
+            </xs:enumeration>
             <xs:enumeration value="demand">
               <xs:annotation>
                 <xs:documentation>

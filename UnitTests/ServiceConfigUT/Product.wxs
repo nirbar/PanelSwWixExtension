@@ -15,19 +15,20 @@
 
         <!-- Change and revert service configuration -->
         <PanelSW:ServiceConfig ServiceName="TapiSrv" Account="NT AUTHORITY\LocalService" CommandLine="[System64Folder]svchost.exe -k tapisrv [HIDE_ME]" Start="auto" />
-        <PanelSW:ServiceConfig ServiceName="TapiSrv" Account="NT AUTHORITY\LocalService" CommandLine="[System64Folder]svchost.exe -k tapisrv [HIDE_ME]" LoadOrderGroup="ab" Start="auto">
+        <PanelSW:ServiceConfig ServiceName="TapiSrv" Account="NT AUTHORITY\LocalService" CommandLine="[System64Folder]svchost.exe -k tapisrv [HIDE_ME]" LoadOrderGroup="ab" Start="autoDelayed">
           <PanelSW:Dependency Group="otherGroup"/>
           <PanelSW:Dependency Service="otherService"/>
           <PanelSW:Dependency Group="[HIDE_ME]"/>
           <PanelSW:Dependency Service="[HIDE_ME]"/>
           <PanelSW:Dependency Group="otherGroup1" Service="otherService1"/>
         </PanelSW:ServiceConfig>
+
+        <!-- Non-existant service -->
+        <PanelSW:ServiceConfig ServiceName="NO_SERVICE_NAMED_LIKE_THAT" Start="demand" ErrorHandling="prompt" />
+
         <PanelSW:ServiceConfig ServiceName="TapiSrv" Account="NT AUTHORITY\NetworkService" CommandLine="[System64Folder]svchost.exe -k tapisrv" LoadOrderGroup="[~]" Start="demand" >
           <PanelSW:Dependency Service="[~]"/>
         </PanelSW:ServiceConfig>
-        
-        <!-- Non-existant service -->
-        <PanelSW:ServiceConfig ServiceName="NO_SERVICE_NAMED_LIKE_THAT" Start="demand" ErrorHandling="prompt" />
       </Component>
     </Feature>
 
