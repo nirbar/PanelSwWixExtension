@@ -29,7 +29,7 @@
 
     <CustomAction Error="30000" Id="DiskSpaceCheck"/>
     <InstallExecuteSequence>
-      <Custom Action="DiskSpaceCheck" After="DiskSpace"><![CDATA[Not Installed And (ProgramFilesFolder_DISK_FREE_SPACE < 21474836480)]]></Custom>
+      <Custom Action="DiskSpaceCheck" After="DiskSpace"><![CDATA[Not Installed And (ProgramFilesFolder_DISK_FREE_SPACE_GB < 20)]]></Custom>
     </InstallExecuteSequence>
     <UI>
       <Error Id="30000"><![CDATA[20GB Disk Free Space Required]]></Error>

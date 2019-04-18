@@ -55,6 +55,18 @@ extern "C" UINT __stdcall DiskSpace(MSIHANDLE hInstall)
 
 		hr = WcaSetProperty(dirName, ullBuff);
 		BreakExitOnFailure(hr, "Failed setting property");
+
+		// Save in GB.
+		diskSpace.QuadPart /= (1024 * 1024 * 1024);
+
+		errn = ::_ui64tow_s(diskSpace.QuadPart, ullBuff, sizeof(ullBuff), 10);
+		BreakExitOnNull(!errn, hr, E_FAIL, "Failed converting disk free space (GB) to string for directory '%ls'", (LPCWSTR)dirPath);
+
+		hr = dirName.AppnedFormat(L"_GB");
+		BreakExitOnFailure(hr, "Failed appending string");
+
+		hr = WcaSetProperty(dirName, ullBuff);
+		BreakExitOnFailure(hr, "Failed setting property");
 	}
 	hr = S_OK;
 

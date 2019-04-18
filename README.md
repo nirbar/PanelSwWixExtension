@@ -21,8 +21,19 @@ The commercial extension- [JetWixExtension](https://github.com/nirbar/JetBA-Show
     <?pragma endtuple.BAR?>
     <?pragma endtuple.NIR?>
     ~~~~~~~
+  - Generate random Id. 
+    Useful when deploying files with same name to different target folders:
+    ~~~~~~~
+  	<ComponentGroup Id="random">
+  		<Component Directory="Product.Dir">
+  		<File Source="$(sys.SOURCEFILEPATH)" Id="$(jet.random_id())"/>
+  		</Component>
+  		<Component Directory="INSTALL_FOLDER">
+  		<File Source="$(sys.SOURCEFILEPATH)" Id="$(jet.random_id())"/>
+  		</Component>
+  	</ComponentGroup>
+    ~~~~~~~
 Contact the owner to obtain a license for [JetWixExtension](https://github.com/nirbar/JetBA-Showcase)
-
 
 ## PanelSwWixExtension WiX Elements
 

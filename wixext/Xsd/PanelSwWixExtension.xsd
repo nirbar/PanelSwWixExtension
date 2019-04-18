@@ -68,7 +68,7 @@
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Directory" />
       </xs:appinfo>
       <xs:documentation>
-        <![CDATA[Calculate disk free space for a directory. The free space is set to property '*DirectoryId*_DISK_FREE_SPACE'.
+        <![CDATA[Calculate disk free space for a directory. The free space is set to property '*DirectoryId*_DISK_FREE_SPACE' in bytes, and to property '*DirectoryId*_DISK_FREE_SPACE_GB' in gigabytes.
         By default, the action executes after CostFinalize. You can author an Error custom action to execute after custom action 'DiskSpace' to condition install on available space.
         Note that, the action does not reserve space for costing. Directories in the same drive are expected to return the same value.
         The directory must exist at the time of the check, so it is recommended to use pre-existing folders such as ProgramFiles64Folder.
