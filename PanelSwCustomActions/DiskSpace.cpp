@@ -47,7 +47,7 @@ extern "C" UINT __stdcall DiskSpace(MSIHANDLE hInstall)
 		dwRes = ::GetDiskFreeSpaceEx((LPCWSTR)dirPath, nullptr, nullptr, &diskSpace);
 		BreakExitOnNullWithLastError(dwRes, hr, "Failed getting disk free space for '%ls'", (LPCWSTR)dirPath);
 
-		errn = ::_ui64tow_s(diskSpace.QuadPart, ullBuff, sizeof(ullBuff), 10);
+		errn = ::_ui64tow_s(diskSpace.QuadPart, ullBuff, ARRAYSIZE(ullBuff), 10);
 		BreakExitOnNull(!errn, hr, E_FAIL, "Failed converting disk free space to string for directory '%ls'", (LPCWSTR)dirPath);
 
 		hr = dirName.AppnedFormat(L"_DISK_FREE_SPACE");
@@ -59,7 +59,7 @@ extern "C" UINT __stdcall DiskSpace(MSIHANDLE hInstall)
 		// Save in GB.
 		diskSpace.QuadPart /= (1024 * 1024 * 1024);
 
-		errn = ::_ui64tow_s(diskSpace.QuadPart, ullBuff, sizeof(ullBuff), 10);
+		errn = ::_ui64tow_s(diskSpace.QuadPart, ullBuff, ARRAYSIZE(ullBuff), 10);
 		BreakExitOnNull(!errn, hr, E_FAIL, "Failed converting disk free space (GB) to string for directory '%ls'", (LPCWSTR)dirPath);
 
 		hr = dirName.AppnedFormat(L"_GB");
