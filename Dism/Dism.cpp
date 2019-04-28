@@ -11,7 +11,10 @@
 using namespace std;
 
 static LPCWSTR DismStateString(DismPackageFeatureState state);
-static void CALLBACK ProgressCallback(UINT Current, UINT Total, PVOID UserData);
+static void ProgressCallback(UINT Current, UINT Total, PVOID UserData);
+
+// Work around DISM API which in some versions is __stdcall and in others __cdecl.
+static DISM_PROGRESS_CALLBACK _pfProgressCallback = [](UINT Current, UINT Total, PVOID UserData) -> void { ProgressCallback(Current, Total, UserData); };
 
 // Will report 1GB for all features.
 struct ProgressReportState
@@ -215,7 +218,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 		bRes = ::PathFileExists(pkgPath);
 		ExitOnNullWithLastError(bRes, hr, "DISM package file not found: '%ls'", pkgPath);
 
-		hr = ::DismAddPackage(hSession, pkgPath, FALSE, FALSE, state.hCancel_, ProgressCallback, &state);
+		hr = ::DismAddPackage(hSession, pkgPath, FALSE, FALSE, state.hCancel_, _pfProgressCallback, &state);
 		if (HRESULT_CODE(hr) == ERROR_SUCCESS_REBOOT_REQUIRED)
 		{
 			hr = S_OK;
@@ -256,7 +259,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 	for (const DismFeature* pFtr : resolvedFeatures)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Enabling feature '%ls'", pFtr->FeatureName);
-		hr = ::DismEnableFeature(hSession, pFtr->FeatureName, nullptr, DismPackageNone, FALSE, nullptr, 0, TRUE, state.hCancel_, ProgressCallback, &state);
+		hr = ::DismEnableFeature(hSession, pFtr->FeatureName, nullptr, DismPackageNone, FALSE, nullptr, 0, TRUE, state.hCancel_, _pfProgressCallback, &state);
 		if (HRESULT_CODE(hr) == ERROR_SUCCESS_REBOOT_REQUIRED)
 		{
 			hr = S_OK;
@@ -365,7 +368,7 @@ static LPCWSTR DismStateString(DismPackageFeatureState state)
 	}
 }
 
-static void CALLBACK ProgressCallback(UINT Current, UINT Total, PVOID UserData)
+static void ProgressCallback(UINT Current, UINT Total, PVOID UserData)
 {
 	HRESULT hr = S_OK;
 	PMSIHANDLE hRec;
