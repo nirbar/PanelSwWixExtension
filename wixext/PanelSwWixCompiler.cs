@@ -326,18 +326,28 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
+        private string GetFileId(XmlElement fileElement)
+        {
+            string file = fileElement.GetAttribute("Id");
+            if (string.IsNullOrEmpty(file))
+            {
+                file = fileElement.GetAttribute("Name");
+                if (string.IsNullOrEmpty(file))
+                {
+                    file = fileElement.GetAttribute("Source");
+                    file = Path.GetFileName(file);
+                }
+                file = CompilerCore.GetIdentifierFromName(file);
+            }
+            return file;
+        }
+
         private void ParseJsonJPathElement(XmlElement node, XmlElement parentElement)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
             string jpath = null;
             string value = null;
-            string file = parentElement.GetAttribute("Id");
-            if (string.IsNullOrEmpty(file))
-            {
-                file = parentElement.GetAttribute("Source");
-                file = Path.GetFileName(file);
-                file = CompilerCore.GetIdentifierFromName(file);
-            }
+            string file = GetFileId(parentElement);
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -647,14 +657,7 @@ namespace PanelSw.Wix.Extensions
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
             InstallUtil_Bitness bitness = InstallUtil_Bitness.asComponent;
-
-            string file = parentElement.GetAttribute("Id");
-            if (string.IsNullOrEmpty(file))
-            {
-                file = parentElement.GetAttribute("Source");
-                file = Path.GetFileName(file);
-                file = CompilerCore.GetIdentifierFromName(file);
-            }
+            string file = GetFileId(parentElement);
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -751,16 +754,8 @@ namespace PanelSw.Wix.Extensions
         private void ParseAlwaysOverwriteFileElement(XmlNode node, XmlElement parentElement)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
-
-            string file = parentElement.GetAttribute("Id");
+            string file = GetFileId(parentElement);
             string srcFile = null;
-
-            if (string.IsNullOrEmpty(file))
-            {
-                file = parentElement.GetAttribute("Source");
-                file = Path.GetFileName(file);
-                file = CompilerCore.GetIdentifierFromName(file);
-            }
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -825,14 +820,7 @@ namespace PanelSw.Wix.Extensions
             string userName = null;
             string password = null;
             ErrorHandling promptOnError = ErrorHandling.fail;
-
-            string file = parentElement.GetAttribute("Id");
-            if (string.IsNullOrEmpty(file))
-            {
-                file = parentElement.GetAttribute("Source");
-                file = Path.GetFileName(file);
-                file = CompilerCore.GetIdentifierFromName(file);
-            }
+            string file = GetFileId(parentElement);
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -2880,14 +2868,7 @@ namespace PanelSw.Wix.Extensions
 
             if (parentElement.LocalName.Equals("File"))
             {
-                fileId = parentElement.GetAttribute("Id");
-                if (string.IsNullOrEmpty(fileId))
-                {
-                    fileId = parentElement.GetAttribute("Source");
-                    fileId = Path.GetFileName(fileId);
-                    fileId = CompilerCore.GetIdentifierFromName(fileId);
-                }
-
+                fileId = GetFileId(parentElement);
                 component = ((XmlElement)parentElement.ParentNode).GetAttribute("Id");
                 if (string.IsNullOrEmpty(component))
                 {
