@@ -438,6 +438,7 @@ HRESULT CTaskScheduler::BackupTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 LExit:
 	if (hFile != INVALID_HANDLE_VALUE)
 	{
+		::FlushFileBuffers(hFile);
 		::CloseHandle(hFile);
 	}
 

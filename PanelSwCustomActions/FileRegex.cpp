@@ -378,6 +378,7 @@ HRESULT CFileRegex::ExecuteMultibyte(LPCWSTR szFilePath, LPCSTR szFileContent, L
 LExit:
 	if (hFile != INVALID_HANDLE_VALUE)
 	{
+		::FlushFileBuffers(hFile);
 		::CloseHandle(hFile);
 	}
 	if (szRegexMB)
@@ -426,6 +427,7 @@ HRESULT CFileRegex::ExecuteUnicode(LPCWSTR szFilePath, LPCWSTR szFileContent, LP
 LExit:
 	if (hFile != INVALID_HANDLE_VALUE)
 	{
+		::FlushFileBuffers(hFile);
 		::CloseHandle(hFile);
 	}
 

@@ -154,6 +154,7 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 			cbData = 0;
 			if ((hFile != INVALID_HANDLE_VALUE) && (hFile != NULL))
 			{
+				::FlushFileBuffers(hFile);
 				::CloseHandle(hFile);
 				hFile = INVALID_HANDLE_VALUE;
 			}
@@ -374,6 +375,7 @@ LExit:
 	ReleaseStr(szObfuscatedCommand);
 	if ((hFile != INVALID_HANDLE_VALUE) && (hFile != NULL))
 	{
+		::FlushFileBuffers(hFile);
 		::CloseHandle(hFile);
 	}
 

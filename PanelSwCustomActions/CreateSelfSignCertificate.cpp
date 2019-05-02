@@ -211,6 +211,7 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)id);
 
 		// Clear for next round
+		::FlushFileBuffers(hFile);
 		::CloseHandle(hFile);
 		hFile = INVALID_HANDLE_VALUE;
 
@@ -245,6 +246,7 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall)
 LExit:
 	if (hFile != INVALID_HANDLE_VALUE)
 	{
+		::FlushFileBuffers(hFile);
 		::CloseHandle(hFile);
 	}
 	if (hStore)
