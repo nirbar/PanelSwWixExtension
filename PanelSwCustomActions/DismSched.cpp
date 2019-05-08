@@ -43,7 +43,7 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 		::wcscpy_s(szDismLog, szMsiLog);
 
 		bRes = ::PathRenameExtension(szDismLog, L".dism.log");
-		ExitOnNullWithLastError1(bRes, hr, "Failed renaming file extension: '%ls'", szMsiLog);
+		ExitOnNullWithLastError(bRes, hr, "Failed renaming file extension: '%ls'", szMsiLog);
 
 		hr = cad.Format(DismLogPrefix L"%s;", szDismLog);
 		ExitOnFailure(hr, "Failed formatting string for DISM log file");

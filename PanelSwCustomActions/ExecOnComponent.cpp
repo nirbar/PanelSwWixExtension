@@ -4,10 +4,12 @@
 #include "../CaCommon/WixString.h"
 #include <wcautil.h>
 #include <memutil.h>
+#include <shlwapi.h>
 #include <procutil.h>
 #include "google\protobuf\any.h"
 using namespace com::panelsw::ca;
 using namespace google::protobuf;
+#pragma comment (lib, "shlwapi.lib")
 
 enum Flags
 {
@@ -88,7 +90,7 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{        
-        BreakExitOnFailure(hr, "Failed to fetch record.");
+		BreakExitOnFailure(hr, "Failed to fetch record.");
 		ReleaseNullStr(szObfuscatedCommand);
 
 		// Get fields
@@ -120,7 +122,8 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		// Execute from binary
 		if (!szBinary.IsNullOrEmpty())
 		{
-			CWixString szNewCommand(szCommandFormat);
+			CWixString szReplaceMe;
+			LPCWSTR szExtension = nullptr;
 
 			hr = szSubQuery.Format(L"SELECT `Data` FROM `Binary` WHERE `Name`='%s'", (LPCWSTR)szBinary);
 			BreakExitOnFailure(hr, "Failed to format string");
@@ -137,10 +140,20 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 			dwRes = ::GetTempFileName(longTempPath, L"EXE", 0, szTempFile);
 			BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
 
-			hr = szCommandFormat.Format(L"\"%s\" %s", szTempFile, (LPCWSTR)szNewCommand);
+			szExtension = ::PathFindExtension((LPCWSTR)szBinary);
+			if (szExtension && *szExtension)
+			{
+				dwRes = ::PathRenameExtension(szTempFile, szExtension);
+				ExitOnNullWithLastError(dwRes, hr, "Failed renaming file extension '%ls' to '%ls'", szTempFile, szExtension);
+			}
+
+			hr = szReplaceMe.Format(L"{*%s}", (LPCWSTR)szBinary);
 			BreakExitOnFailure(hr, "Failed to format string");
 
-			hFile = ::CreateFile(szTempFile, GENERIC_ALL, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
+			hr = szCommandFormat.ReplaceAll((LPCWSTR)szReplaceMe, szTempFile);
+			BreakExitOnFailure(hr, "Failed to replace in string");
+
+			hFile = ::CreateFile(szTempFile, GENERIC_ALL, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
 			ExitOnNullWithLastError((hFile != INVALID_HANDLE_VALUE), hr, "Failed opening file");
 
 			dwRes = ::WriteFile(hFile, pbData, cbData, &cbData, nullptr);

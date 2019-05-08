@@ -677,7 +677,7 @@
       </xs:attribute>
       <xs:attribute name="BinaryKey" type="xs:string" use="optional">
         <xs:annotation>
-          <xs:documentation><![CDATA[If specified, extract the binary and execute it with the arguments specified on 'Command' field.]]></xs:documentation>
+          <xs:documentation><![CDATA[If specified, extract the binary and use it in command execution. Specify '{*BinaryKey}' on the 'Command' attribute to use the binary path. For example, to execute a batch file, use BinaryKey='MySript.bat' and Command='"cmd" /c "{*MySript.bat}"'. If the binary key has the format 'file.ext' then the extension part is preserved.]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="WorkingDirectory" type="xs:string" use="optional">
