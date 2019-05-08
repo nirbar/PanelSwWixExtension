@@ -74,9 +74,6 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 		hr = WcaGetRecordString(hRecord, 8, (LPWSTR*)szCondition);
 		BreakExitOnFailure(hr, "Failed to get Condition.");
 
-		// Sanity
-		ExitOnNull((szFileId.IsNullOrEmpty() != szFilePath.IsNullOrEmpty()), hr, E_INVALIDARG, "Both FilePath and File_ have values or both empty");
-
 		// Test condition(s)
 		hr = IsInstall(szComponent, szFileId, szCondition);
 		BreakExitOnFailure(hr, "Failed to evaluate conditions.");
@@ -84,6 +81,9 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 		{
 			continue;
 		}
+
+		// Sanity
+		ExitOnNull((szFileId.IsNullOrEmpty() != szFilePath.IsNullOrEmpty()), hr, E_INVALIDARG, "Both FilePath and File_ have values or both empty");
 
 		if (szFilePath.IsNullOrEmpty())
 		{

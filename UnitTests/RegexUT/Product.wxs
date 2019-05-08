@@ -21,6 +21,7 @@
       </Component>
     </Feature>
     <PanelSW:FileRegex FilePath="[#Unicode.ini]" Regex="\bCurrentMappingFile=" Replacement="[NEWMAPPINGFILE]" Encoding="Unicode" Condition="$Unicode.ini >= 3"/>
+    <PanelSW:FileRegex FilePath="[SOMEWHERE]" Regex="\bCurrentMappingFile=" Replacement="[NEWMAPPINGFILE]" Encoding="Unicode" Condition="SOMEWHERE"/>
 
     <Directory Id="TARGETDIR" Name="SourceDir">
       <Directory Id="ProgramFilesFolder">
