@@ -1,12 +1,12 @@
+using Microsoft.Tools.WindowsInstallerXml;
+using System;
+using System.IO;
+using System.Reflection;
+using System.Xml;
+using System.Xml.Schema;
+
 namespace PanelSw.Wix.Extensions
 {
-    using Microsoft.Tools.WindowsInstallerXml;
-    using System;
-    using System.IO;
-    using System.Reflection;
-    using System.Xml;
-    using System.Xml.Schema;
-
     /// <summary>
     /// The compiler for the Windows Installer XML Toolset PanelSwWixExtension Extension.
     /// </summary>
@@ -275,13 +275,10 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            // reference the Win32_CopyFiles custom actions since nothing will happen without these
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "JsonJpathSearch");
 
             if (!Core.EncounteredError)
             {
-                // create a row in the ReadIniValues table
-                Core.EnsureTable(sourceLineNumbers, "PSW_JsonJpathSearch");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_JsonJpathSearch");
                 row[0] = id;
                 row[1] = property;
@@ -347,13 +344,10 @@ namespace PanelSw.Wix.Extensions
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Value"));
             }
 
-            // reference the Win32_CopyFiles custom actions since nothing will happen without these
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "JsonJpathSched");
 
             if (!Core.EncounteredError)
             {
-                // create a row in the Win32_CopyFiles table
-                Core.EnsureTable(sourceLineNumbers, "PSW_JsonJPath");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_JsonJPath");
                 row[0] = file;
                 row[1] = jpath;
@@ -369,7 +363,6 @@ namespace PanelSw.Wix.Extensions
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "DiskSpace");
             if (!Core.EncounteredError)
             {
-                Core.EnsureTable(sourceLineNumbers, "PSW_DiskSpace");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_DiskSpace");
                 row[0] = directory;
             }
@@ -414,7 +407,6 @@ namespace PanelSw.Wix.Extensions
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "SetPropertyFromPipe");
             if (!Core.EncounteredError)
             {
-                Core.EnsureTable(sourceLineNumbers, "PSW_SetPropertyFromPipe");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_SetPropertyFromPipe");
                 row[0] = id;
                 row[1] = pipe;
@@ -493,7 +485,6 @@ namespace PanelSw.Wix.Extensions
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "CreateSelfSignCertificate");
             if (!Core.EncounteredError)
             {
-                Core.EnsureTable(sourceLineNumbers, "PSW_SelfSignCertificate");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_SelfSignCertificate");
                 row[0] = id;
                 row[1] = component;
@@ -599,14 +590,11 @@ namespace PanelSw.Wix.Extensions
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "Path"));
             }
 
-            // reference the Win32_CopyFiles custom actions since nothing will happen without these
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "BackupAndRestore");
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "Property", restoreSchedule.ToString());
 
             if (!Core.EncounteredError)
             {
-                // create a row in the Win32_CopyFiles table
-                Core.EnsureTable(sourceLineNumbers, "PSW_BackupAndRestore");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_BackupAndRestore");
                 row[0] = id;
                 row[1] = component;
@@ -658,13 +646,12 @@ namespace PanelSw.Wix.Extensions
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Id"));
             }
 
-            // reference the Win32_CopyFiles custom actions since nothing will happen without these
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "PSW_InstallUtilSched");
 
             if (!Core.EncounteredError)
             {
-                // create a row in the Win32_CopyFiles table
-                Core.EnsureTable(sourceLineNumbers, "PSW_InstallUtil");
+                // Ensure sub-table exists for queries to succeed even if no sub-entries exist.
+                Core.EnsureTable(sourceLineNumbers, "PSW_InstallUtil_Arg");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_InstallUtil");
                 row[0] = file;
                 row[1] = (int)bitness;
@@ -713,8 +700,6 @@ namespace PanelSw.Wix.Extensions
                     continue;
                 }
 
-                // create a row in the PeriGen_PsfConfig table
-                Core.EnsureTable(sourceLineNumbers, "PSW_InstallUtil_Arg");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_InstallUtil_Arg");
                 row[0] = file;
                 row[1] = argId;
@@ -748,7 +733,6 @@ namespace PanelSw.Wix.Extensions
 
             if (!Core.EncounteredError)
             {
-                Core.EnsureTable(sourceLineNumbers, "PSW_AlwaysOverwriteFile");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_AlwaysOverwriteFile");
                 row[0] = file;
                 row[1] = srcFile;
@@ -882,12 +866,10 @@ namespace PanelSw.Wix.Extensions
                 Core.OnMessage(WixErrors.IllegalAttributeValueWithOtherAttribute(sourceLineNumbers, "TopShelf", "Account", "custom", "UserName"));
             }
 
-            // reference the Win32_CopyFiles custom actions since nothing will happen without these
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "TopShelf");
 
             if (!Core.EncounteredError)
             {
-                Core.EnsureTable(sourceLineNumbers, "PSW_TopShelf");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_TopShelf");
                 row[0] = file;
                 row[1] = serviceName;
@@ -1201,7 +1183,6 @@ namespace PanelSw.Wix.Extensions
                                     }
                                 }
 
-                                Core.EnsureTable(sourceLineNumbers, "PSW_ExecOnComponent_ExitCode");
                                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_ExecOnComponent_ExitCode");
                                 row[0] = id;
                                 row[1] = (int)from;
@@ -1242,7 +1223,6 @@ namespace PanelSw.Wix.Extensions
                                     break;
                                 }
 
-                                Core.EnsureTable(sourceLineNumbers, "PSW_ExecOnComponent_Environment");
                                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_ExecOnComponent_Environment");
                                 row[0] = id;
                                 row[1] = name;
@@ -1261,8 +1241,9 @@ namespace PanelSw.Wix.Extensions
 
             if (!Core.EncounteredError)
             {
-                // create a row in the Win32_CopyFiles table
-                Core.EnsureTable(sourceLineNumbers, "PSW_ExecOnComponent");
+                // Ensure sub-tables exist for queries to succeed even if no sub-entries exist.
+                Core.EnsureTable(sourceLineNumbers, "PSW_ExecOnComponent_ExitCode");
+                Core.EnsureTable(sourceLineNumbers, "PSW_ExecOnComponent_Environment");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_ExecOnComponent");
                 row[0] = id;
                 row[1] = component;
@@ -1380,8 +1361,8 @@ namespace PanelSw.Wix.Extensions
 
             if (!Core.EncounteredError)
             {
-                // create a row in the Win32_CopyFiles table
-                Core.EnsureTable(sourceLineNumbers, "PSW_ServiceConfig");
+                // Ensure sub-table exists for queries to succeed even if no sub-entries exist.
+                Core.EnsureTable(sourceLineNumbers, "PSW_ServiceConfig_Dependency");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_ServiceConfig");
                 row[0] = id;
                 row[1] = component;
@@ -1390,7 +1371,7 @@ namespace PanelSw.Wix.Extensions
                 row[4] = account;
                 row[5] = password;
                 row[6] = (start == ServiceStart.autoDelayed) ? (int)ServiceStart.auto : (int)start;
-                row[7] = (start == ServiceStart.autoDelayed) ? 1 : (start == ServiceStart.auto) ? 0: -1;
+                row[7] = (start == ServiceStart.autoDelayed) ? 1 : (start == ServiceStart.auto) ? 0 : -1;
                 row[8] = loadOrderGroup;
                 row[9] = (int)errorHandling;
             }
@@ -1439,8 +1420,6 @@ namespace PanelSw.Wix.Extensions
 
                     if (!Core.EncounteredError)
                     {
-                        // create a row in the Win32_CopyFiles table
-                        Core.EnsureTable(sourceLineNumbers, "PSW_ServiceConfig_Dependency");
                         Row row = Core.CreateRow(sourceLineNumbers, "PSW_ServiceConfig_Dependency");
                         row[0] = id;
                         row[1] = depService;
@@ -1514,7 +1493,6 @@ namespace PanelSw.Wix.Extensions
 
             if (!Core.EncounteredError)
             {
-                Core.EnsureTable(sourceLineNumbers, "PSW_Dism");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_Dism");
                 row[0] = id;
                 row[1] = component;
@@ -1603,8 +1581,6 @@ namespace PanelSw.Wix.Extensions
 
             if (!Core.EncounteredError)
             {
-                // create a row in the Win32_CopyFiles table
-                Core.EnsureTable(sourceLineNumbers, "PSW_TaskScheduler");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_TaskScheduler");
                 row[0] = taskName;
                 row[1] = component;
@@ -1725,15 +1701,12 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            // reference the Win32_CopyFiles custom actions since nothing will happen without these
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "CustomUninstallKey_Immediate");
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "CustomUninstallKey_deferred");
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "CustomUninstallKey_rollback");
 
             if (!Core.EncounteredError)
             {
-                // create a row in the Win32_CopyFiles table
-                Core.EnsureTable(sourceLineNumbers, "PSW_CustomUninstallKey");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_CustomUninstallKey");
                 row[0] = id;
                 row[1] = productCode;
@@ -1850,13 +1823,10 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            // reference the Win32_CopyFiles custom actions since nothing will happen without these
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "ReadIniValues");
 
             if (!Core.EncounteredError)
             {
-                // create a row in the ReadIniValues table
-                Core.EnsureTable(sourceLineNumbers, "PSW_ReadIniValues");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_ReadIniValues");
                 row[0] = id;
                 row[1] = FilePath;
@@ -1962,13 +1932,10 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            // reference the Win32_CopyFiles custom actions since nothing will happen without these
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "RemoveRegistryValue_Immediate");
 
             if (!Core.EncounteredError)
             {
-                // create a row in the ReadIniValues table
-                Core.EnsureTable(sourceLineNumbers, "PSW_RemoveRegistryValue");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_RemoveRegistryValue");
                 row[0] = id;
                 row[1] = root;
@@ -2056,7 +2023,6 @@ namespace PanelSw.Wix.Extensions
             {
                 Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "CertificateHashSearch");
 
-                Core.EnsureTable(sourceLineNumbers, "PSW_CertificateHashSearch");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_CertificateHashSearch");
                 row[0] = property;
                 row[1] = certName;
@@ -2122,13 +2088,10 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            // reference the Win32_CopyFiles custom actions since nothing will happen without these
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "EvaluateExpression");
 
             if (!Core.EncounteredError)
             {
-                // create a row in the ReadIniValues table
-                Core.EnsureTable(sourceLineNumbers, "PSW_EvaluateExpression");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_EvaluateExpression");
                 row[0] = id;
                 row[1] = property;
@@ -2242,13 +2205,10 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            // reference the Win32_CopyFiles custom actions since nothing will happen without these
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "XmlSearch");
 
             if (!Core.EncounteredError)
             {
-                // create a row in the ReadIniValues table
-                Core.EnsureTable(sourceLineNumbers, "PSW_XmlSearch");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_XmlSearch");
                 row[0] = id;
                 row[1] = property;
@@ -2327,13 +2287,10 @@ namespace PanelSw.Wix.Extensions
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "XPath"));
             }
 
-            // reference the Win32_CopyFiles custom actions since nothing will happen without these
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "SqlSearch");
 
             if (!Core.EncounteredError)
             {
-                // create a row in the ReadIniValues table
-                Core.EnsureTable(sourceLineNumbers, "PSW_SqlSearch");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_SqlSearch");
                 row[0] = id;
                 row[1] = server;
@@ -2461,13 +2418,10 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            // reference the Win32_CopyFiles custom actions since nothing will happen without these
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "Telemetry");
 
             if (!Core.EncounteredError)
             {
-                // create a row in the ReadIniValues table
-                Core.EnsureTable(sourceLineNumbers, "PSW_Telemetry");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_Telemetry");
                 row[0] = id;
                 row[1] = url;
@@ -2593,14 +2547,10 @@ namespace PanelSw.Wix.Extensions
                 flags = ExecutePhase.OnExecute;
             }
 
-            // reference the Win32_CopyFiles custom actions since nothing will happen without these
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "ShellExecute_Immediate");
 
             if (!Core.EncounteredError)
             {
-                // create a row in the ReadIniValues table
-                // `Id`, `Target`, `Args`, `Verb`, `WorkingDir`, `Show`, `Wait`, `Condition`
-                Core.EnsureTable(sourceLineNumbers, "PSW_ShellExecute");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_ShellExecute");
                 row[0] = id;
                 row[1] = target;
@@ -2684,13 +2634,10 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            // reference the Win32_CopyFiles custom actions since nothing will happen without these
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "MsiSqlQuery");
 
             if (!Core.EncounteredError)
             {
-                // create a row in the Win32_CopyFiles table
-                Core.EnsureTable(sourceLineNumbers, "PSW_MsiSqlQuery");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_MsiSqlQuery");
                 row[0] = id;
                 row[1] = property;
@@ -2815,13 +2762,10 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            // reference the Win32_CopyFiles custom actions since nothing will happen without these
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "RegularExpression");
 
             if (!Core.EncounteredError)
             {
-                // create a row in the Win32_CopyFiles table
-                Core.EnsureTable(sourceLineNumbers, "PSW_RegularExpression");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_RegularExpression");
                 row[0] = id;
                 row[1] = filepath;
@@ -2847,7 +2791,7 @@ namespace PanelSw.Wix.Extensions
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
             string id = null;
-            string fileId  = null;
+            string fileId = null;
             string component = null;
             string filepath = null;
             string condition = null;
@@ -2949,13 +2893,10 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            // reference the Win32_CopyFiles custom actions since nothing will happen without these
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "FileRegex_Immediate");
 
             if (!Core.EncounteredError)
             {
-                // create a row in the Win32_CopyFiles table
-                Core.EnsureTable(sourceLineNumbers, "PSW_FileRegex");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_FileRegex");
                 row[0] = id;
                 row[1] = component;
@@ -3050,13 +2991,10 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            // reference the Win32_CopyFiles custom actions since nothing will happen without these
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "DeletePath");
 
             if (!Core.EncounteredError)
             {
-                // create a row in the Win32_CopyFiles table
-                Core.EnsureTable(sourceLineNumbers, "PSW_DeletePath");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_DeletePath");
                 row[0] = id;
                 row[1] = filepath;
@@ -3141,13 +3079,10 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            // reference the Win32_CopyFiles custom actions since nothing will happen without these
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "ZipFileSched");
 
             if (!Core.EncounteredError)
             {
-                // create a row in the Win32_CopyFiles table
-                Core.EnsureTable(sourceLineNumbers, "PSW_ZipFile");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_ZipFile");
                 row[0] = id;
                 row[1] = dstZipFile;
@@ -3241,13 +3176,10 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            // reference the Win32_CopyFiles custom actions since nothing will happen without these
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "UnzipSched");
 
             if (!Core.EncounteredError)
             {
-                // create a row in the Win32_CopyFiles table
-                Core.EnsureTable(sourceLineNumbers, "PSW_Unzip");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_Unzip");
                 row[0] = id;
                 row[1] = zipFile;
