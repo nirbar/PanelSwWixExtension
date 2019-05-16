@@ -623,4 +623,17 @@
     </UI>
   </Fragment>
 
+  <!-- AccountSidSearch -->
+  <Fragment>
+    <CustomAction Id="AccountSidSearch" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="AccountSidSearch" Execute="immediate" Return="check" />
+    <InstallExecuteSequence>
+      <Custom Action="AccountSidSearch" After="AppSearch" Overridable="yes"/>
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="AccountSidSearch" After="AppSearch" Overridable="yes"/>
+    </InstallUISequence>
+    <UI>
+      <ProgressText Action="AccountSidSearch">!(loc.AccountSidSearch)</ProgressText>
+    </UI>
+  </Fragment>
 </Wix>

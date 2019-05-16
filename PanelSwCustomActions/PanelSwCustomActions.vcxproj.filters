@@ -124,6 +124,9 @@
     <ClCompile Include="DiskSpace.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AccountSidSearch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\*.pb.*">
@@ -217,6 +220,6 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="$(IntDir)Version.rc" />
+    <ResourceCompile Include="$(IntDir)\Version.rc" />
   </ItemGroup>
 </Project>

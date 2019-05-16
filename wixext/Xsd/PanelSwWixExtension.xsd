@@ -14,6 +14,33 @@
   </xs:annotation>
   <xs:import namespace="http://schemas.microsoft.com/wix/2006/wi" />
 
+  <xs:element name="AccountSidSearch">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Lookup an account security identifier]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="AccountName" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Account name to get SID for. Use a fully qualified string in the domain_name\user_name format to ensure that AccountSidSearch finds the account in the desired domain. This field is formatted</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="SystemName" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>If not supplied, the account name translation begins on the local system. If the name cannot be resolved on the local system, this function will try to resolve the name using domain controllers trusted by the local system.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="JsonJpathSearch">
     <xs:annotation>
       <xs:appinfo>
@@ -1174,7 +1201,7 @@ Send telemetry data to a given URL
 <Wix ... xmlns:PanelSw="http://schemas.panel-sw.co.il/wix/WixExtension">
  <PanelSw:Telemetry Id="My_Telemetry" Method="POST" Secure="yes" OnRollback="yes" OnSucess="yes" OnStart="yes" Url="www.example.com" Page="/telemetry?REMOVE=[REMOVE]&UPGRADINGPRODUCTCODE=[UPGRADINGPRODUCTCODE]&ACTION=[ACTION]" >
   MY_CONDITION
- </PanelSw:XmlSearch>
+ </PanelSw:Telemetry>
 </Wix>
 \endcode
         ]]>

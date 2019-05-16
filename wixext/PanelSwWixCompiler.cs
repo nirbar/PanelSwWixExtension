@@ -117,6 +117,10 @@ namespace PanelSw.Wix.Extensions
                 case "Property":
                     switch (element.LocalName)
                     {
+                        case "AccountSidSearch":
+                            ParseAccountSidSearchElement(element);
+                            break;
+
                         case "XmlSearch":
                             ParseXmlSearchElement(element);
                             break;
@@ -2097,6 +2101,88 @@ namespace PanelSw.Wix.Extensions
                 row[1] = property;
                 row[2] = expression;
                 row[3] = order;
+            }
+        }
+
+        private void ParseAccountSidSearchElement(XmlNode node)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string id = "sid" + Guid.NewGuid().ToString("N"); ;
+            string systemName = null;
+            string accountName = null;
+            string property = null;
+            string condition = "";
+
+            if (node.ParentNode.LocalName != "Property")
+            {
+                Core.UnexpectedElement(node.ParentNode, node);
+                return;
+            }
+            property = node.ParentNode.Attributes["Id"].Value;
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName)
+                    {
+                        case "AccountName":
+                            accountName = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "SystemName":
+                            systemName = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+                else
+                {
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            if (string.IsNullOrEmpty(property))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.LocalName, "Id"));
+                return;
+            }
+            if (string.IsNullOrEmpty(accountName))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "AccountName"));
+            }
+
+            // find unexpected child elements
+            foreach (XmlNode child in node.ChildNodes)
+            {
+                if (XmlNodeType.Element == child.NodeType)
+                {
+                    if (child.NamespaceURI == schema.TargetNamespace)
+                    {
+                        Core.UnexpectedElement(node, child);
+                    }
+                    else
+                    {
+                        Core.UnsupportedExtensionElement(node, child);
+                    }
+                }
+                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
+                {
+                    condition = child.Value.Trim();
+                }
+            }
+
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "AccountSidSearch");
+            if (!Core.EncounteredError)
+            {
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_AccountSidSearch");
+                row[0] = id;
+                row[1] = property;
+                row[2] = systemName;
+                row[3] = accountName;
+                row[4] = condition;
             }
         }
 

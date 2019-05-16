@@ -175,7 +175,7 @@
     <columnDefinition name="ServiceConfig_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" keyTable="PSW_ServiceConfig" keyColumn="1" />
     <columnDefinition name="Service" type="string" length="0" primaryKey="yes" modularize="property" category="formatted" nullable="yes"/>
     <columnDefinition name="Group" type="string" length="0" primaryKey="yes" modularize="property" category="formatted" nullable="yes"/>
-  </tableDefinition> 
+  </tableDefinition>
 
   <tableDefinition name="PSW_InstallUtil">
     <columnDefinition name="File_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" keyTable="File" keyColumn="1" />
@@ -269,5 +269,13 @@
     <columnDefinition name="Property_" type="string" length="72" modularize="column" category="identifier" />
     <columnDefinition name="JPath" type="string" length="0" nullable="no" modularize="column" category="formatted" />
     <columnDefinition name="FilePath" type="string" length="0" nullable="no" modularize="column" category="formatted" />
+  </tableDefinition>
+
+  <tableDefinition name="PSW_AccountSidSearch">
+    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="Property_" type="string" length="0" modularize="property" category="text" />
+    <columnDefinition name="SystemName" type="string" length="0" modularize="property" nullable="yes" category="formatted" />
+    <columnDefinition name="AccountName" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
   </tableDefinition>
 </tableDefinitions>

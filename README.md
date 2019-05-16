@@ -38,6 +38,7 @@ Contact the owner to obtain a license for [JetWixExtension](https://github.com/n
 ## PanelSwWixExtension WiX Elements
 
 - Immediate Actions:
+  - *AccountSidSearch*: Lookup an account's SID by account name.
   - *JsonJpathSearch*: Read JSON values
   - *DiskSpace*: Calculate available disk space for a target directory
   - *CertificateHashSearch*: Find a certificate has in local system MY store.

@@ -24,4 +24,5 @@
   <String Id="Dism"><![CDATA[Enable Windows roles and features]]></String>
   <String Id="JsonJpath"><![CDATA[Editing Json files]]></String>
   <String Id="JsonJpathSearch"><![CDATA[Searching in Json files]]></String>
+  <String Id="AccountSidSearch"><![CDATA[Detecting account security identifier]]></String>
 </WixLocalization>
