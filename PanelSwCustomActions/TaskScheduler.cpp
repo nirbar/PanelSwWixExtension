@@ -313,7 +313,6 @@ HRESULT CTaskScheduler::CreateTask(LPCWSTR szTaskName, LPCWSTR szTaskXml, LPCWST
 	HRESULT hr = S_OK;
 	CComPtr<ITaskDefinition> pTask;
 	CComPtr<IRegisteredTask> pRegTask;
-	TASK_LOGON_TYPE logonType = TASK_LOGON_TYPE::TASK_LOGON_NONE;
 
 	BreakExitOnNull(pRootFolder_.p, hr, E_FAIL, "Task root folder not set");
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Creating task '%ls'", szTaskName);
@@ -324,12 +323,7 @@ HRESULT CTaskScheduler::CreateTask(LPCWSTR szTaskName, LPCWSTR szTaskXml, LPCWST
 	hr = pTask->put_XmlText(CComBSTR(szTaskXml));
 	BreakExitOnFailure(hr, "Failed setting task XML for '%ls'", szTaskName);
 
-	if (szUser && *szUser)
-	{
-		logonType = TASK_LOGON_TYPE::TASK_LOGON_INTERACTIVE_TOKEN_OR_PASSWORD;
-	}
-
-	hr = pRootFolder_->RegisterTaskDefinition(CComBSTR(szTaskName), pTask, TASK_CREATE_OR_UPDATE, CComVariant(szUser), CComVariant(szPassword), logonType, CComVariant(), &pRegTask);
+	hr = pRootFolder_->RegisterTaskDefinition(CComBSTR(szTaskName), pTask, TASK_CREATE_OR_UPDATE, CComVariant(szUser), CComVariant(szPassword), TASK_LOGON_TYPE::TASK_LOGON_NONE, CComVariant(), &pRegTask);
 	BreakExitOnFailure(hr, "Failed creating task '%ls'", szTaskName);
 
 LExit:
