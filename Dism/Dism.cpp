@@ -9,6 +9,7 @@
 #pragma comment (lib, "Shlwapi.lib")
 using namespace std;
 
+#define E_RETRY		HRESULT_FROM_WIN32(ERROR_RETRY)
 enum ErrorHandling
 {
 	fail = 0,
@@ -30,7 +31,7 @@ static DISM_PROGRESS_CALLBACK _pfProgressCallback = [](UINT Current, UINT Total,
 struct ProgressReportState
 {
 	// Number of ticks so far reported for current feature
-	ULONGLONG nDismTicksReportedInFeature = 0;
+	ULONGLONG nDismTicksReported = 0;
 
 	LPWSTR szInclude = nullptr;
 	LPWSTR szExclude = nullptr;
@@ -162,7 +163,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 					bRes = regex_search(pFeatures[i].FeatureName, results, rxExclude);
 					if (bRes && (results.length() > 0))
 					{
-						WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Feature '%ls' excluded by regex '%ls'", pFeatures[i].FeatureName, pStates[j].szExclude);
+						WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Feature '%ls' excluded by regex '%ls'", pFeatures[i].FeatureName, pStates[j].szExclude);
 						continue;
 					}
 				}
@@ -218,11 +219,11 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 				WcaLogError(hr, "Failed adding DISM package '%ls'. %ls", pStates[i].szPackage, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 
 				hr = HandleError(pStates[i].eErrorHandling);
-				ExitOnFailure(hr, "Failed adding DISM package");
-				if (hr == S_FALSE)
+				if (hr == E_RETRY)
 				{
 					goto LRetryPkg;
 				}
+				ExitOnFailure(hr, "Failed adding DISM package");
 			}
 
 			// Cancelled?
@@ -252,11 +253,11 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 				WcaLogError(hr, "Failed enabling feature '%ls'. %ls", pStates[i].pFeatures[j]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 
 				hr = HandleError(pStates[i].eErrorHandling);
-				ExitOnFailure(hr, "Failed enabling feature");
-				if (hr == S_FALSE)
+				if (hr == E_RETRY)
 				{
 					goto LRetryFtr;
 				}
+				ExitOnFailure(hr, "Failed enabling feature");
 			}
 
 			// Cancelled?
@@ -362,8 +363,8 @@ static void ProgressCallback(UINT Current, UINT Total, PVOID UserData)
 		++ftrCnt;
 	}
 	double ftrPortion = state->nMsiCost / ftrCnt;
-	double tickDelta = ((((double)(Current - state->nDismTicksReportedInFeature)) / Total) * ftrPortion);
-	state->nDismTicksReportedInFeature = Current; // Tick reported for this feature
+	double tickDelta = ((((double)(Current - state->nDismTicksReported)) / Total) * ftrPortion);
+	state->nDismTicksReported = Current; // Tick reported for this feature
 	nMsiTicksReported_ += tickDelta; // Ticks reported to MSI
 
 	hr = WcaProgressMessage(tickDelta, FALSE);
@@ -414,7 +415,7 @@ static HRESULT HandleError(ErrorHandling nErrorHandling)
 		case 0: // Probably silent (result 0)
 		case IDRETRY:
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose to retry on failure to enable a Windows Feature");
-			hr = S_FALSE;
+			hr = E_RETRY;
 			break;
 
 		case IDIGNORE:
