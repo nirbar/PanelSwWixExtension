@@ -113,7 +113,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 	hr = ::DismInitialize(DismLogErrorsWarningsInfo, szDismLog, nullptr);
 	if (FAILED(hr))
 	{
-		DismGetLastErrorMessage(&pErrorString);
+		::DismGetLastErrorMessage(&pErrorString);
 		ExitOnFailure(hr, "Failed initializing DISM. %ls", (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 	}
 	bDismInit = TRUE;
@@ -121,15 +121,15 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 	hr = ::DismOpenSession(DISM_ONLINE_IMAGE, nullptr, nullptr, &hSession);
 	if (FAILED(hr))
 	{
-		DismGetLastErrorMessage(&pErrorString);
-		ExitOnFailure(hr, "Failed opening DISM online session. %ls",  (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+		::DismGetLastErrorMessage(&pErrorString);
+		ExitOnFailure(hr, "Failed opening DISM online session. %ls", (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 	}
 
-	// Enumerate features and evaluate include/exclude regex.
+	// Enumerate features to evaluate include/exclude regex.
 	hr = ::DismGetFeatures(hSession, nullptr, DismPackageNone, &pFeatures, &uFeatureNum);
 	if (FAILED(hr))
 	{
-		DismGetLastErrorMessage(&pErrorString);
+		::DismGetLastErrorMessage(&pErrorString);
 		ExitOnFailure(hr, "Failed querying DISM features. %ls", (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 	}
 
@@ -183,7 +183,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 		case DismPackageFeatureState::DismStateInstallPending:
 			WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Skipping feature '%ls' with state '%ls'", pFeatures[i].FeatureName, DismStateString(pFeatures[i].State));
 			break;
-			
+
 		default:
 			hr = E_INVALIDSTATE;
 			ExitOnFailure(hr, "Illegal feature state %i for '%ls'", pFeatures[i].State, pFeatures[i].FeatureName);
@@ -214,7 +214,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 			}
 			if (FAILED(hr))
 			{
-				DismGetLastErrorMessage(&pErrorString);
+				::DismGetLastErrorMessage(&pErrorString);
 				WcaLogError(hr, "Failed adding DISM package '%ls'. %ls", pStates[i].szPackage, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 
 				hr = HandleError(pStates[i].eErrorHandling);
@@ -248,7 +248,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 
 			if (FAILED(hr))
 			{
-				DismGetLastErrorMessage(&pErrorString);
+				::DismGetLastErrorMessage(&pErrorString);
 				WcaLogError(hr, "Failed enabling feature '%ls'. %ls", pStates[i].pFeatures[j]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 
 				hr = HandleError(pStates[i].eErrorHandling);
@@ -297,7 +297,7 @@ LExit:
 	{
 		::DismDelete(pFeatures); //TODO Free each feature in the array?
 	}
-	if (pErrorString) 
+	if (pErrorString)
 	{
 		::DismDelete(pErrorString);
 	}
@@ -344,7 +344,7 @@ static LPCWSTR DismStateString(DismPackageFeatureState state)
 		return Superseded;
 	case DismPackageFeatureState::DismStatePartiallyInstalled:
 		return PartiallyInstalled;
-	
+
 	default:
 		return Invalid;
 	}
@@ -356,7 +356,13 @@ static void ProgressCallback(UINT Current, UINT Total, PVOID UserData)
 	PMSIHANDLE hRec;
 	ProgressReportState *state = (ProgressReportState*)UserData;
 
-	double tickDelta = ((((double)(Current - state->nDismTicksReportedInFeature)) / Total) * (state->nMsiCost / state->dwFeatureNum));
+	double ftrCnt = state->dwFeatureNum;
+	if (state->szPackage && *state->szPackage)
+	{
+		++ftrCnt;
+	}
+	double ftrPortion = state->nMsiCost / ftrCnt;
+	double tickDelta = ((((double)(Current - state->nDismTicksReportedInFeature)) / Total) * ftrPortion);
 	state->nDismTicksReportedInFeature = Current; // Tick reported for this feature
 	nMsiTicksReported_ += tickDelta; // Ticks reported to MSI
 
