@@ -22,6 +22,7 @@
   <String Id="Unzip"><![CDATA[Extracting ZIP archive]]></String>
   <String Id="DiskSpace"><![CDATA[Calculating available disk space]]></String>
   <String Id="Dism"><![CDATA[Enable Windows roles and features]]></String>
+  <String Id="DismFailure"><![CDATA[Failed enabling Windows Feature]]></String>
   <String Id="JsonJpath"><![CDATA[Editing Json files]]></String>
   <String Id="JsonJpathSearch"><![CDATA[Searching in Json files]]></String>
   <String Id="AccountSidSearch"><![CDATA[Detecting account security identifier]]></String>

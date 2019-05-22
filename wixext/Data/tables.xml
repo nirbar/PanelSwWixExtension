@@ -139,6 +139,8 @@
     <columnDefinition name="EnableFeatures" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="ExcludeFeatures" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
     <columnDefinition name="PackagePath" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
+    <columnDefinition name="Cost" type="number" minValue="0" length="4" />
+    <columnDefinition name="ErrorHandling" type="number" minValue="0" maxValue="2" length="2" />
   </tableDefinition>
 
   <tableDefinition name="PSW_ZipFile">

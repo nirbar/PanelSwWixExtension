@@ -1441,6 +1441,8 @@ namespace PanelSw.Wix.Extensions
             string exclude = null;
             string component = null;
             string package = null;
+            ErrorHandling promptOnError = ErrorHandling.fail;
+            int cost = 1;
 
             component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
 
@@ -1469,6 +1471,24 @@ namespace PanelSw.Wix.Extensions
                         id = Core.GetAttributeValue(sourceLineNumbers, attrib);
                         break;
 
+                    case "Cost":
+                        cost = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, int.MaxValue);
+                        break;
+
+                    case "ErrorHandling":
+                        {
+                            string a = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            try
+                            {
+                                promptOnError = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
+                            }
+                            catch
+                            {
+                                Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            }
+                        }
+                        break;
+                        
                     default:
                         Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                         break;
@@ -1503,6 +1523,8 @@ namespace PanelSw.Wix.Extensions
                 row[2] = features;
                 row[3] = exclude;
                 row[4] = package;
+                row[5] = cost;
+                row[6] = (int)promptOnError;
             }
         }
 
