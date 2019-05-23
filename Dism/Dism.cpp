@@ -66,7 +66,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 	LPWSTR szCAD = nullptr;
 	LPWSTR szDismLog = nullptr;
 	DWORD dwStateNum = 0;
-	ProgressReportState *pStates;
+	ProgressReportState *pStates = nullptr;
 	ProgressReportState currState;
 	errno_t err = 0;
 
@@ -294,6 +294,7 @@ LExit:
 		WcaProgressMessage(nMsiRequestedTicks - nMsiTicksReported_, FALSE);
 	}
 
+	ReleaseMem(pStates);
 	ReleaseStr(szCAD);
 	ReleaseStr(szDismLog);
 

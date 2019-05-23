@@ -23,7 +23,7 @@
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component Id="MSMQ_IIS">
         <File Source="$(sys.SOURCEFILEPATH)"/>
-        <PanelSW:Dism EnableFeature="IIS" ErrorHandling="prompt" Cost="1000000" ExcludeFeatures="HTTP" />
+        <PanelSW:Dism EnableFeature="IIS" ErrorHandling="prompt" Cost="1000000" ExcludeFeatures="^Microsoft" />
         <PanelSW:Dism EnableFeature=".HTTP" ErrorHandling="prompt" Cost="1000000" />
         <PanelSW:Dism EnableFeature="IMPOSSIBLE-FEATURE-NAME" PackagePath="[WindowsVolume]non-existing.cab" />
       </Component>
