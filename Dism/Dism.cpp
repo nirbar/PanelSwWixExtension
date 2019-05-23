@@ -196,6 +196,11 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 	{
 		if (pStates[i].dwFeatureNum == 0)
 		{
+			if (pStates[i].nMsiCost) // Report cost for features that were preinstalled.
+			{
+				WcaProgressMessage(pStates[i].nMsiCost, FALSE);
+				nMsiTicksReported_ += pStates[i].nMsiCost;
+			}
 			continue;
 		}
 
