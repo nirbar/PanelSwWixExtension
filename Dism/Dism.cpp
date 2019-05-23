@@ -19,7 +19,7 @@ enum ErrorHandling
 
 static LPCWSTR DismStateString(DismPackageFeatureState state);
 static void ProgressCallback(UINT Current, UINT Total, PVOID UserData);
-static HRESULT HandleError(ErrorHandling nErrorHandling);
+static HRESULT HandleError(ErrorHandling nErrorHandling, LPCWSTR szFeature, LPCWSTR szErrorMsg);
 
 static ULONGLONG nMsiTicksReported_ = 0;
 static HANDLE hCancel_ = NULL;
@@ -218,9 +218,10 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 				::DismGetLastErrorMessage(&pErrorString);
 				WcaLogError(hr, "Failed adding DISM package '%ls'. %ls", pStates[i].szPackage, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 
-				hr = HandleError(pStates[i].eErrorHandling);
+				hr = HandleError(pStates[i].eErrorHandling, pStates[i].szPackage, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 				if (hr == E_RETRY)
 				{
+					hr = S_OK;
 					goto LRetryPkg;
 				}
 				ExitOnFailure(hr, "Failed adding DISM package");
@@ -252,9 +253,10 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 				::DismGetLastErrorMessage(&pErrorString);
 				WcaLogError(hr, "Failed enabling feature '%ls'. %ls", pStates[i].pFeatures[j]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 
-				hr = HandleError(pStates[i].eErrorHandling);
+				hr = HandleError(pStates[i].eErrorHandling, pStates[i].pFeatures[j]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 				if (hr == E_RETRY)
 				{
+					hr = S_OK;
 					goto LRetryFtr;
 				}
 				ExitOnFailure(hr, "Failed enabling feature");
@@ -375,7 +377,7 @@ static void ProgressCallback(UINT Current, UINT Total, PVOID UserData)
 	}
 }
 
-static HRESULT HandleError(ErrorHandling nErrorHandling)
+static HRESULT HandleError(ErrorHandling nErrorHandling, LPCWSTR szFeature, LPCWSTR szErrorMsg)
 {
 	HRESULT hr = S_OK;
 
@@ -396,11 +398,17 @@ static HRESULT HandleError(ErrorHandling nErrorHandling)
 		PMSIHANDLE hRec;
 		UINT promptResult = IDOK;
 
-		hRec = ::MsiCreateRecord(1);
+		hRec = ::MsiCreateRecord(3);
 		ExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
 
 		hr = WcaSetRecordInteger(hRec, 1, 27003);
 		ExitOnFailure(hr, "Failed setting record integer");
+
+		hr = WcaSetRecordString(hRec, 2, szFeature);
+		ExitOnFailure(hr, "Failed setting record string");
+
+		hr = WcaSetRecordString(hRec, 3, szErrorMsg);
+		ExitOnFailure(hr, "Failed setting record string");
 
 		promptResult = WcaProcessMessage((INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_ERROR | MB_ABORTRETRYIGNORE | MB_DEFBUTTON2 | MB_ICONERROR), hRec);
 		switch (promptResult)
