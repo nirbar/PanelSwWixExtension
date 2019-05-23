@@ -23,44 +23,9 @@
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component Id="MSMQ_IIS">
         <File Source="$(sys.SOURCEFILEPATH)"/>
-        <PanelSW:Dism Id="IIS_DefaultDocument" EnableFeature="IIS-DefaultDocument" />
-        <PanelSW:Dism Id="NetFx3" EnableFeature="NetFx3" />
-        <PanelSW:Dism Id="WMISnmpProvider" EnableFeature="WMISnmpProvider" />
-        <PanelSW:Dism Id="IIS_WindowsAuthentication" EnableFeature="IIS-WindowsAuthentication" />
-        <PanelSW:Dism Id="WCF_NonHTTP_Activation" EnableFeature="WCF-NonHTTP-Activation" />
-        <PanelSW:Dism Id="WCF_TCP_Activation45" EnableFeature="WCF-TCP-Activation45" />
-        <PanelSW:Dism Id="WAS_ConfigurationAPI" EnableFeature="WAS-ConfigurationAPI" />
-        <PanelSW:Dism Id="IIS_HttpRedirect" EnableFeature="IIS-HttpRedirect" />
-        <PanelSW:Dism Id="WAS_NetFxEnvironment" EnableFeature="WAS-NetFxEnvironment" />
-        <PanelSW:Dism Id="IIS_ISAPIFilter" EnableFeature="IIS-ISAPIFilter" />
-        <PanelSW:Dism Id="WAS_ProcessModel" EnableFeature="WAS-ProcessModel" />
-        <PanelSW:Dism Id="NetFx4Extended_ASPNET45" EnableFeature="NetFx4Extended-ASPNET45" />
-        <PanelSW:Dism Id="WCF_TCP_PortSharing45" EnableFeature="WCF-TCP-PortSharing45" />
-        <PanelSW:Dism Id="IIS_NetFxExtensibility45" EnableFeature="IIS-NetFxExtensibility45" />
-        <PanelSW:Dism Id="NetFx4" EnableFeature="NetFx4" />
-        <PanelSW:Dism Id="WCF_HTTP_Activation" EnableFeature="WCF-HTTP-Activation" />
-        <PanelSW:Dism Id="IIS_NetFxExtensibility" EnableFeature="IIS-NetFxExtensibility" />
-        <PanelSW:Dism Id="WCF_HTTP_Activation45" EnableFeature="WCF-HTTP-Activation45" />
-        <PanelSW:Dism Id="IIS_RequestFiltering" EnableFeature="IIS-RequestFiltering" />
-        <PanelSW:Dism Id="IIS_ASPNET45" EnableFeature="IIS-ASPNET45" />
-        <PanelSW:Dism Id="MSMQ_Server" EnableFeature="MSMQ-Server" />
-        <PanelSW:Dism Id="IIS_HttpTracing" EnableFeature="IIS-HttpTracing" />
-        <PanelSW:Dism Id="IIS_ISAPIExtensions" EnableFeature="IIS-ISAPIExtensions" />
-        <PanelSW:Dism Id="WCF_Pipe_Activation45" EnableFeature="WCF-Pipe-Activation45" />
-        <PanelSW:Dism Id="IIS_BasicAuthentication" EnableFeature="IIS-BasicAuthentication" />
-        <PanelSW:Dism Id="IIS_LoggingLibraries" EnableFeature="IIS-LoggingLibraries" />
-        <PanelSW:Dism Id="MSMQ_ADIntegration" EnableFeature="MSMQ-ADIntegration" />
-        <PanelSW:Dism Id="MSMQ_HTTP" EnableFeature="MSMQ-HTTP" />
-        <PanelSW:Dism Id="IIS_DirectoryBrowsing" EnableFeature="IIS-DirectoryBrowsing" />
-        <PanelSW:Dism Id="IIS_HttpCompressionStatic" EnableFeature="IIS-HttpCompressionStatic" />
-        <PanelSW:Dism Id="IIS_HttpErrors" EnableFeature="IIS-HttpErrors" />
-        <PanelSW:Dism Id="IIS_HttpLogging" EnableFeature="IIS-HttpLogging" />
-        <PanelSW:Dism Id="IIS_Metabase" EnableFeature="IIS-Metabase" />
-        <PanelSW:Dism Id="IIS_IIS6ManagementCompatibility" EnableFeature="IIS-IIS6ManagementCompatibility" />
-        <PanelSW:Dism Id="IIS_RequestMonitor" EnableFeature="IIS-RequestMonitor" />
-        <PanelSW:Dism Id="IIS_StaticContent" EnableFeature="IIS-StaticContent" />
-        <PanelSW:Dism Id="MSMQ_RoutingServer" EnableFeature="MSMQ-RoutingServer" />
-        <PanelSW:Dism Id="MSMQ_Triggers" EnableFeature="MSMQ-Triggers" />
+        <PanelSW:Dism EnableFeature="IIS" ErrorHandling="prompt" Cost="1000000" ExcludeFeatures="HTTP" />
+        <PanelSW:Dism EnableFeature=".HTTP" ErrorHandling="prompt" Cost="1000000" />
+        <PanelSW:Dism EnableFeature="IMPOSSIBLE-FEATURE-NAME" PackagePath="[WindowsVolume]non-existing.cab" />
       </Component>
     </ComponentGroup>
   </Product>

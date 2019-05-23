@@ -85,6 +85,7 @@ PanelSwWixExtension uses error codes in Error table:
 - 27000: TopShelf error template for prompting user on errors.
 - 27001: ExecOn error template for prompting user on errors.
 - 27002: ServiceConfig error template for prompting user on errors.
+- 27003: Dism error template for prompting user on errors.
 
 ## Properties
 

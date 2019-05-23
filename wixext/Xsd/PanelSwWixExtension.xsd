@@ -675,6 +675,16 @@
               <xs:documentation><![CDATA[Path to package file to add. Packages are added regardless of feature include / exclude matches.]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="ErrorHandling" use="optional" type="ErrorHandlingType" default="fail">
+            <xs:annotation>
+              <xs:documentation><![CDATA[On error fail, ignore, or prompt user to abort, retry or ignore. Defaults to 'fail']]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Cost" use="optional" type="xs:int" default="1">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Cost in ticks]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>

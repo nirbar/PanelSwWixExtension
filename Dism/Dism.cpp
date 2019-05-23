@@ -1,17 +1,28 @@
 #include "stdafx.h"
 #include <wcautil.h>
 #include <strutil.h>
+#include <memutil.h>
 #include <shlwapi.h>
 #include <DismApi.h>
-#include <list>
-#include <string>
 #include <regex>
 #pragma comment (lib, "dismapi.lib")
 #pragma comment (lib, "Shlwapi.lib")
 using namespace std;
 
+#define E_RETRY		HRESULT_FROM_WIN32(ERROR_RETRY)
+enum ErrorHandling
+{
+	fail = 0,
+	ignore = 1,
+	prompt = 2
+};
+
 static LPCWSTR DismStateString(DismPackageFeatureState state);
 static void ProgressCallback(UINT Current, UINT Total, PVOID UserData);
+static HRESULT HandleError(ErrorHandling nErrorHandling, LPCWSTR szFeature, LPCWSTR szErrorMsg);
+
+static ULONGLONG nMsiTicksReported_ = 0;
+static HANDLE hCancel_ = NULL;
 
 // Work around DISM API which in some versions is __stdcall and in others __cdecl.
 static DISM_PROGRESS_CALLBACK _pfProgressCallback = [](UINT Current, UINT Total, PVOID UserData) -> void { ProgressCallback(Current, Total, UserData); };
@@ -19,58 +30,45 @@ static DISM_PROGRESS_CALLBACK _pfProgressCallback = [](UINT Current, UINT Total,
 // Will report 1GB for all features.
 struct ProgressReportState
 {
-	HANDLE hCancel_ = NULL;
-	
-	// Number of features to be enabled.
-	UINT nFeatureCount_ = 0;
-
-	// Number of ticks so far reported
-	ULONGLONG nTotalTicksReported_ = 0;
-
 	// Number of ticks so far reported for current feature
-	ULONGLONG nTicksReportedInFeature_ = 0;
+	ULONGLONG nDismTicksReported = 0;
 
-	static const UINT TOTOAL_TICKS = 1073741824; // 1GB
-
-	UINT TickPerFeatureAllowance()
-	{
-		return (nFeatureCount_ == 0) ? 0 : (TOTOAL_TICKS / nFeatureCount_);
-	}
+	LPWSTR szInclude = nullptr;
+	LPWSTR szExclude = nullptr;
+	LPWSTR szPackage = nullptr;
+	int nMsiCost = 0;
+	ErrorHandling eErrorHandling = ErrorHandling::fail;
+	
+	// Features resolved to be enabled
+	DismFeature **pFeatures = nullptr;
+	DWORD dwFeatureNum = 0;
 };
 
-#define DismLogPrefix		L"DismLog="
-#define IncludeFeatures		L"IncludeFeatures="
-#define ExcludeFeatures		L"ExcludeFeatures="
-#define Packages			L"Packages="
-
-enum CadToken
-{
-	None,
-	CadToken_Include_Feature,
-	CadToken_Exclude_Feature,
-	CadToken_Package
-};
-
+/* CustomActionData fields:
+- Log file
+- Per feature:
+	- Enable regex
+	- Exclude regex
+	- Package
+	- Cost
+	- Error handling
+*/
 extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 {
 	UINT er = ERROR_SUCCESS;
 	HRESULT hr = S_OK;
 	DismSession hSession = DISM_SESSION_DEFAULT;
+	UINT uFeatureNum = 0;
 	DismFeature *pFeatures = nullptr;
 	DismString *pErrorString = nullptr;
 	BOOL bDismInit = FALSE;
 	BOOL bRes = TRUE;
-	UINT uFeatureNum = 0;
-	list<wregex> enableFaetures;
-	list<wregex> excludeFaetures;
-	list<LPCWSTR> packages;
-	list<DismFeature*> resolvedFeatures; // Features that actually need to be enabled.
 	LPWSTR szCAD = nullptr;
-	LPCWSTR szDismLog = nullptr;
-	LPCWSTR szTok = nullptr;
-	LPWSTR szTokData = nullptr;
-	CadToken tokenType = CadToken::None;
-	ProgressReportState state;
+	LPWSTR szDismLog = nullptr;
+	DWORD dwStateNum = 0;
+	ProgressReportState *pStates;
+	ProgressReportState currState;
+	errno_t err = 0;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
@@ -79,59 +77,44 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 	hr = WcaGetProperty(L"CustomActionData", &szCAD);
 	ExitOnFailure(hr, "Failed getting CustomActionData");
 
+	hr = WcaReadStringFromCaData(&szCAD, &szDismLog);
+	ExitOnFailure(hr, "Failed getting CustomActionData field");
+
 	// Parse CAD
-	for (szTok = ::wcstok_s(szCAD, L";", &szTokData); szTok; szTok = ::wcstok_s(nullptr, L";", &szTokData))
+	while ((hr = WcaReadStringFromCaData(&szCAD, &currState.szInclude)) != E_NOMOREITEMS)
 	{
-		// Dism log?
-		if (!szDismLog && ::wcsstr(szTok, DismLogPrefix))
-		{
-			szDismLog = szTok + ::wcslen(DismLogPrefix);
-			continue;
-		}
-		else if (::wcsstr(szTok, IncludeFeatures))
-		{
-			tokenType = CadToken::CadToken_Include_Feature;
-			szTok += ::wcslen(IncludeFeatures);
-		}
-		else if (::wcsstr(szTok, ExcludeFeatures))
-		{
-			tokenType = CadToken::CadToken_Exclude_Feature;
-			szTok += ::wcslen(ExcludeFeatures);
-		}
-		else if (::wcsstr(szTok, Packages))
-		{
-			tokenType = CadToken::CadToken_Package;
-			szTok += ::wcslen(Packages);
-		}
+		ExitOnFailure(hr, "Failed getting CustomActionData field");
 
-		if (!(szTok && *szTok)) // Skip empty.
-		{
-			continue;
-		}
+		hr = WcaReadStringFromCaData(&szCAD, &currState.szExclude);
+		ExitOnFailure(hr, "Failed getting CustomActionData field");
 
-		switch (tokenType)
-		{
-		case CadToken::CadToken_Include_Feature:
-			enableFaetures.push_back(wregex(szTok, std::regex_constants::syntax_option_type::optimize));
-			break;
+		hr = WcaReadStringFromCaData(&szCAD, &currState.szPackage);
+		ExitOnFailure(hr, "Failed getting CustomActionData field");
 
-		case CadToken::CadToken_Exclude_Feature:
-			excludeFaetures.push_back(wregex(szTok, std::regex_constants::syntax_option_type::optimize));
-			break;
+		hr = WcaReadIntegerFromCaData(&szCAD, &currState.nMsiCost);
+		ExitOnFailure(hr, "Failed getting CustomActionData field");
 
-		case CadToken::CadToken_Package:
-			packages.push_back(szTok);
-			break;
-		}
+		hr = WcaReadIntegerFromCaData(&szCAD, (int*)&currState.eErrorHandling);
+		ExitOnFailure(hr, "Failed getting CustomActionData field");
+
+		hr = MemInsertIntoArray((void**)&pStates, 0, 1, dwStateNum, sizeof(ProgressReportState), 1);
+		ExitOnFailure(hr, "Failed inserting state to array");
+
+		err = ::memcpy_s(pStates, sizeof(ProgressReportState), &currState, sizeof(currState));
+		ExitOnNull((err == 0), hr, E_FAIL, "Failed copying memory. Error %i", err);
+
+		++dwStateNum;
+		ZeroMemory(&currState, sizeof(currState));
 	}
+	hr = S_OK;
 
-	state.hCancel_ = ::CreateEvent(nullptr, TRUE, FALSE, nullptr);
-	ExitOnNullWithLastError(state.hCancel_, hr, "Failed creating event");
+	hCancel_ = ::CreateEvent(nullptr, TRUE, FALSE, nullptr);
+	ExitOnNullWithLastError(hCancel_, hr, "Failed creating event");
 
 	hr = ::DismInitialize(DismLogErrorsWarningsInfo, szDismLog, nullptr);
 	if (FAILED(hr))
 	{
-		DismGetLastErrorMessage(&pErrorString);
+		::DismGetLastErrorMessage(&pErrorString);
 		ExitOnFailure(hr, "Failed initializing DISM. %ls", (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 	}
 	bDismInit = TRUE;
@@ -139,15 +122,15 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 	hr = ::DismOpenSession(DISM_ONLINE_IMAGE, nullptr, nullptr, &hSession);
 	if (FAILED(hr))
 	{
-		DismGetLastErrorMessage(&pErrorString);
-		ExitOnFailure(hr, "Failed opening DISM online session. %ls",  (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+		::DismGetLastErrorMessage(&pErrorString);
+		ExitOnFailure(hr, "Failed opening DISM online session. %ls", (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 	}
 
-	// Enumerate features and evaluate include/exclude regex.
+	// Enumerate features to evaluate include/exclude regex.
 	hr = ::DismGetFeatures(hSession, nullptr, DismPackageNone, &pFeatures, &uFeatureNum);
 	if (FAILED(hr))
 	{
-		DismGetLastErrorMessage(&pErrorString);
+		::DismGetLastErrorMessage(&pErrorString);
 		ExitOnFailure(hr, "Failed querying DISM features. %ls", (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 	}
 
@@ -163,36 +146,34 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 		case DismPackageFeatureState::DismStateRemoved:
 		case DismPackageFeatureState::DismStatePartiallyInstalled:
 			// Test if feature matches any regex
-			for (const wregex& rx : enableFaetures)
+			for (DWORD j = 0; j < dwStateNum; ++j)
 			{
+				wregex rxInclude(pStates[j].szInclude);
 				match_results<LPCWSTR> results;
 
-				bRes = regex_search(pFeatures[i].FeatureName, results, rx);
+				bRes = regex_search(pFeatures[i].FeatureName, results, rxInclude);
 				if (!bRes || (results.length() <= 0))
 				{
 					continue;
 				}
-
 				// Feature included. Was it explictly excluded?
-				bool excluded = false;
-				for (const wregex& exRx : excludeFaetures)
+				if (pStates[j].szExclude && *pStates[j].szExclude)
 				{
-					match_results<LPCWSTR> exResults;
-
-					bRes = regex_search(pFeatures[i].FeatureName, exResults, exRx);
-					if (bRes && (exResults.length() > 0))
+					wregex rxExclude(pStates[j].szExclude);
+					bRes = regex_search(pFeatures[i].FeatureName, results, rxExclude);
+					if (bRes && (results.length() > 0))
 					{
-						excluded = true;
-						break;
+						WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Feature '%ls' excluded by regex '%ls'", pFeatures[i].FeatureName, pStates[j].szExclude);
+						continue;
 					}
 				}
-				if (excluded)
-				{
-					WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Feature '%ls' excluded", pFeatures[i].FeatureName);
-					continue;
-				}
 
-				resolvedFeatures.push_back(pFeatures + i);
+				hr = MemInsertIntoArray((void**)&pStates[j].pFeatures, 0, 1, pStates[j].dwFeatureNum, sizeof(DismFeature*), 1);
+				ExitOnFailure(hr, "Failed adding feature to array");
+
+				pStates[j].pFeatures[0] = pFeatures + i;
+				++pStates[j].dwFeatureNum;
+
 				break;
 			}
 			break;
@@ -203,7 +184,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 		case DismPackageFeatureState::DismStateInstallPending:
 			WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Skipping feature '%ls' with state '%ls'", pFeatures[i].FeatureName, DismStateString(pFeatures[i].State));
 			break;
-			
+
 		default:
 			hr = E_INVALIDSTATE;
 			ExitOnFailure(hr, "Illegal feature state %i for '%ls'", pFeatures[i].State, pFeatures[i].FeatureName);
@@ -211,111 +192,115 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 		}
 	}
 
-	state.nFeatureCount_ = resolvedFeatures.size() + packages.size();
-	for (LPCWSTR pkgPath : packages)
+	for (DWORD i = 0; i < dwStateNum; ++i)
 	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Adding package '%ls'", pkgPath);
-		bRes = ::PathFileExists(pkgPath);
-		ExitOnNullWithLastError(bRes, hr, "DISM package file not found: '%ls'", pkgPath);
-
-		hr = ::DismAddPackage(hSession, pkgPath, FALSE, FALSE, state.hCancel_, _pfProgressCallback, &state);
-		if (HRESULT_CODE(hr) == ERROR_SUCCESS_REBOOT_REQUIRED)
+		if (pStates[i].dwFeatureNum == 0)
 		{
-			hr = S_OK;
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Added package '%ls'. However, it requires reboot to complete", pkgPath);
-			WcaDeferredActionRequiresReboot();
-		}
-		if (FAILED(hr))
-		{
-			DismGetLastErrorMessage(&pErrorString);
-			ExitOnFailure(hr, "Failed adding DISM package '%ls'. %ls", pkgPath, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+			continue;
 		}
 
-		// Cancelled?
-		if (::WaitForSingleObject(state.hCancel_, 0) == WAIT_OBJECT_0)
+		if (pStates[i].szPackage && *pStates[i].szPackage)
 		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Seems like DISM was canceled.");
-			hr = S_FALSE;
-			ExitFunction();
-		}
+		LRetryPkg:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Adding package '%ls'", pStates[i].szPackage);
+			bRes = ::PathFileExists(pStates[i].szPackage);
+			ExitOnNullWithLastError(bRes, hr, "DISM package file not found: '%ls'", pStates[i].szPackage);
 
-		// Report unused ticks for this package
-		if (state.nTicksReportedInFeature_ < state.TickPerFeatureAllowance())
-		{
-			UINT delta = (state.TickPerFeatureAllowance() - state.nTicksReportedInFeature_);
-			hr = WcaProgressMessage(delta, FALSE);
-			if (hr == S_FALSE)
+			hr = ::DismAddPackage(hSession, pStates[i].szPackage, FALSE, FALSE, hCancel_, _pfProgressCallback, &pStates[i]);
+			if (HRESULT_CODE(hr) == ERROR_SUCCESS_REBOOT_REQUIRED)
+			{
+				hr = S_OK;
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Added package '%ls'. However, it requires reboot to complete", pStates[i].szPackage);
+				WcaDeferredActionRequiresReboot();
+			}
+			if (FAILED(hr))
+			{
+				::DismGetLastErrorMessage(&pErrorString);
+				WcaLogError(hr, "Failed adding DISM package '%ls'. %ls", pStates[i].szPackage, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+
+				hr = HandleError(pStates[i].eErrorHandling, pStates[i].szPackage, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+				if (hr == E_RETRY)
+				{
+					hr = S_OK;
+					goto LRetryPkg;
+				}
+				ExitOnFailure(hr, "Failed adding DISM package");
+			}
+
+			// Cancelled?
+			if (::WaitForSingleObject(hCancel_, 0) == WAIT_OBJECT_0)
 			{
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Seems like DISM was canceled.");
+				hr = S_FALSE;
 				ExitFunction();
 			}
-			state.nTotalTicksReported_ += delta;
-			state.nTicksReportedInFeature_ += delta;
 		}
 
-		state.nTicksReportedInFeature_ = 0;
-	}
-
-	for (const DismFeature* pFtr : resolvedFeatures)
-	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Enabling feature '%ls'", pFtr->FeatureName);
-		hr = ::DismEnableFeature(hSession, pFtr->FeatureName, nullptr, DismPackageNone, FALSE, nullptr, 0, TRUE, state.hCancel_, _pfProgressCallback, &state);
-		if (HRESULT_CODE(hr) == ERROR_SUCCESS_REBOOT_REQUIRED)
+		for (DWORD j = 0; j < pStates[i].dwFeatureNum; ++j)
 		{
-			hr = S_OK;
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Enabled feature '%ls'. However, it requires reboot to complete", pFtr->FeatureName);
-			WcaDeferredActionRequiresReboot();
-		}
+		LRetryFtr:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Enabling feature '%ls'", pStates[i].pFeatures[j]->FeatureName);
+			hr = ::DismEnableFeature(hSession, pStates[i].pFeatures[j]->FeatureName, nullptr, DismPackageNone, FALSE, nullptr, 0, TRUE, hCancel_, _pfProgressCallback, &pStates[i]);
+			if (HRESULT_CODE(hr) == ERROR_SUCCESS_REBOOT_REQUIRED)
+			{
+				hr = S_OK;
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Enabled feature '%ls'. However, it requires reboot to complete", pStates[i].pFeatures[j]->FeatureName);
+				WcaDeferredActionRequiresReboot();
+			}
 
-		if (FAILED(hr))
-		{
-			DismGetLastErrorMessage(&pErrorString);
-			ExitOnFailure(hr, "Failed enabling feature '%ls'. %ls", pFtr->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
-		}
+			if (FAILED(hr))
+			{
+				::DismGetLastErrorMessage(&pErrorString);
+				WcaLogError(hr, "Failed enabling feature '%ls'. %ls", pStates[i].pFeatures[j]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 
-		// Cancelled?
-		if (::WaitForSingleObject(state.hCancel_, 0) == WAIT_OBJECT_0)
-		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Seems like DISM was canceled.");
-			hr = S_FALSE;
-			ExitFunction();
-		}
+				hr = HandleError(pStates[i].eErrorHandling, pStates[i].pFeatures[j]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+				if (hr == E_RETRY)
+				{
+					hr = S_OK;
+					goto LRetryFtr;
+				}
+				ExitOnFailure(hr, "Failed enabling feature");
+			}
 
-		// Report unused ticks for this feature
-		if (state.nTicksReportedInFeature_ < state.TickPerFeatureAllowance())
-		{
-			UINT delta = (state.TickPerFeatureAllowance() - state.nTicksReportedInFeature_);
-			hr = WcaProgressMessage(delta, FALSE);
-			if (hr == S_FALSE)
+			// Cancelled?
+			if (::WaitForSingleObject(hCancel_, 0) == WAIT_OBJECT_0)
 			{
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Seems like DISM was canceled.");
+				hr = S_FALSE;
 				ExitFunction();
 			}
-			state.nTotalTicksReported_ += delta;
-			state.nTicksReportedInFeature_ += delta;
 		}
-
-		state.nTicksReportedInFeature_ = 0;
-	}
-
-	// Report any left-over ticks.
-	if (state.nTotalTicksReported_ < ProgressReportState::TOTOAL_TICKS)
-	{
-		WcaProgressMessage(ProgressReportState::TOTOAL_TICKS - state.nTotalTicksReported_, FALSE);
 	}
 
 LExit:
+	ULONGLONG nMsiRequestedTicks = 0;
+	for (DWORD i = 0; i < dwStateNum; ++i)
+	{
+		nMsiRequestedTicks += pStates[i].nMsiCost;
+		ReleaseNullStr(pStates[i].szExclude);
+		ReleaseNullStr(pStates[i].szInclude);
+		ReleaseNullStr(pStates[i].szPackage);
+		ReleaseNullMem(pStates[i].pFeatures);
+	}
+
+	// Report any left-over ticks.
+	if (nMsiRequestedTicks > nMsiTicksReported_)
+	{
+		WcaProgressMessage(nMsiRequestedTicks - nMsiTicksReported_, FALSE);
+	}
 
 	ReleaseStr(szCAD);
-	if (state.hCancel_)
+	ReleaseStr(szDismLog);
+
+	if (hCancel_)
 	{
-		::CloseHandle(state.hCancel_);
+		::CloseHandle(hCancel_);
 	}
 	if (pFeatures)
 	{
-		::DismDelete(pFeatures);
+		::DismDelete(pFeatures); //TODO Free each feature in the array?
 	}
-	if (pErrorString) 
+	if (pErrorString)
 	{
 		::DismDelete(pErrorString);
 	}
@@ -362,7 +347,7 @@ static LPCWSTR DismStateString(DismPackageFeatureState state)
 		return Superseded;
 	case DismPackageFeatureState::DismStatePartiallyInstalled:
 		return PartiallyInstalled;
-	
+
 	default:
 		return Invalid;
 	}
@@ -374,14 +359,82 @@ static void ProgressCallback(UINT Current, UINT Total, PVOID UserData)
 	PMSIHANDLE hRec;
 	ProgressReportState *state = (ProgressReportState*)UserData;
 
-	double tickDelta = ((((double)(Current - state->nTicksReportedInFeature_)) / Total) * state->TickPerFeatureAllowance());
-	state->nTicksReportedInFeature_ = Current; // Tick reported for this feature
-	state->nTotalTicksReported_ += tickDelta; // Ticks reported to MSI, normalized to 1GB total.
+	double ftrCnt = state->dwFeatureNum;
+	if (state->szPackage && *state->szPackage)
+	{
+		++ftrCnt;
+	}
+	double ftrPortion = state->nMsiCost / ftrCnt;
+	double tickDelta = ((((double)(Current - state->nDismTicksReported)) / Total) * ftrPortion);
+	state->nDismTicksReported = Current; // Tick reported for this feature
+	nMsiTicksReported_ += tickDelta; // Ticks reported to MSI
 
 	hr = WcaProgressMessage(tickDelta, FALSE);
-	if (state->hCancel_ && (hr == S_FALSE))
+	if (hCancel_ && (hr == S_FALSE))
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Cancelling DISM.");
-		::SetEvent(state->hCancel_);
+		::SetEvent(hCancel_);
 	}
+}
+
+static HRESULT HandleError(ErrorHandling nErrorHandling, LPCWSTR szFeature, LPCWSTR szErrorMsg)
+{
+	HRESULT hr = S_OK;
+
+	switch (nErrorHandling)
+	{
+	case ErrorHandling::fail:
+	default:
+		hr = E_FAIL;
+		break;
+
+	case ErrorHandling::ignore:
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Ignoring Dism failure");
+		hr = S_OK;
+		break;
+
+	case ErrorHandling::prompt:
+	{
+		PMSIHANDLE hRec;
+		UINT promptResult = IDOK;
+
+		hRec = ::MsiCreateRecord(3);
+		ExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
+
+		hr = WcaSetRecordInteger(hRec, 1, 27003);
+		ExitOnFailure(hr, "Failed setting record integer");
+
+		hr = WcaSetRecordString(hRec, 2, szFeature);
+		ExitOnFailure(hr, "Failed setting record string");
+
+		hr = WcaSetRecordString(hRec, 3, szErrorMsg);
+		ExitOnFailure(hr, "Failed setting record string");
+
+		promptResult = WcaProcessMessage((INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_ERROR | MB_ABORTRETRYIGNORE | MB_DEFBUTTON2 | MB_ICONERROR), hRec);
+		switch (promptResult)
+		{
+		case IDABORT:
+		case IDCANCEL:
+		default:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User aborted on failure to enable a Windows Feature");
+			hr = E_FAIL;
+			break;
+
+		case 0: // Probably silent (result 0)
+		case IDRETRY:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose to retry on failure to enable a Windows Feature");
+			hr = E_RETRY;
+			break;
+
+		case IDIGNORE:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User ignored failure to enable a Windows Feature");
+			hr = S_OK;
+			break;
+		}
+		break;
+	}
+	}
+
+LExit:
+	return hr;
 }

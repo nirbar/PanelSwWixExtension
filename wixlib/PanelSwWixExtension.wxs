@@ -355,6 +355,7 @@
       <Custom Action="DismX64" After="DismSched" Overridable="yes"><![CDATA[DismX64 And (VersionNT64 > 601)]]></Custom>
     </InstallExecuteSequence>
     <UI>
+      <Error Id="27003">!(loc.DismFailure)</Error>
       <ProgressText Action="DismX86">!(loc.Dism)</ProgressText>
       <ProgressText Action="DismX64">!(loc.Dism)</ProgressText>
     </UI>
