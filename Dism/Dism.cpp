@@ -415,12 +415,12 @@ static HRESULT HandleError(ErrorHandling nErrorHandling, LPCWSTR szFeature, LPCW
 		{
 		case IDABORT:
 		case IDCANCEL:
+		case 0: // Probably silent (result 0)
 		default:
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User aborted on failure to enable a Windows Feature");
 			hr = E_FAIL;
 			break;
 
-		case 0: // Probably silent (result 0)
 		case IDRETRY:
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose to retry on failure to enable a Windows Feature");
 			hr = E_RETRY;
