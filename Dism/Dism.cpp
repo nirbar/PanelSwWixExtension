@@ -17,9 +17,12 @@ enum ErrorHandling
 	prompt = 2
 };
 
+#define ERROR_ID_PACKAGE	27003
+#define ERROR_ID_FEATURE	27004
+
 static LPCWSTR DismStateString(DismPackageFeatureState state);
 static void ProgressCallback(UINT Current, UINT Total, PVOID UserData);
-static HRESULT HandleError(ErrorHandling nErrorHandling, LPCWSTR szFeature, LPCWSTR szErrorMsg);
+static HRESULT HandleError(ErrorHandling nErrorHandling, UINT nErrorId, LPCWSTR szFeature, LPCWSTR szErrorMsg);
 
 static ULONGLONG nMsiTicksReported_ = 0;
 static HANDLE hCancel_ = NULL;
@@ -223,7 +226,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 				::DismGetLastErrorMessage(&pErrorString);
 				WcaLogError(hr, "Failed adding DISM package '%ls'. %ls", pStates[i].szPackage, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 
-				hr = HandleError(pStates[i].eErrorHandling, pStates[i].szPackage, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+				hr = HandleError(pStates[i].eErrorHandling, ERROR_ID_PACKAGE, pStates[i].szPackage, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 				if (hr == E_RETRY)
 				{
 					hr = S_OK;
@@ -258,7 +261,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 				::DismGetLastErrorMessage(&pErrorString);
 				WcaLogError(hr, "Failed enabling feature '%ls'. %ls", pStates[i].pFeatures[j]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 
-				hr = HandleError(pStates[i].eErrorHandling, pStates[i].pFeatures[j]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+				hr = HandleError(pStates[i].eErrorHandling, ERROR_ID_FEATURE, pStates[i].pFeatures[j]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 				if (hr == E_RETRY)
 				{
 					hr = S_OK;
@@ -383,7 +386,7 @@ static void ProgressCallback(UINT Current, UINT Total, PVOID UserData)
 	}
 }
 
-static HRESULT HandleError(ErrorHandling nErrorHandling, LPCWSTR szFeature, LPCWSTR szErrorMsg)
+static HRESULT HandleError(ErrorHandling nErrorHandling, UINT nErrorId, LPCWSTR szFeature, LPCWSTR szErrorMsg)
 {
 	HRESULT hr = S_OK;
 
@@ -407,7 +410,7 @@ static HRESULT HandleError(ErrorHandling nErrorHandling, LPCWSTR szFeature, LPCW
 		hRec = ::MsiCreateRecord(3);
 		ExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
 
-		hr = WcaSetRecordInteger(hRec, 1, 27003);
+		hr = WcaSetRecordInteger(hRec, 1, nErrorId);
 		ExitOnFailure(hr, "Failed setting record integer");
 
 		hr = WcaSetRecordString(hRec, 2, szFeature);
@@ -423,17 +426,17 @@ static HRESULT HandleError(ErrorHandling nErrorHandling, LPCWSTR szFeature, LPCW
 		case IDCANCEL:
 		case 0: // Probably silent (result 0)
 		default:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User aborted on failure to enable a Windows Feature");
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User aborted on DISM failure.");
 			hr = E_FAIL;
 			break;
 
 		case IDRETRY:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose to retry on failure to enable a Windows Feature");
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose to retry on DISM failure.");
 			hr = E_RETRY;
 			break;
 
 		case IDIGNORE:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User ignored failure to enable a Windows Feature");
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User ignored DISM failure.");
 			hr = S_OK;
 			break;
 		}

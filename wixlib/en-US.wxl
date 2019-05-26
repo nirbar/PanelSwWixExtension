@@ -22,7 +22,9 @@
   <String Id="Unzip"><![CDATA[Extracting ZIP archive]]></String>
   <String Id="DiskSpace"><![CDATA[Calculating available disk space]]></String>
   <String Id="Dism"><![CDATA[Enable Windows roles and features]]></String>
-  <String Id="DismFailure"><![CDATA[Failed enabling Windows Feature or adding a feature package [2]:
+  <String Id="DismPackageFailure"><![CDATA[Failed adding a Windows Feature package [2]:
+  [3]]]></String>
+  <String Id="DismFeatureFailure"><![CDATA[Failed enabling Windows Feature [2]:
   [3]]]></String>
   <String Id="JsonJpath"><![CDATA[Editing Json files]]></String>
   <String Id="JsonJpathSearch"><![CDATA[Searching in Json files]]></String>

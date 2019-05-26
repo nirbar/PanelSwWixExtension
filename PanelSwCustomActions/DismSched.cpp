@@ -72,7 +72,6 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to get Component.");
 		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)include);
 		ExitOnFailure(hr, "Failed to get EnableFeatures.");
-		ExitOnNull(!include.IsNullOrEmpty(), hr, E_INVALIDARG, "EnableFeatures is empty");
 		hr = WcaGetRecordFormattedString(hRecord, 4, (LPWSTR*)exclude);
 		ExitOnFailure(hr, "Failed to get ExcludeFeatures.");
 		hr = WcaGetRecordFormattedString(hRecord, 5, (LPWSTR*)package);
@@ -96,6 +95,8 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 			continue;
 		}
 
+		// Sanity
+		ExitOnNull(!include.IsNullOrEmpty(), hr, E_INVALIDARG, "EnableFeatures is empty");
 		if (nVersionNT <= 601)
 		{
 			ExitOnFailure(hr = E_NOTIMPL, "PanelSwWixExtension Dism is only supported on Windows 8 / Windows Server 2008 R2 or newer operating systems");

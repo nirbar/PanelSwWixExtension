@@ -1442,7 +1442,7 @@ namespace PanelSw.Wix.Extensions
             string component = null;
             string package = null;
             ErrorHandling promptOnError = ErrorHandling.fail;
-            int cost = 1;
+            int cost = 20971520; // 20 MB.
 
             component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
 

@@ -680,9 +680,9 @@
               <xs:documentation><![CDATA[On error fail, ignore, or prompt user to abort, retry or ignore. Defaults to 'fail']]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="Cost" use="optional" type="xs:int" default="1">
+          <xs:attribute name="Cost" use="optional" type="xs:int" default="20971520">
             <xs:annotation>
-              <xs:documentation><![CDATA[Cost in ticks]]></xs:documentation>
+              <xs:documentation><![CDATA[Cost in ticks. The default is 20971520, AKA 20MB]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>
