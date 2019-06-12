@@ -33,7 +33,7 @@
   </ItemGroup>
   <ItemGroup>
     <WixExtension Include="PanelSwWixExtension">
-      <HintPath>..\..\bin\Debug\PanelSwWixExtension.dll</HintPath>
+      <HintPath>..\..\build\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</HintPath>
       <Name>PanelSwWixExtension</Name>
     </WixExtension>
   </ItemGroup>

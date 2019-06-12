@@ -1350,20 +1350,10 @@ Overwrite or create registry values in Software\Microsoft\Windows\CurrentVersion
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
       </xs:appinfo>
       <xs:documentation>
-        <![CDATA[
-Read values from a .INI file
-
-\par Example:
-\code
-<Wix ... xmlns:PanelSw="http://schemas.panel-sw.co.il/wix/WixExtension">
-<Product ...>
- <PanelSw:ReadIniValues Id="MyValue" FilePath="[MyIniFile]" Section="[SectionProp]" Key="[KeyProp]" IgnoreErrors="yes" DestProperty="DestProperty">MY_CONDITION</PanelSw:ReadIniValues>
-</Product>
-</Wix>
-\endcode
-        ]]>
+        <![CDATA[Read values from a .INI file]]>
       </xs:documentation>
     </xs:annotation>
     <xs:complexType>
@@ -1389,14 +1379,19 @@ Read values from a .INI file
               <xs:documentation>.INI key</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="DestProperty" type="xs:string" use="required">
+          <xs:attribute name="DestProperty" type="xs:string" use="optional">
             <xs:annotation>
-              <xs:documentation>Property name in which the value will be placed.</xs:documentation>
+              <xs:documentation>Property name in which the value will be placed. Required if not nested in a Property element.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="IgnoreErrors" type="wix:YesNoType" use="optional" default="no">
             <xs:annotation>
               <xs:documentation>Property name in which the value will be placed.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Condition" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Condition on executing the query. May be specified in this attribute or as inner text.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>

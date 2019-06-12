@@ -56,7 +56,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         case "ReadIniValues":
-                            ParseReadIniValuesElement(element);
+                            ParseReadIniValuesElement(element, parentElement);
                             break;
 
                         case "RemoveRegistryValue":
@@ -143,6 +143,10 @@ namespace PanelSw.Wix.Extensions
 
                         case "MsiSqlQuery":
                             ParseMsiSqlQuery(element, parentElement);
+                            break;
+
+                        case "ReadIniValues":
+                            ParseReadIniValuesElement(element, parentElement);
                             break;
 
                         default:
@@ -1750,7 +1754,7 @@ namespace PanelSw.Wix.Extensions
             IgnoreErrors = 1
         }
 
-        private void ParseReadIniValuesElement(XmlNode node)
+        private void ParseReadIniValuesElement(XmlNode node, XmlElement parent)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
             string id = null;
@@ -1758,32 +1762,44 @@ namespace PanelSw.Wix.Extensions
             string FilePath = null;
             string Section = null;
             string Key = null;
-            string IgnoreErrors = null;
-            string condition = "";
+            YesNoType IgnoreErrors = YesNoType.No;
+            string condition = null;
+
+            if ((parent != null) && parent.LocalName.Equals("Property"))
+            {
+                DestProperty = parent.Attributes["Id"]?.Value;
+            }
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
                 if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
                 {
-                    switch (attrib.LocalName.ToLower())
+                    switch (attrib.LocalName)
                     {
-                        case "id":
+                        case "Id":
                             id = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "destproperty":
+                        case "DestProperty":
+                            if (!string.IsNullOrEmpty(DestProperty))
+                            {
+                                Core.OnMessage(WixErrors.ExpectedAttributeInElementOrParent(sourceLineNumbers, node.LocalName, attrib.LocalName, parent.LocalName));
+                            }
                             DestProperty = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "filepath":
+                        case "FilePath":
                             FilePath = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "section":
+                        case "Section":
                             Section = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "key":
+                        case "Key":
                             Key = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "ignoreerrors":
-                            IgnoreErrors = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        case "IgnoreErrors":
+                            IgnoreErrors = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Condition":
+                            condition = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
 
                         default:
@@ -1822,13 +1838,6 @@ namespace PanelSw.Wix.Extensions
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Section"));
             }
 
-            // Attributes
-            int Attributes = (int)ReadIniValuesAttributes.None;
-            if (!string.IsNullOrEmpty(IgnoreErrors) && IgnoreErrors.Equals("yes", StringComparison.OrdinalIgnoreCase))
-            {
-                Attributes |= (int)ReadIniValuesAttributes.IgnoreErrors;
-            }
-
             // find unexpected child elements
             foreach (XmlNode child in node.ChildNodes)
             {
@@ -1843,8 +1852,12 @@ namespace PanelSw.Wix.Extensions
                         Core.UnsupportedExtensionElement(node, child);
                     }
                 }
-                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
+                else if ((XmlNodeType.CDATA == child.NodeType) || (XmlNodeType.Text == child.NodeType))
                 {
+                    if (!string.IsNullOrEmpty(condition))
+                    {
+                        Core.OnMessage(WixErrors.IllegalAttributeWithInnerText(sourceLineNumbers, node.LocalName, "Condition"));
+                    }
                     condition = child.Value.Trim();
                 }
             }
@@ -1859,7 +1872,7 @@ namespace PanelSw.Wix.Extensions
                 row[2] = Section;
                 row[3] = Key;
                 row[4] = DestProperty;
-                row[5] = Attributes;
+                row[5] = (IgnoreErrors == YesNoType.Yes) ? 1 : 0;
                 row[6] = condition;
             }
         }

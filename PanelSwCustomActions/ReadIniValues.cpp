@@ -1,25 +1,7 @@
 
 #include "stdafx.h"
+#include "..\CaCommon\WixString.h"
 #include <errno.h>
-
-class CPWCHAR
-{
-	WCHAR* m_p;
-public:
-	CPWCHAR() :m_p(0){}
-	CPWCHAR(WCHAR* p) :m_p(p){}
-	~CPWCHAR(){ if (m_p != 0) delete[] m_p; }
-	void operator =(PWCHAR p) { if (m_p) delete[] m_p; m_p = p; }
-	operator WCHAR*() { return m_p; }
-	WCHAR** operator &() { if (m_p) delete[] m_p; m_p = 0; return &m_p; }
-};
-
-#define READINIVALUES_QUERY L"SELECT `Id`, `FilePath`, `Section`, `Key`, `DestProperty`, `Attributes`, `Condition` FROM `PSW_ReadIniValues`"
-enum ReadIniValuesAttributes
-{
-	NONE = 0,
-	IGNORE_ERRORS = 1
-};
 
 extern "C" UINT __stdcall ReadIniValues(MSIHANDLE hInstall)
 {
@@ -27,7 +9,6 @@ extern "C" UINT __stdcall ReadIniValues(MSIHANDLE hInstall)
 	UINT er = ERROR_SUCCESS;
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
-	bool bIgnoreErrors = false;
 
 	hr = WcaInitialize(hInstall, "ReadIniValues");
 	BreakExitOnFailure(hr, "Failed to initialize");
@@ -35,10 +16,10 @@ extern "C" UINT __stdcall ReadIniValues(MSIHANDLE hInstall)
 
 	// Ensure table PSW_ReadIniValues exists.
 	hr = WcaTableExists(L"PSW_ReadIniValues");
-	BreakExitOnFailure(hr, "Table does not exist 'PSW_ReadIniValues'. Have you authored 'PanelSw:ReadIniValues' entries in WiX code?");
+	BreakExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ReadIniValues'. Have you authored 'PanelSw:ReadIniValues' entries in WiX code?");
 
 	// Execute view
-	hr = WcaOpenExecuteView(READINIVALUES_QUERY, &hView);
+	hr = WcaOpenExecuteView(L"SELECT `Id`, `FilePath`, `Section`, `Key`, `DestProperty`, `Attributes`, `Condition` FROM `PSW_ReadIniValues`", &hView);
 	BreakExitOnFailure(hr, "Failed to execute SQL query on 'ReadIniValues'.");
 
 	// Iterate records
@@ -47,40 +28,27 @@ extern "C" UINT __stdcall ReadIniValues(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		LPWSTR Id = nullptr;
-		LPWSTR FilePath = nullptr;
-		LPWSTR Section = nullptr;
-		LPWSTR Key = nullptr;
-		LPWSTR DestProperty = nullptr;
-		LPWSTR Condition = nullptr;
-		int Attributes;
-		hr = WcaGetRecordString(hRecord, 1, &Id);
+		CWixString szId, szFilePath, szSection, szKey, szDestProperty, szCondition, szValue(1024);
+		DWORD dwRes = 0;
+		int bIgnoreErrors = 0;
+
+		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szId);
 		BreakExitOnFailure(hr, "Failed to get Id.");
-		hr = WcaGetRecordFormattedString(hRecord, 2, &FilePath);
+		hr = WcaGetRecordFormattedString(hRecord, 2, (LPWSTR*)szFilePath);
 		BreakExitOnFailure(hr, "Failed to get FilePath.");
-		hr = WcaGetRecordFormattedString(hRecord, 3, &Section);
+		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)szSection);
 		BreakExitOnFailure(hr, "Failed to get Section.");
-		hr = WcaGetRecordFormattedString(hRecord, 4, &Key);
+		hr = WcaGetRecordFormattedString(hRecord, 4, (LPWSTR*)szKey);
 		BreakExitOnFailure(hr, "Failed to get Key.");
-		hr = WcaGetRecordString(hRecord, 5, &DestProperty);
+		hr = WcaGetRecordString(hRecord, 5, (LPWSTR*)szDestProperty);
 		BreakExitOnFailure(hr, "Failed to get DestProperty.");
-		hr = WcaGetRecordInteger(hRecord, 6, &Attributes);
+		hr = WcaGetRecordInteger(hRecord, 6, &bIgnoreErrors);
 		BreakExitOnFailure(hr, "Failed to get Attributes.");
-		hr = WcaGetRecordString(hRecord, 7, &Condition);
+		hr = WcaGetRecordString(hRecord, 7, (LPWSTR*)szCondition);
 		BreakExitOnFailure(hr, "Failed to get Condition.");
-		WcaLog(LOGMSG_STANDARD, "Id=%S; FilePath=%S; Section=%S; Key=%S; DestProperty=%S; Attributes=%i; Condition=%S"
-			, Id
-			, FilePath
-			, Section
-			, Key
-			, DestProperty
-			, Attributes
-			, Condition
-			);
-		bIgnoreErrors = ((Attributes & ReadIniValuesAttributes::IGNORE_ERRORS) == ReadIniValuesAttributes::IGNORE_ERRORS);
 
 		// Test condition
-		MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, Condition);
+		MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, (LPCWSTR)szCondition);
 		switch (condRes)
 		{
 		case MSICONDITION::MSICONDITION_NONE:
@@ -98,41 +66,27 @@ extern "C" UINT __stdcall ReadIniValues(MSIHANDLE hInstall)
 		}
 
 		// Get the value.
-		DWORD dwSize = 1024;
-		CPWCHAR Value(new WCHAR[dwSize]);
-		DWORD dwRes;
-		while ((dwRes = ::GetPrivateProfileStringW(Section, Key, nullptr, Value, 1024, FilePath)) == (dwSize - 1))
+		while ((dwRes = ::GetPrivateProfileStringW((LPCWSTR)szSection, (LPCWSTR)szKey, nullptr, (LPWSTR)szValue, szValue.Capacity(), (LPCWSTR)szFilePath)) == (szValue.Capacity() - 1))
 		{
-			dwSize += 1024;
-			Value = new WCHAR[dwSize];
+			hr = szValue.Allocate(2 * szValue.Capacity());
+			BreakExitOnFailure(hr, "Failed allocating memory");
 		}
-		WcaLog(LOGMSG_STANDARD, "GetPrivateProfileStringW=%u;errno=%i;GetLastError=%u;", dwRes, errno, ::GetLastError());
 
 		// Error?
 		if (dwRes == 0)
 		{
-			dwRes = ::GetLastError();
-			if (dwRes != ERROR_SUCCESS)
+			if (bIgnoreErrors || ((dwRes = ::GetLastError()) == ERROR_SUCCESS))
 			{
-				hr = HRESULT_FROM_WIN32(dwRes);
-				WcaLogError(hr, "Failed reading ini file value");
-				if (bIgnoreErrors)
-				{
-					hr = S_OK;
-				}
-				BreakExitOnFailure(hr, "File not found.");
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Couldn't read value from file '%ls', section '%ls', key '%ls'. Error 0x%08X, ignore = %i", (LPCWSTR)szFilePath, (LPCWSTR)szSection, (LPCWSTR)szKey, dwRes, bIgnoreErrors);
+				continue;
 			}
-			continue;
+			BreakExitOnNullWithLastError(0, hr, "Failed reading value from '%ls'.", (LPCWSTR)szFilePath);
 		}
 
-		hr = WcaSetProperty(DestProperty, Value);
-		if (!bIgnoreErrors)
-		{
-			BreakExitOnFailure(hr, "Failed to set property.");
-		}
+		hr = WcaSetProperty((LPCWSTR)szDestProperty, (LPCWSTR)szValue);
+		BreakExitOnFailure(hr, "Failed to set property.");
 	}
-
-	hr = ERROR_SUCCESS;
+	hr = S_OK;
 
 LExit:
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;

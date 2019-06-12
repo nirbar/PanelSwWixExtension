@@ -24,29 +24,30 @@
         <File Id="JustFile" Source="$(var.ProjectDir)Product.wxs"></File>
       </Component>
     </ComponentGroup>
-  
-    <PanelSW:ReadIniValues Id="TEST_VALUE" FilePath="$(var.ProjectDir)TEST.INI" Key="VALUE" Section="SECTION" DestProperty="TST_TEST_VALUE" IgnoreErrors="yes"></PanelSW:ReadIniValues>
-    <PanelSW:ReadIniValues Id="TST_NULL" FilePath="$(var.ProjectDir)TEST.INI" Key="NO_VALUE" Section="SECTION" DestProperty="TST_NULL" IgnoreErrors="yes"></PanelSW:ReadIniValues>
-    <PanelSW:ReadIniValues Id="TST_NULL_1" FilePath="$(var.ProjectDir)TEST1.INI" Key="VALUE" Section="SECTION" DestProperty="TST_NULL_1" IgnoreErrors="yes"></PanelSW:ReadIniValues>
+
+    <Property Id="TST_TEST_VALUE">
+      <PanelSW:ReadIniValues Id="TEST_VALUE" FilePath="$(var.ProjectDir)TEST.INI" Key="VALUE" Section="SECTION" IgnoreErrors="yes"/>
+    </Property>
+    <Property Id="TST_NULL">
+      <PanelSW:ReadIniValues Id="TST_NULL" FilePath="$(var.ProjectDir)TEST.INI" Key="NO_VALUE" Section="SECTION" IgnoreErrors="yes"/>
+    </Property>
+    <Property Id="TST_NULL_1">
+      <PanelSW:ReadIniValues Id="TST_NULL_1" FilePath="$(var.ProjectDir)TEST1.INI" Key="VALUE" Section="SECTION" IgnoreErrors="yes"/>
+    </Property>
 
     <UI>
       <Error Id="10000">UnitTest failed</Error>
-      <Error Id="10001">UnitTest pass</Error>
     </UI>
     <InstallExecuteSequence>
-      
+
       <!-- Error if conditions show failure. -->
       <Custom Action="ReadIniValuesTest" Before="InstallFinalize">
-        (Not TST_TEST_VALUE="TEST_VALUE")
-        Or
-        TST_NULL
-        Or
-        TST_NULL_1
+        <![CDATA[(Not TST_TEST_VALUE="TEST_VALUE") Or TST_NULL Or TST_NULL_1]]>
       </Custom>
-      
+
       <!-- Terminate Successfully -->
       <Custom Action="TerminateSuccessfully_Immediate" After="ReadIniValuesTest"></Custom>
-      
+
     </InstallExecuteSequence>
     <CustomAction Id="ReadIniValuesTest" Error="10000" Execute="immediate" Return="check"></CustomAction>
   </Product>
