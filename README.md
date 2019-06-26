@@ -33,6 +33,10 @@ The commercial extension- [JetWixExtension](https://github.com/nirbar/JetBA-Show
   		</Component>
   	</ComponentGroup>
     ~~~~~~~
+- Detect bundles and get their versions in a variable:
+    ~~~~~~~
+    <jet:BundleSearch UpgradeCode="{1D1DB5E6-E0D8-3103-8570-369A82A9BF33}" VersionVariable="DetectedVC2013x86Version" NamePattern="\bx86\b"/>
+    ~~~~~~~
 Contact the owner to obtain a license for [JetWixExtension](https://github.com/nirbar/JetBA-Showcase)
 
 ## PanelSwWixExtension WiX Elements
