@@ -635,10 +635,31 @@
               <xs:documentation><![CDATA[Folder to extract the archive into.]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="Overwrite" type="wix:YesNoType" use="optional" default="no">
+          <xs:attribute name="Overwrite" type="wix:YesNoDefaultType" use="optional">
             <xs:annotation>
-              <xs:documentation><![CDATA[Whether or not to overwrite existing files. Defaults to 'no'.]]></xs:documentation>
+              <xs:documentation><![CDATA[Whether or not to overwrite existing files. Use of this attribute is deprecated. Instead, use OverwriteMode. Defaults to OverwriteMode='Unmodified']]></xs:documentation>
             </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="OverwriteMode" use="optional" default="Unmodified">
+            <xs:simpleType>
+              <xs:restriction base="xs:NMTOKEN">
+                <xs:enumeration value="Never">
+                  <xs:annotation>
+                    <xs:documentation>Files will not be overwritten</xs:documentation>
+                  </xs:annotation>
+                </xs:enumeration>
+                <xs:enumeration value="Always">
+                  <xs:annotation>
+                    <xs:documentation>Files will be overwritten</xs:documentation>
+                  </xs:annotation>
+                </xs:enumeration>
+                <xs:enumeration value="Unmodified">
+                  <xs:annotation>
+                    <xs:documentation>Files will be overwritten if their last modified time is older or equal to their creation time</xs:documentation>
+                  </xs:annotation>
+                </xs:enumeration>
+              </xs:restriction>
+            </xs:simpleType>
           </xs:attribute>
         </xs:extension>
       </xs:simpleContent>
@@ -818,7 +839,7 @@
     <xs:complexType>
       <xs:attribute name="Value" type="xs:integer" use="required">
         <xs:annotation>
-          <xs:documentation>Exit code returned from executable package. If no value is provided it means all values not explicitly set default to this behavior.</xs:documentation>
+          <xs:documentation>Exit code returned from command.</xs:documentation>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="Behavior" use="required">

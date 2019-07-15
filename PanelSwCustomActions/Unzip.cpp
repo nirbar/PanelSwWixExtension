@@ -20,12 +20,6 @@ using namespace Poco::Zip;
 - Support rollback (copy current target-folder to temp before decompressing over it).
 */
 
-enum UnzipFlags
-{
-	None = 0,
-	Overwrite = 1
-};
-
 extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
@@ -85,7 +79,7 @@ extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall)
 		ExitOnNull(!zip.IsNullOrEmpty(), hr, E_INVALIDARG, "ZIP file path is empty");
 		ExitOnNull(!folder.IsNullOrEmpty(), hr, E_INVALIDARG, "ZIP target path is empty");
 
-		hr = cad.AddUnzip(zip, folder, flags & UnzipFlags::Overwrite);
+		hr = cad.AddUnzip(zip, folder, (UnzipDetails_OverwriteMode)flags);
 		BreakExitOnFailure(hr, "Failed scheduling zip file extraction");
 	}
 
@@ -100,7 +94,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-HRESULT CUnzip::AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, bool overwrite)
+HRESULT CUnzip::AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, UnzipDetails_OverwriteMode overwriteMode)
 {
 	HRESULT hr = S_OK;
 	Command *pCmd = nullptr;
@@ -116,7 +110,7 @@ HRESULT CUnzip::AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, bool overwrite)
 
 	pDetails->set_zipfile(zipFile, WSTR_BYTE_SIZE(zipFile));
 	pDetails->set_targetfolder(targetFolder, WSTR_BYTE_SIZE(targetFolder));
-	pDetails->set_overwrite(overwrite);
+	pDetails->set_overwritemode(overwriteMode);
 
 	pAny = pCmd->mutable_details();
 	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
@@ -163,15 +157,21 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 		path.append(file);
 		std::string pathA = path.toString(Poco::Path::Style::PATH_WINDOWS).c_str();
 
-		if (details.overwrite() && ::PathFileExistsA(pathA.c_str()))
+		if (::PathFileExistsA(pathA.c_str()))
 		{
-			WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Deleting '%s'", pathA.c_str());
+			hr = ShouldOverwriteFile(pathA.c_str(), details.overwritemode());
+			BreakExitOnFailure(hr, "Failed determining whether or not to overwrite file '%s'", pathA.c_str());
 
-			bRes = ::SetFileAttributesA(pathA.c_str(), FILE_ATTRIBUTE_NORMAL);
-			BreakExitOnNullWithLastError(bRes, hr, "Failed clearing attributes of '%s'", pathA.c_str());
+			if (hr == S_OK)
+			{
+				WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Deleting '%s'", pathA.c_str());
 
-			bRes = ::DeleteFileA(pathA.c_str());
-			BreakExitOnNullWithLastError(bRes, hr, "Failed deleting '%s'", pathA.c_str());
+				bRes = ::SetFileAttributesA(pathA.c_str(), FILE_ATTRIBUTE_NORMAL);
+				BreakExitOnNullWithLastError(bRes, hr, "Failed clearing attributes of '%s'", pathA.c_str());
+
+				bRes = ::DeleteFileA(pathA.c_str());
+				BreakExitOnNullWithLastError(bRes, hr, "Failed deleting '%s'", pathA.c_str());
+			}
 		}
 
 		// Create missing folders
@@ -239,5 +239,52 @@ LExit:
 	{
 		delete zipFileStream;
 	}
+	return hr;
+}
+
+HRESULT CUnzip::ShouldOverwriteFile(LPCSTR szFile, UnzipDetails_OverwriteMode overwriteMode)
+{
+	HRESULT hr = S_OK;
+	bool bRes = true;
+	HANDLE hFile = INVALID_HANDLE_VALUE;
+	FILETIME ftCreate;
+	FILETIME ftModify;
+	ULARGE_INTEGER ulCreate;
+	ULARGE_INTEGER ulModify;
+
+	switch (overwriteMode)
+	{
+	case UnzipDetails::OverwriteMode::UnzipDetails_OverwriteMode_never:
+	default:
+		hr = S_FALSE;
+		break;
+
+	case UnzipDetails::OverwriteMode::UnzipDetails_OverwriteMode_always:
+		hr = S_OK;
+		break;
+
+	case UnzipDetails::OverwriteMode::UnzipDetails_OverwriteMode_unmodified:
+		hFile = ::CreateFileA(szFile, GENERIC_READ, FILE_SHARE_WRITE | FILE_SHARE_READ | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+		BreakExitOnNullWithLastError(((hFile != NULL) && (hFile != INVALID_HANDLE_VALUE)), hr, "Failed opening file '%s' to read times", szFile);
+
+		bRes = ::GetFileTime(hFile, &ftCreate, nullptr, &ftModify);
+		BreakExitOnNullWithLastError(bRes, hr, "Failed getting file times for '%s'", szFile);
+
+		ulCreate.HighPart = ftCreate.dwHighDateTime;
+		ulCreate.LowPart = ftCreate.dwLowDateTime;
+
+		ulModify.HighPart = ftModify.dwHighDateTime;
+		ulModify.LowPart = ftModify.dwLowDateTime;
+
+		hr = (ulModify.QuadPart > ulCreate.QuadPart) ? S_FALSE : S_OK;
+		break;
+	}
+
+LExit:
+	if (hFile && (hFile != INVALID_HANDLE_VALUE)) 
+	{
+		::CloseHandle(hFile);
+	}
+
 	return hr;
 }

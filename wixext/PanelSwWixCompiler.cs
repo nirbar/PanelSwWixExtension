@@ -1492,7 +1492,7 @@ namespace PanelSw.Wix.Extensions
                             }
                         }
                         break;
-                        
+
                     default:
                         Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                         break;
@@ -3214,12 +3214,14 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        [Flags]
-        private enum UnzipFlags
+
+        enum OverwriteMode
         {
-            None = 0,
-            Overwrite = 1
-        }
+            Never = 0,
+            Always = 1,
+            Unmodified = 2,
+        };
+
         private void ParseUnzip(XmlNode node)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
@@ -3227,8 +3229,7 @@ namespace PanelSw.Wix.Extensions
             string zipFile = null;
             string dstDir = null;
             string condition = null;
-            YesNoType aye = YesNoType.No;
-            UnzipFlags flags = UnzipFlags.None;
+            OverwriteMode overwrite = OverwriteMode.Unmodified;
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -3246,10 +3247,20 @@ namespace PanelSw.Wix.Extensions
                             dstDir = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Overwrite":
-                            aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
-                            if (aye == YesNoType.Yes)
+                            YesNoDefaultType aye = Core.GetAttributeYesNoDefaultValue(sourceLineNumbers, attrib);
+                            overwrite = ((aye == YesNoDefaultType.Yes) ? OverwriteMode.Always
+                                : (aye == YesNoDefaultType.No) ? OverwriteMode.Never
+                                : OverwriteMode.Unmodified);
+                            break;
+                        case "OverwriteMode":
+                            string b = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            try
                             {
-                                flags |= UnzipFlags.Overwrite;
+                                overwrite = (OverwriteMode)Enum.Parse(typeof(OverwriteMode), b);
+                            }
+                            catch
+                            {
+                                Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                             }
                             break;
 
@@ -3305,7 +3316,7 @@ namespace PanelSw.Wix.Extensions
                 row[0] = id;
                 row[1] = zipFile;
                 row[2] = dstDir;
-                row[3] = (int)flags;
+                row[3] = (int)overwrite;
                 row[4] = condition;
             }
         }
