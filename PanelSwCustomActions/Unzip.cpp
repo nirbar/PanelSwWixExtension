@@ -136,12 +136,12 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 
 	bRes = details.ParseFromString(command);
 	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking UnzipDetails");
-	
+
 	zipFileW = (LPCWSTR)details.zipfile().c_str();
 	targetFolderW = (LPCWSTR)details.targetfolder().c_str();
 
 	Poco::UnicodeConverter::toUTF8(targetFolderW, targetFolderA);
-	Poco::UnicodeConverter::toUTF8(zipFileW, zipFileA);	
+	Poco::UnicodeConverter::toUTF8(zipFileW, zipFileA);
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Extracting zip file '%s' to '%s'", zipFileA.c_str(), targetFolderA.c_str());
 
 	zipFileStream = new std::ifstream(zipFileA, std::ios::binary);
@@ -156,23 +156,6 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 		Poco::Path path(targetFolderA);
 		path.append(file);
 		std::string pathA = path.toString(Poco::Path::Style::PATH_WINDOWS).c_str();
-
-		if (::PathFileExistsA(pathA.c_str()))
-		{
-			hr = ShouldOverwriteFile(pathA.c_str(), details.overwritemode());
-			BreakExitOnFailure(hr, "Failed determining whether or not to overwrite file '%s'", pathA.c_str());
-
-			if (hr == S_OK)
-			{
-				WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Deleting '%s'", pathA.c_str());
-
-				bRes = ::SetFileAttributesA(pathA.c_str(), FILE_ATTRIBUTE_NORMAL);
-				BreakExitOnNullWithLastError(bRes, hr, "Failed clearing attributes of '%s'", pathA.c_str());
-
-				bRes = ::DeleteFileA(pathA.c_str());
-				BreakExitOnNullWithLastError(bRes, hr, "Failed deleting '%s'", pathA.c_str());
-			}
-		}
 
 		// Create missing folders
 		while (!::PathIsDirectoryA(path.parent().toString(Poco::Path::Style::PATH_WINDOWS).c_str()))
@@ -190,9 +173,26 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 			BreakExitOnNullWithLastError((bRes || (::GetLastError() == ERROR_ALREADY_EXISTS)), hr, "Failed creating folder '%s'", dirA.c_str());
 		}
 
+		if (::PathFileExistsA(pathA.c_str()))
+		{
+			hr = ShouldOverwriteFile(pathA.c_str(), details.overwritemode());
+			BreakExitOnFailure(hr, "Failed determining whether or not to overwrite file '%s'", pathA.c_str());
+
+			if (hr == S_FALSE)
+			{
+				continue;
+			}
+
+			bRes = ::SetFileAttributesA(pathA.c_str(), FILE_ATTRIBUTE_NORMAL);
+			BreakExitOnNullWithLastError(bRes, hr, "Failed clearing attributes of '%s'", pathA.c_str());
+
+			bRes = ::DeleteFileA(pathA.c_str());
+			BreakExitOnNullWithLastError(bRes, hr, "Failed deleting '%s'", pathA.c_str());
+		}
+
 		if (!::PathFileExistsA(pathA.c_str()))
 		{
-			WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Extracting '%s'", pathA.c_str());
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Extracting '%s'", pathA.c_str());
 
 			{ // Scope ZipInputStream to release the file
 				ZipInputStream zipin(*zipFileStream, it->second);
@@ -256,10 +256,12 @@ HRESULT CUnzip::ShouldOverwriteFile(LPCSTR szFile, UnzipDetails_OverwriteMode ov
 	{
 	case UnzipDetails::OverwriteMode::UnzipDetails_OverwriteMode_never:
 	default:
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will not overwrite '%s' due to NeverOverwrite flag", szFile);
 		hr = S_FALSE;
 		break;
 
 	case UnzipDetails::OverwriteMode::UnzipDetails_OverwriteMode_always:
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will overwrite '%s' due to AlwaysOverwrite flag", szFile);
 		hr = S_OK;
 		break;
 
@@ -276,12 +278,22 @@ HRESULT CUnzip::ShouldOverwriteFile(LPCSTR szFile, UnzipDetails_OverwriteMode ov
 		ulModify.HighPart = ftModify.dwHighDateTime;
 		ulModify.LowPart = ftModify.dwLowDateTime;
 
-		hr = (ulModify.QuadPart > ulCreate.QuadPart) ? S_FALSE : S_OK;
+		if (ulModify.QuadPart > ulCreate.QuadPart)
+		{
+			hr = S_FALSE;
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will not overwrite '%s' due to OverwriteUnmodified flag- file has been modified since created", szFile);
+		}
+		else
+		{
+			hr = S_OK;
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will overwrite '%s' due to OverwriteUnmodified flag- file isn't modified", szFile);
+		}
+
 		break;
 	}
 
 LExit:
-	if (hFile && (hFile != INVALID_HANDLE_VALUE)) 
+	if (hFile && (hFile != INVALID_HANDLE_VALUE))
 	{
 		::CloseHandle(hFile);
 	}

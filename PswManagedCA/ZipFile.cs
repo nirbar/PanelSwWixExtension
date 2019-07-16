@@ -174,13 +174,13 @@ namespace PswManagedCA
                 string entryName = filename.Substring(folderOffset); // Makes the name in zip based on the folder
                 entryName = ZipEntry.CleanName(entryName); // Removes drive from name and fixes slash direction
                 ZipEntry newEntry = new ZipEntry(entryName);
-                newEntry.DateTime = fi.LastWriteTime;
+                newEntry.DateTime = fi.LastWriteTimeUtc;
                 newEntry.Size = fi.Length;
 
                 List<byte> fileTimes = new List<byte>();
-                fileTimes.AddRange(BitConverter.GetBytes(fi.CreationTime.ToFileTime()));
-                fileTimes.AddRange(BitConverter.GetBytes(fi.LastAccessTime.ToFileTime()));
-                fileTimes.AddRange(BitConverter.GetBytes(fi.LastWriteTime.ToFileTime()));
+                fileTimes.AddRange(BitConverter.GetBytes(fi.CreationTimeUtc.ToFileTime()));
+                fileTimes.AddRange(BitConverter.GetBytes(fi.LastAccessTimeUtc.ToFileTime()));
+                fileTimes.AddRange(BitConverter.GetBytes(fi.LastWriteTimeUtc.ToFileTime()));
                 newEntry.ExtraData = fileTimes.ToArray();
 
                 zipStream.PutNextEntry(newEntry);
