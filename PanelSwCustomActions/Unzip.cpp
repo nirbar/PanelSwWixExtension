@@ -190,43 +190,20 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 			BreakExitOnNullWithLastError(bRes, hr, "Failed deleting '%s'", pathA.c_str());
 		}
 
-		if (!::PathFileExistsA(pathA.c_str()))
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Extracting '%s'", pathA.c_str());
+
+		{ // Scope ZipInputStream to release the file
+			ZipInputStream zipin(*zipFileStream, it->second);
+			std::ofstream out(pathA.c_str(), std::ios::binary);
+
+			std::streamsize bytes = Poco::StreamCopier::copyStream(zipin, out);
+			BreakExitOnNull((bytes == it->second.getUncompressedSize()), hr, E_FAIL, "Error extracting file '%s' from zip '%ls': %i / %i bytes written", file.c_str(), zipFileW, bytes, it->second.getUncompressedSize());
+		}
+
+		// Set file times, ignore failures.
+		if (it->second.hasExtraField())
 		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Extracting '%s'", pathA.c_str());
-
-			{ // Scope ZipInputStream to release the file
-				ZipInputStream zipin(*zipFileStream, it->second);
-				std::ofstream out(pathA.c_str(), std::ios::binary);
-
-				std::streamsize bytes = Poco::StreamCopier::copyStream(zipin, out);
-				BreakExitOnNull((bytes == it->second.getUncompressedSize()), hr, E_FAIL, "Error extracting file '%s' from zip '%ls': %i / %i bytes written", file.c_str(), zipFileW, bytes, it->second.getUncompressedSize());
-			}
-
-			// Set file times, if created by panelsw:Zip custom action
-			if (it->second.hasExtraField())
-			{
-				const std::string times = it->second.getExtraField();
-				if (times.size() == (3 * sizeof(FILETIME)))
-				{
-					HANDLE hFile = INVALID_HANDLE_VALUE;
-					const FILETIME *fileTimes = (const FILETIME*)times.c_str(); // Create, access, write
-
-					hFile = ::CreateFileA(pathA.c_str(), GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE | FILE_SHARE_READ | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-					if ((hFile == NULL) || (hFile == INVALID_HANDLE_VALUE))
-					{
-						WcaLogError(HRESULT_FROM_WIN32(::GetLastError()), "Failed openning file '%s' to set create/access/modify times", pathA.c_str());
-						continue;
-					}
-
-					bRes = ::SetFileTime(hFile, fileTimes, fileTimes + 1, fileTimes + 2);
-					if (!bRes)
-					{
-						WcaLogError(HRESULT_FROM_WIN32(::GetLastError()), "Failed to set create/access/modify times on '%s'", pathA.c_str());
-					}
-
-					::CloseHandle(hFile);
-				}
-			}
+			SetFileTimes(pathA.c_str(), it->second.getExtraField());
 		}
 	}
 
@@ -239,6 +216,122 @@ LExit:
 	{
 		delete zipFileStream;
 	}
+	return hr;
+}
+
+HRESULT CUnzip::SetFileTimes(LPCSTR szFilePath, const std::string &extradField)
+{
+	HRESULT hr = S_OK;
+	HANDLE hFile = INVALID_HANDLE_VALUE;
+	BOOL bRes = TRUE;
+	FILETIME createTime{ 0, 0 };
+	FILETIME accessTime{ 0, 0 };
+	FILETIME modifyTime{ 0, 0 };
+	FILETIME *pCreateTime = nullptr;
+	FILETIME *pAccessTime = nullptr;
+	FILETIME *pModifyTime = nullptr;
+
+	hr = FindTimeInEntry(extradField, &createTime, &accessTime, &modifyTime);
+	ExitOnFailure(hr, "Failed finding time in entry for %s", szFilePath);
+
+	if ((createTime.dwHighDateTime != 0) || (createTime.dwLowDateTime != 0))
+	{
+		pCreateTime = &createTime;
+	}
+	if ((accessTime.dwHighDateTime != 0) || (accessTime.dwLowDateTime != 0))
+	{
+		pAccessTime = &accessTime;
+	}
+	if ((modifyTime.dwHighDateTime != 0) || (modifyTime.dwLowDateTime != 0))
+	{
+		pModifyTime = &modifyTime;
+	}
+
+	if (!pCreateTime && !pAccessTime && !pModifyTime)
+	{
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "No time fields found in entry for file '%s'", szFilePath);
+		ExitFunction();
+	}
+
+	hFile = ::CreateFileA(szFilePath, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE | FILE_SHARE_READ | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	ExitOnNullWithLastError((hFile && (hFile != INVALID_HANDLE_VALUE)), hr, "Failed openning file '%s' to set create/access/modify times", szFilePath);
+
+	bRes = ::SetFileTime(hFile, pCreateTime, pAccessTime, pModifyTime);
+	ExitOnNullWithLastError(bRes, hr, "Failed to set create/access/modify times on '%s'", szFilePath);
+
+LExit:
+	if (hFile && (hFile != INVALID_HANDLE_VALUE))
+	{
+		::CloseHandle(hFile);
+	}
+
+	return hr;
+}
+
+HRESULT CUnzip::FindTimeInEntry(const std::string &extradField, FILETIME *createTime, FILETIME *accessTime, FILETIME *modifyTime)
+{
+	HRESULT hr = S_OK;
+
+	for (int i = 0; i <= extradField.size() - 4; )
+	{
+		const short *pTag = reinterpret_cast<const short*>(extradField.data() + i);
+		const short *pSize = reinterpret_cast<const short*>(extradField.data() + i + sizeof(short));
+		i += (2 * sizeof(short));
+
+		if ((*pTag == 0xA) && (*pSize == 32))
+		{
+			const ExtraDataWindowsTime *winTime = reinterpret_cast<const ExtraDataWindowsTime*>(extradField.data() + i);
+			if ((winTime->size == 24) && (winTime->tag == 1))
+			{
+				WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Detected Windows time entries for file");
+				*createTime = winTime->creationTime;
+				*accessTime = winTime->accessTime;
+				*modifyTime = winTime->modificationTime;
+			}
+			break;
+		}
+		else if ((*pTag == 0x5455) && (*pSize >= sizeof(char)) && (*pSize <= (sizeof(char) + (3 * sizeof(unsigned int)))))
+		{
+			const ExtraDataUnixTime *unixTime = reinterpret_cast<const ExtraDataUnixTime*>(extradField.data() + i);
+			int j = 0;
+
+			// https://support.microsoft.com/en-us/help/167296/how-to-convert-a-unix-time-t-to-a-win32-filetime-or-systemtime
+			ULARGE_INTEGER ll;
+			unsigned int time = 0;
+
+			// Modify
+			if (unixTime->flags & 1)
+			{
+				WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Detected Unix modification time entry for file");
+				time = unixTime->times[j++];
+				ll.QuadPart = Int32x32To64(time, 10000000) + 116444736000000000;
+				modifyTime->dwHighDateTime = ll.HighPart;
+				modifyTime->dwLowDateTime = ll.LowPart;
+			}
+			if (unixTime->flags & 2)
+			{
+				WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Detected Unix access time entry for file");
+				time = unixTime->times[j++];
+				ll.QuadPart = Int32x32To64(time, 10000000) + 116444736000000000;
+				accessTime->dwHighDateTime = ll.HighPart;
+				accessTime->dwLowDateTime = ll.LowPart;
+			}
+			if (unixTime->flags & 4)
+			{
+				WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Detected Unix creation time entry for file");
+				time = unixTime->times[j++];
+				ll.QuadPart = Int32x32To64(time, 10000000) + 116444736000000000;
+				createTime->dwHighDateTime = ll.HighPart;
+				createTime->dwLowDateTime = ll.LowPart;
+			}
+			break;
+		}
+		
+		i += (*pSize);
+	}
+
+LExit:
+
 	return hr;
 }
 

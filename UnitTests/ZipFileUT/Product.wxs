@@ -27,6 +27,7 @@
     <ComponentGroup Id="ProductComponents">
       <Component Directory="INSTALLFOLDER">
         <File Source="$(sys.SOURCEFILEPATH)"/>
+        <RemoveFile On="both" Name="1.zip" Id="_1"/>
         <util:XmlFile ElementPath="//*[\[]local-name()='Property'[\]]" Name="Nir" Value="Bar" Action="setValue" File="[#Product.wxs]" SelectionLanguage="XPath" Id="NirBar" PreserveModifiedDate="no"/>
       </Component>
       <Component Directory="INSTALLFOLDER">

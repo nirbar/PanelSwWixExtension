@@ -177,11 +177,14 @@ namespace PswManagedCA
                 newEntry.DateTime = fi.LastWriteTimeUtc;
                 newEntry.Size = fi.Length;
 
-                List<byte> fileTimes = new List<byte>();
-                fileTimes.AddRange(BitConverter.GetBytes(fi.CreationTimeUtc.ToFileTime()));
-                fileTimes.AddRange(BitConverter.GetBytes(fi.LastAccessTimeUtc.ToFileTime()));
-                fileTimes.AddRange(BitConverter.GetBytes(fi.LastWriteTimeUtc.ToFileTime()));
-                newEntry.ExtraData = fileTimes.ToArray();
+                NTTaggedData dates = new NTTaggedData();
+                dates.CreateTime = fi.CreationTimeUtc;
+                dates.LastAccessTime = fi.LastAccessTimeUtc;
+                dates.LastModificationTime = fi.LastWriteTimeUtc;
+
+                ZipExtraData datesData = new ZipExtraData();
+                datesData.AddEntry(dates);
+                newEntry.ExtraData = datesData.GetEntryData();
 
                 zipStream.PutNextEntry(newEntry);
 
