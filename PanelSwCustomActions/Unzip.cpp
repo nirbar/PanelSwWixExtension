@@ -277,8 +277,9 @@ HRESULT CUnzip::FindTimeInEntry(const std::string &extradField, FILETIME *create
 		const short *pTag = reinterpret_cast<const short*>(extradField.data() + i);
 		const short *pSize = reinterpret_cast<const short*>(extradField.data() + i + sizeof(short));
 		i += (2 * sizeof(short));
+		ExitOnNull((extradField.size() >= (i + (*pSize))), hr, E_INVALIDARG, "Zip entry extra-data field does not adhere to format.");
 
-		if ((*pTag == 0xA) && (*pSize == 32))
+		if ((*pTag == 0xA) && (*pSize == sizeof(ExtraDataWindowsTime)))
 		{
 			const ExtraDataWindowsTime *winTime = reinterpret_cast<const ExtraDataWindowsTime*>(extradField.data() + i);
 			if ((winTime->size == 24) && (winTime->tag == 1))
@@ -290,7 +291,7 @@ HRESULT CUnzip::FindTimeInEntry(const std::string &extradField, FILETIME *create
 			}
 			break;
 		}
-		else if ((*pTag == 0x5455) && (*pSize >= sizeof(char)) && (*pSize <= (sizeof(char) + (3 * sizeof(unsigned int)))))
+		else if ((*pTag == 0x5455) && (*pSize >= sizeof(char)) && (*pSize <= sizeof(ExtraDataUnixTime)))
 		{
 			const ExtraDataUnixTime *unixTime = reinterpret_cast<const ExtraDataUnixTime*>(extradField.data() + i);
 			int j = 0;
