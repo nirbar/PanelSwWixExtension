@@ -301,7 +301,7 @@ HRESULT CUnzip::FindTimeInEntry(const std::string &extradField, FILETIME *create
 			unsigned int time = 0;
 
 			// Modify
-			if (unixTime->flags & 1)
+			if ((unixTime->flags & 1) && (*pSize >= (sizeof(ExtraDataUnixTime::flags) + ((j + 1) * sizeof(ExtraDataUnixTime::times[0])))))
 			{
 				WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Detected Unix modification time entry for file");
 				time = unixTime->times[j++];
@@ -309,7 +309,7 @@ HRESULT CUnzip::FindTimeInEntry(const std::string &extradField, FILETIME *create
 				modifyTime->dwHighDateTime = ll.HighPart;
 				modifyTime->dwLowDateTime = ll.LowPart;
 			}
-			if (unixTime->flags & 2)
+			if ((unixTime->flags & 2) && (*pSize >= (sizeof(ExtraDataUnixTime::flags) + ((j + 1) * sizeof(ExtraDataUnixTime::times[0])))))
 			{
 				WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Detected Unix access time entry for file");
 				time = unixTime->times[j++];
@@ -317,7 +317,7 @@ HRESULT CUnzip::FindTimeInEntry(const std::string &extradField, FILETIME *create
 				accessTime->dwHighDateTime = ll.HighPart;
 				accessTime->dwLowDateTime = ll.LowPart;
 			}
-			if (unixTime->flags & 4)
+			if ((unixTime->flags & 4) && (*pSize >= (sizeof(ExtraDataUnixTime::flags) + ((j + 1) * sizeof(ExtraDataUnixTime::times[0])))))
 			{
 				WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Detected Unix creation time entry for file");
 				time = unixTime->times[j++];
