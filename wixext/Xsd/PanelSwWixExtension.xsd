@@ -384,6 +384,16 @@
               <xs:documentation>SQL query. Must return a single result at most.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="Condition" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Condition on executing the query.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Order" type="xs:integer" use="optional">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Order of query execution, defaults to line number. Commands with explicit order field will be executed before commands with implicit order]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>

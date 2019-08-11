@@ -6,9 +6,6 @@
 #include <memory>
 using namespace std;
 
-#define SqlSearchQuery L"SELECT `Property_`, `Server`, `Instance`, `Database`, `Username`, `Password`, `Query` FROM `PSW_SqlSearch`"
-enum eSqlSearchQueryQuery { Property_ = 1, Server, Instance, Database, Username, Password, Query };
-
 struct DBCOLUMNDATA
 {
 	DBLENGTH dwLength;
@@ -30,7 +27,7 @@ extern "C" UINT __stdcall SqlSearch(MSIHANDLE hInstall)
 	BreakExitOnFailure(hr, "Table does not exist 'PSW_SqlSearch'. Have you authored 'PanelSw:SqlSearch' entries in WiX code?");
 
 	// Execute view
-	hr = WcaOpenExecuteView(SqlSearchQuery, &hView);
+	hr = WcaOpenExecuteView(L"SELECT `Property_`, `Server`, `Instance`, `Database`, `Username`, `Password`, `Query`, `Condition` FROM `PSW_SqlSearch` ORDER BY `Order`", &hView);
 	BreakExitOnFailure(hr, "Failed to execute SQL query on 'PSW_SqlSearch'.");
 
 	// Iterate records
@@ -46,6 +43,7 @@ extern "C" UINT __stdcall SqlSearch(MSIHANDLE hInstall)
 		CWixString szUsername;
 		CWixString szPassword;
 		CWixString szQuery;
+		CWixString szCondition;
 		DBCOUNTITEM unRows = 0;
 		CComBSTR szError;
 		CComPtr<IDBCreateSession> pDbSession;
@@ -62,20 +60,37 @@ extern "C" UINT __stdcall SqlSearch(MSIHANDLE hInstall)
 		unique_ptr<DBCOLUMNINFO, void(__stdcall*)(LPVOID)> pColInfo(nullptr, ::CoTaskMemFree);
 		unique_ptr<HROW, void(__stdcall*)(LPVOID)> phRow(nullptr, ::CoTaskMemFree);
 
-		hr = WcaGetRecordString(hRecord, eSqlSearchQueryQuery::Property_, (LPWSTR*)szProperty);
+		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szProperty);
 		BreakExitOnFailure(hr, "Failed to get Property_.");
-		hr = WcaGetRecordFormattedString(hRecord, eSqlSearchQueryQuery::Server, (LPWSTR*)szServer);
+		hr = WcaGetRecordFormattedString(hRecord, 2, (LPWSTR*)szServer);
 		BreakExitOnFailure(hr, "Failed to get Server.");
-		hr = WcaGetRecordFormattedString(hRecord, eSqlSearchQueryQuery::Instance, (LPWSTR*)szInstance);
+		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)szInstance);
 		BreakExitOnFailure(hr, "Failed to get Instance.");
-		hr = WcaGetRecordFormattedString(hRecord, eSqlSearchQueryQuery::Database, (LPWSTR*)szDatabase);
+		hr = WcaGetRecordFormattedString(hRecord, 4, (LPWSTR*)szDatabase);
 		BreakExitOnFailure(hr, "Failed to get Database.");
-		hr = WcaGetRecordFormattedString(hRecord, eSqlSearchQueryQuery::Username, (LPWSTR*)szUsername);
+		hr = WcaGetRecordFormattedString(hRecord, 5, (LPWSTR*)szUsername);
 		BreakExitOnFailure(hr, "Failed to get Username.");
-		hr = WcaGetRecordFormattedString(hRecord, eSqlSearchQueryQuery::Password, (LPWSTR*)szPassword);
+		hr = WcaGetRecordFormattedString(hRecord, 6, (LPWSTR*)szPassword);
 		BreakExitOnFailure(hr, "Failed to get Password.");
-		hr = WcaGetRecordFormattedString(hRecord, eSqlSearchQueryQuery::Query, (LPWSTR*)szQuery);
+		hr = WcaGetRecordFormattedString(hRecord, 7, (LPWSTR*)szQuery);
 		BreakExitOnFailure(hr, "Failed to get Query.");
+		hr = WcaGetRecordFormattedString(hRecord, 8, (LPWSTR*)szCondition);
+		BreakExitOnFailure(hr, "Failed to get Condition.");
+
+		if (!szCondition.IsNullOrEmpty())
+		{
+			MSICONDITION condRes = MSICONDITION::MSICONDITION_NONE;
+
+			condRes = ::MsiEvaluateCondition(hInstall, szCondition);
+			BreakExitOnNullWithLastError((condRes != MSICONDITION::MSICONDITION_ERROR), hr, "Failed evaluating condition '%ls'", szCondition);
+
+			hr = (condRes == MSICONDITION::MSICONDITION_FALSE) ? S_FALSE : S_OK;
+			WcaLog(LOGMSG_STANDARD, "Condition '%ls' evaluated to %i", (LPCWSTR)szCondition, (1 - (int)hr));
+			if (hr == S_FALSE)
+			{
+				continue;
+			}
+		}
 
 		// Handle:
 		// Server\Instance

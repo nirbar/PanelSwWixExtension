@@ -2352,6 +2352,8 @@ namespace PanelSw.Wix.Extensions
             string username = null;
             string password = null;
             string query = null;
+            string condition = null;
+            int order = 1000000000 + GetLineNumber(sourceLineNumbers);
 
             if (node.ParentNode.LocalName != "Property")
             {
@@ -2382,6 +2384,12 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "Query":
                             query = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Condition":
+                            condition = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Order":
+                            order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
                             break;
 
                         default:
@@ -2420,6 +2428,8 @@ namespace PanelSw.Wix.Extensions
                 row[4] = username;
                 row[5] = password;
                 row[6] = query;
+                row[7] = condition;
+                row[8] = order;
             }
         }
 

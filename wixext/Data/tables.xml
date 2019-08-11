@@ -198,6 +198,8 @@
     <columnDefinition name="Username" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
     <columnDefinition name="Password" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
     <columnDefinition name="Query" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
+    <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
   </tableDefinition>
 
   <tableDefinition name="PSW_BackupAndRestore">
