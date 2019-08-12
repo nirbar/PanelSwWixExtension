@@ -24,7 +24,7 @@ namespace PswManagedCA.Util
             return null;
         }
 
-        public static void LogObfuscated(this Session session, string msg)
+        public static string Obfuscate(this Session session, string msg)
         {
             string[] hiddenProps = session["MsiHiddenProperties"].Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
             if (hiddenProps != null)
@@ -34,8 +34,12 @@ namespace PswManagedCA.Util
                     msg = msg.Replace($"[{p}]", "******");
                 }
             }
-            msg = session.Format(msg);
+            return session.Format(msg);
+        }
 
+        public static void LogObfuscated(this Session session, string msg)
+        {
+            msg = session.Obfuscate(msg);
             using (Record rec = new Record(1))
             {
                 rec.FormatString = "[1]";

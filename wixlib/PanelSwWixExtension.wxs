@@ -421,14 +421,14 @@
   <!-- InstallUtil -->
   <Fragment>
     <CustomAction Id="PSW_InstallUtilSched" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="InstallUtilSched" Execute="immediate"/>
-    <CustomAction Id="PSW_InstallUtil_InstallExec_x86" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="InstallUtilExec" Execute="deferred" Impersonate="no"/>
-    <CustomAction Id="PSW_InstallUtil_InstallRollback_x86" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="InstallUtilExec" Execute="rollback" Impersonate="no"/>
-    <CustomAction Id="PSW_InstallUtil_UninstallExec_x86" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="InstallUtilExec" Execute="deferred" Impersonate="no"/>
-    <CustomAction Id="PSW_InstallUtil_UninstallRollback_x86" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="InstallUtilExec" Execute="rollback" Impersonate="no"/>
-    <CustomAction Id="PSW_InstallUtil_InstallExec_x64" SuppressModularization="yes" BinaryKey="PswManagedCA.X64.dll" DllEntry="InstallUtilExec" Execute="deferred" Impersonate="no"/>
-    <CustomAction Id="PSW_InstallUtil_InstallRollback_x64" SuppressModularization="yes" BinaryKey="PswManagedCA.X64.dll" DllEntry="InstallUtilExec" Execute="rollback" Impersonate="no"/>
-    <CustomAction Id="PSW_InstallUtil_UninstallExec_x64" SuppressModularization="yes" BinaryKey="PswManagedCA.X64.dll" DllEntry="InstallUtilExec" Execute="deferred" Impersonate="no"/>
-    <CustomAction Id="PSW_InstallUtil_UninstallRollback_x64" SuppressModularization="yes" BinaryKey="PswManagedCA.X64.dll" DllEntry="InstallUtilExec" Execute="rollback" Impersonate="no"/>
+    <CustomAction Id="PSW_InstallUtil_InstallExec_x86" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="InstallUtilExec" Execute="deferred" Impersonate="no" HideTarget="yes"/>
+    <CustomAction Id="PSW_InstallUtil_InstallRollback_x86" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="InstallUtilExec" Execute="rollback" Impersonate="no" HideTarget="yes"/>
+    <CustomAction Id="PSW_InstallUtil_UninstallExec_x86" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="InstallUtilExec" Execute="deferred" Impersonate="no" HideTarget="yes"/>
+    <CustomAction Id="PSW_InstallUtil_UninstallRollback_x86" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="InstallUtilExec" Execute="rollback" Impersonate="no" HideTarget="yes"/>
+    <CustomAction Id="PSW_InstallUtil_InstallExec_x64" SuppressModularization="yes" BinaryKey="PswManagedCA.X64.dll" DllEntry="InstallUtilExec" Execute="deferred" Impersonate="no" HideTarget="yes"/>
+    <CustomAction Id="PSW_InstallUtil_InstallRollback_x64" SuppressModularization="yes" BinaryKey="PswManagedCA.X64.dll" DllEntry="InstallUtilExec" Execute="rollback" Impersonate="no" HideTarget="yes"/>
+    <CustomAction Id="PSW_InstallUtil_UninstallExec_x64" SuppressModularization="yes" BinaryKey="PswManagedCA.X64.dll" DllEntry="InstallUtilExec" Execute="deferred" Impersonate="no" HideTarget="yes"/>
+    <CustomAction Id="PSW_InstallUtil_UninstallRollback_x64" SuppressModularization="yes" BinaryKey="PswManagedCA.X64.dll" DllEntry="InstallUtilExec" Execute="rollback" Impersonate="no" HideTarget="yes"/>
 
     <InstallExecuteSequence>
       <Custom Action="PSW_InstallUtilSched" Before="ProcessComponents" Overridable="yes"/>

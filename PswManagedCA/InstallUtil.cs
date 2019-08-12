@@ -86,10 +86,12 @@ namespace PswManagedCA
                                     string arg = argRec[1] as string;
                                     if (!string.IsNullOrWhiteSpace(arg))
                                     {
+                                        string obfuscated = session.Obfuscate(arg);
                                         arg = session.Format(arg);
                                         if (!string.IsNullOrWhiteSpace(arg))
                                         {
                                             ctlg.Arguments.Add(arg);
+                                            ctlg.ObfuscatedArguments.Add(obfuscated);
                                         }
                                     }
                                 }
@@ -295,9 +297,9 @@ namespace PswManagedCA
                 try
                 {
                     // (Un)Install the assembly
-                    if (ctlg.Arguments.Count > 0)
+                    if (ctlg.ObfuscatedArguments.Count > 0)
                     {
-                        session.Log($"Applying {ctlg.Action} on assembly '{ctlg.FilePath}' with arguments {ctlg.Arguments.Aggregate((a, c) => $"{a} {c}")}");
+                        session.Log($"Applying {ctlg.Action} on assembly '{ctlg.FilePath}' with arguments {ctlg.ObfuscatedArguments.Aggregate((a, c) => $"{a} {c}")}");
                     }
                     else
                     {
@@ -378,6 +380,7 @@ namespace PswManagedCA
             public InstallUtilCatalog()
             {
                 Arguments = new List<string>();
+                ObfuscatedArguments = new List<string>();
             }
 
             public enum InstallUtilAction
@@ -390,6 +393,8 @@ namespace PswManagedCA
             public InstallUtilAction Action { get; set; }
 
             public List<string> Arguments { get; set; }
+
+            public List<string> ObfuscatedArguments { get; set; }
 
             public string FileId { get; set; }
 
