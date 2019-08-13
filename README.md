@@ -33,6 +33,21 @@ The commercial extension- [JetWixExtension](https://github.com/nirbar/JetBA-Show
   		</Component>
   	</ComponentGroup>
     ~~~~~~~
+  - Generate random or pseudo-random Guid. 
+    ~~~~~~~
+  	<ComponentGroup Id="random">
+      <?foreach account in localService;localSystem;networkService;applicationPoolIdentity?>
+      <Component Id="webapp.$(var.account)" Guid="$(jet.Guid($(var.account)))" Transitive="yes">
+        <Condition><![CDATA[IIS_ACCOUNT ~= "$(var.account)"]]></Condition>
+        <CreateFolder />
+        <iis:WebAppPool Id="$(var.account)" Name="WebUI" Identity="$(var.account)" ManagedRuntimeVersion="v4.0" ManagedPipelineMode="Integrated" />
+        <iis:WebVirtualDir Id="$(var.account)" Directory="INSTALLFOLDER" Alias="WebUI" WebSite="WebUI">
+          <iis:WebApplication Id="$(var.account)" Name="WebUI" WebAppPool="$(var.account)" />
+        </iis:WebVirtualDir>
+      </Component>
+      <?endforeach?>
+  	</ComponentGroup>
+    ~~~~~~~
 - Detect bundles and get their versions in a variable:
     ~~~~~~~
     <jet:BundleSearch UpgradeCode="{1D1DB5E6-E0D8-3103-8570-369A82A9BF33}" VersionVariable="DetectedVC2013x86Version" NamePattern="\bx86\b"/>
