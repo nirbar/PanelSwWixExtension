@@ -52,6 +52,7 @@ The commercial extension- [JetWixExtension](https://github.com/nirbar/JetBA-Show
     ~~~~~~~
     <jet:BundleSearch UpgradeCode="{1D1DB5E6-E0D8-3103-8570-369A82A9BF33}" VersionVariable="DetectedVC2013x86Version" NamePattern="\bx86\b"/>
     ~~~~~~~
+- RebootBoundary attrbiute on bundle packages: force reboot after the package if any preceding package required reboot
 Contact the owner to obtain a license for [JetWixExtension](https://github.com/nirbar/JetBA-Showcase)
 
 ## PanelSwWixExtension WiX Elements
@@ -69,7 +70,6 @@ Contact the owner to obtain a license for [JetWixExtension](https://github.com/n
   - *RegularExpression*: Execute a Regular Expression to replace or find matches in property values and in file contents.
   - *MsiSqlQuery*: Execute a MSI-SQL query on the MSI database.
   - *CreateSelfSignCertificate*: Create a self-sign certificate that can then be installed by WixIisExtension.
-  - *AlwaysOverwriteFile*: Sets the highest possible version on a file row (65535.65535.65535.65535) to ensure it overwrites existing file
 - Deferred Actions:
   - *JsonJPath*: Set values in JSON-formatted file.
   - *Dism*: Enable Windows Feature using DISM API. Features will be installed when the parent component is being installed or repaired.
