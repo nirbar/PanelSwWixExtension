@@ -12,6 +12,7 @@
       <Component Id="Test" Directory="INSTALLFOLDER">
         <File Source="$(var.ProjectDir)JsonObject.json">
           <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'Acme Co')[\]]" Value='{ "Customer": "Id" }'/>
+          <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'Acme Co')[\]]" Value='{ "Customer": "Id" }'/>
         </File>
       </Component>
     </Feature>

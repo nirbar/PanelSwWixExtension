@@ -314,6 +314,7 @@ namespace PanelSw.Wix.Extensions
         private void ParseJsonJPathElement(XmlElement node, XmlElement parentElement)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string id = "jpt" + Guid.NewGuid().ToString("N");
             string jpath = null;
             string value = null;
             string file = GetFileId(parentElement);
@@ -357,9 +358,10 @@ namespace PanelSw.Wix.Extensions
             if (!Core.EncounteredError)
             {
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_JsonJPath");
-                row[0] = file;
-                row[1] = jpath;
-                row[2] = value;
+                row[0] = id;
+                row[1] = file;
+                row[2] = jpath;
+                row[3] = value;
             }
         }
 
