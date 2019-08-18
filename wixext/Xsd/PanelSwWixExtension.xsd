@@ -381,7 +381,7 @@
           </xs:attribute>
           <xs:attribute name="Query" use="required">
             <xs:annotation>
-              <xs:documentation>SQL query. Must return a single result at most.</xs:documentation>
+              <xs:documentation>SQL query with string result. Must return a single result at most.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="Condition" type="xs:string" use="optional">
