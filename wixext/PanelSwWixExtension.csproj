@@ -50,7 +50,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="PanelSwBinder.cs" />
     <Compile Include="PanelSwWixCompiler.cs" />
     <Compile Include="PanelSwWixExtension.cs" />
     <EmbeddedResource Include="Data\tables.xml">

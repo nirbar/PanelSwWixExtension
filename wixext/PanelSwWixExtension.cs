@@ -13,9 +13,6 @@ namespace PanelSw.Wix.Extensions
         private Library library;
         private PanelSwWixCompiler compilerExtension;
         private TableDefinitionCollection tableDefinitions;
-        private PanelSwBinder binder_;
-
-        public override BinderExtension BinderExtension => binder_ ?? (binder_ = new PanelSwBinder());
 
         /// <summary>
         /// Gets the optional compiler extension.

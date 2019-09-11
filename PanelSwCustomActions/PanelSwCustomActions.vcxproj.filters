@@ -109,6 +109,9 @@
     <ClCompile Include="CreateSelfSignCertificate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="AlwaysOverwriteFile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="SetPropertyFromPipe.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

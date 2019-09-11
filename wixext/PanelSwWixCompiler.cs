@@ -721,7 +721,6 @@ namespace PanelSw.Wix.Extensions
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
             string file = GetFileId(parentElement);
-            string srcFile = null;
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -736,16 +735,12 @@ namespace PanelSw.Wix.Extensions
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Id"));
             }
 
-            if ((sourceLineNumbers != null) && (sourceLineNumbers.Count > 0))
-            {
-                srcFile = sourceLineNumbers[0].QualifiedFileName;
-            }
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "AlwaysOverwriteFile");
 
             if (!Core.EncounteredError)
             {
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_AlwaysOverwriteFile");
                 row[0] = file;
-                row[1] = srcFile;
             }
         }
 

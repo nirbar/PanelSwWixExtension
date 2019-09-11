@@ -232,9 +232,8 @@
     <columnDefinition name="DeleteOnCommit" type="number" minValue="0" maxValue="1" length="2" />
   </tableDefinition>
 
-  <tableDefinition name="PSW_AlwaysOverwriteFile" unreal="yes">
+  <tableDefinition name="PSW_AlwaysOverwriteFile">
     <columnDefinition name="File" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="SourceLineNumber" type="string" length="0" nullable="yes" />
   </tableDefinition>
 
   <tableDefinition name="PSW_SetPropertyFromPipe">

@@ -33,6 +33,7 @@ EXPORTS
 	XmlSearch
 	TopShelf
 	CreateSelfSignCertificate
+	AlwaysOverwriteFile
 	SetPropertyFromPipe
 	EvaluateExpression
 	CertificateHashSearch

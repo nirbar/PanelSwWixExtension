@@ -89,6 +89,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AccountNames.cpp" />
+    <ClCompile Include="AlwaysOverwriteFile.cpp" />
     <ClCompile Include="AccountSidSearch.cpp" />
     <ClCompile Include="BackupAndRestore.cpp" />
     <ClCompile Include="CertificateHashSearch.cpp" />
