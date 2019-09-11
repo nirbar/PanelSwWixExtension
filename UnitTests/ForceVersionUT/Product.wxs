@@ -24,10 +24,15 @@
   </Fragment>
 
   <Fragment>
-    <ComponentGroup Id="ProductComponents">
-      <Component Directory="INSTALLFOLDER">
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component>
         <File Source="$(var.ProjectDir)Product.wxs">
-          <PanelSW:AlwaysOverwriteFile />
+          <PanelSW:ForceVersion Version="!(bind.fileVersion.PanelSwWixExtension.dll)" />
+        </File>
+      </Component>
+      <Component>
+        <File Source="$(sys.SOURCEFILEDIR)..\..\build\bin\$(var.Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll">
+          <PanelSW:AlwaysOverwriteFile/>
         </File>
       </Component>
     </ComponentGroup>

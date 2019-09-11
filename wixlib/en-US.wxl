@@ -16,7 +16,7 @@
   <String Id="TopShelfFailure"><![CDATA[Failed configuring service [2]]]></String>
   <String Id="CreateSelfSignCertificate"><![CDATA[Creating self-signed certificates]]></String>
   <String Id="FileRegex"><![CDATA[Find & replace in file]]></String>
-  <String Id="AlwaysOverwriteFile"><![CDATA[Ensuring files will overwrite existing]]></String>
+  <String Id="ForceVersion"><![CDATA[Rewriting file version]]></String>
   <String Id="SetPropertyFromPipe"><![CDATA[Reading properties from pipe]]></String>
   <String Id="EvaluateExpression"><![CDATA[Evaluating expressions]]></String>
   <String Id="CertificateHashSearch"><![CDATA[Find certificate hash]]></String>

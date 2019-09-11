@@ -232,8 +232,9 @@
     <columnDefinition name="DeleteOnCommit" type="number" minValue="0" maxValue="1" length="2" />
   </tableDefinition>
 
-  <tableDefinition name="PSW_AlwaysOverwriteFile">
+  <tableDefinition name="PSW_ForceVersion">
     <columnDefinition name="File" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="Version" type="string" length="72" modularize="none" category="version" />
   </tableDefinition>
 
   <tableDefinition name="PSW_SetPropertyFromPipe">

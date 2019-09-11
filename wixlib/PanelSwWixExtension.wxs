@@ -550,14 +550,14 @@
     </UI>
   </Fragment>
 
-  <!-- AlwaysOverwriteFile -->
+  <!-- ForceVersion -->
   <Fragment>
-    <CustomAction Id="AlwaysOverwriteFile" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="AlwaysOverwriteFile" Execute="immediate"/>
+    <CustomAction Id="ForceVersion" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="ForceVersion" Execute="immediate"/>
     <InstallExecuteSequence>
-      <Custom Action="AlwaysOverwriteFile" Before="CostInitialize" Overridable="yes"/>
+      <Custom Action="ForceVersion" Before="CostInitialize" Overridable="yes"/>
     </InstallExecuteSequence>
     <UI>
-      <ProgressText Action="AlwaysOverwriteFile">!(loc.AlwaysOverwriteFile)</ProgressText>
+      <ProgressText Action="ForceVersion">!(loc.ForceVersion)</ProgressText>
     </UI>
   </Fragment>
 

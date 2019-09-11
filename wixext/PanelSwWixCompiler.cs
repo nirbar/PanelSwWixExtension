@@ -205,7 +205,8 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         case "AlwaysOverwriteFile":
-                            ParseAlwaysOverwriteFileElement(element, parentElement);
+                        case "ForceVersion":
+                            ParseForceVersionElement(element, parentElement);
                             break;
 
                         case "FileRegex":
@@ -717,16 +718,31 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseAlwaysOverwriteFileElement(XmlNode node, XmlElement parentElement)
+        private void ParseForceVersionElement(XmlNode node, XmlElement parentElement)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
             string file = GetFileId(parentElement);
+            string version = "65535.65535.65535.65535";
+
+            if (node.LocalName.Equals("AlwaysOverwriteFile"))
+            {
+                Core.OnMessage(WixWarnings.DeprecatedElement(sourceLineNumbers, node.LocalName, "ForceVersion"));
+            }
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
                 if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
                 {
-                    Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                    switch (attrib.LocalName)
+                    {
+                        case "Version":
+                            version = Core.GetAttributeVersionValue(sourceLineNumbers, attrib, true);
+                            break;
+
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
                 }
             }
 
@@ -735,12 +751,13 @@ namespace PanelSw.Wix.Extensions
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Id"));
             }
 
-            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "AlwaysOverwriteFile");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "ForceVersion");
 
             if (!Core.EncounteredError)
             {
-                Row row = Core.CreateRow(sourceLineNumbers, "PSW_AlwaysOverwriteFile");
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_ForceVersion");
                 row[0] = file;
+                row[1] = version;
             }
         }
 

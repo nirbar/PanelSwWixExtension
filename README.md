@@ -58,6 +58,7 @@ Contact the owner to obtain a license for [JetWixExtension](https://github.com/n
 ## PanelSwWixExtension WiX Elements
 
 - Immediate Actions:
+  - *ForceVersion*: Force a specified version for a file. Version overwrite is done on runtime in the MSI database.
   - *AccountSidSearch*: Lookup an account's SID by account name.
   - *JsonJpathSearch*: Read JSON values
   - *DiskSpace*: Calculate available disk space for a target directory

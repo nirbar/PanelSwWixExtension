@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "../CaCommon/WixString.h"
 
-extern "C" UINT __stdcall AlwaysOverwriteFile(MSIHANDLE hInstall)
+extern "C" UINT __stdcall ForceVersion(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -13,12 +13,12 @@ extern "C" UINT __stdcall AlwaysOverwriteFile(MSIHANDLE hInstall)
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_XmlSearch exists.
-	hr = WcaTableExists(L"PSW_AlwaysOverwriteFile");
-	BreakExitOnNull((hr == S_OK), hr, E_FAIL, "Table 'PSW_AlwaysOverwriteFile' does not exist. Have you authored 'PanelSw:AlwaysOverwriteFile' entries in WiX code?");
+	hr = WcaTableExists(L"PSW_ForceVersion");
+	BreakExitOnNull((hr == S_OK), hr, E_FAIL, "Table 'PSW_ForceVersion' does not exist. Have you authored 'PanelSw:ForceVersion' entries in WiX code?");
 
 	// Execute view
-	hr = WcaOpenExecuteView(L"SELECT `File` FROM `PSW_AlwaysOverwriteFile`", &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query on 'PSW_AlwaysOverwriteFile'.");
+	hr = WcaOpenExecuteView(L"SELECT `File`, `Version` FROM `PSW_ForceVersion`", &hView);
+	BreakExitOnFailure(hr, "Failed to execute SQL query on 'PSW_ForceVersion'.");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
@@ -26,7 +26,7 @@ extern "C" UINT __stdcall AlwaysOverwriteFile(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		CWixString file;
+		CWixString file, version;
 		CWixString query;
 		PMSIHANDLE fileView;
 		PMSIHANDLE fileRecord;
@@ -36,8 +36,10 @@ extern "C" UINT __stdcall AlwaysOverwriteFile(MSIHANDLE hInstall)
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)file);
 		BreakExitOnFailure(hr, "Failed to get File.");
+		hr = WcaGetRecordString(hRecord, 2, (LPWSTR*)version);
+		BreakExitOnFailure(hr, "Failed to get Version.");
 
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Forcing highest possible version on file '%ls'", (LPCWSTR)file);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Forcing version '%ls' on file '%ls'", (LPCWSTR)version, (LPCWSTR)file);
 
 		// Get file row
 		hr = query.Format(selectQueryFormat, (LPCWSTR)file);
@@ -50,7 +52,7 @@ extern "C" UINT __stdcall AlwaysOverwriteFile(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed getting 'File' record.");
 
 		// Override version
-		hr = WcaSetRecordString(fileRecord, 5, L"65535.65535.65535.65535");
+		hr = WcaSetRecordString(fileRecord, 5, (LPCWSTR)version);
 		BreakExitOnFailure(hr, "Failed setting 'File' record 'Version' filed.");
 
 		// Delete current row

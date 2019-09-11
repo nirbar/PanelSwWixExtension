@@ -7,13 +7,13 @@
     <ProductVersion>3.8</ProductVersion>
     <ProjectGuid>{f773f85b-cd8b-4fdd-abfc-b74c018ab900}</ProjectGuid>
     <SchemaVersion>2.0</SchemaVersion>
-    <OutputName>AlwaysOverwriteFileUT</OutputName>
+    <OutputName>ForceVersionUT</OutputName>
     <OutputType>Package</OutputType>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' AND '$(MSBuildExtensionsPath32)' != '' ">$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <WixTargetsPath Condition=" '$(WixTargetsPath)' == '' ">$(MSBuildExtensionsPath)\Microsoft\WiX\v3.x\Wix.targets</WixTargetsPath>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
-    <Name>AlwaysOverwriteFileUT</Name>
+    <Name>ForceVersionUT</Name>
     <DefineSolutionProperties>false</DefineSolutionProperties>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
