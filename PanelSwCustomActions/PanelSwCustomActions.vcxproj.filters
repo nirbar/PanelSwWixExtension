@@ -109,9 +109,6 @@
     <ClCompile Include="CreateSelfSignCertificate.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="AlwaysOverwriteFile.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SetPropertyFromPipe.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -128,6 +125,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="AccountSidSearch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ForceVersion.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

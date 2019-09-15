@@ -9,6 +9,8 @@ class CServiceConfig :
 {
 public:
 
+	CServiceConfig() : CDeferredActionBase("ServiceConfig") { }
+
 	HRESULT AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, LPCWSTR szLoadOrderGroup, LPCWSTR szDependencies, ::com::panelsw::ca::ErrorHandling errorHandling, ::com::panelsw::ca::ServciceConfigDetails_DelayStart delayStart);
 
 protected:

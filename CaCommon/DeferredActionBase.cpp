@@ -2,11 +2,14 @@
 #include "WixString.h"
 #include <memutil.h>
 using namespace ::com::panelsw::ca;
-HRESULT CDeferredActionBase::DeferredEntryPoint(ReceiverToExecutorFunc mapFunc)
+
+static void FirstLog(MSIHANDLE hInstall, LPCSTR szMessage);
+
+HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToExecutorFunc mapFunc)
 {
 	HRESULT hr = S_OK;
 	HRESULT hrErr = S_OK;
-	CWixString szCustomActionData;
+	LPWSTR szCustomActionData = nullptr;
 	BYTE *pData = nullptr;
 	DWORD dwDataSize = 0;
 	BOOL bRes = TRUE;
@@ -15,19 +18,56 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(ReceiverToExecutorFunc mapFunc)
 	BOOL bIsRollback = FALSE;
 
 	// Get CustomActionData
-	hr = WcaGetProperty(L"CustomActionData", (LPWSTR*)szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting CustomActionData");
-	if (szCustomActionData.IsNullOrEmpty())
+	UINT er = ERROR_SUCCESS;
+	DWORD_PTR cch = 0;
+	WCHAR szEmpty[1] = L"";
+	er = ::MsiGetPropertyW(hInstall, L"CustomActionData", szEmpty, (DWORD *)&cch);
+	if ((er != ERROR_MORE_DATA) && (er != ERROR_SUCCESS))
 	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Nothing to do");
+		hr = E_FAIL;
+		FirstLog(hInstall, "Failed getting CustomActionData");
+		ExitFunction();
+	}
+
+	hr = StrAlloc(&szCustomActionData, ++cch);
+	if (FAILED(hr))
+	{
+		FirstLog(hInstall, "Failed getting CustomActionData");
+		ExitFunction();
+	}
+
+	er = ::MsiGetPropertyW(hInstall, L"CustomActionData", szCustomActionData, (DWORD *)&cch);
+	if (er != ERROR_SUCCESS)
+	{
+		hr = E_FAIL;
+		FirstLog(hInstall, "Failed getting CustomActionData");
+		ExitFunction();
+	}
+
+	if (!(szCustomActionData && *szCustomActionData))
+	{
+		FirstLog(hInstall, "Nothing to do");
 		ExitFunction();
 	}
 
 	hr = StrAllocBase85Decode(szCustomActionData, &pData, &dwDataSize);
-	BreakExitOnFailure(hr, "Failed decoding CustomActionData");
+	if (FAILED(hr))
+	{
+		FirstLog(hInstall, "Failed decoding CustomActionData");
+		ExitFunction();
+	}
 
 	bRes = cad.ParseFromArray(pData, dwDataSize);
-	BreakExitOnNull(bRes, hr, E_FAIL, "Failed parsing CustomActionData");
+	if (!bRes)
+	{
+		hr = E_FAIL;
+		FirstLog(hInstall, "Failed parsing CustomActionData");
+		ExitFunction();
+	}
+
+	hr = WcaInitialize(hInstall, cad.id().c_str());
+	BreakExitOnFailure(hr, "Failed to initialize");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// During rollback we don't exit on failure before completing cleanup.
 	bIsRollback = ::MsiGetMode(WcaGetInstallHandle(), MSIRUNMODE::MSIRUNMODE_ROLLBACK);
@@ -84,6 +124,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(ReceiverToExecutorFunc mapFunc)
 
 LExit:
 
+	ReleaseStr(szCustomActionData);
 	ReleaseMem(pData);
 	if (pExecutor)
 	{
@@ -93,10 +134,11 @@ LExit:
 	return SUCCEEDED(hr) ? hrErr : hr;
 }
 
-CDeferredActionBase::CDeferredActionBase()
+CDeferredActionBase::CDeferredActionBase(LPCSTR szId)
 	: _uCost( 0)
 	, _cad()
 {
+	_cad.set_id(szId);
 }
 
 CDeferredActionBase::~CDeferredActionBase()
@@ -149,6 +191,7 @@ HRESULT CDeferredActionBase::Prepend(CDeferredActionBase* pOther)
 {
 	HRESULT hr = S_OK;
 	CustomActionData mergedCad;
+	mergedCad.set_id(_cad.id());
 
 	for (const Command &cmd : pOther->_cad.commands())
 	{
@@ -171,4 +214,19 @@ HRESULT CDeferredActionBase::Prepend(CDeferredActionBase* pOther)
 
 LExit:
 	return hr;
+}
+
+static void FirstLog(MSIHANDLE hInstall, LPCSTR szMessage)
+{
+	HRESULT hr = S_OK;
+
+	if (!WcaIsInitialized())
+	{
+		hr = WcaInitialize(hInstall, "CommonDeferred");
+	}
+
+	if (SUCCEEDED(hr))
+	{
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, szMessage);
+	}
 }

@@ -9,6 +9,8 @@ class CUnzip :
 {
 public:
 
+	CUnzip() : CDeferredActionBase("Unzip") { }
+	
 	HRESULT AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, ::com::panelsw::ca::UnzipDetails_OverwriteMode overwriteMode);
 
 protected:

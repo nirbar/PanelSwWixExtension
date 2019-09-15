@@ -75,11 +75,7 @@ extern "C" UINT __stdcall CommonDeferred(MSIHANDLE hInstall)
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
 
-	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
-
-	hr = CDeferredActionBase::DeferredEntryPoint(ReceiverToExecutor);
+	hr = CDeferredActionBase::DeferredEntryPoint(hInstall, ReceiverToExecutor);
 	BreakExitOnFailure(hr, "Failed to excute CustomActionData command object");
 
 LExit :

@@ -6,6 +6,9 @@ class CTelemetry :
 {
 public:
 
+	CTelemetry() : CDeferredActionBase("Telemetry") { }
+
+
 	HRESULT AddPost(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure);
 
 protected:
@@ -15,4 +18,3 @@ protected:
 private:
 	HRESULT Post(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure);
 };
-

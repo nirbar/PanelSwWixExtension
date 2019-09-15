@@ -480,7 +480,8 @@ LExit:
 }
 
 CTaskScheduler::CTaskScheduler()
-	: bComInit_(false)
+	: CDeferredActionBase("TaskScheduler")
+	, bComInit_(false)
 {
 	HRESULT hr = S_OK;
 

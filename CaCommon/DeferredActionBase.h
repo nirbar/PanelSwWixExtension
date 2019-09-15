@@ -11,12 +11,12 @@
 class CDeferredActionBase
 {
 public:
-	CDeferredActionBase();
+	CDeferredActionBase(LPCSTR szId);
 	virtual ~CDeferredActionBase();
 
 	// Function that maps a receiver name to a CDeferredActionBase inheritor.
 	typedef HRESULT(*ReceiverToExecutorFunc)(LPCSTR szReceiver, CDeferredActionBase** ppExecutor);
-	static HRESULT DeferredEntryPoint(ReceiverToExecutorFunc mapFunc);
+	static HRESULT DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToExecutorFunc mapFunc);
 
 	UINT GetCost() const { return _uCost; }
 

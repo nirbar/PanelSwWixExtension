@@ -6,4 +6,5 @@ import "command.proto";
 
 message CustomActionData{
     repeated Command commands = 1;
+	string id = 2;
 }

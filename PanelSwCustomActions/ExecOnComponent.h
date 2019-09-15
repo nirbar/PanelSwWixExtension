@@ -11,6 +11,8 @@ public:
 	typedef std::map<std::string, std::string> EnvironmentMap;
 	typedef EnvironmentMap::const_iterator EnvironmentMapItr;
 
+	CExecOnComponent() : CDeferredActionBase("ExecOn") { }
+
 	HRESULT AddExec(LPCWSTR szCommand, LPCWSTR szObfuscatedCommand, LPCWSTR szWorkingDirectory, ExitCodeMap *pExitCodeMap, EnvironmentMap *pEnv, int nFlags, com::panelsw::ca::ErrorHandling errorHandling);
 
 protected:

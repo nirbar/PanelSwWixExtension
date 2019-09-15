@@ -6,6 +6,8 @@ class CShellExecute :
 {
 public:
 
+	CShellExecute() : CDeferredActionBase("ShellExec") { }
+
 	HRESULT AddShellExec(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR szVerb, LPCWSTR szWorkingDir, int nShow, bool bWait);
 
 protected:

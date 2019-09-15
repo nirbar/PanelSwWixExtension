@@ -7,6 +7,8 @@ class CFileRegex :
 {
 public:
 
+	CFileRegex() : CDeferredActionBase("FileRegex") { }
+
 	HRESULT AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, ::com::panelsw::ca::FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase);
 
 protected:

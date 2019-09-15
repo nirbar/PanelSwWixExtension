@@ -12,6 +12,8 @@ public:
 		, IgnoreErrors = 2 * IgnoreMissingPath
 	};
 
+	CFileOperations() : CDeferredActionBase("FileOperations") { }
+
 	HRESULT AddCopyFile(LPCWSTR szFrom, LPCWSTR szTo, int flags = 0);
 	HRESULT AddMoveFile(LPCWSTR szFrom, LPCWSTR szTo, int flags = 0);
 	HRESULT AddDeleteFile(LPCWSTR szFile, int flags = 0);
