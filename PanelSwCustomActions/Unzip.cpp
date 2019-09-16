@@ -85,7 +85,7 @@ extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall)
 
 	hr = cad.GetCustomActionData(&szCustomActionData);
 	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
-	hr = WcaSetProperty(L"UnzipExec", szCustomActionData);
+	hr = WcaDoDeferredAction(L"UnzipExec", szCustomActionData, 0);
 	BreakExitOnFailure(hr, "Failed setting property");
 
 LExit:

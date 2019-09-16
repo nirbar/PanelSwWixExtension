@@ -369,7 +369,6 @@
 
     <InstallExecuteSequence>
       <Custom Action="ZipFileSched" After="DuplicateFiles" Overridable="yes"/>
-      <Custom Action="ZipFileExec" After="ZipFileSched" Overridable="yes"/>
     </InstallExecuteSequence>
   </Fragment>
 
@@ -380,7 +379,6 @@
 
     <InstallExecuteSequence>
       <Custom Action="UnzipSched" After="DuplicateFiles" Overridable="yes"/>
-      <Custom Action="UnzipExec" After="UnzipSched" Overridable="yes"/>
     </InstallExecuteSequence>
     <UI>
       <ProgressText Action="UnzipSched">!(loc.Unzip)</ProgressText>
@@ -613,8 +611,7 @@
     <CustomAction Id="JsonJpathSched" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="JsonJpathSched" Execute="immediate"/>
     <CustomAction Id="JsonJpathExec" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="JsonJpathExec" Execute="deferred" Impersonate="no" HideTarget="yes"/>
     <InstallExecuteSequence>
-      <Custom Action="JsonJpathSched" Before="JsonJpathExec" Overridable="yes"/>
-      <Custom Action="JsonJpathExec" After="DuplicateFiles" Overridable="yes"><![CDATA[JsonJpathExec]]></Custom>
+      <Custom Action="JsonJpathSched" After="DuplicateFiles" Overridable="yes"/>
     </InstallExecuteSequence>
     <UI>
       <ProgressText Action="JsonJpathSched">!(loc.JsonJpath)</ProgressText>

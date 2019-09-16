@@ -160,6 +160,7 @@ namespace PswManagedCA
                 {
                     srlz.Serialize(sw, catalogs);
                     session["JsonJpathExec"] = sw.ToString();
+                    session.DoAction("JsonJpathExec");
                 }
             }
 

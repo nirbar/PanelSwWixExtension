@@ -62,11 +62,15 @@ namespace PswManagedCA
                 zipper.SchedZip(id, session.Format(zipFile), session.Format(compressFolder), session.Format(filePattern), string.IsNullOrEmpty(recursive) || recursive.Equals("1"));
             }
 
-            XmlSerializer srlz = new XmlSerializer(zipper.catalogs_.GetType());
-            using (StringWriter sw = new StringWriter())
+            if (zipper.catalogs_.Count > 0)
             {
-                srlz.Serialize(sw, zipper.catalogs_);
-                session["ZipFileExec"] = sw.ToString();
+                XmlSerializer srlz = new XmlSerializer(zipper.catalogs_.GetType());
+                using (StringWriter sw = new StringWriter())
+                {
+                    srlz.Serialize(sw, zipper.catalogs_);
+                    session["ZipFileExec"] = sw.ToString();
+                    session.DoAction("ZipFileExec");
+                }
             }
 
             return ActionResult.Success;

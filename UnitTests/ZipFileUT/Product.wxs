@@ -39,7 +39,7 @@
     </ComponentGroup>
     
     <InstallExecuteSequence>
-      <Custom Action="UnzipExec" After="ZipFileExec"/>
+      <Custom Action="UnzipSched" After="ZipFileSched"/>
     </InstallExecuteSequence>
   </Product>
 </Wix>
