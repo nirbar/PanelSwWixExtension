@@ -40,6 +40,11 @@ namespace PswManagedCA.Util
         public static void LogObfuscated(this Session session, string msg)
         {
             msg = session.Obfuscate(msg);
+            session.LogUnformatted(msg);
+        }
+
+        public static void LogUnformatted(this Session session, string msg)
+        {
             using (Record rec = new Record(1))
             {
                 rec.FormatString = "[1]";

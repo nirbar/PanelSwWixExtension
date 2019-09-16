@@ -11,9 +11,9 @@
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <Component Id="Test" Directory="INSTALLFOLDER">
         <File Source="$(var.ProjectDir)JsonObject.json">
-          <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'Acme Co')[\]]" Value='{ "Customer": "Id" }'/>
-          <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'Acme Co')[\]]" Value='{ "Customer": "Id" }'/>
+          <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == '[HiddenTest]')[\]]" Value='{ "Customer": "Id" }'/>
         </File>
+        <PanelSW:JsonJPath FilePath='[#JsonObject.json]' JPath="$.Manufacturers[\[]?(@.Name == '[HiddenTest]')[\]]" Value='{ "Customer": "Id" }'/>
       </Component>
     </Feature>
 
@@ -22,7 +22,7 @@
       <PanelSW:JsonJpathSearch JPath="$.Manufacturers[\[]?(@.Name == '[HiddenTest]')[\]].Products[\[]0[\]].Name" FilePath="$(var.ProjectDir)JsonObject.json"/>
     </Property>
     <Property Id="Anvil" Value='"Anvil"'/>
-    <Condition Message="Expected JSON_TEST=Anvil"><![CDATA[Installed Or (JSON_TEST=Anvil)]]></Condition>
+    <Condition Message="Expected JSON_TEST=Anvil"><![CDATA[Installed Or (JSON_TEST=Anvil) OR SKIP_ANVIL]]></Condition>
 
     <Property Id='JSON_NULL_TEST'>
       <PanelSW:JsonJpathSearch JPath="$.Manufacturers[\[]?(@.Name == 'UnAcme Co')[\]].Products[\[]0[\]].Name" FilePath="$(var.ProjectDir)JsonObject.json"/>

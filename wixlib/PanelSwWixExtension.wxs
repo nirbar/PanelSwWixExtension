@@ -306,9 +306,9 @@
       <Custom Action="ExecOnComponent_Imp_BeforeStop_rollback" Before="ExecOnComponent_Imp_BeforeStop_deferred" Overridable="yes"/>
       <Custom Action="ExecOnComponent_Imp_BeforeStop_deferred" Before="StopServices" Overridable="yes"/>
 
-      <Custom Action="ExecOnComponent_AfterStop_rollback" After="ExecOnComponent_AfterStop_deferred" Overridable="yes"/>
+      <Custom Action="ExecOnComponent_AfterStop_rollback" Before="ExecOnComponent_AfterStop_deferred" Overridable="yes"/>
       <Custom Action="ExecOnComponent_AfterStop_deferred" After="StopServices" Overridable="yes"/>
-      <Custom Action="ExecOnComponent_Imp_AfterStop_rollback" After="ExecOnComponent_Imp_AfterStop_deferred" Overridable="yes"/>
+      <Custom Action="ExecOnComponent_Imp_AfterStop_rollback" Before="ExecOnComponent_Imp_AfterStop_deferred" Overridable="yes"/>
       <Custom Action="ExecOnComponent_Imp_AfterStop_deferred" After="StopServices" Overridable="yes"/>
 
       <Custom Action="ExecOnComponent_BeforeStart_rollback" Before="ExecOnComponent_BeforeStart_deferred" Overridable="yes"/>
@@ -316,9 +316,9 @@
       <Custom Action="ExecOnComponent_Imp_BeforeStart_rollback" Before="ExecOnComponent_Imp_BeforeStart_deferred" Overridable="yes"/>
       <Custom Action="ExecOnComponent_Imp_BeforeStart_deferred" Before="StartServices" Overridable="yes"/>
 
-      <Custom Action="ExecOnComponent_AfterStart_rollback" After="ExecOnComponent_AfterStart_deferred" Overridable="yes"/>
+      <Custom Action="ExecOnComponent_AfterStart_rollback" Before="ExecOnComponent_AfterStart_deferred" Overridable="yes"/>
       <Custom Action="ExecOnComponent_AfterStart_deferred" After="StartServices" Overridable="yes"/>
-      <Custom Action="ExecOnComponent_Imp_AfterStart_rollback" After="ExecOnComponent_Imp_AfterStart_deferred" Overridable="yes"/>
+      <Custom Action="ExecOnComponent_Imp_AfterStart_rollback" Before="ExecOnComponent_Imp_AfterStart_deferred" Overridable="yes"/>
       <Custom Action="ExecOnComponent_Imp_AfterStart_deferred" After="StartServices" Overridable="yes"/>
     </InstallExecuteSequence>
 
@@ -611,7 +611,7 @@
   <!-- JsonJpath -->
   <Fragment>
     <CustomAction Id="JsonJpathSched" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="JsonJpathSched" Execute="immediate"/>
-    <CustomAction Id="JsonJpathExec" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="JsonJpathExec" Execute="deferred" Impersonate="no"/>
+    <CustomAction Id="JsonJpathExec" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="JsonJpathExec" Execute="deferred" Impersonate="no" HideTarget="yes"/>
     <InstallExecuteSequence>
       <Custom Action="JsonJpathSched" Before="JsonJpathExec" Overridable="yes"/>
       <Custom Action="JsonJpathExec" After="DuplicateFiles" Overridable="yes"><![CDATA[JsonJpathExec]]></Custom>

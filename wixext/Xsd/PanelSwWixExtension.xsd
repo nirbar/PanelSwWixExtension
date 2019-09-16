@@ -69,6 +69,7 @@
     <xs:annotation>
       <xs:appinfo>
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="File" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Set values in JSON-formatted file]]>
@@ -76,6 +77,11 @@
     </xs:annotation>
 
     <xs:complexType>
+      <xs:attribute name="FilePath" use="optional" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[JSON file path. Formatted]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
       <xs:attribute name="JPath" use="required" type="xs:string">
         <xs:annotation>
           <xs:documentation><![CDATA[JPath expression. Formatted]]></xs:documentation>
@@ -1118,6 +1124,11 @@ Execute a Regular Expression to replace or find matches in property values.
           <xs:attribute name="Order" type="xs:integer" default="255">
             <xs:annotation>
               <xs:documentation><![CDATA[Order of regex execution, defaults to line number. Expressions with explicit order field will be executed before expressions with implicit order.]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Condition" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Condition on executing the query.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>

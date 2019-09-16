@@ -158,6 +158,10 @@ namespace PanelSw.Wix.Extensions
                 case "Component":
                     switch (element.LocalName)
                     {
+                        case "JsonJPath":
+                            ParseJsonJPathElement(element, parentElement);
+                            break;
+
                         case "TaskScheduler":
                             ParseTaskSchedulerElement(parentElement, element);
                             break;
@@ -318,7 +322,28 @@ namespace PanelSw.Wix.Extensions
             string id = "jpt" + Guid.NewGuid().ToString("N");
             string jpath = null;
             string value = null;
-            string file = GetFileId(parentElement);
+            string file_ = null;
+            string filePath = null;
+            string component_ = null;
+
+            switch (parentElement.LocalName)
+            {
+                case "Component":
+                    component_ = parentElement.GetAttribute("Id");
+                    if (string.IsNullOrEmpty(component_))
+                    {
+                        Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, node.LocalName, "Id", parentElement.LocalName));
+                    }
+                    break;
+
+                case "File":
+                    file_ = GetFileId(parentElement);
+                    if (string.IsNullOrEmpty(file_))
+                    {
+                        Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, node.LocalName, "Id", parentElement.LocalName));
+                    }
+                    break;
+            }
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -328,6 +353,10 @@ namespace PanelSw.Wix.Extensions
                     {
                         case "JPath":
                             jpath = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        case "FilePath":
+                            filePath = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
 
                         case "Value":
@@ -341,9 +370,17 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            if (string.IsNullOrEmpty(file))
+            if (string.IsNullOrEmpty(file_) && string.IsNullOrEmpty(component_))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Id"));
+                Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, node.LocalName, parentElement.LocalName, "FilePath"));
+            }
+            if (string.IsNullOrEmpty(component_) != string.IsNullOrEmpty(filePath))
+            {
+                Core.OnMessage(WixErrors.UnexpectedAttribute(sourceLineNumbers, node.LocalName, "FilePath"));
+            }
+            if (string.IsNullOrEmpty(file_) == string.IsNullOrEmpty(filePath))
+            {
+                Core.OnMessage(WixErrors.UnexpectedAttribute(sourceLineNumbers, node.LocalName, "FilePath"));
             }
             if (string.IsNullOrEmpty(jpath))
             {
@@ -360,9 +397,11 @@ namespace PanelSw.Wix.Extensions
             {
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_JsonJPath");
                 row[0] = id;
-                row[1] = file;
-                row[2] = jpath;
-                row[3] = value;
+                row[1] = component_;
+                row[2] = filePath;
+                row[3] = file_;
+                row[4] = jpath;
+                row[5] = value;
             }
         }
 
@@ -1688,6 +1727,9 @@ namespace PanelSw.Wix.Extensions
                                 attributes |= CustomUninstallKeyAttributes.Write;
                             }
                             break;
+                        case "condition":
+                            condition = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
 
                         default:
                             Core.UnexpectedAttribute(sourceLineNumbers, attrib);
@@ -1739,8 +1781,9 @@ namespace PanelSw.Wix.Extensions
                         Core.UnsupportedExtensionElement(node, child);
                     }
                 }
-                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
+                else if (((XmlNodeType.CDATA == child.NodeType) || (XmlNodeType.Text == child.NodeType)) && string.IsNullOrEmpty(condition))
                 {
+                    Core.OnMessage(WixWarnings.DeprecatedElement(sourceLineNumbers, "text", $"Condition attribute in {node.LocalName}"));
                     condition = child.Value.Trim();
                 }
             }
@@ -1866,12 +1909,9 @@ namespace PanelSw.Wix.Extensions
                         Core.UnsupportedExtensionElement(node, child);
                     }
                 }
-                else if ((XmlNodeType.CDATA == child.NodeType) || (XmlNodeType.Text == child.NodeType))
+                else if (((XmlNodeType.CDATA == child.NodeType) || (XmlNodeType.Text == child.NodeType)) && string.IsNullOrEmpty(condition))
                 {
-                    if (!string.IsNullOrEmpty(condition))
-                    {
-                        Core.OnMessage(WixErrors.IllegalAttributeWithInnerText(sourceLineNumbers, node.LocalName, "Condition"));
-                    }
+                    Core.OnMessage(WixWarnings.DeprecatedElement(sourceLineNumbers, "text", $"Condition attribute in {node.LocalName}"));
                     condition = child.Value.Trim();
                 }
             }
@@ -2181,6 +2221,9 @@ namespace PanelSw.Wix.Extensions
                         case "SystemName":
                             systemName = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
+                        case "Condition":
+                            condition = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
 
                         default:
                             Core.UnexpectedAttribute(sourceLineNumbers, attrib);
@@ -2217,8 +2260,9 @@ namespace PanelSw.Wix.Extensions
                         Core.UnsupportedExtensionElement(node, child);
                     }
                 }
-                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
+                else if (((XmlNodeType.CDATA == child.NodeType) || (XmlNodeType.Text == child.NodeType)) && string.IsNullOrEmpty(condition))
                 {
+                    Core.OnMessage(WixWarnings.DeprecatedElement(sourceLineNumbers, "text", $"Condition attribute in {node.LocalName}"));
                     condition = child.Value.Trim();
                 }
             }
@@ -2291,6 +2335,9 @@ namespace PanelSw.Wix.Extensions
                                 Core.OnMessage(WixErrors.ValueNotSupported(sourceLineNumbers, node.LocalName, "Match", Core.GetAttributeValue(sourceLineNumbers, attrib)));
                             }
                             break;
+                        case "condition":
+                            condition = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
 
                         default:
                             Core.UnexpectedAttribute(sourceLineNumbers, attrib);
@@ -2334,8 +2381,9 @@ namespace PanelSw.Wix.Extensions
                         Core.UnsupportedExtensionElement(node, child);
                     }
                 }
-                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
+                else if (((XmlNodeType.CDATA == child.NodeType) || (XmlNodeType.Text == child.NodeType)) && string.IsNullOrEmpty(condition))
                 {
+                    Core.OnMessage(WixWarnings.DeprecatedElement(sourceLineNumbers, "text", $"Condition attribute in {node.LocalName}"));
                     condition = child.Value.Trim();
                 }
             }
@@ -2773,8 +2821,9 @@ namespace PanelSw.Wix.Extensions
                         Core.UnsupportedExtensionElement(node, child);
                     }
                 }
-                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
+                else if (((XmlNodeType.CDATA == child.NodeType) || (XmlNodeType.Text == child.NodeType)) && string.IsNullOrEmpty(condition))
                 {
+                    Core.OnMessage(WixWarnings.DeprecatedElement(sourceLineNumbers, "text", $"Condition attribute in {node.LocalName}"));
                     condition = child.Value.Trim();
                 }
             }
@@ -2855,6 +2904,9 @@ namespace PanelSw.Wix.Extensions
                         case "Extended":
                             flags |= (int)RegexMatchFlags.Extended << 2;
                             break;
+                        case "Condition":
+                            condition = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
                         case "Order":
                             order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
                             break;
@@ -2901,8 +2953,10 @@ namespace PanelSw.Wix.Extensions
                         Core.UnsupportedExtensionElement(node, child);
                     }
                 }
-                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
+                // Condition can be specified on attribute 'Condition' in which case embedded text may be the property default value.
+                else if (((XmlNodeType.CDATA == child.NodeType) || (XmlNodeType.Text == child.NodeType)) && string.IsNullOrEmpty(condition))
                 {
+                    Core.OnMessage(WixWarnings.DeprecatedElement(sourceLineNumbers, "text", $"Condition attribute in {node.LocalName}"));
                     condition = child.Value.Trim();
                 }
             }
@@ -3027,13 +3081,9 @@ namespace PanelSw.Wix.Extensions
                         Core.UnsupportedExtensionElement(node, child);
                     }
                 }
-                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
+                else if (((XmlNodeType.CDATA == child.NodeType) || (XmlNodeType.Text == child.NodeType)) && string.IsNullOrEmpty(condition))
                 {
-                    if (!string.IsNullOrEmpty(condition))
-                    {
-                        // Can't specify condition both ways
-                        Core.UnexpectedElement(node, child);
-                    }
+                    Core.OnMessage(WixWarnings.DeprecatedElement(sourceLineNumbers, "text", $"Condition attribute in {node.LocalName}"));
                     condition = child.Value.Trim();
                 }
             }

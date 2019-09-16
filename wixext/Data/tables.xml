@@ -264,7 +264,9 @@
 
   <tableDefinition name="PSW_JsonJPath">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="File_" type="string" length="72" nullable="no" modularize="column" category="identifier" keyTable="File" keyColumn="1" />
+    <columnDefinition name="Component_" type="string" length="72" nullable="yes" modularize="column" category="identifier" keyTable="Component" keyColumn="1" />
+    <columnDefinition name="FilePath" type="string" length="0" nullable="yes" category="formatted" modularize="property" />
+    <columnDefinition name="File_" type="string" length="72" nullable="yes" modularize="column" category="identifier" keyTable="File" keyColumn="1" />
     <columnDefinition name="JPath" type="string" length="0" nullable="no" category="formatted" modularize="property" />
     <columnDefinition name="Value" type="string" length="0" nullable="no" category="formatted" modularize="property" />
   </tableDefinition>
