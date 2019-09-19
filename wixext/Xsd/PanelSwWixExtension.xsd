@@ -473,7 +473,7 @@
       <xs:appinfo>
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
       </xs:appinfo>
-      <xs:documentation><![CDATA[Configures a service start account.]]></xs:documentation>
+      <xs:documentation><![CDATA[Configures some service parameters. You can use ServiceConfig to test whether the service is disabled or marked for deletion. In this case, only specify ServiceName and set ErrorHandling to 'ignore'. If a service is disabled or marked for deletion then a reboot will be required.]]></xs:documentation>
     </xs:annotation>
     <xs:complexType>
       <xs:choice minOccurs="0" maxOccurs="unbounded">

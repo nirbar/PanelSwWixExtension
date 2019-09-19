@@ -391,6 +391,7 @@
     <CustomAction Id="PSW_ServiceConfig" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="ServiceConfig" Execute="immediate"/>
     <CustomAction Id="PSW_ServiceConfigRlbk" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no"/>
     <CustomAction Id="PSW_ServiceConfigExec" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no"/>
+    <CustomActionRef Id="WixCheckRebootRequired"/>
 
     <InstallExecuteSequence>
       <Custom Action="PSW_ServiceConfig" After="InstallServices" Overridable="yes"/>

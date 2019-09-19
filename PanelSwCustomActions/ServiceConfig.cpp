@@ -78,6 +78,9 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 		compAction = WcaGetComponentToDo(szComponent);
 		if (compAction != WCA_TODO::WCA_TODO_INSTALL)
 		{
+			// In case of no-action, we just check if the service is marked for deletion to notify reboot is reqired.
+			oDeferred.AddServiceConfig(szServiceName, nullptr, nullptr, nullptr, ServciceConfigDetails::ServiceStart::ServciceConfigDetails_ServiceStart_unchanged, nullptr, nullptr, ErrorHandling::ignore, ServciceConfigDetails_DelayStart::ServciceConfigDetails_DelayStart_unchanged1);
+
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping configuration of service '%ls' since component is not installed", (LPCWSTR)szServiceName);
 			continue;
 		}
@@ -375,6 +378,14 @@ HRESULT CServiceConfig::ExecuteOne(LPCWSTR szServiceName, LPCWSTR szCommandLine,
 
 	// Configure.
 	dwRes = ::ChangeServiceConfig(hService, SERVICE_NO_CHANGE, dwStart, SERVICE_NO_CHANGE, szCommandLine, szLoadOrderGroup, nullptr, szDependencies, szAccount, szPassword, nullptr);
+	if (!dwRes && (::GetLastError() == ERROR_SERVICE_MARKED_FOR_DELETE))
+	{
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Service '%ls' is marked for deletion- reboot is required", szServiceName);
+		hr = WcaDeferredActionRequiresReboot();
+		ExitOnFailure(hr, "Failed requiring reboot");
+		hr = S_FALSE;
+		ExitFunction();
+	}
 	ExitOnNullWithLastError(dwRes, hr, "Failed configuring service '%ls'", szServiceName);
 
 	if ((dwStart == SERVICE_AUTO_START) && (nDelayStart != ServciceConfigDetails_DelayStart::ServciceConfigDetails_DelayStart_unchanged1))

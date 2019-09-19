@@ -29,6 +29,9 @@
         <PanelSW:ServiceConfig ServiceName="TapiSrv" Account="NT AUTHORITY\NetworkService" CommandLine="[System64Folder]svchost.exe -k tapisrv" LoadOrderGroup="[~]" Start="demand" >
           <PanelSW:Dependency Service="[~]"/>
         </PanelSW:ServiceConfig>
+
+        <!-- No change- just check if marked for deletion -->        
+        <PanelSW:ServiceConfig ServiceName="MySQL" ErrorHandling="ignore"/>
       </Component>
     </Feature>
 
