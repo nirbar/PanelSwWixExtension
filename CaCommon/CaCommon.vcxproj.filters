@@ -75,10 +75,9 @@
   <ItemGroup>
     <None Include="protobuf\*.proto" />
     <None Include="packages.config" />
-    <None Include="protobuf\*.proto" />
   </ItemGroup>
   <ItemGroup>
-    <ResourceCompile Include="$(IntDir)Version.rc">
+    <ResourceCompile Include="$(IntDir)\Version.rc">
       <Filter>Resource Files</Filter>
     </ResourceCompile>
   </ItemGroup>

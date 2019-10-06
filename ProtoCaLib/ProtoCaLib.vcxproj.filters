@@ -32,6 +32,11 @@
     <None Include="packages.config" />
     <None Include="*.proto">
       <Filter>Protobuf</Filter>
-	</None>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="$(IntDir)\Version.rc">
+      <Filter>Resource Files</Filter>
+    </ResourceCompile>
   </ItemGroup>
 </Project>
