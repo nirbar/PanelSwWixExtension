@@ -5,7 +5,7 @@ import "ErrorHandling.proto";
 
 message SqlScriptDetails{
 
-	bytes script = 1;
+	repeated bytes scripts = 1;
 	bytes server = 2;
 	bytes instance = 3;
 	bytes database = 4;

@@ -284,6 +284,204 @@ LExit:
 	return hr;
 }
 
+// Copied from WiX function ScaSqlStrsReadScripts
+HRESULT CSqlScript::SplitScript(SqlScriptDetails *pDetails, LPCWSTR pwzScript)
+{
+	DWORD cchScript = ::wcslen(pwzScript);
+	LPCWSTR pwz = nullptr;
+	DWORD cch = 0;
+	HRESULT hr = S_OK;
+
+	while (cchScript && pwzScript && *pwzScript)
+	{
+		// strip off leading whitespace
+		while (cchScript && *pwzScript && iswspace(*pwzScript))
+		{
+			++pwzScript;
+			--cchScript;
+		}
+
+		Assert(0 <= cchScript);
+
+		// if there is a SQL comment remove it
+		while (cchScript && L'/' == *pwzScript && L'*' == *(pwzScript + 1))
+		{
+			// go until end of comment
+			while (cchScript && *pwzScript && *(pwzScript + 1) && !(L'*' == *pwzScript && L'/' == *(pwzScript + 1)))
+			{
+				++pwzScript;
+				--cchScript;
+			}
+
+			Assert(2 <= cchScript);
+
+			if (2 <= cchScript)
+			{
+				// to account for */ at end
+				pwzScript += 2;
+				cchScript -= 2;
+			}
+
+			Assert(0 <= cchScript);
+
+			// strip off any new leading whitespace
+			while (cchScript && *pwzScript && iswspace(*pwzScript))
+			{
+				++pwzScript;
+				--cchScript;
+			}
+		}
+
+		while (cchScript && L'-' == *pwzScript && L'-' == *(pwzScript + 1))
+		{
+			// go past the new line character
+			while (cchScript && *pwzScript && L'\n' != *pwzScript)
+			{
+				++pwzScript;
+				--cchScript;
+			}
+
+			Assert(0 <= cchScript);
+
+			if (cchScript && L'\n' == *pwzScript)
+			{
+				++pwzScript;
+				--cchScript;
+			}
+
+			Assert(0 <= cchScript);
+
+			// strip off any new leading whitespace
+			while (cchScript && *pwzScript && iswspace(*pwzScript))
+			{
+				++pwzScript;
+				--cchScript;
+			}
+		}
+
+		Assert(0 <= cchScript);
+
+		// try to isolate a "GO" keyword and count the characters in the SQL string
+		pwz = pwzScript;
+		cch = 0;
+		CWixString szSubQuery(pwzScript);
+		while (cchScript && *pwz)
+		{
+			//skip past comment lines that might have "go" in them
+			//note that these comments are "in the middle" of our function,
+			//or possibly at the end of a line
+			if (cchScript && L'-' == *pwz && L'-' == *(pwz + 1))
+			{
+				// skip past chars until the new line character
+				while (cchScript && *pwz && (L'\n' != *pwz))
+				{
+					++pwz;
+					++cch;
+					--cchScript;
+				}
+			}
+
+			//skip past comment lines of form /* to */ that might have "go" in them
+			//note that these comments are "in the middle" of our function,
+			//or possibly at the end of a line
+			if (cchScript && L'/' == *pwz && L'*' == *(pwz + 1))
+			{
+				// skip past chars until the new line character
+				while (cchScript && *pwz && *(pwz + 1) && !((L'*' == *pwz) && (L'/' == *(pwz + 1))))
+				{
+					++pwz;
+					++cch;
+					--cchScript;
+				}
+
+				if (2 <= cchScript)
+				{
+					// to account for */ at end
+					pwz += 2;
+					cch += 2;
+					cchScript -= 2;
+				}
+			}
+
+			// Skip past strings that may be part of the SQL statement that might have a "go" in them
+			if (cchScript && L'\'' == *pwz)
+			{
+				++pwz;
+				++cch;
+				--cchScript;
+
+				// Skip past chars until the end of the string
+				while (cchScript && *pwz && !(L'\'' == *pwz))
+				{
+					++pwz;
+					++cch;
+					--cchScript;
+				}
+			}
+
+			// Skip past strings that may be part of the SQL statement that might have a "go" in them
+			if (cchScript && L'\"' == *pwz)
+			{
+				++pwz;
+				++cch;
+				--cchScript;
+
+				// Skip past chars until the end of the string
+				while (cchScript && *pwz && !(L'\"' == *pwz))
+				{
+					++pwz;
+					++cch;
+					--cchScript;
+				}
+			}
+
+			// if "GO" is isolated
+			if ((pwzScript == pwz || iswspace(*(pwz - 1))) &&
+				(L'G' == *pwz || L'g' == *pwz) &&
+				(L'O' == *(pwz + 1) || L'o' == *(pwz + 1)) &&
+				(0 == *(pwz + 2) || iswspace(*(pwz + 2))))
+			{
+				hr = szSubQuery.Copy(pwzScript, pwz - pwzScript);
+				ExitOnFailure(hr, "Failed copying string");
+
+				//TODO Nir- was: *pwz = 0; // null terminate the SQL string on the "G"
+				pwz += 2;
+				cchScript -= 2;
+				break;   // found "GO" now add SQL string to list
+			}
+
+			++pwz;
+			++cch;
+			--cchScript;
+		}
+
+		Assert(0 <= cchScript);
+
+		if (0 < cch) //don't process if there's nothing to process
+		{
+			// replace tabs with spaces
+			hr = szSubQuery.ReplaceAll(L"\t", L" ");
+			ExitOnFailure(hr, "Failed replacing tabs with spaces");
+
+			// strip off whitespace at the end of the script string
+			for (LPCWSTR pwzErase = pwzScript + cch - 1; pwzScript < pwzErase && iswspace(*pwzErase); pwzErase--)
+			{
+				//TODO Nir- was: *(pwzErase) = 0;
+				cch--;
+			}
+		}
+
+		if (0 < cch)
+		{
+			pDetails->add_scripts((LPCWSTR)szSubQuery, WSTR_BYTE_SIZE((LPCWSTR)szSubQuery));
+		}
+
+		pwzScript = pwz;
+	}
+
+LExit:
+	return hr;
+}
 
 HRESULT CSqlScript::AddExec(LPCWSTR szServer, LPCWSTR szInstance, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, com::panelsw::ca::ErrorHandling errorHandling)
 {
@@ -299,12 +497,14 @@ HRESULT CSqlScript::AddExec(LPCWSTR szServer, LPCWSTR szInstance, LPCWSTR szData
 	pDetails = new SqlScriptDetails();
 	ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
+	hr = SplitScript(pDetails, szScript);
+	ExitOnFailure(hr, "Failed splitting script");
+
 	pDetails->set_server(szServer, WSTR_BYTE_SIZE(szServer));
 	pDetails->set_instance(szInstance, WSTR_BYTE_SIZE(szInstance));
 	pDetails->set_database(szDatabase, WSTR_BYTE_SIZE(szDatabase));
 	pDetails->set_username(szUser, WSTR_BYTE_SIZE(szUser));
 	pDetails->set_password(szPassword, WSTR_BYTE_SIZE(szPassword));
-	pDetails->set_script(szScript, WSTR_BYTE_SIZE(szScript));
 	pDetails->set_errorhandling(errorHandling);
 
 	pAny = pCmd->mutable_details();
@@ -329,64 +529,68 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 	bRes = details.ParseFromString(command);
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking SqlScriptDetails");
 
-LRetry:
-	hr = ExecuteOne((LPCWSTR)details.server().c_str(), (LPCWSTR)details.instance().c_str(), (LPCWSTR)details.database().c_str(), (LPCWSTR)details.username().c_str(), (LPCWSTR)details.password().c_str(), (LPCWSTR)details.script().c_str(), &szError);
-	if (FAILED(hr))
+	for (int i = 0; i < details.scripts_size(); ++i)
 	{
-		switch (details.errorhandling())
+
+	LRetry:
+		hr = ExecuteOne((LPCWSTR)details.server().c_str(), (LPCWSTR)details.instance().c_str(), (LPCWSTR)details.database().c_str(), (LPCWSTR)details.username().c_str(), (LPCWSTR)details.password().c_str(), (LPCWSTR)details.scripts(i).c_str(), &szError);
+		if (FAILED(hr))
 		{
-		case ErrorHandling::fail:
-		default:
-			// Will fail downstairs.
-			break;
-
-		case ErrorHandling::ignore:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Ignoring SQL script failure 0x%08X", hr);
-			hr = S_FALSE;
-			break;
-
-		case ErrorHandling::prompt:
-		{
-			HRESULT hrOp = hr;
-			PMSIHANDLE hRec;
-			UINT promptResult = IDABORT;
-
-			hRec = ::MsiCreateRecord(3);
-			ExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
-
-			hr = WcaSetRecordInteger(hRec, 1, 27005);
-			ExitOnFailure(hr, "Failed setting record integer");
-
-			if (szError.Length() > 1)
+			switch (details.errorhandling())
 			{
-				hr = WcaSetRecordString(hRec, 2, (LPWSTR)szError);
-				ExitOnFailure(hr, "Failed setting record integer");
-			}
-
-			promptResult = WcaProcessMessage((INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_ERROR | MB_ABORTRETRYIGNORE | MB_DEFBUTTON1 | MB_ICONERROR), hRec);
-			switch (promptResult)
-			{
-			case IDABORT:
-			case IDCANCEL:
-			default: // Probably silent (result 0)
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User aborted on SQL failure (error code 0x%08X)", hrOp);
-				hr = hrOp;
+			case ErrorHandling::fail:
+			default:
+				// Will fail downstairs.
 				break;
 
-			case IDRETRY:
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose to retry on SQL failure (error code 0x%08X)", hrOp);
-				hr = S_OK;
-				goto LRetry;
-
-			case IDIGNORE:
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User ignored SQL failure (error code 0x%08X)", hrOp);
+			case ErrorHandling::ignore:
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Ignoring SQL script failure 0x%08X", hr);
 				hr = S_FALSE;
 				break;
+
+			case ErrorHandling::prompt:
+			{
+				HRESULT hrOp = hr;
+				PMSIHANDLE hRec;
+				UINT promptResult = IDABORT;
+
+				hRec = ::MsiCreateRecord(3);
+				ExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
+
+				hr = WcaSetRecordInteger(hRec, 1, 27005);
+				ExitOnFailure(hr, "Failed setting record integer");
+
+				if (szError.Length() > 1)
+				{
+					hr = WcaSetRecordString(hRec, 2, (LPWSTR)szError);
+					ExitOnFailure(hr, "Failed setting record integer");
+				}
+
+				promptResult = WcaProcessMessage((INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_ERROR | MB_ABORTRETRYIGNORE | MB_DEFBUTTON1 | MB_ICONERROR), hRec);
+				switch (promptResult)
+				{
+				case IDABORT:
+				case IDCANCEL:
+				default: // Probably silent (result 0)
+					WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User aborted on SQL failure (error code 0x%08X)", hrOp);
+					hr = hrOp;
+					break;
+
+				case IDRETRY:
+					WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose to retry on SQL failure (error code 0x%08X)", hrOp);
+					hr = S_OK;
+					goto LRetry;
+
+				case IDIGNORE:
+					WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User ignored SQL failure (error code 0x%08X)", hrOp);
+					hr = S_FALSE;
+					break;
+				}
+				break;
 			}
-			break;
+			}
+			ExitOnFailure(hr, "Failed to execute SQL query");
 		}
-		}
-		ExitOnFailure(hr, "Failed to execute SQL query");
 	}
 
 LExit:

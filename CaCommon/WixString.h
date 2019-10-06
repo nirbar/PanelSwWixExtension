@@ -106,7 +106,7 @@ public:
 		return hr;
 	}
 
-	HRESULT Copy(const WCHAR* pS)
+	HRESULT Copy(const WCHAR* pS, DWORD dwMax = INFINITE - 1)
 	{
 		DWORD dwSize = 0;
 		HRESULT hr = S_OK;
@@ -119,11 +119,17 @@ public:
 			ExitFunction();
 		}
 
-		dwSize = wcslen(pS) + 1;
-		hr = Allocate(dwSize);
+		dwSize = ::wcslen(pS);
+		if (dwMax <= dwSize)
+		{
+			dwSize = dwMax;
+		}
+
+		hr = Allocate(dwSize + 1);
 		BreakExitOnFailure(hr, "Failed to allocate memory");
 
-		err = ::wcscpy_s(_pS, _dwCapacity, pS);
+		// Copying 
+		err = ::wcsncpy_s(_pS, _dwCapacity, pS, dwSize);
 		BreakExitOnWin32Error(hr, err, "Failed to copy string");
 
 	LExit:
