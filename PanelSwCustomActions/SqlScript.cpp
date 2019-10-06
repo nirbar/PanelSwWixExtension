@@ -86,6 +86,10 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 		ExitOnNull(!szComponent.IsNullOrEmpty(), hr, E_INVALIDARG, "Component is empty");
 		ExitOnNull(!szDatabase.IsNullOrEmpty(), hr, E_INVALIDARG, "Database is empty");
 		ExitOnNull(!szServer.IsNullOrEmpty(), hr, E_INVALIDARG, "Server is empty");
+		if (szUsername.IsNullOrEmpty())
+		{
+			szPassword.SecureRelease();
+		}
 
 		hr = ReadBinary(szBinary, szId, &szQuery);
 		ExitOnFailure(hr, "Failed reading SQL script");
@@ -158,6 +162,8 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 			WcaLog(LOGMSG_STANDARD, "Component '%ls' action is unknown. Skipping execution of '%ls'.", (LPCWSTR)szComponent, (LPCWSTR)szBinary);
 			break;
 		}
+
+		szPassword.SecureRelease();
 	}
 	hr = S_OK;
 

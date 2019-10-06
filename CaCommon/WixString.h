@@ -75,6 +75,20 @@ public:
 		return hr;
 	}
 
+	HRESULT SecureRelease()
+	{
+		HRESULT hr = S_OK;
+
+		if (_pS != NULL)
+		{
+			SecureZeroMemory(_pS, _dwCapacity);
+			hr = Release();
+		}
+
+	LExit:
+		return hr;
+	}
+
 	HRESULT Release()
 	{
 		HRESULT hr = S_OK;
