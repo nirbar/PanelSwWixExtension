@@ -30,4 +30,9 @@
   <String Id="JsonJpath"><![CDATA[Editing Json files]]></String>
   <String Id="JsonJpathSearch"><![CDATA[Searching in Json files]]></String>
   <String Id="AccountSidSearch"><![CDATA[Detecting account security identifier]]></String>
+  <String Id="PSW_SqlScript"><![CDATA[Executing SQL scripts]]></String>
+  <String Id="PSW_SqlScriptFailure">
+    <![CDATA[Failed execuing SQL script
+  [2]]]>
+  </String>
 </WixLocalization>

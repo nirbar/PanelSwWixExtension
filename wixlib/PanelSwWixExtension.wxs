@@ -468,6 +468,22 @@
     </UI>
   </Fragment>
 
+  <!-- SqlScript -->
+  <Fragment>
+    <CustomAction Id="PSW_SqlScript" BinaryKey="PanelSwCustomActions.dll" DllEntry="SqlScript" Execute="immediate" />
+    <CustomAction Id="PSW_SqlScriptRollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Impersonate="yes"/>
+    <CustomAction Id="PSW_SqlScriptExec" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Impersonate="yes"/>
+    <InstallExecuteSequence>
+      <Custom Action="PSW_SqlScript" After="DuplicateFiles" Overridable="yes"/>
+    </InstallExecuteSequence>
+    <UI>
+      <Error Id="27005">!(loc.PSW_SqlScriptFailure)</Error>
+      <ProgressText Action="PSW_SqlScript">!(loc.PSW_SqlScript)</ProgressText>
+      <ProgressText Action="PSW_SqlScriptRollback">!(loc.PSW_SqlScript)</ProgressText>
+      <ProgressText Action="PSW_SqlScriptExec">!(loc.PSW_SqlScript)</ProgressText>
+    </UI>
+  </Fragment>
+
   <!-- BackupAndRestore -->
   <Fragment>
     <CustomAction Id="BackupAndRestore" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="BackupAndRestore" Execute="immediate" Return="check" />

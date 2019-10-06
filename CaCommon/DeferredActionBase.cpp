@@ -165,6 +165,11 @@ HRESULT CDeferredActionBase::AddCommand(LPCSTR szHandler, Command **ppCommand)
 	return hr;
 }
 
+bool CDeferredActionBase::HasActions() const
+{
+	return (_cad.commands_size() > 0);
+}
+
 HRESULT CDeferredActionBase::GetCustomActionData(LPWSTR *pszCustomActionData)
 {
 	HRESULT hr = S_OK;

@@ -40,3 +40,4 @@ EXPORTS
 	Unzip
 	DiskSpace
 	AccountSidSearch
+	SqlScript

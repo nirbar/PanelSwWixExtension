@@ -1,0 +1,15 @@
+syntax = "proto3";
+package com.panelsw.ca;
+option optimize_for = LITE_RUNTIME;
+import "ErrorHandling.proto";
+
+message SqlScriptDetails{
+
+	bytes script = 1;
+	bytes server = 2;
+	bytes instance = 3;
+	bytes database = 4;
+	bytes username = 5;
+	bytes password = 6;
+	ErrorHandling errorHandling = 7;
+}

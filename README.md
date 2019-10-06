@@ -87,6 +87,7 @@ Contact the owner to obtain a license for [JetWixExtension](https://github.com/n
   - *InstallUtil*: Install a .NET assembly service.
   - *TopShelf*: Install a [TopShelf](http://topshelf-project.com/) based service.
   - *BackupAndRestore*: Backup a file before install or upgarde and restore it after.
+  - *SqlScript*: Execute SQL scripts, optionally with text replacements.
 
 ## Custom Actions
 
@@ -107,6 +108,7 @@ PanelSwWixExtension uses error codes in Error table:
 - 27002: ServiceConfig error template for prompting user on errors.
 - 27003: Dism error template for prompting user on failures to add a Windows feature package.
 - 27004: Dism error template for prompting user on failures to enable a Windows feature.
+- 27005: SqlScript error template for prompting user on errors.
 
 ## Properties
 
@@ -174,5 +176,5 @@ After building a unit test project, you'll need to shutdown Visual Studio before
 This is due to the unfortunate habit of Visual Studio to hold the extension file in use.
 You may find it convenient to build unit test projects from a command prompt to workaround this limitation
 ~~~~~~~~~~~~
-MSBuild DismUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild /p:SolutionDir=E:\Projects\PanelSwWixExtension\
+MSBuild UnitTests\DismUT\DismUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild /p:SolutionDir=E:\Projects\PanelSwWixExtension\
 ~~~~~~~~~~~~

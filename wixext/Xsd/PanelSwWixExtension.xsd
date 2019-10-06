@@ -916,6 +916,36 @@
     </xs:complexType>
   </xs:element>
 
+  <xs:element name="Replace">
+    <xs:annotation>
+      <xs:documentation>String replacements</xs:documentation>
+      <xs:appinfo>
+        <xse:parent ref="SqlScript" />
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Text" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Text to be replaced. This field is formatted</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Replacement" type="xs:string">
+            <xs:annotation>
+              <xs:documentation>Replacement text. This field is formatted</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Order" type="xs:integer">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Order of text replacement, defaults to line number. Replacements with explicit order field will be executed before replacements with implicit order]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="TaskScheduler">
     <xs:annotation>
       <xs:appinfo>
@@ -1611,6 +1641,99 @@ Remove registry values.
       </xs:simpleContent>
     </xs:complexType>
   </xs:element>
+
+
+  <xs:element name="SqlScript">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
+      </xs:appinfo>
+      <xs:documentation><![CDATA[Execute a SQL script on component action.]]></xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Replace" />
+      </xs:choice>
+      <xs:attribute name="Id" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Primary key.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="BinaryKey" type="xs:string" use="required">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Binary SQL script file, unicode encoded.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Server" type="xs:string" use="required">
+        <xs:annotation>
+          <xs:documentation>SQL server name</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Instance" type="xs:string">
+        <xs:annotation>
+          <xs:documentation>SQL instance name</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Database" use="required">
+        <xs:annotation>
+          <xs:documentation>Database name.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Username" type="xs:string" use="optional">
+        <xs:annotation>
+          <xs:documentation>SQL user name. Can be empty to denote SSPI Integrated Security</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Password" use="optional">
+        <xs:annotation>
+          <xs:documentation>SQL user password. Ignored if user name is empty</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="ErrorHandling" use="optional" type="ErrorHandlingType" default="fail">
+        <xs:annotation>
+          <xs:documentation><![CDATA[On error fail, ignore, or prompt user to abort, retry or ignore. Defaults to 'fail']]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Order" type="xs:integer">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Order of script execution, defaults to line number. Scripts with explicit order field will be executed before scripts with implicit order]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+
+      <!-- On Component Action -->
+      <xs:attribute name="OnInstall" type="wix:YesNoType">
+        <xs:annotation>
+          <xs:documentation><![CDATA['yes' to execute on component installation. Default is 'no']]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="OnInstallRollback" type="wix:YesNoType">
+        <xs:annotation>
+          <xs:documentation><![CDATA['yes' to execute on component installation rollback. Default is 'no']]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="OnReinstall" type="wix:YesNoType">
+        <xs:annotation>
+          <xs:documentation><![CDATA['yes' to execute on component reinstallation. Default is 'no']]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="OnReinstallRollback" type="wix:YesNoType">
+        <xs:annotation>
+          <xs:documentation><![CDATA['yes' to execute on component reinstallation rollback. Default is 'no']]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="OnUninstall" type="wix:YesNoType">
+        <xs:annotation>
+          <xs:documentation><![CDATA['yes' to execute on component removal. Default is 'no']]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="OnUninstallRollback" type="wix:YesNoType">
+        <xs:annotation>
+          <xs:documentation><![CDATA['yes' to execute on component removal rollback. Default is 'no']]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
 
 
   <xs:simpleType name="RegistryValueType">

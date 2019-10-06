@@ -187,6 +187,10 @@ namespace PanelSw.Wix.Extensions
                             ParseCreateSelfSignCertificateElement(parentElement, element);
                             break;
 
+                        case "SqlScript":
+                            ParseSqlScriptElement(parentElement, element);
+                            break;
+
                         default:
                             Core.UnexpectedElement(parentElement, element);
                             break;
@@ -992,6 +996,229 @@ namespace PanelSw.Wix.Extensions
                 }
             }
             return order;
+        }
+
+        [Flags]
+        private enum SqlExecOn
+        {
+            None = 0,
+            Install = 1,
+            InstallRollback = Install * 2,
+            Uninstall = InstallRollback * 2,
+            UninstallRollback = Uninstall * 2,
+            Reinstall = UninstallRollback * 2,
+            ReinstallRollback = Reinstall * 2,
+        }
+
+        private void ParseSqlScriptElement(XmlElement parentElement, XmlElement element)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
+            string id = "sql" + Guid.NewGuid().ToString("N");
+            string component = null;
+            string binary = null;
+            string server = null;
+            string instance = null;
+            string database = null;
+            string username = null;
+            string password = null;
+            ErrorHandling? errorHandling = null;
+            int order = 1000000000 + GetLineNumber(sourceLineNumbers);
+            SqlExecOn sqlExecOn = SqlExecOn.None;
+            YesNoType aye;
+
+            component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
+
+            foreach (XmlAttribute attrib in element.Attributes)
+            {
+                if ((0 != attrib.NamespaceURI.Length) && (attrib.NamespaceURI != schema.TargetNamespace))
+                {
+                    continue;
+                }
+
+                switch (attrib.LocalName)
+                {
+                    case "Id":
+                        id = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "BinaryKey":
+                        binary = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "Server":
+                        server = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "Instance":
+                        instance = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "Database":
+                        database = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "Username":
+                        username = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "Password":
+                        password = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "Order":
+                        order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
+                        break;
+
+                    case "ErrorHandling":
+                        string a = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        try
+                        {
+                            errorHandling = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
+                        }
+                        catch
+                        {
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                        }
+                        break;
+
+                    case "OnInstall":
+                        aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                        if (aye == YesNoType.Yes)
+                        {
+                            sqlExecOn |= SqlExecOn.Install;
+                        }
+                        break;
+
+                    case "OnInstallRollback":
+                        aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                        if (aye == YesNoType.Yes)
+                        {
+                            sqlExecOn |= SqlExecOn.InstallRollback;
+                        }
+                        break;
+
+                    case "OnReinstall":
+                        aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                        if (aye == YesNoType.Yes)
+                        {
+                            sqlExecOn |= SqlExecOn.Reinstall;
+                        }
+                        break;
+
+                    case "OnReinstallRollback":
+                        aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                        if (aye == YesNoType.Yes)
+                        {
+                            sqlExecOn |= SqlExecOn.ReinstallRollback;
+                        }
+                        break;
+
+                    case "OnUninstall":
+                        aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                        if (aye == YesNoType.Yes)
+                        {
+                            sqlExecOn |= SqlExecOn.Uninstall;
+                        }
+                        break;
+
+                    case "OnUninstallRollback":
+                        aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                        if (aye == YesNoType.Yes)
+                        {
+                            sqlExecOn |= SqlExecOn.UninstallRollback;
+                        }
+                        break;
+
+                    default:
+                        Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                        break;
+                }
+            }
+
+            if (string.IsNullOrEmpty(component))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Id"));
+            }
+            if (string.IsNullOrEmpty(binary))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "BinaryKey"));
+            }
+            if (sqlExecOn == SqlExecOn.None)
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "OnXXX"));
+            }
+
+            // ExitCode mapping
+            foreach (XmlNode child in element.ChildNodes)
+            {
+                SourceLineNumberCollection repLines = Preprocessor.GetSourceLineNumbers(child);
+                if (child.NamespaceURI == schema.TargetNamespace)
+                {
+                    switch (child.LocalName)
+                    {
+                        case "Replace":
+                            {
+                                string from = null;
+                                string to = "";
+                                int repOrder = 1000000000 + GetLineNumber(repLines);
+                                foreach (XmlAttribute a in child.Attributes)
+                                {
+                                    if ((0 != a.NamespaceURI.Length) && (a.NamespaceURI != schema.TargetNamespace))
+                                    {
+                                        continue;
+                                    }
+
+                                    switch (a.LocalName)
+                                    {
+                                        case "Text":
+                                            from = Core.GetAttributeValue(repLines, a);
+                                            break;
+
+                                        case "Replacement":
+                                            to = Core.GetAttributeValue(repLines, a);
+                                            break;
+
+                                        case "Order":
+                                            repOrder = Core.GetAttributeIntegerValue(repLines, a, 0, 1000000000);
+                                            break;
+                                    }
+                                }
+
+                                Row row = Core.CreateRow(repLines, "PSW_SqlScript_Replacements");
+                                row[0] = id;
+                                row[1] = from;
+                                row[2] = to;
+                                row[3] = repOrder;
+                            }
+                            break;
+
+                        default:
+                            Core.UnexpectedElement(element, child);
+                            break;
+                    }
+                }
+            }
+
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "PSW_SqlScript");
+
+            if (!Core.EncounteredError)
+            {
+                // Ensure sub-tables exist for queries to succeed even if no sub-entries exist.
+                Core.EnsureTable(sourceLineNumbers, "PSW_SqlScript_Replacements");
+                Core.EnsureTable(sourceLineNumbers, "PSW_SqlScript");
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_SqlScript");
+                row[0] = id;
+                row[1] = component;
+                row[2] = binary;
+                row[3] = server;
+                row[4] = instance;
+                row[5] = database;
+                row[6] = username;
+                row[7] = password;
+                row[8] = (int)sqlExecOn;
+                row[9] = (int)(errorHandling ?? ErrorHandling.fail);
+                row[10] = order;
+            }
         }
 
         private void ParseExecOnComponentElement(XmlElement parentElement, XmlElement element)

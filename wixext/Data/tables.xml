@@ -285,4 +285,25 @@
     <columnDefinition name="AccountName" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
   </tableDefinition>
+
+  <tableDefinition name="PSW_SqlScript">
+    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="Component_" type="string" length="72" modularize="column" keyTable="Component" keyColumn="1" category="identifier"/>
+    <columnDefinition name="Binary_" type="string" length="72" modularize="column" keyTable="Binary" keyColumn="1" category="identifier" nullable="yes"/>
+    <columnDefinition name="Server" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Instance" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
+    <columnDefinition name="Database" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Username" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
+    <columnDefinition name="Password" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
+    <columnDefinition name="On" type="number" minValue="0" maxValue="127" length="2" />
+    <columnDefinition name="ErrorHandling" type="number" minValue="0" maxValue="2" length="2" />
+    <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
+  </tableDefinition>
+
+  <tableDefinition name="PSW_SqlScript_Replacements">
+    <columnDefinition primaryKey="yes" name="SqlScript_" type="string" length="72" modularize="column" category="identifier" keyTable="PSW_SqlScript" keyColumn="1" />
+    <columnDefinition primaryKey="yes" name="Text" type="string" length="0" />
+    <columnDefinition name="Replacement" type="string" length="0" nullable="yes" />
+    <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
+  </tableDefinition>
 </tableDefinitions>

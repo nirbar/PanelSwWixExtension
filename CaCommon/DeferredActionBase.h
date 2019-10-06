@@ -24,6 +24,8 @@ public:
 
 	HRESULT Prepend(CDeferredActionBase* pOther);
 
+	bool HasActions() const;
+
 protected:
 
 	// Overriden by inheriting classes. Execute the command object (XML element)
