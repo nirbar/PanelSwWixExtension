@@ -3372,6 +3372,9 @@ namespace PanelSw.Wix.Extensions
                                 flags |= DeletePathFlags.IgnoreErrors;
                             }
                             break;
+                        case "condition":
+                            condition = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
 
                         default:
                             Core.UnexpectedAttribute(sourceLineNumbers, attrib);
