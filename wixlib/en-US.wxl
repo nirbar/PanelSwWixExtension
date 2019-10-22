@@ -1,37 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <WixLocalization Culture="en-us" xmlns="http://schemas.microsoft.com/wix/2006/localization">
-  <String Id="CustomUninstallKey">Writing additional registry values</String>
-  <String Id="RemoveRegistryValue">Removing additional registry values</String>
-  <String Id="Telemetry">Posting telemetry data</String>
-  <String Id="ShellExecute">Executing command "[1]" [2] in "[3]" with verb [4]</String>
-  <String Id="TaskScheduler">Configuring Scheduled Tasks</String>
-  <String Id="ExecOnComponent"><![CDATA[Executing custom actions]]></String>
-  <String Id="ExecOnFailure"><![CDATA[Failed executing command [2]]]></String>
-  <String Id="ServiceConfig"><![CDATA[Configuring Services]]></String>
-  <String Id="ServiceConfigFailure"><![CDATA[Failed configuring service [2]]]></String>
-  <String Id="InstallUtil"><![CDATA[Installing .NET service assemblies]]></String>
-  <String Id="SqlSearch"><![CDATA[Executing SQL queries]]></String>
-  <String Id="BackupAndRestore"><![CDATA[Migrating configurations]]></String>
-  <String Id="TopShelf"><![CDATA[Installing TopShelf services]]></String>
-  <String Id="TopShelfFailure"><![CDATA[Failed configuring service [2]]]></String>
-  <String Id="CreateSelfSignCertificate"><![CDATA[Creating self-signed certificates]]></String>
-  <String Id="FileRegex"><![CDATA[Find & replace in file]]></String>
-  <String Id="ForceVersion"><![CDATA[Rewriting file version]]></String>
-  <String Id="SetPropertyFromPipe"><![CDATA[Reading properties from pipe]]></String>
-  <String Id="EvaluateExpression"><![CDATA[Evaluating expressions]]></String>
-  <String Id="CertificateHashSearch"><![CDATA[Find certificate hash]]></String>
-  <String Id="Unzip"><![CDATA[Extracting ZIP archive]]></String>
-  <String Id="DiskSpace"><![CDATA[Calculating available disk space]]></String>
-  <String Id="Dism"><![CDATA[Enable Windows roles and features]]></String>
-  <String Id="DismPackageFailure"><![CDATA[Failed adding a Windows Feature package [2]:
+  <String Overridable="yes" Id="CustomUninstallKey">Writing additional registry values</String>
+  <String Overridable="yes" Id="RemoveRegistryValue">Removing additional registry values</String>
+  <String Overridable="yes" Id="Telemetry">Posting telemetry data</String>
+  <String Overridable="yes" Id="ShellExecute">Executing command "[1]" [2] in "[3]" with verb [4]</String>
+  <String Overridable="yes" Id="TaskScheduler">Configuring Scheduled Tasks</String>
+  <String Overridable="yes" Id="ExecOnComponent"><![CDATA[Executing custom actions]]></String>
+  <String Overridable="yes" Id="ExecOnFailure"><![CDATA[Failed executing command [2]]]></String>
+  <String Overridable="yes" Id="ServiceConfig"><![CDATA[Configuring Services]]></String>
+  <String Overridable="yes" Id="ServiceConfigFailure"><![CDATA[Failed configuring service [2]]]></String>
+  <String Overridable="yes" Id="InstallUtil"><![CDATA[Installing .NET service assemblies]]></String>
+  <String Overridable="yes" Id="SqlSearch"><![CDATA[Executing SQL queries]]></String>
+  <String Overridable="yes" Id="BackupAndRestore"><![CDATA[Migrating configurations]]></String>
+  <String Overridable="yes" Id="TopShelf"><![CDATA[Installing TopShelf services]]></String>
+  <String Overridable="yes" Id="TopShelfFailure"><![CDATA[Failed configuring service [2]]]></String>
+  <String Overridable="yes" Id="CreateSelfSignCertificate"><![CDATA[Creating self-signed certificates]]></String>
+  <String Overridable="yes" Id="FileRegex"><![CDATA[Find & replace in file]]></String>
+  <String Overridable="yes" Id="ForceVersion"><![CDATA[Rewriting file version]]></String>
+  <String Overridable="yes" Id="SetPropertyFromPipe"><![CDATA[Reading properties from pipe]]></String>
+  <String Overridable="yes" Id="EvaluateExpression"><![CDATA[Evaluating expressions]]></String>
+  <String Overridable="yes" Id="CertificateHashSearch"><![CDATA[Find certificate hash]]></String>
+  <String Overridable="yes" Id="Unzip"><![CDATA[Extracting ZIP archive]]></String>
+  <String Overridable="yes" Id="DiskSpace"><![CDATA[Calculating available disk space]]></String>
+  <String Overridable="yes" Id="Dism"><![CDATA[Enable Windows roles and features]]></String>
+  <String Overridable="yes" Id="DismPackageFailure"><![CDATA[Failed adding a Windows Feature package [2]:
   [3]]]></String>
-  <String Id="DismFeatureFailure"><![CDATA[Failed enabling Windows Feature [2]:
+  <String Overridable="yes" Id="DismFeatureFailure"><![CDATA[Failed enabling Windows Feature [2]:
   [3]]]></String>
-  <String Id="JsonJpath"><![CDATA[Editing Json files]]></String>
-  <String Id="JsonJpathSearch"><![CDATA[Searching in Json files]]></String>
-  <String Id="AccountSidSearch"><![CDATA[Detecting account security identifier]]></String>
-  <String Id="PSW_SqlScript"><![CDATA[Executing SQL scripts]]></String>
-  <String Id="PSW_SqlScriptFailure">
+  <String Overridable="yes" Id="JsonJpath"><![CDATA[Editing Json files]]></String>
+  <String Overridable="yes" Id="JsonJpathSearch"><![CDATA[Searching in Json files]]></String>
+  <String Overridable="yes" Id="AccountSidSearch"><![CDATA[Detecting account security identifier]]></String>
+  <String Overridable="yes" Id="PSW_SqlScript"><![CDATA[Executing SQL scripts]]></String>
+  <String Overridable="yes" Id="PSW_SqlScriptFailure">
     <![CDATA[Failed execuing SQL script
   [2]]]>
   </String>
