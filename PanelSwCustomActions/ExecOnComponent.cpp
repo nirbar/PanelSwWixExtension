@@ -665,7 +665,7 @@ HRESULT CExecOnComponent::SetEnvironment(const ::google::protobuf::Map<std::stri
 
 		if (szName && *szName && szValue && *szValue)
 		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Setting custom environment variable '%ls'", szName);
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Setting custom environment variable '%ls' to '%ls'", szName, szValue);
 
 			bRes = ::SetEnvironmentVariable(szName, szValue);
 			BreakExitOnNullWithLastError(bRes, hr, "Failed setting environment variable '%ls'", (LPCWSTR)szName);
