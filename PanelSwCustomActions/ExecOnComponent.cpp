@@ -2,11 +2,13 @@
 #include "RegistryKey.h"
 #include "FileOperations.h"
 #include "../CaCommon/WixString.h"
+#include <regex>
 #include <wcautil.h>
 #include <memutil.h>
 #include <shlwapi.h>
 #include <procutil.h>
 #include "google\protobuf\any.h"
+using namespace std;
 using namespace com::panelsw::ca;
 using namespace google::protobuf;
 #pragma comment (lib, "shlwapi.lib")
@@ -503,6 +505,8 @@ HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command)
 	LPCWSTR szObfuscatedCommand = nullptr;
 	LPCWSTR szWorkingDirectory = nullptr;
 	CWixString commandLineCopy;
+	HANDLE hStdOut = NULL;
+	HANDLE hProc = NULL;
 
 	bRes = details.ParseFromString(command);
 	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ExecOnDetails");
@@ -527,33 +531,51 @@ HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command)
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing '%ls'", szObfuscatedCommand);
     if (details.async())
     {
-        HANDLE hProc = NULL;
-
         WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Not logging output on async command");
 
         hr = ProcExecute(const_cast<LPWSTR>(szCommand), &hProc, nullptr, nullptr);
         BreakExitOnFailure(hr, "Failed to launch command '%ls'", szCommand);
         hr = S_OK;
-
-        if (hProc && (hProc != INVALID_HANDLE_VALUE))
-        {
-            ::CloseHandle(hProc);
-        }
         ExitFunction();
     }
 
 	// Sync
 LRetry:
+	if (hStdOut && (hStdOut != INVALID_HANDLE_VALUE))
+	{
+		ReleaseHandle(hStdOut);
+		hStdOut = INVALID_HANDLE_VALUE;
+	}
+	if (hProc && (hProc != INVALID_HANDLE_VALUE))
+	{
+		ReleaseHandle(hProc);
+	}
+
 	hr = commandLineCopy.Copy(szCommand);
 	BreakExitOnFailure(hr, "Failed to copy string");
 
-	hr = QuietExecEx(commandLineCopy, INFINITE, FALSE, TRUE);
-	exitCode = HRESULT_CODE(hr);
+	// By default, exitCode is what the process returned. If couldn't execute the process, use failure code is result.
+	hr = ProcExecute(commandLineCopy, &hProc, nullptr, &hStdOut);
+	if (SUCCEEDED(hr))
+	{
+		hr = ProcWaitForCompletion(hProc, INFINITE, &exitCode);
+	}
+	if (FAILED(hr)) 
+	{
+		exitCode = HRESULT_CODE(hr);
+	}
 	
     if (details.exitcoderemap().find(exitCode) != details.exitcoderemap().end())
     {
         exitCode = details.exitcoderemap().at(exitCode);
     }
+
+	hr = SearchStdOut(hStdOut, &exitCode, details);
+	if (FAILED(hr) && (exitCode == ERROR_SUCCESS))
+	{
+		exitCode = HRESULT_CODE(hr);
+	}
+
     switch (exitCode)
     {
     case ERROR_SUCCESS_REBOOT_INITIATED:
@@ -628,7 +650,22 @@ LRetry:
 	BreakExitOnFailure(hr, "Failed to execute command '%ls'", szObfuscatedCommand);
 
 LExit:
+	if (hStdOut && (hStdOut != INVALID_HANDLE_VALUE))
+	{
+		ReleaseHandle(hStdOut);
+	}
+	if (hProc && (hProc != INVALID_HANDLE_VALUE))
+	{
+		ReleaseHandle(hProc);
+	}
+
 	return hr;
+}
+
+HRESULT CExecOnComponent::SearchStdOut(HANDLE hStdOut, DWORD *pdwExitCode, const com::panelsw::ca::ExecOnDetails &details)
+{
+	LPBYTE pbStdOut = nullptr;
+
 }
 
 HRESULT CExecOnComponent::SetEnvironment(const ::google::protobuf::Map<std::string, std::string> &customEnv)
