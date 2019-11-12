@@ -168,6 +168,7 @@ static HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR 
 	wregex rx(szExpression, syntax);
 	match_results<LPCWSTR> results;
 	CWixString sPropName;
+	match_results<LPCWSTR>::const_iterator curIt, endIt;
 
 	bRes = regex_search(szInput, results, rx);
 	BreakExitOnNull((bRes || ((flags.s.result & ResultFlags::MustMatch) == 0)), hr, E_FAIL, "Regex returned no matches");
@@ -184,8 +185,8 @@ static HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR 
 	BreakExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)sPropName);
 
 	// Iterate results
-	match_results<LPCWSTR>::const_iterator curIt = results.begin();
-	match_results<LPCWSTR>::const_iterator endIt = results.end();
+	curIt = results.begin();
+	endIt = results.end();
 	for (size_t i = 0; curIt != endIt; ++i, ++curIt)
 	{
 		hr = sPropName.Format(L"%s_%Iu", szProperty_, i);

@@ -22,6 +22,8 @@ protected:
 private:
 	HRESULT SetEnvironment(const ::google::protobuf::Map<std::string, std::string> &customEnv);
 
-	HRESULT SearchStdOut(HANDLE hStdOut, DWORD *pdwExitCode, const com::panelsw::ca::ExecOnDetails &details);
+	HRESULT LogProcessOutput(HANDLE hStdErrOut, LPWSTR *pszText);
+
+	HRESULT SearchStdOut(LPCWSTR szStdOut, DWORD *pdwExitCode, const com::panelsw::ca::ExecOnDetails &details);
 };
 

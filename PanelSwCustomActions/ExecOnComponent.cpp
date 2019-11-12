@@ -505,6 +505,7 @@ HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command)
 	LPCWSTR szObfuscatedCommand = nullptr;
 	LPCWSTR szWorkingDirectory = nullptr;
 	CWixString commandLineCopy;
+	CWixString szLog;
 	HANDLE hStdOut = NULL;
 	HANDLE hProc = NULL;
 
@@ -558,6 +559,8 @@ LRetry:
 	hr = ProcExecute(commandLineCopy, &hProc, nullptr, &hStdOut);
 	if (SUCCEEDED(hr))
 	{
+		LogProcessOutput(hStdOut, (LPWSTR*)szLog);
+
 		hr = ProcWaitForCompletion(hProc, INFINITE, &exitCode);
 	}
 	if (FAILED(hr)) 
@@ -570,7 +573,7 @@ LRetry:
         exitCode = details.exitcoderemap().at(exitCode);
     }
 
-	hr = SearchStdOut(hStdOut, &exitCode, details);
+	hr = SearchStdOut((LPCWSTR)szLog, &exitCode, details);
 	if (FAILED(hr) && (exitCode == ERROR_SUCCESS))
 	{
 		exitCode = HRESULT_CODE(hr);
@@ -662,10 +665,108 @@ LExit:
 	return hr;
 }
 
-HRESULT CExecOnComponent::SearchStdOut(HANDLE hStdOut, DWORD *pdwExitCode, const com::panelsw::ca::ExecOnDetails &details)
+HRESULT CExecOnComponent::LogProcessOutput(HANDLE hStdErrOut, LPWSTR *pszText /* Need to detect whether this is unicode or multibyte */)
 {
-	LPBYTE pbStdOut = nullptr;
+	const int OUTPUT_BUFFER_SIZE = 1024;
+	DWORD dwBytes = OUTPUT_BUFFER_SIZE;
+	HRESULT hr = S_OK;
+	BOOL bRes = TRUE;
+	BYTE *pBuffer = nullptr;
+	FileRegexDetails::FileEncoding encoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_None;
+	LPWSTR szLog = nullptr;
+	DWORD dwLogStart = 0;
+	LPCWSTR szLogEnd = 0;
 
+	pBuffer = reinterpret_cast<BYTE*>(MemAlloc(OUTPUT_BUFFER_SIZE, FALSE));
+	ExitOnNull(pBuffer, hr, E_OUTOFMEMORY, "Failed to allocate buffer for output.");
+
+	while (dwBytes != 0)
+	{
+		dwBytes = OUTPUT_BUFFER_SIZE;
+		::ZeroMemory(pBuffer, OUTPUT_BUFFER_SIZE);
+
+		bRes = ::ReadFile(hStdErrOut, pBuffer, OUTPUT_BUFFER_SIZE - sizeof(WCHAR), &dwBytes, nullptr);
+		ExitOnNullWithLastError((bRes || (::GetLastError() == ERROR_BROKEN_PIPE /* Happens if the process terminated. Still may have data to read */)), hr, "Failed to read from handle.");
+
+		// On first read, test multibyte or unicode
+		if (encoding == FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_None)
+		{
+			encoding = CFileOperations::DetectEncoding(pBuffer, dwBytes);
+		}
+
+		switch (encoding)
+		{
+		case FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_MultiByte:
+			hr = StrAllocConcatFormatted(&szLog, L"%hs", pBuffer);
+			ExitOnFailure(hr, "Failed to concatenate output strings");
+			break;
+
+		case FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_ReverseUnicode:
+		case FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_Unicode:
+			hr = StrAllocConcat(&szLog, (LPCWSTR)pBuffer, 0);
+			ExitOnFailure(hr, "Failed to concatenate output strings");
+			break;
+		}
+
+		// Log each line of the output
+		szLogEnd = ::wcschr(szLog + dwLogStart, L'\r');
+		if (szLogEnd == nullptr)
+		{
+			szLogEnd = ::wcschr(szLog + dwLogStart, L'\n');
+		}
+		while (szLogEnd && *szLogEnd)
+		{
+			char szFormat[20];
+
+			::sprintf_s<sizeof(szFormat)>(szFormat, "%%.%dls", (szLogEnd - (szLog + dwLogStart)));
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, szFormat, szLog + dwLogStart);
+
+			// Go past \n or \r\n
+			if ((*szLogEnd == L'\r') && (*(szLogEnd + 1) == L'\n'))
+			{
+				szLogEnd += 2;
+			}
+			else
+			{
+				++szLogEnd;
+			}
+			dwLogStart = szLogEnd - szLog;
+
+			// Next line
+			szLogEnd = ::wcschr(szLog + dwLogStart, L'\r');
+			if (szLogEnd == nullptr)
+			{
+				szLogEnd = ::wcschr(szLog + dwLogStart, L'\n');
+			}
+		}
+	}
+
+	// Print any text that didn't end with a new line
+	if (szLog && (szLog[dwLogStart] != NULL))
+	{
+		WcaLog(LOGMSG_STANDARD, "%ls", szLog + dwLogStart);
+	}
+
+	// Return full log to the caller
+	if (pszText) 
+	{
+		*pszText = szLog;
+		szLog = nullptr;
+	}
+
+LExit:
+	ReleaseMem(pBuffer);
+	ReleaseStr(szLog);
+
+	return hr;
+}
+
+HRESULT CExecOnComponent::SearchStdOut(LPCWSTR szStdOut, DWORD *pdwExitCode, const ExecOnDetails &details)
+{
+	HRESULT hr = S_OK;
+
+LExit:
+	return hr;
 }
 
 HRESULT CExecOnComponent::SetEnvironment(const ::google::protobuf::Map<std::string, std::string> &customEnv)
