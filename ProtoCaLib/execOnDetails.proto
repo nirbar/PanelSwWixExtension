@@ -1,7 +1,14 @@
 syntax = "proto3";
 package com.panelsw.ca;
 option optimize_for = LITE_RUNTIME;
-import "ErrorHandling.proto";
+import "errorHandling.proto";
+
+message ConsoleOuputRemap { 
+	bytes regex = 1;
+	bool onMatch = 2;
+	ErrorHandling errorHandling = 3;
+	bytes promptText = 4;
+}
 
 message ExecOnDetails{
 
@@ -14,4 +21,6 @@ message ExecOnDetails{
 
 	bool async = 6;
 	ErrorHandling errorHandling = 7;
+
+	repeated ConsoleOuputRemap consoleOuputRemap = 8;
 }

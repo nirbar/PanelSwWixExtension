@@ -750,11 +750,13 @@
       <xs:appinfo>
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
       </xs:appinfo>
-      <xs:documentation><![CDATA[Execute a custom command on component action.]]></xs:documentation>
+      <xs:documentation>
+        <![CDATA[Execute a custom command on component action. Command execution results are handled firstly by ConsoleOutput directives, then by exit code and ExitCode directives, and finally by ErrorHandling attribute]]></xs:documentation>
     </xs:annotation>
     <xs:complexType>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
         <xs:element ref="ExitCode" />
+        <xs:element ref="ConsoleOutput" />
         <xs:element ref="Environment" />
       </xs:choice>
       <xs:attribute name="Id" type="xs:string">
@@ -839,7 +841,7 @@
       </xs:attribute>
       <xs:attribute name="ErrorHandling" use="optional" type="ErrorHandlingType" default="fail">
         <xs:annotation>
-          <xs:documentation><![CDATA[On error fail, ignore, or prompt user to abort, retry or ignore. Defaults to 'fail']]></xs:documentation>
+          <xs:documentation><![CDATA[On error fail, ignore, or prompt user to abort, retry or ignore. Defaults to 'fail'. When there are ConsoleOutput child elements, and they result in prompt, then prompt result will be used instead of prompt in this attribute.]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
 
@@ -887,6 +889,37 @@
             <xs:enumeration value="scheduleReboot" />
           </xs:restriction>
         </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="ConsoleOutput">
+    <xs:annotation>
+      <xs:documentation>Parsing rules for process standard output and standard error (stdout and stderr)</xs:documentation>
+      <xs:appinfo>
+        <xse:parent ref="ExecOn" />
+      </xs:appinfo>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:attribute name="Expression" type="xs:string" use="required">
+        <xs:annotation>
+          <xs:documentation>Regular expression to search in stdout and stderr.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="BehaviorOnMatch" type="wix:YesNoType" use="optional" default="yes">
+        <xs:annotation>
+          <xs:documentation>"yes" to trigger the behavior when the regex Expression is found, or "no" to trigger the behavior when the expression isn't found.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="PromptText" type="xs:string" use="optional">
+        <xs:annotation>
+          <xs:documentation>Text to use when Behavior is prompt</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Behavior" use="required" type="ErrorHandlingType">
+        <xs:annotation>
+          <xs:documentation>Action to take</xs:documentation>
+        </xs:annotation>
       </xs:attribute>
     </xs:complexType>
   </xs:element>
