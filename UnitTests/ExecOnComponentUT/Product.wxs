@@ -27,6 +27,8 @@
         <File Source="$(var.ProjectDir)Product.wxs" />
         <PanelSW:ExecOn Id="_1" Command='"ping.exe" "[GOOGLE]"' OnInstall='yes' OnInstallRollback='yes' OnReinstall='yes' OnReinstallRollback='yes' OnUninstall='yes' OnUninstallRollback='yes'
                         BeforeStopServices='yes' AfterStopServices='yes' BeforeStartServices='yes' AfterStartServices='yes' WorkingDirectory='[INSTALLFOLDER]'>
+          <PanelSW:ConsoleOutput Expression='[GOOGLE]' Behavior='prompt' BehaviorOnMatch='yes' PromptText='We pinged google'/>
+          <PanelSW:ConsoleOutput Expression='[GOOGLE]' Behavior='prompt' BehaviorOnMatch='no' PromptText='We did not ping google'/>
           <PanelSW:ExitCode Value='0' Behavior='scheduleReboot'/>
         </PanelSW:ExecOn>
         <PanelSW:ExecOn Id="_2" Command='"ping.exe" "[GOOGLE]"' OnInstall='yes' OnInstallRollback='yes' OnReinstall='yes' OnReinstallRollback='yes' OnUninstall='yes' OnUninstallRollback='yes'

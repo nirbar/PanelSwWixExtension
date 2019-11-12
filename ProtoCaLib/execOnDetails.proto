@@ -4,9 +4,10 @@ option optimize_for = LITE_RUNTIME;
 import "errorHandling.proto";
 
 message ConsoleOuputRemap { 
-	int32 from = 1;
-	int32 to = 2;
-	bytes regex = 3;
+	bytes regex = 1;
+	bool onMatch = 2;
+	ErrorHandling errorHandling = 3;
+	bytes promptText = 4;
 }
 
 message ExecOnDetails{

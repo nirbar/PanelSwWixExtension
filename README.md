@@ -109,6 +109,7 @@ PanelSwWixExtension uses error codes in Error table:
 - 27003: Dism error template for prompting user on failures to add a Windows feature package.
 - 27004: Dism error template for prompting user on failures to enable a Windows feature.
 - 27005: SqlScript error template for prompting user on errors.
+- 27006: ExecOn error template for prompting user on console output parsing.
 
 ## Properties
 

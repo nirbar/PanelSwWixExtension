@@ -1478,6 +1478,67 @@ namespace PanelSw.Wix.Extensions
                             }
                             break;
 
+                        case "ConsoleOutput":
+                            {
+                                ErrorHandling stdoutHandling = ErrorHandling.fail;
+                                string regex = null;
+                                string prompt = null;
+                                bool onMatch = true;
+
+                                foreach (XmlAttribute a in child.Attributes)
+                                {
+                                    if ((0 != a.NamespaceURI.Length) && (a.NamespaceURI != schema.TargetNamespace))
+                                    {
+                                        continue;
+                                    }
+
+                                    switch (a.LocalName)
+                                    {
+                                        case "Expression":
+                                            regex = Core.GetAttributeValue(sourceLineNumbers, a);
+                                            break;
+
+                                        case "BehaviorOnMatch":
+                                            onMatch = (Core.GetAttributeYesNoValue(sourceLineNumbers, a) == YesNoType.Yes);
+                                            break;
+
+                                        case "PromptText":
+                                            prompt = Core.GetAttributeValue(sourceLineNumbers, a);
+                                            break;
+
+                                        case "Behavior":
+                                            try
+                                            {
+                                                stdoutHandling = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), Core.GetAttributeValue(sourceLineNumbers, a));
+                                            }
+                                            catch
+                                            {
+                                                Core.UnexpectedAttribute(sourceLineNumbers, a);
+                                            }
+                                            break;
+                                    }
+                                }
+
+                                if ((stdoutHandling == ErrorHandling.prompt) == string.IsNullOrEmpty(prompt))
+                                {
+                                    Core.OnMessage(WixErrors.IllegalAttributeValueWithOtherAttribute(sourceLineNumbers, child.LocalName, "Behavior", "prompt", "PromptText"));
+                                }
+                                if (string.IsNullOrEmpty(regex))
+                                {
+                                    Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, child.LocalName, "Expression"));
+                                }
+
+                                Row row = Core.CreateRow(sourceLineNumbers, "PSW_ExecOn_ConsoleOutput");
+                                row[0] = "std" + Guid.NewGuid().ToString("N");
+                                row[1] = id;
+                                row[2] = regex;
+                                row[3] = onMatch ? 1 : 0;
+                                row[4] = (int)stdoutHandling;
+                                row[5] = prompt;
+                            }
+                            break;
+
+
                         case "Environment":
                             {
                                 string name = null, value = null;
@@ -1531,6 +1592,7 @@ namespace PanelSw.Wix.Extensions
             {
                 // Ensure sub-tables exist for queries to succeed even if no sub-entries exist.
                 Core.EnsureTable(sourceLineNumbers, "PSW_ExecOnComponent_ExitCode");
+                Core.EnsureTable(sourceLineNumbers, "PSW_ExecOn_ConsoleOutput");
                 Core.EnsureTable(sourceLineNumbers, "PSW_ExecOnComponent_Environment");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_ExecOnComponent");
                 row[0] = id;

@@ -127,6 +127,15 @@
     <columnDefinition name="To" type="number" length="4" minValue="0" maxValue="65535" />
   </tableDefinition>
 
+  <tableDefinition name="PSW_ExecOn_ConsoleOutput">
+    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="ExecOnId_" type="string" length="72" modularize="column" category="identifier" keyTable="PSW_ExecOnComponent" keyColumn="1" />
+    <columnDefinition name="Expression" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Flags" type="number" length="4" minValue="0" maxValue="1" />
+    <columnDefinition name="ErrorHandling" type="number" minValue="0" maxValue="2" length="2" />
+    <columnDefinition name="PromptText" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
+  </tableDefinition>
+
   <tableDefinition name="PSW_ExecOnComponent_Environment">
     <columnDefinition primaryKey="yes" name="ExecOnId_" type="string" length="72" modularize="column" category="identifier" keyTable="PSW_ExecOnComponent" keyColumn="1" />
     <columnDefinition primaryKey="yes" name="Name" type="string" length="0" />

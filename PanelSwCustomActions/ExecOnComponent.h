@@ -2,6 +2,7 @@
 #include "../CaCommon/DeferredActionBase.h"
 #include "execOnDetails.pb.h"
 #include <map>
+#include <vector>
 
 class CExecOnComponent :
 	public CDeferredActionBase
@@ -13,7 +14,7 @@ public:
 
 	CExecOnComponent() : CDeferredActionBase("ExecOn") { }
 
-	HRESULT AddExec(LPCWSTR szCommand, LPCWSTR szObfuscatedCommand, LPCWSTR szWorkingDirectory, ExitCodeMap *pExitCodeMap, EnvironmentMap *pEnv, int nFlags, com::panelsw::ca::ErrorHandling errorHandling);
+	HRESULT AddExec(LPCWSTR szCommand, LPCWSTR szObfuscatedCommand, LPCWSTR szWorkingDirectory, ExitCodeMap *pExitCodeMap, std::vector<com::panelsw::ca::ConsoleOuputRemap> *pConsoleOuput, EnvironmentMap *pEnv, int nFlags, com::panelsw::ca::ErrorHandling errorHandling);
 
 protected:
 	// Execute the command object (XML element)
@@ -24,6 +25,10 @@ private:
 
 	HRESULT LogProcessOutput(HANDLE hStdErrOut, LPWSTR *pszText);
 
-	HRESULT SearchStdOut(LPCWSTR szStdOut, DWORD *pdwExitCode, const com::panelsw::ca::ExecOnDetails &details);
+	// S_FALSE: Had no matches, go on with error handling.
+	// S_OK: Ignore errors and continue
+	// E_RETRY: Retry
+	// E_FAIL: Abort
+	HRESULT SearchStdOut(LPCWSTR szStdOut, const com::panelsw::ca::ExecOnDetails &details);
 };
 

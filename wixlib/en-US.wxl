@@ -7,6 +7,8 @@
   <String Overridable="yes" Id="TaskScheduler">Configuring Scheduled Tasks</String>
   <String Overridable="yes" Id="ExecOnComponent"><![CDATA[Executing custom actions]]></String>
   <String Overridable="yes" Id="ExecOnFailure"><![CDATA[Failed executing command [2]]]></String>
+  <String Overridable="yes" Id="ExecOnConsoleFailure"><![CDATA[Command [2] yielded error
+  [3]]]></String>  
   <String Overridable="yes" Id="ServiceConfig"><![CDATA[Configuring Services]]></String>
   <String Overridable="yes" Id="ServiceConfigFailure"><![CDATA[Failed configuring service [2]]]></String>
   <String Overridable="yes" Id="InstallUtil"><![CDATA[Installing .NET service assemblies]]></String>
