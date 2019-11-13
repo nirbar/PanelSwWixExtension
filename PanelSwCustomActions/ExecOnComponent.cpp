@@ -611,7 +611,7 @@ LRetry:
 	hr = ProcExecute(commandLineCopy, &hProc, nullptr, &hStdOut);
 	if (SUCCEEDED(hr))
 	{
-		LogProcessOutput(hStdOut, (LPWSTR*)szLog);
+		LogProcessOutput(hStdOut, ((details.consoleouputremap_size() > 0) ? (LPWSTR*)szLog : nullptr));
 
 		hr = ProcWaitForCompletion(hProc, INFINITE, &exitCode);
 	}
@@ -805,6 +805,21 @@ HRESULT CExecOnComponent::LogProcessOutput(HANDLE hStdErrOut, LPWSTR *pszText /*
 			{
 				szLogEnd = ::wcschr(szLog + dwLogStart, L'\n');
 			}
+		}
+
+		// If we don't have to accumulate all log text, we can release whatever text we already logged.
+		if (!pszText && !dwLogStart)
+		{
+			LPWSTR szTemp = nullptr;
+
+			hr = StrAllocString(&szTemp, szLog + dwLogStart, 0);
+			if (SUCCEEDED(hr))
+			{
+				ReleaseStr(szLog);
+				szLog = szTemp;
+				dwLogStart = 0;
+			}
+			hr = S_OK;
 		}
 	}
 
