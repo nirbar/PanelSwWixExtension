@@ -221,6 +221,64 @@ LExit:
 	return hr;
 }
 
+void CDeferredActionBase::LogUnformatted(LOGLEVEL level, PCSTR szFormat, ...)
+{
+	HRESULT hr = S_OK;
+	int nRes = 0;
+	LPSTR szMessage = nullptr;
+	LPCSTR szLogName = nullptr;
+	va_list va;
+	size_t nSize = 0;
+	PMSIHANDLE hRec;
+
+	va_start(va, szFormat);
+
+	nSize = ::_vscprintf(szFormat, va);
+	if (nSize == 0)
+	{
+		ExitFunction();
+	}
+	++nSize;
+
+	szMessage = reinterpret_cast<char*>(MemAlloc(nSize, TRUE));
+	if (szMessage == nullptr)
+	{
+		ExitFunction();
+	}
+
+	nRes = ::vsprintf_s(szMessage, nSize, szFormat, va);
+	if (nRes < 0)
+	{
+		ExitFunction();
+	}
+
+	hRec = MsiCreateRecord(3);
+	if (static_cast<MSIHANDLE>(hRec) == NULL)
+	{
+		ExitFunction();
+	}
+
+	szLogName = WcaGetLogName();
+	if (szLogName && *szLogName)
+	{
+		::MsiRecordSetStringA(hRec, 0, "[1]:  [2]");
+		::MsiRecordSetStringA(hRec, 1, szLogName);
+		::MsiRecordSetStringA(hRec, 2, szMessage);
+	}
+	else
+	{
+		::MsiRecordSetStringA(hRec, 0, "[1]");
+		::MsiRecordSetStringA(hRec, 1, szMessage);
+	}
+	WcaProcessMessage(INSTALLMESSAGE_INFO, hRec);
+
+LExit:
+
+	ReleaseMem(szMessage);
+	va_end(va);
+	return;
+}
+
 static void FirstLog(MSIHANDLE hInstall, LPCSTR szMessage)
 {
 	HRESULT hr = S_OK;

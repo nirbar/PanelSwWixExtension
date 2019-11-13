@@ -237,13 +237,13 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		while ((hr = WcaFetchRecord(hSubView, &hSubRecord)) != E_NOMOREITEMS)
 		{
 			BreakExitOnFailure(hr, "Failed to fetch record.");
-			CWixString szExpression;
+			CWixString szExpressionFormat, szExpression, szObfuscatedExpression;
 			CWixString szPrompt;
 			int onMatch = 1;
 			ErrorHandling stdoutHandling = ErrorHandling::fail;
 			ConsoleOuputRemap console;
 
-			hr = WcaGetRecordFormattedString(hSubRecord, 1, (LPWSTR*)szExpression);
+			hr = WcaGetRecordString(hSubRecord, 1, (LPWSTR*)szExpressionFormat);
 			BreakExitOnFailure(hr, "Failed to get Expression.");
 			hr = WcaGetRecordInteger(hSubRecord, 2, &onMatch);
 			BreakExitOnFailure(hr, "Failed to get Flags.");
@@ -252,7 +252,11 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 			hr = WcaGetRecordFormattedString(hSubRecord, 4, (LPWSTR*)szPrompt);
 			BreakExitOnFailure(hr, "Failed to get ErrorHandling.");
 
+			hr = szExpression.MsiFormat((LPCWSTR)szExpressionFormat, (LPWSTR*)szObfuscatedExpression);
+			BreakExitOnFailure(hr, "Failed to format Expression.");
+
 			console.set_regex((LPCWSTR)szExpression, WSTR_BYTE_SIZE((LPCWSTR)szExpression));
+			console.set_obfuscatedregex((LPCWSTR)szObfuscatedExpression, WSTR_BYTE_SIZE((LPCWSTR)szObfuscatedExpression));
 			console.set_onmatch(onMatch);
 			console.set_errorhandling(stdoutHandling);
 			console.set_prompttext((LPCWSTR)szPrompt, WSTR_BYTE_SIZE((LPCWSTR)szPrompt));
@@ -442,7 +446,7 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedC
 
 	if (nFlags & Flags::BeforeStopServices)
 	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' before StopServices", szObfuscatedCommand);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' before StopServices", szObfuscatedCommand);
 		if (nFlags & Flags::Impersonate)
 		{
 			hr = pBeforeStopImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
@@ -455,7 +459,7 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedC
 	}
 	if (nFlags & Flags::AfterStopServices)
 	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' after StopServices", szObfuscatedCommand);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' after StopServices", szObfuscatedCommand);
 		if (nFlags & Flags::Impersonate)
 		{
 			hr = pAfterStopImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
@@ -468,7 +472,7 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedC
 	}
 	if (nFlags & Flags::BeforeStartServices)
 	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' before StartServices", szObfuscatedCommand, (ErrorHandling)errorHandling);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' before StartServices", szObfuscatedCommand, (ErrorHandling)errorHandling);
 		if (nFlags & Flags::Impersonate)
 		{
 			hr = pBeforeStartImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
@@ -481,7 +485,7 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedC
 	}
 	if (nFlags & Flags::AfterStartServices)
 	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' after StartServices", szObfuscatedCommand, (ErrorHandling)errorHandling);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' after StartServices", szObfuscatedCommand, (ErrorHandling)errorHandling);
 		if (nFlags & Flags::Impersonate)
 		{
 			hr = pAfterStartImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
@@ -526,6 +530,7 @@ HRESULT CExecOnComponent::AddExec(LPCWSTR szCommand, LPCWSTR szObfuscatedCommand
 	{
 		ConsoleOuputRemap *pConsole = pDetails->add_consoleouputremap();
 		pConsole->set_regex(pConsoleOuput->at(i).regex());
+		pConsole->set_obfuscatedregex(pConsoleOuput->at(i).obfuscatedregex());
 		pConsole->set_prompttext(pConsoleOuput->at(i).prompttext());
 		pConsole->set_onmatch(pConsoleOuput->at(i).onmatch());
 		pConsole->set_errorhandling(pConsoleOuput->at(i).errorhandling());
@@ -576,7 +581,7 @@ HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command)
 		::SetCurrentDirectory(szWorkingDirectory);
 	}
 
-	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing '%ls'", szObfuscatedCommand);
+	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Executing '%ls'", szObfuscatedCommand);
     if (details.async())
     {
         WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Not logging output on async command");
@@ -781,7 +786,7 @@ HRESULT CExecOnComponent::LogProcessOutput(HANDLE hStdErrOut, LPWSTR *pszText /*
 			char szFormat[20];
 
 			::sprintf_s<sizeof(szFormat)>(szFormat, "%%.%dls", (szLogEnd - (szLog + dwLogStart)));
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, szFormat, szLog + dwLogStart);
+			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, szFormat, szLog + dwLogStart);
 
 			// Go past \n or \r\n
 			if ((*szLogEnd == L'\r') && (*(szLogEnd + 1) == L'\n'))
@@ -806,7 +811,7 @@ HRESULT CExecOnComponent::LogProcessOutput(HANDLE hStdErrOut, LPWSTR *pszText /*
 	// Print any text that didn't end with a new line
 	if (szLog && (szLog[dwLogStart] != NULL))
 	{
-		WcaLog(LOGMSG_STANDARD, "%ls", szLog + dwLogStart);
+		LogUnformatted(LOGMSG_STANDARD, "%ls", szLog + dwLogStart);
 	}
 
 	// Return full log to the caller
@@ -840,10 +845,7 @@ HRESULT CExecOnComponent::SearchStdOut(LPCWSTR szStdOut, const ExecOnDetails &de
 		match_results<LPCWSTR> results;
 
 		bRes = regex_search(szStdOut, results, rx);
-		if (bRes && results.size())
-		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Regex search yielded %i matches", results.size());
-		}
+		LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Regex '%ls' search yielded %i matches", (LPCWSTR)console.obfuscatedregex().data(), results.size());
 		if ((bRes && results.size()) != console.onmatch())
 		{
 			continue;
@@ -943,7 +945,7 @@ HRESULT CExecOnComponent::SetEnvironment(const ::google::protobuf::Map<std::stri
 
 		if (szName && *szName && szValue && *szValue)
 		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Setting custom environment variable '%ls' to '%ls'", szName, szValue);
+			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Setting custom environment variable '%ls' to '%ls'", szName, szValue);
 
 			bRes = ::SetEnvironmentVariable(szName, szValue);
 			BreakExitOnNullWithLastError(bRes, hr, "Failed setting environment variable '%ls'", (LPCWSTR)szName);

@@ -69,7 +69,8 @@ extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		CWixString sId, sFilePath, sInput, sExpression, sReplace, sDstProperty, sCondition;
+		CWixString szExpressionFormat, szExpression, szObfuscatedExpression;
+		CWixString sId, sFilePath, sInput, sReplace, sDstProperty, sCondition;
 		int iFlags = 0;
 		RegexFlags flags;
 		std::regex_constants::syntax_option_type syntax = (std::regex_constants::syntax_option_type)0;
@@ -80,7 +81,7 @@ extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to get FilePath.");
 		hr = WcaGetRecordFormattedString(hRecord, eRegularExpressionQuery::Input, (LPWSTR*)sInput);
 		BreakExitOnFailure(hr, "Failed to get Input.");
-		hr = WcaGetRecordFormattedString(hRecord, eRegularExpressionQuery::Expression, (LPWSTR*)sExpression);
+		hr = WcaGetRecordString(hRecord, eRegularExpressionQuery::Expression, (LPWSTR*)szExpressionFormat);
 		BreakExitOnFailure(hr, "Failed to get Expression.");
 		hr = WcaGetRecordFormattedString(hRecord, eRegularExpressionQuery::Replacement, (LPWSTR*)sReplace);
 		BreakExitOnFailure(hr, "Failed to get Replacement.");
@@ -91,6 +92,9 @@ extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 		flags.u = *reinterpret_cast<unsigned int*>(&iFlags);
 		hr = WcaGetRecordString(hRecord, eRegularExpressionQuery::Condition, (LPWSTR*)sCondition);
 		BreakExitOnFailure(hr, "Failed to get Condition.");
+
+		hr = szExpression.MsiFormat((LPCWSTR)szExpressionFormat, (LPWSTR*)szObfuscatedExpression);
+		BreakExitOnFailure(hr, "Failed to format Expression.");
 
 		// Test condition
 		if (!sCondition.IsNullOrEmpty())
@@ -115,36 +119,36 @@ extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 				BreakExitOnFailure(hr, "Bad Condition field");
 			}
 		}
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing regular expression query '%ls'", (LPCWSTR)sId);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Executing regular expression query '%ls'", (LPCWSTR)szObfuscatedExpression);
 
 		// Syntax flags
 		if (flags.s.match & MatchFlags::IgnoreCare)
 		{
 			syntax |= std::regex_constants::syntax_option_type::icase;
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Ignoring case", (LPCWSTR)sId);
+			WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Ignoring case", (LPCWSTR)sId);
 		}
 		if (flags.s.match & MatchFlags::Extended)
 		{
 			syntax |= std::regex_constants::syntax_option_type::extended;
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Extended regex syntax", (LPCWSTR)sId);
+			WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Extended regex syntax", (LPCWSTR)sId);
 		}
 
 		// Match in file
 		if (!sFilePath.IsNullOrEmpty())
 		{
-			hr = SearchInFile(sDstProperty, sExpression, sFilePath, flags, syntax);
+			hr = SearchInFile(sDstProperty, szExpression, sFilePath, flags, syntax);
 			BreakExitOnFailure(hr, "Failed executing search");
 		}
 		// Match in property
 		else if (flags.s.search == SearchFlags::Search)
 		{
-			hr = SearchUnicode(sDstProperty, sExpression, sInput, flags, syntax);
+			hr = SearchUnicode(sDstProperty, szExpression, sInput, flags, syntax);
 			BreakExitOnFailure(hr, "Failed executing search");
 		}
 		// Replace
 		else
 		{
-			wregex rx((LPCWSTR)sExpression, syntax);
+			wregex rx((LPCWSTR)szExpression, syntax);
 
 			std::wstring rep = regex_replace((LPCWSTR)sInput, rx, (LPCWSTR)sReplace);
 			

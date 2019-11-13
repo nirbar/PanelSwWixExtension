@@ -26,6 +26,8 @@ public:
 
 	bool HasActions() const;
 
+	static void LogUnformatted(LOGLEVEL level, PCSTR szFormat, ...);
+
 protected:
 
 	// Overriden by inheriting classes. Execute the command object (XML element)

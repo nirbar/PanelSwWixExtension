@@ -100,7 +100,7 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 		hr = szReplacement.MsiFormat((LPCWSTR)szReplacementUnformatted, (LPWSTR*)szReplacementObfuscated);
 		BreakExitOnFailure(hr, "Failed formatting string");
 
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will replace matches of regex '%ls' with '%ls' on file '%ls'", (LPCWSTR)szRegexObfuscated, (LPCWSTR)szReplacementObfuscated, (LPCWSTR)szFilePath);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Will replace matches of regex '%ls' with '%ls' on file '%ls'", (LPCWSTR)szRegexObfuscated, (LPCWSTR)szReplacementObfuscated, (LPCWSTR)szFilePath);
 
 		// Generate temp file name.
 		hr = tempFile.Allocate(MAX_PATH + 1);
