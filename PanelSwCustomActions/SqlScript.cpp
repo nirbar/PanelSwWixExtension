@@ -84,7 +84,6 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 		ExitOnNull(!szBinary.IsNullOrEmpty(), hr, E_INVALIDARG, "Binary key is empty");
 		ExitOnNull(!szId.IsNullOrEmpty(), hr, E_INVALIDARG, "Id is empty");
 		ExitOnNull(!szComponent.IsNullOrEmpty(), hr, E_INVALIDARG, "Component is empty");
-		ExitOnNull(!szDatabase.IsNullOrEmpty(), hr, E_INVALIDARG, "Database is empty");
 		ExitOnNull(!szServer.IsNullOrEmpty(), hr, E_INVALIDARG, "Server is empty");
 		if (szUsername.IsNullOrEmpty())
 		{
@@ -280,6 +279,130 @@ static HRESULT ReplaceStrings(CWixString *pszQuery, LPCWSTR szQueryId)
 	hr = S_OK;
 
 LExit:
+
+	return hr;
+}
+
+/*static*/ HRESULT CSqlScript::SqlConnect(LPCWSTR wzServer, LPCWSTR wzDatabase, LPCWSTR wzUser, LPCWSTR wzPassword, IDBCreateSession** ppidbSession)
+{
+	HRESULT hr = S_OK;
+	IDBInitialize* pidbInitialize = nullptr;
+	IDBProperties* pidbProperties = nullptr;
+	DBPROP rgdbpInit[4];
+	DBPROPSET rgdbpsetInit[1];
+	ULONG cProperties = 0;
+	
+	// Error text on unfortunate.
+	IErrorInfo* pError = nullptr;
+	ISupportErrorInfo* pISupportErrorInfo = nullptr;
+	CComBSTR szError;
+
+	::memset(rgdbpInit, 0, sizeof(rgdbpInit));
+	::memset(rgdbpsetInit, 0, sizeof(rgdbpsetInit));
+
+	//obtain access to the SQLOLEDB provider
+	hr = ::CoCreateInstance(CLSID_SQLOLEDB, NULL, CLSCTX_INPROC_SERVER, IID_IDBInitialize, (LPVOID*)&pidbInitialize);
+	ExitOnFailure(hr, "Failed to create IID_IDBInitialize object");
+
+	// server[\instance]
+	rgdbpInit[cProperties].dwPropertyID = DBPROP_INIT_DATASOURCE;
+	rgdbpInit[cProperties].dwOptions = DBPROPOPTIONS_REQUIRED;
+	rgdbpInit[cProperties].colid = DB_NULLID;
+	::VariantInit(&rgdbpInit[cProperties].vValue);
+	rgdbpInit[cProperties].vValue.vt = VT_BSTR;
+	rgdbpInit[cProperties].vValue.bstrVal = ::SysAllocString(wzServer);
+	++cProperties;
+
+	// Database, default if not supplied.
+	if (wzDatabase && *wzDatabase)
+	{
+		rgdbpInit[cProperties].dwPropertyID = DBPROP_INIT_CATALOG;
+		rgdbpInit[cProperties].dwOptions = DBPROPOPTIONS_REQUIRED;
+		rgdbpInit[cProperties].colid = DB_NULLID;
+		::VariantInit(&rgdbpInit[cProperties].vValue);
+		rgdbpInit[cProperties].vValue.vt = VT_BSTR;
+		rgdbpInit[cProperties].vValue.bstrVal = ::SysAllocString(wzDatabase);
+		++cProperties;
+	}
+
+	// Authentication
+	if (wzUser && *wzUser)
+	{
+		// username
+		rgdbpInit[cProperties].dwPropertyID = DBPROP_AUTH_USERID;
+		rgdbpInit[cProperties].dwOptions = DBPROPOPTIONS_REQUIRED;
+		rgdbpInit[cProperties].colid = DB_NULLID;
+		::VariantInit(&rgdbpInit[cProperties].vValue);
+		rgdbpInit[cProperties].vValue.vt = VT_BSTR;
+		rgdbpInit[cProperties].vValue.bstrVal = ::SysAllocString(wzUser);
+		++cProperties;
+
+		if (wzPassword && *wzPassword)
+		{
+			rgdbpInit[cProperties].dwPropertyID = DBPROP_AUTH_PASSWORD;
+			rgdbpInit[cProperties].dwOptions = DBPROPOPTIONS_REQUIRED;
+			rgdbpInit[cProperties].colid = DB_NULLID;
+			::VariantInit(&rgdbpInit[cProperties].vValue);
+			rgdbpInit[cProperties].vValue.vt = VT_BSTR;
+			rgdbpInit[cProperties].vValue.bstrVal = ::SysAllocString(wzPassword);
+			++cProperties;
+		}
+	}
+	else // Integrated security
+	{
+		rgdbpInit[cProperties].dwPropertyID = DBPROP_AUTH_INTEGRATED;
+		rgdbpInit[cProperties].dwOptions = DBPROPOPTIONS_REQUIRED;
+		rgdbpInit[cProperties].colid = DB_NULLID;
+		::VariantInit(&rgdbpInit[cProperties].vValue);
+		rgdbpInit[cProperties].vValue.vt = VT_BSTR;
+		rgdbpInit[cProperties].vValue.bstrVal = ::SysAllocString(L"SSPI");   // default windows authentication
+		++cProperties;
+	}
+
+	// put the properties into a set
+	rgdbpsetInit[0].guidPropertySet = DBPROPSET_DBINIT;
+	rgdbpsetInit[0].rgProperties = rgdbpInit;
+	rgdbpsetInit[0].cProperties = cProperties;
+
+	// create and set the property set
+	hr = pidbInitialize->QueryInterface(IID_IDBProperties, (LPVOID*)&pidbProperties);
+	ExitOnFailure(hr, "Failed to get IID_IDBProperties object");
+	hr = pidbProperties->SetProperties(1, rgdbpsetInit);
+	ExitOnFailure(hr, "Failed to set properties");
+
+	//initialize connection to datasource
+	hr = pidbInitialize->Initialize();
+	if (FAILED(hr)) // On error, we try to get meaningful text for log.
+	{
+		if (SUCCEEDED(pidbInitialize->QueryInterface(IID_ISupportErrorInfo, (void**)&pISupportErrorInfo)))
+		{
+			if (S_OK == pISupportErrorInfo->InterfaceSupportsErrorInfo(IID_IDBInitialize))
+			{
+				if ((S_OK == GetErrorInfo(0, &pError)) && pError)
+				{
+					if (SUCCEEDED(pError->GetDescription(&szError)) && (szError.Length() > 0))
+					{
+						ExitOnFailure(hr, "Failed to initialize connection. %ls", (BSTR)szError);
+					}
+				}
+			}
+		}
+	}
+	ExitOnFailure(hr, "Failed to initialize connection");
+
+	hr = pidbInitialize->QueryInterface(IID_IDBCreateSession, (LPVOID*)ppidbSession);
+	ExitOnFailure(hr, "Failed to get DB session object");
+
+LExit:
+	for (; 0 < cProperties; cProperties--)
+	{
+		::VariantClear(&rgdbpInit[cProperties - 1].vValue);
+	}
+
+	ReleaseObject(pidbProperties);
+	ReleaseObject(pidbInitialize);
+	ReleaseObject(pISupportErrorInfo);
+	ReleaseObject(pError);
 
 	return hr;
 }
@@ -602,8 +725,18 @@ HRESULT CSqlScript::ExecuteOne(LPCWSTR szServer, LPCWSTR szInstance, LPCWSTR szD
 {
 	HRESULT hr = S_OK;
 	CComPtr<IDBCreateSession> pDbSession;
+	LPWSTR szServerInstance = nullptr;
 
-	hr = SqlConnectDatabase(szServer, szInstance, szDatabase, !(szUser && *szUser), szUser, szPassword, &pDbSession);
+	hr = StrAllocString(&szServerInstance, szServer, 0);
+	ExitOnFailure(hr, "Failed allocating string");
+
+	if (szInstance && *szInstance)
+	{
+		hr = StrAllocConcatFormatted(&szServerInstance, L"\\%s", szServer);
+		ExitOnFailure(hr, "Failed concatentaing string");
+	}
+
+	hr = SqlConnect(szServer, szDatabase, szUser, szPassword, &pDbSession);
 	ExitOnFailure(hr, "Failed connecting to database");
 	ExitOnNull(pDbSession, hr, E_FAIL, "Failed connecting to database (NULL)");
 
@@ -611,5 +744,7 @@ HRESULT CSqlScript::ExecuteOne(LPCWSTR szServer, LPCWSTR szInstance, LPCWSTR szD
 	ExitOnFailure(hr, "Failed executing query. %ls", (pszError && *pszError) ? *pszError : L"");
 
 LExit:
+	ReleaseStr(szServerInstance);
+
 	return hr;
 }

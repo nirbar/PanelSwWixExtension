@@ -1,6 +1,6 @@
-
 #include "stdafx.h"
 #include "../CaCommon/WixString.h"
+#include "SqlScript.h"
 #include <sqlutil.h>
 #include <atlbase.h>
 #include <memory>
@@ -92,30 +92,16 @@ extern "C" UINT __stdcall SqlSearch(MSIHANDLE hInstall)
 			}
 		}
 
-		// Handle:
 		// Server\Instance
-		// Server\...\Instance (multiple backslash)
-		// Server\ (default instance)
-		if (szInstance.IsNullOrEmpty())
+		if (!szInstance.IsNullOrEmpty())
 		{
-			DWORD dwInstIndex = 0;
-
-			dwInstIndex = szServer.RFind(L'\\');
-			if ((dwInstIndex != INFINITE) && (dwInstIndex < szServer.StrLen()))
-			{
-				// Copy instance name
-				hr = szInstance.Copy(dwInstIndex + 1 + (LPCWSTR)szServer);
-				BreakExitOnFailure(hr, "Failed copying instance name.");
-
-				// Terminate server name on first backslash
-				dwInstIndex = szServer.Find(L'\\');
-				const_cast<LPWSTR>((LPCWSTR)szServer)[dwInstIndex] = NULL;
-			}
+			hr = szServer.AppnedFormat(L"\\%s", (LPCWSTR)szInstance);
+			BreakExitOnFailure(hr, "Failed copying instance name.");
 		}
 
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing SQL query '%ls'. Server='%ls', Instance='%ls', User='%ls'. Will place results in property '%ls'", (LPCWSTR)szQuery, (LPCWSTR)szServer, (LPCWSTR)szInstance, (LPCWSTR)szUsername, (LPCWSTR)szProperty);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing SQL query '%ls'. Server='%ls', Database='%ls', User='%ls'. Will place results in property '%ls'", (LPCWSTR)szQuery, (LPCWSTR)szServer, (LPCWSTR)szDatabase, (LPCWSTR)szUsername, (LPCWSTR)szProperty);
 
-		hr = SqlConnectDatabase((LPCWSTR)szServer, (LPCWSTR)szInstance, (LPCWSTR)szDatabase, szUsername.IsNullOrEmpty(), (LPCWSTR)szUsername, (LPCWSTR)szPassword, &pDbSession);
+		hr = CSqlScript::SqlConnect((LPCWSTR)szServer, (LPCWSTR)szDatabase, (LPCWSTR)szUsername, (LPCWSTR)szPassword, &pDbSession);
 		BreakExitOnFailure(hr, "Failed connecting to database");
 		BreakExitOnNull(pDbSession, hr, E_FAIL, "Failed connecting to database (NULL)");
 

@@ -388,7 +388,7 @@
               <xs:documentation>SQL instance name</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="Database" use="required">
+          <xs:attribute name="Database" use="optional" type="xs:string">
             <xs:annotation>
               <xs:documentation>Database name.</xs:documentation>
             </xs:annotation>
@@ -1707,7 +1707,7 @@ Remove registry values.
           <xs:documentation>SQL instance name</xs:documentation>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="Database" use="required">
+      <xs:attribute name="Database" use="optional" type="xs:string">
         <xs:annotation>
           <xs:documentation>Database name.</xs:documentation>
         </xs:annotation>

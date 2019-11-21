@@ -203,7 +203,7 @@
     <columnDefinition name="Property_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
     <columnDefinition name="Server" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Instance" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="Database" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Database" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
     <columnDefinition name="Username" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
     <columnDefinition name="Password" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
     <columnDefinition name="Query" type="string" length="0" modularize="property" category="formatted" />
@@ -301,7 +301,7 @@
     <columnDefinition name="Binary_" type="string" length="72" modularize="column" keyTable="Binary" keyColumn="1" category="identifier" nullable="yes"/>
     <columnDefinition name="Server" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Instance" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="Database" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Database" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
     <columnDefinition name="Username" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
     <columnDefinition name="Password" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
     <columnDefinition name="On" type="number" minValue="0" maxValue="127" length="2" />
