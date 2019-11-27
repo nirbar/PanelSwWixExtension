@@ -364,6 +364,20 @@
     </UI>
   </Fragment>
 
+  <!-- WebsiteConfigSched -->
+  <Fragment>
+    <CustomAction Id="PSW_WebsiteConfigSched" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="WebsiteConfigSched" Execute="immediate"/>
+    <CustomAction Id="PSW_WebsiteConfigExec" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="WebsiteConfigExec" Execute="deferred" Impersonate="no"/>
+
+    <InstallExecuteSequence>
+      <Custom Action="PSW_WebsiteConfigSched" After="StartServices" Overridable="yes"/>
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="PSW_WebsiteConfigSched">!(loc.PSW_WebsiteConfig)</ProgressText>
+      <ProgressText Action="PSW_WebsiteConfigExec">!(loc.PSW_WebsiteConfig)</ProgressText>
+    </UI>
+  </Fragment>
+
   <!-- ZipFile -->
   <Fragment>
     <CustomAction Id="ZipFileSched" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="ZipFileSched" Execute="immediate"/>
@@ -372,6 +386,10 @@
     <InstallExecuteSequence>
       <Custom Action="ZipFileSched" After="DuplicateFiles" Overridable="yes"/>
     </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="ZipFileSched">!(loc.ZipFile)</ProgressText>
+      <ProgressText Action="ZipFileExec">!(loc.ZipFile)</ProgressText>
+    </UI>
   </Fragment>
 
   <!-- Unzip -->

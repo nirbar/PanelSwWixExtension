@@ -191,6 +191,10 @@ namespace PanelSw.Wix.Extensions
                             ParseSqlScriptElement(parentElement, element);
                             break;
 
+                        case "WebsiteConfig":
+                            ParseWebsiteConfigElement(parentElement, element);
+                            break;
+
                         default:
                             Core.UnexpectedElement(parentElement, element);
                             break;
@@ -230,6 +234,56 @@ namespace PanelSw.Wix.Extensions
                     Core.UnexpectedElement(parentElement, element);
                     break;
             }
+        }
+
+        private void ParseWebsiteConfigElement(XmlElement parentElement, XmlElement element)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
+            string id = "web" + Guid.NewGuid().ToString("N");
+            string component = null;
+            string website = null;
+            bool stop = false;
+
+            component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
+            foreach (XmlAttribute attrib in element.Attributes)
+            {
+                if ((0 != attrib.NamespaceURI.Length) && (attrib.NamespaceURI != schema.TargetNamespace))
+                {
+                    continue;
+                }
+
+                switch (attrib.LocalName)
+                {
+                    case "Website":
+                        website = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "Stop":
+                        stop = (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes);
+                        break;
+                }
+            }
+
+            if (string.IsNullOrEmpty(component))
+            {
+                Core.OnMessage(WixErrors.ParentElementAttributeRequired(sourceLineNumbers, parentElement.LocalName, "Id", element.LocalName));
+            }
+            if (string.IsNullOrEmpty(website))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "Website"));
+            }
+
+            if (Core.EncounteredError)
+            {
+                return;
+            }
+
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "PSW_WebsiteConfigSched");
+            Row row = Core.CreateRow(sourceLineNumbers, "PSW_WebsiteConfig");
+            row[0] = id;
+            row[1] = component;
+            row[2] = website;
+            row[3] = stop ? 1 : 0;
         }
 
         private void ParseJsonJpathSearchElement(XmlNode node)
@@ -483,7 +537,7 @@ namespace PanelSw.Wix.Extensions
             component = Core.GetAttributeValue(parentsourceLineNumbers, parentElement.Attributes["Id"]);
             if (string.IsNullOrEmpty(component))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(parentsourceLineNumbers, parentElement.LocalName, "Id"));
+                Core.OnMessage(WixErrors.ParentElementAttributeRequired(sourceLineNumbers, parentElement.LocalName, "Id", element.LocalName));
             }
 
             foreach (XmlAttribute attrib in element.Attributes)
@@ -570,7 +624,7 @@ namespace PanelSw.Wix.Extensions
             component = Core.GetAttributeValue(parentsourceLineNumbers, parentElement.Attributes["Id"]);
             if (string.IsNullOrEmpty(component))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(parentsourceLineNumbers, parentElement.LocalName, "Id"));
+                Core.OnMessage(WixErrors.ParentElementAttributeRequired(sourceLineNumbers, parentElement.LocalName, "Id", element.LocalName));
             }
 
             foreach (XmlAttribute attrib in element.Attributes)
@@ -1137,7 +1191,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(component))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Id"));
+                Core.OnMessage(WixErrors.ParentElementAttributeRequired(sourceLineNumbers, parentElement.LocalName, "Id", element.LocalName));
             }
             if (string.IsNullOrEmpty(binary))
             {
@@ -1405,7 +1459,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(component))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Id"));
+                Core.OnMessage(WixErrors.ParentElementAttributeRequired(sourceLineNumbers, parentElement.LocalName, "Id", element.LocalName));
             }
             if (string.IsNullOrEmpty(id))
             {

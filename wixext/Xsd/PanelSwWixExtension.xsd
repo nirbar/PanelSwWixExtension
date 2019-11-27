@@ -600,6 +600,31 @@
     </xs:complexType>
   </xs:element>
 
+  <xs:element name="WebsiteConfig">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
+      </xs:appinfo>
+      <xs:documentation><![CDATA[Configure an existing website]]></xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Website" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Target website name. This field is formatted]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Stop" type="wix:YesNoType" use="optional" default="no">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Whether or not to permanently stop the website]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="ZipFile">
     <xs:annotation>
       <xs:appinfo>

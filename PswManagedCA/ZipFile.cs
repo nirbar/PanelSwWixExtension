@@ -43,23 +43,30 @@ namespace PswManagedCA
 
             ZipFile zipper = new ZipFile();
 
-            IList<string> results = session.Database.ExecuteStringQuery("SELECT `Id`, `ZipFile`, `CompressFolder`, `FilePattern`, `Recursive`, `Condition` FROM `PSW_ZipFile`");
-            for (int i = 0; i < results.Count; i += 6)
+            using (View view = session.Database.OpenView("SELECT `Id`, `ZipFile`, `CompressFolder`, `FilePattern`, `Recursive`, `Condition` FROM `PSW_ZipFile`"))
             {
-                string id = results[i + 0]?.ToString();
-                string zipFile = results[i + 1]?.ToString();
-                string compressFolder = results[i + 2]?.ToString();
-                string filePattern = results[i + 3]?.ToString();
-                string recursive = results[i + 4]?.ToString();
-                string condition = results[i + 5]?.ToString();
+                view.Execute(null);
 
-                if (!string.IsNullOrEmpty(condition) && !session.EvaluateCondition(condition))
+                foreach (Record rec in view)
                 {
-                    session.Log($"Condition '{condition}' evaluates to false");
-                    continue;
-                }
+                    using (rec)
+                    {
+                        string id = rec.GetString("Id");
+                        string zipFile = rec.GetString("ZipFile");
+                        string compressFolder = rec.GetString("CompressFolder");
+                        string filePattern = rec.GetString("FilePattern");
+                        bool recursive = (rec.GetString("Recursive")?.Equals("1") != false); // true or null
+                        string condition = rec.GetString("Condition");
 
-                zipper.SchedZip(id, session.Format(zipFile), session.Format(compressFolder), session.Format(filePattern), string.IsNullOrEmpty(recursive) || recursive.Equals("1"));
+                        if (!string.IsNullOrEmpty(condition) && !session.EvaluateCondition(condition))
+                        {
+                            session.Log($"Condition '{condition}' evaluates to false");
+                            continue;
+                        }
+
+                        zipper.SchedZip(id, session.Format(zipFile), session.Format(compressFolder), session.Format(filePattern), recursive);
+                    }
+                }
             }
 
             if (zipper.catalogs_.Count > 0)

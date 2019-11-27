@@ -22,6 +22,7 @@
   <String Overridable="yes" Id="SetPropertyFromPipe"><![CDATA[Reading properties from pipe]]></String>
   <String Overridable="yes" Id="EvaluateExpression"><![CDATA[Evaluating expressions]]></String>
   <String Overridable="yes" Id="CertificateHashSearch"><![CDATA[Find certificate hash]]></String>
+  <String Overridable="yes" Id="ZipFile"><![CDATA[Creating ZIP archive]]></String>
   <String Overridable="yes" Id="Unzip"><![CDATA[Extracting ZIP archive]]></String>
   <String Overridable="yes" Id="DiskSpace"><![CDATA[Calculating available disk space]]></String>
   <String Overridable="yes" Id="Dism"><![CDATA[Enable Windows roles and features]]></String>
@@ -37,4 +38,5 @@
     <![CDATA[Failed execuing SQL script
   [2]]]>
   </String>
+  <String Overridable="yes" Id="PSW_WebsiteConfig"><![CDATA[Configuring websites]]></String>
 </WixLocalization>

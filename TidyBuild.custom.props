@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <Import Project="$(MSBuildThisFileDirectory)TidyBuild.user.props" Condition="Exists('$(MSBuildThisFileDirectory)TidyBuild.user.props')"/>
   <PropertyGroup>
-    <FullVersion>2.14.2</FullVersion>
+    <FullVersion>2.15.0</FullVersion>
     <ProductName>PanelSwWixExtension</ProductName>
     <Manufacturer>Panel::Software</Manufacturer>
 
@@ -22,7 +22,7 @@
     <DismApiDir Condition="'$(DismApiDir)'==''">C:\Program Files (x86)\Windows Kits\8.0\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\</DismApiDir>
     <NugetDir Condition="'$(NugetDir)'==''">$(MSBuildThisFileDirectory)..\..\Tools\</NugetDir>
 
-    <WixVariables>JetVersion=$(FullVersion);JetProductName=$(ProductName);JetManufacturer=$(Manufacturer)</WixVariables>
+    <DefineConstants>JetVersion=$(FullVersion);JetProductName=$(ProductName);JetManufacturer=$(Manufacturer)</DefineConstants>
 
   </PropertyGroup>
 </Project>
