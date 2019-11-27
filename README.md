@@ -72,6 +72,7 @@ Contact the owner to obtain a license for [JetWixExtension](https://github.com/n
   - *MsiSqlQuery*: Execute a MSI-SQL query on the MSI database.
   - *CreateSelfSignCertificate*: Create a self-sign certificate that can then be installed by WixIisExtension.
 - Deferred Actions:
+  - *WebsiteConfig*: currently, can only stop a website
   - *JsonJPath*: Set values in JSON-formatted file.
   - *Dism*: Enable Windows Feature using DISM API. Features will be installed when the parent component is being installed or repaired.
   - *ZipFile*: Creates a ZIP archive from selected files.
