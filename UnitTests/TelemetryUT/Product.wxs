@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension">
-	<Product Id="*" Name="TelemetryUT" Language="1033" Version="1.0.0.0" Manufacturer="Microsoft" UpgradeCode="4ba1a99f-7eb4-491d-882d-b4d69a91c63b">
+	<Product Id="*" Name="TelemetryUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="Microsoft" UpgradeCode="4ba1a99f-7eb4-491d-882d-b4d69a91c63b">
 		<Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
 		<MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />

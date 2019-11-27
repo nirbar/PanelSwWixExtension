@@ -3,7 +3,7 @@
      xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
      >
 
-  <Product Id="*" Name="ReadIniValuesUT" Language="1033" Version="1.0.0.0" Manufacturer="Microsoft" UpgradeCode="d377fd04-a940-4ed2-8d55-e2f1f6f39d2d">
+  <Product Id="*" Name="ReadIniValuesUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="Microsoft" UpgradeCode="d377fd04-a940-4ed2-8d55-e2f1f6f39d2d">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perUser" />
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
     <MediaTemplate />

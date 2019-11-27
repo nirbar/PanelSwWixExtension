@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
-  <Product Id="{769C11E5-D811-4CE3-BE79-CC23725E6B38}" Name="$(var.ProjectName)" Language="1033" Version="1.0.0.0" Manufacturer="Panel::Software" UpgradeCode="{8DC7207F-59B4-45E6-90B0-75769F8040B8}">
+  <Product Id="{769C11E5-D811-4CE3-BE79-CC23725E6B38}" Name="$(var.ProjectName)" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{8DC7207F-59B4-45E6-90B0-75769F8040B8}">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
