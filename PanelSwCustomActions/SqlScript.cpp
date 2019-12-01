@@ -382,13 +382,13 @@ LExit:
 				{
 					if (SUCCEEDED(pError->GetDescription(&szError)) && (szError.Length() > 0))
 					{
-						ExitOnFailure(hr, "Failed to initialize connection. %ls", (BSTR)szError);
+						ExitOnFailure(hr, "Failed to initialize connection to Server='%ls', Database='%ls', User='%ls'. %ls", wzServer, wzDatabase, wzUser, (BSTR)szError);
 					}
 				}
 			}
 		}
 	}
-	ExitOnFailure(hr, "Failed to initialize connection");
+	ExitOnFailure(hr, "Failed to initialize connection to Server='%ls', Database='%ls', User='%ls'", wzServer, wzDatabase, wzUser);
 
 	hr = pidbInitialize->QueryInterface(IID_IDBCreateSession, (LPVOID*)ppidbSession);
 	ExitOnFailure(hr, "Failed to get DB session object");
@@ -732,11 +732,11 @@ HRESULT CSqlScript::ExecuteOne(LPCWSTR szServer, LPCWSTR szInstance, LPCWSTR szD
 
 	if (szInstance && *szInstance)
 	{
-		hr = StrAllocConcatFormatted(&szServerInstance, L"\\%s", szServer);
+		hr = StrAllocConcatFormatted(&szServerInstance, L"\\%s", szInstance);
 		ExitOnFailure(hr, "Failed concatentaing string");
 	}
 
-	hr = SqlConnect(szServer, szDatabase, szUser, szPassword, &pDbSession);
+	hr = SqlConnect(szServerInstance, szDatabase, szUser, szPassword, &pDbSession);
 	ExitOnFailure(hr, "Failed connecting to database");
 	ExitOnNull(pDbSession, hr, E_FAIL, "Failed connecting to database (NULL)");
 
