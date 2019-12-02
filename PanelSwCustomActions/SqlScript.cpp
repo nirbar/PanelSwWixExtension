@@ -291,17 +291,13 @@ LExit:
 	DBPROP rgdbpInit[4];
 	DBPROPSET rgdbpsetInit[1];
 	ULONG cProperties = 0;
-	
-	// Error text on unfortunate.
-	IErrorInfo* pError = nullptr;
-	ISupportErrorInfo* pISupportErrorInfo = nullptr;
-	CComBSTR szError;
+	LPWSTR szError = nullptr;
 
 	::memset(rgdbpInit, 0, sizeof(rgdbpInit));
 	::memset(rgdbpsetInit, 0, sizeof(rgdbpsetInit));
 
 	//obtain access to the SQLOLEDB provider
-	hr = ::CoCreateInstance(CLSID_SQLOLEDB, NULL, CLSCTX_INPROC_SERVER, IID_IDBInitialize, (LPVOID*)&pidbInitialize);
+	hr = ::CoCreateInstance(CLSID_SQLOLEDB, nullptr, CLSCTX_INPROC_SERVER, IID_IDBInitialize, (LPVOID*)&pidbInitialize);
 	ExitOnFailure(hr, "Failed to create IID_IDBInitialize object");
 
 	// server[\instance]
@@ -374,18 +370,10 @@ LExit:
 	hr = pidbInitialize->Initialize();
 	if (FAILED(hr)) // On error, we try to get meaningful text for log.
 	{
-		if (SUCCEEDED(pidbInitialize->QueryInterface(IID_ISupportErrorInfo, (void**)&pISupportErrorInfo)))
+		GetLastErrorText(pidbInitialize, IID_IDBInitialize, &szError);
+		if (szError && *szError)
 		{
-			if (S_OK == pISupportErrorInfo->InterfaceSupportsErrorInfo(IID_IDBInitialize))
-			{
-				if ((S_OK == GetErrorInfo(0, &pError)) && pError)
-				{
-					if (SUCCEEDED(pError->GetDescription(&szError)) && (szError.Length() > 0))
-					{
-						ExitOnFailure(hr, "Failed to initialize connection to Server='%ls', Database='%ls', User='%ls'. %ls", wzServer, wzDatabase, wzUser, (BSTR)szError);
-					}
-				}
-			}
+			ExitOnFailure(hr, "Failed to initialize connection to Server='%ls', Database='%ls', User='%ls'. %ls", wzServer, wzDatabase, wzUser, szError);
 		}
 	}
 	ExitOnFailure(hr, "Failed to initialize connection to Server='%ls', Database='%ls', User='%ls'", wzServer, wzDatabase, wzUser);
@@ -401,8 +389,7 @@ LExit:
 
 	ReleaseObject(pidbProperties);
 	ReleaseObject(pidbInitialize);
-	ReleaseObject(pISupportErrorInfo);
-	ReleaseObject(pError);
+	ReleaseStr(szError);
 
 	return hr;
 }
@@ -721,11 +708,99 @@ LExit:
 	return hr;
 }
 
+HRESULT CSqlScript::GetLastErrorText(IUnknown* pObjectWithError, REFIID IID_InterfaceWithError, LPWSTR* pszErrorDescription)
+{
+	HRESULT hr = S_OK;
+	CComPtr<ISupportErrorInfo> pISupportErrorInfo;
+	CComPtr<IErrorInfo> pIErrorInfoAll;
+	CComPtr<IErrorRecords> pIErrorRecords;
+	LPWSTR szAccumulated = nullptr;
+
+	// only ask for error information if the interface supports it.
+	hr = pObjectWithError->QueryInterface(IID_ISupportErrorInfo, (void**)&pISupportErrorInfo);
+	ExitOnFailure(hr, "No error information was found for object.");
+
+	hr = pISupportErrorInfo->InterfaceSupportsErrorInfo(IID_InterfaceWithError);
+	ExitOnFailure(hr, "InterfaceWithError is not supported for object with error");
+
+	// ignore the return of GetErrorInfo it can succeed and return a NULL pointer in pIErrorInfoAll anyway
+	hr = ::GetErrorInfo(0, &pIErrorInfoAll);
+	ExitOnFailure(hr, "failed to get error info");
+	if (pIErrorInfoAll == nullptr)
+	{
+		ExitFunction();
+	}
+
+	// see if it's a valid OLE DB IErrorInfo interface that exposes a list of records
+	hr = pIErrorInfoAll->QueryInterface(IID_IErrorRecords, (void**)&pIErrorRecords);
+	if (SUCCEEDED(hr))
+	{
+		ULONG cErrors = 0;
+		pIErrorRecords->GetRecordCount(&cErrors);
+
+		// get the error information for each record
+		for (ULONG i = 0; i < cErrors; ++i)
+		{
+			CComPtr<IErrorInfo> pIErrorInfoRecord;
+			CComBSTR szError;
+			LCID locale = ::GetThreadLocale();
+
+			if ((locale == LOCALE_CUSTOM_DEFAULT) || (locale == LOCALE_CUSTOM_DEFAULT))
+			{
+				locale = 0x409; // en-US
+			}
+
+			if (SUCCEEDED(pIErrorRecords->GetErrorInfo(i, locale, &pIErrorInfoRecord)) && (pIErrorInfoRecord != nullptr))
+			{
+				if (SUCCEEDED(pIErrorInfoRecord->GetDescription(&szError)) && (szError.Length() > 0))
+				{
+					if (szAccumulated)
+					{
+						hr = StrAllocConcatFormatted(&szAccumulated, L"\n%s", (LPWSTR)szError);
+						ExitOnFailure(hr, "Failed concatenating string");
+					}
+					else
+					{
+						StrAllocString(&szAccumulated, (LPWSTR)szError, 0);
+						ExitOnFailure(hr, "Failed allocating string");
+					}
+				}
+			}
+		}
+	}
+	else // we have a simple error record
+	{
+		CComPtr<IErrorInfo> pIErrorInfoRecord;
+		CComBSTR szError;
+
+		hr = pIErrorInfoRecord->GetDescription(&szError);
+		ExitOnFailure(hr, "Failed getting error message");
+
+		StrAllocString(&szAccumulated, (LPWSTR)szError, 0);
+		ExitOnFailure(hr, "Failed allocating string");
+	}
+
+LExit:
+	if (szAccumulated && *szAccumulated)
+	{
+		*pszErrorDescription = szAccumulated;
+		szAccumulated = nullptr;		
+	}
+
+	ReleaseStr(szAccumulated);
+
+	return hr;
+}
+
 HRESULT CSqlScript::ExecuteOne(LPCWSTR szServer, LPCWSTR szInstance, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, BSTR *pszError)
 {
 	HRESULT hr = S_OK;
 	CComPtr<IDBCreateSession> pDbSession;
+	CComPtr<IDBCreateCommand> pCmdFactory;
+	CComPtr<ICommand> pCmd;
+	CComPtr<ICommandText> pCmdText;
 	LPWSTR szServerInstance = nullptr;
+	LPWSTR szError = nullptr;
 
 	hr = StrAllocString(&szServerInstance, szServer, 0);
 	ExitOnFailure(hr, "Failed allocating string");
@@ -740,10 +815,68 @@ HRESULT CSqlScript::ExecuteOne(LPCWSTR szServer, LPCWSTR szInstance, LPCWSTR szD
 	ExitOnFailure(hr, "Failed connecting to database");
 	ExitOnNull(pDbSession, hr, E_FAIL, "Failed connecting to database (NULL)");
 
-	hr = SqlSessionExecuteQuery(pDbSession, szScript, nullptr, nullptr, pszError);
-	ExitOnFailure(hr, "Failed executing query. %ls", (pszError && *pszError) ? *pszError : L"");
+	hr = pDbSession->CreateSession(nullptr, IID_IDBCreateCommand, (IUnknown**)&pCmdFactory);
+	if (FAILED(hr))
+	{
+		GetLastErrorText(pDbSession, IID_IDBCreateSession, &szError);
+		if (szError && *szError)
+		{
+			ExitOnFailure(hr, "failed to create database session. %ls", szError);
+		}
+	}
+	ExitOnFailure(hr, "failed to create database session");
+
+	hr = pCmdFactory->CreateCommand(nullptr, IID_ICommand, (IUnknown**)&pCmd);
+	if (FAILED(hr))
+	{
+		GetLastErrorText(pCmdFactory, IID_IDBCreateCommand, &szError);
+		if (szError && *szError)
+		{
+			ExitOnFailure(hr, "Failed to create command to execute session. %ls", szError);
+		}
+	}
+	ExitOnFailure(hr, "Failed to create command to execute session");
+
+	hr = pCmd->QueryInterface(IID_ICommandText, (LPVOID*)&pCmdText);
+	if (FAILED(hr))
+	{
+		GetLastErrorText(pCmd, IID_ICommand, &szError);
+		if (szError && *szError)
+		{
+			ExitOnFailure(hr, "Failed to get command text object for command. %ls", szError);
+		}
+	}
+	ExitOnFailure(hr, "Failed to get command text object for command");
+
+	hr = pCmdText->SetCommandText(DBGUID_DEFAULT, szScript);
+	if (FAILED(hr))
+	{
+		GetLastErrorText(pCmdText, IID_ICommandText, &szError);
+		if (szError && *szError)
+		{
+			ExitOnFailure(hr, "Failed to set SQL string. %ls", szError);
+		}
+	}
+	ExitOnFailure(hr, "Failed to set SQL string");
+
+	hr = pCmd->Execute(nullptr, IID_NULL, nullptr, nullptr, nullptr);
+	if (hr = DB_S_ERRORSOCCURRED)
+	{
+		hr = E_FAIL;
+	}
+	if (FAILED(hr))
+	{
+		GetLastErrorText(pCmd, IID_ICommand, &szError);
+		if (szError && *szError)
+		{
+			ExitOnFailure(hr, "Failed to execute SQL string. %ls", szError);
+		}
+	}
+	ExitOnFailure(hr, "Failed to execute SQL string");
 
 LExit:
+
+	ReleaseStr(szError);
 	ReleaseStr(szServerInstance);
 
 	return hr;
