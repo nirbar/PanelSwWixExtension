@@ -863,10 +863,6 @@ HRESULT CSqlScript::ExecuteOne(LPCWSTR szServer, LPCWSTR szInstance, LPCWSTR szD
 	ExitOnFailure(hr, "Failed to set SQL string");
 
 	hr = pCmd->Execute(nullptr, IID_NULL, nullptr, nullptr, nullptr);
-	if (hr = DB_S_ERRORSOCCURRED)
-	{
-		hr = E_FAIL;
-	}
 	if (FAILED(hr))
 	{
 		GetLastErrorText(pCmd, IID_ICommand, &szError);
