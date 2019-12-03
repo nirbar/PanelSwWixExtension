@@ -634,7 +634,7 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 	DWORD exitCode = 0;
 	BOOL bRes = TRUE;
 	SqlScriptDetails details;
-	CComBSTR szError;
+	LPWSTR szError = nullptr;
 
 	bRes = details.ParseFromString(command);
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking SqlScriptDetails");
@@ -642,8 +642,9 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing %i SQL scripts on Server=%ls; Instance=%ls; Database=%ls; User=%ls", details.scripts_size(), (LPCWSTR)details.server().c_str(), (LPCWSTR)details.instance().c_str(), (LPCWSTR)details.database().c_str(), (LPCWSTR)details.username().c_str());
 	for (int i = 0; i < details.scripts_size(); ++i)
 	{
-
 	LRetry:
+		ReleaseNullStr(szError);
+
 		hr = ExecuteOne((LPCWSTR)details.server().c_str(), (LPCWSTR)details.instance().c_str(), (LPCWSTR)details.database().c_str(), (LPCWSTR)details.username().c_str(), (LPCWSTR)details.password().c_str(), (LPCWSTR)details.scripts(i).c_str(), &szError);
 		if (FAILED(hr))
 		{
@@ -671,9 +672,9 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 				hr = WcaSetRecordInteger(hRec, 1, 27005);
 				ExitOnFailure(hr, "Failed setting record integer");
 
-				if (szError.Length() > 1)
+				if (szError && *szError)
 				{
-					hr = WcaSetRecordString(hRec, 2, (LPWSTR)szError);
+					hr = WcaSetRecordString(hRec, 2, szError);
 					ExitOnFailure(hr, "Failed setting record integer");
 				}
 
@@ -705,6 +706,8 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 	}
 
 LExit:
+	ReleaseStr(szError);
+
 	return hr;
 }
 
@@ -792,7 +795,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CSqlScript::ExecuteOne(LPCWSTR szServer, LPCWSTR szInstance, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, BSTR *pszError)
+HRESULT CSqlScript::ExecuteOne(LPCWSTR szServer, LPCWSTR szInstance, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, LPWSTR *pszError)
 {
 	HRESULT hr = S_OK;
 	CComPtr<IDBCreateSession> pDbSession;
@@ -875,6 +878,11 @@ HRESULT CSqlScript::ExecuteOne(LPCWSTR szServer, LPCWSTR szInstance, LPCWSTR szD
 	ExitOnFailure(hr, "Failed to execute SQL string");
 
 LExit:
+	if (szError && *szError && pszError)
+	{
+		*pszError = szError;
+		szError = nullptr;
+	}
 
 	ReleaseStr(szError);
 	ReleaseStr(szServerInstance);
