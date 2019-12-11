@@ -71,6 +71,12 @@ extern "C" UINT __stdcall MsiSqlQuery(MSIHANDLE hInstall)
 			CWixString value;
 			
 			hr = WcaFetchRecord(hQueryView, &hQueryRec);
+			if (hr == E_NOMOREITEMS)
+			{
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "No results found");
+				hr = S_FALSE;
+				continue;
+			}
 			BreakExitOnFailure(hr, "Failed fetching query result");
 
 			hr = WcaGetRecordString(hQueryRec, 1, (LPWSTR*)value);
@@ -81,8 +87,7 @@ extern "C" UINT __stdcall MsiSqlQuery(MSIHANDLE hInstall)
 		}
 	}
 
-	hr = ERROR_SUCCESS;
-	WcaLog(LOGMSG_STANDARD, "Done.");
+	hr = S_OK;
 
 LExit:
 
