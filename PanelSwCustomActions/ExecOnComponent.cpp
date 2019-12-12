@@ -854,16 +854,29 @@ HRESULT CExecOnComponent::SearchStdOut(LPCWSTR szStdOut, const ExecOnDetails &de
 
 	for (int i = 0; i < details.consoleouputremap_size(); ++i)
 	{
-		bool bRes = true;
 		const ConsoleOuputRemap &console = details.consoleouputremap(i);
-		std::wregex rx((LPCWSTR)console.regex().data());
-		match_results<LPCWSTR> results;
 
-		bRes = regex_search(szStdOut, results, rx);
-		LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Regex '%ls' search yielded %i matches", (LPCWSTR)console.obfuscatedregex().data(), results.size());
-		if ((bRes && results.size()) != console.onmatch())
+		try 
 		{
-			continue;
+			bool bRes = true;
+			std::wregex rx((LPCWSTR)console.regex().data());
+			match_results<LPCWSTR> results;
+
+			bRes = regex_search(szStdOut, results, rx);
+			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Regex '%ls' search yielded %i matches", (LPCWSTR)console.obfuscatedregex().data(), results.size());
+			if ((bRes && results.size()) != console.onmatch())
+			{
+				continue;
+			}
+		}
+		catch (std::regex_error ex)
+		{
+			hr = HRESULT_FROM_WIN32(ex.code());
+			if (SUCCEEDED(hr))
+			{
+				hr = E_FAIL;
+			}
+			BreakExitOnFailure(hr, "Failed evaluating regular expression. %ls", ex.what());
 		}
 
 		switch (console.errorhandling())

@@ -151,10 +151,22 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 			// Test if feature matches any regex
 			for (DWORD j = 0; j < dwStateNum; ++j)
 			{
-				wregex rxInclude(pStates[j].szInclude);
 				match_results<LPCWSTR> results;
+				try
+				{
+					wregex rxInclude(pStates[j].szInclude);
+					bRes = regex_search(pFeatures[i].FeatureName, results, rxInclude);
+				}
+				catch (std::regex_error ex)
+				{
+					hr = HRESULT_FROM_WIN32(ex.code());
+					if (SUCCEEDED(hr))
+					{
+						hr = E_FAIL;
+					}
+					ExitOnFailure(hr, "Failed evaluating regular expression. %ls", ex.what());
+				}
 
-				bRes = regex_search(pFeatures[i].FeatureName, results, rxInclude);
 				if (!bRes || (results.length() <= 0))
 				{
 					continue;
@@ -162,8 +174,21 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 				// Feature included. Was it explictly excluded?
 				if (pStates[j].szExclude && *pStates[j].szExclude)
 				{
-					wregex rxExclude(pStates[j].szExclude);
-					bRes = regex_search(pFeatures[i].FeatureName, results, rxExclude);
+					try
+					{
+						wregex rxExclude(pStates[j].szExclude);
+						bRes = regex_search(pFeatures[i].FeatureName, results, rxExclude);
+					}
+					catch (std::regex_error ex)
+					{
+						hr = HRESULT_FROM_WIN32(ex.code());
+						if (SUCCEEDED(hr))
+						{
+							hr = E_FAIL;
+						}
+						ExitOnFailure(hr, "Failed evaluating regular expression. %ls", ex.what());
+					}
+
 					if (bRes && (results.length() > 0))
 					{
 						WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Feature '%ls' excluded by regex '%ls'", pFeatures[i].FeatureName, pStates[j].szExclude);

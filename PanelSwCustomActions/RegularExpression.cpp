@@ -148,12 +148,23 @@ extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 		// Replace
 		else
 		{
-			wregex rx((LPCWSTR)szExpression, syntax);
+			try 
+			{
+				wregex rx((LPCWSTR)szExpression, syntax);
+				std::wstring rep = regex_replace((LPCWSTR)sInput, rx, (LPCWSTR)sReplace);
 
-			std::wstring rep = regex_replace((LPCWSTR)sInput, rx, (LPCWSTR)sReplace);
-			
-			hr = WcaSetProperty(sDstProperty, rep.c_str());
-			BreakExitOnFailure(hr, "Failed setting target property");
+				hr = WcaSetProperty(sDstProperty, rep.c_str());
+				BreakExitOnFailure(hr, "Failed setting target property");
+			}
+			catch (std::regex_error ex)
+			{
+				hr = HRESULT_FROM_WIN32(ex.code());
+				if (SUCCEEDED(hr))
+				{
+					hr = E_FAIL;
+				}
+				BreakExitOnFailure(hr, "Failed evaluating regular expression. %ls", ex.what());
+			}
 		}
 	}
 
@@ -169,13 +180,26 @@ static HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR 
 {
 	HRESULT hr = S_OK;
 	bool bRes = true;
-	wregex rx(szExpression, syntax);
 	match_results<LPCWSTR> results;
 	CWixString sPropName;
 	match_results<LPCWSTR>::const_iterator curIt, endIt;
 
-	bRes = regex_search(szInput, results, rx);
-	BreakExitOnNull((bRes || ((flags.s.result & ResultFlags::MustMatch) == 0)), hr, E_FAIL, "Regex returned no matches");
+	try
+	{
+		wregex rx(szExpression, syntax);
+		bRes = regex_search(szInput, results, rx);
+		BreakExitOnNull((bRes || ((flags.s.result & ResultFlags::MustMatch) == 0)), hr, E_FAIL, "Regex returned no matches");
+	}
+	catch (std::regex_error ex)
+	{
+		hr = HRESULT_FROM_WIN32(ex.code());
+		if (SUCCEEDED(hr))
+		{
+			hr = E_FAIL;
+		}
+		BreakExitOnFailure(hr, "Failed evaluating regular expression. %ls", ex.what());
+	}
+
 	if (!bRes)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "No matches");
@@ -209,44 +233,55 @@ static HRESULT SearchMultibyte(LPCWSTR szProperty_, LPCWSTR szExpression, LPCSTR
 	HRESULT hr = S_OK;
 	LPSTR szPropertyA = nullptr;
 	LPSTR szExpressionA = nullptr;
+	match_results<LPCSTR> results;
+	bool bRes = true;
+	CWixString szCntProp;
 
 	hr = StrAnsiAllocString(&szExpressionA, szExpression, 0, CP_UTF8);
 	BreakExitOnFailure(hr, "Failed converting string to multibyte");
 
 	// New scope to construct regex in
+	try
 	{
-		bool bRes = true;
 		regex rx(szExpressionA, syntax);
-		match_results<LPCSTR> results;
-		CWixString szCntProp;
 
 		bRes = regex_search(szInput, results, rx);
 		BreakExitOnNull((bRes || ((flags.s.result & ResultFlags::MustMatch) == 0)), hr, E_FAIL, "Regex returned no matches");
-		if (!bRes)
+	}
+	catch (std::regex_error ex)
+	{
+		hr = HRESULT_FROM_WIN32(ex.code());
+		if (SUCCEEDED(hr))
 		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "No matches");
-			ExitFunction1(hr = S_FALSE);
+			hr = E_FAIL;
 		}
+		ExitOnFailure(hr, "Failed evaluating regular expression. %ls", ex.what());
+	}
 
-		hr = szCntProp.Format(L"%s_COUNT", szProperty_);
-		BreakExitOnFailure(hr, "Failed formatting string");
+	if (!bRes)
+	{
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "No matches");
+		ExitFunction1(hr = S_FALSE);
+	}
 
-		hr = ::WcaSetIntProperty(szCntProp, results.size());
-		BreakExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)szCntProp);
+	hr = szCntProp.Format(L"%s_COUNT", szProperty_);
+	BreakExitOnFailure(hr, "Failed formatting string");
 
-		// Iterate results
-		match_results<LPCSTR>::const_iterator curIt = results.begin();
-		match_results<LPCSTR>::const_iterator endIt = results.end();
-		for (size_t i = 0; curIt != endIt; ++i, ++curIt)
-		{
-			hr = StrAnsiAllocFormatted(&szPropertyA, "%ls_%Iu", szProperty_, i);
-			BreakExitOnFailure(hr, "Failed formatting ansi string");
+	hr = ::WcaSetIntProperty(szCntProp, results.size());
+	BreakExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)szCntProp);
 
-			hr = ::MsiSetPropertyA(WcaGetInstallHandle(), szPropertyA, curIt->str().c_str());
-			BreakExitOnFailure(hr, "Failed setting property '%s'", szPropertyA);
+	// Iterate results
+	match_results<LPCSTR>::const_iterator curIt = results.begin();
+	match_results<LPCSTR>::const_iterator endIt = results.end();
+	for (size_t i = 0; curIt != endIt; ++i, ++curIt)
+	{
+		hr = StrAnsiAllocFormatted(&szPropertyA, "%ls_%Iu", szProperty_, i);
+		BreakExitOnFailure(hr, "Failed formatting ansi string");
 
-			ReleaseNullMem(szPropertyA);
-		}
+		hr = ::MsiSetPropertyA(WcaGetInstallHandle(), szPropertyA, curIt->str().c_str());
+		BreakExitOnFailure(hr, "Failed setting property '%s'", szPropertyA);
+
+		ReleaseNullMem(szPropertyA);
 	}
 
 LExit:

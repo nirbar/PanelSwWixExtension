@@ -333,7 +333,6 @@ HRESULT CFileRegex::ExecuteMultibyte(LPCWSTR szFilePath, LPCSTR szFileContent, L
 	HANDLE hFile = INVALID_HANDLE_VALUE;
 	LPSTR szRegexMB = nullptr;
 	LPSTR szReplacementMB = nullptr;
-	regex rx;
 	string szContent;
 	regex_constants::syntax_option_type syntax = std::regex_constants::syntax_option_type::ECMAScript;
 
@@ -361,9 +360,22 @@ HRESULT CFileRegex::ExecuteMultibyte(LPCWSTR szFilePath, LPCSTR szFileContent, L
 	{
 		syntax |= std::regex_constants::syntax_option_type::icase;
 	}
-	rx.assign(szRegexMB, syntax);
 
-	szContent = std::regex_replace(szFileContent, rx, szReplacementMB);
+	try
+	{
+		regex rx(szRegexMB, syntax);
+		szContent = std::regex_replace(szFileContent, rx, szReplacementMB);
+	}
+	catch (std::regex_error ex)
+	{
+		hr = HRESULT_FROM_WIN32(ex.code());
+		if (SUCCEEDED(hr))
+		{
+			hr = E_FAIL;
+		}
+		ExitOnFailure(hr, "Failed evaluating regular expression. %ls", ex.what());
+	}
+
 	dwSize = szContent.length();
 
 	dwFileAttr = ::GetFileAttributes(szFilePath);
@@ -401,7 +413,6 @@ HRESULT CFileRegex::ExecuteUnicode(LPCWSTR szFilePath, LPCWSTR szFileContent, LP
 	DWORD dwFileSize = 0;
 	DWORD dwFileAttr = FILE_ATTRIBUTE_NORMAL;
 	HANDLE hFile = INVALID_HANDLE_VALUE;
-	wregex rx;
 	wstring szContent;
 	regex_constants::syntax_option_type syntax = std::regex_constants::syntax_option_type::ECMAScript;
 
@@ -409,9 +420,21 @@ HRESULT CFileRegex::ExecuteUnicode(LPCWSTR szFilePath, LPCWSTR szFileContent, LP
 	{
 		syntax |= std::regex_constants::syntax_option_type::icase;
 	}
-	rx.assign(szRegex, syntax);
+	try
+	{
+		wregex rx(szRegex, syntax);
+		szContent = std::regex_replace(szFileContent, rx, szReplacement);
+	}
+	catch (std::regex_error ex)
+	{
+		hr = HRESULT_FROM_WIN32(ex.code());
+		if (SUCCEEDED(hr))
+		{
+			hr = E_FAIL;
+		}
+		BreakExitOnFailure(hr, "Failed evaluating regular expression. %ls", ex.what());
+	}
 
-	szContent = std::regex_replace(szFileContent, rx, szReplacement);
 	dwFileSize = szContent.length();
 	dwFileSize *= sizeof(wchar_t);
 
