@@ -92,16 +92,9 @@ extern "C" UINT __stdcall SqlSearch(MSIHANDLE hInstall)
 			}
 		}
 
-		// Server\Instance
-		if (!szInstance.IsNullOrEmpty())
-		{
-			hr = szServer.AppnedFormat(L"\\%s", (LPCWSTR)szInstance);
-			BreakExitOnFailure(hr, "Failed copying instance name.");
-		}
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing SQL query '%ls'. Server='%ls', Instance='%ls', Database='%ls', User='%ls'. Will place results in property '%ls'", (LPCWSTR)szQuery, (LPCWSTR)szServer, (LPCWSTR)szInstance, (LPCWSTR)szDatabase, (LPCWSTR)szUsername, (LPCWSTR)szProperty);
 
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing SQL query '%ls'. Server='%ls', Database='%ls', User='%ls'. Will place results in property '%ls'", (LPCWSTR)szQuery, (LPCWSTR)szServer, (LPCWSTR)szDatabase, (LPCWSTR)szUsername, (LPCWSTR)szProperty);
-
-		hr = CSqlScript::SqlConnect((LPCWSTR)szServer, (LPCWSTR)szDatabase, (LPCWSTR)szUsername, (LPCWSTR)szPassword, &pDbSession);
+		hr = CSqlScript::SqlConnect((LPCWSTR)szServer, (LPCWSTR)szInstance, (LPCWSTR)szDatabase, (LPCWSTR)szUsername, (LPCWSTR)szPassword, &pDbSession);
 		BreakExitOnFailure(hr, "Failed connecting to database");
 		BreakExitOnNull(pDbSession, hr, E_FAIL, "Failed connecting to database (NULL)");
 

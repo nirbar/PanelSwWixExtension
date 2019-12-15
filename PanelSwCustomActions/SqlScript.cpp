@@ -283,7 +283,7 @@ LExit:
 	return hr;
 }
 
-/*static*/ HRESULT CSqlScript::SqlConnect(LPCWSTR wzServer, LPCWSTR wzDatabase, LPCWSTR wzUser, LPCWSTR wzPassword, IDBCreateSession** ppidbSession)
+/*static*/ HRESULT CSqlScript::SqlConnect(LPCWSTR wzServer, LPCWSTR wzInstance, LPCWSTR wzDatabase, LPCWSTR wzUser, LPCWSTR wzPassword, IDBCreateSession** ppidbSession)
 {
 	HRESULT hr = S_OK;
 	IDBInitialize* pidbInitialize = nullptr;
@@ -292,6 +292,7 @@ LExit:
 	DBPROPSET rgdbpsetInit[1];
 	ULONG cProperties = 0;
 	LPWSTR szError = nullptr;
+	LPWSTR szServerInstance = nullptr;
 
 	::memset(rgdbpInit, 0, sizeof(rgdbpInit));
 	::memset(rgdbpsetInit, 0, sizeof(rgdbpsetInit));
@@ -300,13 +301,35 @@ LExit:
 	hr = ::CoCreateInstance(CLSID_SQLOLEDB, nullptr, CLSCTX_INPROC_SERVER, IID_IDBInitialize, (LPVOID*)&pidbInitialize);
 	ExitOnFailure(hr, "Failed to create IID_IDBInitialize object");
 
+	hr = StrAllocString(&szServerInstance, wzServer, 0);
+	ExitOnFailure(hr, "Failed allocating string");
+
+	if (wzInstance && *wzInstance)
+	{
+		LPWSTR szBackslash = ::wcschr(szServerInstance, L'\\');
+		if (szBackslash && szBackslash[1])
+		{
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Ignoring instance part '%ls' because server part '%ls' already has an instance name", wzInstance, szServerInstance);
+		}
+		else
+		{
+			if (szBackslash)
+			{
+				szBackslash[0] = NULL; // Prevent multi-backslash
+			}
+
+			hr = StrAllocConcatFormatted(&szServerInstance, L"\\%s", wzInstance);
+			ExitOnFailure(hr, "Failed concatentaing string");
+		}
+	}
+
 	// server[\instance]
 	rgdbpInit[cProperties].dwPropertyID = DBPROP_INIT_DATASOURCE;
 	rgdbpInit[cProperties].dwOptions = DBPROPOPTIONS_REQUIRED;
 	rgdbpInit[cProperties].colid = DB_NULLID;
 	::VariantInit(&rgdbpInit[cProperties].vValue);
 	rgdbpInit[cProperties].vValue.vt = VT_BSTR;
-	rgdbpInit[cProperties].vValue.bstrVal = ::SysAllocString(wzServer);
+	rgdbpInit[cProperties].vValue.bstrVal = ::SysAllocString(szServerInstance);
 	++cProperties;
 
 	// Database, default if not supplied.
@@ -373,10 +396,10 @@ LExit:
 		GetLastErrorText(pidbInitialize, IID_IDBInitialize, &szError);
 		if (szError && *szError)
 		{
-			ExitOnFailure(hr, "Failed to initialize connection to Server='%ls', Database='%ls', User='%ls'. %ls", wzServer, wzDatabase, wzUser, szError);
+			ExitOnFailure(hr, "Failed to initialize connection to Server='%ls', Database='%ls', User='%ls'. %ls", szServerInstance, wzDatabase, wzUser, szError);
 		}
 	}
-	ExitOnFailure(hr, "Failed to initialize connection to Server='%ls', Database='%ls', User='%ls'", wzServer, wzDatabase, wzUser);
+	ExitOnFailure(hr, "Failed to initialize connection to Server='%ls', Database='%ls', User='%ls'", szServerInstance, wzDatabase, wzUser);
 
 	hr = pidbInitialize->QueryInterface(IID_IDBCreateSession, (LPVOID*)ppidbSession);
 	ExitOnFailure(hr, "Failed to get DB session object");
@@ -390,6 +413,7 @@ LExit:
 	ReleaseObject(pidbProperties);
 	ReleaseObject(pidbInitialize);
 	ReleaseStr(szError);
+	ReleaseStr(szServerInstance);
 
 	return hr;
 }
@@ -802,19 +826,9 @@ HRESULT CSqlScript::ExecuteOne(LPCWSTR szServer, LPCWSTR szInstance, LPCWSTR szD
 	CComPtr<IDBCreateCommand> pCmdFactory;
 	CComPtr<ICommand> pCmd;
 	CComPtr<ICommandText> pCmdText;
-	LPWSTR szServerInstance = nullptr;
 	LPWSTR szError = nullptr;
 
-	hr = StrAllocString(&szServerInstance, szServer, 0);
-	ExitOnFailure(hr, "Failed allocating string");
-
-	if (szInstance && *szInstance)
-	{
-		hr = StrAllocConcatFormatted(&szServerInstance, L"\\%s", szInstance);
-		ExitOnFailure(hr, "Failed concatentaing string");
-	}
-
-	hr = SqlConnect(szServerInstance, szDatabase, szUser, szPassword, &pDbSession);
+	hr = SqlConnect(szServer, szInstance, szDatabase, szUser, szPassword, &pDbSession);
 	ExitOnFailure(hr, "Failed connecting to database");
 	ExitOnNull(pDbSession, hr, E_FAIL, "Failed connecting to database (NULL)");
 
@@ -881,7 +895,6 @@ LExit:
 	}
 
 	ReleaseStr(szError);
-	ReleaseStr(szServerInstance);
 
 	return hr;
 }

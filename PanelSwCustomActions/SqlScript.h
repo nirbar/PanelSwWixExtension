@@ -11,7 +11,7 @@ public:
 
 	CSqlScript() : CDeferredActionBase("SqlScript") { }
 
-	static HRESULT SqlConnect(LPCWSTR wzServer, LPCWSTR wzDatabase, LPCWSTR wzUser, LPCWSTR wzPassword, IDBCreateSession** ppidbSession);
+	static HRESULT SqlConnect(LPCWSTR wzServer, LPCWSTR wzInstance, LPCWSTR wzDatabase, LPCWSTR wzUser, LPCWSTR wzPassword, IDBCreateSession** ppidbSession);
 
 	HRESULT AddExec(LPCWSTR szServer, LPCWSTR szInstance, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, com::panelsw::ca::ErrorHandling errorHandling);
 
