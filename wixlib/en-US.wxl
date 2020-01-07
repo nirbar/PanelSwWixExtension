@@ -8,7 +8,7 @@
   <String Overridable="yes" Id="ExecOnComponent"><![CDATA[Executing custom actions]]></String>
   <String Overridable="yes" Id="ExecOnFailure"><![CDATA[Failed executing command [2]]]></String>
   <String Overridable="yes" Id="ExecOnConsoleFailure"><![CDATA[Command [2] yielded error
-  [3]]]></String>  
+[3]]]></String>  
   <String Overridable="yes" Id="ServiceConfig"><![CDATA[Configuring Services]]></String>
   <String Overridable="yes" Id="ServiceConfigFailure"><![CDATA[Failed configuring service [2]]]></String>
   <String Overridable="yes" Id="InstallUtil"><![CDATA[Installing .NET service assemblies]]></String>
@@ -27,16 +27,15 @@
   <String Overridable="yes" Id="DiskSpace"><![CDATA[Calculating available disk space]]></String>
   <String Overridable="yes" Id="Dism"><![CDATA[Enable Windows roles and features]]></String>
   <String Overridable="yes" Id="DismPackageFailure"><![CDATA[Failed adding a Windows Feature package [2]:
-  [3]]]></String>
+[3]]]></String>
   <String Overridable="yes" Id="DismFeatureFailure"><![CDATA[Failed enabling Windows Feature [2]:
-  [3]]]></String>
+[3]]]></String>
   <String Overridable="yes" Id="JsonJpath"><![CDATA[Editing Json files]]></String>
   <String Overridable="yes" Id="JsonJpathSearch"><![CDATA[Searching in Json files]]></String>
   <String Overridable="yes" Id="AccountSidSearch"><![CDATA[Detecting account security identifier]]></String>
   <String Overridable="yes" Id="PSW_SqlScript"><![CDATA[Executing SQL scripts]]></String>
-  <String Overridable="yes" Id="PSW_SqlScriptFailure">
-    <![CDATA[Failed execuing SQL script
-  [2]]]>
+  <String Overridable="yes" Id="PSW_SqlScriptFailure"><![CDATA[Failed executing SQL script
+[2]]]>
   </String>
   <String Overridable="yes" Id="PSW_WebsiteConfig"><![CDATA[Configuring websites]]></String>
 </WixLocalization>
