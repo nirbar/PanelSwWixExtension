@@ -322,4 +322,11 @@
     <columnDefinition name="Website" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Stop" type="number" length="2" minValue="0" maxValue="1" />
   </tableDefinition>
+
+  <tableDefinition name="PSW_VersionCompare">
+    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="Property_" type="string" length="0" modularize="property" category="text" />
+    <columnDefinition name="Version1" type="string" length="0" modularize="property" nullable="yes" category="formatted" />
+    <columnDefinition name="Version2" type="string" length="0" modularize="property" nullable="yes" category="formatted" />
+  </tableDefinition>
 </tableDefinitions>

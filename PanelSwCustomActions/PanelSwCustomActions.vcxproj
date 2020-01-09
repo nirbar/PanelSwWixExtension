@@ -125,6 +125,7 @@
     <ClCompile Include="TerminateSuccessfully.cpp" />
     <ClCompile Include="TopShelfService.cpp" />
     <ClCompile Include="Unzip.cpp" />
+    <ClCompile Include="VersionCompare.cpp" />
     <ClCompile Include="XmlSearch.cpp" />
   </ItemGroup>
   <ItemGroup>

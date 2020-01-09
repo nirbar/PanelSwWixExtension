@@ -121,6 +121,10 @@ namespace PanelSw.Wix.Extensions
                             ParseAccountSidSearchElement(element);
                             break;
 
+                        case "VersionCompare":
+                            ParseVersionCompareElement(element);
+                            break;
+
                         case "XmlSearch":
                             ParseXmlSearchElement(element);
                             break;
@@ -2533,6 +2537,69 @@ namespace PanelSw.Wix.Extensions
                 row[1] = property;
                 row[2] = expression;
                 row[3] = order;
+            }
+        }
+
+        private void ParseVersionCompareElement(XmlNode node)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string id = "ver" + Guid.NewGuid().ToString("N"); ;
+            string version1 = null;
+            string version2 = null;
+            string property = null;
+
+            if (node.ParentNode.LocalName != "Property")
+            {
+                Core.UnexpectedElement(node.ParentNode, node);
+                return;
+            }
+            property = node.ParentNode.Attributes["Id"].Value;
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName)
+                    {
+                        case "Version1":
+                            version1 = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Version2":
+                            version2 = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+                else
+                {
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            if (string.IsNullOrEmpty(property))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.LocalName, "Id"));
+                return;
+            }
+            if (string.IsNullOrEmpty(version1))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Version1"));
+            }
+            if (string.IsNullOrEmpty(version2))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Version2"));
+            }
+
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "PSW_VersionCompare");
+            if (!Core.EncounteredError)
+            {
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_VersionCompare");
+                row[0] = id;
+                row[1] = property;
+                row[2] = version1;
+                row[3] = version2;
             }
         }
 

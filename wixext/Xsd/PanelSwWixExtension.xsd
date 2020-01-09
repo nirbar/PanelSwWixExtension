@@ -14,6 +14,33 @@
   </xs:annotation>
   <xs:import namespace="http://schemas.microsoft.com/wix/2006/wi" />
 
+  <xs:element name="VersionCompare">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Compare versions and set target property to -1, 0 or 1.]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Version1" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Left-hand side version for comparison. This field is formatted</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Version2" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Right-hand side version for comparison. This field is formatted</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="AccountSidSearch">
     <xs:annotation>
       <xs:appinfo>

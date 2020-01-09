@@ -58,6 +58,7 @@ Contact the owner to obtain a license for [JetWixExtension](https://github.com/n
 ## PanelSwWixExtension WiX Elements
 
 - Immediate Actions:
+  - *VersionCompare*: compare two versions, set result to property as -1, 0, or 1
   - *ForceVersion*: Force a specified version for a file. Version overwrite is done on runtime in the MSI database.
   - *AccountSidSearch*: Lookup an account's SID by account name.
   - *JsonJpathSearch*: Read JSON values

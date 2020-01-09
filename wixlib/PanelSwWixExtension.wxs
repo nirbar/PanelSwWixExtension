@@ -683,4 +683,18 @@
       <ProgressText Action="AccountSidSearch">!(loc.AccountSidSearch)</ProgressText>
     </UI>
   </Fragment>
+
+  <!-- VersionCompare -->
+  <Fragment>
+    <CustomAction Id="PSW_VersionCompare" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="VersionCompare" Execute="immediate" Return="check" />
+    <InstallExecuteSequence>
+      <Custom Action="PSW_VersionCompare" After="AppSearch" Overridable="yes"/>
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="PSW_VersionCompare" After="AppSearch" Overridable="yes"/>
+    </InstallUISequence>
+    <UI>
+      <ProgressText Action="PSW_VersionCompare">!(loc.PSW_VersionCompare)</ProgressText>
+    </UI>
+  </Fragment>
 </Wix>
