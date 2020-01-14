@@ -1,6 +1,7 @@
 #include "DeferredActionBase.h"
 #include "WixString.h"
 #include <memutil.h>
+#include <wcawow64.h>
 using namespace ::com::panelsw::ca;
 
 static void FirstLog(MSIHANDLE hInstall, LPCSTR szMessage);
@@ -16,6 +17,8 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToEx
 	CDeferredActionBase* pExecutor = nullptr;
 	CustomActionData cad;
 	BOOL bIsRollback = FALSE;
+	BOOL bIsWow64Initialized = FALSE;
+	BOOL bRedirected = FALSE;
 
 	// Get CustomActionData
 	UINT er = ERROR_SUCCESS;
@@ -68,6 +71,18 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToEx
 	hr = WcaInitialize(hInstall, cad.id().c_str());
 	BreakExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
+
+	bIsWow64Initialized = (WcaInitializeWow64() == S_OK);
+	if (bIsWow64Initialized)
+	{
+		hr = WcaDisableWow64FSRedirection();
+		bRedirected = SUCCEEDED(hr);
+		if (!bRedirected)
+		{
+			WcaLogError(hr, "Failed to enable filesystem redirection.");
+			hr = S_OK;
+		}
+	}
 
 	// During rollback we don't exit on failure before completing cleanup.
 	bIsRollback = ::MsiGetMode(WcaGetInstallHandle(), MSIRUNMODE::MSIRUNMODE_ROLLBACK);
@@ -123,6 +138,15 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToEx
 	}
 
 LExit:
+
+	if (bRedirected)
+	{
+		WcaRevertWow64FSRedirection();
+	}
+	if (bIsWow64Initialized)
+	{
+		WcaFinalizeWow64();
+	}
 
 	ReleaseStr(szCustomActionData);
 	ReleaseMem(pData);

@@ -1,35 +1,32 @@
-
 #include "stdafx.h"
 #include <Windows.h>
 #include <procutil.h>
+#include "DeferredActionBase.h"
 
-// DllMain - Initialize and cleanup WiX custom action utils.
 PROC_FILESYSTEMREDIRECTION _gFsRedirect;
-extern "C" BOOL WINAPI DllMain(
-	__in HINSTANCE hInst,
-	__in ULONG ulReason,
-	__in LPVOID
-	)
+extern "C" BOOL WINAPI DllMain(HINSTANCE hInst, ULONG ulReason, LPVOID)
 {
 	BOOL bWow64 = FALSE;
 	HANDLE hProc = NULL;
 	HRESULT hr = S_OK;
-	
-	switch(ulReason)
+
+	switch (ulReason)
 	{
 	case DLL_PROCESS_ATTACH:
 		WcaGlobalInitialize(hInst);
-		
+
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Checking if file system redirection can be disabled");
 		_gFsRedirect.fDisabled = FALSE;
 		hProc = ::GetCurrentProcess();
-		hr = ProcWow64( hProc, &bWow64);
-		if( SUCCEEDED( hr) &&  bWow64)
+		hr = ProcWow64(hProc, &bWow64);
+		if (SUCCEEDED(hr) && bWow64)
 		{
-			hr = ProcDisableWowFileSystemRedirection( &_gFsRedirect);
-			if( FAILED( hr))
+			CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Disabling file system redirection");
+			hr = ProcDisableWowFileSystemRedirection(&_gFsRedirect);
+			if (FAILED(hr))
 			{
 				_gFsRedirect.fDisabled = FALSE;
-				WcaLogError( E_FAIL, "ProcDisableWowFileSystemRedirection failed");
+				CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "ProcDisableWowFileSystemRedirection failed with code %u", hr);
 			}
 		}
 
@@ -38,12 +35,12 @@ extern "C" BOOL WINAPI DllMain(
 	case DLL_PROCESS_DETACH:
 		WcaGlobalFinalize();
 
-		if( _gFsRedirect.fDisabled)
+		if (_gFsRedirect.fDisabled)
 		{
-			hr = ProcRevertWowFileSystemRedirection( &_gFsRedirect);
-			if( FAILED( hr))
+			hr = ProcRevertWowFileSystemRedirection(&_gFsRedirect);
+			if (FAILED(hr))
 			{
-				WcaLogError( E_FAIL, "Wow64RevertWow64FsRedirection failed");
+				CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Wow64RevertWow64FsRedirection failed");
 			}
 		}
 
