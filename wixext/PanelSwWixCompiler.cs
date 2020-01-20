@@ -153,6 +153,10 @@ namespace PanelSw.Wix.Extensions
                             ParseReadIniValuesElement(element, parentElement);
                             break;
 
+                        case "RegularExpression":
+                            ParseRegularExpression(element);
+                            break;
+
                         default:
                             Core.UnexpectedElement(parentElement, element);
                             break;
@@ -3283,6 +3287,11 @@ namespace PanelSw.Wix.Extensions
             string condition = null;
             int order = 1000000000 + GetLineNumber(sourceLineNumbers);
 
+            if (node.ParentNode.LocalName == "Property")
+            {
+                prop = node.ParentNode.Attributes["Id"].Value;
+            }
+
             foreach (XmlAttribute attrib in node.Attributes)
             {
                 if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
@@ -3306,6 +3315,10 @@ namespace PanelSw.Wix.Extensions
                             flags |= (int)RegexSearchFlags.Replace;
                             break;
                         case "DstProperty":
+                            if (!string.IsNullOrEmpty(prop))
+                            {
+                                Core.OnMessage(WixErrors.ExpectedAttributeInElementOrParent(sourceLineNumbers, node.LocalName, attrib.LocalName, node.ParentNode.LocalName));
+                            }
                             prop = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "IgnoreCase":

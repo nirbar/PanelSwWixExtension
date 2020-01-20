@@ -32,10 +32,10 @@
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
 
     <Property Id="MY_INPUT" Value="Test Text" />
-    <PanelSW:RegularExpression Input="My Input is [MY_INPUT]"
-                               DstProperty="REGEX_MATCH"
-                               Expression="is (.*)"
-                               />
+    <Property Id="REGEX_MATCH">
+      <PanelSW:RegularExpression Input="My Input is [MY_INPUT]"
+                                 Expression="is (.*)"/>
+    </Property>
     <PanelSW:RegularExpression Input="My Input is [MY_INPUT]"
                                DstProperty="REGEX_REPLACE"
                                Replacement="IS YOUR INPUT"
