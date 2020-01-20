@@ -614,6 +614,10 @@ LRetry:
 		LogProcessOutput(hStdOut, ((details.consoleouputremap_size() > 0) ? (LPWSTR*)szLog : nullptr));
 
 		hr = ProcWaitForCompletion(hProc, INFINITE, &exitCode);
+		if (SUCCEEDED(hr))
+		{
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Process exited with code %u", exitCode);
+		}
 	}
 	if (FAILED(hr)) 
 	{
