@@ -94,6 +94,40 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 		}
 		if (!szAccount.IsNullOrEmpty())
 		{
+			// Ensure account format is domain\user
+			DWORD i = szAccount.Find(L'@');
+			if (i != INFINITE)
+			{
+				CWixString szDomain, szName;
+				
+				hr = szDomain.Copy(((LPCWSTR)szAccount) + i + 1);
+				ExitOnFailure(hr, "Failed copying string");
+				
+				hr = szName.Copy((LPCWSTR)szAccount, i);
+				ExitOnFailure(hr, "Failed copying string");
+
+				szAccount.Format(L"%s\\%s", (LPCWSTR)szDomain, (LPCWSTR)szName);
+				ExitOnFailure(hr, "Failed formatting string");
+			}
+			else
+			{
+				// Set computer name as domain part if not specified
+				i = szAccount.Find(L'\\');
+				if (i == INFINITE)
+				{
+					CWixString szDomain, szName;
+
+					hr = WcaGetProperty(L"ComputerName", (LPWSTR*)szDomain);
+					ExitOnFailure(hr, "Failed getting 'ComputerName' property");
+
+					hr = szName.Copy((LPCWSTR)szAccount);
+					ExitOnFailure(hr, "Failed copying string");
+
+					szAccount.Format(L"%s\\%s", (LPCWSTR)szDomain, (LPCWSTR)szName);
+					ExitOnFailure(hr, "Failed formatting string");
+				}
+			}
+
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will change service '%ls' start account to '%ls'", (LPCWSTR)szServiceName, (LPCWSTR)szAccount);
 		}
 		if (start != ServciceConfigDetails_ServiceStart::ServciceConfigDetails_ServiceStart_unchanged)
