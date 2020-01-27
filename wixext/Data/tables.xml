@@ -321,6 +321,9 @@
     <columnDefinition name="Component_" type="string" length="72" modularize="column" keyTable="Component" keyColumn="1" category="identifier"/>
     <columnDefinition name="Website" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Stop" type="number" length="2" minValue="0" maxValue="1" />
+    <columnDefinition name="Start" type="number" length="2" minValue="0" maxValue="1" />
+    <columnDefinition name="AutoStart" type="number" length="2" minValue="-1" maxValue="1" />
+    <columnDefinition name="ErrorHandling" type="number" minValue="0" maxValue="2" length="2" />
   </tableDefinition>
 
   <tableDefinition name="PSW_VersionCompare">

@@ -38,5 +38,7 @@
 [2]]]>
   </String>
   <String Overridable="yes" Id="PSW_WebsiteConfig"><![CDATA[Configuring websites]]></String>
+  <String Overridable="yes" Id="WebsiteConfigFailure"><![CDATA[Failed configuring website [2]
+[3]]]></String>
   <String Overridable="yes" Id="PSW_VersionCompare"><![CDATA[Comparing versions]]></String>
 </WixLocalization>

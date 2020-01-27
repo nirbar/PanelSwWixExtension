@@ -632,7 +632,7 @@
       <xs:appinfo>
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
       </xs:appinfo>
-      <xs:documentation><![CDATA[Configure an existing website]]></xs:documentation>
+      <xs:documentation><![CDATA[Configure an existing website. Note that it may be useful to schedule this action after WiX iis extension's ConfigureIIs action.]]></xs:documentation>
     </xs:annotation>
     <xs:complexType>
       <xs:simpleContent>
@@ -644,7 +644,22 @@
           </xs:attribute>
           <xs:attribute name="Stop" type="wix:YesNoType" use="optional" default="no">
             <xs:annotation>
-              <xs:documentation><![CDATA[Whether or not to permanently stop the website]]></xs:documentation>
+              <xs:documentation><![CDATA[Whether or not to stop the website. If both 'Stop' and 'Start' are set to 'yes' then the site will restart]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Start" type="wix:YesNoType" use="optional" default="no">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Whether or not to start the website. If both 'Stop' and 'Start' are set to 'yes' then the site will restart]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="AutoStart" type="wix:YesNoDefaultType" use="optional" default="default">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Whether or not to set AutoStart. 'default' does not change this setting]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="ErrorHandling" use="optional" type="ErrorHandlingType" default="fail">
+            <xs:annotation>
+              <xs:documentation><![CDATA[On error fail, ignore, or prompt user to abort, retry or ignore. Defaults to 'fail']]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>

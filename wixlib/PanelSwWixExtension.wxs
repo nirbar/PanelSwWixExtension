@@ -375,6 +375,7 @@
     <UI>
       <ProgressText Action="PSW_WebsiteConfigSched">!(loc.PSW_WebsiteConfig)</ProgressText>
       <ProgressText Action="PSW_WebsiteConfigExec">!(loc.PSW_WebsiteConfig)</ProgressText>
+      <Error Id="27007">!(loc.WebsiteConfigFailure)</Error>
     </UI>
   </Fragment>
 

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Xml.Serialization;
+using PswManagedCA.Util;
 
 namespace PswManagedCA
 {
@@ -15,7 +16,10 @@ namespace PswManagedCA
         {
             public string Component { get; set; }
             public string Website { get; set; }
-            public bool Stop { get; set; }
+            public bool Stop { get; set; } = false;
+            public bool Start { get; set; } = false;
+            public bool? AutoStart { get; set; } = null;
+            public ErrorHandling ErrorHandling { get; set; } = ErrorHandling.fail;
         }
 
         [CustomAction]
@@ -25,7 +29,7 @@ namespace PswManagedCA
             session.Log($"Initialized from {me.Name} v{me.Version}");
 
             List<WebsiteConfigCatalog> catalogs = new List<WebsiteConfigCatalog>();
-            using (View view = session.Database.OpenView("SELECT `Component_`, `Website`, `Stop` FROM `PSW_WebsiteConfig`"))
+            using (View view = session.Database.OpenView("SELECT `Component_`, `Website`, `Stop`, `Start`, `AutoStart`, `ErrorHandling` FROM `PSW_WebsiteConfig`"))
             {
                 view.Execute(null);
 
@@ -37,6 +41,10 @@ namespace PswManagedCA
                         cfg.Component = rec.GetString("Component_");
                         cfg.Website = session.Format(rec.GetString("Website"));
                         cfg.Stop = (rec.GetInteger("Stop") != 0);
+                        cfg.Start = (rec.GetInteger("Start") != 0);
+                        int autoStart = rec.GetInteger("AutoStart");
+                        cfg.AutoStart = (autoStart < 0) ? null : (autoStart == 0) ? (bool?)false : true;
+                        cfg.ErrorHandling = (ErrorHandling)rec.GetInteger("ErrorHandling");
                     }
 
                     ComponentInfo ci = session.Components[cfg.Component];
@@ -102,7 +110,29 @@ namespace PswManagedCA
 
             foreach (WebsiteConfigCatalog ctlg in actions)
             {
-                WebsiteConfigExec(session, ctlg);
+            LRetry:
+                try
+                {
+                    WebsiteConfigExec(session, ctlg);
+                }
+                catch (Exception ex)
+                {
+                    switch (session.HandleError(ctlg.ErrorHandling, 27007, ctlg.Website, ex.Message))
+                    {
+                        default:
+                        case MessageResult.Abort:
+                            session.Log($"User aborted on failure to configure website {ctlg.Website}. {ex.Message}");
+                            return ActionResult.Failure;
+
+                        case MessageResult.Ignore:
+                            session.Log($"User ignored failure to configure website {ctlg.Website}. {ex.Message}");
+                            continue;
+
+                        case MessageResult.Retry:
+                            session.Log($"User retry on failure to configure website {ctlg.Website}. {ex.Message}");
+                            goto LRetry;
+                    }
+                }
             }
 
             return ActionResult.Success;
@@ -122,17 +152,38 @@ namespace PswManagedCA
                 {
                     session.Log($"Stopping site '{cfg.Website}'");
                     site.Stop();
-                    site.ServerAutoStart = false;
                     manager.CommitChanges();
 
                     switch (site.State)
                     {
                         case ObjectState.Stopped:
                         case ObjectState.Stopping:
-                            return;
+                            break;
 
                         default:
-                            throw new Exception($"Failed to stop website '{cfg.Website}'- state is '{site.State}'");
+                            throw new Exception("Failed stopping website");
+                    }
+                }
+                if (cfg.AutoStart != null)
+                {
+                    session.Log($"Configuring site AutoStart to '{cfg.AutoStart}'");
+                    site.ServerAutoStart = (bool)cfg.AutoStart;
+                    manager.CommitChanges();
+                }
+                if (cfg.Start)
+                {
+                    session.Log($"Starting site '{cfg.Website}'");
+                    site.Start();
+                    manager.CommitChanges();
+
+                    switch (site.State)
+                    {
+                        case ObjectState.Started:
+                        case ObjectState.Starting:
+                            break;
+
+                        default:
+                            throw new Exception("Failed starting website");
                     }
                 }
             }

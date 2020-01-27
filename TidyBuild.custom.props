@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <Import Project="$(MSBuildThisFileDirectory)TidyBuild.user.props" Condition="Exists('$(MSBuildThisFileDirectory)TidyBuild.user.props')"/>
   <PropertyGroup>
-    <FullVersion>2.16.3</FullVersion>
+    <FullVersion>2.17.0</FullVersion>
     <ProductName>PanelSwWixExtension</ProductName>
     <Manufacturer>Panel::Software</Manufacturer>
 
@@ -19,7 +19,7 @@
     <CMakeVsVersion Condition="'$(CMakeVsVersion)'==''">Visual Studio 15 2017</CMakeVsVersion>
     <PlatformToolset Condition="'$(PlatformToolset)'==''">v141_xp</PlatformToolset>
 
-    <DismApiDir Condition="'$(DismApiDir)'==''">C:\Program Files (x86)\Windows Kits\8.0\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\</DismApiDir>
+    <DismApiDir Condition="'$(DismApiDir)'==''">C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\</DismApiDir>
     <NugetDir Condition="'$(NugetDir)'==''">$(MSBuildThisFileDirectory)..\..\Tools\</NugetDir>
 
     <DefineConstants>JetVersion=$(FullVersion);JetProductName=$(ProductName);JetManufacturer=$(Manufacturer)</DefineConstants>

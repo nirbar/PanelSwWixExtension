@@ -69,7 +69,7 @@
   <PropertyGroup>
     <LibraryPath Condition="'$(Platform)'=='x64'">$(DismApiDir)Lib\amd64;$(WIX)SDK\VS2017\lib\x64;$(LibraryPath)</LibraryPath>
     <LibraryPath Condition="'$(Platform)'=='Win32'">$(DismApiDir)Lib\x86;$(WIX)SDK\VS2017\lib\x86;$(LibraryPath)</LibraryPath>
-    <IncludePath>C:\Program Files %28x86%29\Windows Kits\8.1\Include\shared;$(DismApiDir)Include;$(WIX)SDK\VS2017\inc;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\shared;$(DismApiDir)Include;$(WIX)SDK\VS2017\inc;$(IncludePath)</IncludePath>
     <_ProjectFileVersion>14.0.25431.1</_ProjectFileVersion>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">

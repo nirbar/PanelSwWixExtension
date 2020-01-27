@@ -251,6 +251,9 @@ namespace PanelSw.Wix.Extensions
             string component = null;
             string website = null;
             bool stop = false;
+            bool start = false;
+            YesNoDefaultType autoStart = YesNoDefaultType.Default;
+            ErrorHandling promptOnError = ErrorHandling.fail;
 
             component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
             foreach (XmlAttribute attrib in element.Attributes)
@@ -268,6 +271,32 @@ namespace PanelSw.Wix.Extensions
 
                     case "Stop":
                         stop = (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes);
+                        break;
+
+                    case "Start":
+                        start = (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes);
+                        break;
+
+                    case "AutoStart":
+                        autoStart = Core.GetAttributeYesNoDefaultValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "ErrorHandling":
+                        {
+                            string a = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            try
+                            {
+                                promptOnError = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
+                            }
+                            catch
+                            {
+                                Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            }
+                        }
+                        break;
+
+                    default:
+                        Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                         break;
                 }
             }
@@ -292,6 +321,9 @@ namespace PanelSw.Wix.Extensions
             row[1] = component;
             row[2] = website;
             row[3] = stop ? 1 : 0;
+            row[4] = start ? 1 : 0;
+            row[5] = (autoStart == YesNoDefaultType.Yes) ? 1 : (autoStart == YesNoDefaultType.No) ? 0 : -1;
+            row[6] = (int)promptOnError;
         }
 
         private void ParseJsonJpathSearchElement(XmlNode node)
