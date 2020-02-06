@@ -626,8 +626,9 @@ LRetry:
 	
     if (details.exitcoderemap().find(exitCode) != details.exitcoderemap().end())
     {
-        exitCode = details.exitcoderemap().at(exitCode);
-    }
+		exitCode = details.exitcoderemap().at(exitCode);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Remapped exit code to %u", exitCode);
+	}
 
 	hr = SearchStdOut((LPCWSTR)szLog, details);
 	switch (hr)
@@ -647,7 +648,9 @@ LRetry:
 
 	if (FAILED(hr) && (exitCode == ERROR_SUCCESS))
 	{
+		// Shouldn't happen since SearchStdOut doesn't return any value not handled in switch above. However, keeping for sake of future changes.
 		exitCode = HRESULT_CODE(hr);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Remapped exit code to %u after searching console output", exitCode);
 	}
 
     switch (exitCode)
@@ -665,6 +668,7 @@ LRetry:
         break;
 
     default:
+		hr = HRESULT_FROM_WIN32(exitCode);
         break;
     }
 

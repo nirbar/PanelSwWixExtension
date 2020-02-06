@@ -37,6 +37,8 @@
           <PanelSW:Environment Name='ABC' Value='NIR'/>
         </PanelSW:ExecOn>
 
+        <PanelSW:ExecOn Command='CMD /C "EXIT /b 1"' BeforeStopServices='yes' OnInstall='yes' ErrorHandling='prompt'/>
+
         <PanelSW:ExecOn Id='TestBinary' BinaryKey='TestBinary' Command='--version' BeforeStartServices='yes' OnInstall='yes'/>
       </Component>
     </ComponentGroup>
