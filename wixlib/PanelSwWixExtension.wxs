@@ -698,4 +698,18 @@
       <ProgressText Action="PSW_VersionCompare">!(loc.PSW_VersionCompare)</ProgressText>
     </UI>
   </Fragment>
+
+  <!-- PathSearch -->
+  <Fragment>
+    <CustomAction Id="PSW_PathSearch" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="PathSearch" Execute="immediate" Return="check" />
+    <InstallExecuteSequence>
+      <Custom Action="PSW_PathSearch" After="AppSearch" Overridable="yes"/>
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="PSW_PathSearch" After="AppSearch" Overridable="yes"/>
+    </InstallUISequence>
+    <UI>
+      <ProgressText Action="PSW_PathSearch">!(loc.PSW_PathSearch)</ProgressText>
+    </UI>
+  </Fragment>
 </Wix>

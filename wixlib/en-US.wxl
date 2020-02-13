@@ -41,4 +41,5 @@
   <String Overridable="yes" Id="WebsiteConfigFailure"><![CDATA[Failed configuring website [2]
 [3]]]></String>
   <String Overridable="yes" Id="PSW_VersionCompare"><![CDATA[Comparing versions]]></String>
+  <String Overridable="yes" Id="PSW_PathSearch"><![CDATA[Searching file on PATH]]></String>
 </WixLocalization>

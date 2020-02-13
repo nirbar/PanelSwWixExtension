@@ -104,6 +104,7 @@
     <ClCompile Include="FileRegex.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="MsiSqlQuery.cpp" />
+    <ClCompile Include="PathSearch.cpp" />
     <ClCompile Include="RegDataSerializer.cpp" />
     <ClCompile Include="CustomUninstallKey.cpp" />
     <ClCompile Include="ReadIniValues.cpp" />

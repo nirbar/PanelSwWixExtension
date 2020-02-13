@@ -121,6 +121,10 @@ namespace PanelSw.Wix.Extensions
                             ParseAccountSidSearchElement(element);
                             break;
 
+                        case "PathSearch":
+                            ParsePathSearchElement(element);
+                            break;
+
                         case "VersionCompare":
                             ParseVersionCompareElement(element);
                             break;
@@ -2573,6 +2577,56 @@ namespace PanelSw.Wix.Extensions
                 row[1] = property;
                 row[2] = expression;
                 row[3] = order;
+            }
+        }
+
+        private void ParsePathSearchElement(XmlNode node)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string id = "pth" + Guid.NewGuid().ToString("N"); ;
+            string file = null;
+            string property = null;
+
+            if (node.ParentNode.LocalName != "Property")
+            {
+                Core.UnexpectedElement(node.ParentNode, node);
+                return;
+            }
+            property = node.ParentNode.Attributes["Id"].Value;
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName)
+                    {
+                        case "FileName":
+                            file = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(property))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.LocalName, "Id"));
+                return;
+            }
+            if (string.IsNullOrEmpty(file))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "FileName"));
+            }
+
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "PSW_PathSearch");
+            if (!Core.EncounteredError)
+            {
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_PathSearch");
+                row[0] = id;
+                row[1] = property;
+                row[2] = file;
             }
         }
 
