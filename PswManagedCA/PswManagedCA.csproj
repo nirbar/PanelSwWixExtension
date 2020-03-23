@@ -68,6 +68,7 @@
     <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.Deployment.WindowsInstaller">
+      <HintPath>$(WixToolPath)\..\SDK\Microsoft.Deployment.WindowsInstaller.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>

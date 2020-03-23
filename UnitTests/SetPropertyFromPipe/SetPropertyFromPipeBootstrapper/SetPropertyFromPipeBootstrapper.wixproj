@@ -23,7 +23,7 @@
   </ItemGroup>
   <ItemGroup>
     <WixExtension Include="WixBalExtension">
-      <HintPath>$(WixExtDir)\WixBalExtension.dll</HintPath>
+      <HintPath>$(WixToolPath)\WixBalExtension.dll</HintPath>
       <Name>WixBalExtension</Name>
     </WixExtension>
   </ItemGroup>

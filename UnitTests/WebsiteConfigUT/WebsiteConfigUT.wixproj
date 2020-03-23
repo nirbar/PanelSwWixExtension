@@ -29,7 +29,7 @@
       <Name>PanelSwWixExtension</Name>
     </WixExtension>
     <WixExtension Include="WixUtilExtension">
-      <HintPath>$(WixExtDir)\WixUtilExtension.dll</HintPath>
+      <HintPath>$(WixToolPath)\WixUtilExtension.dll</HintPath>
       <Name>WixUtilExtension</Name>
     </WixExtension>
   </ItemGroup>

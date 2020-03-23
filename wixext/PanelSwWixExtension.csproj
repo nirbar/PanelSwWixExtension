@@ -84,7 +84,7 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="wix">
-      <HintPath>$(WIX)\bin\wix.dll</HintPath>
+      <HintPath>$(WixToolPath)\wix.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

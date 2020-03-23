@@ -35,8 +35,8 @@
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
   <PropertyGroup>
-    <IncludePath>$(WIX)SDK\VS2017\inc;$(IntDir)..\Protobuf;..\protobuf\src;$(IncludePath)</IncludePath>
-    <LibraryPath>$(WIX)SDK\VS2017\lib\x86;..\build\protobuf\$(Configuration);$(OutDir)..\ProtoCaLib;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(WIX)SDK\VS2017\inc;$(WixToolPath)\..\SDK\inc;$(IntDir)..\Protobuf;..\protobuf\src;$(IncludePath)</IncludePath>
+    <LibraryPath>$(WIX)SDK\VS2017\lib\x86;$(WixToolPath)\..\SDK\VS2017\lib\x86;..\build\protobuf\$(Configuration);$(OutDir)..\ProtoCaLib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
