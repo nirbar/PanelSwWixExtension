@@ -946,6 +946,12 @@
         </xs:annotation>
       </xs:attribute>
 
+      <xs:attribute name="User" type="xs:string" default="no">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Set to Id of a User element to impersonate the user.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+
       <xs:attribute name="Order" type="xs:integer">
         <xs:annotation>
           <xs:documentation><![CDATA[Order of command execution, defaults to line number. Commands with explicit order field will be executed before commands with implicit order]]></xs:documentation>

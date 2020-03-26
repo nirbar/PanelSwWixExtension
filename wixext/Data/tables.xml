@@ -119,6 +119,7 @@
     <columnDefinition name="Flags" type="number" length="4" minValue="0" maxValue="65535" />
     <columnDefinition name="ErrorHandling" type="number" minValue="0" maxValue="2" length="2" />
     <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
+    <columnDefinition name="User_" type="string" length="72" modularize="column" keyTable="User" keyColumn="1" category="identifier" nullable="yes"/>
   </tableDefinition>
 
   <tableDefinition name="PSW_ExecOnComponent_ExitCode">

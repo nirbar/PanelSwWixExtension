@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
-     xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension">
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../wixext/XSD/PanelSwWixExtension.xsd">
+  
   <Product Id="{769C11E5-D811-4CE3-BE79-CC23725E6B38}" Name="$(var.ProjectName)" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{8DC7207F-59B4-45E6-90B0-75769F8040B8}">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
@@ -23,6 +24,9 @@
 
     <Binary Id="TestBinary" SourceFile="..\..\build\protobuf\$(var.Configuration)\protoc.exe"/>
 
+    <Property Id="MY_PASSWORD" Hidden="yes"/>
+    <util:User Domain="[MY_DOMAIN]" Name="[MY_NAME]" Password="[MY_PASSWORD]" Id="me"/>
+
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component Id="Test" Guid="*">
         <File Source="$(var.ProjectDir)Product.wxs" />
@@ -40,6 +44,7 @@
         <PanelSW:ExecOn Command='CMD /C "EXIT /b 1"' BeforeStopServices='yes' OnInstall='yes' ErrorHandling='prompt'/>
 
         <PanelSW:ExecOn Id='TestBinary' BinaryKey='TestBinary' Command='--version' BeforeStartServices='yes' OnInstall='yes'/>
+        <PanelSW:ExecOn Impersonate='no' User='me' BeforeStartServices='yes' OnInstall='yes' Command='"notepad.exe"' ErrorHandling='prompt'/>        
       </Component>
     </ComponentGroup>
   </Product>

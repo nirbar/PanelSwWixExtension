@@ -26,4 +26,9 @@ message ExecOnDetails{
 	ErrorHandling errorHandling = 7;
 
 	repeated ConsoleOuputRemap consoleOuputRemap = 8;
+
+	// Impersonate a user
+	bytes domain = 9;
+	bytes user = 10;
+	bytes password = 11;
 }

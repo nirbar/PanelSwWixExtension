@@ -30,6 +30,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <WixToolPath Condition="'$(WixToolPath)'==''">$(WiX)bin\</WixToolPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>

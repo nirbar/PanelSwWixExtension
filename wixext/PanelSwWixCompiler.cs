@@ -1331,6 +1331,7 @@ namespace PanelSw.Wix.Extensions
             ErrorHandling? errorHandling = null;
             int order = 1000000000 + GetLineNumber(sourceLineNumbers);
             YesNoType aye;
+            string user = null;
 
             component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
 
@@ -1375,6 +1376,10 @@ namespace PanelSw.Wix.Extensions
                         {
                             flags |= ExecOnComponentFlags.Impersonate;
                         }
+                        break;
+
+                    case "User":
+                        user = Core.GetAttributeValue(sourceLineNumbers, attrib);
                         break;
 
                     case "IgnoreExitCode":
@@ -1701,6 +1706,7 @@ namespace PanelSw.Wix.Extensions
                 row[5] = (int)flags;
                 row[6] = (int)(errorHandling ?? ErrorHandling.fail);
                 row[7] = order;
+                row[8] = user;
             }
         }
 
