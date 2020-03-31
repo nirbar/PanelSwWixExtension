@@ -7,7 +7,7 @@ using namespace std;
 using namespace ::com::panelsw::ca;
 using namespace google::protobuf;
 
-static HRESULT IsInstall(LPCWSTR szComponent, LPCWSTR szFileId, LPCWSTR szCondition);
+static HRESULT IsInstall(LPCWSTR szComponent, LPCWSTR szCondition);
 
 extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 {
@@ -61,7 +61,7 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to get Id.");
 		hr = WcaGetRecordString(hRecord, 2, (LPWSTR*)szFileId);
 		BreakExitOnFailure(hr, "Failed to get File_.");
-		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)szFilePath);
+		hr = WcaGetRecordString(hRecord, 3, (LPWSTR*)szFileFormat);
 		BreakExitOnFailure(hr, "Failed to get FilePath.");
 		hr = WcaGetRecordString(hRecord, 4, (LPWSTR*)szRegexUnformatted);
 		BreakExitOnFailure(hr, "Failed to get Regex.");
@@ -75,7 +75,7 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to get Condition.");
 
 		// Test condition(s)
-		hr = IsInstall(szComponent, szFileId, szCondition);
+		hr = IsInstall(szComponent, szCondition);
 		BreakExitOnFailure(hr, "Failed to evaluate conditions.");
 		if (hr == S_FALSE)
 		{
@@ -83,15 +83,22 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 		}
 
 		// Sanity
-		ExitOnNull((szFileId.IsNullOrEmpty() != szFilePath.IsNullOrEmpty()), hr, E_INVALIDARG, "Both FilePath and File_ have values or both empty");
+		ExitOnNull((szFileId.IsNullOrEmpty() != szFileFormat.IsNullOrEmpty()), hr, E_INVALIDARG, "Both FilePath and File_ have values or both empty");
 
-		if (szFilePath.IsNullOrEmpty())
+		// Parse file path
+		if (!szFileId.IsNullOrEmpty())
 		{
 			hr = szFileFormat.Format(L"[#%s]", (LPCWSTR)szFileId);
 			BreakExitOnFailure(hr, "Failed formatting string");
+		}
 
-			hr = szFilePath.MsiFormat(szFileFormat);
-			BreakExitOnFailure(hr, "Failed MSI-formatting string");
+		hr = szFilePath.MsiFormat(szFileFormat);
+		BreakExitOnFailure(hr, "Failed MSI-formatting string");
+
+		if (szFilePath.IsNullOrEmpty())
+		{
+			CFileRegex::LogUnformatted(LOGMSG_STANDARD, "Will skip regex for file '%ls'.", (LPCWSTR)szFileFormat);
+			continue;
 		}
 
 		hr = szRegex.MsiFormat((LPCWSTR)szRegexUnformatted, (LPWSTR*)szRegexObfuscated);
@@ -107,9 +114,9 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed allocating memory");
 
 		dwRes = ::GetTempFileName(longTempPath, L"RGX", 0, (LPWSTR)tempFile);
-		BreakExitOnNullWithLastError( dwRes, hr, "Failed getting temporary file name");
+		BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
 
-		hr = rollbackCAD.AddMoveFile( (LPCWSTR)tempFile, szFilePath);
+		hr = rollbackCAD.AddMoveFile((LPCWSTR)tempFile, szFilePath);
 		BreakExitOnFailure(hr, "Failed creating custom action data for rollback action.");
 
 		// Add deferred data to copy file szFilePath -> tempFile.
@@ -119,7 +126,7 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 		hr = oDeferredFileRegex.AddFileRegex(szFilePath, szRegex, szReplacement, (FileRegexDetails::FileEncoding)nEncoding, nIgnoreCase != 0);
 		BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
 
-		hr = commitCAD.AddDeleteFile( (LPCWSTR)tempFile);
+		hr = commitCAD.AddDeleteFile((LPCWSTR)tempFile);
 		BreakExitOnFailure(hr, "Failed creating custom action data for commit action.");
 	}
 
@@ -148,7 +155,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-static HRESULT IsInstall(LPCWSTR szComponent, LPCWSTR szFileId, LPCWSTR szCondition)
+static HRESULT IsInstall(LPCWSTR szComponent, LPCWSTR szCondition)
 {
 	HRESULT hr = S_OK;
 
@@ -166,26 +173,7 @@ static HRESULT IsInstall(LPCWSTR szComponent, LPCWSTR szFileId, LPCWSTR szCondit
 		case WCA_TODO::WCA_TODO_UNINSTALL:
 		case WCA_TODO::WCA_TODO_UNKNOWN:
 		default:
-			WcaLog(LOGMSG_STANDARD, "Will skip regex for file '%ls'.", (LPCWSTR)szFileId);
-			hr = S_FALSE;
-			ExitFunction();
-		}
-	}
-
-	if (szFileId && *szFileId)
-	{
-		CWixString szFileFormat, szFilePath;
-		
-		hr = szFileFormat.Format(L"[#%s]", (LPCWSTR)szFileId);
-		BreakExitOnFailure(hr, "Failed formatting string");
-
-		hr = szFilePath.MsiFormat(szFileFormat);
-		BreakExitOnFailure(hr, "Failed MSI-formatting string");
-
-		// Component condition is false
-		if (szFilePath.IsNullOrEmpty())
-		{
-			WcaLog(LOGMSG_STANDARD, "Will skip regex for file '%ls'.", (LPCWSTR)szFileId);
+			WcaLog(LOGMSG_STANDARD, "Will skip regex for component '%ls'.", (LPCWSTR)szComponent);
 			hr = S_FALSE;
 			ExitFunction();
 		}
@@ -194,7 +182,7 @@ static HRESULT IsInstall(LPCWSTR szComponent, LPCWSTR szFileId, LPCWSTR szCondit
 	if (szCondition && *szCondition)
 	{
 		MSICONDITION condRes = MSICONDITION::MSICONDITION_NONE;
-		
+
 		condRes = ::MsiEvaluateCondition(WcaGetInstallHandle(), szCondition);
 		BreakExitOnNullWithLastError((condRes != MSICONDITION::MSICONDITION_ERROR), hr, "Failed evaluating condition '%ls'", szCondition);
 
@@ -209,9 +197,9 @@ LExit:
 HRESULT CFileRegex::AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase)
 {
 	HRESULT hr = S_OK;
-	::com::panelsw::ca::Command *pCmd = nullptr;
-	FileRegexDetails *pDetails = nullptr;
-	::std::string *pAny = nullptr;
+	::com::panelsw::ca::Command* pCmd = nullptr;
+	FileRegexDetails* pDetails = nullptr;
+	::std::string* pAny = nullptr;
 	bool bRes = true;
 
 	hr = AddCommand("CFileRegex", &pCmd);
@@ -262,7 +250,7 @@ LExit:
 
 HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase)
 {
-    HRESULT hr = S_OK;
+	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
 	DWORD dwBytesRead = 0;
 	DWORD dwFileSize = 0;
@@ -277,7 +265,7 @@ HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szRepla
 	dwFileSize = ::GetFileSize(hFile, nullptr);
 	pFileContents = MemAlloc(dwFileSize + 2, FALSE);
 	ExitOnNull(pFileContents, hr, E_FAIL, "Failed allocating memory");
-	
+
 	// Terminate with ascii/wchar NULL.
 	((BYTE*)pFileContents)[dwFileSize] = NULL;
 	((BYTE*)pFileContents)[dwFileSize + 1] = NULL;
@@ -320,7 +308,7 @@ LExit:
 		MemFree(pFileContents);
 	}
 
-    return hr;
+	return hr;
 }
 
 HRESULT CFileRegex::ExecuteMultibyte(LPCWSTR szFilePath, LPCSTR szFileContent, LPCWSTR szRegex, LPCWSTR szReplacement, bool bIgnoreCase)
