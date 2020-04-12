@@ -80,6 +80,9 @@
     <ClCompile Include="DeferredActionBase.cpp" />
     <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="MsiBreak.cpp" />
+    <ClCompile Include="SqlClientBase.cpp" />
+    <ClCompile Include="SqlConnection.cpp" />
+    <ClCompile Include="SqlQuery.cpp" />
     <ClCompile Include="stdafx.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
@@ -96,6 +99,9 @@
     <ClInclude Include="AutoRelease.h" />
     <ClInclude Include="DeferredActionBase.h" />
     <ClInclude Include="MsiBreak.h" />
+    <ClInclude Include="SqlClientBase.h" />
+    <ClInclude Include="SqlConnection.h" />
+    <ClInclude Include="SqlQuery.h" />
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="SummaryStream.h" />
     <ClInclude Include="targetver.h" />

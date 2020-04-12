@@ -467,6 +467,16 @@
               <xs:documentation><![CDATA[Order of query execution, defaults to line number. Commands with explicit order field will be executed before commands with implicit order]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="Port" type="xs:string" use="optional" default="0">
+            <xs:annotation>
+              <xs:documentation><![CDATA[SQL Server port. Ignored if 0. Defaults to 0. May be formatted]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Encrypt" type="xs:string" use="optional" default="0">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Whether or not to use TLS (Encrypt=true in connection string). Supported values are 0/1, true/false, yes/no. Defaults to 0. May be formatted]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>
@@ -1825,6 +1835,16 @@ Remove registry values.
       <xs:attribute name="Order" type="xs:integer">
         <xs:annotation>
           <xs:documentation><![CDATA[Order of script execution, defaults to line number. Scripts with explicit order field will be executed before scripts with implicit order]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Port" type="xs:string" use="optional" default="0">
+        <xs:annotation>
+          <xs:documentation><![CDATA[SQL Server port. Ignored if 0. Defaults to 0. May be formatted]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Encrypt" type="xs:string" use="optional" default="0">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Whether or not to use TLS (Encrypt=true in connection string). Supported values are 0/1, true/false, yes/no. Defaults to 0. May be formatted]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
 

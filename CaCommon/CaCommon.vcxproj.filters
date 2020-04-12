@@ -36,6 +36,15 @@
     <ClCompile Include="..\build\obj\$(Configuration)\CaCommon\*.pb.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="SqlConnection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SqlClientBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SqlQuery.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.h">
@@ -69,6 +78,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\command.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SqlConnection.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SqlClientBase.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SqlQuery.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

@@ -12,4 +12,6 @@ message SqlScriptDetails{
 	bytes username = 5;
 	bytes password = 6;
 	ErrorHandling errorHandling = 7;
+	uint32 port = 8;
+	bool encrypted = 9;	
 }

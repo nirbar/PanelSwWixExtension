@@ -1,9 +1,10 @@
 #include "SqlScript.h"
 #include "FileOperations.h"
 #include "../CaCommon/WixString.h"
+#include "../CaCommon/SqlConnection.h"
+#include "../CaCommon/SqlQuery.h"
 #include <wcautil.h>
 #include <memutil.h>
-#include <sqlutil.h>
 #include "google\protobuf\any.h"
 using namespace com::panelsw::ca;
 using namespace google::protobuf;
@@ -43,7 +44,7 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
     ExitOnFailure((hr == S_OK), "Table does not exist 'PSW_SqlScript_Replacements'. Have you authored 'PanelSw:SqlScript' entries in WiX code?");
 
 	// Execute view
-	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `Server`, `Instance`, `Database`, `Username`, `Password`, `Binary_`, `On`, `ErrorHandling` FROM `PSW_SqlScript` ORDER BY `Order`", &hView);
+	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `Server`, `Instance`, `Database`, `Username`, `Password`, `Binary_`, `On`, `ErrorHandling`, `Port`, `Encrypted` FROM `PSW_SqlScript` ORDER BY `Order`", &hView);
 	ExitOnFailure(hr, "Failed to execute SQL query.");
 
 	// Iterate records
@@ -54,11 +55,13 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 		// Get fields
         PMSIHANDLE hSubView;
         PMSIHANDLE hSubRecord;
-		CWixString szId, szComponent, szServer, szInstance, szDatabase, szUsername, szPassword, szBinary;
+		CWixString szId, szComponent, szServer, szInstance, szDatabase, szUsername, szPassword, szBinary, szEncrypted;
 		CWixString szQuery;
 		int nOn = 0;
 		int errorHandling = ErrorHandling::fail;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
+		int nPort = 0;
+		int bEncrypted = 0;
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szId);
 		ExitOnFailure(hr, "Failed to get Id.");
@@ -80,6 +83,11 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to get On.");
 		hr = WcaGetRecordInteger(hRecord, 10, &errorHandling);
 		ExitOnFailure(hr, "Failed to get ErrorHandling.");
+		hr = WcaGetRecordFormattedInteger(hRecord, 11, &nPort);
+		BreakExitOnFailure(hr, "Failed to get Port.");
+		hr = WcaGetRecordFormattedString(hRecord, 12, (LPWSTR*)szEncrypted);
+		BreakExitOnFailure(hr, "Failed to get Encrypted.");
+		bEncrypted = (szEncrypted.EqualsIgnoreCase(L"true") || szEncrypted.EqualsIgnoreCase(L"yes") || szEncrypted.Equals(L"1"));
 
 		ExitOnNull(!szBinary.IsNullOrEmpty(), hr, E_INVALIDARG, "Binary key is empty");
 		ExitOnNull(!szId.IsNullOrEmpty(), hr, E_INVALIDARG, "Id is empty");
@@ -121,12 +129,12 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 		case WCA_TODO::WCA_TODO_INSTALL:
 			if (nOn & SqlExecOn::Install)
 			{
-				hr = deferredCA.AddExec(szServer, szInstance, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
+				hr = deferredCA.AddExec(szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
 				ExitOnFailure(hr, "Failed scheduling '%ls' SQL script", (LPCWSTR)szBinary);
 			}
 			if (nOn & SqlExecOn::InstallRollback)
 			{
-				hr = rollbackCA.AddExec(szServer, szInstance, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
+				hr = rollbackCA.AddExec(szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
 				ExitOnFailure(hr, "Failed scheduling '%ls' SQL script", (LPCWSTR)szBinary);
 			}
 			break;
@@ -134,12 +142,12 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 		case WCA_TODO::WCA_TODO_REINSTALL:
 			if (nOn & SqlExecOn::Reinstall)
 			{
-				hr = deferredCA.AddExec(szServer, szInstance, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
+				hr = deferredCA.AddExec(szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
 				ExitOnFailure(hr, "Failed scheduling '%ls' SQL script", (LPCWSTR)szBinary);
 			}
 			if (nOn & SqlExecOn::ReinstallRollback)
 			{
-				hr = rollbackCA.AddExec(szServer, szInstance, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
+				hr = rollbackCA.AddExec(szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
 				ExitOnFailure(hr, "Failed scheduling '%ls' SQL script", (LPCWSTR)szBinary);
 			}
 			break;
@@ -147,12 +155,12 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 		case WCA_TODO::WCA_TODO_UNINSTALL:
 			if (nOn & SqlExecOn::Uninstall)
 			{
-				hr = deferredCA.AddExec(szServer, szInstance, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
+				hr = deferredCA.AddExec(szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
 				ExitOnFailure(hr, "Failed scheduling '%ls' SQL script", (LPCWSTR)szBinary);
 			}
 			if (nOn & SqlExecOn::UninstallRollback)
 			{
-				hr = rollbackCA.AddExec(szServer, szInstance, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
+				hr = rollbackCA.AddExec(szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
 				ExitOnFailure(hr, "Failed scheduling '%ls' SQL script", (LPCWSTR)szBinary);
 			}
 			break;
@@ -279,141 +287,6 @@ static HRESULT ReplaceStrings(CWixString *pszQuery, LPCWSTR szQueryId)
 	hr = S_OK;
 
 LExit:
-
-	return hr;
-}
-
-/*static*/ HRESULT CSqlScript::SqlConnect(LPCWSTR wzServer, LPCWSTR wzInstance, LPCWSTR wzDatabase, LPCWSTR wzUser, LPCWSTR wzPassword, IDBCreateSession** ppidbSession)
-{
-	HRESULT hr = S_OK;
-	IDBInitialize* pidbInitialize = nullptr;
-	IDBProperties* pidbProperties = nullptr;
-	DBPROP rgdbpInit[4];
-	DBPROPSET rgdbpsetInit[1];
-	ULONG cProperties = 0;
-	LPWSTR szError = nullptr;
-	LPWSTR szServerInstance = nullptr;
-
-	::memset(rgdbpInit, 0, sizeof(rgdbpInit));
-	::memset(rgdbpsetInit, 0, sizeof(rgdbpsetInit));
-
-	//obtain access to the SQLOLEDB provider
-	hr = ::CoCreateInstance(CLSID_SQLOLEDB, nullptr, CLSCTX_INPROC_SERVER, IID_IDBInitialize, (LPVOID*)&pidbInitialize);
-	ExitOnFailure(hr, "Failed to create IID_IDBInitialize object");
-
-	hr = StrAllocString(&szServerInstance, wzServer, 0);
-	ExitOnFailure(hr, "Failed allocating string");
-
-	if (wzInstance && *wzInstance)
-	{
-		LPWSTR szBackslash = ::wcschr(szServerInstance, L'\\');
-		if (szBackslash && szBackslash[1])
-		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Ignoring instance part '%ls' because server part '%ls' already has an instance name", wzInstance, szServerInstance);
-		}
-		else
-		{
-			if (szBackslash)
-			{
-				szBackslash[0] = NULL; // Prevent multi-backslash
-			}
-
-			hr = StrAllocConcatFormatted(&szServerInstance, L"\\%s", wzInstance);
-			ExitOnFailure(hr, "Failed concatentaing string");
-		}
-	}
-
-	// server[\instance]
-	rgdbpInit[cProperties].dwPropertyID = DBPROP_INIT_DATASOURCE;
-	rgdbpInit[cProperties].dwOptions = DBPROPOPTIONS_REQUIRED;
-	rgdbpInit[cProperties].colid = DB_NULLID;
-	::VariantInit(&rgdbpInit[cProperties].vValue);
-	rgdbpInit[cProperties].vValue.vt = VT_BSTR;
-	rgdbpInit[cProperties].vValue.bstrVal = ::SysAllocString(szServerInstance);
-	++cProperties;
-
-	// Database, default if not supplied.
-	if (wzDatabase && *wzDatabase)
-	{
-		rgdbpInit[cProperties].dwPropertyID = DBPROP_INIT_CATALOG;
-		rgdbpInit[cProperties].dwOptions = DBPROPOPTIONS_REQUIRED;
-		rgdbpInit[cProperties].colid = DB_NULLID;
-		::VariantInit(&rgdbpInit[cProperties].vValue);
-		rgdbpInit[cProperties].vValue.vt = VT_BSTR;
-		rgdbpInit[cProperties].vValue.bstrVal = ::SysAllocString(wzDatabase);
-		++cProperties;
-	}
-
-	// Authentication
-	if (wzUser && *wzUser)
-	{
-		// username
-		rgdbpInit[cProperties].dwPropertyID = DBPROP_AUTH_USERID;
-		rgdbpInit[cProperties].dwOptions = DBPROPOPTIONS_REQUIRED;
-		rgdbpInit[cProperties].colid = DB_NULLID;
-		::VariantInit(&rgdbpInit[cProperties].vValue);
-		rgdbpInit[cProperties].vValue.vt = VT_BSTR;
-		rgdbpInit[cProperties].vValue.bstrVal = ::SysAllocString(wzUser);
-		++cProperties;
-
-		if (wzPassword && *wzPassword)
-		{
-			rgdbpInit[cProperties].dwPropertyID = DBPROP_AUTH_PASSWORD;
-			rgdbpInit[cProperties].dwOptions = DBPROPOPTIONS_REQUIRED;
-			rgdbpInit[cProperties].colid = DB_NULLID;
-			::VariantInit(&rgdbpInit[cProperties].vValue);
-			rgdbpInit[cProperties].vValue.vt = VT_BSTR;
-			rgdbpInit[cProperties].vValue.bstrVal = ::SysAllocString(wzPassword);
-			++cProperties;
-		}
-	}
-	else // Integrated security
-	{
-		rgdbpInit[cProperties].dwPropertyID = DBPROP_AUTH_INTEGRATED;
-		rgdbpInit[cProperties].dwOptions = DBPROPOPTIONS_REQUIRED;
-		rgdbpInit[cProperties].colid = DB_NULLID;
-		::VariantInit(&rgdbpInit[cProperties].vValue);
-		rgdbpInit[cProperties].vValue.vt = VT_BSTR;
-		rgdbpInit[cProperties].vValue.bstrVal = ::SysAllocString(L"SSPI");   // default windows authentication
-		++cProperties;
-	}
-
-	// put the properties into a set
-	rgdbpsetInit[0].guidPropertySet = DBPROPSET_DBINIT;
-	rgdbpsetInit[0].rgProperties = rgdbpInit;
-	rgdbpsetInit[0].cProperties = cProperties;
-
-	// create and set the property set
-	hr = pidbInitialize->QueryInterface(IID_IDBProperties, (LPVOID*)&pidbProperties);
-	ExitOnFailure(hr, "Failed to get IID_IDBProperties object");
-	hr = pidbProperties->SetProperties(1, rgdbpsetInit);
-	ExitOnFailure(hr, "Failed to set properties");
-
-	//initialize connection to datasource
-	hr = pidbInitialize->Initialize();
-	if (FAILED(hr)) // On error, we try to get meaningful text for log.
-	{
-		GetLastErrorText(pidbInitialize, IID_IDBInitialize, &szError);
-		if (szError && *szError)
-		{
-			ExitOnFailure(hr, "Failed to initialize connection to Server='%ls', Database='%ls', User='%ls'. %ls", szServerInstance, wzDatabase, wzUser, szError);
-		}
-	}
-	ExitOnFailure(hr, "Failed to initialize connection to Server='%ls', Database='%ls', User='%ls'", szServerInstance, wzDatabase, wzUser);
-
-	hr = pidbInitialize->QueryInterface(IID_IDBCreateSession, (LPVOID*)ppidbSession);
-	ExitOnFailure(hr, "Failed to get DB session object");
-
-LExit:
-	for (; 0 < cProperties; cProperties--)
-	{
-		::VariantClear(&rgdbpInit[cProperties - 1].vValue);
-	}
-
-	ReleaseObject(pidbProperties);
-	ReleaseObject(pidbInitialize);
-	ReleaseStr(szError);
-	ReleaseStr(szServerInstance);
 
 	return hr;
 }
@@ -617,7 +490,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CSqlScript::AddExec(LPCWSTR szServer, LPCWSTR szInstance, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, com::panelsw::ca::ErrorHandling errorHandling)
+HRESULT CSqlScript::AddExec(LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, bool bEncrypted, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, com::panelsw::ca::ErrorHandling errorHandling)
 {
     HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
@@ -636,6 +509,8 @@ HRESULT CSqlScript::AddExec(LPCWSTR szServer, LPCWSTR szInstance, LPCWSTR szData
 
 	pDetails->set_server(szServer, WSTR_BYTE_SIZE(szServer));
 	pDetails->set_instance(szInstance, WSTR_BYTE_SIZE(szInstance));
+	pDetails->set_port(nPort);
+	pDetails->set_encrypted(bEncrypted);
 	pDetails->set_database(szDatabase, WSTR_BYTE_SIZE(szDatabase));
 	pDetails->set_username(szUser, WSTR_BYTE_SIZE(szUser));
 	pDetails->set_password(szPassword, WSTR_BYTE_SIZE(szPassword));
@@ -663,13 +538,13 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 	bRes = details.ParseFromString(command);
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking SqlScriptDetails");
 
-	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing %i SQL scripts on Server=%ls; Instance=%ls; Database=%ls; User=%ls", details.scripts_size(), (LPCWSTR)details.server().c_str(), (LPCWSTR)details.instance().c_str(), (LPCWSTR)details.database().c_str(), (LPCWSTR)details.username().c_str());
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing %i SQL scripts on Server=%ls; Instance=%ls; Port=%u; Database=%ls; User=%ls", details.scripts_size(), (LPCWSTR)details.server().c_str(), (LPCWSTR)details.instance().c_str(), details.port(), (LPCWSTR)details.database().c_str(), (LPCWSTR)details.username().c_str());
 	for (int i = 0; i < details.scripts_size(); ++i)
 	{
 	LRetry:
 		ReleaseNullStr(szError);
 
-		hr = ExecuteOne((LPCWSTR)details.server().c_str(), (LPCWSTR)details.instance().c_str(), (LPCWSTR)details.database().c_str(), (LPCWSTR)details.username().c_str(), (LPCWSTR)details.password().c_str(), (LPCWSTR)details.scripts(i).c_str(), &szError);
+		hr = ExecuteOne((LPCWSTR)details.server().c_str(), (LPCWSTR)details.instance().c_str(), details.port(), details.encrypted(), (LPCWSTR)details.database().c_str(), (LPCWSTR)details.username().c_str(), (LPCWSTR)details.password().c_str(), (LPCWSTR)details.scripts(i).c_str(), &szError);
 		if (FAILED(hr))
 		{
 			switch (details.errorhandling())
@@ -735,156 +610,17 @@ LExit:
 	return hr;
 }
 
-HRESULT CSqlScript::GetLastErrorText(IUnknown* pObjectWithError, REFIID IID_InterfaceWithError, LPWSTR* pszErrorDescription)
+HRESULT CSqlScript::ExecuteOne(LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, bool bEncrypted, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, LPWSTR *pszError)
 {
 	HRESULT hr = S_OK;
-	CComPtr<ISupportErrorInfo> pISupportErrorInfo;
-	CComPtr<IErrorInfo> pIErrorInfoAll;
-	CComPtr<IErrorRecords> pIErrorRecords;
-	LPWSTR szAccumulated = nullptr;
-
-	// only ask for error information if the interface supports it.
-	hr = pObjectWithError->QueryInterface(IID_ISupportErrorInfo, (void**)&pISupportErrorInfo);
-	ExitOnFailure(hr, "No error information was found for object.");
-
-	hr = pISupportErrorInfo->InterfaceSupportsErrorInfo(IID_InterfaceWithError);
-	ExitOnFailure(hr, "InterfaceWithError is not supported for object with error");
-
-	// ignore the return of GetErrorInfo it can succeed and return a NULL pointer in pIErrorInfoAll anyway
-	hr = ::GetErrorInfo(0, &pIErrorInfoAll);
-	ExitOnFailure(hr, "failed to get error info");
-	if (pIErrorInfoAll == nullptr)
-	{
-		ExitFunction();
-	}
-
-	// see if it's a valid OLE DB IErrorInfo interface that exposes a list of records
-	hr = pIErrorInfoAll->QueryInterface(IID_IErrorRecords, (void**)&pIErrorRecords);
-	if (SUCCEEDED(hr))
-	{
-		ULONG cErrors = 0;
-		pIErrorRecords->GetRecordCount(&cErrors);
-
-		// get the error information for each record
-		for (ULONG i = 0; i < cErrors; ++i)
-		{
-			CComPtr<IErrorInfo> pIErrorInfoRecord;
-			CComBSTR szError;
-			LCID locale = ::GetThreadLocale();
-
-			if ((locale == LOCALE_CUSTOM_DEFAULT) || (locale == LOCALE_CUSTOM_DEFAULT))
-			{
-				locale = 0x409; // en-US
-			}
-
-			if (SUCCEEDED(pIErrorRecords->GetErrorInfo(i, locale, &pIErrorInfoRecord)) && (pIErrorInfoRecord != nullptr))
-			{
-				if (SUCCEEDED(pIErrorInfoRecord->GetDescription(&szError)) && (szError.Length() > 0))
-				{
-					if (szAccumulated)
-					{
-						hr = StrAllocConcatFormatted(&szAccumulated, L"\n%s", (LPWSTR)szError);
-						ExitOnFailure(hr, "Failed concatenating string");
-					}
-					else
-					{
-						StrAllocString(&szAccumulated, (LPWSTR)szError, 0);
-						ExitOnFailure(hr, "Failed allocating string");
-					}
-				}
-			}
-		}
-	}
-	else // we have a simple error record
-	{
-		CComPtr<IErrorInfo> pIErrorInfoRecord;
-		CComBSTR szError;
-
-		hr = pIErrorInfoRecord->GetDescription(&szError);
-		ExitOnFailure(hr, "Failed getting error message");
-
-		StrAllocString(&szAccumulated, (LPWSTR)szError, 0);
-		ExitOnFailure(hr, "Failed allocating string");
-	}
-
-LExit:
-	if (szAccumulated && *szAccumulated)
-	{
-		*pszErrorDescription = szAccumulated;
-		szAccumulated = nullptr;		
-	}
-
-	ReleaseStr(szAccumulated);
-
-	return hr;
-}
-
-HRESULT CSqlScript::ExecuteOne(LPCWSTR szServer, LPCWSTR szInstance, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, LPWSTR *pszError)
-{
-	HRESULT hr = S_OK;
-	CComPtr<IDBCreateSession> pDbSession;
-	CComPtr<IDBCreateCommand> pCmdFactory;
-	CComPtr<ICommand> pCmd;
-	CComPtr<ICommandText> pCmdText;
 	LPWSTR szError = nullptr;
+	CSqlConnection sqlConn;
+	CSqlQuery sqlQuery;
 
-	hr = SqlConnect(szServer, szInstance, szDatabase, szUser, szPassword, &pDbSession);
+	hr = sqlConn.Connect(szServer, szInstance, nPort, szDatabase, szUser, szPassword, bEncrypted);
 	ExitOnFailure(hr, "Failed connecting to database");
-	ExitOnNull(pDbSession, hr, E_FAIL, "Failed connecting to database (NULL)");
 
-	hr = pDbSession->CreateSession(nullptr, IID_IDBCreateCommand, (IUnknown**)&pCmdFactory);
-	if (FAILED(hr))
-	{
-		GetLastErrorText(pDbSession, IID_IDBCreateSession, &szError);
-		if (szError && *szError)
-		{
-			ExitOnFailure(hr, "failed to create database session. %ls", szError);
-		}
-	}
-	ExitOnFailure(hr, "failed to create database session");
-
-	hr = pCmdFactory->CreateCommand(nullptr, IID_ICommand, (IUnknown**)&pCmd);
-	if (FAILED(hr))
-	{
-		GetLastErrorText(pCmdFactory, IID_IDBCreateCommand, &szError);
-		if (szError && *szError)
-		{
-			ExitOnFailure(hr, "Failed to create command to execute session. %ls", szError);
-		}
-	}
-	ExitOnFailure(hr, "Failed to create command to execute session");
-
-	hr = pCmd->QueryInterface(IID_ICommandText, (LPVOID*)&pCmdText);
-	if (FAILED(hr))
-	{
-		GetLastErrorText(pCmd, IID_ICommand, &szError);
-		if (szError && *szError)
-		{
-			ExitOnFailure(hr, "Failed to get command text object for command. %ls", szError);
-		}
-	}
-	ExitOnFailure(hr, "Failed to get command text object for command");
-
-	hr = pCmdText->SetCommandText(DBGUID_DEFAULT, szScript);
-	if (FAILED(hr))
-	{
-		GetLastErrorText(pCmdText, IID_ICommandText, &szError);
-		if (szError && *szError)
-		{
-			ExitOnFailure(hr, "Failed to set SQL string. %ls", szError);
-		}
-	}
-	ExitOnFailure(hr, "Failed to set SQL string");
-
-	hr = pCmd->Execute(nullptr, IID_NULL, nullptr, nullptr, nullptr);
-	if (FAILED(hr))
-	{
-		GetLastErrorText(pCmd, IID_ICommand, &szError);
-		if (szError && *szError)
-		{
-			ExitOnFailure(hr, "Failed to execute SQL string. %ls", szError);
-		}
-	}
+	hr = sqlQuery.ExecuteQuery(sqlConn, szScript, nullptr, &szError);
 	ExitOnFailure(hr, "Failed to execute SQL string");
 
 LExit:

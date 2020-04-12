@@ -23,7 +23,7 @@
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component Id="JustFile">
         <File Source="$(sys.SOURCEFILEPATH)"/>
-        <PanelSW:SqlScript BinaryKey="Script.sql" Server="[SQL_SERVER]" Instance="[SQL_INSTANCE]" Database="[SQL_DB]" Username="[SQL_USER]" Password="[SQL_PSW]" OnInstall="yes" ErrorHandling="prompt">
+        <PanelSW:SqlScript BinaryKey="Script.sql" Server="[SQL_SERVER]" Instance="[SQL_INSTANCE]" Port="[SQL_PORT]" Database="[SQL_DB]" Username="[SQL_USER]" Password="[SQL_PSW]" OnInstall="yes" ErrorHandling="prompt">
           <PanelSW:Replace Text="PANELSW_Test" Replacement="PANELSW_Test1"/>
         </PanelSW:SqlScript>
       </Component>
@@ -31,20 +31,10 @@
 
     <Property Id="SQL_SERVER" Value="."/>
     <Property Id="SQL_INSTANCE" Value="SQLEXPRESS"/>
+    <Property Id="SQL_PORT" Value="0"/>
 
     <Property Id="SQL_TEST">
-      <PanelSW:SqlSearch Server="[SQL_SERVER]" Instance="[SQL_INSTANCE]" Database="[SQL_DB]" Username="[SQL_USER]" Password="[SQL_PSW]"
-                         Query="SELECT TOP 1 name FROM sysdatabases" />
-    </Property>
-
-    <Property Id="SQL_TEST1">
-      <PanelSW:SqlSearch Server="[SQL_SERVER]\[SQL_INSTANCE]" Database="[SQL_DB]" Username="[SQL_USER]" Password="[SQL_PSW]"
-                         Query="SELECT TOP 1 name FROM sysdatabases" />
-    </Property>
-
-    <!-- Hopefully, default instance exists on test machine -->
-    <Property Id="SQL_TEST3">
-      <PanelSW:SqlSearch Server="[SQL_SERVER]" Database="[SQL_DB]" Username="[SQL_USER]" Password="[SQL_PSW]"
+      <PanelSW:SqlSearch Server="[SQL_SERVER]" Instance="[SQL_INSTANCE]" Port="[SQL_PORT]" Database="[SQL_DB]" Username="[SQL_USER]" Password="[SQL_PSW]"
                          Query="SELECT TOP 1 name FROM sysdatabases" />
     </Property>
   </Product>

@@ -1119,6 +1119,8 @@ namespace PanelSw.Wix.Extensions
             string database = null;
             string username = null;
             string password = null;
+            string port = null;
+            string encrypted = null;
             ErrorHandling? errorHandling = null;
             int order = 1000000000 + GetLineNumber(sourceLineNumbers);
             SqlExecOn sqlExecOn = SqlExecOn.None;
@@ -1149,6 +1151,14 @@ namespace PanelSw.Wix.Extensions
 
                     case "Instance":
                         instance = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "Port":
+                        port = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "Encrypted":
+                        encrypted = Core.GetAttributeValue(sourceLineNumbers, attrib);
                         break;
 
                     case "Database":
@@ -1310,12 +1320,14 @@ namespace PanelSw.Wix.Extensions
                 row[2] = binary;
                 row[3] = server;
                 row[4] = instance;
-                row[5] = database;
-                row[6] = username;
-                row[7] = password;
-                row[8] = (int)sqlExecOn;
-                row[9] = (int)(errorHandling ?? ErrorHandling.fail);
-                row[10] = order;
+                row[5] = port;
+                row[6] = encrypted;
+                row[7] = database;
+                row[8] = username;
+                row[9] = password;
+                row[10] = (int)sqlExecOn;
+                row[11] = (int)(errorHandling ?? ErrorHandling.fail);
+                row[12] = order;
             }
         }
 
@@ -2921,6 +2933,8 @@ namespace PanelSw.Wix.Extensions
             string password = null;
             string query = null;
             string condition = null;
+            string port = null;
+            string encrypted = null;
             int order = 1000000000 + GetLineNumber(sourceLineNumbers);
 
             if (node.ParentNode.LocalName != "Property")
@@ -2959,6 +2973,12 @@ namespace PanelSw.Wix.Extensions
                         case "Order":
                             order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
                             break;
+                        case "Port":
+                            port = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Encrypted":
+                            encrypted = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
 
                         default:
                             Core.UnexpectedAttribute(sourceLineNumbers, attrib);
@@ -2992,12 +3012,14 @@ namespace PanelSw.Wix.Extensions
                 row[0] = id;
                 row[1] = server;
                 row[2] = instance;
-                row[3] = database;
-                row[4] = username;
-                row[5] = password;
-                row[6] = query;
-                row[7] = condition;
-                row[8] = order;
+                row[3] = port;
+                row[4] = encrypted;
+                row[5] = database;
+                row[6] = username;
+                row[7] = password;
+                row[8] = query;
+                row[9] = condition;
+                row[10] = order;
             }
         }
 
