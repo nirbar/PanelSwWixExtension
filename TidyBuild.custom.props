@@ -6,6 +6,10 @@
     <ProductName>PanelSwWixExtension</ProductName>
     <Manufacturer>Panel::Software</Manufacturer>
 
+    <!--
+    <NugetPrereleaseVersion>-fix-6144</NugetPrereleaseVersion>
+    -->
+
     <!-- Output folder -->
     <OutputPath>$(MSBuildThisFileDirectory)build\bin\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
     <IntermediateOutputPath>$(MSBuildThisFileDirectory)build\obj\$(Configuration)\$(MSBuildProjectName)\</IntermediateOutputPath>
