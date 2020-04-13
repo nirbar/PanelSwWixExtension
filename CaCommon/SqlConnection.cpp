@@ -54,7 +54,7 @@ HRESULT CSqlConnection::Connect(LPCWSTR szServer, LPCWSTR szInstance, USHORT nPo
     }
     else if (nPort > 0)
     {
-        hr = szServerTmp.Format(L"%s,%u", (LPCWSTR)szServer, nPort);
+        hr = szServerTmp.AppnedFormat(L",%u", nPort);
         ExitOnFailure(hr, "Failed appending string");
     }
 

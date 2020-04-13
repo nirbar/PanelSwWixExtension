@@ -81,12 +81,10 @@ HRESULT CSqlQuery::ExecuteQuery(const CSqlConnection &sqlConn, LPCWSTR szQuery, 
         hr = szResult.AppnedFormat(L"%s", szChunk); // Wary of results containing '%' specifiers
         ExitOnFailure(hr, "Failed allocting memory");
 
-        if ((nDataSize == SQL_NO_TOTAL) || (nDataSize > DATA_CHUNK_SIZE))
+        if ((nDataSize != SQL_NO_TOTAL) && (nDataSize <= DATA_CHUNK_SIZE))
         {
-            continue;
+            break;
         }
-
-        break;
     } while (true);
 
     hr = StrAllocString(pszResult, (LPCWSTR)szResult, 0);
