@@ -538,7 +538,7 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 	bRes = details.ParseFromString(command);
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking SqlScriptDetails");
 
-	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing %i SQL scripts on Server=%ls; Instance=%ls; Port=%u; Database=%ls; User=%ls", details.scripts_size(), (LPCWSTR)details.server().c_str(), (LPCWSTR)details.instance().c_str(), details.port(), (LPCWSTR)details.database().c_str(), (LPCWSTR)details.username().c_str());
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing %i SQL scripts", details.scripts_size());
 	for (int i = 0; i < details.scripts_size(); ++i)
 	{
 	LRetry:

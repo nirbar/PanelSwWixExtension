@@ -79,7 +79,7 @@ extern "C" UINT __stdcall SqlSearch(MSIHANDLE hInstall)
 			}
 		}
 
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing SQL query '%ls'. Server='%ls', Instance='%ls', Port=%u, Database='%ls', User='%ls'. Will place results in property '%ls'", (LPCWSTR)szQuery, (LPCWSTR)szServer, (LPCWSTR)szInstance, nPort, (LPCWSTR)szDatabase, (LPCWSTR)szUsername, (LPCWSTR)szProperty);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing SQL query '%ls'. Will place results in property '%ls'", (LPCWSTR)szQuery, (LPCWSTR)szProperty);
 
 		hr = sqlConn.Connect((LPCWSTR)szServer, (LPCWSTR)szInstance, nPort, (LPCWSTR)szDatabase, (LPCWSTR)szUsername, (LPCWSTR)szPassword, bEncrypted);
 		BreakExitOnFailure(hr, "Failed connecting to database");

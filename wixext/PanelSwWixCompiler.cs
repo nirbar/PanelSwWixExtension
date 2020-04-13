@@ -1157,7 +1157,7 @@ namespace PanelSw.Wix.Extensions
                         port = Core.GetAttributeValue(sourceLineNumbers, attrib);
                         break;
 
-                    case "Encrypted":
+                    case "Encrypt":
                         encrypted = Core.GetAttributeValue(sourceLineNumbers, attrib);
                         break;
 
@@ -2976,7 +2976,7 @@ namespace PanelSw.Wix.Extensions
                         case "Port":
                             port = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "Encrypted":
+                        case "Encrypt":
                             encrypted = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
 

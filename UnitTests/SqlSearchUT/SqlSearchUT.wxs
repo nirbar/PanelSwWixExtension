@@ -33,13 +33,14 @@
     <Property Id="SQL_PORT" Value="1433"/>
     <Property Id="SQL_DB" Value="master"/>
     <Property Id="SQL_TABLE" Value="PANELSW_Test"/>
+    <Property Id="SQL_ENCRYPT" Value="no"/>
 
     <Property Id="SQL_TABLE_EXISTS">
-      <PanelSW:SqlSearch Server="[SQL_SERVER]" Instance="[SQL_INSTANCE]" Port="[SQL_PORT]" Database="[SQL_DB]" Username="[SQL_USER]" Password="[SQL_PSW]"
+      <PanelSW:SqlSearch Server="[SQL_SERVER]" Instance="[SQL_INSTANCE]" Port="[SQL_PORT]" Database="[SQL_DB]" Username="[SQL_USER]" Password="[SQL_PSW]" Encrypt="[SQL_ENCRYPT]"
                          Query="SELECT COUNT(DISTINCT table_name) FROM information_schema.columns WHERE table_catalog = '[SQL_DB]' And table_name = '[SQL_TABLE]'" />
     </Property>
     <Property Id="LARGE_TEXT">
-      <PanelSW:SqlSearch Server="[SQL_SERVER]" Instance="[SQL_INSTANCE]" Port="[SQL_PORT]" Database="[SQL_DB]" Username="[SQL_USER]" Password="[SQL_PSW]"
+      <PanelSW:SqlSearch Server="[SQL_SERVER]" Instance="[SQL_INSTANCE]" Port="[SQL_PORT]" Database="[SQL_DB]" Username="[SQL_USER]" Password="[SQL_PSW]" Encrypt="[SQL_ENCRYPT]"
                          Condition="SQL_TABLE_EXISTS > 0"
                          Query="SELECT TOP 1 someText FROM [SQL_TABLE]" />
     </Property>
