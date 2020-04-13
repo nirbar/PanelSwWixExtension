@@ -1,7 +1,6 @@
 #include "SqlScript.h"
 #include "FileOperations.h"
 #include "../CaCommon/WixString.h"
-#include "../CaCommon/SqlConnection.h"
 #include "../CaCommon/SqlQuery.h"
 #include <wcautil.h>
 #include <memutil.h>
@@ -534,6 +533,7 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 	BOOL bRes = TRUE;
 	SqlScriptDetails details;
 	LPWSTR szError = nullptr;
+	CSqlConnection sqlConn;
 
 	bRes = details.ParseFromString(command);
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking SqlScriptDetails");
@@ -544,7 +544,16 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 	LRetry:
 		ReleaseNullStr(szError);
 
-		hr = ExecuteOne((LPCWSTR)details.server().c_str(), (LPCWSTR)details.instance().c_str(), details.port(), details.encrypted(), (LPCWSTR)details.database().c_str(), (LPCWSTR)details.username().c_str(), (LPCWSTR)details.password().c_str(), (LPCWSTR)details.scripts(i).c_str(), &szError);
+		// Failure and error handling on either connection or query failure
+		if (!sqlConn.IsConnected())
+		{
+			hr = sqlConn.Connect((LPCWSTR)details.server().c_str(), (LPCWSTR)details.instance().c_str(), details.port(), (LPCWSTR)details.database().c_str(), (LPCWSTR)details.username().c_str(), (LPCWSTR)details.password().c_str(), details.encrypted(), &szError);
+		}
+		if (sqlConn.IsConnected())
+		{
+			hr = ExecuteOne(sqlConn, (LPCWSTR)details.scripts(i).c_str(), &szError);
+		}
+
 		if (FAILED(hr))
 		{
 			switch (details.errorhandling())
@@ -610,15 +619,11 @@ LExit:
 	return hr;
 }
 
-HRESULT CSqlScript::ExecuteOne(LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, bool bEncrypted, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, LPWSTR *pszError)
+HRESULT CSqlScript::ExecuteOne(const CSqlConnection &sqlConn, LPCWSTR szScript, LPWSTR *pszError)
 {
 	HRESULT hr = S_OK;
 	LPWSTR szError = nullptr;
-	CSqlConnection sqlConn;
 	CSqlQuery sqlQuery;
-
-	hr = sqlConn.Connect(szServer, szInstance, nPort, szDatabase, szUser, szPassword, bEncrypted);
-	ExitOnFailure(hr, "Failed connecting to database");
 
 	hr = sqlQuery.ExecuteQuery(sqlConn, szScript, nullptr, &szError);
 	ExitOnFailure(hr, "Failed to execute SQL string");

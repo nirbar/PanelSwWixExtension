@@ -36,6 +36,7 @@ HRESULT CSqlClientBase::LogDiagnosticRecord(SQLHANDLE hHandle, SQLSMALLINT hType
         // Skip "Data truncated" messages
         if (::wcscmp(wszState, L"01004") == 0)
         {
+            ++iRec;
             continue;
         }
 

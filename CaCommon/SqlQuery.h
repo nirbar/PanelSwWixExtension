@@ -7,16 +7,11 @@ class CSqlQuery : public CSqlClientBase
 public:
     ~CSqlQuery();
 
-    HRESULT ExecuteQuery(CSqlConnection& sqlConn, LPCWSTR szQuery, LPWSTR* pszResult, LPWSTR *pszError = nullptr);
+    HRESULT ExecuteQuery(const CSqlConnection &sqlConn, LPCWSTR szQuery, LPWSTR* pszResult, LPWSTR *pszError = nullptr);
 
 private:
-    typedef struct {
-        LPWSTR wszBuffer;
-        SQLLEN indPtr;
-    } BINDING;
-
-    HRESULT AllocateBinding(BINDING **ppBinding);
 
     HSTMT hStmt_ = NULL;
+    const int DATA_CHUNK_SIZE = 2000;
 };
 

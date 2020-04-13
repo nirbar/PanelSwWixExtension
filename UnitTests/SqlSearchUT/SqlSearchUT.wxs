@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../wixext/XSD/PanelSwWixExtension.xsd">
+
+  <Product Id="*" Name="SqlSearchUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="d377fd04-a940-4ed2-8d55-e2f1f6f39d2d">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perUser" />
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate />
+    <Property Id="MSIFASTINSTALL" Value="1"></Property>
+
+    <Feature Id="ProductFeature" Title="SqlSearchUT" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="SqlSearchUT" />
+      </Directory>
+    </Directory>
+
+    <Binary SourceFile="$(sys.SOURCEFILEDIR)Script.sql" Id="Script.sql"/>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="JustFile">
+        <File Source="$(sys.SOURCEFILEPATH)"/>
+        <PanelSW:SqlScript BinaryKey="Script.sql" Server="[SQL_SERVER]" Instance="[SQL_INSTANCE]" Port="[SQL_PORT]" Database="[SQL_DB]" Username="[SQL_USER]" Password="[SQL_PSW]" OnInstall="yes" ErrorHandling="prompt">
+          <PanelSW:Replace Text="[\[]SQL_TABLE[\]]" Replacement="[SQL_TABLE]"/>
+        </PanelSW:SqlScript>
+      </Component>
+    </ComponentGroup>
+
+    <Property Id="SQL_SERVER" Value="."/>
+    <Property Id="SQL_INSTANCE" Value="SQLEXPRESS"/>
+    <Property Id="SQL_PORT" Value="1433"/>
+    <Property Id="SQL_DB" Value="master"/>
+    <Property Id="SQL_TABLE" Value="PANELSW_Test"/>
+
+    <Property Id="SQL_TABLE_EXISTS">
+      <PanelSW:SqlSearch Server="[SQL_SERVER]" Instance="[SQL_INSTANCE]" Port="[SQL_PORT]" Database="[SQL_DB]" Username="[SQL_USER]" Password="[SQL_PSW]"
+                         Query="SELECT COUNT(DISTINCT table_name) FROM information_schema.columns WHERE table_catalog = '[SQL_DB]' And table_name = '[SQL_TABLE]'" />
+    </Property>
+    <Property Id="LARGE_TEXT">
+      <PanelSW:SqlSearch Server="[SQL_SERVER]" Instance="[SQL_INSTANCE]" Port="[SQL_PORT]" Database="[SQL_DB]" Username="[SQL_USER]" Password="[SQL_PSW]"
+                         Condition="SQL_TABLE_EXISTS > 0"
+                         Query="SELECT TOP 1 someText FROM [SQL_TABLE]" />
+    </Property>
+    <Condition Message="Expected table '[SQL_TABLE]' to not exist or to have data in it if it does exist"><![CDATA[NOT SQL_TABLE_EXISTS OR (SQL_TABLE_EXISTS = 0) OR LARGE_TEXT]]></Condition>
+    
+  </Product>
+</Wix>

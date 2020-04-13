@@ -36,7 +36,7 @@ CSqlConnection::~CSqlConnection()
 }
 
 // https://docs.microsoft.com/en-us/sql/relational-databases/native-client/applications/using-connection-string-keywords-with-sql-server-native-client
-HRESULT CSqlConnection::Connect(LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, bool bEncrypted)
+HRESULT CSqlConnection::Connect(LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, bool bEncrypted, LPWSTR* pszError)
 {
     CWixString szConnString;
     CWixString szServerTmp;
@@ -54,7 +54,7 @@ HRESULT CSqlConnection::Connect(LPCWSTR szServer, LPCWSTR szInstance, USHORT nPo
     }
     else if (nPort > 0)
     {
-        hr = szServerTmp.Format(L"tcp:%s,%u", (LPCWSTR)szServer, nPort);
+        hr = szServerTmp.Format(L"%s,%u", (LPCWSTR)szServer, nPort);
         ExitOnFailure(hr, "Failed appending string");
     }
 
@@ -68,11 +68,24 @@ HRESULT CSqlConnection::Connect(LPCWSTR szServer, LPCWSTR szInstance, USHORT nPo
         ExitOnFailure(hr, "Failed appending string");
     }
 
+    if (bEncrypted)
+    {
+        hr = szConnString.AppnedFormat(L" Encrypt=yes;");
+        ExitOnFailure(hr, "Failed appending string");
+    }
+    else
+    {
+        hr = szConnString.AppnedFormat(L" Encrypt=no;");
+        ExitOnFailure(hr, "Failed appending string");
+    }
+
+    // User/password last to log obfuscated connection string
     if (szUser && *szUser)
     {
         hr = szConnString.AppnedFormat(L" Trusted_Connection=no; UID={%s};", szUser);
         ExitOnFailure(hr, "Failed appending string");
 
+        WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Connection string '%ls PWD={******};'", (LPCWSTR)szConnString);
         if (szPassword && *szPassword)
         {
             hr = szConnString.AppnedFormat(L" PWD={%s};", szPassword);
@@ -83,15 +96,11 @@ HRESULT CSqlConnection::Connect(LPCWSTR szServer, LPCWSTR szInstance, USHORT nPo
     {
         hr = szConnString.AppnedFormat(L" Trusted_Connection=yes;");
         ExitOnFailure(hr, "Failed appending string");
+  
+        WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Connection string '%ls'", (LPCWSTR)szConnString);
     }
 
-    if (bEncrypted)
-    {
-        hr = szConnString.AppnedFormat(L" Encrypt=yes;");
-        ExitOnFailure(hr, "Failed appending string");
-    }
-
-    hr = Connect(szConnString);
+    hr = Connect(szConnString, pszError);
     ExitOnFailure(hr, "Failed connecting to SQL server");
 
 LExit:
@@ -99,7 +108,7 @@ LExit:
 }
 
 
-HRESULT CSqlConnection::Connect(LPWSTR szConnectionString)
+HRESULT CSqlConnection::Connect(LPWSTR szConnectionString, LPWSTR* pszError)
 {
     HRESULT hr = S_OK;
     SQLRETURN sr = SQL_SUCCESS;
@@ -109,13 +118,13 @@ HRESULT CSqlConnection::Connect(LPWSTR szConnectionString)
     if (bConnected_)
     {
         sr = SQLDisconnect(hDbc_);
-        ExitOnOdbcError(sr, hDbc_, SQL_HANDLE_DBC, hr, "Failed disconnecting database");
+        ExitOnOdbcErrorWithText(sr, hDbc_, SQL_HANDLE_DBC, hr, pszError, "Failed disconnecting database");
 
         bConnected_ = false;
     }
 
     sr = SQLDriverConnect(hDbc_, nullptr, szConnectionString, SQL_NTS, nullptr, 0, nullptr, SQL_DRIVER_NOPROMPT);
-    ExitOnOdbcError(sr, hDbc_, SQL_HANDLE_DBC, hr, "Failed connecting to SQL DB");
+    ExitOnOdbcErrorWithText(sr, hDbc_, SQL_HANDLE_DBC, hr, pszError, "Failed connecting to SQL DB");
 
     bConnected_ = true;
     szConnectionString_.Copy(szConnectionString);

@@ -12,9 +12,9 @@ public:
     CSqlConnection();
     ~CSqlConnection();
 
-    HRESULT Connect(LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, LPCWSTR szDatabase = nullptr, LPCWSTR szUser = nullptr, LPCWSTR szPassword = nullptr, bool bEncrypted = false);
+    HRESULT Connect(LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, bool bEncrypted, LPWSTR* pszError = nullptr);
 
-    HRESULT Connect(LPWSTR szConnectionString);
+    HRESULT Connect(LPWSTR szConnectionString, LPWSTR *pszError = nullptr);
 
     bool IsConnected() const;
 

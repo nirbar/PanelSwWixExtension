@@ -25,7 +25,7 @@
     <IntermediateOutputPath>obj\$(Configuration)\</IntermediateOutputPath>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Product.wxs" />
+    <Compile Include="SqlSearchUT.wxs" />
   </ItemGroup>
   <ItemGroup>
     <WixExtension Include="PanelSwWixExtension">

@@ -1,5 +1,6 @@
 #pragma once
 #include "../CaCommon/DeferredActionBase.h"
+#include "../CaCommon/SqlConnection.h"
 #include "sqlScriptDetails.pb.h"
 
 class CSqlScript :
@@ -16,7 +17,7 @@ protected:
 	HRESULT DeferredExecute(const ::std::string& command) override;
 
 private:
-	HRESULT ExecuteOne(LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, bool bEncrypted, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, LPWSTR *pszError);
+	HRESULT ExecuteOne(const CSqlConnection &sqlConn, LPCWSTR szScript, LPWSTR *pszError);
 
 	HRESULT SplitScript(com::panelsw::ca::SqlScriptDetails *pDetails, LPCWSTR szScript);
 };
