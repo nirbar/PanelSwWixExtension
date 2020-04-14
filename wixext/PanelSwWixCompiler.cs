@@ -343,6 +343,10 @@ namespace PanelSw.Wix.Extensions
                 Core.UnexpectedElement(node.ParentNode, node);
             }
             property = node.ParentNode.Attributes["Id"].Value;
+            if (!property.ToUpper().Equals(property))
+            {
+                Core.OnMessage(WixErrors.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
+            }
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -2284,6 +2288,10 @@ namespace PanelSw.Wix.Extensions
             {
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "DestProperty"));
             }
+            if (!DestProperty.ToUpper().Equals(DestProperty))
+            {
+                Core.OnMessage(WixErrors.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", DestProperty));
+            }
 
             if (string.IsNullOrEmpty(FilePath))
             {
@@ -2459,6 +2467,10 @@ namespace PanelSw.Wix.Extensions
                 Core.UnexpectedElement(node.ParentNode, node);
             }
             property = node.ParentNode.Attributes["Id"].Value;
+            if (!property.ToUpper().Equals(property))
+            {
+                Core.OnMessage(WixErrors.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
+            }
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -2543,6 +2555,10 @@ namespace PanelSw.Wix.Extensions
                 Core.UnexpectedElement(node.ParentNode, node);
             }
             property = node.ParentNode.Attributes["Id"].Value;
+            if (!property.ToUpper().Equals(property))
+            {
+                Core.OnMessage(WixErrors.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
+            }
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -2611,6 +2627,10 @@ namespace PanelSw.Wix.Extensions
                 return;
             }
             property = node.ParentNode.Attributes["Id"].Value;
+            if (!property.ToUpper().Equals(property))
+            {
+                Core.OnMessage(WixErrors.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
+            }
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -2662,6 +2682,10 @@ namespace PanelSw.Wix.Extensions
                 return;
             }
             property = node.ParentNode.Attributes["Id"].Value;
+            if (!property.ToUpper().Equals(property))
+            {
+                Core.OnMessage(WixErrors.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
+            }
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -2758,6 +2782,10 @@ namespace PanelSw.Wix.Extensions
             {
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.LocalName, "Id"));
                 return;
+            }
+            if (!property.ToUpper().Equals(property))
+            {
+                Core.OnMessage(WixErrors.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
             }
             if (string.IsNullOrEmpty(accountName))
             {
@@ -2872,6 +2900,10 @@ namespace PanelSw.Wix.Extensions
             {
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.LocalName, "Id"));
             }
+            if (!property.ToUpper().Equals(property))
+            {
+                Core.OnMessage(WixErrors.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
+            }
             if (string.IsNullOrEmpty(id))
             {
                 id = "xms" + Guid.NewGuid().ToString("N");
@@ -2942,6 +2974,10 @@ namespace PanelSw.Wix.Extensions
                 Core.UnexpectedElement(node.ParentNode, node);
             }
             id = node.ParentNode.Attributes["Id"].Value;
+            if (!id.ToUpper().Equals(id))
+            {
+                Core.OnMessage(WixErrors.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", id));
+            }
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -3323,6 +3359,10 @@ namespace PanelSw.Wix.Extensions
             if ((parent != null) && parent.LocalName.Equals("Property"))
             {
                 property = parent.Attributes["Id"]?.Value;
+                if (!property.ToUpper().Equals(property))
+                {
+                    Core.OnMessage(WixErrors.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
+                }
             }
 
             if (string.IsNullOrEmpty(id))
@@ -3470,6 +3510,10 @@ namespace PanelSw.Wix.Extensions
             if (string.IsNullOrEmpty(prop))
             {
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "DstProperty"));
+            }
+            if (!prop.ToUpper().Equals(prop))
+            {
+                Core.OnMessage(WixErrors.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", prop));
             }
             if (string.IsNullOrEmpty(input) == string.IsNullOrEmpty(filepath))
             {
