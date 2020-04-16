@@ -47,6 +47,7 @@ HRESULT CSqlConnection::Connect(LPCWSTR szServer, LPCWSTR szInstance, USHORT nPo
     hr = szServerTmp.Copy(szServer);
     ExitOnFailure(hr, "Failed alloacting string");
 
+    // Server[\Instance|,port]
     if (szInstance && *szInstance)
     {
         hr = szServerTmp.AppnedFormat(L"\\%s", szInstance);
@@ -58,7 +59,6 @@ HRESULT CSqlConnection::Connect(LPCWSTR szServer, LPCWSTR szInstance, USHORT nPo
         ExitOnFailure(hr, "Failed appending string");
     }
 
-    // Server\Instance,port
     hr = szConnString.Format(L"Driver={SQL Server}; Server={%s};", (LPCWSTR)szServerTmp);
     ExitOnFailure(hr, "Failed alloacting string");
 

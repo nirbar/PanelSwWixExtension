@@ -28,5 +28,7 @@
 
     <DefineConstants>JetVersion=$(FullVersion);JetProductName=$(ProductName);JetManufacturer=$(Manufacturer)</DefineConstants>
 
+    <SignAssembly Condition="Exists('$(AssemblyOriginatorKeyFile)')">true</SignAssembly>
+
   </PropertyGroup>
 </Project>
