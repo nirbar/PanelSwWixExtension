@@ -37,6 +37,10 @@ HRESULT CSqlQuery::ExecuteQuery(const CSqlConnection &sqlConn, LPCWSTR szQuery, 
     }
 
     sr = SQLExecDirect(hStmt_, szQueryTemp, SQL_NTS);
+    if (sr == SQL_NO_DATA)
+    {
+        sr = SQL_SUCCESS;
+    }
     ExitOnOdbcErrorWithText(sr, hStmt_, SQL_HANDLE_STMT, hr, pszError, "Failed executing query");
 
     if (SQL_SUCCEEDED(SQLRowCount(hStmt_, &nRows)) && (nRows >= 0))
