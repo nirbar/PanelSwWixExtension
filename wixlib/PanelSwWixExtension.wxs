@@ -497,7 +497,6 @@
       <Custom Action="PSW_XslTransform" After="DuplicateFiles" Overridable="yes"/>
     </InstallExecuteSequence>
     <UI>
-      <Error Id="27008">!(loc.PSW_XslTransformFailure)</Error>
       <ProgressText Action="PSW_XslTransform">!(loc.PSW_XslTransform)</ProgressText>
       <ProgressText Action="PSW_XslTransformExec">!(loc.PSW_XslTransform)</ProgressText>
     </UI>

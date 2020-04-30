@@ -43,5 +43,4 @@
   <String Overridable="yes" Id="PSW_VersionCompare"><![CDATA[Comparing versions]]></String>
   <String Overridable="yes" Id="PSW_PathSearch"><![CDATA[Searching file on PATH]]></String>
   <String Overridable="yes" Id="PSW_XslTransform"><![CDATA[Applying XSL transforms]]></String>
-  <String Overridable="yes" Id="PSW_XslTransformFailure"><![CDATA[Failed applying XSL transform on file [2]]]></String>
 </WixLocalization>

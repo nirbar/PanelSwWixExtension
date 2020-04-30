@@ -33,21 +33,21 @@ extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall)
 	// Ensure tables exist.
 	hr = WcaTableExists(L"PSW_XslTransform");
 	ExitOnFailure((hr == S_OK), "Table does not exist 'PSW_XslTransform'. Have you authored 'PanelSw:XslTransform' entries in WiX code?");
-    hr = WcaTableExists(L"PSW_XslTransform_Replacements");
-    ExitOnFailure((hr == S_OK), "Table does not exist 'PSW_XslTransform_Replacements'. Have you authored 'PanelSw:XslTransform' entries in WiX code?");
+	hr = WcaTableExists(L"PSW_XslTransform_Replacements");
+	ExitOnFailure((hr == S_OK), "Table does not exist 'PSW_XslTransform_Replacements'. Have you authored 'PanelSw:XslTransform' entries in WiX code?");
 
 	// Execute view
-	hr = WcaOpenExecuteView(L"SELECT `PSW_XslTransform`.`Id`, `File`.`Component_`, `PSW_XslTransform`.`File_`, `PSW_XslTransform`.`XslBinary_` FROM `PSW_XslTransform`, `File` ORDER BY `PSW_XslTransform`.`Order` WHERE `PSW_XslTransform`.`File_` = `File`.`File`", &hView);
+	hr = WcaOpenExecuteView(L"SELECT `PSW_XslTransform`.`Id`, `File`.`Component_`, `PSW_XslTransform`.`File_`, `PSW_XslTransform`.`XslBinary_` FROM `PSW_XslTransform`, `File` WHERE `PSW_XslTransform`.`File_` = `File`.`File` ORDER BY `PSW_XslTransform`.`Order`", &hView);
 	ExitOnFailure(hr, "Failed to execute SQL query.");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
-	{        
+	{
 		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-        PMSIHANDLE hSubView;
-        PMSIHANDLE hSubRecord;
+		PMSIHANDLE hSubView;
+		PMSIHANDLE hSubRecord;
 		CWixString szId, szComponent, szFileId, szXslBinaryId;
 		CWixString szXsl, szFileFmt, szFilePath;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
@@ -65,6 +65,19 @@ extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall)
 		ExitOnNull(!szFileId.IsNullOrEmpty(), hr, E_INVALIDARG, "File key is empty");
 		ExitOnNull(!szComponent.IsNullOrEmpty(), hr, E_INVALIDARG, "Component is empty");
 
+		// Test condition
+		compAction = WcaGetComponentToDo(szComponent);
+		switch (compAction)
+		{
+		case WCA_TODO::WCA_TODO_INSTALL:
+		case WCA_TODO::WCA_TODO_REINSTALL:
+			break;
+
+		case WCA_TODO::WCA_TODO_UNKNOWN:
+			WcaLog(LOGMSG_STANDARD, "Skipping execution of XSLT '%ls' since component '%ls' is not being installed or reinstalled", (LPCWSTR)szXslBinaryId, (LPCWSTR)szComponent);
+			continue;
+		}
+
 		hr = szFileFmt.Format(L"[#%s]", (LPCWSTR)szFileId);
 		ExitOnFailure(hr, "Failed formatting string");
 
@@ -77,23 +90,12 @@ extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall)
 			continue;
 		}
 
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will apply XSL transform '%ls' on file '%ls'", (LPCWSTR)szXslBinaryId, (LPCWSTR)szFilePath);
 		hr = ReadBinary(szXslBinaryId, szId, &szXsl);
 		ExitOnFailure(hr, "Failed reading XSL transform");
 
-		// Test condition
-		compAction = WcaGetComponentToDo(szComponent);
-		switch (compAction)
-		{
-		case WCA_TODO::WCA_TODO_INSTALL:
-		case WCA_TODO::WCA_TODO_REINSTALL:
-			hr = deferredCA.AddExec(szFilePath, szXsl);
-			ExitOnFailure(hr, "Failed scheduling '%ls' SQL script", (LPCWSTR)szXslBinaryId);
-			break;
-
-		case WCA_TODO::WCA_TODO_UNKNOWN:
-			WcaLog(LOGMSG_STANDARD, "Skipping execution of XSLT '%ls' since component '%ls' is not being installed or reinstalled", (LPCWSTR)szXslBinaryId, (LPCWSTR)szComponent);
-			break;
-		}
+		hr = deferredCA.AddExec(szFilePath, szXsl);
+		ExitOnFailure(hr, "Failed scheduling '%ls' XSL transform", (LPCWSTR)szXslBinaryId);
 	}
 	hr = S_OK;
 
@@ -114,7 +116,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, CWixString *pszQuery)
+static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, CWixString* pszQuery)
 {
 	HRESULT hr = S_OK;
 	CWixString szMsiQuery;
@@ -149,16 +151,16 @@ static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, CWixString *ps
 	if (encoding == FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_MultiByte)
 	{
 		hr = pszQuery->Format(L"%hs", pbData);
-		ExitOnFailure(hr, "Failed to copy SQL script to string. Is binary file '%ls' multibyte-encoded?", szBinaryKey);
+		ExitOnFailure(hr, "Failed to copy XSL to string. Is binary file '%ls' multibyte-encoded?", szBinaryKey);
 	}
 	else
 	{
 		hr = pszQuery->Copy((LPCWSTR)pbData);
-		ExitOnFailure(hr, "Failed to copy SQL script to string. Is binary file '%ls' unicode-encoded?", szBinaryKey);
+		ExitOnFailure(hr, "Failed to copy XSL to string. Is binary file '%ls' unicode-encoded?", szBinaryKey);
 	}
 
 	hr = ReplaceStrings(pszQuery, szQueryId);
-	ExitOnFailure(hr, "Failed to replacing strings in SQL script '%ls'", szBinaryKey);
+	ExitOnFailure(hr, "Failed to replacing strings in XSL transform '%ls'", szBinaryKey);
 
 LExit:
 	ReleaseMem(pbData);
@@ -166,7 +168,7 @@ LExit:
 	return hr;
 }
 
-static HRESULT ReplaceStrings(CWixString *pszXsl, LPCWSTR szXslId)
+static HRESULT ReplaceStrings(CWixString* pszXsl, LPCWSTR szXslId)
 {
 	HRESULT hr = S_OK;
 	CWixString szMsiQuery;
@@ -184,15 +186,25 @@ static HRESULT ReplaceStrings(CWixString *pszXsl, LPCWSTR szXslId)
 	{
 		ExitOnFailure(hr, "Failed to fetch record.");
 
+		CWixString szTextFmt, szReplacementFmt;
 		CWixString szText, szReplacement;
+		CWixString szTextObf, szReplacementObf;
 
-		hr = WcaGetRecordFormattedString(hRecord, 1, (LPWSTR*)szText);
+		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szTextFmt);
 		ExitOnFailure(hr, "Failed to get Text.");
-		hr = WcaGetRecordFormattedString(hRecord, 2, (LPWSTR*)szReplacement);
+		hr = WcaGetRecordString(hRecord, 2, (LPWSTR*)szReplacementFmt);
 		ExitOnFailure(hr, "Failed to get Replacement.");
+
+		hr = szText.MsiFormat((LPCWSTR)szTextFmt, (LPWSTR*)szTextObf);
+		ExitOnFailure(hr, "Failed formatting string");
+
+		hr = szReplacement.MsiFormat((LPCWSTR)szReplacementFmt, (LPWSTR*)szReplacementObf);
+		ExitOnFailure(hr, "Failed formatting string");
 
 		if (!szText.IsNullOrEmpty())
 		{
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Replacing '%ls' with '%ls' in XSL transform", (LPCWSTR)szTextObf, (LPCWSTR)szReplacementObf);
+
 			hr = pszXsl->ReplaceAll(szText, szReplacement);
 			ExitOnFailure(hr, "Failed to replace strings in SQL script.");
 		}
@@ -206,14 +218,14 @@ LExit:
 
 HRESULT CXslTransform::AddExec(LPCWSTR szXmlFilePath, LPCWSTR szXslt)
 {
-    HRESULT hr = S_OK;
-	::com::panelsw::ca::Command *pCmd = nullptr;
-	XslTransformDetails *pDetails = nullptr;
-	::std::string *pAny = nullptr;
+	HRESULT hr = S_OK;
+	::com::panelsw::ca::Command* pCmd = nullptr;
+	XslTransformDetails* pDetails = nullptr;
+	::std::string* pAny = nullptr;
 	bool bRes = true;
 
-    hr = AddCommand("CXslTransform", &pCmd);
-    ExitOnFailure(hr, "Failed to add command");
+	hr = AddCommand("CXslTransform", &pCmd);
+	ExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new XslTransformDetails();
 	ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
@@ -228,7 +240,7 @@ HRESULT CXslTransform::AddExec(LPCWSTR szXmlFilePath, LPCWSTR szXslt)
 	ExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
-    return hr;
+	return hr;
 }
 
 // Execute the command object (XML element)
@@ -241,8 +253,10 @@ HRESULT CXslTransform::DeferredExecute(const ::std::string& command)
 	LPCWSTR szXmlPath = nullptr;
 	CComPtr<IXMLDOMDocument2> pXmlDoc;
 	CComPtr<IXMLDOMDocument2> pXsl;
+	CComPtr<IXMLDOMParseError2> pError;
 	CComPtr<IXMLDOMNodeList> pNodeList;
 	CComVariant filePath;
+	CComBSTR szError;
 	CComBSTR xslText;
 	CComBSTR xmlTransformed;
 	VARIANT_BOOL isXmlSuccess;
@@ -264,21 +278,39 @@ HRESULT CXslTransform::DeferredExecute(const ::std::string& command)
 	// Load XML document
 	filePath = szXmlPath;
 	hr = pXmlDoc->load(filePath, &isXmlSuccess);
-	ExitOnFailure(hr, "Failed to load XML");
-	if (!isXmlSuccess)
+	if (FAILED(hr) || !isXmlSuccess)
 	{
-		hr = E_FAIL;
-		ExitOnFailure(hr, "Failed to load XML");
+		if (SUCCEEDED(hr))
+		{
+			hr = E_FAIL;
+		}
+		if (SUCCEEDED(pXsl->get_parseError((IXMLDOMParseError**)&pError)) && SUCCEEDED(pError->get_srcText(&szError)))
+		{
+			ExitOnFailure(hr, "Failed to load XML. %ls", (LPWSTR)szError);
+		}
+		else
+		{
+			ExitOnFailure(hr, "Failed to load XML");
+		}
 	}
 
 	// Load XSL document
 	xslText = szXsl;
 	hr = pXsl->loadXML(xslText, &isXmlSuccess);
-	ExitOnFailure(hr, "Failed to load XML");
-	if (!isXmlSuccess)
+	if (FAILED(hr) || !isXmlSuccess)
 	{
-		hr = E_FAIL;
-		BreakExitOnFailure(hr, "Failed to load XSL");
+		if (SUCCEEDED(hr))
+		{
+			hr = E_FAIL;
+		}
+		if (SUCCEEDED(pXsl->get_parseError((IXMLDOMParseError**)&pError)) && SUCCEEDED(pError->get_srcText(&szError)))
+		{
+			ExitOnFailure(hr, "Failed to load XSL. %ls", (LPWSTR)szError);
+		}
+		else
+		{
+			ExitOnFailure(hr, "Failed to load XSL");
+		}
 	}
 
 	hr = pXmlDoc->transformNode(pXsl, &xmlTransformed);

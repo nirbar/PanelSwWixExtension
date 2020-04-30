@@ -81,11 +81,13 @@
 
   <Fragment>
     <Binary SourceFile="$(sys.SOURCEFILEDIR)XSLTFile1.xslt" Id="XslTransform"/>
+    <Property Id="FILE_NAME" Value="someName.xml" Hidden="yes"/>
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component>
         <File Source="$(sys.SOURCEFILEPATH)">
           <PanelSW:XslTransform BinaryKey="XslTransform">
-            <PanelSW:Replace Text="HI" Replacement="BYE"/>
+            <!-- Expecting to get <File Name="BYE" -->
+            <PanelSW:Replace Text="[\[]FILE_NAME[\]]" Replacement="[FILE_NAME]"/>
           </PanelSW:XslTransform>
         </File>
       </Component>
