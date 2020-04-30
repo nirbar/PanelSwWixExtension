@@ -238,7 +238,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         case "XslTransform":
-                            ParseXslTransform(element, parentElement);
+                            ParseXslTransform(parentElement, element);
                             break;
                         default:
                             Core.UnexpectedElement(parentElement, element);
