@@ -128,6 +128,7 @@
     <ClCompile Include="Unzip.cpp" />
     <ClCompile Include="VersionCompare.cpp" />
     <ClCompile Include="XmlSearch.cpp" />
+    <ClCompile Include="XslTransform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ExecOnComponent.h" />
@@ -179,6 +180,7 @@
     </ClInclude>
     <ClInclude Include="TopShelfService.h" />
     <ClInclude Include="Unzip.h" />
+    <ClInclude Include="XslTransform.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

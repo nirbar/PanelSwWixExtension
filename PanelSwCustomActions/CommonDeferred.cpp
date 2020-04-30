@@ -11,6 +11,7 @@
 #include "TopShelfService.h"
 #include "Unzip.h"
 #include "SqlScript.h"
+#include "XslTransform.h"
 
 // ReceiverToExecutorFunc implementation.
 HRESULT ReceiverToExecutor(LPCSTR szReceiver, CDeferredActionBase** ppExecutor)
@@ -67,6 +68,11 @@ HRESULT ReceiverToExecutor(LPCSTR szReceiver, CDeferredActionBase** ppExecutor)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating SqlScript handler");
 		(*ppExecutor) = new CSqlScript();
+	}
+	else if (0 == ::strcmp(szReceiver, "CXslTransform"))
+	{
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating XslTransform handler");
+		(*ppExecutor) = new CXslTransform();
 	}
 	else
 	{

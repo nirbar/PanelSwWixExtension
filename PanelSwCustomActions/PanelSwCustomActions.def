@@ -43,3 +43,4 @@ EXPORTS
 	SqlScript
 	VersionCompare
 	PathSearch
+	XslTransform

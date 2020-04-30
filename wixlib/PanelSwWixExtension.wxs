@@ -489,6 +489,20 @@
     </UI>
   </Fragment>
 
+  <!-- XslTransform -->
+  <Fragment>
+    <CustomAction Id="PSW_XslTransform" BinaryKey="PanelSwCustomActions.dll" DllEntry="XslTransform" Execute="immediate" />
+    <CustomAction Id="PSW_XslTransformExec" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes"/>
+    <InstallExecuteSequence>
+      <Custom Action="PSW_XslTransform" After="DuplicateFiles" Overridable="yes"/>
+    </InstallExecuteSequence>
+    <UI>
+      <Error Id="27008">!(loc.PSW_XslTransformFailure)</Error>
+      <ProgressText Action="PSW_XslTransform">!(loc.PSW_XslTransform)</ProgressText>
+      <ProgressText Action="PSW_XslTransformExec">!(loc.PSW_XslTransform)</ProgressText>
+    </UI>
+  </Fragment>
+
   <!-- SqlScript -->
   <Fragment>
     <CustomAction Id="PSW_SqlScript" BinaryKey="PanelSwCustomActions.dll" DllEntry="SqlScript" Execute="immediate" />

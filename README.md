@@ -90,6 +90,7 @@ Contact the owner to obtain a license for [JetWixExtension](https://github.com/n
   - *MsiSqlQuery*: Execute a MSI-SQL query on the MSI database.
   - *CreateSelfSignCertificate*: Create a self-sign certificate that can then be installed by WixIisExtension.
 - Deferred Actions:
+  - *XslTransform*: Apply a XSL transform on an installed XML file
   - *WebsiteConfig*: currently, can only stop a website
   - *JsonJPath*: Set values in JSON-formatted file.
   - *Dism*: Enable Windows Feature using DISM API. Features will be installed when the parent component is being installed or repaired.
@@ -130,6 +131,7 @@ PanelSwWixExtension uses error codes in Error table:
 - 27005: SqlScript error template for prompting user on errors.
 - 27006: ExecOn error template for prompting user on console output parsing.
 - 27007: WebsiteConfig error template for prompting user on errors.
+- 27008: XslTransform error template for prompting user on errors.
 
 ## Properties
 
