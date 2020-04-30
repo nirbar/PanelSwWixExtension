@@ -5,7 +5,12 @@ The commercial extension- [JetWixExtension](https://github.com/nirbar/JetBA-Show
 - JetBA: The most comprehensive, fully customizable, extensible, WPF-based BootstrapperApplication.
 - JetBA++: The only native fully customizable, extensible, Qt-based BootstrapperApplication.
 - Preprocessor extension:
-  - Harvest directly from WiX source code by executing Heat commands
+  - Harvest directly from WiX source code by executing Heat commands. The command is passes to heat.exe with the following changes:
+    - Added support to use DuplicateFile where possible:
+      - -cp NameSizeHash: Files with the same name, size, and MD5 hash are duplicated
+      - -cp NameVersion: File with the same name and version are duplicated. Files without a version are handled on NameSizeHash policy
+    - The "-out" parameter can be omitted
+    - "SourceDir" is replaced with preprocessed folder path in File/@Source and Payload/@SourceFile attributes
     ~~~~~~~
     <?pragma heat.dir "$(sys.SOURCEFILEDIR)..\bin\Release" -cg BIN -dr INSTALLFOLDER -ag?>
     ~~~~~~~
@@ -26,10 +31,21 @@ The commercial extension- [JetWixExtension](https://github.com/nirbar/JetBA-Show
     ~~~~~~~
   	<ComponentGroup Id="random">
   		<Component Directory="Product.Dir">
-  		<File Source="$(sys.SOURCEFILEPATH)" Id="$(jet.random_id())"/>
+  		<File Source="$(sys.SOURCEFILEPATH)" Id="$(jet.RandomId())"/>
   		</Component>
   		<Component Directory="INSTALL_FOLDER">
-  		<File Source="$(sys.SOURCEFILEPATH)" Id="$(jet.random_id())"/>
+  		<File Source="$(sys.SOURCEFILEPATH)" Id="$(jet.RandomId())"/>
+  		</Component>
+  	</ComponentGroup>
+    ~~~~~~~
+  - Get a running index. 
+    On each call get the next index, starting at 1.
+    ~~~~~~~
+  	<ComponentGroup Id="random">
+  		<Component Directory="Product.Dir">
+  		<File Source="$(sys.SOURCEFILEPATH)" />
+            <util:XmlFile ... Sequence="$(jet.Index())"/>
+            <util:XmlFile ... Sequence="$(jet.Index())"/>
   		</Component>
   	</ComponentGroup>
     ~~~~~~~
