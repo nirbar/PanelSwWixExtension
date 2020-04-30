@@ -200,7 +200,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, CWixString *pszQuoery)
+static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, CWixString *pszQuery)
 {
 	HRESULT hr = S_OK;
 	CWixString szMsiQuery;
@@ -227,23 +227,23 @@ static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, CWixString *ps
 	{
 		cbData += 2;
 		BYTE* pbData1 = (LPBYTE)MemReAlloc(pbData, cbData, TRUE);
-		ExitOnNull(pbData, hr, E_FAIL, "Failed reallocating memory");
+		ExitOnNull(pbData1, hr, E_FAIL, "Failed reallocating memory");
 		pbData = pbData1;
 	}
 
 	encoding = CFileOperations::DetectEncoding(pbData, cbData);
 	if (encoding == FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_MultiByte)
 	{
-		hr = pszQuoery->Format(L"%hs", pbData);
+		hr = pszQuery->Format(L"%hs", pbData);
 		ExitOnFailure(hr, "Failed to copy SQL script to string. Is binary file '%ls' multibyte-encoded?", szBinaryKey);
 	}
 	else
 	{
-		hr = pszQuoery->Copy((LPCWSTR)pbData);
+		hr = pszQuery->Copy((LPCWSTR)pbData);
 		ExitOnFailure(hr, "Failed to copy SQL script to string. Is binary file '%ls' unicode-encoded?", szBinaryKey);
 	}
 
-	hr = ReplaceStrings(pszQuoery, szQueryId);
+	hr = ReplaceStrings(pszQuery, szQueryId);
 	ExitOnFailure(hr, "Failed to replacing strings in SQL script '%ls'", szBinaryKey);
 
 LExit:
