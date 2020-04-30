@@ -237,6 +237,9 @@ namespace PanelSw.Wix.Extensions
                             ParseFileRegex(element, parentElement);
                             break;
 
+                        case "XslTransform":
+                            ParseXslTransform(parentElement, element);
+                            break;
                         default:
                             Core.UnexpectedElement(parentElement, element);
                             break;
@@ -1332,6 +1335,117 @@ namespace PanelSw.Wix.Extensions
                 row[10] = (int)sqlExecOn;
                 row[11] = (int)(errorHandling ?? ErrorHandling.fail);
                 row[12] = order;
+            }
+        }
+
+        private void ParseXslTransform(XmlElement parentElement, XmlElement element)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
+            string id = "xsl" + Guid.NewGuid().ToString("N");
+            string file = null;
+            string binary = null;
+            int order = 1000000000 + GetLineNumber(sourceLineNumbers);
+
+            file = GetFileId(parentElement);
+
+            foreach (XmlAttribute attrib in element.Attributes)
+            {
+                if ((0 != attrib.NamespaceURI.Length) && (attrib.NamespaceURI != schema.TargetNamespace))
+                {
+                    continue;
+                }
+
+                switch (attrib.LocalName)
+                {
+                    case "Id":
+                        id = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "BinaryKey":
+                        binary = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "Order":
+                        order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
+                        break;
+
+                    default:
+                        Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                        break;
+                }
+            }
+
+            if (string.IsNullOrEmpty(file))
+            {
+                Core.OnMessage(WixErrors.ParentElementAttributeRequired(sourceLineNumbers, parentElement.LocalName, "Id", element.LocalName));
+            }
+            if (string.IsNullOrEmpty(binary))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "BinaryKey"));
+            }
+
+            // Text replacements in XSL
+            foreach (XmlNode child in element.ChildNodes)
+            {
+                SourceLineNumberCollection repLines = Preprocessor.GetSourceLineNumbers(child);
+                if (child.NamespaceURI == schema.TargetNamespace)
+                {
+                    switch (child.LocalName)
+                    {
+                        case "Replace":
+                            {
+                                string from = null;
+                                string to = "";
+                                int repOrder = 1000000000 + GetLineNumber(repLines);
+                                foreach (XmlAttribute a in child.Attributes)
+                                {
+                                    if ((0 != a.NamespaceURI.Length) && (a.NamespaceURI != schema.TargetNamespace))
+                                    {
+                                        continue;
+                                    }
+
+                                    switch (a.LocalName)
+                                    {
+                                        case "Text":
+                                            from = Core.GetAttributeValue(repLines, a);
+                                            break;
+
+                                        case "Replacement":
+                                            to = Core.GetAttributeValue(repLines, a);
+                                            break;
+
+                                        case "Order":
+                                            repOrder = Core.GetAttributeIntegerValue(repLines, a, 0, 1000000000);
+                                            break;
+                                    }
+                                }
+
+                                Row row = Core.CreateRow(repLines, "PSW_XslTransform_Replacements");
+                                row[0] = id;
+                                row[1] = from;
+                                row[2] = to;
+                                row[3] = repOrder;
+                            }
+                            break;
+
+                        default:
+                            Core.UnexpectedElement(element, child);
+                            break;
+                    }
+                }
+            }
+
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "PSW_XslTransform");
+
+            if (!Core.EncounteredError)
+            {
+                // Ensure sub-tables exist for queries to succeed even if no sub-entries exist.
+                Core.EnsureTable(sourceLineNumbers, "PSW_XslTransform_Replacements");
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_XslTransform");
+                row[0] = id;
+                row[1] = file;
+                row[2] = binary;
+                row[3] = order;
             }
         }
 

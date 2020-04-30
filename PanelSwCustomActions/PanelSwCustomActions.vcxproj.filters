@@ -139,6 +139,9 @@
     <ClCompile Include="PathSearch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="XslTransform.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\*.pb.*">
@@ -225,6 +228,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SqlScript.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="XslTransform.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

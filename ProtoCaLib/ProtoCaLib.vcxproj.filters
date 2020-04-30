@@ -22,14 +22,146 @@
     <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\*.pb.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\customActionData.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\ErrorHandling.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\command.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\setPropertyFromPipeDetails.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\execOnDetails.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\fileOperationsDetails.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\fileRegexDetails.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\servciceConfigDetails.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\shellExecDetails.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\sqlScriptDetails.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\taskSchedulerDetails.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\telemetryDetails.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\topShelfServiceDetails.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\unzipDetails.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\xslTransformDetails.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\*.pb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\customActionData.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\ErrorHandling.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\command.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\execOnDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\setPropertyFromPipeDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\fileOperationsDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\fileRegexDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\servciceConfigDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\shellExecDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\sqlScriptDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\taskSchedulerDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\telemetryDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\topShelfServiceDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\unzipDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\xslTransformDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="*.proto">
+      <Filter>Protobuf</Filter>
+    </None>
+    <None Include="*.proto">
+      <Filter>Protobuf</Filter>
+    </None>
+    <None Include="*.proto">
+      <Filter>Protobuf</Filter>
+    </None>
+    <None Include="*.proto">
+      <Filter>Protobuf</Filter>
+    </None>
+    <None Include="*.proto">
+      <Filter>Protobuf</Filter>
+    </None>
+    <None Include="*.proto">
+      <Filter>Protobuf</Filter>
+    </None>
+    <None Include="*.proto">
+      <Filter>Protobuf</Filter>
+    </None>
+    <None Include="*.proto">
+      <Filter>Protobuf</Filter>
+    </None>
+    <None Include="*.proto">
+      <Filter>Protobuf</Filter>
+    </None>
+    <None Include="*.proto">
+      <Filter>Protobuf</Filter>
+    </None>
+    <None Include="*.proto">
+      <Filter>Protobuf</Filter>
+    </None>
+    <None Include="*.proto">
+      <Filter>Protobuf</Filter>
+    </None>
+    <None Include="*.proto">
+      <Filter>Protobuf</Filter>
+    </None>
+    <None Include="*.proto">
+      <Filter>Protobuf</Filter>
+    </None>
     <None Include="*.proto">
       <Filter>Protobuf</Filter>
     </None>

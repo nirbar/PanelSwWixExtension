@@ -90,6 +90,7 @@ Contact the owner to obtain a license for [JetWixExtension](https://github.com/n
   - *MsiSqlQuery*: Execute a MSI-SQL query on the MSI database.
   - *CreateSelfSignCertificate*: Create a self-sign certificate that can then be installed by WixIisExtension.
 - Deferred Actions:
+  - *XslTransform*: Apply a XSL transform on an installed XML file
   - *WebsiteConfig*: currently, can only stop a website
   - *JsonJPath*: Set values in JSON-formatted file.
   - *Dism*: Enable Windows Feature using DISM API. Features will be installed when the parent component is being installed or repaired.
@@ -197,5 +198,5 @@ After building a unit test project, you'll need to shutdown Visual Studio before
 This is due to the unfortunate habit of Visual Studio to hold the extension file in use.
 You may find it convenient to build unit test projects from a command prompt to workaround this limitation
 ~~~~~~~~~~~~
-MSBuild UnitTests\DismUT\DismUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
+MSBuild UnitTests\XmlSearchUT\XmlSearchUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
 ~~~~~~~~~~~~

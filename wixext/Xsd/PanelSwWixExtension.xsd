@@ -1059,6 +1059,7 @@
       <xs:documentation>String replacements</xs:documentation>
       <xs:appinfo>
         <xse:parent ref="SqlScript" />
+        <xse:parent ref="XslTransform" />
       </xs:appinfo>
     </xs:annotation>
     <xs:complexType>
@@ -1780,6 +1781,34 @@ Remove registry values.
     </xs:complexType>
   </xs:element>
 
+  <xs:element name="XslTransform">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="File" />
+      </xs:appinfo>
+      <xs:documentation><![CDATA[Apply an XSL transform on an installed XML file]]></xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Replace" />
+      </xs:choice>
+      <xs:attribute name="Id" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Primary key.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="BinaryKey" type="xs:string" use="required">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Binary XSL file]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Order" type="xs:integer">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Order of XSL execution, defaults to line number. XSL with explicit order field will be executed before XSL with implicit order]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
 
   <xs:element name="SqlScript">
     <xs:annotation>
@@ -1881,8 +1910,6 @@ Remove registry values.
       </xs:attribute>
     </xs:complexType>
   </xs:element>
-
-
 
   <xs:simpleType name="RegistryValueType">
     <xs:annotation>
