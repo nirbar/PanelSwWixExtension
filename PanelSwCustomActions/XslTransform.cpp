@@ -73,7 +73,7 @@ extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall)
 		case WCA_TODO::WCA_TODO_REINSTALL:
 			break;
 
-		case WCA_TODO::WCA_TODO_UNKNOWN:
+		default:
 			WcaLog(LOGMSG_STANDARD, "Skipping execution of XSLT '%ls' since component '%ls' is not being installed or reinstalled", (LPCWSTR)szXslBinaryId, (LPCWSTR)szComponent);
 			continue;
 		}
