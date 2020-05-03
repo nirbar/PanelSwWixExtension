@@ -256,6 +256,7 @@ HRESULT CXslTransform::DeferredExecute(const ::std::string& command)
 	CComPtr<IXMLDOMParseError2> pError;
 	CComPtr<IXMLDOMNodeList> pNodeList;
 	CComVariant filePath;
+	CComBSTR szErrorReason;
 	CComBSTR szError;
 	CComBSTR xslText;
 	CComBSTR xmlTransformed;
@@ -275,6 +276,38 @@ HRESULT CXslTransform::DeferredExecute(const ::std::string& command)
 	hr = ::CoCreateInstance(CLSID_DOMDocument, nullptr, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&pXsl);
 	ExitOnFailure(hr, "Failed to CoCreateInstance CLSID_DOMDocument");
 
+	// Lifting security limitations since XSL are from known source (the developer) and anyway it has local system priveleges
+	hr = pXmlDoc->setProperty(L"AllowXsltScript", CComVariant(true));
+	if (FAILED(hr))
+	{
+		WcaLogError(hr, "Failed setting AllowXsltScript");
+	}
+	hr = pXmlDoc->setProperty(L"AllowDocumentFunction", CComVariant(true));
+	if (FAILED(hr))
+	{
+		WcaLogError(hr, "Failed setting AllowDocumentFunction");
+	}
+	hr = pXmlDoc->setProperty(L"ProhibitDTD", CComVariant(false));
+	if (FAILED(hr))
+	{
+		WcaLogError(hr, "Failed resetting ProhibitDTD");
+	}
+	hr = pXsl->setProperty(L"AllowXsltScript", CComVariant(true));
+	if (FAILED(hr))
+	{
+		WcaLogError(hr, "Failed setting AllowXsltScript");
+	}
+	hr = pXsl->setProperty(L"AllowDocumentFunction", CComVariant(true));
+	if (FAILED(hr))
+	{
+		WcaLogError(hr, "Failed setting AllowDocumentFunction");
+	}
+	hr = pXsl->setProperty(L"ProhibitDTD", CComVariant(false));
+	if (FAILED(hr))
+	{
+		WcaLogError(hr, "Failed resetting ProhibitDTD");
+	}
+
 	// Load XML document
 	filePath = szXmlPath;
 	hr = pXmlDoc->load(filePath, &isXmlSuccess);
@@ -284,9 +317,9 @@ HRESULT CXslTransform::DeferredExecute(const ::std::string& command)
 		{
 			hr = E_FAIL;
 		}
-		if (SUCCEEDED(pXsl->get_parseError((IXMLDOMParseError**)&pError)) && SUCCEEDED(pError->get_srcText(&szError)))
+		if (SUCCEEDED(pXsl->get_parseError((IXMLDOMParseError**)&pError)) && SUCCEEDED(pError->get_srcText(&szError)) && SUCCEEDED(pError->get_reason(&szErrorReason)))
 		{
-			ExitOnFailure(hr, "Failed to load XML. %ls", (LPWSTR)szError);
+			ExitOnFailure(hr, "Failed to load XML. %ls: %ls", (LPWSTR)szErrorReason, (LPWSTR)szError);
 		}
 		else
 		{
@@ -303,9 +336,9 @@ HRESULT CXslTransform::DeferredExecute(const ::std::string& command)
 		{
 			hr = E_FAIL;
 		}
-		if (SUCCEEDED(pXsl->get_parseError((IXMLDOMParseError**)&pError)) && SUCCEEDED(pError->get_srcText(&szError)))
+		if (SUCCEEDED(pXsl->get_parseError((IXMLDOMParseError**)&pError)) && SUCCEEDED(pError->get_srcText(&szError)) && SUCCEEDED(pError->get_reason(&szErrorReason)))
 		{
-			ExitOnFailure(hr, "Failed to load XSL. %ls", (LPWSTR)szError);
+			ExitOnFailure(hr, "Failed to load XSL. %ls: %ls", (LPWSTR)szErrorReason, (LPWSTR)szError);
 		}
 		else
 		{
@@ -314,6 +347,13 @@ HRESULT CXslTransform::DeferredExecute(const ::std::string& command)
 	}
 
 	hr = pXmlDoc->transformNode(pXsl, &xmlTransformed);
+	if (FAILED(hr))
+	{
+		if (SUCCEEDED(pXmlDoc->get_parseError((IXMLDOMParseError**)&pError)) && SUCCEEDED(pError->get_srcText(&szError)) && SUCCEEDED(pError->get_reason(&szErrorReason)))
+		{
+			ExitOnFailure(hr, "Failed to apply XSL transform. %ls: %ls", (LPWSTR)szErrorReason, (LPWSTR)szError);
+		}
+	}
 	ExitOnFailure(hr, "Failed to apply XSL transform");
 
 	hr = FileWrite(szXmlPath, FILE_ATTRIBUTE_NORMAL, (BYTE*)(LPWSTR)xmlTransformed, xmlTransformed.ByteLength(), nullptr);

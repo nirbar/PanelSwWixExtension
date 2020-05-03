@@ -86,7 +86,7 @@
       <Component>
         <File Source="$(sys.SOURCEFILEPATH)">
           <PanelSW:XslTransform BinaryKey="XslTransform">
-            <!-- Expecting to get <File Name="BYE" -->
+            <!-- Expecting to get <File Name="someNAME.xml" -->
             <PanelSW:Replace Text="[\[]FILE_NAME[\]]" Replacement="[FILE_NAME]"/>
           </PanelSW:XslTransform>
         </File>
