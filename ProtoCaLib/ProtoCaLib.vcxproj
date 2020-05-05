@@ -176,7 +176,7 @@
     <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
     <Import Project="..\packages\TidyBuild.1.1.1\build\TidyBuild.targets" Condition="Exists('..\packages\TidyBuild.1.1.1\build\TidyBuild.targets')" />
   </ImportGroup>
-  <Target Name="BuildProtobuf" BeforeTargets="ProtoBuffCompile">
+  <Target Name="BuildProtobuf" BeforeTargets="ProtoBuffCompile" Condition="!Exists('$(SolutionDir)build\protobuf\$(Configuration)\protoc.exe')">
     <MakeDir Directories="$(SolutionDir)build\protobuf" />
     <MakeDir Directories="$(IntDir)..\protobuf" />
     <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; -G &quot;$(CMakeVsVersion)&quot; -T $(PlatformToolset) ..\..\protobuf\cmake -Dprotobuf_BUILD_TESTS=OFF" WorkingDirectory="$(SolutionDir)build\protobuf" />
