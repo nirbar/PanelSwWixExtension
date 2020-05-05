@@ -187,7 +187,7 @@
     <None Include="PanelSwCustomActions.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <Target Name="BuildPoco" BeforeTargets="PrepareForBuild">
+  <Target Name="BuildPoco" BeforeTargets="PrepareForBuild" Condition="!Exists('$(SolutionDir)build\poco\lib\$(Configuration)\PocoZipmt.lib')">
     <MakeDir Directories="$(SolutionDir)build\poco;$(IntDir)..\poco" />
     <MakeDir Directories="" />
     <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; -G &quot;Visual Studio 15 2017&quot; -T $(PlatformToolset) -DPOCO_STATIC=ON -DPOCO_MT=ON ..\..\poco" WorkingDirectory="$(SolutionDir)build\poco" />
