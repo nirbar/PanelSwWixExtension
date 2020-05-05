@@ -194,6 +194,7 @@
     <ProtoFiles Include="*.proto" />
   </ItemGroup>
   <Target Name="ProtoBuffCompile" BeforeTargets="PrepareForBuild" Inputs="@(ProtoFiles)" Outputs="$(IntDir)..\Protobuf\%(ProtoFiles.FileName).pb.h;$(IntDir)..\Protobuf\%(ProtoFiles.FileName).pb.cc">
+    <MakeDir Directories="$(IntDir)..\protobuf" />
     <Exec Command="&quot;$(SolutionDir)build\protobuf\$(Configuration)\protoc.exe&quot; &quot;--proto_path=$(MSBuildProjectDirectory)&quot; &quot;--proto_path=$(SolutionDir)protobuf\src&quot; &quot;--cpp_out=$(IntDir)..\Protobuf&quot; @(ProtoFiles, ' ')" />
   </Target>
 </Project>
