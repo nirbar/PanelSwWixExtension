@@ -2162,6 +2162,8 @@ namespace PanelSw.Wix.Extensions
                 else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
                 {
                     taskXml = child.Value.Trim();
+                    taskXml = taskXml.Replace("\r", "");
+                    taskXml = taskXml.Replace("\n", "");
                     taskXml = taskXml.Replace(Environment.NewLine, "");
                 }
             }

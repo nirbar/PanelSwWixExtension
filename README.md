@@ -1,3 +1,5 @@
+[![Build status](https://ci.appveyor.com/api/projects/status/2o8lfou5i3hw41aq/branch/master?svg=true)](https://ci.appveyor.com/project/nirbar/panelswwixextension/branch/master)
+
 PanelSwWixExtension is the most comprehensive open source [WiX](http://wixtoolset.org/) extension. 
 It features dozens of actions from querying XML, JSON and text files to installing [ServiceBase](https://docs.microsoft.com/en-us/dotnet/api/system.serviceprocess.servicebase)-based and [TopShelf](http://topshelf-project.com/) services.
 
