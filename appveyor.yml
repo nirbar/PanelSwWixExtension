@@ -1,0 +1,22 @@
+version: 2.22.1.{build}
+configuration: Release
+platform: x86
+clone_depth: 1
+before_build:
+- cmd: >-
+    choco install windows-adk
+
+    git submodule update --init
+
+    nuget restore
+
+    cmake.exe -G "Visual Studio 16 2019" -T v141_xp,host=x86 -A Win32 .\protobuf\cmake -Dprotobuf_BUILD_TESTS=OFF -B build\protobuf
+
+    cmake.exe --build build\protobuf --config Release
+
+    cmake.exe -G "Visual Studio 16 2019" -T v141_xp,host=x86 -A Win32 .\poco -DPOCO_STATIC=ON -DPOCO_MT=ON -B build\poco
+
+    cmake.exe --build build\poco --config Release
+build:
+  project: PanelSwWixExtension.sln
+  verbosity: normal
