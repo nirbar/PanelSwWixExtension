@@ -25,9 +25,9 @@ build:
 
 before_package:
 - cmd: >-
-    nuget pack PanelSwWixExtension\PanelSwWixExtension.nuspec -Version "{version}" -OutputDirectory build\nuget-out
+    nuget pack PanelSwWixExtension\PanelSwWixExtension.nuspec -Version "%APPVEYOR_BUILD_VERSION%" -OutputDirectory build\nuget-out
 
-    appveyor PushArtifact build\nuget-out\PanelSwWixExtension.{version}.nupkg
+    appveyor PushArtifact build\nuget-out\PanelSwWixExtension.%APPVEYOR_BUILD_VERSION%.nupkg
 
 artifacts:
-  - path: 'build\nuget-out\PanelSwWixExtension.{version}.nupkg'
+  - path: 'build\nuget-out\PanelSwWixExtension.%APPVEYOR_BUILD_VERSION%.nupkg'
