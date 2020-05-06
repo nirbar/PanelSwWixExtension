@@ -57,7 +57,7 @@
                          Namespaces="xmlns:wix='http://schemas.microsoft.com/wix/2006/wi' xmlns:fn='http://www.w3.org/2005/xpath-functions'"
                          Match="enforceSingle"/>
     </Property>
-    <Condition Message="Expected XPathTest2=[ProductCode]"><![CDATA[XPathTest2=ProductCode]]></Condition>
+    <Condition Message="Expected XPATHTEST2=[ProductCode]"><![CDATA[XPATHTEST2=ProductCode]]></Condition>
 
     <!-- Not failing on no-match -->
     <Property Id="XPATHTEST3">

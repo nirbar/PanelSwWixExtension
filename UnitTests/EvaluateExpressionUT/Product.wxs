@@ -22,21 +22,19 @@
 
     <Property Id="MSIFASTINSTALL" Value="1"/>
 
-    <Property Id="Test" Value="2">
-      <PanelSW:Evaluate Expression="[Test] * 2"/>
-      <PanelSW:Evaluate Expression="[Test] + 1" Order="1"/>
+    <Property Id="TEST" Value="2">
+      <PanelSW:Evaluate Expression="[TEST] * 2"/>
+      <PanelSW:Evaluate Expression="[TEST] + 1" Order="1"/>
     </Property>
 
     <CustomActionRef Id="WixExitEarlyWithSuccess" />
     <CustomAction Id="BadResult" Error="29000"/>
     <UI>
-      <Error Id="29000"><![CDATA[Test evaluated to [Test]]]></Error>
+      <Error Id="29000"><![CDATA[TEST evaluated to [TEST]]]></Error>
     </UI>
     <InstallExecuteSequence>
-      <Custom Action="WixExitEarlyWithSuccess" After="EvaluateExpression"><![CDATA[Test=5]]></Custom>
-      <Custom Action="BadResult" After="EvaluateExpression"><![CDATA[Test<>5]]></Custom>
+      <Custom Action="WixExitEarlyWithSuccess" After="EvaluateExpression"><![CDATA[TEST=5]]></Custom>
+      <Custom Action="BadResult" After="EvaluateExpression"><![CDATA[TEST<>5]]></Custom>
     </InstallExecuteSequence>
-
-
   </Product>
 </Wix>

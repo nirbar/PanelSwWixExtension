@@ -22,15 +22,15 @@
 
     <Property Id="MSIFASTINSTALL" Value="7"></Property>
 
-    <Property Id="dotnet">
+    <Property Id="DOTNET">
       <PanelSW:PathSearch FileName="dotnet.exe"/>
     </Property>
-    <Condition Message="Expected to find dotnet on PATH"><![CDATA[dotnet]]></Condition>
+    <Condition Message="Expected to find dotnet on PATH"><![CDATA[DOTNET]]></Condition>
 
-    <Property Id="notdotnet">
+    <Property Id="NOTDOTNET">
       <PanelSW:PathSearch FileName="notdotnet"/>
     </Property>
-    <Condition Message="Expected to not find notdotnet on PATH"><![CDATA[Not notdotnet]]></Condition>
+    <Condition Message="Expected to not find notdotnet on PATH"><![CDATA[Not NOTDOTNET]]></Condition>
 
     <!-- Terminate after validating result. -->
     <InstallUISequence>
