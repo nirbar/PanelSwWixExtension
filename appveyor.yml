@@ -20,3 +20,7 @@ before_build:
 build:
   project: PanelSwWixExtension.sln
   verbosity: normal
+  publish_nuget: true
+
+artifacts:
+  - path: '**\*.nupkg'
