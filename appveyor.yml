@@ -3,6 +3,10 @@ configuration: Release
 platform: x86
 clone_depth: 1
 
+environment:
+  SignPathToken:
+    secure: xaUj8cwvyB4tT2BPVKxdaa02eRC1GK6EaGknYDshwVr6UfG+wv6/txF+o86/LEF9
+    
 before_build:
 - cmd: >-
     choco install windows-adk
@@ -26,6 +30,11 @@ build:
 before_package:
 - cmd: >-
     nuget pack PanelSwWixExtension\PanelSwWixExtension.nuspec -Version "%APPVEYOR_BUILD_VERSION%" -OutputDirectory build\nuget-out
+
+- ps: >-
+    Install-Module -Name SignPath
+
+    Submit-SigningRequest -InputArtifactPath "build\nuget-out\PanelSwWixExtension.%APPVEYOR_BUILD_VERSION%.nupkg" -CIUserToken "{SignPathToken}" -OrganizationId "247d954d-acdc-41dd-8bd2-9ef69d21ca2b" -ProjectKey "PanelSwWixExtension" -SigningPolicyKey "release-signing" -OutputArtifactPath "build\nuget-out\PanelSwWixExtension.%APPVEYOR_BUILD_VERSION%.nupkg" -WaitForCompletion
 
 artifacts:
   - path: 'build\nuget-out\PanelSwWixExtension.%APPVEYOR_BUILD_VERSION%.nupkg'
