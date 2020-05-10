@@ -37,5 +37,5 @@ artifacts:
 
 deploy:
 - provider: Webhook
-  url: https://app.signpath.io/API/v1/247d954d-acdc-41dd-8bd2-9ef69d21ca2b/Integrations/AppVeyor?ProjectKey=PanelSwWixExtension&SigningPolicyKey=release-signing
+  url: https://app.signpath.io/API/v1/247d954d-acdc-41dd-8bd2-9ef69d21ca2b/Integrations/AppVeyor?ProjectKey=PanelSwWixExtension&SigningPolicyKey=test-signing
   authorization: Bearer %SIGNPATH_TOKEN%
