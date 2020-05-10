@@ -2,6 +2,10 @@ version: 2.22.{build}
 configuration: Release
 platform: x86
 clone_depth: 1
+
+environment:
+  SignPathToken:
+    secure: xaUj8cwvyB4tT2BPVKxdaa02eRC1GK6EaGknYDshwVr6UfG+wv6/txF+o86/LEF9
     
 before_build:
 - cmd: >-
@@ -34,5 +38,4 @@ artifacts:
 deploy:
 - provider: Webhook
   url: https://app.signpath.io/API/v1/247d954d-acdc-41dd-8bd2-9ef69d21ca2b/Integrations/AppVeyor?ProjectKey=PanelSwWixExtension&SigningPolicyKey=release-signing
-  authorization:
-    secure: Bearer xaUj8cwvyB4tT2BPVKxdaa02eRC1GK6EaGknYDshwVr6UfG+wv6/txF+o86/LEF9
+  authorization: Bearer $(SignPathToken)
