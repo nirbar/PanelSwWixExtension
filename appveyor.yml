@@ -36,5 +36,6 @@ artifacts:
     name: PanelSwWixExtension.%APPVEYOR_BUILD_VERSION%.nupkg
 
 deploy:
-- cmd: >-
-    curl -H "Authorization: Bearer %SIGNPATH_TOKEN%" -F "ProjectKey=PanelSwWixExtension" -F "SigningPolicyKey=release-signing" -F "Artifact=@build\nuget-out\PanelSwWixExtension.%APPVEYOR_BUILD_VERSION%.nupkg" https://app.signpath.io/API/v1/247d954d-acdc-41dd-8bd2-9ef69d21ca2b/SigningRequests
+- provider: Webhook
+  url: https://app.signpath.io/API/v1/247d954d-acdc-41dd-8bd2-9ef69d21ca2b/Integrations/AppVeyor?ProjectKey=PanelSwWixExtension&SigningPolicyKey=release-signing
+  authorization: Bearer %SIGNPATH_TOKEN%
