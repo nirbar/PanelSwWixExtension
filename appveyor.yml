@@ -4,7 +4,7 @@ platform: x86
 clone_depth: 1
 
 environment:
-  SignPathToken:
+  SIGNPATH_TOKEN:
     secure: xaUj8cwvyB4tT2BPVKxdaa02eRC1GK6EaGknYDshwVr6UfG+wv6/txF+o86/LEF9
     
 before_build:
@@ -36,6 +36,5 @@ artifacts:
     name: PanelSwWixExtension.%APPVEYOR_BUILD_VERSION%.nupkg
 
 deploy:
-- provider: Webhook
-  url: https://app.signpath.io/API/v1/247d954d-acdc-41dd-8bd2-9ef69d21ca2b/Integrations/AppVeyor?ProjectKey=PanelSwWixExtension&SigningPolicyKey=release-signing
-  authorization: Bearer $(SignPathToken)
+- cmd: >-
+    curl -H "Authorization: Bearer %SIGNPATH_TOKEN%" -F "ProjectKey=PanelSwWixExtension" -F "SigningPolicyKey=release-signing" -F "Artifact=@build\nuget-out\PanelSwWixExtension.%APPVEYOR_BUILD_VERSION%.nupkg" https://app.signpath.io/API/v1/247d954d-acdc-41dd-8bd2-9ef69d21ca2b/SigningRequests
