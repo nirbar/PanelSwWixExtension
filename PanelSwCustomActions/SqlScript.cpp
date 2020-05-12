@@ -128,11 +128,13 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 		case WCA_TODO::WCA_TODO_INSTALL:
 			if (nOn & SqlExecOn::Install)
 			{
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute SQL script '%ls'", (LPCWSTR)szBinary);
 				hr = deferredCA.AddExec(szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
 				ExitOnFailure(hr, "Failed scheduling '%ls' SQL script", (LPCWSTR)szBinary);
 			}
 			if (nOn & SqlExecOn::InstallRollback)
 			{
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute SQL script '%ls' on rollback", (LPCWSTR)szBinary);
 				hr = rollbackCA.AddExec(szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
 				ExitOnFailure(hr, "Failed scheduling '%ls' SQL script", (LPCWSTR)szBinary);
 			}
@@ -141,11 +143,13 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 		case WCA_TODO::WCA_TODO_REINSTALL:
 			if (nOn & SqlExecOn::Reinstall)
 			{
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute SQL script '%ls'", (LPCWSTR)szBinary);
 				hr = deferredCA.AddExec(szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
 				ExitOnFailure(hr, "Failed scheduling '%ls' SQL script", (LPCWSTR)szBinary);
 			}
 			if (nOn & SqlExecOn::ReinstallRollback)
 			{
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute SQL script '%ls' on rollback", (LPCWSTR)szBinary);
 				hr = rollbackCA.AddExec(szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
 				ExitOnFailure(hr, "Failed scheduling '%ls' SQL script", (LPCWSTR)szBinary);
 			}
@@ -154,11 +158,13 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 		case WCA_TODO::WCA_TODO_UNINSTALL:
 			if (nOn & SqlExecOn::Uninstall)
 			{
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute SQL script '%ls'", (LPCWSTR)szBinary);
 				hr = deferredCA.AddExec(szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
 				ExitOnFailure(hr, "Failed scheduling '%ls' SQL script", (LPCWSTR)szBinary);
 			}
 			if (nOn & SqlExecOn::UninstallRollback)
 			{
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute SQL script '%ls' on rollback", (LPCWSTR)szBinary);
 				hr = rollbackCA.AddExec(szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
 				ExitOnFailure(hr, "Failed scheduling '%ls' SQL script", (LPCWSTR)szBinary);
 			}
