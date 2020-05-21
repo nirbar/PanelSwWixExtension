@@ -62,6 +62,7 @@ HRESULT CSqlQuery::ExecuteQuery(const CSqlConnection &sqlConn, LPCWSTR szQuery, 
     }
 
     sr = SQLFetch(hStmt_);
+    ExitOnNull((sr != SQL_NO_DATA), hr, S_FALSE, "Query returned no data");
     ExitOnOdbcErrorWithText(sr, hStmt_, SQL_HANDLE_STMT, hr, pszError, "Failed fetching result");
 
     // Allocate chunk

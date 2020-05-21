@@ -52,8 +52,6 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-        PMSIHANDLE hSubView;
-        PMSIHANDLE hSubRecord;
 		CWixString szId, szComponent, szServer, szInstance, szDatabase, szUsername, szPassword, szBinary, szEncrypted;
 		CWixString szQuery;
 		int nOn = 0;

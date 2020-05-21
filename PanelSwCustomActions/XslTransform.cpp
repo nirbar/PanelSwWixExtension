@@ -46,8 +46,6 @@ extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		PMSIHANDLE hSubView;
-		PMSIHANDLE hSubRecord;
 		CWixString szId, szComponent, szFileId, szXslBinaryId;
 		CWixString szXsl, szFileFmt, szFilePath;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
