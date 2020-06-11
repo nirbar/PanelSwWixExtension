@@ -2,7 +2,11 @@
 #include "../CaCommon/WixString.h"
 #include "../CaCommon/SqlConnection.h"
 #include "../CaCommon/SqlQuery.h"
+#include "errorHandling.pb.h"
+using namespace ::com::panelsw::ca;
 #include "SqlScript.h"
+
+static HRESULT ExecuteOne(LPCWSTR szServer, LPCWSTR szInstance, int nPort, LPCWSTR szDatabase, LPCWSTR szUsername, LPCWSTR szPassword, bool bEncrypted, ErrorHandling errorHandling, LPCWSTR szPropertyName, LPCWSTR szQuery);
 
 extern "C" UINT __stdcall SqlSearch(MSIHANDLE hInstall)
 {
@@ -11,20 +15,20 @@ extern "C" UINT __stdcall SqlSearch(MSIHANDLE hInstall)
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	hr = WcaTableExists(L"PSW_SqlSearch");
-	BreakExitOnFailure(hr, "Table does not exist 'PSW_SqlSearch'. Have you authored 'PanelSw:SqlSearch' entries in WiX code?");
+	ExitOnFailure(hr, "Table does not exist 'PSW_SqlSearch'. Have you authored 'PanelSw:SqlSearch' entries in WiX code?");
 
 	// Execute view
-	hr = WcaOpenExecuteView(L"SELECT `Property_`, `Server`, `Instance`, `Database`, `Username`, `Password`, `Query`, `Condition`, `Port`, `Encrypted` FROM `PSW_SqlSearch` ORDER BY `Order`", &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query on 'PSW_SqlSearch'.");
+	hr = WcaOpenExecuteView(L"SELECT `Property_`, `Server`, `Instance`, `Database`, `Username`, `Password`, `Query`, `Condition`, `Port`, `Encrypted`, `ErrorHandling` FROM `PSW_SqlSearch` ORDER BY `Order`", &hView);
+	ExitOnFailure(hr, "Failed to execute SQL query on 'PSW_SqlSearch'.");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
-		BreakExitOnFailure(hr, "Failed to fetch record.");
+		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
 		CWixString szProperty;
@@ -39,37 +43,38 @@ extern "C" UINT __stdcall SqlSearch(MSIHANDLE hInstall)
 		CWixString szEncrypted;
 		int nPort = 0;
 		int bEncrypted = 0;
-		CSqlConnection sqlConn;
-		CSqlQuery sqlQuery;
+		ErrorHandling nErrorHandling = ErrorHandling::fail;
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szProperty);
-		BreakExitOnFailure(hr, "Failed to get Property_.");
+		ExitOnFailure(hr, "Failed to get Property_.");
 		hr = WcaGetRecordFormattedString(hRecord, 2, (LPWSTR*)szServer);
-		BreakExitOnFailure(hr, "Failed to get Server.");
+		ExitOnFailure(hr, "Failed to get Server.");
 		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)szInstance);
-		BreakExitOnFailure(hr, "Failed to get Instance.");
+		ExitOnFailure(hr, "Failed to get Instance.");
 		hr = WcaGetRecordFormattedString(hRecord, 4, (LPWSTR*)szDatabase);
-		BreakExitOnFailure(hr, "Failed to get Database.");
+		ExitOnFailure(hr, "Failed to get Database.");
 		hr = WcaGetRecordFormattedString(hRecord, 5, (LPWSTR*)szUsername);
-		BreakExitOnFailure(hr, "Failed to get Username.");
+		ExitOnFailure(hr, "Failed to get Username.");
 		hr = WcaGetRecordFormattedString(hRecord, 6, (LPWSTR*)szPassword);
-		BreakExitOnFailure(hr, "Failed to get Password.");
+		ExitOnFailure(hr, "Failed to get Password.");
 		hr = WcaGetRecordFormattedString(hRecord, 7, (LPWSTR*)szQuery);
-		BreakExitOnFailure(hr, "Failed to get Query.");
+		ExitOnFailure(hr, "Failed to get Query.");
 		hr = WcaGetRecordFormattedString(hRecord, 8, (LPWSTR*)szCondition);
-		BreakExitOnFailure(hr, "Failed to get Condition.");
+		ExitOnFailure(hr, "Failed to get Condition.");
 		hr = WcaGetRecordFormattedInteger(hRecord, 9, &nPort);
-		BreakExitOnFailure(hr, "Failed to get Port.");
+		ExitOnFailure(hr, "Failed to get Port.");
 		hr = WcaGetRecordFormattedString(hRecord, 10, (LPWSTR*)szEncrypted);
-		BreakExitOnFailure(hr, "Failed to get Encrypted.");
+		ExitOnFailure(hr, "Failed to get Encrypted.");
 		bEncrypted = (szEncrypted.EqualsIgnoreCase(L"true") || szEncrypted.EqualsIgnoreCase(L"yes") || szEncrypted.Equals(L"1"));
+		hr = WcaGetRecordInteger(hRecord, 11, (int*)&nErrorHandling);
+		ExitOnFailure(hr, "Failed to get ErrorHandling.");
 
 		if (!szCondition.IsNullOrEmpty())
 		{
 			MSICONDITION condRes = MSICONDITION::MSICONDITION_NONE;
 
 			condRes = ::MsiEvaluateCondition(hInstall, szCondition);
-			BreakExitOnNullWithLastError((condRes != MSICONDITION::MSICONDITION_ERROR), hr, "Failed evaluating condition '%ls'", szCondition);
+			ExitOnNullWithLastError((condRes != MSICONDITION::MSICONDITION_ERROR), hr, "Failed evaluating condition '%ls'", szCondition);
 
 			hr = (condRes == MSICONDITION::MSICONDITION_FALSE) ? S_FALSE : S_OK;
 			WcaLog(LOGMSG_STANDARD, "Condition '%ls' evaluated to %i", (LPCWSTR)szCondition, (1 - (int)hr));
@@ -81,14 +86,8 @@ extern "C" UINT __stdcall SqlSearch(MSIHANDLE hInstall)
 
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing SQL query '%ls'. Will place results in property '%ls'", (LPCWSTR)szQuery, (LPCWSTR)szProperty);
 
-		hr = sqlConn.Connect((LPCWSTR)szServer, (LPCWSTR)szInstance, nPort, (LPCWSTR)szDatabase, (LPCWSTR)szUsername, (LPCWSTR)szPassword, bEncrypted);
-		BreakExitOnFailure(hr, "Failed connecting to database");
-
-		hr = sqlQuery.ExecuteQuery(sqlConn, (LPWSTR)szQuery, (LPWSTR*)szResult);
-		BreakExitOnFailure(hr, "Failed excuting query");
-
-		hr = WcaSetProperty((LPCWSTR)szProperty, szResult.IsNullOrEmpty() ? L"" : (LPCWSTR)szResult);
-		BreakExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)szProperty);
+		hr = ExecuteOne((LPCWSTR)szServer, (LPCWSTR)szInstance, nPort, (LPCWSTR)szDatabase, (LPCWSTR)szUsername, (LPCWSTR)szPassword, bEncrypted, nErrorHandling, szProperty, szQuery);
+		ExitOnFailure(hr, "Failed executing SQL search");
 	}
 	hr = S_OK;
 
@@ -96,4 +95,93 @@ LExit:
 
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
+}
+
+static HRESULT ExecuteOne(LPCWSTR szServer, LPCWSTR szInstance, int nPort, LPCWSTR szDatabase, LPCWSTR szUsername, LPCWSTR szPassword, bool bEncrypted, ErrorHandling errorHandling, LPCWSTR szPropertyName, LPCWSTR szQuery)
+{
+	HRESULT hr = S_OK;
+	CSqlConnection sqlConn;
+	CSqlQuery sqlQuery;
+	CWixString szResult;
+	CWixString szError;
+
+LRetry:
+	hr = sqlConn.Connect(szServer, szInstance, nPort, szDatabase, szUsername, szPassword, bEncrypted, (LPWSTR*)szError);
+	if (SUCCEEDED(hr))
+	{
+		hr = sqlQuery.ExecuteQuery(sqlConn, szQuery, (LPWSTR*)szResult, (LPWSTR*)szError);
+	}
+
+	if (FAILED(hr))
+	{
+		WcaLogError(hr, "Failed executing SQL query: %ls", (LPCWSTR)szError);
+
+		switch (errorHandling)
+		{
+		case ErrorHandling::fail:
+		default:
+			// Will fail downstairs.
+			break;
+
+		case ErrorHandling::ignore:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Ignoring SQL query error");
+			hr = S_FALSE;
+			ExitFunction();
+
+		case ErrorHandling::prompt:
+		{
+			HRESULT hrOp = hr;
+			PMSIHANDLE hRec;
+			UINT promptResult = IDOK;
+
+			hRec = ::MsiCreateRecord(3);
+			ExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
+
+			hr = WcaSetRecordInteger(hRec, 1, 27008);
+			ExitOnFailure(hr, "Failed setting record integer");
+
+			hr = WcaSetRecordString(hRec, 2, szQuery);
+			ExitOnFailure(hr, "Failed setting record string");
+
+			hr = WcaSetRecordString(hRec, 3, (LPCWSTR)szError);
+			ExitOnFailure(hr, "Failed setting record string");
+
+			promptResult = WcaProcessMessage((INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_ERROR | MB_ABORTRETRYIGNORE | MB_DEFBUTTON1 | MB_ICONERROR), hRec);
+			switch (promptResult)
+			{
+			case IDABORT:
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User aborted on failure to execute SQL query");
+				hr = hrOp;
+				break;
+
+			case IDRETRY:
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose to retry on failure to execute SQL query");
+				goto LRetry;
+
+			case IDIGNORE:
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User ignored failure to execute SQL query");
+				hr = S_FALSE;
+				ExitFunction();
+
+			case IDCANCEL:
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User canceled on failure to execute SQL query");
+				ExitOnWin32Error(ERROR_INSTALL_USEREXIT, hr, "Cancelling");
+				break;
+
+			default: // Probably silent (result 0)
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failure to execute SQL query. Prompt result is 0x%08X", promptResult);
+				hr = hrOp;
+				break;
+			}
+			break;
+		}
+		}
+	}
+	ExitOnFailure(hr, "Failed excuting SQL search");
+
+	hr = WcaSetProperty(szPropertyName, szResult.IsNullOrEmpty() ? L"" : (LPCWSTR)szResult);
+	ExitOnFailure(hr, "Failed setting property '%ls'", szPropertyName);
+
+LExit:
+	return hr;
 }

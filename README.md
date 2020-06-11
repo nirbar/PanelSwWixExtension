@@ -62,6 +62,7 @@ PanelSwWixExtension uses error codes in Error table:
 - 27005: SqlScript error template for prompting user on errors.
 - 27006: ExecOn error template for prompting user on console output parsing.
 - 27007: WebsiteConfig error template for prompting user on errors.
+- 27008: SqlSearch error template for prompting user on errors.
 
 ## Properties
 

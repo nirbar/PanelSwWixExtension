@@ -13,6 +13,9 @@
   <String Overridable="yes" Id="ServiceConfigFailure"><![CDATA[Failed configuring service [2]]]></String>
   <String Overridable="yes" Id="InstallUtil"><![CDATA[Installing .NET service assemblies]]></String>
   <String Overridable="yes" Id="SqlSearch"><![CDATA[Executing SQL queries]]></String>
+  <String Overridable="yes" Id="PSW_SqlSearchFailure"><![CDATA[Failed executing SQL query '[2]':
+[3]]]>
+  </String>
   <String Overridable="yes" Id="BackupAndRestore"><![CDATA[Migrating configurations]]></String>
   <String Overridable="yes" Id="TopShelf"><![CDATA[Installing TopShelf services]]></String>
   <String Overridable="yes" Id="TopShelfFailure"><![CDATA[Failed configuring service [2]]]></String>

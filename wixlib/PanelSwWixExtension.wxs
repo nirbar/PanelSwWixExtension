@@ -485,6 +485,7 @@
       <Custom Action="SqlSearch" After="AppSearch" Overridable="yes"/>
     </InstallUISequence>
     <UI>
+      <Error Id="27008">!(loc.PSW_SqlSearchFailure)</Error>
       <ProgressText Action="SqlSearch">!(loc.SqlSearch)</ProgressText>
     </UI>
   </Fragment>

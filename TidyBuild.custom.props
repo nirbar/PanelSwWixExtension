@@ -7,7 +7,7 @@
     <Manufacturer>Panel::Software</Manufacturer>
 
     <!--
-    <NugetPrereleaseVersion>-fix-6144</NugetPrereleaseVersion>
+    <NugetPrereleaseVersion>-psw-wix</NugetPrereleaseVersion>
     -->
 
     <!-- Output folder -->

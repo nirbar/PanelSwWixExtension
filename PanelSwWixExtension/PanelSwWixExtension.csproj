@@ -75,7 +75,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="PanelSwWixExtension-fix-6144.nuspec" />
+    <None Include="PanelSwWixExtension-psw-wix.nuspec" />
     <None Include="PanelSwWixExtension.nuspec" />
     <None Include="Xsd\PanelSwWixExtension.xsx">
       <DependentUpon>PanelSwWixExtension.xsd</DependentUpon>

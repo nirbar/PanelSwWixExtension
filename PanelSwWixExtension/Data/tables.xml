@@ -212,6 +212,7 @@
     <columnDefinition name="Query" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
     <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
+    <columnDefinition name="ErrorHandling" type="number" minValue="0" maxValue="2" length="2" />
   </tableDefinition>
 
   <tableDefinition name="PSW_BackupAndRestore">
@@ -311,7 +312,7 @@
     <columnDefinition name="Replacement" type="string" length="0" nullable="yes" />
     <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
   </tableDefinition>
-  
+
   <tableDefinition name="PSW_SqlScript">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
     <columnDefinition name="Component_" type="string" length="72" modularize="column" keyTable="Component" keyColumn="1" category="identifier"/>

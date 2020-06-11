@@ -3083,6 +3083,7 @@ namespace PanelSw.Wix.Extensions
             string condition = null;
             string port = null;
             string encrypted = null;
+            ErrorHandling errorHandling = ErrorHandling.fail;
             int order = 1000000000 + GetLineNumber(sourceLineNumbers);
 
             if (node.ParentNode.LocalName != "Property")
@@ -3131,6 +3132,19 @@ namespace PanelSw.Wix.Extensions
                         case "Encrypt":
                             encrypted = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
+                        case "ErrorHandling":
+                            {
+                                string a = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                                try
+                                {
+                                    errorHandling = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
+                                }
+                                catch
+                                {
+                                    Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                                }
+                            }
+                            break;
 
                         default:
                             Core.UnexpectedAttribute(sourceLineNumbers, attrib);
@@ -3172,6 +3186,7 @@ namespace PanelSw.Wix.Extensions
                 row[8] = query;
                 row[9] = condition;
                 row[10] = order;
+                row[11] = (int)errorHandling;
             }
         }
 

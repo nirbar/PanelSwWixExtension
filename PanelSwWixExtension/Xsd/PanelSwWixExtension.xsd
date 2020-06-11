@@ -477,6 +477,11 @@
               <xs:documentation><![CDATA[Whether or not to use TLS (Encrypt=true in connection string). Supported values are 0/1, true/false, yes/no. Defaults to 0. May be formatted]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="ErrorHandling" use="optional" type="ErrorHandlingType" default="fail">
+            <xs:annotation>
+              <xs:documentation><![CDATA[On error fail, ignore, or prompt user to abort, retry or ignore. Defaults to 'fail']]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../wixext/XSD/PanelSwWixExtension.xsd">
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
 
   <Product Id="*" Name="SqlSearchUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="d377fd04-a940-4ed2-8d55-e2f1f6f39d2d">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perUser" />
@@ -36,11 +36,11 @@
     <Property Id="SQL_ENCRYPT" Value="no"/>
 
     <Property Id="SQL_TABLE_EXISTS">
-      <PanelSW:SqlSearch Server="[SQL_SERVER]" Instance="[SQL_INSTANCE]" Port="[SQL_PORT]" Database="[SQL_DB]" Username="[SQL_USER]" Password="[SQL_PSW]" Encrypt="[SQL_ENCRYPT]"
+      <PanelSW:SqlSearch Server="[SQL_SERVER]" Instance="[SQL_INSTANCE]" Port="[SQL_PORT]" Database="[SQL_DB]" Username="[SQL_USER]" Password="[SQL_PSW]" Encrypt="[SQL_ENCRYPT]" ErrorHandling="prompt"
                          Query="SELECT COUNT(DISTINCT table_name) FROM information_schema.columns WHERE table_catalog = '[SQL_DB]' And table_name = '[SQL_TABLE]'" />
     </Property>
     <Property Id="LARGE_TEXT">
-      <PanelSW:SqlSearch Server="[SQL_SERVER]" Instance="[SQL_INSTANCE]" Port="[SQL_PORT]" Database="[SQL_DB]" Username="[SQL_USER]" Password="[SQL_PSW]" Encrypt="[SQL_ENCRYPT]"
+      <PanelSW:SqlSearch Server="[SQL_SERVER]" Instance="[SQL_INSTANCE]" Port="[SQL_PORT]" Database="[SQL_DB]" Username="[SQL_USER]" Password="[SQL_PSW]" Encrypt="[SQL_ENCRYPT]" ErrorHandling="prompt"
                          Condition="SQL_TABLE_EXISTS > 0"
                          Query="SELECT TOP 1 someText FROM [SQL_TABLE]" />
     </Property>
