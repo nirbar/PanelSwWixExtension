@@ -168,8 +168,22 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
+    <None Include="command.proto" />
+    <None Include="customActionData.proto" />
+    <None Include="errorHandling.proto" />
+    <None Include="execOnDetails.proto" />
+    <None Include="fileOperationsDetails.proto" />
+    <None Include="fileRegexDetails.proto" />
     <None Include="packages.config" />
-    <None Include="*.proto" />
+    <None Include="servciceConfigDetails.proto" />
+    <None Include="setPropertyFromPipeDetails.proto" />
+    <None Include="shellExecDetails.proto" />
+    <None Include="sqlScriptDetails.proto" />
+    <None Include="taskSchedulerDetails.proto" />
+    <None Include="telemetryDetails.proto" />
+    <None Include="topShelfServiceDetails.proto" />
+    <None Include="unzipDetails.proto" />
+    <None Include="xslTransformDetails.proto" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

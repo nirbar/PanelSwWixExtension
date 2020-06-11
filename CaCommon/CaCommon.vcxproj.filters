@@ -33,9 +33,6 @@
     <ClCompile Include="DeferredActionBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\CaCommon\*.pb.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="SqlConnection.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -71,9 +68,6 @@
     <ClInclude Include="AutoRelease.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\CaCommon\*.pb.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\customActionData.pb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -91,8 +85,9 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="protobuf\*.proto" />
     <None Include="packages.config" />
+    <None Include="protobuf\command.proto" />
+    <None Include="protobuf\customActionData.proto" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(IntDir)\Version.rc">

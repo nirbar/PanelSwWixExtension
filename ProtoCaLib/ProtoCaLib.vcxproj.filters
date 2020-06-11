@@ -19,9 +19,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\*.pb.cc">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\customActionData.pb.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -69,9 +66,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\*.pb.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\customActionData.pb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -120,49 +114,49 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="*.proto">
+    <None Include="command.proto">
       <Filter>Protobuf</Filter>
     </None>
-    <None Include="*.proto">
+    <None Include="customActionData.proto">
       <Filter>Protobuf</Filter>
     </None>
-    <None Include="*.proto">
+    <None Include="errorHandling.proto">
       <Filter>Protobuf</Filter>
     </None>
-    <None Include="*.proto">
+    <None Include="execOnDetails.proto">
       <Filter>Protobuf</Filter>
     </None>
-    <None Include="*.proto">
+    <None Include="fileOperationsDetails.proto">
       <Filter>Protobuf</Filter>
     </None>
-    <None Include="*.proto">
+    <None Include="fileRegexDetails.proto">
       <Filter>Protobuf</Filter>
     </None>
-    <None Include="*.proto">
+    <None Include="servciceConfigDetails.proto">
       <Filter>Protobuf</Filter>
     </None>
-    <None Include="*.proto">
+    <None Include="setPropertyFromPipeDetails.proto">
       <Filter>Protobuf</Filter>
     </None>
-    <None Include="*.proto">
+    <None Include="shellExecDetails.proto">
       <Filter>Protobuf</Filter>
     </None>
-    <None Include="*.proto">
+    <None Include="sqlScriptDetails.proto">
       <Filter>Protobuf</Filter>
     </None>
-    <None Include="*.proto">
+    <None Include="taskSchedulerDetails.proto">
       <Filter>Protobuf</Filter>
     </None>
-    <None Include="*.proto">
+    <None Include="telemetryDetails.proto">
       <Filter>Protobuf</Filter>
     </None>
-    <None Include="*.proto">
+    <None Include="topShelfServiceDetails.proto">
       <Filter>Protobuf</Filter>
     </None>
-    <None Include="*.proto">
+    <None Include="unzipDetails.proto">
       <Filter>Protobuf</Filter>
     </None>
-    <None Include="*.proto">
+    <None Include="xslTransformDetails.proto">
       <Filter>Protobuf</Filter>
     </None>
   </ItemGroup>
