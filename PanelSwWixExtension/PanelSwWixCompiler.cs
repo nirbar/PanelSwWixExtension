@@ -3073,7 +3073,8 @@ namespace PanelSw.Wix.Extensions
         private void ParseSqlSearchElement(XmlNode node)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
-            string id = null;
+            string id = "sql" + Guid.NewGuid().ToString("N");
+            string property = null;
             string server = null;
             string instance = null;
             string database = null;
@@ -3086,14 +3087,18 @@ namespace PanelSw.Wix.Extensions
             ErrorHandling errorHandling = ErrorHandling.fail;
             int order = 1000000000 + GetLineNumber(sourceLineNumbers);
 
-            if (node.ParentNode.LocalName != "Property")
+            if (!node.ParentNode.LocalName.Equals("Property"))
             {
                 Core.UnexpectedElement(node.ParentNode, node);
             }
-            id = node.ParentNode.Attributes["Id"].Value;
-            if (!id.ToUpper().Equals(id))
+            property = node.ParentNode.Attributes["Id"].Value;
+            if (string.IsNullOrWhiteSpace(property))
             {
-                Core.OnMessage(WixErrors.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", id));
+                Core.OnMessage(WixErrors.ParentElementAttributeRequired(sourceLineNumbers, node.ParentNode.LocalName, "Id", node.LocalName));
+            }
+            if (!property.ToUpper().Equals(property))
+            {
+                Core.OnMessage(WixErrors.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
             }
 
             foreach (XmlAttribute attrib in node.Attributes)
@@ -3157,10 +3162,6 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            if (string.IsNullOrEmpty(id))
-            {
-                id = "sql" + Guid.NewGuid().ToString("N");
-            }
             if (string.IsNullOrEmpty(server))
             {
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "FilePath"));
@@ -3175,18 +3176,20 @@ namespace PanelSw.Wix.Extensions
             if (!Core.EncounteredError)
             {
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_SqlSearch");
-                row[0] = id;
-                row[1] = server;
-                row[2] = instance;
-                row[3] = port;
-                row[4] = encrypted;
-                row[5] = database;
-                row[6] = username;
-                row[7] = password;
-                row[8] = query;
-                row[9] = condition;
-                row[10] = order;
-                row[11] = (int)errorHandling;
+                int i = 0;
+                row[i++] = id;
+                row[i++] = property;
+                row[i++] = server;
+                row[i++] = instance;
+                row[i++] = port;
+                row[i++] = encrypted;
+                row[i++] = database;
+                row[i++] = username;
+                row[i++] = password;
+                row[i++] = query;
+                row[i++] = condition;
+                row[i++] = order;
+                row[i++] = (int)errorHandling;
             }
         }
 

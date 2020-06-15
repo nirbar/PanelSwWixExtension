@@ -201,7 +201,8 @@
   </tableDefinition>
 
   <tableDefinition name="PSW_SqlSearch">
-    <columnDefinition name="Property_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="Property_" type="string" length="72" modularize="column" category="identifier" />
     <columnDefinition name="Server" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Instance" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
     <columnDefinition name="Port" type="string" length="0" modularize="property" category="formatted" nullable="yes" />

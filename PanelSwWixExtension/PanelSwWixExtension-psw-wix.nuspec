@@ -19,9 +19,9 @@
   </metadata>
 
   <files>
-    <file src=".\Nuget\*" target="build" />
-    <file src=".\build\bin\Release\PanelSwWixExtension\PanelSwWixExtension.dll" target="tools\lib"/>
-    <file src=".\wixext\Xsd\PanelSwWixExtension.xsd" target="content"/>
+    <file src="..\Nuget\*" target="build" />
+    <file src="..\build\bin\Release\PanelSwWixExtension\PanelSwWixExtension.dll" target="tools\lib"/>
+    <file src=".\Xsd\PanelSwWixExtension.xsd" target="content"/>
   </files>
 
 </package>
