@@ -3,6 +3,7 @@
   <Import Project="$(MSBuildThisFileDirectory)TidyBuild.user.props" Condition="Exists('$(MSBuildThisFileDirectory)TidyBuild.user.props')"/>
   <PropertyGroup>
     <FullVersion>2.24.0</FullVersion>
+    <FullVersion Condition=" '$(APPVEYOR_BUILD_VERSION)'!='' ">$(APPVEYOR_BUILD_VERSION)</FullVersion>
     <ProductName>PanelSwWixExtension</ProductName>
     <Manufacturer>Panel::Software</Manufacturer>
 
