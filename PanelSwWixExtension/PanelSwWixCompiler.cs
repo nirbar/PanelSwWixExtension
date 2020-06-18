@@ -1122,6 +1122,7 @@ namespace PanelSw.Wix.Extensions
             string component = null;
             string binary = null;
             string server = null;
+            string connectionString = null;
             string instance = null;
             string database = null;
             string username = null;
@@ -1150,6 +1151,10 @@ namespace PanelSw.Wix.Extensions
 
                     case "BinaryKey":
                         binary = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "ConnectionString":
+                        connectionString = Core.GetAttributeValue(sourceLineNumbers, attrib);
                         break;
 
                     case "Server":
@@ -1250,6 +1255,15 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
+            if (!string.IsNullOrEmpty(connectionString) &&
+                (!string.IsNullOrEmpty(server) || !string.IsNullOrEmpty(instance) || !string.IsNullOrEmpty(database) || !string.IsNullOrEmpty(port) || !string.IsNullOrEmpty(encrypted) || !string.IsNullOrEmpty(password) || !string.IsNullOrEmpty(username)))
+            {
+                Core.OnMessage(WixErrors.IllegalAttributeWithOtherAttribute(sourceLineNumbers, element.LocalName, "ConnectionString", "any other"));
+            }
+            if (string.IsNullOrEmpty(server) && string.IsNullOrEmpty(connectionString))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttributes(sourceLineNumbers, element.LocalName, "Server", "ConnectionString"));
+            }
             if (string.IsNullOrEmpty(component))
             {
                 Core.OnMessage(WixErrors.ParentElementAttributeRequired(sourceLineNumbers, parentElement.LocalName, "Id", element.LocalName));
@@ -1335,6 +1349,7 @@ namespace PanelSw.Wix.Extensions
                 row[10] = (int)sqlExecOn;
                 row[11] = (int)(errorHandling ?? ErrorHandling.fail);
                 row[12] = order;
+                row[13] = connectionString;
             }
         }
 
@@ -3076,6 +3091,7 @@ namespace PanelSw.Wix.Extensions
             string id = "sql" + Guid.NewGuid().ToString("N");
             string property = null;
             string server = null;
+            string connectionString = null;
             string instance = null;
             string database = null;
             string username = null;
@@ -3107,6 +3123,9 @@ namespace PanelSw.Wix.Extensions
                 {
                     switch (attrib.LocalName)
                     {
+                        case "ConnectionString":
+                            connectionString = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
                         case "Server":
                             server = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
@@ -3162,13 +3181,19 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            if (string.IsNullOrEmpty(server))
+            if (!string.IsNullOrEmpty(connectionString) && 
+                (!string.IsNullOrEmpty(server) || !string.IsNullOrEmpty(instance) || !string.IsNullOrEmpty(database) || !string.IsNullOrEmpty(port)||!string.IsNullOrEmpty(encrypted)||!string.IsNullOrEmpty(password)||!string.IsNullOrEmpty(username)))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "FilePath"));
+                Core.OnMessage(WixErrors.IllegalAttributeWithOtherAttribute(sourceLineNumbers, node.LocalName, "ConnectionString", "any other"));
+            }
+
+            if (string.IsNullOrEmpty(server) && string.IsNullOrEmpty(connectionString))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttributes(sourceLineNumbers, node.LocalName, "Server", "ConnectionString"));
             }
             if (string.IsNullOrEmpty(query))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "XPath"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Query"));
             }
 
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "SqlSearch");
@@ -3190,6 +3215,7 @@ namespace PanelSw.Wix.Extensions
                 row[i++] = condition;
                 row[i++] = order;
                 row[i++] = (int)errorHandling;
+                row[i++] = connectionString;
             }
         }
 

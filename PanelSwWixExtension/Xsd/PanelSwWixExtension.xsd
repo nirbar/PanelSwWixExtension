@@ -427,7 +427,12 @@
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Server" type="xs:string" use="required">
+          <xs:attribute name="ConnectionString" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>SQL full connection string, including driver. Use either this attribute or the other connection parameters attributes, but not both</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Server" type="xs:string" use="optional">
             <xs:annotation>
               <xs:documentation>SQL server name</xs:documentation>
             </xs:annotation>
@@ -1836,7 +1841,12 @@ Remove registry values.
           <xs:documentation><![CDATA[Binary SQL script file, unicode encoded.]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
-      <xs:attribute name="Server" type="xs:string" use="required">
+      <xs:attribute name="ConnectionString" type="xs:string" use="optional">
+        <xs:annotation>
+          <xs:documentation>SQL full connection string, including driver. Use either this attribute or the other connection parameters attributes, but not both</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Server" type="xs:string" use="optional">
         <xs:annotation>
           <xs:documentation>SQL server name</xs:documentation>
         </xs:annotation>

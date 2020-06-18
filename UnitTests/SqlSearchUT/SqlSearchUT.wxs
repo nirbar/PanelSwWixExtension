@@ -21,8 +21,9 @@
     <Binary SourceFile="$(sys.SOURCEFILEDIR)Script.sql" Id="Script.sql"/>
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component Id="JustFile">
+        <Condition><![CDATA[NOT SQL_TABLE_EXISTS OR (SQL_TABLE_EXISTS = 0)]]></Condition>
         <File Source="$(sys.SOURCEFILEPATH)"/>
-        <PanelSW:SqlScript BinaryKey="Script.sql" Server="[SQL_SERVER]" Instance="[SQL_INSTANCE]" Port="[SQL_PORT]" Database="[SQL_DB]" Username="[SQL_USER]" Password="[SQL_PSW]" OnInstall="yes" ErrorHandling="prompt">
+        <PanelSW:SqlScript BinaryKey="Script.sql" ConnectionString="[CONNECTION_STRING]" OnInstall="yes" ErrorHandling="prompt">
           <PanelSW:Replace Text="[\[]SQL_TABLE[\]]" Replacement="[SQL_TABLE]"/>
         </PanelSW:SqlScript>
       </Component>
@@ -36,7 +37,7 @@
     <Property Id="SQL_ENCRYPT" Value="no"/>
 
     <Property Id="SQL_TABLE_EXISTS">
-      <PanelSW:SqlSearch Server="[SQL_SERVER]" Instance="[SQL_INSTANCE]" Port="[SQL_PORT]" Database="[SQL_DB]" Username="[SQL_USER]" Password="[SQL_PSW]" Encrypt="[SQL_ENCRYPT]" ErrorHandling="prompt"
+      <PanelSW:SqlSearch ConnectionString="[CONNECTION_STRING]" ErrorHandling="prompt"
                          Query="SELECT COUNT(DISTINCT table_name) FROM information_schema.columns WHERE table_catalog = '[SQL_DB]' And table_name = '[SQL_TABLE]'" />
     </Property>
     <Property Id="LARGE_TEXT">

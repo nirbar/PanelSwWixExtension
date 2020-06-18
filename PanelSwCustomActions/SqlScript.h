@@ -10,7 +10,7 @@ public:
 
 	CSqlScript() : CDeferredActionBase("SqlScript") { }
 
-	HRESULT AddExec(LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, bool bEncrypted, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, com::panelsw::ca::ErrorHandling errorHandling);
+	HRESULT AddExec(LPCWSTR szConnectionString, LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, bool bEncrypted, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, com::panelsw::ca::ErrorHandling errorHandling);
 
 protected:
 	// Execute the command object (XML element)

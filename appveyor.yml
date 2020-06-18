@@ -1,4 +1,4 @@
-version: 2.23.{build}
+version: 2.24.0.{build}
 configuration: Release
 platform: x86
 clone_depth: 1

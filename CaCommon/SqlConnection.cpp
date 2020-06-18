@@ -108,10 +108,11 @@ LExit:
 }
 
 
-HRESULT CSqlConnection::Connect(LPWSTR szConnectionString, LPWSTR* pszError)
+HRESULT CSqlConnection::Connect(LPCWSTR szConnectionString, LPWSTR* pszError)
 {
     HRESULT hr = S_OK;
     SQLRETURN sr = SQL_SUCCESS;
+    LPWSTR szConnectionString1 = nullptr;
 
     ExitOnNull(hDbc_, hr, E_FAIL, "SQL DB handle is invalid");
 
@@ -123,13 +124,17 @@ HRESULT CSqlConnection::Connect(LPWSTR szConnectionString, LPWSTR* pszError)
         bConnected_ = false;
     }
 
-    sr = SQLDriverConnect(hDbc_, nullptr, szConnectionString, SQL_NTS, nullptr, 0, nullptr, SQL_DRIVER_NOPROMPT);
+    hr = StrAllocString(&szConnectionString1, szConnectionString, 0);
+    ExitOnFailure(hr, "Failed copying string");
+
+    sr = SQLDriverConnect(hDbc_, nullptr, szConnectionString1, SQL_NTS, nullptr, 0, nullptr, SQL_DRIVER_NOPROMPT);
     ExitOnOdbcErrorWithText(sr, hDbc_, SQL_HANDLE_DBC, hr, pszError, "Failed connecting to SQL DB");
 
     bConnected_ = true;
-    szConnectionString_.Copy(szConnectionString);
+    szConnectionString_.Copy(szConnectionString1);
 
 LExit:
+    ReleaseStr(szConnectionString1);
     return hr;
 }
 

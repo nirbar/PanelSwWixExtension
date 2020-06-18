@@ -14,4 +14,5 @@ message SqlScriptDetails{
 	ErrorHandling errorHandling = 7;
 	uint32 port = 8;
 	bool encrypted = 9;	
+	bytes connectionstring = 10;
 }

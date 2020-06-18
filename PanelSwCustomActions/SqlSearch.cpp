@@ -6,7 +6,7 @@
 using namespace ::com::panelsw::ca;
 #include "SqlScript.h"
 
-static HRESULT ExecuteOne(LPCWSTR szServer, LPCWSTR szInstance, int nPort, LPCWSTR szDatabase, LPCWSTR szUsername, LPCWSTR szPassword, bool bEncrypted, ErrorHandling errorHandling, LPCWSTR szPropertyName, LPCWSTR szQuery);
+static HRESULT ExecuteOne(LPCWSTR szConnectionString, LPCWSTR szServer, LPCWSTR szInstance, int nPort, LPCWSTR szDatabase, LPCWSTR szUsername, LPCWSTR szPassword, bool bEncrypted, ErrorHandling errorHandling, LPCWSTR szPropertyName, LPCWSTR szQuery);
 
 extern "C" UINT __stdcall SqlSearch(MSIHANDLE hInstall)
 {
@@ -22,7 +22,7 @@ extern "C" UINT __stdcall SqlSearch(MSIHANDLE hInstall)
 	ExitOnFailure(hr, "Table does not exist 'PSW_SqlSearch'. Have you authored 'PanelSw:SqlSearch' entries in WiX code?");
 
 	// Execute view
-	hr = WcaOpenExecuteView(L"SELECT `Property_`, `Server`, `Instance`, `Database`, `Username`, `Password`, `Query`, `Condition`, `Port`, `Encrypted`, `ErrorHandling` FROM `PSW_SqlSearch` ORDER BY `Order`", &hView);
+	hr = WcaOpenExecuteView(L"SELECT `Property_`, `Server`, `Instance`, `Database`, `Username`, `Password`, `Query`, `Condition`, `Port`, `Encrypted`, `ErrorHandling`, `ConnectionString` FROM `PSW_SqlSearch` ORDER BY `Order`", &hView);
 	ExitOnFailure(hr, "Failed to execute SQL query on 'PSW_SqlSearch'.");
 
 	// Iterate records
@@ -32,6 +32,7 @@ extern "C" UINT __stdcall SqlSearch(MSIHANDLE hInstall)
 
 		// Get fields
 		CWixString szProperty;
+		CWixString szConnectionString;
 		CWixString szServer;
 		CWixString szInstance;
 		CWixString szDatabase;
@@ -68,6 +69,8 @@ extern "C" UINT __stdcall SqlSearch(MSIHANDLE hInstall)
 		bEncrypted = (szEncrypted.EqualsIgnoreCase(L"true") || szEncrypted.EqualsIgnoreCase(L"yes") || szEncrypted.Equals(L"1"));
 		hr = WcaGetRecordInteger(hRecord, 11, (int*)&nErrorHandling);
 		ExitOnFailure(hr, "Failed to get ErrorHandling.");
+		hr = WcaGetRecordFormattedString(hRecord, 12, (LPWSTR*)szConnectionString);
+		ExitOnFailure(hr, "Failed to get ConnectionString.");
 
 		if (!szCondition.IsNullOrEmpty())
 		{
@@ -86,7 +89,7 @@ extern "C" UINT __stdcall SqlSearch(MSIHANDLE hInstall)
 
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing SQL query '%ls'. Will place results in property '%ls'", (LPCWSTR)szQuery, (LPCWSTR)szProperty);
 
-		hr = ExecuteOne((LPCWSTR)szServer, (LPCWSTR)szInstance, nPort, (LPCWSTR)szDatabase, (LPCWSTR)szUsername, (LPCWSTR)szPassword, bEncrypted, nErrorHandling, szProperty, szQuery);
+		hr = ExecuteOne((LPCWSTR)szConnectionString, (LPCWSTR)szServer, (LPCWSTR)szInstance, nPort, (LPCWSTR)szDatabase, (LPCWSTR)szUsername, (LPCWSTR)szPassword, bEncrypted, nErrorHandling, szProperty, szQuery);
 		ExitOnFailure(hr, "Failed executing SQL search");
 	}
 	hr = S_OK;
@@ -97,7 +100,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-static HRESULT ExecuteOne(LPCWSTR szServer, LPCWSTR szInstance, int nPort, LPCWSTR szDatabase, LPCWSTR szUsername, LPCWSTR szPassword, bool bEncrypted, ErrorHandling errorHandling, LPCWSTR szPropertyName, LPCWSTR szQuery)
+static HRESULT ExecuteOne(LPCWSTR szConnectionString, LPCWSTR szServer, LPCWSTR szInstance, int nPort, LPCWSTR szDatabase, LPCWSTR szUsername, LPCWSTR szPassword, bool bEncrypted, ErrorHandling errorHandling, LPCWSTR szPropertyName, LPCWSTR szQuery)
 {
 	HRESULT hr = S_OK;
 	CSqlConnection sqlConn;
@@ -106,7 +109,14 @@ static HRESULT ExecuteOne(LPCWSTR szServer, LPCWSTR szInstance, int nPort, LPCWS
 	CWixString szError;
 
 LRetry:
-	hr = sqlConn.Connect(szServer, szInstance, nPort, szDatabase, szUsername, szPassword, bEncrypted, (LPWSTR*)szError);
+	if (szConnectionString && *szConnectionString)
+	{
+		hr = sqlConn.Connect(szConnectionString, (LPWSTR*)szError);
+	}
+	else
+	{
+		hr = sqlConn.Connect(szServer, szInstance, nPort, szDatabase, szUsername, szPassword, bEncrypted, (LPWSTR*)szError);
+	}
 	if (SUCCEEDED(hr))
 	{
 		hr = sqlQuery.ExecuteQuery(sqlConn, szQuery, (LPWSTR*)szResult, (LPWSTR*)szError);
