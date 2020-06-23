@@ -4,6 +4,14 @@ configuration: Release
 platform: x86
 clone_depth: 1
 
+init:
+  # Set version number when tagged
+  - ps: >-
+      if ($env:APPVEYOR_REPO_TAG -eq "true")
+      {
+        Update-AppveyorBuild -Version "$($env:APPVEYOR_REPO_TAG_NAME.TrimStart("v"))" + "." + "$env:APPVEYOR_BUILD_NUMBER"
+      }
+
 environment:
   SIGNPATH_TOKEN:
     secure: xaUj8cwvyB4tT2BPVKxdaa02eRC1GK6EaGknYDshwVr6UfG+wv6/txF+o86/LEF9
