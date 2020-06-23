@@ -30,4 +30,5 @@ message ServciceConfigDetails{
 	bytes dependencies = 7;
 	ErrorHandling errorHandling = 8;
 	DelayStart delayStart = 9;
+	uint32 serviceType = 10;
 }

@@ -1,4 +1,4 @@
-version: 2.24.0.{build}
+version: 2.24.1.{build}
 skip_non_tags: true
 configuration: Release
 platform: x86

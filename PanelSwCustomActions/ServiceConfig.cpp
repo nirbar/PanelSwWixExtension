@@ -3,6 +3,8 @@
 #include "../CaCommon/WixString.h"
 #include <wcautil.h>
 #include <procutil.h>
+#include <memutil.h>
+#include <svcutil.h>
 #include "google\protobuf\any.h"
 using namespace com::panelsw::ca;
 using namespace google::protobuf;
@@ -18,7 +20,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 	CServiceConfig oRollback;
 	SC_HANDLE hManager = NULL;
 	SC_HANDLE hService = NULL;
-	QUERY_SERVICE_CONFIG *pServiceCfg = nullptr;
+	QUERY_SERVICE_CONFIG* pServiceCfg = nullptr;
 	LPWSTR szDependencies = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
@@ -41,8 +43,8 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
-	{        
-        BreakExitOnFailure(hr, "Failed to fetch record.");
+	{
+		BreakExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
 		CWixString szId, szComponent, szServiceName, szCommand, szCommandFormat, szCommandObfuscated, szAccount, szPassword, szLoadOrderGroupFmt, szLoadOrderGroup;
@@ -52,6 +54,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 		int nDelayStart = -1;
 		int errorHandling = -1;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
+		DWORD dwServiceType = SERVICE_NO_CHANGE;
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szId);
 		BreakExitOnFailure(hr, "Failed to get Id.");
@@ -79,7 +82,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 		if (compAction != WCA_TODO::WCA_TODO_INSTALL)
 		{
 			// In case of no-action, we just check if the service is marked for deletion to notify reboot is reqired.
-			oDeferred.AddServiceConfig(szServiceName, nullptr, nullptr, nullptr, ServciceConfigDetails::ServiceStart::ServciceConfigDetails_ServiceStart_unchanged, nullptr, nullptr, ErrorHandling::ignore, ServciceConfigDetails_DelayStart::ServciceConfigDetails_DelayStart_unchanged1);
+			oDeferred.AddServiceConfig(szServiceName, nullptr, nullptr, nullptr, ServciceConfigDetails::ServiceStart::ServciceConfigDetails_ServiceStart_unchanged, nullptr, nullptr, ErrorHandling::ignore, ServciceConfigDetails_DelayStart::ServciceConfigDetails_DelayStart_unchanged1, SERVICE_NO_CHANGE);
 
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping configuration of service '%ls' since component is not installed", (LPCWSTR)szServiceName);
 			continue;
@@ -99,10 +102,10 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 			if (i != INFINITE)
 			{
 				CWixString szDomain, szName;
-				
+
 				hr = szDomain.Copy(((LPCWSTR)szAccount) + i + 1);
 				ExitOnFailure(hr, "Failed copying string");
-				
+
 				hr = szName.Copy((LPCWSTR)szAccount, i);
 				ExitOnFailure(hr, "Failed copying string");
 
@@ -193,7 +196,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 
 				hr = szService.MsiFormat(szServiceFmt, nullptr);
 				BreakExitOnFailure(hr, "Failed to format string");
-				
+
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will add to service '%ls' dependency on service '%ls'", (LPCWSTR)szServiceName, (LPCWSTR)szService);
 				if (szDependencies == nullptr)
 				{
@@ -208,9 +211,6 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 			}
 		}
 
-		hr = oDeferred.AddServiceConfig(szServiceName, szCommand, szAccount, szPassword, start, szLoadOrderGroup, szDependencies, (ErrorHandling)errorHandling, (ServciceConfigDetails_DelayStart)nDelayStart);
-		ExitOnFailure(hr, "Failed creating CustomActionData");
-
 		// Get current service account.
 		hService = ::OpenService(hManager, (LPCWSTR)szServiceName, SERVICE_QUERY_CONFIG);
 		if (hService) // Won't fail if service doesn't exist
@@ -219,13 +219,20 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 			ServciceConfigDetails_DelayStart rlbkDelayStart = ServciceConfigDetails_DelayStart::ServciceConfigDetails_DelayStart_unchanged1;
 
 			dwRes = ::QueryServiceConfig(hService, nullptr, 0, &dwSize);
-			ExitOnNullWithLastError((dwRes || (::GetLastError() == ERROR_INSUFFICIENT_BUFFER)) , hr, "Failed querying service '%ls' configuration size", (LPCWSTR)szServiceName);
+			ExitOnNullWithLastError((dwRes || (::GetLastError() == ERROR_INSUFFICIENT_BUFFER)), hr, "Failed querying service '%ls' configuration size", (LPCWSTR)szServiceName);
 
-			pServiceCfg = (QUERY_SERVICE_CONFIG*)new BYTE[dwSize];
+			pServiceCfg = (QUERY_SERVICE_CONFIG*)MemAlloc(dwSize, FALSE);
 			ExitOnNull(pServiceCfg, hr, E_FAIL, "Failed allocating memory");
 
 			dwRes = ::QueryServiceConfig(hService, pServiceCfg, dwSize, &dwSize);
 			ExitOnNullWithLastError(dwRes, hr, "Failed querying service '%ls' configuration", (LPCWSTR)szServiceName);
+
+			// If service is interactive, may need to change the type.
+			if (!szAccount.IsNullOrEmpty() && !szAccount.EqualsIgnoreCase(L".\\LocalSystem") && (pServiceCfg->dwServiceType & SERVICE_INTERACTIVE_PROCESS) && ((pServiceCfg->dwServiceType & SERVICE_WIN32_OWN_PROCESS) || (pServiceCfg->dwServiceType & SERVICE_WIN32_SHARE_PROCESS)))
+			{
+				dwServiceType = (pServiceCfg->dwServiceType ^ SERVICE_INTERACTIVE_PROCESS);
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will change service '%ls' type to 0x%08X", (LPCWSTR)szServiceName, dwServiceType);
+			}
 
 			if (start == ServciceConfigDetails::ServiceStart::ServciceConfigDetails_ServiceStart_unchanged)
 			{
@@ -242,17 +249,16 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 				rlbkDelayStart = delayStart.fDelayedAutostart ? ServciceConfigDetails_DelayStart::ServciceConfigDetails_DelayStart_yes : ServciceConfigDetails_DelayStart::ServciceConfigDetails_DelayStart_no;
 			}
 
-			hr = oRollback.AddServiceConfig((LPCWSTR)szServiceName, pServiceCfg->lpBinaryPathName, pServiceCfg->lpServiceStartName, nullptr, pServiceCfg->dwStartType, pServiceCfg->lpLoadOrderGroup, szDependencies, ErrorHandling::ignore, rlbkDelayStart);
+			hr = oRollback.AddServiceConfig((LPCWSTR)szServiceName, pServiceCfg->lpBinaryPathName, pServiceCfg->lpServiceStartName, nullptr, pServiceCfg->dwStartType, pServiceCfg->lpLoadOrderGroup, szDependencies, ErrorHandling::ignore, rlbkDelayStart, pServiceCfg->dwServiceType);
 			ExitOnFailure(hr, "Failed creating rollback CustomActionData");
 
-			delete[]pServiceCfg;
-			pServiceCfg = nullptr;
-
-			::CloseServiceHandle(hService);
-			hService = nullptr;
-
+			ReleaseNullMem(pServiceCfg);
+			ReleaseServiceHandle(hService);
 			ReleaseNullStr(szDependencies);
 		}
+
+		hr = oDeferred.AddServiceConfig(szServiceName, szCommand, szAccount, szPassword, start, szLoadOrderGroup, szDependencies, (ErrorHandling)errorHandling, (ServciceConfigDetails_DelayStart)nDelayStart, dwServiceType);
+		ExitOnFailure(hr, "Failed creating CustomActionData");
 	}
 
 	// Set CAD
@@ -270,25 +276,15 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 LExit:
 	ReleaseStr(szCustomActionData);
 	ReleaseStr(szDependencies);
-
-	if (pServiceCfg)
-	{
-		delete[]pServiceCfg;
-	}
-	if (hService)
-	{
-		::CloseServiceHandle(hService);
-	}
-	if (hManager)
-	{
-		::CloseServiceHandle(hManager);
-	}
+	ReleaseNullMem(pServiceCfg);
+	ReleaseServiceHandle(hService);
+	ReleaseServiceHandle(hManager);
 
 	dwRes = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(dwRes);
 }
 
-HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, LPCWSTR szLoadOrderGroup, LPCWSTR szDependencies, ErrorHandling errorHandling, ServciceConfigDetails_DelayStart delayStart)
+HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, LPCWSTR szLoadOrderGroup, LPCWSTR szDependencies, ErrorHandling errorHandling, ServciceConfigDetails_DelayStart delayStart, DWORD dwServiceType)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
@@ -331,6 +327,7 @@ HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szComman
 	pDetails->set_start((ServciceConfigDetails::ServiceStart)start);
 	pDetails->set_delaystart(delayStart);
 	pDetails->set_errorhandling((ErrorHandling)errorHandling);
+	pDetails->set_servicetype(dwServiceType);
 
 	pAny = pCmd->mutable_details();
 	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
@@ -381,7 +378,7 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 	}
 
 LRetry:
-	hr = ExecuteOne(szServiceName, szCommandLine, szAccount, szPassword, details.start(), szLoadOrderGroup, szDependencies, details.delaystart());
+	hr = ExecuteOne(szServiceName, szCommandLine, szAccount, szPassword, details.start(), szLoadOrderGroup, szDependencies, details.delaystart(), details.servicetype());
 	if (FAILED(hr))
 	{
 		hr = PromptError(szServiceName, details.errorhandling());
@@ -396,7 +393,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CServiceConfig::ExecuteOne(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, DWORD dwStart, LPCWSTR szLoadOrderGroup, LPCWSTR szDependencies, ServciceConfigDetails_DelayStart nDelayStart)
+HRESULT CServiceConfig::ExecuteOne(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, DWORD dwStart, LPCWSTR szLoadOrderGroup, LPCWSTR szDependencies, ServciceConfigDetails_DelayStart nDelayStart, DWORD dwServiceType)
 {
 	HRESULT hr = S_OK;
 	SC_HANDLE hManager = NULL;
@@ -411,7 +408,7 @@ HRESULT CServiceConfig::ExecuteOne(LPCWSTR szServiceName, LPCWSTR szCommandLine,
 	ExitOnNullWithLastError(hService, hr, "Failed opening service '%ls'", szServiceName);
 
 	// Configure.
-	dwRes = ::ChangeServiceConfig(hService, SERVICE_NO_CHANGE, dwStart, SERVICE_NO_CHANGE, szCommandLine, szLoadOrderGroup, nullptr, szDependencies, szAccount, szPassword, nullptr);
+	dwRes = ::ChangeServiceConfig(hService, dwServiceType, dwStart, SERVICE_NO_CHANGE, szCommandLine, szLoadOrderGroup, nullptr, szDependencies, szAccount, szPassword, nullptr);
 	if (!dwRes && (::GetLastError() == ERROR_SERVICE_MARKED_FOR_DELETE))
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Service '%ls' is marked for deletion- reboot is required", szServiceName);
@@ -433,14 +430,8 @@ HRESULT CServiceConfig::ExecuteOne(LPCWSTR szServiceName, LPCWSTR szCommandLine,
 
 LExit:
 
-	if (hService)
-	{
-		::CloseServiceHandle(hService);
-	}
-	if (hManager)
-	{
-		::CloseServiceHandle(hManager);
-	}
+	ReleaseServiceHandle(hService);
+	ReleaseServiceHandle(hManager);
 	return hr;
 }
 
