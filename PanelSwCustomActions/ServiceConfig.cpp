@@ -228,9 +228,9 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 			ExitOnNullWithLastError(dwRes, hr, "Failed querying service '%ls' configuration", (LPCWSTR)szServiceName);
 
 			// If service is interactive, may need to change the type.
-			if (!szAccount.IsNullOrEmpty() && !szAccount.EqualsIgnoreCase(L".\\LocalSystem") && (pServiceCfg->dwServiceType & SERVICE_INTERACTIVE_PROCESS) && ((pServiceCfg->dwServiceType & SERVICE_WIN32_OWN_PROCESS) || (pServiceCfg->dwServiceType & SERVICE_WIN32_SHARE_PROCESS)))
+			if (!szAccount.IsNullOrEmpty() && !szAccount.EqualsIgnoreCase(L".\\LocalSystem") && ((pServiceCfg->dwServiceType & SERVICE_INTERACTIVE_PROCESS) == SERVICE_INTERACTIVE_PROCESS))
 			{
-				dwServiceType = (pServiceCfg->dwServiceType ^ SERVICE_INTERACTIVE_PROCESS);
+				dwServiceType = (pServiceCfg->dwServiceType & ~SERVICE_INTERACTIVE_PROCESS);
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will change service '%ls' type to 0x%08X", (LPCWSTR)szServiceName, dwServiceType);
 			}
 
