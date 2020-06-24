@@ -37,7 +37,7 @@ extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall)
 	ExitOnFailure((hr == S_OK), "Table does not exist 'PSW_XslTransform_Replacements'. Have you authored 'PanelSw:XslTransform' entries in WiX code?");
 
 	// Execute view
-	hr = WcaOpenExecuteView(L"SELECT `PSW_XslTransform`.`Id`, `File`.`Component_`, `PSW_XslTransform`.`File_`, `PSW_XslTransform`.`XslBinary_` FROM `PSW_XslTransform`, `File` WHERE `PSW_XslTransform`.`File_` = `File`.`File` ORDER BY `PSW_XslTransform`.`Order`", &hView);
+	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `File_`, `FilePath`, `XslBinary_` FROM `PSW_XslTransform` ORDER BY `Order`", &hView);
 	ExitOnFailure(hr, "Failed to execute SQL query.");
 
 	// Iterate records
@@ -56,12 +56,14 @@ extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to get Component_.");
 		hr = WcaGetRecordString(hRecord, 3, (LPWSTR*)szFileId);
 		ExitOnFailure(hr, "Failed to get File_.");
-		hr = WcaGetRecordString(hRecord, 4, (LPWSTR*)szXslBinaryId);
+		hr = WcaGetRecordString(hRecord, 4, (LPWSTR*)szFileFmt);
+		ExitOnFailure(hr, "Failed to get File_.");
+		hr = WcaGetRecordString(hRecord, 5, (LPWSTR*)szXslBinaryId);
 		ExitOnFailure(hr, "Failed to get XslBinary_.");
 
 		ExitOnNull(!szXslBinaryId.IsNullOrEmpty(), hr, E_INVALIDARG, "Binary key is empty");
-		ExitOnNull(!szFileId.IsNullOrEmpty(), hr, E_INVALIDARG, "File key is empty");
 		ExitOnNull(!szComponent.IsNullOrEmpty(), hr, E_INVALIDARG, "Component is empty");
+		ExitOnNull((szFileFmt.IsNullOrEmpty() != szFileId.IsNullOrEmpty()), hr, E_INVALIDARG, "Either FileId or FilePath must be specified");
 
 		// Test condition
 		compAction = WcaGetComponentToDo(szComponent);
@@ -76,8 +78,11 @@ extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall)
 			continue;
 		}
 
-		hr = szFileFmt.Format(L"[#%s]", (LPCWSTR)szFileId);
-		ExitOnFailure(hr, "Failed formatting string");
+		if (!szFileId.IsNullOrEmpty())
+		{
+			hr = szFileFmt.Format(L"[#%s]", (LPCWSTR)szFileId);
+			ExitOnFailure(hr, "Failed formatting string");
+		}
 
 		hr = szFilePath.MsiFormat((LPCWSTR)szFileFmt);
 		ExitOnFailure(hr, "Failed formatting string");

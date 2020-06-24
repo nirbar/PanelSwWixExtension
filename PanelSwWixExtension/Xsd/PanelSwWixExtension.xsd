@@ -1795,6 +1795,7 @@ Remove registry values.
     <xs:annotation>
       <xs:appinfo>
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="File" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
       </xs:appinfo>
       <xs:documentation><![CDATA[Apply an XSL transform on an installed XML file]]></xs:documentation>
     </xs:annotation>
@@ -1810,6 +1811,11 @@ Remove registry values.
       <xs:attribute name="BinaryKey" type="xs:string" use="required">
         <xs:annotation>
           <xs:documentation><![CDATA[Binary XSL file]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="FilePath" type="xs:string" use="optional">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Full path to XML file to apply the transform on. Required when not nested under a File element. This field is formatted.]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="Order" type="xs:integer">

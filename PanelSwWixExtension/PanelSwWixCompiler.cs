@@ -207,6 +207,10 @@ namespace PanelSw.Wix.Extensions
                             ParseWebsiteConfigElement(parentElement, element);
                             break;
 
+                        case "XslTransform":
+                            ParseXslTransform(parentElement, element);
+                            break;
+
                         default:
                             Core.UnexpectedElement(parentElement, element);
                             break;
@@ -407,6 +411,21 @@ namespace PanelSw.Wix.Extensions
                 row[2] = expression;
                 row[3] = file;
             }
+        }
+
+        private string GetFileComponentId(XmlElement fileElement)
+        {
+            if (!fileElement.LocalName.Equals("File") || !(fileElement.ParentNode is XmlElement component) || !component.LocalName.Equals("Component"))
+            {
+                return null;
+            }
+
+            string id = component.GetAttribute("Id");
+            if (string.IsNullOrEmpty(id))
+            {
+                id = GetFileId(fileElement); //TODO: May yield wrong component Id if there's another key-path
+            }
+            return id;
         }
 
         private string GetFileId(XmlElement fileElement)
@@ -1358,10 +1377,24 @@ namespace PanelSw.Wix.Extensions
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
             string id = "xsl" + Guid.NewGuid().ToString("N");
             string file = null;
+            string component = null;
+            string filePath = null;
             string binary = null;
             int order = 1000000000 + GetLineNumber(sourceLineNumbers);
 
-            file = GetFileId(parentElement);
+            if (parentElement.LocalName.Equals("Component"))
+            {
+                component = parentElement.GetAttribute("Id");
+                if (string.IsNullOrEmpty(component))
+                {
+                    Core.OnMessage(WixErrors.ParentElementAttributeRequired(sourceLineNumbers, parentElement.LocalName, "Id", element.LocalName));
+                }
+            }
+            else if (parentElement.LocalName.Equals("File"))
+            {
+                file = GetFileId(parentElement);
+                component = GetFileComponentId(parentElement);
+            }
 
             foreach (XmlAttribute attrib in element.Attributes)
             {
@@ -1380,6 +1413,10 @@ namespace PanelSw.Wix.Extensions
                         binary = Core.GetAttributeValue(sourceLineNumbers, attrib);
                         break;
 
+                    case "FilePath":
+                        filePath = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
                     case "Order":
                         order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
                         break;
@@ -1390,9 +1427,13 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            if (string.IsNullOrEmpty(file))
+            if (string.IsNullOrEmpty(file) == string.IsNullOrEmpty(filePath))
             {
-                Core.OnMessage(WixErrors.ParentElementAttributeRequired(sourceLineNumbers, parentElement.LocalName, "Id", element.LocalName));
+                Core.OnMessage(WixErrors.ExpectedAttributeInElementOrParent(sourceLineNumbers, element.LocalName, "FilePath", "File"));
+            }
+            if (string.IsNullOrEmpty(component))
+            {
+                Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, parentElement.LocalName, "Id", parentElement.ParentNode.LocalName));
             }
             if (string.IsNullOrEmpty(binary))
             {
@@ -1457,10 +1498,13 @@ namespace PanelSw.Wix.Extensions
                 // Ensure sub-tables exist for queries to succeed even if no sub-entries exist.
                 Core.EnsureTable(sourceLineNumbers, "PSW_XslTransform_Replacements");
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_XslTransform");
-                row[0] = id;
-                row[1] = file;
-                row[2] = binary;
-                row[3] = order;
+                int i = 0;
+                row[i++] = id;
+                row[i++] = file;
+                row[i++] = component;
+                row[i++] = filePath;
+                row[i++] = binary;
+                row[i++] = order;
             }
         }
 
@@ -3744,11 +3788,7 @@ namespace PanelSw.Wix.Extensions
             if (parentElement.LocalName.Equals("File"))
             {
                 fileId = GetFileId(parentElement);
-                component = ((XmlElement)parentElement.ParentNode).GetAttribute("Id");
-                if (string.IsNullOrEmpty(component))
-                {
-                    component = fileId;
-                }
+                component = GetFileComponentId(parentElement);
             }
 
             foreach (XmlAttribute attrib in node.Attributes)

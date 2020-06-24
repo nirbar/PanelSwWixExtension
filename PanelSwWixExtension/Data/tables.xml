@@ -303,7 +303,9 @@
 
   <tableDefinition name="PSW_XslTransform">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="File_" type="string" length="72" modularize="column" keyTable="File" keyColumn="1" category="identifier"/>
+    <columnDefinition name="File_" type="string" length="72" modularize="column" keyTable="File" keyColumn="1" category="identifier" nullable="yes"/>
+    <columnDefinition name="Component_" type="string" length="72" modularize="column" keyTable="Component" keyColumn="1" category="identifier"/>
+    <columnDefinition name="FilePath" type="string" length="0" modularize="column" category="formatted" nullable="yes"/>
     <columnDefinition name="XslBinary_" type="string" length="72" modularize="column" keyTable="Binary" keyColumn="1" category="identifier" nullable="yes"/>
     <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
   </tableDefinition>
