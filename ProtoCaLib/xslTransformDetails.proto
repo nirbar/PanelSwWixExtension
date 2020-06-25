@@ -4,6 +4,6 @@ option optimize_for = LITE_RUNTIME;
 
 message XslTransformDetails{
 
-	bytes xslt = 1;
+	bytes xsl_path = 1;
 	bytes xml_path = 2;
 }

@@ -1,9 +1,8 @@
-<?xml version="1.0" encoding="utf-8"?>
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+﻿<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:text="my-text"
                 xmlns:wix="http://schemas.microsoft.com/wix/2006/wi"
                 xmlns:msxsl="urn:schemas-microsoft-com:xslt" exclude-result-prefixes="msxsl">
-  <xsl:output method="xml" indent="yes"/>
+  <xsl:output method="xml" indent="yes" encoding="utf-8" omit-xml-declaration="yes"/>
 
   <xsl:variable name="fileName">[FILE_NAME]</xsl:variable>
 
@@ -24,7 +23,7 @@
 
   <msxsl:script implements-prefix="text" language="JScript">
     function replaceAll(str, a, b) {
-      return str.replace(RegExp(a, 'g'), b);
+    return str.replace(RegExp(a, 'g'), b);
     }
   </msxsl:script>
 </xsl:stylesheet>

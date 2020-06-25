@@ -1,5 +1,6 @@
 #include "XslTransform.h"
 #include "FileOperations.h"
+#include "FileRegex.h"
 #include "../CaCommon/WixString.h"
 #include "XslTransformDetails.pb.h"
 #include <wcautil.h>
@@ -13,8 +14,8 @@
 using namespace com::panelsw::ca;
 using namespace google::protobuf;
 
-static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, CWixString *pszQuery);
-static HRESULT ReplaceStrings(CWixString * pszXsl, LPCWSTR szXslId);
+static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, LPWSTR *pszQuery);
+static HRESULT ReplaceStrings(LPCWSTR szXslPath, LPCWSTR szXslId);
 
 extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall)
 {
@@ -47,7 +48,7 @@ extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall)
 
 		// Get fields
 		CWixString szId, szComponent, szFileId, szXslBinaryId;
-		CWixString szXsl, szFileFmt, szFilePath;
+		CWixString szXslPath, szFileFmt, szFilePath;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szId);
@@ -94,10 +95,14 @@ extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall)
 		}
 
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will apply XSL transform '%ls' on file '%ls'", (LPCWSTR)szXslBinaryId, (LPCWSTR)szFilePath);
-		hr = ReadBinary(szXslBinaryId, szId, &szXsl);
+		hr = ReadBinary(szXslBinaryId, szId, (LPWSTR*)szXslPath);
 		ExitOnFailure(hr, "Failed reading XSL transform");
 
-		hr = deferredCA.AddExec(szFilePath, szXsl);
+		hr = ReplaceStrings(szXslPath, szId);
+		ExitOnFailure(hr, "Failed replacing strings in temp XSL file");
+
+		//TODO Add rollback + commit to delete the XSL file and rollback to revert the XML file
+		hr = deferredCA.AddExec(szFilePath, szXslPath);
 		ExitOnFailure(hr, "Failed scheduling '%ls' XSL transform", (LPCWSTR)szXslBinaryId);
 	}
 	hr = S_OK;
@@ -119,7 +124,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, CWixString* pszQuery)
+static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, LPWSTR *pszXslFile)
 {
 	HRESULT hr = S_OK;
 	CWixString szMsiQuery;
@@ -128,7 +133,7 @@ static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, CWixString* ps
 	PMSIHANDLE hRecord;
 	BYTE* pbData = nullptr;
 	DWORD cbData = 0;
-	FileRegexDetails::FileEncoding encoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_None;
+	HANDLE hFile = INVALID_HANDLE_VALUE;
 
 	hr = szMsiQuery.Format(L"SELECT `Data` FROM `Binary` WHERE `Name`='%s'", szBinaryKey);
 	ExitOnFailure(hr, "Failed to format string");
@@ -142,36 +147,23 @@ static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, CWixString* ps
 	hr = WcaGetRecordStream(hRecord, 1, &pbData, &cbData);
 	ExitOnFailure(hr, "Failed to ready Binary.Data for certificate.");
 
-	// Ensure null-termination. scoped for local use of pbData1
-	{
-		cbData += 2;
-		BYTE* pbData1 = (LPBYTE)MemReAlloc(pbData, cbData, TRUE);
-		ExitOnNull(pbData1, hr, E_FAIL, "Failed reallocating memory");
-		pbData = pbData1;
-	}
+	// Load XSL document
+	hr = FileCreateTempW(L"XSL", L"xsl", pszXslFile, &hFile);
+	ExitOnFailure(hr, "Failed creating temp XSL file");
 
-	encoding = CFileOperations::DetectEncoding(pbData, cbData);
-	if (encoding == FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_MultiByte)
-	{
-		hr = pszQuery->Format(L"%hs", pbData);
-		ExitOnFailure(hr, "Failed to copy XSL to string. Is binary file '%ls' multibyte-encoded?", szBinaryKey);
-	}
-	else
-	{
-		hr = pszQuery->Copy((LPCWSTR)pbData);
-		ExitOnFailure(hr, "Failed to copy XSL to string. Is binary file '%ls' unicode-encoded?", szBinaryKey);
-	}
+	hr = FileWriteHandle(hFile, pbData, cbData);
+	ExitOnFailure(hr, "Failed writing temp XSL file");
 
-	hr = ReplaceStrings(pszQuery, szQueryId);
-	ExitOnFailure(hr, "Failed to replacing strings in XSL transform '%ls'", szBinaryKey);
+	::FlushFileBuffers(hFile);
 
 LExit:
 	ReleaseMem(pbData);
+	ReleaseFile(hFile);
 
 	return hr;
 }
 
-static HRESULT ReplaceStrings(CWixString* pszXsl, LPCWSTR szXslId)
+static HRESULT ReplaceStrings(LPCWSTR szXslPath, LPCWSTR szXslId)
 {
 	HRESULT hr = S_OK;
 	CWixString szMsiQuery;
@@ -192,6 +184,7 @@ static HRESULT ReplaceStrings(CWixString* pszXsl, LPCWSTR szXslId)
 		CWixString szTextFmt, szReplacementFmt;
 		CWixString szText, szReplacement;
 		CWixString szTextObf, szReplacementObf;
+		CFileRegex fileRegex;
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szTextFmt);
 		ExitOnFailure(hr, "Failed to get Text.");
@@ -206,9 +199,9 @@ static HRESULT ReplaceStrings(CWixString* pszXsl, LPCWSTR szXslId)
 
 		if (!szText.IsNullOrEmpty())
 		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Replacing '%ls' with '%ls' in XSL transform", (LPCWSTR)szTextObf, (LPCWSTR)szReplacementObf);
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Replacing regex '%ls' with '%ls' in XSL transform", (LPCWSTR)szTextObf, (LPCWSTR)szReplacementObf);
 
-			hr = pszXsl->ReplaceAll(szText, szReplacement);
+			hr = fileRegex.Execute(szXslPath, szText, szReplacement, com::panelsw::ca::FileRegexDetails_FileEncoding::FileRegexDetails_FileEncoding_None, false);
 			ExitOnFailure(hr, "Failed to replace strings in SQL script.");
 		}
 	}
@@ -218,8 +211,7 @@ LExit:
 
 	return hr;
 }
-
-HRESULT CXslTransform::AddExec(LPCWSTR szXmlFilePath, LPCWSTR szXslt)
+HRESULT CXslTransform::AddExec(LPCWSTR szXmlFilePath, LPCWSTR szXsltPath)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command* pCmd = nullptr;
@@ -233,7 +225,7 @@ HRESULT CXslTransform::AddExec(LPCWSTR szXmlFilePath, LPCWSTR szXslt)
 	pDetails = new XslTransformDetails();
 	ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	pDetails->set_xslt(szXslt, WSTR_BYTE_SIZE(szXslt));
+	pDetails->set_xsl_path(szXsltPath, WSTR_BYTE_SIZE(szXsltPath));
 	pDetails->set_xml_path(szXmlFilePath, WSTR_BYTE_SIZE(szXmlFilePath));
 
 	pAny = pCmd->mutable_details();
@@ -252,8 +244,8 @@ HRESULT CXslTransform::DeferredExecute(const ::std::string& command)
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
 	XslTransformDetails details;
-	LPCWSTR szXsl = nullptr;
 	LPCWSTR szXmlPath = nullptr;
+	LPCWSTR szXslPath = nullptr;
 	CComPtr<IXMLDOMDocument2> pXmlDoc;
 	CComPtr<IXMLDOMDocument2> pXsl;
 	CComPtr<IXMLDOMParseError2> pError;
@@ -261,7 +253,6 @@ HRESULT CXslTransform::DeferredExecute(const ::std::string& command)
 	CComVariant filePath;
 	CComBSTR szErrorReason;
 	CComBSTR szError;
-	CComBSTR xslText;
 	CComBSTR xmlTransformed;
 	VARIANT_BOOL isXmlSuccess;
 
@@ -269,7 +260,7 @@ HRESULT CXslTransform::DeferredExecute(const ::std::string& command)
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking XslTransformDetails");
 
 	szXmlPath = (LPCWSTR)details.xml_path().c_str();
-	szXsl = (LPCWSTR)details.xslt().c_str();
+	szXslPath = (LPCWSTR)details.xsl_path().c_str();
 
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing XSL transform on file '%ls'", szXmlPath);
 
@@ -330,9 +321,8 @@ HRESULT CXslTransform::DeferredExecute(const ::std::string& command)
 		}
 	}
 
-	// Load XSL document
-	xslText = szXsl;
-	hr = pXsl->loadXML(xslText, &isXmlSuccess);
+	filePath = szXslPath;
+	hr = pXsl->load(filePath, &isXmlSuccess);
 	if (FAILED(hr) || !isXmlSuccess)
 	{
 		if (SUCCEEDED(hr))
@@ -363,5 +353,6 @@ HRESULT CXslTransform::DeferredExecute(const ::std::string& command)
 	ExitOnFailure(hr, "Failed writing XML file '%ls'", szXmlPath);
 
 LExit:
+
 	return hr;
 }
