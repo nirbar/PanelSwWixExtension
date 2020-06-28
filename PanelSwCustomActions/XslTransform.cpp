@@ -247,6 +247,7 @@ HRESULT CXslTransform::DeferredExecute(const ::std::string& command)
 	LPCWSTR szXmlPath = nullptr;
 	LPCWSTR szXslPath = nullptr;
 	CComPtr<IXMLDOMDocument2> pXmlDoc;
+	CComPtr<IXMLDOMDocument2> pOutXmlDoc;
 	CComPtr<IXMLDOMDocument2> pXsl;
 	CComPtr<IXMLDOMParseError2> pError;
 	CComPtr<IXMLDOMNodeList> pNodeList;
@@ -268,6 +269,8 @@ HRESULT CXslTransform::DeferredExecute(const ::std::string& command)
 	hr = ::CoCreateInstance(CLSID_DOMDocument, nullptr, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&pXmlDoc);
 	ExitOnFailure(hr, "Failed to CoCreateInstance CLSID_DOMDocument");
 	hr = ::CoCreateInstance(CLSID_DOMDocument, nullptr, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&pXsl);
+	ExitOnFailure(hr, "Failed to CoCreateInstance CLSID_DOMDocument");
+	hr = ::CoCreateInstance(CLSID_DOMDocument, nullptr, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&pOutXmlDoc);
 	ExitOnFailure(hr, "Failed to CoCreateInstance CLSID_DOMDocument");
 
 	// Lifting security limitations since XSL are from known source (the developer) and anyway it has local system priveleges
@@ -339,7 +342,7 @@ HRESULT CXslTransform::DeferredExecute(const ::std::string& command)
 		}
 	}
 
-	hr = pXmlDoc->transformNode(pXsl, &xmlTransformed);
+	hr = pXmlDoc->transformNodeToObject(pXsl, CComVariant(pOutXmlDoc.p));
 	if (FAILED(hr))
 	{
 		if (SUCCEEDED(pXmlDoc->get_parseError((IXMLDOMParseError**)&pError)) && SUCCEEDED(pError->get_srcText(&szError)) && SUCCEEDED(pError->get_reason(&szErrorReason)))
@@ -349,8 +352,8 @@ HRESULT CXslTransform::DeferredExecute(const ::std::string& command)
 	}
 	ExitOnFailure(hr, "Failed to apply XSL transform");
 
-	hr = FileWrite(szXmlPath, FILE_ATTRIBUTE_NORMAL, (BYTE*)(LPWSTR)xmlTransformed, xmlTransformed.ByteLength(), nullptr);
-	ExitOnFailure(hr, "Failed writing XML file '%ls'", szXmlPath);
+	hr = pOutXmlDoc->save(CComVariant(szXmlPath));
+	ExitOnFailure(hr, "Failed saving XML file '%ls'", szXmlPath);
 
 LExit:
 
