@@ -1,5 +1,6 @@
 using Microsoft.Tools.WindowsInstallerXml;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Xml;
@@ -253,6 +254,76 @@ namespace PanelSw.Wix.Extensions
                     Core.UnexpectedElement(parentElement, element);
                     break;
             }
+        }
+
+        public override void ParseAttribute(SourceLineNumberCollection sourceLineNumbers, XmlElement parentElement, XmlAttribute attribute, Dictionary<string, string> contextValues)
+        {
+            ParseAttribute(sourceLineNumbers, parentElement, attribute);
+        }
+
+        public override void ParseAttribute(SourceLineNumberCollection sourceLineNumbers, XmlElement parentElement, XmlAttribute attribute)
+        {
+            if (!parentElement.NamespaceURI.Equals("http://schemas.microsoft.com/wix/2006/wi"))
+            {
+                Core.UnexpectedAttribute(sourceLineNumbers, attribute);
+                return;
+            }
+
+            switch (parentElement.LocalName)
+            {
+                case "CustomAction":
+                    switch (attribute.LocalName)
+                    {
+                        case "CustomActionData":
+                            ParseCustomActionDataAttribute(sourceLineNumbers, parentElement, attribute);
+                            break;
+
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attribute);
+                            break;
+                    }
+                    break;
+
+                default:
+                    Core.UnexpectedElement(parentElement, attribute);
+                    break;
+            }
+        }
+
+        private void ParseCustomActionDataAttribute(SourceLineNumberCollection sourceLineNumbers, XmlElement parentElement, XmlAttribute attribute)
+        {
+            string cad = Core.GetAttributeValue(sourceLineNumbers, attribute);
+            if (string.IsNullOrEmpty(cad))
+            {
+                Core.OnMessage(WixErrors.IllegalEmptyAttributeValue(sourceLineNumbers, parentElement.LocalName, attribute.LocalName));
+            }
+
+            XmlAttribute idAttrib = parentElement.GetAttributeNode("Id");
+            if (idAttrib == null)
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Id"));
+            }
+            string caId = Core.GetAttributeIdentifierValue(sourceLineNumbers, idAttrib);
+            if (string.IsNullOrEmpty(cad))
+            {
+                Core.OnMessage(WixErrors.IllegalEmptyAttributeValue(sourceLineNumbers, parentElement.LocalName, "Id"));
+            }
+
+            Row row = Core.CreateRow(sourceLineNumbers, "CustomAction");
+            row[0] = $"Set{caId}";
+            row[1] = 0x00000030 | 0x00000003; // Set formatted property
+            row[2] = caId;
+            row[3] = cad;
+
+            Row sequenceRow = Core.CreateRow(sourceLineNumbers, "WixAction");
+            sequenceRow[0] = "InstallExecuteSequence";
+            sequenceRow[1] = $"Set{caId}";
+            sequenceRow[2] = null; // condition
+            sequenceRow[4] = caId; // beforeAction
+            sequenceRow[5] = null; // afterAction
+            sequenceRow[6] = 0; // not overridable
+
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", caId);
         }
 
         private void ParseWebsiteConfigElement(XmlElement parentElement, XmlElement element)

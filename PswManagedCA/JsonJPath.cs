@@ -213,7 +213,7 @@ namespace PswManagedCA
                 }
                 catch (Exception ex)
                 {
-                    session.LogUnformatted($"Failed replacing JsonJpath '{ctlg.JPathObfuscated}' with '{ctlg.ValueObfuscated}' in file '{ctlg.FilePath}': {ex.Message}");
+                    session.LogUnformatted($"Failed setting JsonJpath '{ctlg.JPathObfuscated}' to '{ctlg.ValueObfuscated}' in file '{ctlg.FilePath}': {ex.Message}");
                     throw;
                 }
             }

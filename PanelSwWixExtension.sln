@@ -105,6 +105,8 @@ Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "VersionCompareUT", "UnitTes
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "PathSearchUT", "UnitTests\PathSearchUT\PathSearchUT.wixproj", "{0FBEE09F-52C0-4AA2-8238-D55067106829}"
 EndProject
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "CustomActionDataUT", "UnitTests\CustomActionDataUT\CustomActionDataUT.wixproj", "{F0FAAEE2-E1C5-4122-80FA-CE8CA58F7621}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|x86 = Release|x86
@@ -154,6 +156,7 @@ Global
 		{742496FF-76A2-419C-BA48-BE8C6C1C23EB}.Release|x86.ActiveCfg = Release|x86
 		{E386BD7E-2DDC-4F30-8FD0-2ED41E851159}.Release|x86.ActiveCfg = Release|x86
 		{0FBEE09F-52C0-4AA2-8238-D55067106829}.Release|x86.ActiveCfg = Release|x86
+		{F0FAAEE2-E1C5-4122-80FA-CE8CA58F7621}.Release|x86.ActiveCfg = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -190,6 +193,7 @@ Global
 		{742496FF-76A2-419C-BA48-BE8C6C1C23EB} = {B533D9FC-4927-4A05-892D-B90E8BEDCF5D}
 		{E386BD7E-2DDC-4F30-8FD0-2ED41E851159} = {B533D9FC-4927-4A05-892D-B90E8BEDCF5D}
 		{0FBEE09F-52C0-4AA2-8238-D55067106829} = {B533D9FC-4927-4A05-892D-B90E8BEDCF5D}
+		{F0FAAEE2-E1C5-4122-80FA-CE8CA58F7621} = {B533D9FC-4927-4A05-892D-B90E8BEDCF5D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F5B6389D-77ED-4938-A322-8DFCA4D9FEF5}

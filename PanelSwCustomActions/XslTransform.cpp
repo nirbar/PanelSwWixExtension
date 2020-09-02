@@ -14,7 +14,7 @@
 using namespace com::panelsw::ca;
 using namespace google::protobuf;
 
-static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, LPWSTR *pszQuery);
+static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, LPWSTR *pszXslPath);
 static HRESULT ReplaceStrings(LPCWSTR szXslPath, LPCWSTR szXslId);
 
 extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall)
