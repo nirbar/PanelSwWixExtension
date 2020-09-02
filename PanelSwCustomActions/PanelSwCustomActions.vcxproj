@@ -2,10 +2,6 @@
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\TidyBuild.1.1.1\build\TidyBuild.props" Condition="Exists('..\packages\TidyBuild.1.1.1\build\TidyBuild.props')" />
   <ItemGroup Label="ProjectConfigurations">
-    <ProjectConfiguration Include="Debug|Win32">
-      <Configuration>Debug</Configuration>
-      <Platform>Win32</Platform>
-    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
@@ -37,10 +33,7 @@
   <PropertyGroup>
     <LibraryPath>$(OutDir)..\CaCommon\;$(OutDir)..\ProtoCaLib\;$(WIX)SDK\VS2017\lib\x86;$(WixToolPath)\..\SDK\VS2017\lib\x86;$(LibraryPath)</LibraryPath>
     <IncludePath>$(SolutionDir)CaCommon;$(SolutionDir)poco\Zip\include;$(SolutionDir)poco\Foundation\include;$(WIX)SDK\VS2017\inc;$(WixToolPath)\..\SDK\inc;$(IncludePath)</IncludePath>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</LinkIncremental>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
   </PropertyGroup>
@@ -55,20 +48,6 @@
       <AdditionalLibraryDirectories>$(WIX)SDK\VS2017\lib\x86;$(WixToolPath)\..\SDK\VS2017\lib\x86;..\build\protobuf\$(Configuration);..\build\poco\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
-    </Link>
-  </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <ClCompile>
-      <Optimization>Disabled</Optimization>
-      <PreprocessorDefinitions>_DEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <MinimalRebuild>true</MinimalRebuild>
-      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
-      <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-    </ClCompile>
-    <Link>
-      <GenerateDebugInformation>true</GenerateDebugInformation>
-      <ModuleDefinitionFile>PanelSwCustomActions.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

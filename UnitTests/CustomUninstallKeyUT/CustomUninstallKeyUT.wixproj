@@ -2,7 +2,7 @@
 <Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\..\packages\TidyBuild.1.1.1\build\TidyBuild.props" Condition="Exists('..\..\packages\TidyBuild.1.1.1\build\TidyBuild.props')" />
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
     <ProductVersion>3.8</ProductVersion>
     <ProjectGuid>5e7e80c3-8093-4df6-ad3d-de3f2872b01f</ProjectGuid>
@@ -14,9 +14,6 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <DefineSolutionProperties>false</DefineSolutionProperties>
-  </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
-    <DefineConstants>Debug;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
   </PropertyGroup>
