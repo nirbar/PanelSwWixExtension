@@ -19,7 +19,7 @@
       <xs:appinfo>
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="CustomAction" />
       </xs:appinfo>
-      <xs:documentation><![CDATA[Add a SetProperty custom action sequenced before the custom action that sets CustomActionData for it. This field is formatted.]]></xs:documentation>
+      <xs:documentation><![CDATA[Add a SetProperty custom action sequenced before the custom action that sets CustomActionData for it. Note that CustomActionData is only relevant for deferred, rollback, and commit actions. This field is formatted.]]></xs:documentation>
     </xs:annotation>
   </xs:attribute>
 

@@ -1,4 +1,5 @@
 using Microsoft.Tools.WindowsInstallerXml;
+using Microsoft.Tools.WindowsInstallerXml.Serialize;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -296,6 +297,39 @@ namespace PanelSw.Wix.Extensions
             if (string.IsNullOrEmpty(cad))
             {
                 Core.OnMessage(WixErrors.IllegalEmptyAttributeValue(sourceLineNumbers, parentElement.LocalName, attribute.LocalName));
+            }
+
+            XmlAttribute executeAttrib = parentElement.GetAttributeNode("Execute");
+            if (executeAttrib == null)
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Execute"));
+                return;
+            }
+            string execute = Core.GetAttributeValue(sourceLineNumbers, executeAttrib);
+            CustomAction.ExecuteType executeType = CustomAction.ParseExecuteType(execute);
+            switch (executeType)
+            {
+                case CustomAction.ExecuteType.commit:
+                case CustomAction.ExecuteType.deferred:
+                case CustomAction.ExecuteType.rollback:
+                    break;
+
+                default:
+                    // CustomActionData is only relevant for deferred actions
+                    Core.OnMessage(WixErrors.IllegalAttributeValueWithOtherAttribute(sourceLineNumbers, parentElement.LocalName, "Execute", execute, attribute.LocalName));
+                    return;
+            }
+
+            XmlAttribute dllEntryAttrib = parentElement.GetAttributeNode("DllEntry");
+            if (dllEntryAttrib == null)
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "DllEntry"));
+            }
+            string dllEntry = Core.GetAttributeValue(sourceLineNumbers, dllEntryAttrib);
+            if (string.IsNullOrWhiteSpace(dllEntry))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "DllEntry"));
+                return;
             }
 
             XmlAttribute idAttrib = parentElement.GetAttributeNode("Id");
