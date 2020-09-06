@@ -694,7 +694,6 @@ LRetry:
 		hImpersonation = NULL;
 	}
 
-
 	if (SUCCEEDED(hr))
 	{
 		LogProcessOutput(hStdOut, ((details.consoleouputremap_size() > 0) ? (LPWSTR*)szLog : nullptr));

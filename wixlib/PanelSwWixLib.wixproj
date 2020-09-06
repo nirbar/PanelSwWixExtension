@@ -24,6 +24,7 @@
     <Compile Include="PanelSwWixExtension.wxs" />
   </ItemGroup>
   <ItemGroup>
+    <EmbeddedResource Include="he-IL.wxl" />
     <EmbeddedResource Include="en-US.wxl" />
   </ItemGroup>
   <ItemGroup>
