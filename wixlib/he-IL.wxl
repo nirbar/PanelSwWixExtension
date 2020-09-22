@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<WixLocalization Culture="he-il" xmlns="http://schemas.microsoft.com/wix/2006/localization">
+  <String Overridable="yes" Id="CustomUninstallKey">כתיבת ערכים ל- Registry</String>
+  <String Overridable="yes" Id="RemoveRegistryValue">מחיקת ערכים מה- Registry</String>
+  <String Overridable="yes" Id="Telemetry">שליחת מידע טלמטרי</String>
+  <String Overridable="yes" Id="ShellExecute">הרצת פקודה "[1]" [2] ב- "[3]" בפעולת [4]</String>
+  <String Overridable="yes" Id="TaskScheduler">Configuring Scheduled Tasks</String>
+  <String Overridable="yes" Id="ExecOnComponent"><![CDATA[הרצת פקודות]]></String>
+  <String Overridable="yes" Id="ExecOnFailure"><![CDATA[כשלון בהרצת פקודה [2]]]></String>
+  <String Overridable="yes" Id="ExecOnConsoleFailure"><![CDATA[פקודה [2] החזירה שגיאה
+[3]]]></String>  
+  <String Overridable="yes" Id="ServiceConfig"><![CDATA[הגדרת שירותי מערכת]]></String>
+  <String Overridable="yes" Id="ServiceConfigFailure"><![CDATA[כשלון בהגדרת שירותי מערכת [2]]]></String>
+  <String Overridable="yes" Id="InstallUtil"><![CDATA[מתקין שירותי מערכת .NET]]></String>
+  <String Overridable="yes" Id="SqlSearch"><![CDATA[מבצע שאילתות SQL]]></String>
+  <String Overridable="yes" Id="PSW_SqlSearchFailure"><![CDATA[כשלון בשאילתות SQL '[2]':
+[3]]]>
+  </String>
+  <String Overridable="yes" Id="BackupAndRestore"><![CDATA[מגבה קבצים]]></String>
+  <String Overridable="yes" Id="TopShelf"><![CDATA[מתקין שירותי מערכת TopShelf]]></String>
+  <String Overridable="yes" Id="TopShelfFailure"><![CDATA[כשלון בהגדרת שירותי מערכת [2]]]></String>
+  <String Overridable="yes" Id="CreateSelfSignCertificate"><![CDATA[מייצר תעודות בחתימה אישית]]></String>
+  <String Overridable="yes" Id="FileRegex"><![CDATA[חיפוש והחלפה בקבצים]]></String>
+  <String Overridable="yes" Id="ForceVersion"><![CDATA[החלפת גירסאות קבצים]]></String>
+  <String Overridable="yes" Id="SetPropertyFromPipe"><![CDATA[קריאת פרמטרים חיצוניים]]></String>
+  <String Overridable="yes" Id="EvaluateExpression"><![CDATA[חישוב נוסחאות]]></String>
+  <String Overridable="yes" Id="CertificateHashSearch"><![CDATA[איתור תעודות]]></String>
+  <String Overridable="yes" Id="ZipFile"><![CDATA[יצירת ארכיון קבצים]]></String>
+  <String Overridable="yes" Id="Unzip"><![CDATA[פריסת ארכיון קבצים]]></String>
+  <String Overridable="yes" Id="DiskSpace"><![CDATA[חישוב מקום פנוי בכונן]]></String>
+  <String Overridable="yes" Id="Dism"><![CDATA[הפעלת מאפייני מערכת]]></String>
+  <String Overridable="yes" Id="DismPackageFailure"><![CDATA[כשלון בהוספת חבילת מאפייני מערכת [2]:
+[3]]]></String>
+  <String Overridable="yes" Id="DismFeatureFailure"><![CDATA[כשלון בהתקנת מאפייני מערכת [2]:
+[3]]]></String>
+  <String Overridable="yes" Id="JsonJpath"><![CDATA[עריכת קבצי JSON]]></String>
+  <String Overridable="yes" Id="JsonJpathSearch"><![CDATA[חיפוש בקבצי JSON]]></String>
+  <String Overridable="yes" Id="AccountSidSearch"><![CDATA[איתור מזהי אבטחה]]></String>
+  <String Overridable="yes" Id="PSW_SqlScript"><![CDATA[הרצת סקריפטים SQL]]></String>
+  <String Overridable="yes" Id="PSW_SqlScriptFailure"><![CDATA[כשלון בהרצת סקריפטי SQL
+[2]]]>
+  </String>
+  <String Overridable="yes" Id="PSW_WebsiteConfig"><![CDATA[עדכון אתרי IIS]]></String>
+  <String Overridable="yes" Id="WebsiteConfigFailure"><![CDATA[כשלון בעדכון אתרי IIS [2]
+[3]]]></String>
+  <String Overridable="yes" Id="PSW_VersionCompare"><![CDATA[השוואת גרסאות]]></String>
+  <String Overridable="yes" Id="PSW_PathSearch"><![CDATA[חיפוש קבצים במשתנה סביבה PATH]]></String>
+  <String Overridable="yes" Id="PSW_XslTransform"><![CDATA[עדכון קבצי XML]]></String>
+</WixLocalization>

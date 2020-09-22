@@ -1,5 +1,4 @@
 using Microsoft.Tools.WindowsInstallerXml;
-using Microsoft.Tools.WindowsInstallerXml.Serialize;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -279,6 +278,10 @@ namespace PanelSw.Wix.Extensions
                             ParseCustomActionDataAttribute(sourceLineNumbers, parentElement, attribute);
                             break;
 
+                        case "ActionStartText":
+                            ParseActionStartTextAttribute(sourceLineNumbers, parentElement, attribute);
+                            break;
+
                         default:
                             Core.UnexpectedAttribute(sourceLineNumbers, attribute);
                             break;
@@ -289,6 +292,34 @@ namespace PanelSw.Wix.Extensions
                     Core.UnexpectedElement(parentElement, attribute);
                     break;
             }
+        }
+
+        private void ParseActionStartTextAttribute(SourceLineNumberCollection sourceLineNumbers, XmlElement parentElement, XmlAttribute attribute)
+        {
+            string actionStartText = Core.GetAttributeValue(sourceLineNumbers, attribute);
+            if (string.IsNullOrEmpty(actionStartText))
+            {
+                Core.OnMessage(WixErrors.IllegalEmptyAttributeValue(sourceLineNumbers, parentElement.LocalName, attribute.LocalName));
+                return;
+            }
+
+            XmlAttribute idAttrib = parentElement.GetAttributeNode("Id");
+            if (idAttrib == null)
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Id"));
+                return;
+            }
+            string caId = Core.GetAttributeIdentifierValue(sourceLineNumbers, idAttrib);
+            if (string.IsNullOrEmpty(caId))
+            {
+                Core.OnMessage(WixErrors.IllegalEmptyAttributeValue(sourceLineNumbers, parentElement.LocalName, "Id"));
+                return;
+            }
+
+            Row row = Core.CreateRow(sourceLineNumbers, "ActionText");
+            row[0] = caId;
+            row[1] = actionStartText;
+            row[2] = "";
         }
 
         private void ParseCustomActionDataAttribute(SourceLineNumberCollection sourceLineNumbers, XmlElement parentElement, XmlAttribute attribute)
@@ -306,12 +337,12 @@ namespace PanelSw.Wix.Extensions
                 return;
             }
             string execute = Core.GetAttributeValue(sourceLineNumbers, executeAttrib);
-            CustomAction.ExecuteType executeType = CustomAction.ParseExecuteType(execute);
+            Microsoft.Tools.WindowsInstallerXml.Serialize.CustomAction.ExecuteType executeType = Microsoft.Tools.WindowsInstallerXml.Serialize.CustomAction.ParseExecuteType(execute);
             switch (executeType)
             {
-                case CustomAction.ExecuteType.commit:
-                case CustomAction.ExecuteType.deferred:
-                case CustomAction.ExecuteType.rollback:
+                case Microsoft.Tools.WindowsInstallerXml.Serialize.CustomAction.ExecuteType.commit:
+                case Microsoft.Tools.WindowsInstallerXml.Serialize.CustomAction.ExecuteType.deferred:
+                case Microsoft.Tools.WindowsInstallerXml.Serialize.CustomAction.ExecuteType.rollback:
                     break;
 
                 default:
@@ -338,7 +369,7 @@ namespace PanelSw.Wix.Extensions
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Id"));
             }
             string caId = Core.GetAttributeIdentifierValue(sourceLineNumbers, idAttrib);
-            if (string.IsNullOrEmpty(cad))
+            if (string.IsNullOrEmpty(caId))
             {
                 Core.OnMessage(WixErrors.IllegalEmptyAttributeValue(sourceLineNumbers, parentElement.LocalName, "Id"));
             }

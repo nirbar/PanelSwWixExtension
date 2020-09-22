@@ -23,6 +23,15 @@
     </xs:annotation>
   </xs:attribute>
 
+  <xs:attribute name="ActionStartText" type="xs:string">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="CustomAction" />
+      </xs:appinfo>
+      <xs:documentation><![CDATA[Define an ActionStart text for the custom action. If ActionData template is also required, use wix:ProgressText instead. This field is formatted.]]></xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+
   <xs:element name="PathSearch">
     <xs:annotation>
       <xs:appinfo>

@@ -22,7 +22,7 @@
 
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
 
-    <CustomAction Id="Test" BinaryKey="WixCA" DllEntry="WixQuietExec" PanelSW:CustomActionData='"cmd" /C DEL "[INSTALLFOLDER]"' Execute='deferred' Impersonate='no'/>
+    <CustomAction Id="Test" BinaryKey="WixCA" DllEntry="WixQuietExec" PanelSW:CustomActionData='"cmd" /C DEL "[INSTALLFOLDER]"' PanelSW:ActionStartText="My custom action text" Execute='deferred' Impersonate='no'/>
     <InstallExecuteSequence>
       <Custom Action='Test' Before='InstallFiles'/>
     </InstallExecuteSequence>
