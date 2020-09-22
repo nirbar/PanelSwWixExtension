@@ -374,6 +374,12 @@ namespace PanelSw.Wix.Extensions
                 Core.OnMessage(WixErrors.IllegalEmptyAttributeValue(sourceLineNumbers, parentElement.LocalName, "Id"));
             }
 
+
+            if (Core.EncounteredError)
+            {
+                return;
+            }
+
             Row row = Core.CreateRow(sourceLineNumbers, "CustomAction");
             row[0] = $"Set{caId}";
             row[1] = 0x00000030 | 0x00000003; // Set formatted property
@@ -389,6 +395,20 @@ namespace PanelSw.Wix.Extensions
             sequenceRow[6] = 0; // not overridable
 
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", caId);
+
+            // Set action text to the SetProperty element as well if it is set for the CA
+            XmlAttribute caTextAttrib = parentElement.GetAttributeNode("ActionStartText", attribute.NamespaceURI);
+            if (caTextAttrib != null)
+            {
+                string actionText = Core.GetAttributeValue(sourceLineNumbers, caTextAttrib);
+                if (!string.IsNullOrWhiteSpace(actionText))
+                {
+                    row = Core.CreateRow(sourceLineNumbers, "ActionText");
+                    row[0] = $"Set{caId}";
+                    row[1] = actionText;
+                    row[2] = "";
+                }
+            }
         }
 
         private void ParseWebsiteConfigElement(XmlElement parentElement, XmlElement element)
@@ -3361,8 +3381,8 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            if (!string.IsNullOrEmpty(connectionString) && 
-                (!string.IsNullOrEmpty(server) || !string.IsNullOrEmpty(instance) || !string.IsNullOrEmpty(database) || !string.IsNullOrEmpty(port)||!string.IsNullOrEmpty(encrypted)||!string.IsNullOrEmpty(password)||!string.IsNullOrEmpty(username)))
+            if (!string.IsNullOrEmpty(connectionString) &&
+                (!string.IsNullOrEmpty(server) || !string.IsNullOrEmpty(instance) || !string.IsNullOrEmpty(database) || !string.IsNullOrEmpty(port) || !string.IsNullOrEmpty(encrypted) || !string.IsNullOrEmpty(password) || !string.IsNullOrEmpty(username)))
             {
                 Core.OnMessage(WixErrors.IllegalAttributeWithOtherAttribute(sourceLineNumbers, node.LocalName, "ConnectionString", "any other"));
             }
