@@ -12,10 +12,6 @@ init:
         $v = -join($env:APPVEYOR_REPO_TAG_NAME.TrimStart("v"), ".", $env:APPVEYOR_BUILD_NUMBER)
         Update-AppveyorBuild -Version $v
       }
-
-environment:
-  SIGNPATH_TOKEN:
-    secure: xaUj8cwvyB4tT2BPVKxdaa02eRC1GK6EaGknYDshwVr6UfG+wv6/txF+o86/LEF9
     
 before_build:
 - cmd: >-
@@ -44,8 +40,3 @@ before_package:
 artifacts:
   - path: 'build\nuget-out\PanelSwWixExtension.%APPVEYOR_BUILD_VERSION%.nupkg'
     name: PanelSwWixExtension.%APPVEYOR_BUILD_VERSION%.nupkg
-
-deploy:
-- provider: Webhook
-  url: https://app.signpath.io/API/v1/247d954d-acdc-41dd-8bd2-9ef69d21ca2b/Integrations/AppVeyor?ProjectKey=PanelSwWixExtension&SigningPolicyKey=test-signing
-  authorization: Bearer %SIGNPATH_TOKEN%
