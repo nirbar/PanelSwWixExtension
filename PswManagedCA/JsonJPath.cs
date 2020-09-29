@@ -12,6 +12,12 @@ namespace PswManagedCA
 {
     public class JsonJPath
     {
+        private enum JsonFormatting
+        {
+            Raw,
+            String
+        }
+
         List<JsonJPathCatalog> catalogs_ = new List<JsonJPathCatalog>();
 
         [CustomAction]
@@ -66,7 +72,7 @@ namespace PswManagedCA
 
             List<JsonJPathCatalog> catalogs = new List<JsonJPathCatalog>(); ;
 
-            using (View jsonView = session.Database.OpenView("SELECT `PSW_JsonJPath`.`File_`, `PSW_JsonJPath`.`Component_`, `PSW_JsonJPath`.`FilePath`, `PSW_JsonJPath`.`JPath`, `PSW_JsonJPath`.`Value` FROM `PSW_JsonJPath`"))
+            using (View jsonView = session.Database.OpenView("SELECT `PSW_JsonJPath`.`File_`, `PSW_JsonJPath`.`Component_`, `PSW_JsonJPath`.`FilePath`, `PSW_JsonJPath`.`JPath`, `PSW_JsonJPath`.`Value`, `PSW_JsonJPath`.`Formatting` FROM `PSW_JsonJPath`"))
             {
                 jsonView.Execute(null);
 
@@ -80,10 +86,16 @@ namespace PswManagedCA
                         string filePath = rec[3] as string;
                         string jpath = rec[4] as string;
                         string value = rec[5] as string;
+                        int? formatting = rec[6] as int?;
                         ctlg.JPathObfuscated = session.Obfuscate(jpath);
                         ctlg.ValueObfuscated = session.Obfuscate(value);
                         ctlg.JPath = session.Format(jpath);
+                        
                         ctlg.Value = session.Format(value);
+                        if (formatting == (int?)JsonFormatting.String)
+                        {
+                            ctlg.Value = JsonConvert.ToString(ctlg.Value);
+                        }
 
                         // Sanity checks
                         if (string.IsNullOrWhiteSpace(fileId) == string.IsNullOrEmpty(component))

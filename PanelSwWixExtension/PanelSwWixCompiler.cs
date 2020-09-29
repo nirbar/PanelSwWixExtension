@@ -374,7 +374,6 @@ namespace PanelSw.Wix.Extensions
                 Core.OnMessage(WixErrors.IllegalEmptyAttributeValue(sourceLineNumbers, parentElement.LocalName, "Id"));
             }
 
-
             if (Core.EncounteredError)
             {
                 return;
@@ -600,6 +599,12 @@ namespace PanelSw.Wix.Extensions
             return file;
         }
 
+        private enum JsonFormatting
+        {
+            Raw,
+            String
+        }
+
         private void ParseJsonJPathElement(XmlElement node, XmlElement parentElement)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
@@ -609,6 +614,7 @@ namespace PanelSw.Wix.Extensions
             string file_ = null;
             string filePath = null;
             string component_ = null;
+            JsonFormatting jsonFormatting = JsonFormatting.Raw;
 
             switch (parentElement.LocalName)
             {
@@ -645,6 +651,14 @@ namespace PanelSw.Wix.Extensions
 
                         case "Value":
                             value = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        case "Formatting":
+                            string formatting = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            if (!Enum.TryParse(formatting, true, out jsonFormatting))
+                            {
+                                Core.OnMessage(WixErrors.IllegalAttributeValueWithLegalList(sourceLineNumbers, node.LocalName, attrib.LocalName, formatting, $"{JsonFormatting.Raw}, {JsonFormatting.String}"));
+                            }
                             break;
 
                         default:
@@ -686,6 +700,7 @@ namespace PanelSw.Wix.Extensions
                 row[3] = file_;
                 row[4] = jpath;
                 row[5] = value;
+                row[6] = (int)jsonFormatting;
             }
         }
 

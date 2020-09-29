@@ -159,6 +159,11 @@
           <xs:documentation><![CDATA[JSON object to replace the matched value. Formatted]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="Formatting" use="optional" type="JsonFormatType" default="raw">
+        <xs:annotation>
+          <xs:documentation><![CDATA[JSON object formatting. Defaults to 'raw']]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
 
@@ -878,7 +883,8 @@
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
       </xs:appinfo>
       <xs:documentation>
-        <![CDATA[Execute a custom command on component action. Command execution results are handled firstly by ConsoleOutput directives, then by exit code and ExitCode directives, and finally by ErrorHandling attribute]]></xs:documentation>
+        <![CDATA[Execute a custom command on component action. Command execution results are handled firstly by ConsoleOutput directives, then by exit code and ExitCode directives, and finally by ErrorHandling attribute]]>
+      </xs:documentation>
     </xs:annotation>
     <xs:complexType>
       <xs:choice minOccurs="0" maxOccurs="unbounded">
@@ -2048,6 +2054,24 @@ Remove registry values.
       <xs:enumeration value="fail"></xs:enumeration>
       <xs:enumeration value="ignore"></xs:enumeration>
       <xs:enumeration value="prompt"></xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="JsonFormatType">
+    <xs:annotation>
+      <xs:documentation>JSON object formatting</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:NMTOKEN">
+      <xs:enumeration value="raw">
+        <xs:annotation>
+          <xs:documentation>Write the value as is</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="string">
+        <xs:annotation>
+          <xs:documentation>Format the value as JSON string</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>
