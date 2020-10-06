@@ -2341,6 +2341,7 @@ namespace PanelSw.Wix.Extensions
         private void ParseTaskSchedulerElement(XmlElement parentElement, XmlElement element)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
+            string id = "tsk" + Guid.NewGuid().ToString("N");
             string taskXml = null;
             string taskName = null;
             string component = null;
@@ -2370,6 +2371,10 @@ namespace PanelSw.Wix.Extensions
                         password = Core.GetAttributeValue(sourceLineNumbers, attrib);
                         break;
 
+                    case "XmlFile":
+                        taskXml = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
                     default:
                         Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                         break;
@@ -2391,10 +2396,11 @@ namespace PanelSw.Wix.Extensions
                 }
                 else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
                 {
-                    taskXml = child.Value.Trim();
-                    taskXml = taskXml.Replace("\r", "");
-                    taskXml = taskXml.Replace("\n", "");
-                    taskXml = taskXml.Replace(Environment.NewLine, "");
+                    if (!string.IsNullOrWhiteSpace(taskXml))
+                    {
+                        Core.OnMessage(WixErrors.IllegalAttributeWithInnerText(sourceLineNumbers, element.LocalName, "XmlFile"));
+                    }
+                    taskXml = child.Value;
                 }
             }
 
@@ -2402,9 +2408,9 @@ namespace PanelSw.Wix.Extensions
             {
                 Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, parentElement.LocalName, "Id", ""));
             }
-            if (string.IsNullOrEmpty(taskXml))
+            if (string.IsNullOrWhiteSpace(taskXml))
             {
-                Core.OnMessage(WixErrors.ExpectedElement(sourceLineNumbers, element.LocalName, "Text or CDATA"));
+                Core.OnMessage(WixErrors.ExpectedAttributeOrElement(sourceLineNumbers, element.LocalName, "XmlFile", "Inner text or CDATA"));
             }
             if (string.IsNullOrEmpty(taskName))
             {
@@ -2419,12 +2425,18 @@ namespace PanelSw.Wix.Extensions
 
             if (!Core.EncounteredError)
             {
+                taskXml = taskXml.Trim();
+                taskXml = taskXml.Replace("\r", "");
+                taskXml = taskXml.Replace("\n", "");
+                taskXml = taskXml.Replace(Environment.NewLine, "");
+
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_TaskScheduler");
-                row[0] = taskName;
-                row[1] = component;
-                row[2] = taskXml;
-                row[3] = user;
-                row[4] = password;
+                row[0] = id;
+                row[1] = taskName;
+                row[2] = component;
+                row[3] = taskXml;
+                row[4] = user;
+                row[5] = password;
             }
         }
 

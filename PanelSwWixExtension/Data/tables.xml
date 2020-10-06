@@ -103,7 +103,8 @@
   </tableDefinition>
 
   <tableDefinition name="PSW_TaskScheduler">
-    <columnDefinition name="TaskName" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="TaskName" type="string" length="72" modularize="column" category="formatted" />
     <columnDefinition name="Component_" type="string" length="72" modularize="column" keyTable="Component" keyColumn="1" category="identifier"/>
     <columnDefinition name="TaskXml" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="User" type="string" length="0" modularize="property" category="formatted" nullable="yes" />

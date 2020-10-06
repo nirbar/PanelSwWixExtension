@@ -43,7 +43,7 @@ extern "C" UINT __stdcall TaskScheduler(MSIHANDLE hInstall)
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
 		int nIgnoreCase = 0;
 
-		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szTaskName);
+		hr = WcaGetRecordFormattedString(hRecord, 1, (LPWSTR*)szTaskName);
 		BreakExitOnFailure(hr, "Failed to get TaskName.");
 		hr = WcaGetRecordString(hRecord, 2, (LPWSTR*)szComponent);
 		BreakExitOnFailure(hr, "Failed to get Component.");

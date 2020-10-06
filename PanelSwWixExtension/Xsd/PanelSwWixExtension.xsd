@@ -1124,14 +1124,14 @@
       <xs:appinfo>
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
       </xs:appinfo>
-      <xs:documentation><![CDATA[Add a task to Windows Task Scheduler. Task definition XML should be in inner text]]></xs:documentation>
+      <xs:documentation><![CDATA[Add a task to Windows Task Scheduler. Task definition XML should be in inner text or as file path in XmlFile attribute]]></xs:documentation>
     </xs:annotation>
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
           <xs:attribute name="TaskName" type="xs:string" use="required">
             <xs:annotation>
-              <xs:documentation><![CDATA[Task name in Windows Task Scheduler (primary key).]]></xs:documentation>
+              <xs:documentation><![CDATA[Task name in Windows Task Scheduler. This field may be formatted]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="User" type="xs:string" use="optional">
@@ -1142,6 +1142,11 @@
           <xs:attribute name="Password" type="xs:string" use="optional">
             <xs:annotation>
               <xs:documentation><![CDATA[Optional user's password for task logon.]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="XmlFile" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Path to task XML definition in build time. The file must be accessible during compilation]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>
