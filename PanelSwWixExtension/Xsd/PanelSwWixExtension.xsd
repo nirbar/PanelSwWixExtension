@@ -2077,6 +2077,11 @@ Remove registry values.
           <xs:documentation>Format the value as JSON string</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
+      <xs:enumeration value="boolean">
+        <xs:annotation>
+          <xs:documentation>Format the value as JSON true or false. If the value is true or false then it is used as is. Otherwise if the value evaluates to null, it is considered false. If the value evaluates to a numric 0, it is also considered false. Any other value is considered true</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

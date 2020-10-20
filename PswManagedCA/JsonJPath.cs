@@ -15,7 +15,8 @@ namespace PswManagedCA
         private enum JsonFormatting
         {
             Raw,
-            String
+            String,
+            Boolean
         }
 
         List<JsonJPathCatalog> catalogs_ = new List<JsonJPathCatalog>();
@@ -90,11 +91,41 @@ namespace PswManagedCA
                         ctlg.JPathObfuscated = session.Obfuscate(jpath);
                         ctlg.ValueObfuscated = session.Obfuscate(value);
                         ctlg.JPath = session.Format(jpath);
-                        
+
                         ctlg.Value = session.Format(value);
-                        if (formatting == (int?)JsonFormatting.String)
+                        if ((formatting != null) && Enum.IsDefined(typeof(JsonConvert), (int)formatting))
                         {
-                            ctlg.Value = JsonConvert.ToString(ctlg.Value);
+                            JsonFormatting jsonFormat = (JsonFormatting)formatting;
+                            switch (jsonFormat)
+                            {
+                                case JsonFormatting.Raw:
+                                default:
+                                    break;
+
+                                case JsonFormatting.String:
+                                    ctlg.Value = JsonConvert.ToString(ctlg.Value);
+                                    break;
+
+                                case JsonFormatting.Boolean:
+                                    if (string.IsNullOrWhiteSpace(ctlg.Value))
+                                    {
+                                        ctlg.Value = JsonConvert.False;
+                                    }
+                                    else if (bool.TryParse(ctlg.Value, out bool b))
+                                    {
+                                        ctlg.Value = b ? JsonConvert.True : JsonConvert.False;
+                                    }
+                                    else if (int.TryParse(ctlg.Value, out int i) && (i == 0))
+                                    {
+                                        ctlg.Value = JsonConvert.False;
+                                    }
+                                    else
+                                    {
+                                        ctlg.Value = JsonConvert.True;
+                                    }
+                                    break;
+                            }
+
                         }
 
                         // Sanity checks

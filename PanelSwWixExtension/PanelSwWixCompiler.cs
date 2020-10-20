@@ -602,7 +602,8 @@ namespace PanelSw.Wix.Extensions
         private enum JsonFormatting
         {
             Raw,
-            String
+            String,
+            Boolean
         }
 
         private void ParseJsonJPathElement(XmlElement node, XmlElement parentElement)
