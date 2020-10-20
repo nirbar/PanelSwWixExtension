@@ -11,10 +11,14 @@
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <Component Id="Test" Directory="INSTALLFOLDER">
         <File Source="$(var.ProjectDir)JsonObject.json">
-          <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == '[HiddenTest]')[\]]" Value='{ "Customer": "Id" }'/>
+          <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == '[HiddenTest]')[\]]" Value='{ "Name": "MyName", "Customer": "Id", "Customer1": "Id1", "Customer2": "Id2", "Customer3": "Id3", "Customer4": "Id4" }'/>
           <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'Contoso')[\]].Name" Value='Contoso "2" \backslashed\ &apos;Quoted&apos;' Formatting="string" />
+          <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'MyName')[\]].Customer1" Value='TrUE' Formatting='boolean'/>
+          <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'MyName')[\]].Customer2" Value='FALsE' Formatting='boolean'/>
+          <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'MyName')[\]].Customer3" Value='0' Formatting='boolean'/>
+          <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'MyName')[\]].Customer4" Value='[HiddenTest]' Formatting='boolean'/>
         </File>
-        <PanelSW:JsonJPath FilePath='[#JsonObject.json]' JPath="$.Manufacturers[\[]?(@.Name == '[HiddenTest]')[\]]" Value='{ "Customer": "Id" }'/>
+        <PanelSW:JsonJPath FilePath='[#JsonObject.json]' JPath="$.Manufacturers[\[]?(@.Name == '[HiddenTest]')[\]]" Value='{ "Customer": "Id", "Customer1": "Id1", "Customer2": "Id2", "Customer3": "Id3", "Customer4": "Id4" }'/>
       </Component>
     </Feature>
 

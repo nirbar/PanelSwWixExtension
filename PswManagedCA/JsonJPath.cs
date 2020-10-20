@@ -91,9 +91,10 @@ namespace PswManagedCA
                         ctlg.JPathObfuscated = session.Obfuscate(jpath);
                         ctlg.ValueObfuscated = session.Obfuscate(value);
                         ctlg.JPath = session.Format(jpath);
-
                         ctlg.Value = session.Format(value);
-                        if ((formatting != null) && Enum.IsDefined(typeof(JsonConvert), (int)formatting))
+                        bool isHidden = !ctlg.Value.Equals(ctlg.ValueObfuscated);
+
+                        if ((formatting != null) && Enum.IsDefined(typeof(JsonFormatting), (int)formatting))
                         {
                             JsonFormatting jsonFormat = (JsonFormatting)formatting;
                             switch (jsonFormat)
@@ -125,7 +126,10 @@ namespace PswManagedCA
                                     }
                                     break;
                             }
-
+                            if (!isHidden)
+                            {
+                                ctlg.ValueObfuscated = ctlg.Value;
+                            }
                         }
 
                         // Sanity checks
