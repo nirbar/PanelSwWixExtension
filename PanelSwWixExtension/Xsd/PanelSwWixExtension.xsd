@@ -164,6 +164,11 @@
           <xs:documentation><![CDATA[JSON object formatting. Defaults to 'raw']]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="ErrorHandling" use="optional" type="ErrorHandlingType" default="fail">
+        <xs:annotation>
+          <xs:documentation><![CDATA[On error fail, ignore, or prompt user to abort, retry or ignore. Defaults to 'fail']]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
 

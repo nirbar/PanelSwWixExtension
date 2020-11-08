@@ -63,6 +63,7 @@ PanelSwWixExtension uses error codes in Error table:
 - 27006: ExecOn error template for prompting user on console output parsing.
 - 27007: WebsiteConfig error template for prompting user on errors.
 - 27008: SqlSearch error template for prompting user on errors.
+- 27009: JsonJpath error template for prompting user on errors.
 
 ## Properties
 
@@ -130,5 +131,5 @@ After building a unit test project, you'll need to shutdown Visual Studio before
 This is due to the unfortunate habit of Visual Studio to hold the extension file in use.
 You may find it convenient to build unit test projects from a command prompt to workaround this limitation
 ~~~~~~~~~~~~
-MSBuild UnitTests\TaskScheulerUT\TaskScheulerUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
+MSBuild UnitTests\JsonJPathUT\JsonJPathUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
 ~~~~~~~~~~~~

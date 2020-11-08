@@ -616,6 +616,7 @@ namespace PanelSw.Wix.Extensions
             string filePath = null;
             string component_ = null;
             JsonFormatting jsonFormatting = JsonFormatting.Raw;
+            ErrorHandling promptOnError = ErrorHandling.fail;
 
             switch (parentElement.LocalName)
             {
@@ -662,6 +663,20 @@ namespace PanelSw.Wix.Extensions
                             }
                             break;
 
+                        case "ErrorHandling":
+                            {
+                                string a = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                                try
+                                {
+                                    promptOnError = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
+                                }
+                                catch
+                                {
+                                    Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                                }
+                            }
+                            break;
+
                         default:
                             Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                             break;
@@ -702,6 +717,7 @@ namespace PanelSw.Wix.Extensions
                 row[4] = jpath;
                 row[5] = value;
                 row[6] = (int)jsonFormatting;
+                row[7] = (int)promptOnError;
             }
         }
 

@@ -666,6 +666,7 @@
       <Custom Action="JsonJpathSched" After="DuplicateFiles" Overridable="yes"/>
     </InstallExecuteSequence>
     <UI>
+      <Error Id="27009">!(loc.JsonJpathFailure)</Error>
       <ProgressText Action="JsonJpathSched">!(loc.JsonJpath)</ProgressText>
       <ProgressText Action="JsonJpathExec">!(loc.JsonJpath)</ProgressText>
     </UI>

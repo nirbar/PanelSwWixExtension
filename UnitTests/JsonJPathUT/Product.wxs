@@ -17,8 +17,9 @@
           <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'MyName')[\]].Customer2" Value='FALsE' Formatting='boolean'/>
           <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'MyName')[\]].Customer3" Value='0' Formatting='boolean'/>
           <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'MyName')[\]].Customer4" Value='[HiddenTest]' Formatting='boolean'/>
+          <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'Missing')[\]].Customer4" Value='[HiddenTest]' Formatting='boolean' ErrorHandling='prompt'/>
         </File>
-        <PanelSW:JsonJPath FilePath='[#JsonObject.json]' JPath="$.Manufacturers[\[]?(@.Name == '[HiddenTest]')[\]]" Value='{ "Customer": "Id", "Customer1": "Id1", "Customer2": "Id2", "Customer3": "Id3", "Customer4": "Id4" }'/>
+        <PanelSW:JsonJPath FilePath='[#JsonObject.json]' JPath="$.Manufacturers[\[]?(@.Name == '[HiddenTest]')[\]]" Value='{ "Customer": "Id", "Customer1": "Id1", "Customer2": "Id2", "Customer3": "Id3", "Customer4": "Id4" }' ErrorHandling='ignore'/>
       </Component>
     </Feature>
 

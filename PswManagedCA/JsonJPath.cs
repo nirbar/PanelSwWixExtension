@@ -73,7 +73,7 @@ namespace PswManagedCA
 
             List<JsonJPathCatalog> catalogs = new List<JsonJPathCatalog>(); ;
 
-            using (View jsonView = session.Database.OpenView("SELECT `PSW_JsonJPath`.`File_`, `PSW_JsonJPath`.`Component_`, `PSW_JsonJPath`.`FilePath`, `PSW_JsonJPath`.`JPath`, `PSW_JsonJPath`.`Value`, `PSW_JsonJPath`.`Formatting` FROM `PSW_JsonJPath`"))
+            using (View jsonView = session.Database.OpenView("SELECT `PSW_JsonJPath`.`File_`, `PSW_JsonJPath`.`Component_`, `PSW_JsonJPath`.`FilePath`, `PSW_JsonJPath`.`JPath`, `PSW_JsonJPath`.`Value`, `PSW_JsonJPath`.`Formatting`, `PSW_JsonJPath`.`ErrorHandling` FROM `PSW_JsonJPath`"))
             {
                 jsonView.Execute(null);
 
@@ -88,6 +88,7 @@ namespace PswManagedCA
                         string jpath = rec[4] as string;
                         string value = rec[5] as string;
                         int? formatting = rec[6] as int?;
+                        int? errorHandling = rec[7] as int?;
                         ctlg.JPathObfuscated = session.Obfuscate(jpath);
                         ctlg.ValueObfuscated = session.Obfuscate(value);
                         ctlg.JPath = session.Format(jpath);
@@ -168,6 +169,10 @@ namespace PswManagedCA
                             session.Log("Did not find component");
                             return ActionResult.Failure;
                         }
+                        if (errorHandling != null)
+                        {
+                            ctlg.ErrorHandling = (Util.ErrorHandling)errorHandling;
+                        }
 
                         ComponentInfo ci = session.Components[component];
                         if (ci == null)
@@ -236,23 +241,21 @@ namespace PswManagedCA
                     executer.catalogs_.AddRange(ctlgs);
                 }
             }
-            executer.Execute(session);
-
-            return ActionResult.Success;
+            return executer.Execute(session);
         }
 
-        private void Execute(Session session)
+        private ActionResult Execute(Session session)
         {
             foreach (JsonJPathCatalog ctlg in catalogs_)
             {
+                LRetry:
                 try
                 {
                     JObject jo = JObject.Parse(File.ReadAllText(ctlg.FilePath));
                     JToken token = jo.SelectToken(ctlg.JPath, true);
                     if (token == null)
                     {
-                        session.LogUnformatted($"Did not find results for Jpath '{ctlg.JPathObfuscated}' in file '{ctlg.FilePath}'");
-                        continue;
+                        throw new Exception("JPath did not match any results");
                     }
 
                     token.Replace(JToken.Parse(ctlg.Value));
@@ -260,10 +263,24 @@ namespace PswManagedCA
                 }
                 catch (Exception ex)
                 {
-                    session.LogUnformatted($"Failed setting JsonJpath '{ctlg.JPathObfuscated}' to '{ctlg.ValueObfuscated}' in file '{ctlg.FilePath}': {ex.Message}");
-                    throw;
+                    session.LogUnformatted($"Failed setting JsonJpath '{ctlg.JPathObfuscated}' to '{ctlg.ValueObfuscated}' in file '{ctlg.FilePath}': {ex}");
+                    switch( session.HandleError(ctlg.ErrorHandling, 27009, ctlg.JPathObfuscated, ctlg.ValueObfuscated, ctlg.FilePath, ex.Message))
+                    {
+                        case MessageResult.Abort:
+                            session.Log($"Aborted on failure");
+                            return ActionResult.Failure;
+
+                        case MessageResult.Ignore:
+                            session.Log($"Ignored failure");
+                            continue;
+
+                        case MessageResult.Retry:
+                            session.Log($"User retried on failure");
+                            goto LRetry;
+                    }
                 }
             }
+            return ActionResult.Success;
         }
     }
 
@@ -279,5 +296,7 @@ namespace PswManagedCA
         public string ValueObfuscated { get; set; }
 
         public string Value { get; set; }
+
+        public ErrorHandling ErrorHandling { get; set; } = ErrorHandling.fail;
     }
 }
