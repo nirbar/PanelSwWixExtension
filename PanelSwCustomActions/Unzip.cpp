@@ -55,7 +55,7 @@ extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall)
 		BreakExitOnFailure(hr, "Failed to get zip file.");
 		hr = WcaGetRecordFormattedString(hRecord, 2, (LPWSTR*)folder);
 		BreakExitOnFailure(hr, "Failed to get folder.");
-		hr = WcaGetRecordFormattedInteger(hRecord, 3, &flags);
+		hr = WcaGetRecordInteger(hRecord, 3, &flags);
 		BreakExitOnFailure(hr, "Failed to get flags.");
 		hr = WcaGetRecordString(hRecord, 4, (LPWSTR*)condition);
 		BreakExitOnFailure(hr, "Failed to get condition.");
@@ -79,7 +79,7 @@ extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall)
 		ExitOnNull(!zip.IsNullOrEmpty(), hr, E_INVALIDARG, "ZIP file path is empty");
 		ExitOnNull(!folder.IsNullOrEmpty(), hr, E_INVALIDARG, "ZIP target path is empty");
 
-		hr = cad.AddUnzip(zip, folder, (UnzipDetails_OverwriteMode)flags);
+		hr = cad.AddUnzip(zip, folder, (UnzipDetails_UnzipFlags)flags);
 		BreakExitOnFailure(hr, "Failed scheduling zip file extraction");
 	}
 
@@ -94,7 +94,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-HRESULT CUnzip::AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, UnzipDetails_OverwriteMode overwriteMode)
+HRESULT CUnzip::AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, UnzipDetails_UnzipFlags flags)
 {
 	HRESULT hr = S_OK;
 	Command *pCmd = nullptr;
@@ -110,7 +110,7 @@ HRESULT CUnzip::AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, UnzipDetails_Ove
 
 	pDetails->set_zipfile(zipFile, WSTR_BYTE_SIZE(zipFile));
 	pDetails->set_targetfolder(targetFolder, WSTR_BYTE_SIZE(targetFolder));
-	pDetails->set_overwritemode(overwriteMode);
+	pDetails->set_flags(flags);
 
 	pAny = pCmd->mutable_details();
 	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
@@ -175,7 +175,7 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 
 		if (::PathFileExistsA(pathA.c_str()))
 		{
-			hr = ShouldOverwriteFile(pathA.c_str(), details.overwritemode());
+			hr = ShouldOverwriteFile(pathA.c_str(), details.flags());
 			BreakExitOnFailure(hr, "Failed determining whether or not to overwrite file '%s'", pathA.c_str());
 
 			if (hr == S_FALSE)
@@ -204,6 +204,15 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 		if (it->second.hasExtraField())
 		{
 			SetFileTimes(pathA.c_str(), it->second.getExtraField());
+		}
+	}
+
+	if ((details.flags() & UnzipDetails_UnzipFlags::UnzipDetails_UnzipFlags_delete_) == UnzipDetails_UnzipFlags::UnzipDetails_UnzipFlags_delete_)
+	{
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Deleting ZIP archive '%ls'", zipFileW);
+		if (::DeleteFileW(zipFileW))
+		{
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed deleting ZIP archive '%ls'. Error %i", zipFileW, ::GetLastError());
 		}
 	}
 
@@ -336,7 +345,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CUnzip::ShouldOverwriteFile(LPCSTR szFile, UnzipDetails_OverwriteMode overwriteMode)
+HRESULT CUnzip::ShouldOverwriteFile(LPCSTR szFile, UnzipDetails_UnzipFlags flags)
 {
 	HRESULT hr = S_OK;
 	bool bRes = true;
@@ -346,20 +355,20 @@ HRESULT CUnzip::ShouldOverwriteFile(LPCSTR szFile, UnzipDetails_OverwriteMode ov
 	ULARGE_INTEGER ulCreate;
 	ULARGE_INTEGER ulModify;
 
-	switch (overwriteMode)
+	switch (flags & 0x3)
 	{
-	case UnzipDetails::OverwriteMode::UnzipDetails_OverwriteMode_never:
+	case UnzipDetails::UnzipFlags::UnzipDetails_UnzipFlags_never:
 	default:
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will not overwrite '%s' due to NeverOverwrite flag", szFile);
 		hr = S_FALSE;
 		break;
 
-	case UnzipDetails::OverwriteMode::UnzipDetails_OverwriteMode_always:
+	case UnzipDetails::UnzipFlags::UnzipDetails_UnzipFlags_always:
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will overwrite '%s' due to AlwaysOverwrite flag", szFile);
 		hr = S_OK;
 		break;
 
-	case UnzipDetails::OverwriteMode::UnzipDetails_OverwriteMode_unmodified:
+	case UnzipDetails::UnzipFlags::UnzipDetails_UnzipFlags_unmodified:
 		hFile = ::CreateFileA(szFile, GENERIC_READ, FILE_SHARE_WRITE | FILE_SHARE_READ | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 		BreakExitOnNullWithLastError(((hFile != NULL) && (hFile != INVALID_HANDLE_VALUE)), hr, "Failed opening file '%s' to read times", szFile);
 

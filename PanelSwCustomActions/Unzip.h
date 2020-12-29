@@ -11,13 +11,13 @@ public:
 
 	CUnzip() : CDeferredActionBase("Unzip") { }
 	
-	HRESULT AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, ::com::panelsw::ca::UnzipDetails_OverwriteMode overwriteMode);
+	HRESULT AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, ::com::panelsw::ca::UnzipDetails_UnzipFlags flags);
 
 protected:
 	HRESULT DeferredExecute(const ::std::string& command) override;
 
 private:
-	HRESULT ShouldOverwriteFile(LPCSTR szFile, ::com::panelsw::ca::UnzipDetails_OverwriteMode overwriteMode);
+	HRESULT ShouldOverwriteFile(LPCSTR szFile, ::com::panelsw::ca::UnzipDetails_UnzipFlags flags);
 
 	HRESULT SetFileTimes(LPCSTR szFilePath, const std::string &extradField);
 

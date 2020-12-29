@@ -806,6 +806,11 @@
               <xs:documentation><![CDATA[Folder to extract the archive into.]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="DeleteZip" type="wix:YesNoType" use="optional" default="no">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Whether or not to delete the ZIP archive when extraction has ended successfully. Defaults to no.]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
           <xs:attribute name="Overwrite" type="wix:YesNoDefaultType" use="optional">
             <xs:annotation>
               <xs:documentation><![CDATA[Whether or not to overwrite existing files. Use of this attribute is deprecated. Instead, use OverwriteMode. Defaults to OverwriteMode='Unmodified']]></xs:documentation>

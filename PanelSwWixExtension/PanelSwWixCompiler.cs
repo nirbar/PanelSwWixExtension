@@ -4272,12 +4272,17 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-
-        enum OverwriteMode
+        [Flags]
+        enum UnzipFlags
         {
+            // Overwrite mode
             Never = 0,
-            Always = 1,
-            Unmodified = 2,
+            Always = 0x1,
+            Unmodified = 0x2,
+            OverwriteMask = 0x3,
+
+            // Delete ZIP after extract
+            Delete = 0x10
         };
 
         private void ParseUnzip(XmlNode node)
@@ -4287,7 +4292,7 @@ namespace PanelSw.Wix.Extensions
             string zipFile = null;
             string dstDir = null;
             string condition = null;
-            OverwriteMode overwrite = OverwriteMode.Unmodified;
+            UnzipFlags flags = UnzipFlags.Unmodified;
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -4304,17 +4309,29 @@ namespace PanelSw.Wix.Extensions
                         case "TargetFolder":
                             dstDir = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
+                        case "DeleteZip":
+                            {
+                                YesNoType aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                                if (aye == YesNoType.Yes)
+                                {
+                                    flags |= UnzipFlags.Delete;
+                                }
+                            }
+                            break;
                         case "Overwrite":
-                            YesNoDefaultType aye = Core.GetAttributeYesNoDefaultValue(sourceLineNumbers, attrib);
-                            overwrite = ((aye == YesNoDefaultType.Yes) ? OverwriteMode.Always
-                                : (aye == YesNoDefaultType.No) ? OverwriteMode.Never
-                                : OverwriteMode.Unmodified);
+                            {
+                                YesNoDefaultType aye = Core.GetAttributeYesNoDefaultValue(sourceLineNumbers, attrib);
+                                flags = ((aye == YesNoDefaultType.Yes) ? ((flags & ~UnzipFlags.OverwriteMask) | UnzipFlags.Always)
+                                    : (aye == YesNoDefaultType.No) ? (flags & ~UnzipFlags.OverwriteMask)
+                                    : ((flags & ~UnzipFlags.OverwriteMask) | UnzipFlags.Unmodified));
+                            }
                             break;
                         case "OverwriteMode":
                             string b = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             try
                             {
-                                overwrite = (OverwriteMode)Enum.Parse(typeof(OverwriteMode), b);
+                                UnzipFlags f = (UnzipFlags)Enum.Parse(typeof(UnzipFlags), b);
+                                flags = ((flags & ~UnzipFlags.OverwriteMask) | f);
                             }
                             catch
                             {
@@ -4374,7 +4391,7 @@ namespace PanelSw.Wix.Extensions
                 row[0] = id;
                 row[1] = zipFile;
                 row[2] = dstDir;
-                row[3] = (int)overwrite;
+                row[3] = (int)flags;
                 row[4] = condition;
             }
         }

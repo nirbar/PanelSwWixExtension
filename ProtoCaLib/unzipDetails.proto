@@ -4,13 +4,15 @@ option optimize_for = LITE_RUNTIME;
 
 message UnzipDetails{
 
-	enum OverwriteMode {
+	enum UnzipFlags {
 		never = 0;
 		always = 1;
 		unmodified = 2;
+
+		delete = 16;
 	}
 
     bytes zipFile = 1;
     bytes targetFolder = 2;
-	OverwriteMode overwriteMode = 3;
+	UnzipFlags flags = 3;
 }
