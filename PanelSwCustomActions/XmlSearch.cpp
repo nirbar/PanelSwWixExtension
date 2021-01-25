@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "..\CaCommon\WixString.h"
+#include <fileutil.h>
 #include <errno.h>
 #include <objbase.h>
 #include <msxml6.h>
@@ -127,7 +128,7 @@ static HRESULT QueryXml(LPCWSTR pFile, LPCWSTR pExpression, LPCWSTR szLanguage, 
 	BreakExitOnNull(pExpression, hr, E_INVALIDARG, "pExpression is null");
 	BreakExitOnNull(pProperty, hr, E_INVALIDARG, "pProperty is null");
 
-	if (!::PathFileExists(pFile))
+	if (!FileExistsEx(pFile, nullptr))
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File doesn't exist: '%ls'", pFile);
 		ExitFunction();

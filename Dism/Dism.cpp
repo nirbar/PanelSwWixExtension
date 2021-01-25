@@ -1,4 +1,5 @@
 #include "stdafx.h"
+#include <fileutil.h>
 #include <wcautil.h>
 #include <strutil.h>
 #include <memutil.h>
@@ -236,7 +237,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 		{
 		LRetryPkg:
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Adding package '%ls'", pStates[i].szPackage);
-			bRes = ::PathFileExists(pStates[i].szPackage);
+			bRes = FileExistsEx(pStates[i].szPackage, nullptr);
 			ExitOnNullWithLastError(bRes, hr, "DISM package file not found: '%ls'", pStates[i].szPackage);
 
 			hr = ::DismAddPackage(hSession, pStates[i].szPackage, FALSE, FALSE, hCancel_, _pfProgressCallback, &pStates[i]);

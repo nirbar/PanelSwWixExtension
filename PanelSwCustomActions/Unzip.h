@@ -17,7 +17,7 @@ protected:
 	HRESULT DeferredExecute(const ::std::string& command) override;
 
 private:
-	HRESULT ShouldOverwriteFile(LPCSTR szFile, ::com::panelsw::ca::UnzipDetails_UnzipFlags flags);
+	HRESULT ShouldOverwriteFile(LPCWSTR szFile, ::com::panelsw::ca::UnzipDetails_UnzipFlags flags);
 
 	HRESULT SetFileTimes(LPCSTR szFilePath, const std::string &extradField);
 

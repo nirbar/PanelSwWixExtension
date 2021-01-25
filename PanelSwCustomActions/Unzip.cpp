@@ -6,6 +6,7 @@
 #include "..\poco\Foundation\include\Poco\Delegate.h"
 #include "..\poco\Foundation\include\Poco\StreamCopier.h"
 #include "unzipDetails.pb.h"
+#include <fileutil.h>
 #include <Windows.h>
 #include <fstream>
 #include <shlwapi.h>
@@ -133,6 +134,7 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 	std::string zipFileA;
 	std::string targetFolderA;
 	std::istream *zipFileStream = nullptr;
+	LPWSTR szDstFile = nullptr;
 
 	bRes = details.ParseFromString(command);
 	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking UnzipDetails");
@@ -157,6 +159,9 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 		path.append(file);
 		std::string pathA = path.toString(Poco::Path::Style::PATH_WINDOWS).c_str();
 
+		hr = StrAllocStringAnsi(&szDstFile, pathA.c_str(), 0, CP_UTF8);
+		ExitOnFailure(hr, "Failed converting ANSI string to wide")
+
 		// Create missing folders
 		while (!::PathIsDirectoryA(path.parent().toString(Poco::Path::Style::PATH_WINDOWS).c_str()))
 		{
@@ -173,9 +178,9 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 			BreakExitOnNullWithLastError((bRes || (::GetLastError() == ERROR_ALREADY_EXISTS)), hr, "Failed creating folder '%s'", dirA.c_str());
 		}
 
-		if (::PathFileExistsA(pathA.c_str()))
+		if (FileExistsEx(szDstFile, nullptr))
 		{
-			hr = ShouldOverwriteFile(pathA.c_str(), details.flags());
+			hr = ShouldOverwriteFile(szDstFile, details.flags());
 			BreakExitOnFailure(hr, "Failed determining whether or not to overwrite file '%s'", pathA.c_str());
 
 			if (hr == S_FALSE)
@@ -205,6 +210,7 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 		{
 			SetFileTimes(pathA.c_str(), it->second.getExtraField());
 		}
+		ReleaseNullStr(szDstFile);
 	}
 
 	if ((details.flags() & UnzipDetails_UnzipFlags::UnzipDetails_UnzipFlags_delete_) == UnzipDetails_UnzipFlags::UnzipDetails_UnzipFlags_delete_)
@@ -225,6 +231,7 @@ LExit:
 	{
 		delete zipFileStream;
 	}
+	ReleaseStr(szDstFile);
 	return hr;
 }
 
@@ -345,7 +352,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CUnzip::ShouldOverwriteFile(LPCSTR szFile, UnzipDetails_UnzipFlags flags)
+HRESULT CUnzip::ShouldOverwriteFile(LPCWSTR szFile, UnzipDetails_UnzipFlags flags)
 {
 	HRESULT hr = S_OK;
 	bool bRes = true;
@@ -369,7 +376,7 @@ HRESULT CUnzip::ShouldOverwriteFile(LPCSTR szFile, UnzipDetails_UnzipFlags flags
 		break;
 
 	case UnzipDetails::UnzipFlags::UnzipDetails_UnzipFlags_unmodified:
-		hFile = ::CreateFileA(szFile, GENERIC_READ, FILE_SHARE_WRITE | FILE_SHARE_READ | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+		hFile = ::CreateFileW(szFile, GENERIC_READ, FILE_SHARE_WRITE | FILE_SHARE_READ | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 		BreakExitOnNullWithLastError(((hFile != NULL) && (hFile != INVALID_HANDLE_VALUE)), hr, "Failed opening file '%s' to read times", szFile);
 
 		bRes = ::GetFileTime(hFile, &ftCreate, nullptr, &ftModify);
