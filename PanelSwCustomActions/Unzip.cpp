@@ -213,13 +213,16 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 		ReleaseNullStr(szDstFile);
 	}
 
+	delete archive;
+	archive = nullptr;
+
+	delete zipFileStream;
+	zipFileStream = nullptr;
+
 	if ((details.flags() & UnzipDetails_UnzipFlags::UnzipDetails_UnzipFlags_delete_) == UnzipDetails_UnzipFlags::UnzipDetails_UnzipFlags_delete_)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Deleting ZIP archive '%ls'", zipFileW);
-		if (::DeleteFileW(zipFileW))
-		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed deleting ZIP archive '%ls'. Error %i", zipFileW, ::GetLastError());
-		}
+		FileEnsureDelete(zipFileW);// Ignoring result
 	}
 
 LExit:
