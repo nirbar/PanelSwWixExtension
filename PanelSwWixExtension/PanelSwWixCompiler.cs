@@ -162,6 +162,10 @@ namespace PanelSw.Wix.Extensions
                             ParseRegularExpression(element);
                             break;
 
+                        case "ToLowerCase":
+                            ParseToLowerCase(element);
+                            break;
+
                         default:
                             Core.UnexpectedElement(parentElement, element);
                             break;
@@ -490,6 +494,52 @@ namespace PanelSw.Wix.Extensions
             row[4] = start ? 1 : 0;
             row[5] = (autoStart == YesNoDefaultType.Yes) ? 1 : (autoStart == YesNoDefaultType.No) ? 0 : -1;
             row[6] = (int)promptOnError;
+        }
+
+        private void ParseToLowerCase(XmlNode node)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string property = null;
+
+            if (node.ParentNode.LocalName != "Property")
+            {
+                Core.UnexpectedElement(node.ParentNode, node);
+            }
+            property = node.ParentNode.Attributes["Id"].Value;
+            if (!property.ToUpper().Equals(property))
+            {
+                Core.OnMessage(WixErrors.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
+            }
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
+                {
+                    Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            if (string.IsNullOrEmpty(property))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.LocalName, "Id"));
+            }
+
+            // find unexpected child elements
+            foreach (XmlNode child in node.ChildNodes)
+            {
+                if (child.NamespaceURI == schema.TargetNamespace)
+                {
+                    Core.UnexpectedElement(node, child);
+                }
+            }
+
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "PSW_ToLowerCase");
+
+            if (!Core.EncounteredError)
+            {
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_ToLowerCase");
+                row[0] = property;
+            }
         }
 
         private void ParseJsonJpathSearchElement(XmlNode node)

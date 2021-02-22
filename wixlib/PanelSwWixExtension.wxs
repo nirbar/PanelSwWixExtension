@@ -727,4 +727,19 @@
       <ProgressText Action="PSW_PathSearch">!(loc.PSW_PathSearch)</ProgressText>
     </UI>
   </Fragment>
+
+  <!-- ToLowerCase -->
+  <Fragment>
+    <CustomAction Id="PSW_ToLowerCase" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="ToLowerCase" Execute="firstSequence" Return="check" />
+    <InstallUISequence>
+      <Custom Action="PSW_ToLowerCase" After="AppSearch" Overridable="yes" />
+    </InstallUISequence>
+    <InstallExecuteSequence>
+      <Custom Action="PSW_ToLowerCase" After="AppSearch" Overridable="yes" />
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="PSW_ToLowerCase">!(loc.PSW_ToLowerCase)</ProgressText>
+    </UI>
+  </Fragment>
+
 </Wix>

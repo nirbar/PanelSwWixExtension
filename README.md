@@ -20,6 +20,7 @@ PanelSwWixExtension from the creator of [JetBA](https://github.com/nirbar/JetBA-
   - *RegularExpression*: Execute a Regular Expression to replace or find matches in property values and in file contents.
   - *MsiSqlQuery*: Execute a MSI-SQL query on the MSI database.
   - *CreateSelfSignCertificate*: Create a self-sign certificate that can then be installed by WixIisExtension.
+  - *ToLowerCase*: Convert property value to lowercase.
 - Deferred Actions:
   - *XslTransform*: Apply a XSL transform on an installed XML file
   - *WebsiteConfig*: currently, can only stop a website
@@ -131,5 +132,5 @@ After building a unit test project, you'll need to shutdown Visual Studio before
 This is due to the unfortunate habit of Visual Studio to hold the extension file in use.
 You may find it convenient to build unit test projects from a command prompt to workaround this limitation
 ~~~~~~~~~~~~
-MSBuild UnitTests\JsonJPathUT\JsonJPathUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
+MSBuild UnitTests\StringUT\StringUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
 ~~~~~~~~~~~~

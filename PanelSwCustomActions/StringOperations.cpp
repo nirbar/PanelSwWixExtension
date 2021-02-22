@@ -169,3 +169,50 @@ LExit:
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
 }
+
+extern "C" UINT __stdcall ToLowerCase(MSIHANDLE hInstall)
+{
+	HRESULT hr = S_OK;
+	UINT er = ERROR_SUCCESS;
+	PMSIHANDLE hView;
+	PMSIHANDLE hRecord;
+	bool bIgnoreErrors = false;
+
+	hr = WcaInitialize(hInstall, __FUNCTION__);
+	BreakExitOnFailure(hr, "Failed to initialize");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
+
+	// Ensure table PSW_XmlSearch exists.
+	hr = WcaTableExists(L"PSW_ToLowerCase");
+	BreakExitOnFailure(hr, "Table does not exist 'PSW_ToLowerCase'. Have you authored 'PanelSw:ToLowerCase' entries in WiX code?");
+
+	// Execute view
+	hr = WcaOpenExecuteView(L"SELECT `Property_` FROM `PSW_ToLowerCase`", &hView);
+	BreakExitOnFailure(hr, "Failed to execute SQL query on 'PSW_ToLowerCase'.");
+
+	// Iterate records
+	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
+	{
+		BreakExitOnFailure(hr, "Failed to fetch record.");
+
+		// Get fields
+		CWixString szProperty, szValue;
+
+		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szProperty);
+		BreakExitOnFailure(hr, "Failed to get Property_.");
+
+		hr = WcaGetProperty(szProperty, (LPWSTR*)szValue);
+		BreakExitOnFailure(hr, "Failed to get property '%ls' value.", (LPCWSTR)szProperty);
+
+		StrStringToLower(szValue);
+
+		hr = WcaSetProperty(szProperty, szValue);
+		BreakExitOnFailure(hr, "Failed setting property");
+	}
+	hr = ERROR_SUCCESS;
+
+LExit:
+
+	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
+	return WcaFinalize(er);
+}

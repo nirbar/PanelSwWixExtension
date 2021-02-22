@@ -44,3 +44,4 @@ EXPORTS
 	VersionCompare
 	PathSearch
 	XslTransform
+	ToLowerCase

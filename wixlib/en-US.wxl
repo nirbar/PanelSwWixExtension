@@ -46,6 +46,7 @@
   <String Overridable="yes" Id="PSW_VersionCompare"><![CDATA[Comparing versions]]></String>
   <String Overridable="yes" Id="PSW_PathSearch"><![CDATA[Searching file on PATH]]></String>
   <String Overridable="yes" Id="PSW_XslTransform"><![CDATA[Applying XSL transforms]]></String>
+  <String Overridable="yes" Id="PSW_ToLowerCase"><![CDATA[Converting to lowercase]]></String>
   <String Overridable="yes" Id="JsonJpathFailure"><![CDATA[Failed setting JsonJpath '[2]' to '[3]' in file '[4]'.
 [5]]]></String>
 </WixLocalization>
