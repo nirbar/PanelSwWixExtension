@@ -63,10 +63,10 @@ public:
 		if (dwSize > Capacity())
 		{
 			hr = Release();
-			BreakExitOnFailure(hr, "Failed to free memory");
+			ExitOnFailure(hr, "Failed to free memory");
 
 			hr = StrAlloc(&_pS, dwSize);
-			BreakExitOnFailure(hr, "Failed to allocate memory");
+			ExitOnFailure(hr, "Failed to allocate memory");
 
 			_dwCapacity = dwSize;
 		}
@@ -85,7 +85,6 @@ public:
 			hr = Release();
 		}
 
-	LExit:
 		return hr;
 	}
 
@@ -96,7 +95,7 @@ public:
 		if (_pS != NULL)
 		{
 			hr = StrFree(_pS);
-			BreakExitOnFailure(hr, "Failed to free memory");
+			ExitOnFailure(hr, "Failed to free memory");
 
 			_pS = NULL;
 			_dwCapacity = 0;
@@ -115,7 +114,7 @@ public:
 		if ((pS == NULL) || (*pS == NULL))
 		{
 			hr = Release();
-			BreakExitOnFailure(hr, "Failed to release string");
+			ExitOnFailure(hr, "Failed to release string");
 			ExitFunction();
 		}
 
@@ -126,11 +125,11 @@ public:
 		}
 
 		hr = Allocate(dwSize + 1);
-		BreakExitOnFailure(hr, "Failed to allocate memory");
+		ExitOnFailure(hr, "Failed to allocate memory");
 
 		// Copying 
 		err = ::wcsncpy_s(_pS, _dwCapacity, pS, dwSize);
-		BreakExitOnWin32Error(hr, err, "Failed to copy string");
+		ExitOnWin32Error(hr, err, "Failed to copy string");
 
 	LExit:
 		return hr;
@@ -141,7 +140,7 @@ public:
 		HRESULT hr = S_OK;
 
 		hr = StrReplaceStringAll(&_pS, from, to);
-		BreakExitOnFailure(hr, "Failed to replace in string");
+		ExitOnFailure(hr, "Failed to replace in string");
 
 	LExit:
 		return hr;
@@ -162,7 +161,7 @@ public:
 
 		++sSize;
 		hr = Allocate(sSize);
-		BreakExitOnFailure(hr, "Failed allocating memory");
+		ExitOnFailure(hr, "Failed allocating memory");
 
 		vswprintf_s(_pS, Capacity(), stFormat, va);
 

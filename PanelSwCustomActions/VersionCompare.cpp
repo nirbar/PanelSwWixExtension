@@ -11,32 +11,32 @@ extern "C" UINT __stdcall VersionCompare(MSIHANDLE hInstall)
 	bool bIgnoreErrors = false;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_XmlSearch exists.
 	hr = WcaTableExists(L"PSW_VersionCompare");
-	BreakExitOnNull((hr == S_OK), hr, E_INVALIDSTATE, "Table does not exist 'PSW_VersionCompare'. Have you authored 'PanelSw:VersionCompare' entries in WiX code?");
+	ExitOnNull((hr == S_OK), hr, E_INVALIDSTATE, "Table does not exist 'PSW_VersionCompare'. Have you authored 'PanelSw:VersionCompare' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `Property_`, `Version1`, `Version2` FROM `PSW_VersionCompare`", &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query on 'PSW_VersionCompare'.");
+	ExitOnFailure(hr, "Failed to execute SQL query on 'PSW_VersionCompare'.");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
-		BreakExitOnFailure(hr, "Failed to fetch record.");
+		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
 		CWixString ver1, ver2, property;
 		ULARGE_INTEGER ullVer1, ullVer2;
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)property);
-		BreakExitOnFailure(hr, "Failed to get Property_.");
+		ExitOnFailure(hr, "Failed to get Property_.");
 		hr = WcaGetRecordFormattedString(hRecord, 2, (LPWSTR*)ver1);
-		BreakExitOnFailure(hr, "Failed to get Version1.");
+		ExitOnFailure(hr, "Failed to get Version1.");
 		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)ver2);
-		BreakExitOnFailure(hr, "Failed to get Version2.");
+		ExitOnFailure(hr, "Failed to get Version2.");
 
 		if (FAILED(FileVersionFromString(ver1, &ullVer1.HighPart, &ullVer1.LowPart)) || FAILED(FileVersionFromString(ver2, &ullVer2.HighPart, &ullVer2.LowPart)))
 		{
@@ -56,7 +56,7 @@ extern "C" UINT __stdcall VersionCompare(MSIHANDLE hInstall)
 			, (LPCWSTR)property
 		);
 		hr = WcaSetIntProperty(property, (ullVer1.QuadPart > ullVer2.QuadPart) ? 1 : (ullVer1.QuadPart < ullVer2.QuadPart) ? -1 : 0);
-		BreakExitOnFailure(hr, "Failed setting property");
+		ExitOnFailure(hr, "Failed setting property");
 	}
 
 	hr = ERROR_SUCCESS;

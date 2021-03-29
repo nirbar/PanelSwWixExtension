@@ -21,21 +21,21 @@ extern "C" UINT __stdcall TaskScheduler(MSIHANDLE hInstall)
 	CTaskScheduler oRollback;
 	CFileOperations oCommit;
 
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_FileRegex exists.
 	hr = WcaTableExists(L"PSW_TaskScheduler");
-	BreakExitOnFailure(hr, "Table does not exist 'PSW_TaskScheduler'. Have you authored 'PanelSw:TaskScheduler' entries in WiX code?");
+	ExitOnFailure(hr, "Table does not exist 'PSW_TaskScheduler'. Have you authored 'PanelSw:TaskScheduler' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `TaskName`, `Component_`, `TaskXml`, `User`, `Password` FROM `PSW_TaskScheduler`", &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query");
+	ExitOnFailure(hr, "Failed to execute SQL query");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
-		BreakExitOnFailure(hr, "Failed to fetch record.");
+		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
 		CWixString szTaskName, szComponent, szTaskXml, szUser, szPassword;
@@ -44,15 +44,15 @@ extern "C" UINT __stdcall TaskScheduler(MSIHANDLE hInstall)
 		int nIgnoreCase = 0;
 
 		hr = WcaGetRecordFormattedString(hRecord, 1, (LPWSTR*)szTaskName);
-		BreakExitOnFailure(hr, "Failed to get TaskName.");
+		ExitOnFailure(hr, "Failed to get TaskName.");
 		hr = WcaGetRecordString(hRecord, 2, (LPWSTR*)szComponent);
-		BreakExitOnFailure(hr, "Failed to get Component.");
+		ExitOnFailure(hr, "Failed to get Component.");
 		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)szTaskXml);
-		BreakExitOnFailure(hr, "Failed to get TaskXml.");
+		ExitOnFailure(hr, "Failed to get TaskXml.");
 		hr = WcaGetRecordFormattedString(hRecord, 4, (LPWSTR*)szUser);
-		BreakExitOnFailure(hr, "Failed to get User.");
+		ExitOnFailure(hr, "Failed to get User.");
 		hr = WcaGetRecordFormattedString(hRecord, 5, (LPWSTR*)szPassword);
-		BreakExitOnFailure(hr, "Failed to get Password.");
+		ExitOnFailure(hr, "Failed to get Password.");
 
 		// Test condition
 		compAction = WcaGetComponentToDo(szComponent);
@@ -62,17 +62,17 @@ extern "C" UINT __stdcall TaskScheduler(MSIHANDLE hInstall)
 		case WCA_TODO::WCA_TODO_REINSTALL:
 			WcaLog(LOGMSG_STANDARD, "Will create task '%ls'.", (LPCWSTR)szTaskName);
 			hr = oDeferred.AddRollbackTask(szTaskName, &oRollback, &oCommit);
-			BreakExitOnFailure(hr, "Failed scheduling rollback of task '%ls'", (LPCWSTR)szTaskName);
+			ExitOnFailure(hr, "Failed scheduling rollback of task '%ls'", (LPCWSTR)szTaskName);
 			hr = oDeferred.AddCreateTask(szTaskName, szTaskXml, szUser, szPassword);
-			BreakExitOnFailure(hr, "Failed scheduling creation of task '%ls'", (LPCWSTR)szTaskName);
+			ExitOnFailure(hr, "Failed scheduling creation of task '%ls'", (LPCWSTR)szTaskName);
 			break;
 
 		case WCA_TODO::WCA_TODO_UNINSTALL:
 			WcaLog(LOGMSG_STANDARD, "Will delete task '%ls'.", (LPCWSTR)szTaskName);
 			hr = oDeferred.AddRollbackTask(szTaskName, &oRollback, &oCommit);
-			BreakExitOnFailure(hr, "Failed scheduling rollback of task '%ls'", (LPCWSTR)szTaskName);
+			ExitOnFailure(hr, "Failed scheduling rollback of task '%ls'", (LPCWSTR)szTaskName);
 			hr = oDeferred.AddRemoveTask(szTaskName);
-			BreakExitOnFailure(hr, "Failed scheduling removal of task '%ls'", (LPCWSTR)szTaskName);
+			ExitOnFailure(hr, "Failed scheduling removal of task '%ls'", (LPCWSTR)szTaskName);
 			break;
 
 		case WCA_TODO::WCA_TODO_UNKNOWN:
@@ -83,23 +83,23 @@ extern "C" UINT __stdcall TaskScheduler(MSIHANDLE hInstall)
 
 	ReleaseNullStr(szCustomActionData);
 	hr = oCommit.GetCustomActionData(&szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting custom action data for commit action.");
+	ExitOnFailure(hr, "Failed getting custom action data for commit action.");
 	hr = WcaDoDeferredAction(L"TaskScheduler_commit", szCustomActionData, oCommit.GetCost());
-	BreakExitOnFailure(hr, "Failed scheduling commit action.");
+	ExitOnFailure(hr, "Failed scheduling commit action.");
 
 	// Rollback deletes same files as commit does (after importing tasks).
 	hr = oCommit.Prepend(&oRollback);
-	BreakExitOnFailure(hr, "Failed pre-pending custom action data for deferred action.");
+	ExitOnFailure(hr, "Failed pre-pending custom action data for deferred action.");
 	hr = oCommit.GetCustomActionData(&szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting custom action data for rollback action.");
+	ExitOnFailure(hr, "Failed getting custom action data for rollback action.");
 	hr = WcaDoDeferredAction(L"TaskScheduler_rollback", szCustomActionData, oCommit.GetCost());
-	BreakExitOnFailure(hr, "Failed scheduling rollback action.");
+	ExitOnFailure(hr, "Failed scheduling rollback action.");
 
 	ReleaseNullStr(szCustomActionData);
 	hr = oDeferred.GetCustomActionData(&szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
+	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
 	hr = WcaDoDeferredAction(L"TaskScheduler_deferred", szCustomActionData, oDeferred.GetCost());
-	BreakExitOnFailure(hr, "Failed scheduling deferred action.");
+	ExitOnFailure(hr, "Failed scheduling deferred action.");
 
 LExit:
 	ReleaseStr(szCustomActionData);
@@ -120,14 +120,14 @@ HRESULT CTaskScheduler::AddCreateTask(LPCWSTR szTaskName, LPCWSTR szTaskXml, LPC
 	if ((!szUser || !*szUser) && (szPassword && *szPassword))
 	{
 		hr = E_INVALIDARG;
-		BreakExitOnFailure(hr, "Password specified without user");
+		ExitOnFailure(hr, "Password specified without user");
 	}
 
 	hr = AddCommand("CTaskScheduler", &pCmd);
-	BreakExitOnFailure(hr, "Failed to add command");
+	ExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new TaskSchedulerDetails();
-	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
+	ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
 	pDetails->set_name(szTaskName, WSTR_BYTE_SIZE(szTaskName));
 	pDetails->set_taskxml(szTaskXml, WSTR_BYTE_SIZE(szTaskXml));
@@ -142,10 +142,10 @@ HRESULT CTaskScheduler::AddCreateTask(LPCWSTR szTaskName, LPCWSTR szTaskXml, LPC
 	}
 
 	pAny = pCmd->mutable_details();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
 	bRes = pDetails->SerializeToString(pAny);
-	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
+	ExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
@@ -160,19 +160,19 @@ HRESULT CTaskScheduler::AddRemoveTask(LPCWSTR szTaskName)
 	bool bRes = true;
 
 	hr = AddCommand("CTaskScheduler", &pCmd);
-	BreakExitOnFailure(hr, "Failed to add command");
+	ExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new TaskSchedulerDetails();
-	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
+	ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
 	pDetails->set_name(szTaskName, WSTR_BYTE_SIZE(szTaskName));
 	pDetails->set_action(TaskSchedulerDetails_Action::TaskSchedulerDetails_Action_Delete);
 
 	pAny = pCmd->mutable_details();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
 	bRes = pDetails->SerializeToString(pAny);
-	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
+	ExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
@@ -183,14 +183,14 @@ HRESULT CTaskScheduler::AddRollbackTask(LPCWSTR szTaskName, CTaskScheduler* pRol
 	HRESULT hr = S_OK;
 	CComPtr<IRegisteredTask> pTask;
 
-	BreakExitOnNull(pRootFolder_.p, hr, E_FAIL, "Task root folder not set");
+	ExitOnNull(pRootFolder_.p, hr, E_FAIL, "Task root folder not set");
 
 	hr = pRootFolder_->GetTask(BSTR(szTaskName), &pTask);
 	// New task ==> rollback will delete it.
 	if ((hr == E_FILENOTFOUND) || (hr == E_PATHNOTFOUND))
 	{
 		hr = pRollback->AddRemoveTask(szTaskName);
-		BreakExitOnFailure(hr, "Failed scheduling removal of task '%ls' on rollback", szTaskName);
+		ExitOnFailure(hr, "Failed scheduling removal of task '%ls' on rollback", szTaskName);
 		ExitFunction();
 	}
 
@@ -198,13 +198,13 @@ HRESULT CTaskScheduler::AddRollbackTask(LPCWSTR szTaskName, CTaskScheduler* pRol
 	if (SUCCEEDED(hr))
 	{
 		CComBSTR xml;
-		BreakExitOnNull(pTask, hr, E_FAIL, "Failed getting task '%ls'", szTaskName);
+		ExitOnNull(pTask, hr, E_FAIL, "Failed getting task '%ls'", szTaskName);
 
 		hr = pTask->get_Xml(&xml);
-		BreakExitOnFailure(hr, "Failed getting existing task '%ls' XML definition", szTaskName);
+		ExitOnFailure(hr, "Failed getting existing task '%ls' XML definition", szTaskName);
 
 		hr = pRollback->AddCreateTask(szTaskName, (LPWSTR)xml, nullptr, nullptr);
-		BreakExitOnFailure(hr, "Failed scheduling re-creation of task '%ls' on rollback", szTaskName);
+		ExitOnFailure(hr, "Failed scheduling re-creation of task '%ls' on rollback", szTaskName);
 		ExitFunction();
 	}
 
@@ -218,19 +218,19 @@ HRESULT CTaskScheduler::AddRollbackTask(LPCWSTR szTaskName, CTaskScheduler* pRol
 
 		// Get temp folder
 		dwRes = ::GetTempPath(MAX_PATH, szTempFolder);
-		BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary folder");
+		ExitOnNullWithLastError(dwRes, hr, "Failed getting temporary folder");
 
 		dwRes = ::GetTempFileName(szTempFolder, L"TSK", 0, szBackupFile);
-		BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
+		ExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
 
 		hr = AddBackupTask(szTaskName, szBackupFile);
-		BreakExitOnFailure(hr, "Failed setting action data to backup task");
+		ExitOnFailure(hr, "Failed setting action data to backup task");
 
 		hr = pRollback->AddRestoreTask(szTaskName, szBackupFile);
-		BreakExitOnFailure(hr, "Failed setting rollback action data");
+		ExitOnFailure(hr, "Failed setting rollback action data");
 
 		hr = pCommit->AddDeleteFile(szBackupFile);
-		BreakExitOnFailure(hr, "Failed setting commit action data");
+		ExitOnFailure(hr, "Failed setting commit action data");
 
 		ExitFunction();
 	}
@@ -250,7 +250,7 @@ HRESULT CTaskScheduler::DeferredExecute(const ::std::string& command)
 	TaskSchedulerDetails_Action eAction;
 
 	bRes = details.ParseFromString(command);
-	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking TaskSchedulerDetails");
+	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking TaskSchedulerDetails");
 
 	eAction = details.action();
 
@@ -269,7 +269,7 @@ HRESULT CTaskScheduler::DeferredExecute(const ::std::string& command)
 		szPassword = (LPCWSTR)details.password().data();
 
 		hr = CreateTask(szName, szXml, szUser, szPassword);
-		BreakExitOnFailure(hr, "Failed to create task '%ls'", szName);
+		ExitOnFailure(hr, "Failed to create task '%ls'", szName);
 	}
 	break;
 
@@ -280,7 +280,7 @@ HRESULT CTaskScheduler::DeferredExecute(const ::std::string& command)
 		szName = (LPCWSTR)details.name().data();
 
 		hr = RemoveTask(szName);
-		BreakExitOnFailure(hr, "Failed to create task '%ls'", szName);
+		ExitOnFailure(hr, "Failed to create task '%ls'", szName);
 	}
 	break;
 
@@ -293,7 +293,7 @@ HRESULT CTaskScheduler::DeferredExecute(const ::std::string& command)
 		szBackupFile = (LPCWSTR)details.backupfile().data();
 
 		hr = BackupTask(szName, szBackupFile);
-		BreakExitOnFailure(hr, "Failed to backup task '%ls'", szName);
+		ExitOnFailure(hr, "Failed to backup task '%ls'", szName);
 	}
 	break;
 
@@ -301,7 +301,7 @@ HRESULT CTaskScheduler::DeferredExecute(const ::std::string& command)
 		LPCWSTR szName = nullptr;
 		szName = (LPCWSTR)details.name().data();
 		hr = E_INVALIDARG;
-		BreakExitOnFailure(hr, "Bad action for task '%ls'", szName);
+		ExitOnFailure(hr, "Bad action for task '%ls'", szName);
 	}
 
 LExit:
@@ -314,17 +314,17 @@ HRESULT CTaskScheduler::CreateTask(LPCWSTR szTaskName, LPCWSTR szTaskXml, LPCWST
 	CComPtr<ITaskDefinition> pTask;
 	CComPtr<IRegisteredTask> pRegTask;
 
-	BreakExitOnNull(pRootFolder_.p, hr, E_FAIL, "Task root folder not set");
+	ExitOnNull(pRootFolder_.p, hr, E_FAIL, "Task root folder not set");
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Creating task '%ls'", szTaskName);
 
 	hr = pService_->NewTask(NULL, &pTask);
-	BreakExitOnFailure(hr, "Failed creating a new task for '%ls'", szTaskName);
+	ExitOnFailure(hr, "Failed creating a new task for '%ls'", szTaskName);
 
 	hr = pTask->put_XmlText(CComBSTR(szTaskXml));
-	BreakExitOnFailure(hr, "Failed setting task XML for '%ls'", szTaskName);
+	ExitOnFailure(hr, "Failed setting task XML for '%ls'", szTaskName);
 
 	hr = pRootFolder_->RegisterTaskDefinition(CComBSTR(szTaskName), pTask, TASK_CREATE_OR_UPDATE, CComVariant(szUser), CComVariant(szPassword), TASK_LOGON_TYPE::TASK_LOGON_NONE, CComVariant(), &pRegTask);
-	BreakExitOnFailure(hr, "Failed creating task '%ls'", szTaskName);
+	ExitOnFailure(hr, "Failed creating task '%ls'", szTaskName);
 
 LExit:
 	return hr;
@@ -334,7 +334,7 @@ HRESULT CTaskScheduler::RemoveTask(LPCWSTR szTaskName)
 {
 	HRESULT hr = S_OK;
 	
-	BreakExitOnNull(pRootFolder_.p, hr, E_FAIL, "Task root folder not set");
+	ExitOnNull(pRootFolder_.p, hr, E_FAIL, "Task root folder not set");
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Removing task '%ls'", szTaskName);
 
 	hr = pRootFolder_->DeleteTask(CComBSTR(szTaskName), NULL);
@@ -343,7 +343,7 @@ HRESULT CTaskScheduler::RemoveTask(LPCWSTR szTaskName)
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Task '%ls' does not exist", szTaskName);
 		ExitFunction1(hr = S_FALSE);
 	}
-	BreakExitOnFailure(hr, "Failed deleting task '%ls'", szTaskName);
+	ExitOnFailure(hr, "Failed deleting task '%ls'", szTaskName);
 
 LExit:
 	return hr;
@@ -358,20 +358,20 @@ HRESULT CTaskScheduler::AddBackupTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 	bool bRes = true;
 
 	hr = AddCommand("CTaskScheduler", &pCmd);
-	BreakExitOnFailure(hr, "Failed to add command");
+	ExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new TaskSchedulerDetails();
-	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
+	ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
 	pDetails->set_name(szTaskName, WSTR_BYTE_SIZE(szTaskName));
 	pDetails->set_backupfile(szBackupFile, WSTR_BYTE_SIZE(szBackupFile));
 	pDetails->set_action(TaskSchedulerDetails_Action::TaskSchedulerDetails_Action_Backup);
 
 	pAny = pCmd->mutable_details();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
 	bRes = pDetails->SerializeToString(pAny);
-	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
+	ExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
@@ -386,20 +386,20 @@ HRESULT CTaskScheduler::AddRestoreTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 	bool bRes = true;
 
 	hr = AddCommand("CTaskScheduler", &pCmd);
-	BreakExitOnFailure(hr, "Failed to add command");
+	ExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new TaskSchedulerDetails();
-	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
+	ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
 	pDetails->set_name(szTaskName, WSTR_BYTE_SIZE(szTaskName));
 	pDetails->set_backupfile(szBackupFile, WSTR_BYTE_SIZE(szBackupFile));
 	pDetails->set_action(TaskSchedulerDetails_Action::TaskSchedulerDetails_Action_Restore);
 
 	pAny = pCmd->mutable_details();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
 	bRes = pDetails->SerializeToString(pAny);
-	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
+	ExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
@@ -413,21 +413,21 @@ HRESULT CTaskScheduler::BackupTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 	HANDLE hFile = INVALID_HANDLE_VALUE;
 	DWORD dwJunk = 0;
 
-	BreakExitOnNull(pRootFolder_.p, hr, E_FAIL, "Task root folder not set");
+	ExitOnNull(pRootFolder_.p, hr, E_FAIL, "Task root folder not set");
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Backing-up task '%ls'", szTaskName);
 
 	hr = pRootFolder_->GetTask(BSTR(szTaskName), &pTask);
-	BreakExitOnFailure(hr, "Failed getting existing task '%ls'", szTaskName);
-	BreakExitOnNull(pTask, hr, E_FAIL, "Failed getting task '%ls'", szTaskName);
+	ExitOnFailure(hr, "Failed getting existing task '%ls'", szTaskName);
+	ExitOnNull(pTask, hr, E_FAIL, "Failed getting task '%ls'", szTaskName);
 
 	hr = pTask->get_Xml(&xml);
-	BreakExitOnFailure(hr, "Failed getting existing task '%ls' XML definition", szTaskName);
+	ExitOnFailure(hr, "Failed getting existing task '%ls' XML definition", szTaskName);
 
 	hFile = ::CreateFile(szBackupFile, GENERIC_WRITE, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-	BreakExitOnNullWithLastError((hFile != INVALID_HANDLE_VALUE), hr, "Failed opening backup file");
+	ExitOnNullWithLastError((hFile != INVALID_HANDLE_VALUE), hr, "Failed opening backup file");
 
 	dwJunk = ::WriteFile(hFile, (LPWSTR)xml, xml.ByteLength(), &dwJunk, nullptr);
-	BreakExitOnNullWithLastError(dwJunk, hr, "Failed writing to backup file");
+	ExitOnNullWithLastError(dwJunk, hr, "Failed writing to backup file");
 
 LExit:
 	if (hFile != INVALID_HANDLE_VALUE)
@@ -449,25 +449,25 @@ HRESULT CTaskScheduler::RestoreTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
 	DWORD dwReadSize;
 	BOOL bRes = TRUE;
 
-	BreakExitOnNull(pRootFolder_.p, hr, E_FAIL, "Task root folder not set");
+	ExitOnNull(pRootFolder_.p, hr, E_FAIL, "Task root folder not set");
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Restoring task '%ls'", szTaskName);
 
 	hFile = ::CreateFile(szBackupFile, GENERIC_READ, 0, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-	BreakExitOnNullWithLastError((hFile != INVALID_HANDLE_VALUE), hr, "Failed opening backup file");
+	ExitOnNullWithLastError((hFile != INVALID_HANDLE_VALUE), hr, "Failed opening backup file");
 
 	dwFileSize = ::GetFileSize(hFile, nullptr);
-	BreakExitOnNullWithLastError((dwFileSize != INVALID_FILE_SIZE), hr, "Failed getting backup file size");
+	ExitOnNullWithLastError((dwFileSize != INVALID_FILE_SIZE), hr, "Failed getting backup file size");
 	dwStrSize = (dwFileSize / sizeof(WCHAR));
 
 	hr = StrAlloc(&szTaskXml, dwStrSize + 1);
-	BreakExitOnFailure(hr, "Failed allocating memory");
+	ExitOnFailure(hr, "Failed allocating memory");
 	szTaskXml[dwStrSize] = 0;
 
 	bRes = ::ReadFile(hFile, szTaskXml, dwFileSize, &dwReadSize, nullptr);
-	BreakExitOnNullWithLastError(bRes, hr, "Failed reading backup file");
+	ExitOnNullWithLastError(bRes, hr, "Failed reading backup file");
 
 	hr = CreateTask(szTaskName, szTaskXml, nullptr, nullptr);
-	BreakExitOnFailure(hr, "Failed restoring task '%ls'", szTaskName);
+	ExitOnFailure(hr, "Failed restoring task '%ls'", szTaskName);
 
 LExit:
 	if (hFile != INVALID_HANDLE_VALUE)
@@ -486,17 +486,17 @@ CTaskScheduler::CTaskScheduler()
 	HRESULT hr = S_OK;
 
 	hr = ::CoInitialize(nullptr);
-	BreakExitOnFailure(hr, "Failed CoInitializeEx");
+	ExitOnFailure(hr, "Failed CoInitializeEx");
 	bComInit_ = true;
 
 	hr = ::CoCreateInstance(CLSID_TaskScheduler, nullptr, CLSCTX_INPROC_SERVER, IID_ITaskService, (void**)&pService_);
-	BreakExitOnFailure(hr, "Failed to CoCreate an instance of the TaskService class");
+	ExitOnFailure(hr, "Failed to CoCreate an instance of the TaskService class");
 
 	hr = pService_->Connect(CComVariant(), CComVariant(), CComVariant(), CComVariant());
-	BreakExitOnFailure(hr, "Failed to connecting to task service");
+	ExitOnFailure(hr, "Failed to connecting to task service");
 
 	hr = pService_->GetFolder(BSTR(L"\\"), &pRootFolder_);
-	BreakExitOnFailure(hr, "Failed getting root task folder");
+	ExitOnFailure(hr, "Failed getting root task folder");
 
 LExit:
 	;

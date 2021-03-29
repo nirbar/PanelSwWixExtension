@@ -9,34 +9,34 @@ extern "C" UINT __stdcall MsiSqlQuery(MSIHANDLE hInstall)
 	PMSIHANDLE hRecord;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_XmlSearch exists.
 	hr = WcaTableExists(L"PSW_MsiSqlQuery");
-	BreakExitOnFailure(hr, "Table does not exist 'PSW_MsiSqlQuery'. Have you authored 'PanelSw:MsiSqlQuery' entries in WiX code?");
+	ExitOnFailure(hr, "Table does not exist 'PSW_MsiSqlQuery'. Have you authored 'PanelSw:MsiSqlQuery' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `Id`, `Property_`, `Query`, `Condition` FROM `PSW_MsiSqlQuery`", &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query on 'PSW_MsiSqlQuery'.");
+	ExitOnFailure(hr, "Failed to execute SQL query on 'PSW_MsiSqlQuery'.");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
-		BreakExitOnFailure(hr, "Failed to fetch record.");
+		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
 		CWixString sId, dstProperty, sQuery, sCondition;
 		PMSIHANDLE hQueryView;
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)sId);
-		BreakExitOnFailure(hr, "Failed to get Id.");
+		ExitOnFailure(hr, "Failed to get Id.");
 		hr = WcaGetRecordString(hRecord, 2, (LPWSTR*)dstProperty);
-		BreakExitOnFailure(hr, "Failed to get Property_.");
+		ExitOnFailure(hr, "Failed to get Property_.");
 		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)sQuery);
-		BreakExitOnFailure(hr, "Failed to get Query.");
+		ExitOnFailure(hr, "Failed to get Query.");
 		hr = WcaGetRecordString(hRecord, 4, (LPWSTR*)sCondition);
-		BreakExitOnFailure(hr, "Failed to get Condition.");
+		ExitOnFailure(hr, "Failed to get Condition.");
 
 		// Test condition
 		if (!sCondition.IsNullOrEmpty())
@@ -55,14 +55,14 @@ extern "C" UINT __stdcall MsiSqlQuery(MSIHANDLE hInstall)
 
 			case MSICONDITION::MSICONDITION_ERROR:
 				hr = E_FAIL;
-				BreakExitOnFailure(hr, "Bad Condition field");
+				ExitOnFailure(hr, "Bad Condition field");
 			}
 		}
 
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing MSI query: %ls", (LPCWSTR)sQuery);
 
 		hr = WcaOpenExecuteView((LPCWSTR)sQuery, &hQueryView);
-		BreakExitOnFailure(hr, "Failed executing MSI SQL query %ls", (LPCWSTR)sId);
+		ExitOnFailure(hr, "Failed executing MSI SQL query %ls", (LPCWSTR)sId);
 
 		// Store result to a property?
 		if (!dstProperty.IsNullOrEmpty())
@@ -77,13 +77,13 @@ extern "C" UINT __stdcall MsiSqlQuery(MSIHANDLE hInstall)
 				hr = S_FALSE;
 				continue;
 			}
-			BreakExitOnFailure(hr, "Failed fetching query result");
+			ExitOnFailure(hr, "Failed fetching query result");
 
 			hr = WcaGetRecordString(hQueryRec, 1, (LPWSTR*)value);
-			BreakExitOnFailure(hr, "Failed to get query result.");
+			ExitOnFailure(hr, "Failed to get query result.");
 
 			hr = WcaSetProperty(dstProperty, value);
-			BreakExitOnFailure(hr, "Failed to set query result to property.");
+			ExitOnFailure(hr, "Failed to set query result to property.");
 		}
 	}
 

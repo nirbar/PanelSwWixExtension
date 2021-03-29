@@ -90,21 +90,21 @@ extern "C" UINT __stdcall CleanPendingFileRenameOperationsSched(MSIHANDLE hInsta
 
 	// Iterate files to be installed.
 	hr = WcaOpenExecuteView(CleanPendingFileRenameOperationsSched_QUERY, &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", CleanPendingFileRenameOperationsSched_QUERY);
+	ExitOnFailure(hr, "Failed to execute SQL query '%ls'.", CleanPendingFileRenameOperationsSched_QUERY);
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
-		BreakExitOnFailure(hr, "Failed to fetch record.");
+		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
 		CWixString szId, szComponent, szFilePathFmt, szFilePath;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
 
 		hr = WcaGetRecordString(hRecord, CleanPendingFileRenameOperationsSchedQuery::File, (LPWSTR*)szId);
-		BreakExitOnFailure(hr, "Failed to get Id.");
+		ExitOnFailure(hr, "Failed to get Id.");
 		hr = WcaGetRecordString(hRecord, CleanPendingFileRenameOperationsSchedQuery::Component, (LPWSTR*)szComponent);
-		BreakExitOnFailure(hr, "Failed to get Component.");
+		ExitOnFailure(hr, "Failed to get Component.");
 
 		compAction = WcaGetComponentToDo((LPCWSTR)szComponent);
 		if (compAction != WCA_TODO::WCA_TODO_INSTALL)
@@ -113,17 +113,17 @@ extern "C" UINT __stdcall CleanPendingFileRenameOperationsSched(MSIHANDLE hInsta
 		}
 
 		hr = szFilePathFmt.Format(L"[#%s]", (LPCWSTR)szId);
-		BreakExitOnFailure(hr, "Failed formatting string.");
+		ExitOnFailure(hr, "Failed formatting string.");
 
 		hr = szFilePath.MsiFormat((LPCWSTR)szFilePathFmt);
-		BreakExitOnFailure(hr, "Failed MSI-formatting string.");
+		ExitOnFailure(hr, "Failed MSI-formatting string.");
 
 		for (LPCWSTR szDelete : lstDeletedFiles)
 		{
 			if (::_wcsicmp(szDelete, (LPCWSTR)szFilePath) == 0)
 			{
 				hr = szCleanPendingFileRenameOperations.AppnedFormat(L"%s;", szDelete);
-				BreakExitOnFailure(hr, "Failed to append string.");
+				ExitOnFailure(hr, "Failed to append string.");
 			}
 		}
 	}
@@ -132,7 +132,7 @@ extern "C" UINT __stdcall CleanPendingFileRenameOperationsSched(MSIHANDLE hInsta
 	if (!szCleanPendingFileRenameOperations.IsNullOrEmpty())
 	{
 		hr = WcaSetProperty(L"CleanPendingFileRenameOperations", (LPCWSTR)szCleanPendingFileRenameOperations);
-		BreakExitOnFailure(hr, "Failed to set property.");
+		ExitOnFailure(hr, "Failed to set property.");
 	}
 
 LExit:
@@ -171,7 +171,7 @@ extern "C" UINT __stdcall CleanPendingFileRenameOperations(MSIHANDLE hInstall)
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	hr = WcaGetProperty(L"CustomActionData", (LPWSTR*)szPreventDelete);
-	BreakExitOnFailure(hr, "Failed getting 'CustomActionData'");
+	ExitOnFailure(hr, "Failed getting 'CustomActionData'");
 
 	hr = RegOpen(HKEY_LOCAL_MACHINE, L"SYSTEM\\CurrentControlSet\\Control\\Session Manager", GENERIC_ALL, &hKey);
 	ExitOnFailure(hr, "Failed to open Session Manager registry key");

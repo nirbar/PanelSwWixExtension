@@ -56,9 +56,6 @@
     <ClInclude Include="MsiBreak.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="WixBreak.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="WixString.h">
       <Filter>Header Files</Filter>
     </ClInclude>

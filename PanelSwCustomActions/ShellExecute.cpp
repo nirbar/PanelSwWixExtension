@@ -30,21 +30,21 @@ extern "C" UINT __stdcall PSW_ShellExecute(MSIHANDLE hInstall)
 	LPWSTR szCustomActionData = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_ShellExecute exists.
 	hr = WcaTableExists(L"PSW_ShellExecute");
-	BreakExitOnFailure(hr, "Table does not exist 'PSW_ShellExecute'. Have you authored 'PanelSw:ShellExecute' entries in WiX code?");
+	ExitOnFailure(hr, "Table does not exist 'PSW_ShellExecute'. Have you authored 'PanelSw:ShellExecute' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(ShellExecute_QUERY, &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", ShellExecute_QUERY);
+	ExitOnFailure(hr, "Failed to execute SQL query '%ls'.", ShellExecute_QUERY);
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
-		BreakExitOnFailure(hr, "Failed to fetch record.");
+		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
 		CWixString szId, szTarget, szArgs, szVerb, szWorkingDir, szCondition;
@@ -53,23 +53,23 @@ extern "C" UINT __stdcall PSW_ShellExecute(MSIHANDLE hInstall)
 		int nWait = 0;
 
 		hr = WcaGetRecordString(hRecord, ShellExecuteQuery::Id, (LPWSTR*)szId);
-		BreakExitOnFailure(hr, "Failed to get Id.");
+		ExitOnFailure(hr, "Failed to get Id.");
 		hr = WcaGetRecordFormattedString(hRecord, ShellExecuteQuery::Target, (LPWSTR*)szTarget);
-		BreakExitOnFailure(hr, "Failed to get Target.");
+		ExitOnFailure(hr, "Failed to get Target.");
 		hr = WcaGetRecordFormattedString(hRecord, ShellExecuteQuery::Args, (LPWSTR*)szArgs);
-		BreakExitOnFailure(hr, "Failed to get Args.");
+		ExitOnFailure(hr, "Failed to get Args.");
 		hr = WcaGetRecordFormattedString(hRecord, ShellExecuteQuery::Verb, (LPWSTR*)szVerb);
-		BreakExitOnFailure(hr, "Failed to get Verb.");
+		ExitOnFailure(hr, "Failed to get Verb.");
 		hr = WcaGetRecordFormattedString(hRecord, ShellExecuteQuery::WorkingDir, (LPWSTR*)szWorkingDir);
-		BreakExitOnFailure(hr, "Failed to get WorkingDir.");
+		ExitOnFailure(hr, "Failed to get WorkingDir.");
 		hr = WcaGetRecordInteger(hRecord, ShellExecuteQuery::Show, &nShow);
-		BreakExitOnFailure(hr, "Failed to get Show.");
+		ExitOnFailure(hr, "Failed to get Show.");
 		hr = WcaGetRecordInteger(hRecord, ShellExecuteQuery::Wait, &nWait);
-		BreakExitOnFailure(hr, "Failed to get Wait.");
+		ExitOnFailure(hr, "Failed to get Wait.");
 		hr = WcaGetRecordInteger(hRecord, ShellExecuteQuery::Flags, &nFlags);
-		BreakExitOnFailure(hr, "Failed to get Flags.");
+		ExitOnFailure(hr, "Failed to get Flags.");
 		hr = WcaGetRecordString(hRecord, ShellExecuteQuery::Condition, (LPWSTR*)szCondition);
-		BreakExitOnFailure(hr, "Failed to get Condition.");
+		ExitOnFailure(hr, "Failed to get Condition.");
 
 		// Test condition
 		MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, szCondition);
@@ -86,43 +86,43 @@ extern "C" UINT __stdcall PSW_ShellExecute(MSIHANDLE hInstall)
 
 		case MSICONDITION::MSICONDITION_ERROR:
 			hr = E_FAIL;
-			BreakExitOnFailure(hr, "Bad Condition field");
+			ExitOnFailure(hr, "Bad Condition field");
 		}
 
 		if ((nFlags & ShellExecuteFlags::OnExecute) != 0)
 		{
 			hr = oDeferredShellExecute.AddShellExec( szTarget, szArgs, szVerb, szWorkingDir, nShow, nWait != 0);
-			BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
+			ExitOnFailure(hr, "Failed creating custom action data for deferred action.");
 		}
 		if ((nFlags & ShellExecuteFlags::OnCommit) != 0)
 		{
 			hr = oCommitShellExecute.AddShellExec( szTarget, szArgs, szVerb, szWorkingDir, nShow, nWait != 0);
-			BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
+			ExitOnFailure(hr, "Failed creating custom action data for deferred action.");
 		}
 		if ((nFlags & ShellExecuteFlags::OnRollback) != 0)
 		{
 			hr = oRollbackShellExecute.AddShellExec( szTarget, szArgs, szVerb, szWorkingDir, nShow, nWait != 0);
-			BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
+			ExitOnFailure(hr, "Failed creating custom action data for deferred action.");
 		}
 	}
 	
 	// Schedule actions.
 	hr = oRollbackShellExecute.GetCustomActionData(&szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting custom action data for rollback action.");
+	ExitOnFailure(hr, "Failed getting custom action data for rollback action.");
 	hr = WcaDoDeferredAction(L"ShellExecute_rollback", szCustomActionData, oRollbackShellExecute.GetCost());
-	BreakExitOnFailure(hr, "Failed scheduling rollback action.");
+	ExitOnFailure(hr, "Failed scheduling rollback action.");
 
 	ReleaseNullStr(szCustomActionData);
 	hr = oDeferredShellExecute.GetCustomActionData(&szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
+	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
 	hr = WcaDoDeferredAction(L"ShellExecute_deferred", szCustomActionData, oDeferredShellExecute.GetCost());
-	BreakExitOnFailure(hr, "Failed scheduling deferred action.");
+	ExitOnFailure(hr, "Failed scheduling deferred action.");
 
 	ReleaseNullStr(szCustomActionData);
 	hr = oCommitShellExecute.GetCustomActionData(&szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting custom action data for commit action.");
+	ExitOnFailure(hr, "Failed getting custom action data for commit action.");
 	hr = WcaDoDeferredAction(L"ShellExecute_commit", szCustomActionData, oCommitShellExecute.GetCost());
-	BreakExitOnFailure(hr, "Failed scheduling commit action.");
+	ExitOnFailure(hr, "Failed scheduling commit action.");
 
 LExit:
 	ReleaseStr(szCustomActionData);
@@ -140,10 +140,10 @@ HRESULT CShellExecute::AddShellExec(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR sz
 	bool bRes = true;
 
 	hr = AddCommand("CShellExecute", &pCmd);
-	BreakExitOnFailure(hr, "Failed to add command");
+	ExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new ShellExecDetails();
-	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
+	ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
 	pDetails->set_target(szTarget, WSTR_BYTE_SIZE(szTarget));
 	pDetails->set_args(szArgs, WSTR_BYTE_SIZE(szArgs));
@@ -154,10 +154,10 @@ HRESULT CShellExecute::AddShellExec(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR sz
 	pDetails->set_show(nShow);
 
 	pAny = pCmd->mutable_details();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
 	bRes = pDetails->SerializeToString(pAny);
-	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
+	ExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
@@ -177,7 +177,7 @@ HRESULT CShellExecute::DeferredExecute(const ::std::string& command)
 	bool bWait;
 
 	bRes = details.ParseFromString(command);
-	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ShellExecDetails");
+	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ShellExecDetails");
 
 	szTarget = (LPCWSTR)details.target().data();
 	szArgs = (LPCWSTR)details.args().data();
@@ -189,7 +189,7 @@ HRESULT CShellExecute::DeferredExecute(const ::std::string& command)
 		, szTarget, szArgs, szVerb, szWorkingDir, nShow, bWait);
 	
 	hr = Execute(szTarget, szArgs, szVerb, szWorkingDir, nShow, bWait);
-	BreakExitOnFailure(hr, "Failed to execute \"%ls\" %ls", szTarget, szArgs);
+	ExitOnFailure(hr, "Failed to execute \"%ls\" %ls", szTarget, szArgs);
 
 LExit:
 	return hr;

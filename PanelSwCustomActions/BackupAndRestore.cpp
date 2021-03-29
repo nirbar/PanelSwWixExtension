@@ -25,30 +25,30 @@ extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall)
 	LPWSTR szCustomActionData = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_DeletePath exists.
 	hr = WcaTableExists(L"PSW_BackupAndRestore");
-	BreakExitOnFailure(hr, "Table does not exist 'PSW_BackupAndRestore'. Have you authored 'PanelSw:BackupAndRestore' entries in WiX code?");
+	ExitOnFailure(hr, "Table does not exist 'PSW_BackupAndRestore'. Have you authored 'PanelSw:BackupAndRestore' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(BackupAndRestore_QUERY, &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", BackupAndRestore_QUERY);
+	ExitOnFailure(hr, "Failed to execute SQL query '%ls'.", BackupAndRestore_QUERY);
 
 	// Get temporay folder
 	dwRes = ::GetTempPath(MAX_PATH, shortTempPath);
-	BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary folder");
-	BreakExitOnNull((dwRes <= MAX_PATH), hr, E_FAIL, "Temporary folder path too long");
+	ExitOnNullWithLastError(dwRes, hr, "Failed getting temporary folder");
+	ExitOnNull((dwRes <= MAX_PATH), hr, E_FAIL, "Temporary folder path too long");
 
 	dwRes = ::GetLongPathName(shortTempPath, longTempPath, MAX_PATH + 1);
-	BreakExitOnNullWithLastError(dwRes, hr, "Failed expanding temporary folder");
-	BreakExitOnNull((dwRes <= MAX_PATH), hr, E_FAIL, "Temporary folder expanded path too long");
+	ExitOnNullWithLastError(dwRes, hr, "Failed expanding temporary folder");
+	ExitOnNull((dwRes <= MAX_PATH), hr, E_FAIL, "Temporary folder expanded path too long");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
-		BreakExitOnFailure(hr, "Failed to fetch record.");
+		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
 		CWixString szId, szPath, szComponent;
@@ -59,13 +59,13 @@ extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall)
 		bool bIsFolder = false;
 
 		hr = WcaGetRecordString(hRecord, BackupAndRestoreQuery::Id, (LPWSTR*)szId);
-		BreakExitOnFailure(hr, "Failed to get Id.");
+		ExitOnFailure(hr, "Failed to get Id.");
 		hr = WcaGetRecordFormattedString(hRecord, BackupAndRestoreQuery::Path, (LPWSTR*)szPath);
-		BreakExitOnFailure(hr, "Failed to get Path.");
+		ExitOnFailure(hr, "Failed to get Path.");
 		hr = WcaGetRecordInteger(hRecord, BackupAndRestoreQuery::Flags, &flags);
-		BreakExitOnFailure(hr, "Failed to get Flags.");
+		ExitOnFailure(hr, "Failed to get Flags.");
 		hr = WcaGetRecordString(hRecord, BackupAndRestoreQuery::Component, (LPWSTR*)szComponent);
-		BreakExitOnFailure(hr, "Failed to get Condition.");
+		ExitOnFailure(hr, "Failed to get Condition.");
 		bIgnoreMissing = flags & CFileOperations::FileOperationsAttributes::IgnoreMissingPath;
 
 		// Test condition
@@ -78,7 +78,7 @@ extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall)
 
 		// Generate temp file name.
 		dwRes = ::GetTempFileName(longTempPath, L"BNR", 0, szTempFile);
-		BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
+		ExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
 
 		bIsFolder = ::PathIsDirectory(szPath);
 		if (bIsFolder) // For folders, we'll delete the file that holds the same name. For files, we'll simply overwrite.
@@ -88,7 +88,7 @@ extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall)
 		}
 
 		hr = deferredCAD.CopyPath(szPath, szTempFile, false, bIgnoreMissing, flags & CFileOperations::FileOperationsAttributes::IgnoreErrors);
-		BreakExitOnFailure(hr, "Failed backing up '%ls'", (LPCWSTR)szPath);
+		ExitOnFailure(hr, "Failed backing up '%ls'", (LPCWSTR)szPath);
 		if (hr == S_FALSE)
 		{
 			deferredCAD.DeletePath(szTempFile, true, true); // Delete the temporay file we created now as we're not going to need it.
@@ -99,48 +99,48 @@ extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall)
 		if (bIsFolder)
 		{
 			hr = rollbackCAD.AddDeleteFile(szPath, flags);
-			BreakExitOnFailure(hr, "Failed creating custom action data for rollback action.");
+			ExitOnFailure(hr, "Failed creating custom action data for rollback action.");
 
 			hr = rollbackCAD.AddMoveFile(szTempFile, szPath, flags);
-			BreakExitOnFailure(hr, "Failed creating custom action data for rollback action.");
+			ExitOnFailure(hr, "Failed creating custom action data for rollback action.");
 		
 			hr = deferredCAD.AddDeleteFile(szPath, flags);
-			BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
+			ExitOnFailure(hr, "Failed creating custom action data for deferred action.");
 
 			hr = deferredCAD.AddCopyFile(szTempFile, szPath, flags);
-			BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
+			ExitOnFailure(hr, "Failed creating custom action data for deferred action.");
 		}
 		else
 		{
 			hr = rollbackCAD.AddMoveFile(szTempFile, szPath, flags);
-			BreakExitOnFailure(hr, "Failed creating custom action data for rollback action.");
+			ExitOnFailure(hr, "Failed creating custom action data for rollback action.");
 
 			hr = deferredCAD.AddCopyFile(szTempFile, szPath, flags);
-			BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
+			ExitOnFailure(hr, "Failed creating custom action data for deferred action.");
 		}
 
 		hr = commitCAD.AddDeleteFile(szTempFile, flags);
-		BreakExitOnFailure(hr, "Failed creating custom action data for commit action.");
+		ExitOnFailure(hr, "Failed creating custom action data for commit action.");
 	}
 
 	hr = rollbackCAD.GetCustomActionData(&szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting custom action data for rollback action.");
+	ExitOnFailure(hr, "Failed getting custom action data for rollback action.");
 	hr = WcaSetProperty(L"BackupAndRestore_rollback", szCustomActionData);
-	BreakExitOnFailure(hr, "Failed setting rollback action data.");
+	ExitOnFailure(hr, "Failed setting rollback action data.");
 
 	ReleaseNullStr(szCustomActionData);
 	hr = commitCAD.GetCustomActionData(&szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting custom action data for commit action.");
+	ExitOnFailure(hr, "Failed getting custom action data for commit action.");
 	hr = WcaSetProperty(L"BackupAndRestore_commit", szCustomActionData);
-	BreakExitOnFailure(hr, "Failed setting commit action data.");
+	ExitOnFailure(hr, "Failed setting commit action data.");
 
 	ReleaseNullStr(szCustomActionData);
 	hr = deferredCAD.GetCustomActionData(&szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
+	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
 	hr = WcaSetProperty(L"BackupAndRestore_deferred", szCustomActionData);
-	BreakExitOnFailure(hr, "Failed setting deferred action data.");
+	ExitOnFailure(hr, "Failed setting deferred action data.");
 	hr = WcaProgressMessage(deferredCAD.GetCost(), TRUE);
-	BreakExitOnFailure(hr, "Failed extending progress bar.");
+	ExitOnFailure(hr, "Failed extending progress bar.");
 
 LExit:
 	ReleaseStr(szCustomActionData);

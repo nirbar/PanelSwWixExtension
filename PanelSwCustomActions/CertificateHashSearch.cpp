@@ -19,23 +19,23 @@ extern "C" UINT __stdcall CertificateHashSearch(MSIHANDLE hInstall)
 	PMSIHANDLE hRecord;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	hr = WcaTableExists(L"PSW_CertificateHashSearch");
-	BreakExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_CertificateHashSearch'. Have you authored 'PanelSw:CertificateHashSearch' entries in WiX code?");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_CertificateHashSearch'. Have you authored 'PanelSw:CertificateHashSearch' entries in WiX code?");
 	
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `Id`, `CertName`, `FriendlyName`, `Issuer`, `SerialNumber` FROM `PSW_CertificateHashSearch`", &hView);
-	BreakExitOnFailure(hr, "Failed to execute MSI SQL query");
+	ExitOnFailure(hr, "Failed to execute MSI SQL query");
 
 	hMachineStore = ::CertOpenStore(CERT_STORE_PROV_SYSTEM, 0, NULL, CERT_STORE_READONLY_FLAG | CERT_SYSTEM_STORE_LOCAL_MACHINE, L"MY");
-	BreakExitOnNullWithLastError(hMachineStore, hr, "Failed opening certificate store");
+	ExitOnNullWithLastError(hMachineStore, hr, "Failed opening certificate store");
 
 	// Loop
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
-		BreakExitOnFailure(hr, "Failed to fetch record.");
+		ExitOnFailure(hr, "Failed to fetch record.");
 		
 		CWixString id; // Property name i.e. "SELF_SIGNED_PFX"
 		CWixString certName; // Subject
@@ -47,15 +47,15 @@ extern "C" UINT __stdcall CertificateHashSearch(MSIHANDLE hInstall)
 		WCHAR hashHex[20 * 2 + 1];
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)id);
-		BreakExitOnFailure(hr, "Failed to get Id.");
+		ExitOnFailure(hr, "Failed to get Id.");
 		hr = WcaGetRecordFormattedString(hRecord, 2, (LPWSTR*)certName);
-		BreakExitOnFailure(hr, "Failed to get CertName.");
+		ExitOnFailure(hr, "Failed to get CertName.");
 		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)friendlyName);
-		BreakExitOnFailure(hr, "Failed to get CertName.");
+		ExitOnFailure(hr, "Failed to get CertName.");
 		hr = WcaGetRecordFormattedString(hRecord, 4, (LPWSTR*)issuer);
-		BreakExitOnFailure(hr, "Failed to get Issuer.");
+		ExitOnFailure(hr, "Failed to get Issuer.");
 		hr = WcaGetRecordFormattedString(hRecord, 5, (LPWSTR*)serial);
-		BreakExitOnFailure(hr, "Failed to get Serial.");
+		ExitOnFailure(hr, "Failed to get Serial.");
 
 		if (certName.IsNullOrEmpty() && (issuer.IsNullOrEmpty() || serial.IsNullOrEmpty()) && friendlyName.IsNullOrEmpty())
 		{
@@ -75,12 +75,12 @@ extern "C" UINT __stdcall CertificateHashSearch(MSIHANDLE hInstall)
 		if (!pCertContext && !issuer.IsNullOrEmpty() && !serial.IsNullOrEmpty()) // Expecting both Issuer and serial.
 		{
 			hr = SearchIssuerAndSerial(hMachineStore, issuer, serial, &pCertContext);
-			BreakExitOnFailure(hr, "Failed searching certificate by issuer and serial number");
+			ExitOnFailure(hr, "Failed searching certificate by issuer and serial number");
 		}
 		if (!pCertContext && !friendlyName.IsNullOrEmpty())
 		{
 			hr = SearchByFriendlyName(hMachineStore, friendlyName, &pCertContext);
-			BreakExitOnFailure(hr, "Failed searching certificate by friendly name '%ls'", (LPCWSTR)friendlyName);
+			ExitOnFailure(hr, "Failed searching certificate by friendly name '%ls'", (LPCWSTR)friendlyName);
 		}
 
 		if (!pCertContext && (SUCCEEDED(hr) || (hr == CRYPT_E_NOT_FOUND)))
@@ -89,19 +89,19 @@ extern "C" UINT __stdcall CertificateHashSearch(MSIHANDLE hInstall)
 			hr = S_FALSE;
 			continue;
 		}
-		BreakExitOnNull(pCertContext, hr, hr, "Failed finding matching certificate");
+		ExitOnNull(pCertContext, hr, hr, "Failed finding matching certificate");
 
 		bRes = ::CertGetCertificateContextProperty(pCertContext, CERT_SHA1_HASH_PROP_ID, certHash, &hashSize);
-		BreakExitOnNullWithLastError(bRes, hr, "Failed getting certificate hash");
+		ExitOnNullWithLastError(bRes, hr, "Failed getting certificate hash");
 
 		hr = StrHexEncode(certHash, hashSize, hashHex, countof(hashHex));
-		BreakExitOnFailure(hr, "Failed encoding certificate hash");
+		ExitOnFailure(hr, "Failed encoding certificate hash");
 
 		hr = WcaSetProperty(id, hashHex);
-		BreakExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)id);
+		ExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)id);
 
 		bRes = ::CertFreeCertificateContext(pCertContext);
-		BreakExitOnNullWithLastError(bRes, hr, "Failed releasing certificate");
+		ExitOnNullWithLastError(bRes, hr, "Failed releasing certificate");
 		pCertContext = nullptr;
 	}
 	hr = S_OK;
@@ -133,14 +133,14 @@ static HRESULT SearchIssuerAndSerial(HCERTSTORE hMachineStore, CWixString &issue
 	::ZeroMemory(&certInfo, sizeof(certInfo));
 
 	hr = RegBinaryToMem(issuer, &buffer1, &buffSize);
-	BreakExitOnFailure(hr, "Failed parsing issuer as binary");
+	ExitOnFailure(hr, "Failed parsing issuer as binary");
 
 	certInfo.Issuer.cbData = buffSize;
 	certInfo.Issuer.pbData = buffer1;
 
 	buffSize = 0;
 	hr = RegBinaryToMem(serial, &buffer2, &buffSize);
-	BreakExitOnFailure(hr, "Failed parsing serial as binary");
+	ExitOnFailure(hr, "Failed parsing serial as binary");
 
 	certInfo.SerialNumber.cbData = buffSize;
 	certInfo.SerialNumber.pbData = buffer2;
@@ -166,7 +166,6 @@ LExit:
 static HRESULT SearchByFriendlyName(HCERTSTORE hMachineStore, LPCWSTR friendlyName, PCCERT_CONTEXT *ppCertContext)
 {
 	HRESULT hr = S_OK;
-	CERT_INFO certInfo;
 	PCCERT_CONTEXT pCertContext = nullptr;
 	WCHAR wzFriendlyName[256] = { 0 };
 	DWORD cbFriendlyName = sizeof(wzFriendlyName);

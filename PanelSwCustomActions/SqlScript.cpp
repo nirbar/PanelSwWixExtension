@@ -82,9 +82,9 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 		hr = WcaGetRecordInteger(hRecord, 10, &errorHandling);
 		ExitOnFailure(hr, "Failed to get ErrorHandling.");
 		hr = WcaGetRecordFormattedInteger(hRecord, 11, &nPort);
-		BreakExitOnFailure(hr, "Failed to get Port.");
+		ExitOnFailure(hr, "Failed to get Port.");
 		hr = WcaGetRecordFormattedString(hRecord, 12, (LPWSTR*)szEncrypted);
-		BreakExitOnFailure(hr, "Failed to get Encrypted.");
+		ExitOnFailure(hr, "Failed to get Encrypted.");
 		bEncrypted = (szEncrypted.EqualsIgnoreCase(L"true") || szEncrypted.EqualsIgnoreCase(L"yes") || szEncrypted.Equals(L"1"));
 		hr = WcaGetRecordFormattedString(hRecord, 13, (LPWSTR*)szConnectionString);
 		ExitOnFailure(hr, "Failed to get ConnectionString.");

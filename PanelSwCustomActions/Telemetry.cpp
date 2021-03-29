@@ -31,21 +31,21 @@ extern "C" UINT __stdcall Telemetry(MSIHANDLE hInstall)
 	LPWSTR szCustomActionData = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_Telemetry exists.
 	hr = WcaTableExists(L"PSW_Telemetry");
-	BreakExitOnFailure(hr, "Table does not exist 'PSW_Telemetry'. Have you authored 'PanelSw:Telemetry' entries in WiX code?");
+	ExitOnFailure(hr, "Table does not exist 'PSW_Telemetry'. Have you authored 'PanelSw:Telemetry' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(TELEMETRY_QUERY, &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", TELEMETRY_QUERY);
+	ExitOnFailure(hr, "Failed to execute SQL query '%ls'.", TELEMETRY_QUERY);
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
-		BreakExitOnFailure(hr, "Failed to fetch record.");
+		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
 		CWixString szId, szUrl, szPage, szMethod, szData, szCondition;
@@ -53,19 +53,19 @@ extern "C" UINT __stdcall Telemetry(MSIHANDLE hInstall)
 		BOOL bSecure = FALSE;
 
 		hr = WcaGetRecordString(hRecord, TelemetryQuery::Id, (LPWSTR*)szId);
-		BreakExitOnFailure(hr, "Failed to get Id.");
+		ExitOnFailure(hr, "Failed to get Id.");
 		hr = WcaGetRecordFormattedString(hRecord, TelemetryQuery::Url, (LPWSTR*)szUrl);
-		BreakExitOnFailure(hr, "Failed to get URL.");
+		ExitOnFailure(hr, "Failed to get URL.");
 		hr = WcaGetRecordFormattedString(hRecord, TelemetryQuery::Page, (LPWSTR*)szPage);
-		BreakExitOnFailure(hr, "Failed to get Page.");
+		ExitOnFailure(hr, "Failed to get Page.");
 		hr = WcaGetRecordFormattedString(hRecord, TelemetryQuery::Method, (LPWSTR*)szMethod);
-		BreakExitOnFailure(hr, "Failed to get Method.");
+		ExitOnFailure(hr, "Failed to get Method.");
 		hr = WcaGetRecordFormattedString(hRecord, TelemetryQuery::Data, (LPWSTR*)szData);
-		BreakExitOnFailure(hr, "Failed to get Data.");
+		ExitOnFailure(hr, "Failed to get Data.");
 		hr = WcaGetRecordInteger(hRecord, TelemetryQuery::Flags, &nFlags);
-		BreakExitOnFailure(hr, "Failed to get Flags.");
+		ExitOnFailure(hr, "Failed to get Flags.");
 		hr = WcaGetRecordString(hRecord, TelemetryQuery::Condition, (LPWSTR*)szCondition);
-		BreakExitOnFailure(hr, "Failed to get Condition.");
+		ExitOnFailure(hr, "Failed to get Condition.");
 
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Will post telemetry: Id=%ls\nUrl=%ls\nPage=%ls\nData=%ls\nFlags=%i\nCondition=%ls"
 			, (LPCWSTR)szId
@@ -91,7 +91,7 @@ extern "C" UINT __stdcall Telemetry(MSIHANDLE hInstall)
 
 		case MSICONDITION::MSICONDITION_ERROR:
 			hr = E_FAIL;
-			BreakExitOnFailure(hr, "Bad Condition field");
+			ExitOnFailure(hr, "Bad Condition field");
 		}
 
 		if ((nFlags & TelemetryFlags::Secure) == TelemetryFlags::Secure)
@@ -102,37 +102,37 @@ extern "C" UINT __stdcall Telemetry(MSIHANDLE hInstall)
 		if ((nFlags & TelemetryFlags::OnExecute) == TelemetryFlags::OnExecute)
 		{
 			hr = oDeferredTelemetry.AddPost(szUrl, szPage, szMethod, szData, bSecure);
-			BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
+			ExitOnFailure(hr, "Failed creating custom action data for deferred action.");
 		}
 		if ((nFlags & TelemetryFlags::OnCommit) == TelemetryFlags::OnCommit)
 		{
 			hr = oCommitTelemetry.AddPost(szUrl, szPage, szMethod, szData, bSecure);
-			BreakExitOnFailure(hr, "Failed creating custom action data for commit action.");
+			ExitOnFailure(hr, "Failed creating custom action data for commit action.");
 		}
 		if ((nFlags & TelemetryFlags::OnRollback) == TelemetryFlags::OnRollback)
 		{
 			hr = oRollbackTelemetry.AddPost(szUrl, szPage, szMethod, szData, bSecure);
-			BreakExitOnFailure(hr, "Failed creating custom action data for rollback action.");
+			ExitOnFailure(hr, "Failed creating custom action data for rollback action.");
 		}
 	}
 	
 	// Schedule actions.
 	hr = oRollbackTelemetry.GetCustomActionData(&szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting custom action data for rollback action.");
+	ExitOnFailure(hr, "Failed getting custom action data for rollback action.");
 	hr = WcaDoDeferredAction(L"Telemetry_rollback", szCustomActionData, oRollbackTelemetry.GetCost());
-	BreakExitOnFailure(hr, "Failed scheduling rollback action.");
+	ExitOnFailure(hr, "Failed scheduling rollback action.");
 
 	ReleaseNullStr(szCustomActionData);
 	hr = oDeferredTelemetry.GetCustomActionData(&szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
+	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
 	hr = WcaDoDeferredAction(L"Telemetry_deferred", szCustomActionData, oDeferredTelemetry.GetCost());
-	BreakExitOnFailure(hr, "Failed scheduling deferred action.");
+	ExitOnFailure(hr, "Failed scheduling deferred action.");
 
 	ReleaseNullStr(szCustomActionData);
 	hr = oCommitTelemetry.GetCustomActionData(&szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting custom action data for commit action.");
+	ExitOnFailure(hr, "Failed getting custom action data for commit action.");
 	hr = WcaDoDeferredAction(L"Telemetry_commit", szCustomActionData, oCommitTelemetry.GetCost());
-	BreakExitOnFailure(hr, "Failed scheduling commit action.");
+	ExitOnFailure(hr, "Failed scheduling commit action.");
 
 LExit:
 	ReleaseStr(szCustomActionData);
@@ -150,10 +150,10 @@ HRESULT CTelemetry::AddPost(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPC
 	bool bRes = true;
 
 	hr = AddCommand("CTelemetry", &pCmd);
-	BreakExitOnFailure(hr, "Failed to add command");
+	ExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new TelemetryDetails();
-	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
+	ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
 	pDetails->set_url(szUrl, WSTR_BYTE_SIZE(szUrl));
 	pDetails->set_page(szPage, WSTR_BYTE_SIZE(szPage));
@@ -162,10 +162,10 @@ HRESULT CTelemetry::AddPost(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPC
 	pDetails->set_secure(bSecure);
 
 	pAny = pCmd->mutable_details();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
 	bRes = pDetails->SerializeToString(pAny);
-	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
+	ExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
@@ -183,7 +183,7 @@ HRESULT CTelemetry::DeferredExecute(const ::std::string& command)
 	TelemetryDetails details;
 
 	bRes = details.ParseFromString(command);
-	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking TelemetryDetails");
+	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking TelemetryDetails");
 
 	szUrl = (LPCWSTR)details.url().data();
 	szPage = (LPCWSTR)details.page().data();
@@ -198,7 +198,7 @@ HRESULT CTelemetry::DeferredExecute(const ::std::string& command)
 		, details.secure());
 
 	hr = Post(szUrl, szPage, szMethod, szData, details.secure());
-	BreakExitOnFailure(hr, "Failed to post Data '%ls' to URL '%ls%ls'", szData, szUrl, szPage);
+	ExitOnFailure(hr, "Failed to post Data '%ls' to URL '%ls%ls'", szData, szUrl, szPage);
 
 LExit:
 	return hr;
@@ -221,17 +221,17 @@ HRESULT CTelemetry::Post(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWST
 		WINHTTP_ACCESS_TYPE_DEFAULT_PROXY,
 		WINHTTP_NO_PROXY_NAME,
 		WINHTTP_NO_PROXY_BYPASS, 0);
-	BreakExitOnNullWithLastError(hSession, hr, "Failed opening HTTP session");
+	ExitOnNullWithLastError(hSession, hr, "Failed opening HTTP session");
 
 	// Specify an HTTP server.
 	hConnect = ::WinHttpConnect(hSession, szUrl,
 		bSecure ? INTERNET_DEFAULT_HTTPS_PORT : INTERNET_DEFAULT_HTTP_PORT, 0);
-	BreakExitOnNullWithLastError(hConnect, hr, "Failed connecting to URL");
+	ExitOnNullWithLastError(hConnect, hr, "Failed connecting to URL");
 
 	// Create an HTTP request handle.
 	hRequest = ::WinHttpOpenRequest(hConnect, szMethod, szPage, nullptr, WINHTTP_NO_REFERER, WINHTTP_DEFAULT_ACCEPT_TYPES,
 		bSecure ? WINHTTP_FLAG_SECURE : 0);
-	BreakExitOnNullWithLastError(hRequest, hr, "Failed opening request");
+	ExitOnNullWithLastError(hRequest, hr, "Failed opening request");
 
 	// Get data size
 	if (szData && *szData)
@@ -241,11 +241,11 @@ HRESULT CTelemetry::Post(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWST
 
 	// Send a request.
 	bResults = ::WinHttpSendRequest(hRequest, WINHTTP_NO_ADDITIONAL_HEADERS, 0, (LPVOID)szData, dwSize, dwSize, 0);
-	BreakExitOnNull(bResults, hr, E_FAIL, "Failed sending HTTP request");
+	ExitOnNull(bResults, hr, E_FAIL, "Failed sending HTTP request");
 
 	// End the request.
 	bResults = ::WinHttpReceiveResponse(hRequest, nullptr);
-	BreakExitOnNull(bResults, hr, E_FAIL, "Failed receiving HTTP response");
+	ExitOnNull(bResults, hr, E_FAIL, "Failed receiving HTTP response");
 
 	// Keep checking for data until there is nothing left.
 	do
@@ -253,7 +253,7 @@ HRESULT CTelemetry::Post(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWST
 		// Check for available data.
 		dwSize = 0;
 		bResults = ::WinHttpQueryDataAvailable(hRequest, &dwSize);
-		BreakExitOnNullWithLastError(bResults, hr, "Failed querying available data.");
+		ExitOnNullWithLastError(bResults, hr, "Failed querying available data.");
 
 		// No more data.
 		if (dwSize == 0)
@@ -272,7 +272,7 @@ HRESULT CTelemetry::Post(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWST
 			}
 
 			pszOutBuffer = new char[dwSize + 1];
-			BreakExitOnNull(pszOutBuffer, hr, E_FAIL, "Failed allocating memory");
+			ExitOnNull(pszOutBuffer, hr, E_FAIL, "Failed allocating memory");
 			dwPrevSize = dwSize;
 		}
 
@@ -280,8 +280,8 @@ HRESULT CTelemetry::Post(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWST
 		::ZeroMemory(pszOutBuffer, dwSize + 1);
 
 		bResults = ::WinHttpReadData(hRequest, (LPVOID)pszOutBuffer, dwSize, &dwDownloaded);
-		BreakExitOnNullWithLastError(bResults, hr, "Failed reading data");
-		BreakExitOnNull(dwDownloaded, hr, E_FAIL, "Failed reading data (dwDownloaded=0)");
+		ExitOnNullWithLastError(bResults, hr, "Failed reading data");
+		ExitOnNull(dwDownloaded, hr, E_FAIL, "Failed reading data (dwDownloaded=0)");
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "%s", pszOutBuffer);
 
 	} while (dwSize > 0);

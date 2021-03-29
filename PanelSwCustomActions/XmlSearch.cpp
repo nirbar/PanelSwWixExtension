@@ -28,24 +28,24 @@ extern "C" UINT __stdcall XmlSearch(MSIHANDLE hInstall)
 	PMSIHANDLE hRecord;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	hr = ::CoInitialize(nullptr);
-	BreakExitOnFailure(hr, "Failed to CoInitialize");
+	ExitOnFailure(hr, "Failed to CoInitialize");
 
 	// Ensure table PSW_XmlSearch exists.
 	hr = WcaTableExists(L"PSW_XmlSearch");
-	BreakExitOnFailure(hr, "Table does not exist 'PSW_XmlSearch'. Have you authored 'PanelSw:XmlSearch' entries in WiX code?");
+	ExitOnFailure(hr, "Table does not exist 'PSW_XmlSearch'. Have you authored 'PanelSw:XmlSearch' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(XmlSearchQuery, &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query on 'PSW_XmlSearch'.");
+	ExitOnFailure(hr, "Failed to execute SQL query on 'PSW_XmlSearch'.");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
-		BreakExitOnFailure(hr, "Failed to fetch record.");
+		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
 		CWixString szId;
@@ -58,26 +58,26 @@ extern "C" UINT __stdcall XmlSearch(MSIHANDLE hInstall)
 		eXmlMatch eMatch = eXmlMatch::first;
 
 		hr = WcaGetRecordString(hRecord, eXmlSearchQueryQuery::Id, (LPWSTR*)szId);
-		BreakExitOnFailure(hr, "Failed to get Id.");
+		ExitOnFailure(hr, "Failed to get Id.");
 		hr = WcaGetRecordString(hRecord, eXmlSearchQueryQuery::Property_, (LPWSTR*)szProperty);
-		BreakExitOnFailure(hr, "Failed to get Property_.");
+		ExitOnFailure(hr, "Failed to get Property_.");
 		hr = WcaGetRecordFormattedString(hRecord, eXmlSearchQueryQuery::FilePath, (LPWSTR*)szFilePath);
-		BreakExitOnFailure(hr, "Failed to get FilePath.");
+		ExitOnFailure(hr, "Failed to get FilePath.");
 		hr = WcaGetRecordString(hRecord, eXmlSearchQueryQuery::Expression, (LPWSTR*)szUnformattedExpression);
-		BreakExitOnFailure(hr, "Failed to get Expression.");
+		ExitOnFailure(hr, "Failed to get Expression.");
 		hr = WcaGetRecordString(hRecord, eXmlSearchQueryQuery::Language, (LPWSTR*)szLanguage);
-		BreakExitOnFailure(hr, "Failed to get Language.");
+		ExitOnFailure(hr, "Failed to get Language.");
 		hr = WcaGetRecordString(hRecord, eXmlSearchQueryQuery::Namespaces, (LPWSTR*)szNamespaces);
-		BreakExitOnFailure(hr, "Failed to get Namespaces.");
+		ExitOnFailure(hr, "Failed to get Namespaces.");
 		hr = WcaGetRecordInteger(hRecord, eXmlSearchQueryQuery::Match, (int*)&eMatch);
-		BreakExitOnFailure(hr, "Failed to get Match.");
+		ExitOnFailure(hr, "Failed to get Match.");
 		hr = WcaGetRecordString(hRecord, eXmlSearchQueryQuery::Condition, (LPWSTR*)szCondition);
-		BreakExitOnFailure(hr, "Failed to get Condition.");
+		ExitOnFailure(hr, "Failed to get Condition.");
 
 		// Test condition
 		if (!szCondition.IsNullOrEmpty())
 		{
-			MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, szCondition);
+			const MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, szCondition);
 			switch (condRes)
 			{
 			case MSICONDITION::MSICONDITION_NONE:
@@ -91,16 +91,16 @@ extern "C" UINT __stdcall XmlSearch(MSIHANDLE hInstall)
 
 			case MSICONDITION::MSICONDITION_ERROR:
 				hr = E_FAIL;
-				BreakExitOnFailure(hr, "Bad Condition field");
+				ExitOnFailure(hr, "Bad Condition field");
 			}
 		}
 
 		hr = szExpression.MsiFormat(szUnformattedExpression, (LPWSTR*)szObfuscatedExpression);
-		BreakExitOnFailure(hr, "Failed formatting query.");
+		ExitOnFailure(hr, "Failed formatting query.");
 
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Running Expression '%ls' on '%ls'", (LPCWSTR)szObfuscatedExpression, (LPCWSTR)szFilePath);
 		hr = QueryXml(szFilePath, szExpression, szLanguage, szNamespaces, eMatch, szProperty);
-		BreakExitOnFailure(hr, "Failed to query XML.");
+		ExitOnFailure(hr, "Failed to query XML.");
 	}
 
 	hr = ERROR_SUCCESS;
@@ -124,9 +124,9 @@ static HRESULT QueryXml(LPCWSTR pFile, LPCWSTR pExpression, LPCWSTR szLanguage, 
 	CComBSTR result(L"");
 	CComBSTR delimiter(L"[~]");
 
-	BreakExitOnNull(pFile, hr, E_INVALIDARG, "pFile is null");
-	BreakExitOnNull(pExpression, hr, E_INVALIDARG, "pExpression is null");
-	BreakExitOnNull(pProperty, hr, E_INVALIDARG, "pProperty is null");
+	ExitOnNull(pFile, hr, E_INVALIDARG, "pFile is null");
+	ExitOnNull(pExpression, hr, E_INVALIDARG, "pExpression is null");
+	ExitOnNull(pProperty, hr, E_INVALIDARG, "pProperty is null");
 
 	if (!FileExistsEx(pFile, nullptr))
 	{
@@ -136,16 +136,16 @@ static HRESULT QueryXml(LPCWSTR pFile, LPCWSTR pExpression, LPCWSTR szLanguage, 
 
 	// Create XML doc.
 	hr = ::CoCreateInstance(CLSID_DOMDocument, nullptr, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&pXmlDoc);
-	BreakExitOnFailure(hr, "Failed to CoCreateInstance CLSID_DOMDocument");
+	ExitOnFailure(hr, "Failed to CoCreateInstance CLSID_DOMDocument");
 
 	// Load XML document
 	filePath = pFile;
 	hr = pXmlDoc->load(filePath, &isXmlSuccess);
-	BreakExitOnFailure(hr, "Failed to load XML");
+	ExitOnFailure(hr, "Failed to load XML");
 	if (!isXmlSuccess)
 	{
 		hr = E_FAIL;
-		BreakExitOnFailure(hr, "Failed to load XML");
+		ExitOnFailure(hr, "Failed to load XML");
 	}
 
 	// Set language.
@@ -153,11 +153,11 @@ static HRESULT QueryXml(LPCWSTR pFile, LPCWSTR pExpression, LPCWSTR szLanguage, 
 	{
 		static const CComBSTR SelectionLanguage(L"SelectionLanguage");
 		hr = pXmlDoc->setProperty(SelectionLanguage, CComVariant(szLanguage));
-		BreakExitOnFailure(hr, "Failed setting SelectionLanguage");
+		ExitOnFailure(hr, "Failed setting SelectionLanguage");
 
 		CComVariant varTmp;
 		hr = pXmlDoc->getProperty(SelectionLanguage, &varTmp);
-		BreakExitOnFailure(hr, "Failed getting namespaces");
+		ExitOnFailure(hr, "Failed getting namespaces");
 
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "SelectionLanguage is %ls", varTmp.bstrVal);
 	}
@@ -167,23 +167,23 @@ static HRESULT QueryXml(LPCWSTR pFile, LPCWSTR pExpression, LPCWSTR szLanguage, 
 	{
 		static const CComBSTR SelectionNamespaces(L"SelectionNamespaces");
 		hr = pXmlDoc->setProperty(SelectionNamespaces, CComVariant(szNamespaces));
-		BreakExitOnFailure(hr, "Failed setting namespaces");
+		ExitOnFailure(hr, "Failed setting namespaces");
 
 		CComVariant varTmp;
 		hr = pXmlDoc->getProperty(SelectionNamespaces, &varTmp);
-		BreakExitOnFailure(hr, "Failed getting namespaces");
+		ExitOnFailure(hr, "Failed getting namespaces");
 
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "SelectionNamespaces is %ls", varTmp.bstrVal);
 	}
 
 	// Execute Expression
 	hr = pXmlDoc->selectNodes(CComBSTR(pExpression), &pNodeList);
-	BreakExitOnFailure(hr, "Failed to select XML nodes");
-	BreakExitOnNull(pNodeList, hr, E_FAIL, "selectNodes returned NULL");
+	ExitOnFailure(hr, "Failed to select XML nodes");
+	ExitOnNull(pNodeList, hr, E_FAIL, "selectNodes returned NULL");
 
 	// Get match-count
 	hr = pNodeList->get_length(&nodeCount);
-	BreakExitOnFailure(hr, "Failed to get node count");
+	ExitOnFailure(hr, "Failed to get node count");
 
 	// Validate with request match parameter
 	switch (eMatch)
@@ -198,13 +198,13 @@ static HRESULT QueryXml(LPCWSTR pFile, LPCWSTR pExpression, LPCWSTR szLanguage, 
 		if (nodeCount != 1)
 		{
 			hr = E_INVALIDARG;
-			BreakExitOnFailure(hr, "XmlSreach %i matches. Expected exactly one match", nodeCount);
+			ExitOnFailure(hr, "XmlSreach %i matches. Expected exactly one match", nodeCount);
 		}
 		maxMatches = 1;
 		break;
 	default:
 		hr = E_INVALIDARG;
-		BreakExitOnFailure(hr, "Wrong match parameter for XmlSreach.");
+		ExitOnFailure(hr, "Wrong match parameter for XmlSreach.");
 		break;
 	}
 
@@ -220,24 +220,24 @@ static HRESULT QueryXml(LPCWSTR pFile, LPCWSTR pExpression, LPCWSTR szLanguage, 
 		CComVariant nodeValue;
 
 		hr = pNodeList->get_item(i, &pNode);
-		BreakExitOnFailure(hr, "Failed to get node.");
-		BreakExitOnNull(pNode.p, hr, E_FAIL, "Failed to get node.");
+		ExitOnFailure(hr, "Failed to get node.");
+		ExitOnNull(pNode.p, hr, E_FAIL, "Failed to get node.");
 
 		hr = pNode->get_nodeValue(&nodeValue);
-		BreakExitOnFailure(hr, "Failed to get node's value.");
+		ExitOnFailure(hr, "Failed to get node's value.");
 
 		hr = nodeValue.ChangeType(VT_BSTR);
-		BreakExitOnFailure(hr, "Failed to get node's value as string.");
+		ExitOnFailure(hr, "Failed to get node's value as string.");
 
 		// Add result
 		hr = result.AppendBSTR(nodeValue.bstrVal);
-		BreakExitOnFailure(hr, "Failed to append result.");
+		ExitOnFailure(hr, "Failed to append result.");
 
 		// Add delimiter (unless this is the last)
 		if (i < maxMatches - 1)
 		{
 			hr = result.AppendBSTR(delimiter);
-			BreakExitOnFailure(hr, "Failed to append delimiter.");
+			ExitOnFailure(hr, "Failed to append delimiter.");
 		}
 	}
 

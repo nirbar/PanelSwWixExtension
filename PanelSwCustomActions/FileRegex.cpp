@@ -25,30 +25,30 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 	DWORD dwRes = 0;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_FileRegex exists.
 	hr = WcaTableExists(L"PSW_FileRegex");
-	BreakExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_FileRegex'. Have you authored 'PanelSw:FileRegex' entries in WiX code?");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_FileRegex'. Have you authored 'PanelSw:FileRegex' entries in WiX code?");
 
 	// Get temporary folder
 	dwRes = ::GetTempPath(MAX_PATH, shortTempPath);
-	BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary folder");
-	BreakExitOnNull((dwRes <= MAX_PATH), hr, E_FAIL, "Temporary folder path too long");
+	ExitOnNullWithLastError(dwRes, hr, "Failed getting temporary folder");
+	ExitOnNull((dwRes <= MAX_PATH), hr, E_FAIL, "Temporary folder path too long");
 
 	dwRes = ::GetLongPathName(shortTempPath, longTempPath, MAX_PATH + 1);
-	BreakExitOnNullWithLastError(dwRes, hr, "Failed expanding temporary folder");
-	BreakExitOnNull((dwRes <= MAX_PATH), hr, E_FAIL, "Temporary folder expanded path too long");
+	ExitOnNullWithLastError(dwRes, hr, "Failed expanding temporary folder");
+	ExitOnNull((dwRes <= MAX_PATH), hr, E_FAIL, "Temporary folder expanded path too long");
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `Component_`, `File_`, `FilePath`, `Regex`, `Replacement`, `IgnoreCase`, `Encoding`, `Condition` FROM `PSW_FileRegex` ORDER BY `Order`", &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query.");
+	ExitOnFailure(hr, "Failed to execute SQL query.");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
-		BreakExitOnFailure(hr, "Failed to fetch record.");
+		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
 		CWixString szComponent, szFileId, szFileFormat, szFilePath, szRegexUnformatted, szReplacementUnformatted, szCondition;
@@ -58,25 +58,25 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 		int nEncoding = 0;
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szComponent);
-		BreakExitOnFailure(hr, "Failed to get Id.");
+		ExitOnFailure(hr, "Failed to get Id.");
 		hr = WcaGetRecordString(hRecord, 2, (LPWSTR*)szFileId);
-		BreakExitOnFailure(hr, "Failed to get File_.");
+		ExitOnFailure(hr, "Failed to get File_.");
 		hr = WcaGetRecordString(hRecord, 3, (LPWSTR*)szFileFormat);
-		BreakExitOnFailure(hr, "Failed to get FilePath.");
+		ExitOnFailure(hr, "Failed to get FilePath.");
 		hr = WcaGetRecordString(hRecord, 4, (LPWSTR*)szRegexUnformatted);
-		BreakExitOnFailure(hr, "Failed to get Regex.");
+		ExitOnFailure(hr, "Failed to get Regex.");
 		hr = WcaGetRecordString(hRecord, 5, (LPWSTR*)szReplacementUnformatted);
-		BreakExitOnFailure(hr, "Failed to get Replacement.");
+		ExitOnFailure(hr, "Failed to get Replacement.");
 		hr = WcaGetRecordInteger(hRecord, 6, &nIgnoreCase);
-		BreakExitOnFailure(hr, "Failed to get IgnoreCase.");
+		ExitOnFailure(hr, "Failed to get IgnoreCase.");
 		hr = WcaGetRecordInteger(hRecord, 7, &nEncoding);
-		BreakExitOnFailure(hr, "Failed to get Encoding.");
+		ExitOnFailure(hr, "Failed to get Encoding.");
 		hr = WcaGetRecordString(hRecord, 8, (LPWSTR*)szCondition);
-		BreakExitOnFailure(hr, "Failed to get Condition.");
+		ExitOnFailure(hr, "Failed to get Condition.");
 
 		// Test condition(s)
 		hr = IsInstall(szComponent, szCondition);
-		BreakExitOnFailure(hr, "Failed to evaluate conditions.");
+		ExitOnFailure(hr, "Failed to evaluate conditions.");
 		if (hr == S_FALSE)
 		{
 			continue;
@@ -89,11 +89,11 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 		if (!szFileId.IsNullOrEmpty())
 		{
 			hr = szFileFormat.Format(L"[#%s]", (LPCWSTR)szFileId);
-			BreakExitOnFailure(hr, "Failed formatting string");
+			ExitOnFailure(hr, "Failed formatting string");
 		}
 
 		hr = szFilePath.MsiFormat(szFileFormat);
-		BreakExitOnFailure(hr, "Failed MSI-formatting string");
+		ExitOnFailure(hr, "Failed MSI-formatting string");
 
 		if (szFilePath.IsNullOrEmpty())
 		{
@@ -102,52 +102,52 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 		}
 
 		hr = szRegex.MsiFormat((LPCWSTR)szRegexUnformatted, (LPWSTR*)szRegexObfuscated);
-		BreakExitOnFailure(hr, "Failed formatting string");
+		ExitOnFailure(hr, "Failed formatting string");
 
 		hr = szReplacement.MsiFormat((LPCWSTR)szReplacementUnformatted, (LPWSTR*)szReplacementObfuscated);
-		BreakExitOnFailure(hr, "Failed formatting string");
+		ExitOnFailure(hr, "Failed formatting string");
 
 		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Will replace matches of regex '%ls' with '%ls' on file '%ls'", (LPCWSTR)szRegexObfuscated, (LPCWSTR)szReplacementObfuscated, (LPCWSTR)szFilePath);
 
 		// Generate temp file name.
 		hr = tempFile.Allocate(MAX_PATH + 1);
-		BreakExitOnFailure(hr, "Failed allocating memory");
+		ExitOnFailure(hr, "Failed allocating memory");
 
 		dwRes = ::GetTempFileName(longTempPath, L"RGX", 0, (LPWSTR)tempFile);
-		BreakExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
+		ExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
 
 		hr = rollbackCAD.AddMoveFile((LPCWSTR)tempFile, szFilePath);
-		BreakExitOnFailure(hr, "Failed creating custom action data for rollback action.");
+		ExitOnFailure(hr, "Failed creating custom action data for rollback action.");
 
 		// Add deferred data to copy file szFilePath -> tempFile.
 		hr = deferredFileCAD.AddCopyFile(szFilePath, (LPCWSTR)tempFile);
-		BreakExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
+		ExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
 
 		hr = oDeferredFileRegex.AddFileRegex(szFilePath, szRegex, szReplacement, (FileRegexDetails::FileEncoding)nEncoding, nIgnoreCase != 0);
-		BreakExitOnFailure(hr, "Failed creating custom action data for deferred action.");
+		ExitOnFailure(hr, "Failed creating custom action data for deferred action.");
 
 		hr = commitCAD.AddDeleteFile((LPCWSTR)tempFile);
-		BreakExitOnFailure(hr, "Failed creating custom action data for commit action.");
+		ExitOnFailure(hr, "Failed creating custom action data for commit action.");
 	}
 
 	hr = rollbackCAD.GetCustomActionData(&szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
+	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
 	hr = WcaDoDeferredAction(L"FileRegex_rollback", szCustomActionData, rollbackCAD.GetCost());
-	BreakExitOnFailure(hr, "Failed scheduling deferred action.");
+	ExitOnFailure(hr, "Failed scheduling deferred action.");
 
 	ReleaseNullStr(szCustomActionData);
 	hr = oDeferredFileRegex.Prepend(&deferredFileCAD);
-	BreakExitOnFailure(hr, "Failed getting custom action data for deferred file actions.");
+	ExitOnFailure(hr, "Failed getting custom action data for deferred file actions.");
 	hr = oDeferredFileRegex.GetCustomActionData(&szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
+	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
 	hr = WcaDoDeferredAction(L"FileRegex_deferred", szCustomActionData, oDeferredFileRegex.GetCost());
-	BreakExitOnFailure(hr, "Failed scheduling deferred action.");
+	ExitOnFailure(hr, "Failed scheduling deferred action.");
 
 	ReleaseNullStr(szCustomActionData);
 	hr = commitCAD.GetCustomActionData(&szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
+	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
 	hr = WcaDoDeferredAction(L"FileRegex_commit", szCustomActionData, commitCAD.GetCost());
-	BreakExitOnFailure(hr, "Failed scheduling deferred action.");
+	ExitOnFailure(hr, "Failed scheduling deferred action.");
 
 LExit:
 	ReleaseStr(szCustomActionData);
@@ -184,7 +184,7 @@ static HRESULT IsInstall(LPCWSTR szComponent, LPCWSTR szCondition)
 		MSICONDITION condRes = MSICONDITION::MSICONDITION_NONE;
 
 		condRes = ::MsiEvaluateCondition(WcaGetInstallHandle(), szCondition);
-		BreakExitOnNullWithLastError((condRes != MSICONDITION::MSICONDITION_ERROR), hr, "Failed evaluating condition '%ls'", szCondition);
+		ExitOnNullWithLastError((condRes != MSICONDITION::MSICONDITION_ERROR), hr, "Failed evaluating condition '%ls'", szCondition);
 
 		hr = (condRes == MSICONDITION::MSICONDITION_FALSE) ? S_FALSE : S_OK;
 		WcaLog(LOGMSG_STANDARD, "Condition evaluated to %i", (1 - (int)hr));
@@ -203,10 +203,10 @@ HRESULT CFileRegex::AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR sz
 	bool bRes = true;
 
 	hr = AddCommand("CFileRegex", &pCmd);
-	BreakExitOnFailure(hr, "Failed to add command");
+	ExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new FileRegexDetails();
-	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
+	ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
 	pDetails->set_file(szFilePath, WSTR_BYTE_SIZE(szFilePath));
 	pDetails->set_expression(szRegex, WSTR_BYTE_SIZE(szRegex));
@@ -215,10 +215,10 @@ HRESULT CFileRegex::AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR sz
 	pDetails->set_ignorecase(bIgnoreCase);
 
 	pAny = pCmd->mutable_details();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
 	bRes = pDetails->SerializeToString(pAny);
-	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
+	ExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
@@ -235,14 +235,14 @@ HRESULT CFileRegex::DeferredExecute(const ::std::string& command)
 	LPCWSTR szReplacement = nullptr;
 
 	bRes = details.ParseFromString(command);
-	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking FileOperationsDetails");
+	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking FileOperationsDetails");
 
 	szFile = (LPCWSTR)details.file().data();
 	szExpression = (LPCWSTR)details.expression().data();
 	szReplacement = (LPCWSTR)details.replacement().data();
 
 	hr = Execute(szFile, szExpression, szReplacement, details.encoding(), details.ignorecase());
-	BreakExitOnFailure(hr, "Failed to execute file regular expression");
+	ExitOnFailure(hr, "Failed to execute file regular expression");
 
 LExit:
 	return hr;
@@ -420,7 +420,7 @@ HRESULT CFileRegex::ExecuteUnicode(LPCWSTR szFilePath, LPCWSTR szFileContent, LP
 		{
 			hr = E_FAIL;
 		}
-		BreakExitOnFailure(hr, "Failed evaluating regular expression. %ls", ex.what());
+		ExitOnFailure(hr, "Failed evaluating regular expression. %ls", ex.what());
 	}
 
 	dwFileSize = szContent.length();

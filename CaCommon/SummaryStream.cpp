@@ -15,27 +15,21 @@ CSummaryStream::CSummaryStream(void)
 {
 }
 
-CSummaryStream::~CSummaryStream(void)
-{
-}
-
 HRESULT CSummaryStream::IsPackageX64( bool *pIsX64)
 {
 	HRESULT hr = S_OK;
 
-	BreakExitOnNull( pIsX64, hr, E_INVALIDARG, "pIsX64 is NULL");
+	ExitOnNull( pIsX64, hr, E_INVALIDARG, "pIsX64 is NULL");
 
 	if (!_pTemplate)
 	{
 		hr = GetProperty(SummaryStreamProperties::PID_TEMPLATE, &_pTemplate);
-		BreakExitOnFailure(hr, "Failed getting template property from summary stream");
-		BreakExitOnNull(_pTemplate, hr, E_FAIL, "Failed getting template property from summary stream");
+		ExitOnFailure(hr, "Failed getting template property from summary stream");
+		ExitOnNull(_pTemplate, hr, E_FAIL, "Failed getting template property from summary stream");
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Template summary stream value is '%ls'", _pTemplate);
 	}
 	
-	MsiDebugBreak();
-
-	if ((::wcscmp(_pTemplate, L"Intel64") == 0) || (::wcscmp(_pTemplate, L"x64") == 0))
+	if ((_wcsicmp(_pTemplate, L"Intel64") == 0) || (_wcsicmp(_pTemplate, L"x64") == 0) || (_wcsicmp(_pTemplate, L"Arm64") == 0))
 	{
 		(*pIsX64) = true;
 	}
@@ -60,29 +54,29 @@ HRESULT CSummaryStream::GetProperty( SummaryStreamProperties eProp, LPWSTR *ppPr
 	FILETIME ftJunk;
 	INT iJunk;
 
-	BreakExitOnNull( ppProp, hr, E_INVALIDARG, "ppProp is NULL");
+	ExitOnNull( ppProp, hr, E_INVALIDARG, "ppProp is NULL");
 
 	hDatabase = WcaGetDatabaseHandle();
-	BreakExitOnNull( hDatabase, hr, E_FAIL, "Failed to get MSI database");
+	ExitOnNull( hDatabase, hr, E_FAIL, "Failed to get MSI database");
 
 	dwRes = ::MsiGetSummaryInformation( hDatabase, nullptr, 0, &hSummaryInfo);
 	hr = HRESULT_FROM_WIN32( dwRes);
-	BreakExitOnFailure( hr, "Failed to get summary stream");
+	ExitOnFailure( hr, "Failed to get summary stream");
 
 	dwRes = ::MsiSummaryInfoGetProperty( hSummaryInfo, eProp , &uiDataType, &iJunk, &ftJunk, L"", &dwDataSize);
 	if( dwRes != ERROR_MORE_DATA)
 	{
 		hr = E_INVALIDSTATE;
-		BreakExitOnFailure( hr, "Failed getting MSI Template property size from summary stream");
+		ExitOnFailure( hr, "Failed getting MSI Template property size from summary stream");
 	}
 
 	++dwDataSize;
 	hr = StrAlloc( ppProp, dwDataSize);
-	BreakExitOnFailure( hr, "Failed to allocate memory");
+	ExitOnFailure( hr, "Failed to allocate memory");
 	
 	dwRes = ::MsiSummaryInfoGetProperty( hSummaryInfo, eProp , &uiDataType, &iJunk, &ftJunk, (*ppProp), &dwDataSize);
 	hr = HRESULT_FROM_WIN32( dwRes);
-	BreakExitOnFailure( hr, "Failed to get summary stream property with PID=%u", eProp);
+	ExitOnFailure( hr, "Failed to get summary stream property with PID=%u", eProp);
 	
 LExit:
 	return hr;

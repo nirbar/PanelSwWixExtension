@@ -69,7 +69,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToEx
 	}
 
 	hr = WcaInitialize(hInstall, cad.id().c_str());
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	bIsWow64Initialized = (WcaInitializeWow64() == S_OK);
@@ -104,7 +104,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToEx
 			hr = S_OK;
 			goto LContinue;
 		}
-		BreakExitOnFailure(hr, "Failed to get CDeferredActionBase for '%s'", cmd.handler().c_str());
+		ExitOnFailure(hr, "Failed to get CDeferredActionBase for '%s'", cmd.handler().c_str());
 
 		// Execute
 		hr = pExecutor->DeferredExecute(cmd.details());
@@ -115,7 +115,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToEx
 			hr = S_OK;
 			goto LContinue;
 		}
-		BreakExitOnFailure(hr, "Failed");
+		ExitOnFailure(hr, "Failed");
 
 		hr = WcaProgressMessage(cmd.cost(), FALSE);
 		if (bIsRollback && FAILED(hr))
@@ -125,7 +125,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToEx
 			hr = S_OK;
 			goto LContinue;
 		}
-		BreakExitOnFailure(hr, "Failed to report progress by cost");
+		ExitOnFailure(hr, "Failed to report progress by cost");
 
 	LContinue:
 
@@ -202,10 +202,10 @@ HRESULT CDeferredActionBase::GetCustomActionData(LPWSTR *pszCustomActionData)
 	LPWSTR szCustomActionData = nullptr;
 
 	bRes = _cad.SerializeToString(&srlz);
-	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing CustomActionData");
+	ExitOnNull(bRes, hr, E_FAIL, "Failed serializing CustomActionData");
 
 	hr = StrAllocBase85Encode((const BYTE*)srlz.data(), srlz.size(), &szCustomActionData);
-	BreakExitOnFailure(hr, "Failed encode CustomActionData");
+	ExitOnFailure(hr, "Failed encode CustomActionData");
 
 	*pszCustomActionData = szCustomActionData;
 	szCustomActionData = nullptr;
@@ -225,7 +225,7 @@ HRESULT CDeferredActionBase::Prepend(CDeferredActionBase* pOther)
 	for (const Command &cmd : pOther->_cad.commands())
 	{
 		Command *pNewCmd = mergedCad.add_commands();
-		BreakExitOnNull(pNewCmd, hr, E_FAIL, "Failed to allocate command");
+		ExitOnNull(pNewCmd, hr, E_FAIL, "Failed to allocate command");
 
 		pNewCmd->CopyFrom(cmd);
 	}
@@ -233,7 +233,7 @@ HRESULT CDeferredActionBase::Prepend(CDeferredActionBase* pOther)
 	for (const Command &cmd : _cad.commands())
 	{
 		Command *pNewCmd = mergedCad.add_commands();
-		BreakExitOnNull(pNewCmd, hr, E_FAIL, "Failed to allocate command");
+		ExitOnNull(pNewCmd, hr, E_FAIL, "Failed to allocate command");
 
 		pNewCmd->CopyFrom(cmd);
 	}

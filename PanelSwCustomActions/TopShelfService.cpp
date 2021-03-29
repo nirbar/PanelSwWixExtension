@@ -22,21 +22,21 @@ extern "C" UINT __stdcall TopShelf(MSIHANDLE hInstall)
 	LPWSTR szCustomActionData = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_DeletePath exists.
 	hr = WcaTableExists(L"PSW_TopShelf");
-	BreakExitOnFailure(hr, "Table does not exist 'PSW_DeletePath'. Have you authored 'PanelSw:DeletePath' entries in WiX code?");
+	ExitOnFailure(hr, "Table does not exist 'PSW_DeletePath'. Have you authored 'PanelSw:DeletePath' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(TopShelfService_QUERY, &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", TopShelfService_QUERY);
+	ExitOnFailure(hr, "Failed to execute SQL query '%ls'.", TopShelfService_QUERY);
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
-		BreakExitOnFailure(hr, "Failed to fetch record.");
+		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
 		CWixString fileId, fileFormat, file, component, serviceName, displayName, description, instance, userName, password;
@@ -47,27 +47,27 @@ extern "C" UINT __stdcall TopShelf(MSIHANDLE hInstall)
 		bool install = true;
 
 		hr = WcaGetRecordString(hRecord, TopShelfServiceQuery::File_, (LPWSTR*)fileId);
-		BreakExitOnFailure(hr, "Failed to get File ID.");
+		ExitOnFailure(hr, "Failed to get File ID.");
 		hr = WcaGetRecordString(hRecord, TopShelfServiceQuery::Component_, (LPWSTR*)component);
-		BreakExitOnFailure(hr, "Failed to get Component ID.");
+		ExitOnFailure(hr, "Failed to get Component ID.");
 		hr = WcaGetRecordFormattedString(hRecord, TopShelfServiceQuery::ServiceName, (LPWSTR*)serviceName);
-		BreakExitOnFailure(hr, "Failed to get ServiceName.");
+		ExitOnFailure(hr, "Failed to get ServiceName.");
 		hr = WcaGetRecordFormattedString(hRecord, TopShelfServiceQuery::DisplayName, (LPWSTR*)displayName);
-		BreakExitOnFailure(hr, "Failed to get DisplayName.");
+		ExitOnFailure(hr, "Failed to get DisplayName.");
 		hr = WcaGetRecordFormattedString(hRecord, TopShelfServiceQuery::Description, (LPWSTR*)description);
-		BreakExitOnFailure(hr, "Failed to get Description.");
+		ExitOnFailure(hr, "Failed to get Description.");
 		hr = WcaGetRecordFormattedString(hRecord, TopShelfServiceQuery::Instance, (LPWSTR*)instance);
-		BreakExitOnFailure(hr, "Failed to get Instance.");
+		ExitOnFailure(hr, "Failed to get Instance.");
 		hr = WcaGetRecordFormattedString(hRecord, TopShelfServiceQuery::UserName, (LPWSTR*)userName);
-		BreakExitOnFailure(hr, "Failed to get UserName.");
+		ExitOnFailure(hr, "Failed to get UserName.");
 		hr = WcaGetRecordFormattedString(hRecord, TopShelfServiceQuery::Password, (LPWSTR*)password);
-		BreakExitOnFailure(hr, "Failed to get Password.");
+		ExitOnFailure(hr, "Failed to get Password.");
 		hr = WcaGetRecordInteger(hRecord, TopShelfServiceQuery::HowToStart, &howToStart);
-		BreakExitOnFailure(hr, "Failed to get HowToStart.");
+		ExitOnFailure(hr, "Failed to get HowToStart.");
 		hr = WcaGetRecordInteger(hRecord, TopShelfServiceQuery::Account, &account);
-		BreakExitOnFailure(hr, "Failed to get Account.");
+		ExitOnFailure(hr, "Failed to get Account.");
 		hr = WcaGetRecordInteger(hRecord, TopShelfServiceQuery::ErrorHandling, &promptOnError);
-		BreakExitOnFailure(hr, "Failed to get PromptOnError.");
+		ExitOnFailure(hr, "Failed to get PromptOnError.");
 
 		// Test condition
 		compToDo = WcaGetComponentToDo(component);
@@ -88,10 +88,10 @@ extern "C" UINT __stdcall TopShelf(MSIHANDLE hInstall)
 		}
 
 		hr = fileFormat.Format(L"[#%s]", (LPCWSTR)fileId);
-		BreakExitOnFailure(hr, "Failed formatting string");
+		ExitOnFailure(hr, "Failed formatting string");
 
 		hr = file.MsiFormat(fileFormat);
-		BreakExitOnFailure(hr, "Failed MSI-formatting string");
+		ExitOnFailure(hr, "Failed MSI-formatting string");
 
 		// Component condition is false
 		if (file.IsNullOrEmpty())
@@ -101,52 +101,52 @@ extern "C" UINT __stdcall TopShelf(MSIHANDLE hInstall)
 		}
 
 		// Validate accout
-		BreakExitOnNull(((account != TopShelfServiceDetails_ServiceAccount::TopShelfServiceDetails_ServiceAccount_custom) || !userName.IsNullOrEmpty()), hr, E_INVALIDARG, "TopShelf Service '%ls' has custom account but account user name is not specified", (LPCWSTR)displayName);
+		ExitOnNull(((account != TopShelfServiceDetails_ServiceAccount::TopShelfServiceDetails_ServiceAccount_custom) || !userName.IsNullOrEmpty()), hr, E_INVALIDARG, "TopShelf Service '%ls' has custom account but account user name is not specified", (LPCWSTR)displayName);
 
 		if (install)
 		{
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will install TopShelf service for file '%ls'", (LPCWSTR)file);
 
 			hr = installRollbackCAD.AddUninstall((LPCWSTR)file, (LPCWSTR)instance);
-			BreakExitOnFailure(hr, "Failed scheduling service install-rollback");
+			ExitOnFailure(hr, "Failed scheduling service install-rollback");
 
 			hr = installCAD.AddInstall((LPCWSTR)file, (LPCWSTR)serviceName, (LPCWSTR)displayName, (LPCWSTR)description, (LPCWSTR)instance, (LPCWSTR)userName, (LPCWSTR)password, (TopShelfServiceDetails_HowToStart)howToStart, (TopShelfServiceDetails_ServiceAccount)account, (com::panelsw::ca::ErrorHandling)promptOnError);
-			BreakExitOnFailure(hr, "Failed scheduling service install");
+			ExitOnFailure(hr, "Failed scheduling service install");
 		}
 		else
 		{
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will uninstall TopShelf service '%ls'", (LPCWSTR)file);
 			
 			hr = uninstallRollbackCAD.AddInstall((LPCWSTR)file, (LPCWSTR)serviceName, (LPCWSTR)displayName, (LPCWSTR)description, (LPCWSTR)instance, (LPCWSTR)userName, (LPCWSTR)password, (TopShelfServiceDetails_HowToStart)howToStart, (TopShelfServiceDetails_ServiceAccount)account, (com::panelsw::ca::ErrorHandling)promptOnError);
-			BreakExitOnFailure(hr, "Failed scheduling service uninstall-rollback");
+			ExitOnFailure(hr, "Failed scheduling service uninstall-rollback");
 
 			hr = uninstallCAD.AddUninstall((LPCWSTR)file, (LPCWSTR)instance);
-			BreakExitOnFailure(hr, "Failed scheduling service uninstall");
+			ExitOnFailure(hr, "Failed scheduling service uninstall");
 		}
 	}
 
 	hr = installRollbackCAD.GetCustomActionData(&szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
+	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
 	hr = WcaSetProperty(L"TopShelfService_InstallRollback", szCustomActionData);
-	BreakExitOnFailure(hr, "Failed setting property");
+	ExitOnFailure(hr, "Failed setting property");
 
 	ReleaseNullStr(szCustomActionData);
 	hr = installCAD.GetCustomActionData(&szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
+	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
 	hr = WcaSetProperty(L"TopShelfService_Install", szCustomActionData);
-	BreakExitOnFailure(hr, "Failed setting property");
+	ExitOnFailure(hr, "Failed setting property");
 
 	ReleaseNullStr(szCustomActionData);
 	hr = uninstallRollbackCAD.GetCustomActionData(&szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
+	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
 	hr = WcaSetProperty(L"TopShelfService_UninstallRollback", szCustomActionData);
-	BreakExitOnFailure(hr, "Failed setting property");
+	ExitOnFailure(hr, "Failed setting property");
 
 	ReleaseNullStr(szCustomActionData);
 	hr = uninstallCAD.GetCustomActionData(&szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
+	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
 	hr = WcaSetProperty(L"TopShelfService_Uninstall", szCustomActionData);
-	BreakExitOnFailure(hr, "Failed setting property");
+	ExitOnFailure(hr, "Failed setting property");
 
 LExit:
 	ReleaseStr(szCustomActionData);
@@ -163,10 +163,10 @@ HRESULT CTopShelfService::AddInstall(LPCWSTR file, LPCWSTR serviceName, LPCWSTR 
 	bool bRes = true;
 
 	hr = AddCommand("CTopShelfService", &pCmd);
-	BreakExitOnFailure(hr, "Failed to add command");
+	ExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new TopShelfServiceDetails();
-	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
+	ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
 	pDetails->set_install(true);
 	pDetails->set_file(file, WSTR_BYTE_SIZE(file));
@@ -181,10 +181,10 @@ HRESULT CTopShelfService::AddInstall(LPCWSTR file, LPCWSTR serviceName, LPCWSTR 
 	pDetails->set_errorhandling(promptOnError);
 
 	pAny = pCmd->mutable_details();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
 	bRes = pDetails->SerializeToString(pAny);
-	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
+	ExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
@@ -199,20 +199,20 @@ HRESULT CTopShelfService::AddUninstall(LPCWSTR file, LPCWSTR instance)
 	bool bRes = true;
 
 	hr = AddCommand("CTopShelfService", &pCmd);
-	BreakExitOnFailure(hr, "Failed to add command");
+	ExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new TopShelfServiceDetails();
-	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
+	ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
 	pDetails->set_install(false);
 	pDetails->set_file(file, WSTR_BYTE_SIZE(file));
 	pDetails->set_instance(instance, WSTR_BYTE_SIZE(instance));
 
 	pAny = pCmd->mutable_details();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
 	bRes = pDetails->SerializeToString(pAny);
-	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
+	ExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
@@ -231,20 +231,20 @@ HRESULT CTopShelfService::DeferredExecute(const ::std::string& command)
 	bool isDeferred = false;
 
 	bRes = details.ParseFromString(command);
-	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking TopShelfServiceDetails");
+	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking TopShelfServiceDetails");
 
 	hr = BuildCommandLine(&details, &commandLine);
-	BreakExitOnFailure(hr, "Failed to create TopShelf command line");
+	ExitOnFailure(hr, "Failed to create TopShelf command line");
 
 	hMsi = WcaGetInstallHandle();
-	BreakExitOnNull(hMsi, hr, E_FAIL, "Failed getting MSI handle");
+	ExitOnNull(hMsi, hr, E_FAIL, "Failed getting MSI handle");
 
 	isDeferred = ::MsiGetMode(hMsi, MSIRUNMODE::MSIRUNMODE_SCHEDULED);
 
 LRetry:
 
 	hr = commandLineCopy.Copy(commandLine);
-	BreakExitOnFailure(hr, "Failed to copy string");
+	ExitOnFailure(hr, "Failed to copy string");
 
 	hr = QuietExecEx(commandLineCopy, INFINITE, FALSE, TRUE);
 	if (FAILED(hr) && isDeferred)
@@ -274,13 +274,13 @@ LRetry:
 			}
 
 			hRec = ::MsiCreateRecord(2);
-			BreakExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
+			ExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
 
 			hr = WcaSetRecordInteger(hRec, 1, 27000);
-			BreakExitOnFailure(hr, "Failed setting record integer");
+			ExitOnFailure(hr, "Failed setting record integer");
 
 			hr = WcaSetRecordString(hRec, 2, fileName);
-			BreakExitOnFailure(hr, "Failed setting record string");
+			ExitOnFailure(hr, "Failed setting record string");
 
 			promptResult = WcaProcessMessage((INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_ERROR | MB_ABORTRETRYIGNORE | MB_DEFBUTTON1 | MB_ICONERROR), hRec);
 			switch (promptResult)
@@ -300,7 +300,7 @@ LRetry:
 
 			case IDCANCEL:
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User canceled on failure to install TopShelf '%ls' service", fileName);
-				BreakExitOnWin32Error(ERROR_INSTALL_USEREXIT, hr, "Cancelling");
+				ExitOnWin32Error(ERROR_INSTALL_USEREXIT, hr, "Cancelling");
 				break;
 
 			default: // Probably silent (result 0)
@@ -312,7 +312,7 @@ LRetry:
 		}
 		}
 	}
-	BreakExitOnFailure(hr, "TopShelf command failed");
+	ExitOnFailure(hr, "TopShelf command failed");
 
 LExit:
 	return hr;
@@ -331,22 +331,22 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 	CWixString logCommand;
 
 	hr = StrAllocString(&file, (LPCWSTR)(pDetails->file().c_str()), 0);
-	BreakExitOnFailure(hr, "Failed allocating string");
+	ExitOnFailure(hr, "Failed allocating string");
 
 	hr = PathEnsureQuoted(&file, FALSE);
-	BreakExitOnFailure(hr, "Failed ensuring file path '%ls' is quoted", file);
+	ExitOnFailure(hr, "Failed ensuring file path '%ls' is quoted", file);
 
 	hr = pCommandLine->Format(L"%s %s"
 		, file
 		, pDetails->install() ? L"install" : L"uninstall"
 	);
-	BreakExitOnFailure(hr, "Failed formatting string");
+	ExitOnFailure(hr, "Failed formatting string");
 
 	instance = (LPCWSTR)pDetails->instance().data();
 	if (instance && *instance)
 	{
 		hr = pCommandLine->AppnedFormat(L" -instance \"%s\"", instance);
-		BreakExitOnFailure(hr, "Failed formatting string");
+		ExitOnFailure(hr, "Failed formatting string");
 	}
 
 	// Uninstall - command is ready
@@ -359,19 +359,19 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 	if (serviceName && *serviceName)
 	{
 		hr = pCommandLine->AppnedFormat(L" -servicename \"%s\"", serviceName);
-		BreakExitOnFailure(hr, "Failed formatting string");
+		ExitOnFailure(hr, "Failed formatting string");
 	}
 	displayName = (LPCWSTR)pDetails->displayname().data();
 	if (displayName && *displayName)
 	{
 		hr = pCommandLine->AppnedFormat(L" -displayname \"%s\"", displayName);
-		BreakExitOnFailure(hr, "Failed formatting string");
+		ExitOnFailure(hr, "Failed formatting string");
 	}
 	description = (LPCWSTR)pDetails->description().data();
 	if (description && *description)
 	{
 		hr = pCommandLine->AppnedFormat(L" -description \"%s\"", description);
-		BreakExitOnFailure(hr, "Failed formatting string");
+		ExitOnFailure(hr, "Failed formatting string");
 	}
 
 	switch (pDetails->account())
@@ -380,31 +380,31 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 		userName = (LPCWSTR)pDetails->username().data();
 
 		hr = pCommandLine->AppnedFormat(L" -username \"%s\"", userName);
-		BreakExitOnFailure(hr, "Failed formatting string");
+		ExitOnFailure(hr, "Failed formatting string");
 
 		// Password will be added later, when formatting command line for log so it will be hidden.
 		break;
 
 	case TopShelfServiceDetails_ServiceAccount::TopShelfServiceDetails_ServiceAccount_localservice:
 		hr = pCommandLine->AppnedFormat(L" --localservice");
-		BreakExitOnFailure(hr, "Failed formatting string");
+		ExitOnFailure(hr, "Failed formatting string");
 		break;
 
 	case TopShelfServiceDetails_ServiceAccount::TopShelfServiceDetails_ServiceAccount_localsystem:
 		hr = pCommandLine->AppnedFormat(L" --localsystem");
-		BreakExitOnFailure(hr, "Failed formatting string");
+		ExitOnFailure(hr, "Failed formatting string");
 		break;
 
 	case TopShelfServiceDetails_ServiceAccount::TopShelfServiceDetails_ServiceAccount_networkservice:
 		hr = pCommandLine->AppnedFormat(L" --networkservice");
-		BreakExitOnFailure(hr, "Failed formatting string");
+		ExitOnFailure(hr, "Failed formatting string");
 		break;
 
 	case TopShelfServiceDetails_ServiceAccount::TopShelfServiceDetails_ServiceAccount_noAccount:
 		break;
 
 	default:
-		BreakExitOnFailure((hr = E_INVALIDARG), "Illegal service account");
+		ExitOnFailure((hr = E_INVALIDARG), "Illegal service account");
 		break;
 	}
 
@@ -412,36 +412,36 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 	{
 	case TopShelfServiceDetails_HowToStart::TopShelfServiceDetails_HowToStart_auto_:
 		hr = pCommandLine->AppnedFormat(L" --autostart");
-		BreakExitOnFailure(hr, "Failed formatting string");
+		ExitOnFailure(hr, "Failed formatting string");
 		break;
 
 	case TopShelfServiceDetails_HowToStart::TopShelfServiceDetails_HowToStart_delayedAuto:
 		hr = pCommandLine->AppnedFormat(L" --delayed");
-		BreakExitOnFailure(hr, "Failed formatting string");
+		ExitOnFailure(hr, "Failed formatting string");
 		break;
 
 	case TopShelfServiceDetails_HowToStart::TopShelfServiceDetails_HowToStart_disabled:
 		hr = pCommandLine->AppnedFormat(L" --disabled");
-		BreakExitOnFailure(hr, "Failed formatting string");
+		ExitOnFailure(hr, "Failed formatting string");
 		break;
 
 	case TopShelfServiceDetails_HowToStart::TopShelfServiceDetails_HowToStart_manual:
 		hr = pCommandLine->AppnedFormat(L" --manual");
-		BreakExitOnFailure(hr, "Failed formatting string");
+		ExitOnFailure(hr, "Failed formatting string");
 		break;
 
 	case TopShelfServiceDetails_HowToStart::TopShelfServiceDetails_HowToStart_noStart:
 		break;
 
 	default:
-		BreakExitOnFailure((hr = E_INVALIDARG), "Illegal service start");
+		ExitOnFailure((hr = E_INVALIDARG), "Illegal service start");
 		break;
 	}
 
 LCommandForLog: // Dump command line to log without password.
 
 	hr = logCommand.Copy((LPCWSTR)*pCommandLine);
-	BreakExitOnFailure(hr, "Failed copying string");
+	ExitOnFailure(hr, "Failed copying string");
 
 	if (!pDetails->install() && (pDetails->account() == TopShelfServiceDetails_ServiceAccount::TopShelfServiceDetails_ServiceAccount_custom))
 	{
@@ -449,10 +449,10 @@ LCommandForLog: // Dump command line to log without password.
 		if (password && *password)
 		{
 			hr = logCommand.AppnedFormat(L" -password \"*********\"");
-			BreakExitOnFailure(hr, "Failed formatting string");
+			ExitOnFailure(hr, "Failed formatting string");
 
 			hr = pCommandLine->AppnedFormat(L" -password \"%s\"", password);
-			BreakExitOnFailure(hr, "Failed formatting string");
+			ExitOnFailure(hr, "Failed formatting string");
 		}
 	}
 

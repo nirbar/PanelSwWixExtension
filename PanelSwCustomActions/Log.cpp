@@ -11,7 +11,7 @@ extern "C" UINT __stdcall Log(MSIHANDLE hInstall)
 	CWixString szMsg;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 
 	// Deferred? Get CustomActionData
 	if( ::MsiGetMode( hInstall, MSIRUNMODE_SCHEDULED)
@@ -22,7 +22,7 @@ extern "C" UINT __stdcall Log(MSIHANDLE hInstall)
 	}
 
 	hr = WcaGetProperty( szPropName, (LPWSTR*)szMsg);
-	BreakExitOnFailure(hr, "Failed to get property '%ls'", szPropName);
+	ExitOnFailure(hr, "Failed to get property '%ls'", szPropName);
 
 	WcaLog( LOGLEVEL::LOGMSG_STANDARD, "%ls", (LPCWSTR)szMsg);
 
@@ -40,7 +40,7 @@ extern "C" UINT __stdcall Warn(MSIHANDLE hInstall)
 	CWixString szMsg;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 
 	// Deferred? Get CustomActionData
 	if( ::MsiGetMode( hInstall, MSIRUNMODE_SCHEDULED)
@@ -51,13 +51,13 @@ extern "C" UINT __stdcall Warn(MSIHANDLE hInstall)
 	}
 
 	hr = WcaGetProperty( szPropName, (LPWSTR*)szMsg);
-	BreakExitOnFailure(hr, "Failed to get property '%ls'", szPropName);
+	ExitOnFailure(hr, "Failed to get property '%ls'", szPropName);
 
 	hRecord = ::MsiCreateRecord( 1);
-	BreakExitOnNullWithLastError(hRecord, hr, "Failed to create a warning record.");
+	ExitOnNullWithLastError(hRecord, hr, "Failed to create a warning record.");
 
 	hr = WcaSetRecordString(hRecord, 0, (LPCWSTR)szMsg);
-	BreakExitOnFailure(hr, "Failed to set warning record message");
+	ExitOnFailure(hr, "Failed to set warning record message");
 
 	WcaProcessMessage( INSTALLMESSAGE::INSTALLMESSAGE_WARNING, hRecord);
 

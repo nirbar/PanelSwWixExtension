@@ -18,19 +18,19 @@ extern "C" UINT __stdcall RemoveRegistryValue_Immediate(MSIHANDLE hInstall)
 	CComBSTR xmlString;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 		
 	// Ensure table PSW_RemoveRegistryValue exists.
 	hr = WcaTableExists(L"PSW_RemoveRegistryValue");
-	BreakExitOnFailure(hr, "Table does not exist 'PSW_RemoveRegistryValue'. Have you authored 'PanelSw:RemoveRegistryValue' entries in WiX code?");
+	ExitOnFailure(hr, "Table does not exist 'PSW_RemoveRegistryValue'. Have you authored 'PanelSw:RemoveRegistryValue' entries in WiX code?");
 
 	hr = WcaOpenExecuteView( RemoveRegistryValueQuery, &hView);
-	BreakExitOnFailure(hr, "Failed to execute view");
+	ExitOnFailure(hr, "Failed to execute view");
 
 	while ( E_NOMOREITEMS != (hr = WcaFetchRecord(hView, &hRec)))
     {
-		BreakExitOnFailure(hr, "Failed to fetch record");
+		ExitOnFailure(hr, "Failed to fetch record");
 		
 		// Get record.
 		LPWSTR pId = nullptr;
@@ -51,17 +51,17 @@ extern "C" UINT __stdcall RemoveRegistryValue_Immediate(MSIHANDLE hInstall)
 		CRegDataSerializer dataSerialiser;
 		
 		hr = WcaGetRecordString( hRec, eRemoveRegistryValueQuery::Id, &pId);
-		BreakExitOnFailure(hr, "Failed to get Id");
+		ExitOnFailure(hr, "Failed to get Id");
 		hr = WcaGetRecordString( hRec, eRemoveRegistryValueQuery::Root, &pRoot);
-		BreakExitOnFailure(hr, "Failed to get Root");
+		ExitOnFailure(hr, "Failed to get Root");
 		hr = WcaGetRecordFormattedString( hRec, eRemoveRegistryValueQuery::Key, &pKey);
-		BreakExitOnFailure(hr, "Failed to get Key");
+		ExitOnFailure(hr, "Failed to get Key");
 		hr = WcaGetRecordFormattedString( hRec, eRemoveRegistryValueQuery::Name, &pName);
-		BreakExitOnFailure(hr, "Failed to get Name");
+		ExitOnFailure(hr, "Failed to get Name");
 		hr = WcaGetRecordString( hRec, eRemoveRegistryValueQuery::Area, &pArea);
-		BreakExitOnFailure(hr, "Failed to get Area");
+		ExitOnFailure(hr, "Failed to get Area");
 		hr = WcaGetRecordString( hRec, eRemoveRegistryValueQuery::Condition, &pCondition);
-		BreakExitOnFailure(hr, "Failed to get Condition");
+		ExitOnFailure(hr, "Failed to get Condition");
 
 		MSICONDITION cond = ::MsiEvaluateCondition( hInstall, pCondition);
 		switch( cond)
@@ -77,20 +77,20 @@ extern "C" UINT __stdcall RemoveRegistryValue_Immediate(MSIHANDLE hInstall)
 
 		case MSICONDITION::MSICONDITION_ERROR:
 			hr = E_FAIL;
-			BreakExitOnFailure(hr, "Failed to evaluate condition");
+			ExitOnFailure(hr, "Failed to evaluate condition");
 		}
 
 		// Parse root name.
 		hr = CRegistryKey::ParseRoot( pRoot, &eRoot);
-		BreakExitOnFailure(hr, "Failed to parse root");
+		ExitOnFailure(hr, "Failed to parse root");
 
 		// Parse area name.
 		hr = CRegistryKey::ParseArea( pArea, &eArea);
-		BreakExitOnFailure(hr, "Failed to parse area");
+		ExitOnFailure(hr, "Failed to parse area");
 
 		// CustomActionData
 		hr = actionData.AddDeleteValue( pId, eRoot, pKey, eArea, pName);
-		BreakExitOnFailure(hr, "Failed to add 'DeleteValue' to CustomActionData");
+		ExitOnFailure(hr, "Failed to add 'DeleteValue' to CustomActionData");
 
 		// Rollback CustomActionData
 		hr = key.Open( eRoot, pKey, eArea, CRegistryKey::RegAccess::ReadOnly);
@@ -99,7 +99,7 @@ extern "C" UINT __stdcall RemoveRegistryValue_Immediate(MSIHANDLE hInstall)
 			hr = S_OK;
 			continue;
 		}
-		BreakExitOnFailure(hr, "Failed to query existing key");
+		ExitOnFailure(hr, "Failed to query existing key");
 
 		hr = key.GetValue( pName, &pData, &valueType, &dwValueSize);
 		if( hr == E_FILENOTFOUND)
@@ -107,28 +107,28 @@ extern "C" UINT __stdcall RemoveRegistryValue_Immediate(MSIHANDLE hInstall)
 			hr = S_OK;
 			continue;
 		}
-		BreakExitOnFailure(hr, "Failed to query existing value");
+		ExitOnFailure(hr, "Failed to query existing value");
 
 		hr = dataSerialiser.Set( pData, valueType, dwValueSize);
-		BreakExitOnFailure(hr, "Failed to initialize data serializer");
+		ExitOnFailure(hr, "Failed to initialize data serializer");
 
 		hr = dataSerialiser.Serialize( &pDataString);
-		BreakExitOnFailure(hr, "Failed to serialize data");
+		ExitOnFailure(hr, "Failed to serialize data");
 
 		hr = rollbackActionData.AddCreateValue(pId, eRoot, pKey, eArea, pName, valueType, pDataString);
-		BreakExitOnFailure(hr, "Failed to create XML element");
+		ExitOnFailure(hr, "Failed to create XML element");
 	}
 	
 	hr = rollbackActionData.GetXmlString( &xmlString);
-	BreakExitOnFailure(hr, "Failed to read XML as text");
+	ExitOnFailure(hr, "Failed to read XML as text");
 	hr = WcaDoDeferredAction( L"RemoveRegistryValue_rollback", xmlString, 0);
-	BreakExitOnFailure(hr, "Failed to set property");	
+	ExitOnFailure(hr, "Failed to set property");	
 	xmlString.Empty();
 
 	hr = actionData.GetXmlString( &xmlString);
-	BreakExitOnFailure(hr, "Failed to read XML as text");
+	ExitOnFailure(hr, "Failed to read XML as text");
 	hr = WcaDoDeferredAction( L"RemoveRegistryValue_deferred", xmlString, 0);
-	BreakExitOnFailure(hr, "Failed to set property");
+	ExitOnFailure(hr, "Failed to set property");
 	xmlString.Empty();
 
 LExit:
@@ -145,14 +145,14 @@ extern "C" UINT __stdcall RemoveRegistryValue_Deferred(MSIHANDLE hInstall)
 	LPWSTR pActionData = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	hr = WcaGetProperty( L"CustomActionData", &pActionData);
-	BreakExitOnFailure(hr, "Failed to get CustomActionData");
+	ExitOnFailure(hr, "Failed to get CustomActionData");
 
 	hr = action.Execute( pActionData);
-	BreakExitOnFailure(hr, "Failed to parse-execute RemoveRegistryValue");
+	ExitOnFailure(hr, "Failed to parse-execute RemoveRegistryValue");
 
 LExit:
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;

@@ -24,18 +24,18 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 	LPWSTR szDependencies = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure tables exist.
 	hr = WcaTableExists(L"PSW_ServiceConfig");
-	BreakExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ServiceConfig'. Have you authored 'PanelSw:ServiceConfig' entries in WiX code?");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ServiceConfig'. Have you authored 'PanelSw:ServiceConfig' entries in WiX code?");
 	hr = WcaTableExists(L"PSW_ServiceConfig_Dependency");
-	BreakExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ServiceConfig_Dependency'. Have you authored 'PanelSw:ServiceConfig' entries in WiX code?");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ServiceConfig_Dependency'. Have you authored 'PanelSw:ServiceConfig' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `ServiceName`, `CommandLine`, `Account`, `Password`, `Start`, `DelayStart`, `LoadOrderGroup`, `ErrorHandling` FROM `PSW_ServiceConfig`", &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query.");
+	ExitOnFailure(hr, "Failed to execute SQL query.");
 
 	// Open service.
 	hManager = ::OpenSCManager(nullptr, nullptr, SC_MANAGER_CONNECT);
@@ -44,7 +44,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
-		BreakExitOnFailure(hr, "Failed to fetch record.");
+		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
 		CWixString szId, szComponent, szServiceName, szCommand, szCommandFormat, szCommandObfuscated, szAccount, szPassword, szLoadOrderGroupFmt, szLoadOrderGroup;
@@ -57,25 +57,25 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 		DWORD dwServiceType = SERVICE_NO_CHANGE;
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szId);
-		BreakExitOnFailure(hr, "Failed to get Id.");
+		ExitOnFailure(hr, "Failed to get Id.");
 		hr = WcaGetRecordString(hRecord, 2, (LPWSTR*)szComponent);
-		BreakExitOnFailure(hr, "Failed to get Component.");
+		ExitOnFailure(hr, "Failed to get Component.");
 		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)szServiceName);
-		BreakExitOnFailure(hr, "Failed to get ServiceName.");
+		ExitOnFailure(hr, "Failed to get ServiceName.");
 		hr = WcaGetRecordString(hRecord, 4, (LPWSTR*)szCommandFormat);
-		BreakExitOnFailure(hr, "Failed to get CommandLine.");
+		ExitOnFailure(hr, "Failed to get CommandLine.");
 		hr = WcaGetRecordFormattedString(hRecord, 5, (LPWSTR*)szAccount);
-		BreakExitOnFailure(hr, "Failed to get Account.");
+		ExitOnFailure(hr, "Failed to get Account.");
 		hr = WcaGetRecordFormattedString(hRecord, 6, (LPWSTR*)szPassword);
-		BreakExitOnFailure(hr, "Failed to get Password.");
+		ExitOnFailure(hr, "Failed to get Password.");
 		hr = WcaGetRecordInteger(hRecord, 7, &start);
-		BreakExitOnFailure(hr, "Failed to get Start.");
+		ExitOnFailure(hr, "Failed to get Start.");
 		hr = WcaGetRecordInteger(hRecord, 8, &nDelayStart);
-		BreakExitOnFailure(hr, "Failed to get DelayStart.");
+		ExitOnFailure(hr, "Failed to get DelayStart.");
 		hr = WcaGetRecordString(hRecord, 9, (LPWSTR*)szLoadOrderGroupFmt);
-		BreakExitOnFailure(hr, "Failed to get LoadOrderGroup.");
+		ExitOnFailure(hr, "Failed to get LoadOrderGroup.");
 		hr = WcaGetRecordInteger(hRecord, 10, &errorHandling);
-		BreakExitOnFailure(hr, "Failed to get ErrorHandling.");
+		ExitOnFailure(hr, "Failed to get ErrorHandling.");
 
 		// Test condition
 		compAction = WcaGetComponentToDo(szComponent);
@@ -154,21 +154,21 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 
 		// Dependencies
 		hr = szSubQuery.Format(L"SELECT `Service`, `Group` FROM `PSW_ServiceConfig_Dependency` WHERE `ServiceConfig_`='%s'", (LPCWSTR)szId);
-		BreakExitOnFailure(hr, "Failed to format string");
+		ExitOnFailure(hr, "Failed to format string");
 
 		hr = WcaOpenExecuteView((LPCWSTR)szSubQuery, &hSubView);
-		BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", (LPCWSTR)szSubQuery);
+		ExitOnFailure(hr, "Failed to execute SQL query '%ls'.", (LPCWSTR)szSubQuery);
 
 		// Iterate records
 		while ((hr = WcaFetchRecord(hSubView, &hSubRecord)) != E_NOMOREITEMS)
 		{
-			BreakExitOnFailure(hr, "Failed to fetch record.");
+			ExitOnFailure(hr, "Failed to fetch record.");
 			CWixString szServiceFmt, szGroup;
 
 			hr = WcaGetRecordString(hSubRecord, 1, (LPWSTR*)szServiceFmt);
-			BreakExitOnFailure(hr, "Failed to get Dependency.");
+			ExitOnFailure(hr, "Failed to get Dependency.");
 			hr = WcaGetRecordFormattedString(hSubRecord, 2, (LPWSTR*)szGroup);
-			BreakExitOnFailure(hr, "Failed to get Group.");
+			ExitOnFailure(hr, "Failed to get Group.");
 
 			if (!szGroup.IsNullOrEmpty())
 			{
@@ -176,17 +176,17 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 				if (szDependencies == nullptr)
 				{
 					hr = StrAllocFormatted(&szDependencies, L"%c%s%c", SC_GROUP_IDENTIFIER, (LPCWSTR)szGroup, NULL);
-					BreakExitOnFailure(hr, "Failed creating multstring.");
+					ExitOnFailure(hr, "Failed creating multstring.");
 				}
 				else
 				{
 					CWixString szTmp;
 
 					hr = szTmp.Format(L"%c%s", SC_GROUP_IDENTIFIER, (LPCWSTR)szGroup);
-					BreakExitOnFailure(hr, "Failed formatting string");
+					ExitOnFailure(hr, "Failed formatting string");
 
 					hr = MultiSzInsertString(&szDependencies, nullptr, 0, (LPCWSTR)szTmp);
-					BreakExitOnFailure(hr, "Failed inserting to multi-string");
+					ExitOnFailure(hr, "Failed inserting to multi-string");
 				}
 			}
 
@@ -195,18 +195,18 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 				CWixString szService;
 
 				hr = szService.MsiFormat(szServiceFmt, nullptr);
-				BreakExitOnFailure(hr, "Failed to format string");
+				ExitOnFailure(hr, "Failed to format string");
 
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will add to service '%ls' dependency on service '%ls'", (LPCWSTR)szServiceName, (LPCWSTR)szService);
 				if (szDependencies == nullptr)
 				{
 					hr = StrAllocFormatted(&szDependencies, L"%s%c", (LPCWSTR)szService, NULL);
-					BreakExitOnFailure(hr, "Failed creating multstring.");
+					ExitOnFailure(hr, "Failed creating multstring.");
 				}
 				else
 				{
 					hr = MultiSzInsertString(&szDependencies, nullptr, 0, (LPCWSTR)szService);
-					BreakExitOnFailure(hr, "Failed inserting to multi-string");
+					ExitOnFailure(hr, "Failed inserting to multi-string");
 				}
 			}
 		}
@@ -263,15 +263,15 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 
 	// Set CAD
 	hr = oRollback.GetCustomActionData(&szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting custom action data for rollback.");
+	ExitOnFailure(hr, "Failed getting custom action data for rollback.");
 	hr = WcaDoDeferredAction(L"PSW_ServiceConfigRlbk", szCustomActionData, oRollback.GetCost());
-	BreakExitOnFailure(hr, "Failed setting rollback action data.");
+	ExitOnFailure(hr, "Failed setting rollback action data.");
 
 	ReleaseNullStr(szCustomActionData);
 	hr = oDeferred.GetCustomActionData(&szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting custom action data.");
+	ExitOnFailure(hr, "Failed getting custom action data.");
 	hr = WcaDoDeferredAction(L"PSW_ServiceConfigExec", szCustomActionData, oDeferred.GetCost());
-	BreakExitOnFailure(hr, "Failed setting action data.");
+	ExitOnFailure(hr, "Failed setting action data.");
 
 LExit:
 	ReleaseStr(szCustomActionData);
@@ -293,10 +293,10 @@ HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szComman
 	bool bRes = true;
 
 	hr = AddCommand("CServiceConfig", &pCmd);
-	BreakExitOnFailure(hr, "Failed to add command");
+	ExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new ServciceConfigDetails();
-	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
+	ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
 	pDetails->set_name(szServiceName, WSTR_BYTE_SIZE(szServiceName));
 	if (szAccount && *szAccount)
@@ -319,7 +319,7 @@ HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szComman
 	{
 		DWORD dwLen = 0;
 		hr = ::MultiSzLen(szDependencies, &dwLen);
-		BreakExitOnFailure(hr, "Failed getting multi-string length");
+		ExitOnFailure(hr, "Failed getting multi-string length");
 		dwLen *= sizeof(WCHAR);
 		
 		pDetails->set_dependencies(szDependencies, dwLen);
@@ -330,10 +330,10 @@ HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szComman
 	pDetails->set_servicetype(dwServiceType);
 
 	pAny = pCmd->mutable_details();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
 	bRes = pDetails->SerializeToString(pAny);
-	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
+	ExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
@@ -353,7 +353,7 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 	ServciceConfigDetails details;
 
 	bRes = details.ParseFromString(command);
-	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ExecOnDetails");
+	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ExecOnDetails");
 
 	szServiceName = (LPCWSTR)details.name().data();
 	if (details.account().size() > sizeof(WCHAR)) // Larger than NULL
@@ -456,13 +456,13 @@ HRESULT CServiceConfig::PromptError(LPCWSTR szServiceName, ::com::panelsw::ca::E
 		UINT promptResult = IDOK;
 
 		hRec = ::MsiCreateRecord(2);
-		BreakExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
+		ExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
 
 		hr = WcaSetRecordInteger(hRec, 1, 27002);
-		BreakExitOnFailure(hr, "Failed setting record integer");
+		ExitOnFailure(hr, "Failed setting record integer");
 
 		hr = WcaSetRecordString(hRec, 2, szServiceName);
-		BreakExitOnFailure(hr, "Failed setting record string");
+		ExitOnFailure(hr, "Failed setting record string");
 
 		promptResult = WcaProcessMessage((INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_ERROR | MB_ABORTRETRYIGNORE | MB_DEFBUTTON1 | MB_ICONERROR), hRec);
 		switch (promptResult)
@@ -483,7 +483,7 @@ HRESULT CServiceConfig::PromptError(LPCWSTR szServiceName, ::com::panelsw::ca::E
 
 		case IDCANCEL:
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User canceled on failure to configure '%ls' service", szServiceName);
-			BreakExitOnWin32Error(ERROR_INSTALL_USEREXIT, hr, "Cancelling");
+			ExitOnWin32Error(ERROR_INSTALL_USEREXIT, hr, "Cancelling");
 			break;
 
 		default: // Probably silent (result 0)

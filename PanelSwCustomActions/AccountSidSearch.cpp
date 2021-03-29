@@ -10,17 +10,17 @@ extern "C" UINT __stdcall AccountSidSearch(MSIHANDLE hInstall)
 	PMSIHANDLE hRecord;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `Property_`, `SystemName`, `AccountName`, `Condition` FROM `PSW_AccountSidSearch`", &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query on 'PSW_AccountSidSearch'.");
+	ExitOnFailure(hr, "Failed to execute SQL query on 'PSW_AccountSidSearch'.");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
-		BreakExitOnFailure(hr, "Failed to fetch record.");
+		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
 		CWixString szProperty;
@@ -30,13 +30,13 @@ extern "C" UINT __stdcall AccountSidSearch(MSIHANDLE hInstall)
 		CWixString szSid;
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szProperty);
-		BreakExitOnFailure(hr, "Failed to get Property_.");
+		ExitOnFailure(hr, "Failed to get Property_.");
 		hr = WcaGetRecordFormattedString(hRecord, 2, (LPWSTR*)szSystemName);
-		BreakExitOnFailure(hr, "Failed to get SystemName.");
+		ExitOnFailure(hr, "Failed to get SystemName.");
 		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)szAccountName);
-		BreakExitOnFailure(hr, "Failed to get AccountName.");
+		ExitOnFailure(hr, "Failed to get AccountName.");
 		hr = WcaGetRecordString(hRecord, 4, (LPWSTR*)szCondition);
-		BreakExitOnFailure(hr, "Failed to get Condition.");
+		ExitOnFailure(hr, "Failed to get Condition.");
 
 		// Test condition
 		if (!szCondition.IsNullOrEmpty())
@@ -55,7 +55,7 @@ extern "C" UINT __stdcall AccountSidSearch(MSIHANDLE hInstall)
 
 			case MSICONDITION::MSICONDITION_ERROR:
 				hr = E_FAIL;
-				BreakExitOnFailure(hr, "Bad Condition field");
+				ExitOnFailure(hr, "Bad Condition field");
 			}
 		}
 
@@ -70,10 +70,10 @@ extern "C" UINT __stdcall AccountSidSearch(MSIHANDLE hInstall)
 			hr = S_FALSE;
 			continue;
 		}
-		BreakExitOnFailure(hr, "Failed getting account SID for '%ls'", (LPCWSTR)szAccountName);
+		ExitOnFailure(hr, "Failed getting account SID for '%ls'", (LPCWSTR)szAccountName);
 
 		hr = WcaSetProperty(szProperty, szSid);
-		BreakExitOnFailure(hr, "Failed set property '%ls' with SID for '%ls'", (LPCWSTR)szProperty, (LPCWSTR)szAccountName);
+		ExitOnFailure(hr, "Failed set property '%ls' with SID for '%ls'", (LPCWSTR)szProperty, (LPCWSTR)szAccountName);
 	}
 	hr = S_OK;
 

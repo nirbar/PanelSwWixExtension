@@ -51,7 +51,7 @@ extern "C" UINT __stdcall SplitString(MSIHANDLE hInstall)
 	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Will split string '%ls' by token '%ls'", (LPCWSTR)szFullString, (LPCWSTR)szToken);
 
 	hr = szDstPropName.Allocate(szPropName.Capacity() + 20);
-	BreakExitOnFailure(hr, "Failed allocating memory");
+	ExitOnFailure(hr, "Failed allocating memory");
 
 	for (hr = szFullString.Tokenize((LPCWSTR)szToken, &szCurrValue);
 		(SUCCEEDED(hr) && szCurrValue);
@@ -179,35 +179,35 @@ extern "C" UINT __stdcall ToLowerCase(MSIHANDLE hInstall)
 	bool bIgnoreErrors = false;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_XmlSearch exists.
 	hr = WcaTableExists(L"PSW_ToLowerCase");
-	BreakExitOnFailure(hr, "Table does not exist 'PSW_ToLowerCase'. Have you authored 'PanelSw:ToLowerCase' entries in WiX code?");
+	ExitOnFailure(hr, "Table does not exist 'PSW_ToLowerCase'. Have you authored 'PanelSw:ToLowerCase' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `Property_` FROM `PSW_ToLowerCase`", &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query on 'PSW_ToLowerCase'.");
+	ExitOnFailure(hr, "Failed to execute SQL query on 'PSW_ToLowerCase'.");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
-		BreakExitOnFailure(hr, "Failed to fetch record.");
+		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
 		CWixString szProperty, szValue;
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szProperty);
-		BreakExitOnFailure(hr, "Failed to get Property_.");
+		ExitOnFailure(hr, "Failed to get Property_.");
 
 		hr = WcaGetProperty(szProperty, (LPWSTR*)szValue);
-		BreakExitOnFailure(hr, "Failed to get property '%ls' value.", (LPCWSTR)szProperty);
+		ExitOnFailure(hr, "Failed to get property '%ls' value.", (LPCWSTR)szProperty);
 
 		StrStringToLower(szValue);
 
 		hr = WcaSetProperty(szProperty, szValue);
-		BreakExitOnFailure(hr, "Failed setting property");
+		ExitOnFailure(hr, "Failed setting property");
 	}
 	hr = ERROR_SUCCESS;
 

@@ -10,30 +10,30 @@ extern "C" UINT __stdcall PathSearch(MSIHANDLE hInstall)
 	bool bIgnoreErrors = false;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_XmlSearch exists.
 	hr = WcaTableExists(L"PSW_PathSearch");
-	BreakExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_PathSearch'. Have you authored 'PanelSw:PathSearch' entries in WiX code?");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_PathSearch'. Have you authored 'PanelSw:PathSearch' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `FileName`, `Property_` FROM `PSW_PathSearch`", &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query on 'PSW_PathSearch'.");
+	ExitOnFailure(hr, "Failed to execute SQL query on 'PSW_PathSearch'.");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
-		BreakExitOnFailure(hr, "Failed to fetch record.");
+		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
 		CWixString szFileName, szProperty, szFullPath;
 		DWORD nBuffSize = 0;
 
 		hr = WcaGetRecordFormattedString(hRecord, 1, (LPWSTR*)szFileName);
-		BreakExitOnFailure(hr, "Failed to get FileName.");
+		ExitOnFailure(hr, "Failed to get FileName.");
 		hr = WcaGetRecordString(hRecord, 2, (LPWSTR*)szProperty);
-		BreakExitOnFailure(hr, "Failed to get Property_.");
+		ExitOnFailure(hr, "Failed to get Property_.");
 
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Searching '%ls' on PATH. Setting result in property '%ls'", (LPCWSTR)szFileName, (LPCWSTR)szProperty);
 
@@ -53,7 +53,7 @@ extern "C" UINT __stdcall PathSearch(MSIHANDLE hInstall)
 		}
 
 		hr = WcaSetProperty(szProperty, szFullPath);
-		BreakExitOnFailure(hr, "Failed setting property");
+		ExitOnFailure(hr, "Failed setting property");
 	}
 	hr = S_OK;
 

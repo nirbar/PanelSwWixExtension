@@ -19,21 +19,21 @@ extern "C" UINT __stdcall EvaluateExpression(MSIHANDLE hInstall)
 	LPSTR szAnsiExpression = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_DeletePath exists.
 	hr = WcaTableExists(L"PSW_EvaluateExpression");
-	BreakExitOnFailure(hr, "Table does not exist 'PSW_BackupAndRestore'. Have you authored 'PanelSw:Evaluate' entries in WiX code?");
+	ExitOnFailure(hr, "Table does not exist 'PSW_BackupAndRestore'. Have you authored 'PanelSw:Evaluate' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(QUERY, &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query '%ls'.", QUERY);
+	ExitOnFailure(hr, "Failed to execute SQL query '%ls'.", QUERY);
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
-		BreakExitOnFailure(hr, "Failed to fetch record.");
+		ExitOnFailure(hr, "Failed to fetch record.");
 		CWixString expression, property_;
 		bool bRes = true;
 		double value = 0;
@@ -41,19 +41,19 @@ extern "C" UINT __stdcall EvaluateExpression(MSIHANDLE hInstall)
 		exprtk::parser<double> parser;
 
 		hr = WcaGetRecordFormattedString(hRecord, 1, (LPWSTR*)expression);
-		BreakExitOnFailure(hr, "Failed to get expression.");
+		ExitOnFailure(hr, "Failed to get expression.");
 		hr = WcaGetRecordString(hRecord, 2, (LPWSTR*)property_);
-		BreakExitOnFailure(hr, "Failed to get Path.");
+		ExitOnFailure(hr, "Failed to get Path.");
 		hr = expression.ToAnsiString(&szAnsiExpression);
-		BreakExitOnFailure(hr, "Failed to get expression as ANSI string.");
+		ExitOnFailure(hr, "Failed to get expression as ANSI string.");
 
 		bRes = parser.compile(szAnsiExpression, expr);
-		BreakExitOnNull(bRes, hr, E_FAIL, "Failed compiling expression '%s'", szAnsiExpression);
+		ExitOnNull(bRes, hr, E_FAIL, "Failed compiling expression '%s'", szAnsiExpression);
 
 		value = expr.value();
 
 		hr = WcaSetIntProperty(property_, (int)value);
-		BreakExitOnFailure(hr, "Failed to set property.");
+		ExitOnFailure(hr, "Failed to set property.");
 
 		ReleaseNullMem(szAnsiExpression);
 	}

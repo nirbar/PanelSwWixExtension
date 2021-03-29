@@ -38,26 +38,26 @@ HRESULT CRegistryKey::Create(RegRoot root, WCHAR* key, RegArea area, RegAccess a
 
 
 	hr = Close();
-	BreakExitOnFailure(hr, "Failed to close registry key");
+	ExitOnFailure(hr, "Failed to close registry key");
 
-	BreakExitOnNull(key, hr, E_FILENOTFOUND, "key is NULL");
-	BreakExitOnNull(*key, hr, E_FILENOTFOUND, "key points to NULL");
+	ExitOnNull(key, hr, E_FILENOTFOUND, "key is NULL");
+	ExitOnNull(*key, hr, E_FILENOTFOUND, "key points to NULL");
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Attempting to create registry key %ls", key);
 
 	hParentKey = Root2Handle(root);
-	BreakExitOnNull(hParentKey, hr, E_FILENOTFOUND, "key is NULL");
+	ExitOnNull(hParentKey, hr, E_FILENOTFOUND, "key is NULL");
 
 	_samAccess = access;
 	_area = area;
 	if (_area == RegArea::Default)
 	{
 		hr = GetDefaultArea(&_area);
-		BreakExitOnFailure(hr, "Failed to get default registry area");
+		ExitOnFailure(hr, "Failed to get default registry area");
 	}
 
 	lRes = ::RegCreateKeyExW(hParentKey, key, 0, nullptr, 0, _samAccess | _area, nullptr, &hKey, nullptr);
 	hr = HRESULT_FROM_WIN32(lRes);
-	BreakExitOnFailure(hr, "Failed to create registry key");
+	ExitOnFailure(hr, "Failed to create registry key");
 
 	_hKey = hKey;
 	_hRootKey = hParentKey;
@@ -73,25 +73,25 @@ HRESULT CRegistryKey::Open(RegRoot root, WCHAR* key, RegArea area, RegAccess acc
 	HKEY hKey = NULL, hParentKey = NULL;
 	LONG lRes;
 
-	BreakExitOnNull(key, hr, E_INVALIDARG, "key is NULL");
+	ExitOnNull(key, hr, E_INVALIDARG, "key is NULL");
 
 	hr = Close();
-	BreakExitOnFailure(hr, "Failed to close registry key");
+	ExitOnFailure(hr, "Failed to close registry key");
 
 	hParentKey = Root2Handle(root);
-	BreakExitOnNull(hParentKey, hr, E_INVALIDARG, "Parent key is NULL");
+	ExitOnNull(hParentKey, hr, E_INVALIDARG, "Parent key is NULL");
 
 	_samAccess = access;
 	_area = area;
 	if (_area == RegArea::Default)
 	{
 		hr = GetDefaultArea(&_area);
-		BreakExitOnFailure(hr, "Failed to get default registry area");
+		ExitOnFailure(hr, "Failed to get default registry area");
 	}
 
 	lRes = ::RegOpenKeyExW(hParentKey, key, 0, _samAccess | _area, &hKey);
 	hr = HRESULT_FROM_WIN32(lRes);
-	BreakExitOnFailure(hr, "Failed to open registry key");
+	ExitOnFailure(hr, "Failed to open registry key");
 
 	_hKey = hKey;
 	_hRootKey = hParentKey;
@@ -107,7 +107,7 @@ HRESULT CRegistryKey::Delete()
 	LONG lRes = ERROR_SUCCESS;
 	WCHAR keyName[MAX_PATH];
 
-	BreakExitOnNull(_hKey, hr, E_FILENOTFOUND, "_hKey is NULL");
+	ExitOnNull(_hKey, hr, E_FILENOTFOUND, "_hKey is NULL");
 
 	// Copy info
 	HKEY rootKey = _hRootKey;
@@ -118,7 +118,7 @@ HRESULT CRegistryKey::Delete()
 
 	// Delete key
 	hr = RegDelete(rootKey, keyName, (_area == RegArea::X64 ? REG_KEY_BITNESS::REG_KEY_64BIT : (_area == RegArea::X86) ? REG_KEY_BITNESS::REG_KEY_32BIT : REG_KEY_BITNESS::REG_KEY_DEFAULT), TRUE);
-	BreakExitOnFailure(hr, "Failed to delete registry key '%ls'", keyName);
+	ExitOnFailure(hr, "Failed to delete registry key '%ls'", keyName);
 
 LExit:
 	return hr;
@@ -134,7 +134,7 @@ HRESULT CRegistryKey::EnumValues(DWORD dwIndex, LPWSTR* pszName, RegValueType* p
 		hr = S_FALSE;
 		ExitFunction();
 	}
-	BreakExitOnFailure(hr, "Failed to enumerate values for registry key");
+	ExitOnFailure(hr, "Failed to enumerate values for registry key");
 
 LExit:
 	return hr;
@@ -145,7 +145,7 @@ HRESULT CRegistryKey::GetStringValue(LPWSTR szName, LPWSTR* pszData)
 	HRESULT hr = S_OK;
 
 	hr = RegReadString(_hKey, szName, pszData);
-	BreakExitOnFailure(hr, "Failed to get registry string value '%ls'", szName);
+	ExitOnFailure(hr, "Failed to get registry string value '%ls'", szName);
 
 LExit:
 	return hr;
@@ -156,22 +156,22 @@ HRESULT CRegistryKey::GetValue(WCHAR* name, BYTE** pData, RegValueType* pType, D
 	LONG lRes = ERROR_SUCCESS;
 	HRESULT hr = S_OK;
 
-	BreakExitOnNull(pData, hr, E_INVALIDARG, "pData is NULL");
-	BreakExitOnNull(pType, hr, E_INVALIDARG, "pType is NULL");
-	BreakExitOnNull(pDataSize, hr, E_INVALIDARG, "pDataSize is NULL");
+	ExitOnNull(pData, hr, E_INVALIDARG, "pData is NULL");
+	ExitOnNull(pType, hr, E_INVALIDARG, "pType is NULL");
+	ExitOnNull(pDataSize, hr, E_INVALIDARG, "pDataSize is NULL");
 
 	(*pDataSize) = 0;
 	lRes = ::RegQueryValueEx(_hKey, name, 0, (LPDWORD)pType, nullptr, pDataSize);
 	hr = HRESULT_FROM_WIN32(lRes);
-	BreakExitOnFailure(hr, "Failed to query registry value");
-	BreakExitOnNull((*pDataSize), hr, E_FILENOTFOUND, "Registry value's size is 0.");
+	ExitOnFailure(hr, "Failed to query registry value");
+	ExitOnNull((*pDataSize), hr, E_FILENOTFOUND, "Registry value's size is 0.");
 
 	(*pData) = new BYTE[(*pDataSize) + 1];
-	BreakExitOnNull((*pData), hr, E_NOT_SUFFICIENT_BUFFER, "Can't allocate buffer");
+	ExitOnNull((*pData), hr, E_NOT_SUFFICIENT_BUFFER, "Can't allocate buffer");
 
 	lRes = ::RegQueryValueEx(_hKey, name, 0, (LPDWORD)pType, (*pData), pDataSize);
 	hr = HRESULT_FROM_WIN32(lRes);
-	BreakExitOnFailure(hr, "Failed to get registry value");
+	ExitOnFailure(hr, "Failed to get registry value");
 	(*pData)[(*pDataSize)] = NULL; // Just to make sure.
 
 LExit:
@@ -182,11 +182,11 @@ HRESULT CRegistryKey::SetValue(WCHAR* name, RegValueType type, BYTE* value, DWOR
 {
 	HRESULT hr = S_OK;
 	LONG lRes = ERROR_SUCCESS;
-	BreakExitOnNull(_hKey, hr, E_FILENOTFOUND, "_hKey is NULL");
+	ExitOnNull(_hKey, hr, E_FILENOTFOUND, "_hKey is NULL");
 
 	lRes = ::RegSetValueEx(_hKey, name, 0, type, value, valueSize);
 	hr = HRESULT_FROM_WIN32(lRes);
-	BreakExitOnFailure(hr, "Failed to set registry value");
+	ExitOnFailure(hr, "Failed to set registry value");
 
 LExit:
 	return hr;
@@ -196,8 +196,8 @@ HRESULT CRegistryKey::SetValueString(WCHAR* name, WCHAR* value)
 {
 	HRESULT hr = S_OK;
 
-	BreakExitOnNull(name, hr, E_FILENOTFOUND, "name is NULL");
-	BreakExitOnNull(value, hr, E_FILENOTFOUND, "value is NULL");
+	ExitOnNull(name, hr, E_FILENOTFOUND, "name is NULL");
+	ExitOnNull(value, hr, E_FILENOTFOUND, "value is NULL");
 
 	DWORD dwSize = ((wcslen(value) + 1) * sizeof(WCHAR));
 	hr = SetValue(
@@ -215,7 +215,7 @@ HRESULT CRegistryKey::DeleteValue(WCHAR* name)
 {
 	HRESULT hr = S_OK;
 	LONG lRes = ERROR_SUCCESS;
-	BreakExitOnNull(_hKey, hr, E_FILENOTFOUND, "_hKey is NULL");
+	ExitOnNull(_hKey, hr, E_FILENOTFOUND, "_hKey is NULL");
 
 	RegDeleteValue(_hKey, name);
 
@@ -253,7 +253,7 @@ HRESULT CRegistryKey::ParseRoot(LPCWSTR pRootString, RegRoot* peRoot)
 {
 	HRESULT hr = S_OK;
 
-	BreakExitOnNull(peRoot, hr, E_INVALIDARG, "Invalid root pointer");
+	ExitOnNull(peRoot, hr, E_INVALIDARG, "Invalid root pointer");
 
 	if (!(pRootString && *pRootString))
 	{
@@ -289,7 +289,7 @@ HRESULT CRegistryKey::ParseRoot(LPCWSTR pRootString, RegRoot* peRoot)
 	else
 	{
 		hr = E_INVALIDARG;
-		BreakExitOnFailure(hr, "Invalid root name");
+		ExitOnFailure(hr, "Invalid root name");
 	}
 
 LExit:
@@ -300,12 +300,12 @@ HRESULT CRegistryKey::ParseArea(LPCWSTR pAreaString, RegArea* peArea)
 {
 	HRESULT hr = S_OK;
 
-	BreakExitOnNull(peArea, hr, E_INVALIDARG, "Invalid area pointer");
+	ExitOnNull(peArea, hr, E_INVALIDARG, "Invalid area pointer");
 
 	if (!pAreaString || !*pAreaString || (::_wcsicmp(pAreaString, L"default") == 0))
 	{
 		hr = GetDefaultArea(peArea);
-		BreakExitOnFailure(hr, "Failed to get default registry area");
+		ExitOnFailure(hr, "Failed to get default registry area");
 		ExitFunction();
 	}
 	else if (::_wcsicmp(pAreaString, L"x86") == 0)
@@ -319,7 +319,7 @@ HRESULT CRegistryKey::ParseArea(LPCWSTR pAreaString, RegArea* peArea)
 	else
 	{
 		hr = E_INVALIDARG;
-		BreakExitOnFailure(hr, "Invalid area name");
+		ExitOnFailure(hr, "Invalid area name");
 	}
 
 LExit:
@@ -330,7 +330,7 @@ HRESULT CRegistryKey::ParseValueType(LPCWSTR pTypeString, RegValueType* peType)
 {
 	HRESULT hr = S_OK;
 
-	BreakExitOnNull(peType, hr, E_INVALIDARG, "Invalid type pointer");
+	ExitOnNull(peType, hr, E_INVALIDARG, "Invalid type pointer");
 
 	if (!pTypeString || !*pTypeString)
 	{
@@ -377,7 +377,7 @@ HRESULT CRegistryKey::ParseValueType(LPCWSTR pTypeString, RegValueType* peType)
 	else
 	{
 		hr = E_INVALIDARG;
-		BreakExitOnFailure(hr, "Invalid area name");
+		ExitOnFailure(hr, "Invalid area name");
 	}
 
 LExit:
@@ -390,11 +390,11 @@ HRESULT CRegistryKey::GetDefaultArea(CRegistryKey::RegArea* pArea)
 	DWORD dwRes = ERROR_SUCCESS;
 	bool bIsX64 = false;
 
-	BreakExitOnNull(pArea, hr, E_INVALIDARG, "pArea is NULL");
+	ExitOnNull(pArea, hr, E_INVALIDARG, "pArea is NULL");
 	(*pArea) = RegArea::Default;
 
 	hr = CSummaryStream::GetInstance()->IsPackageX64(&bIsX64);
-	BreakExitOnFailure(hr, "Failed determining package bitness");
+	ExitOnFailure(hr, "Failed determining package bitness");
 
 	(*pArea) = bIsX64 ? RegArea::X64 : RegArea::X86;
 

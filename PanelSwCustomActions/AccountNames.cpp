@@ -16,7 +16,7 @@ extern "C" UINT __stdcall AccountNames(MSIHANDLE hInstall)
 	PSID pSid = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	mapSid2Property[SDDL_BUILTIN_ADMINISTRATORS] = L"BUILTIN_ADMINISTRATORS";
@@ -95,39 +95,39 @@ extern "C" UINT __stdcall AccountNames(MSIHANDLE hInstall)
 		}
 
 		hr = accountName.Allocate(dwNameLen);
-		BreakExitOnFailure(hr, "Failed allocating memory");
+		ExitOnFailure(hr, "Failed allocating memory");
 
 		hr = domainName.Allocate(dwDomainLen);
-		BreakExitOnFailure(hr, "Failed allocating memory");
+		ExitOnFailure(hr, "Failed allocating memory");
 
 		bRes = ::LookupAccountSid(nullptr, pSid, (LPWSTR)accountName, &dwNameLen, (LPWSTR)domainName, &dwDomainLen, &eUse);
-		BreakExitOnNullWithLastError(bRes, hr, "Failed looking up SID");
+		ExitOnNullWithLastError(bRes, hr, "Failed looking up SID");
 
 		if (domainName.StrLen() > 0)
 		{
 			hr = fullName.Format(L"%s\\%s", (LPCWSTR)domainName, (LPCWSTR)accountName);
-			BreakExitOnFailure(hr, "Failed formatting string");
+			ExitOnFailure(hr, "Failed formatting string");
 
 			hr = property.Format(L"%s_DOMAIN", itCur->second);
-			BreakExitOnFailure(hr, "Failed formatting string");
+			ExitOnFailure(hr, "Failed formatting string");
 
 			hr = WcaSetProperty(property, (LPCWSTR)domainName);
-			BreakExitOnFailure(hr, "Failed setting property");
+			ExitOnFailure(hr, "Failed setting property");
 		}
 		else
 		{
 			hr = fullName.Copy(accountName);
-			BreakExitOnFailure(hr, "Failed copying string");
+			ExitOnFailure(hr, "Failed copying string");
 		}
 
 		hr = property.Format(L"%s_NAME", itCur->second);
-		BreakExitOnFailure(hr, "Failed formatting string");
+		ExitOnFailure(hr, "Failed formatting string");
 
 		hr = WcaSetProperty(property, (LPCWSTR)accountName);
-		BreakExitOnFailure(hr, "Failed setting property");
+		ExitOnFailure(hr, "Failed setting property");
 
 		hr = WcaSetProperty(itCur->second, (LPCWSTR)fullName);
-		BreakExitOnFailure(hr, "Failed setting property");
+		ExitOnFailure(hr, "Failed setting property");
 
 LForContinue:
 

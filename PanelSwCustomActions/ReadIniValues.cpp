@@ -11,21 +11,21 @@ extern "C" UINT __stdcall ReadIniValues(MSIHANDLE hInstall)
 	PMSIHANDLE hRecord;
 
 	hr = WcaInitialize(hInstall, "ReadIniValues");
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_ReadIniValues exists.
 	hr = WcaTableExists(L"PSW_ReadIniValues");
-	BreakExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ReadIniValues'. Have you authored 'PanelSw:ReadIniValues' entries in WiX code?");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ReadIniValues'. Have you authored 'PanelSw:ReadIniValues' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `Id`, `FilePath`, `Section`, `Key`, `DestProperty`, `Attributes`, `Condition` FROM `PSW_ReadIniValues`", &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query on 'ReadIniValues'.");
+	ExitOnFailure(hr, "Failed to execute SQL query on 'ReadIniValues'.");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
-		BreakExitOnFailure(hr, "Failed to fetch record.");
+		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
 		CWixString szId, szFilePath, szSection, szKey, szDestProperty, szCondition, szValue(1024);
@@ -33,19 +33,19 @@ extern "C" UINT __stdcall ReadIniValues(MSIHANDLE hInstall)
 		int bIgnoreErrors = 0;
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szId);
-		BreakExitOnFailure(hr, "Failed to get Id.");
+		ExitOnFailure(hr, "Failed to get Id.");
 		hr = WcaGetRecordFormattedString(hRecord, 2, (LPWSTR*)szFilePath);
-		BreakExitOnFailure(hr, "Failed to get FilePath.");
+		ExitOnFailure(hr, "Failed to get FilePath.");
 		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)szSection);
-		BreakExitOnFailure(hr, "Failed to get Section.");
+		ExitOnFailure(hr, "Failed to get Section.");
 		hr = WcaGetRecordFormattedString(hRecord, 4, (LPWSTR*)szKey);
-		BreakExitOnFailure(hr, "Failed to get Key.");
+		ExitOnFailure(hr, "Failed to get Key.");
 		hr = WcaGetRecordString(hRecord, 5, (LPWSTR*)szDestProperty);
-		BreakExitOnFailure(hr, "Failed to get DestProperty.");
+		ExitOnFailure(hr, "Failed to get DestProperty.");
 		hr = WcaGetRecordInteger(hRecord, 6, &bIgnoreErrors);
-		BreakExitOnFailure(hr, "Failed to get Attributes.");
+		ExitOnFailure(hr, "Failed to get Attributes.");
 		hr = WcaGetRecordString(hRecord, 7, (LPWSTR*)szCondition);
-		BreakExitOnFailure(hr, "Failed to get Condition.");
+		ExitOnFailure(hr, "Failed to get Condition.");
 
 		// Test condition
 		MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, (LPCWSTR)szCondition);
@@ -62,14 +62,14 @@ extern "C" UINT __stdcall ReadIniValues(MSIHANDLE hInstall)
 
 		case MSICONDITION::MSICONDITION_ERROR:
 			hr = E_FAIL;
-			BreakExitOnFailure(hr, "Bad Condition field");
+			ExitOnFailure(hr, "Bad Condition field");
 		}
 
 		// Get the value.
 		while ((dwRes = ::GetPrivateProfileStringW((LPCWSTR)szSection, (LPCWSTR)szKey, nullptr, (LPWSTR)szValue, szValue.Capacity(), (LPCWSTR)szFilePath)) == (szValue.Capacity() - 1))
 		{
 			hr = szValue.Allocate(2 * szValue.Capacity());
-			BreakExitOnFailure(hr, "Failed allocating memory");
+			ExitOnFailure(hr, "Failed allocating memory");
 		}
 
 		// Error?
@@ -80,11 +80,11 @@ extern "C" UINT __stdcall ReadIniValues(MSIHANDLE hInstall)
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Couldn't read value from file '%ls', section '%ls', key '%ls'. Error 0x%08X, ignore = %i", (LPCWSTR)szFilePath, (LPCWSTR)szSection, (LPCWSTR)szKey, dwRes, bIgnoreErrors);
 				continue;
 			}
-			BreakExitOnNullWithLastError(0, hr, "Failed reading value from '%ls'.", (LPCWSTR)szFilePath);
+			ExitOnNullWithLastError(0, hr, "Failed reading value from '%ls'.", (LPCWSTR)szFilePath);
 		}
 
 		hr = WcaSetProperty((LPCWSTR)szDestProperty, (LPCWSTR)szValue);
-		BreakExitOnFailure(hr, "Failed to set property.");
+		ExitOnFailure(hr, "Failed to set property.");
 	}
 	hr = S_OK;
 

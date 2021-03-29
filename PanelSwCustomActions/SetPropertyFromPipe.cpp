@@ -17,30 +17,30 @@ extern "C" UINT __stdcall SetPropertyFromPipe(MSIHANDLE hInstall)
 	PMSIHANDLE hRecord;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_XmlSearch exists.
 	hr = WcaTableExists(L"PSW_SetPropertyFromPipe");
-	BreakExitOnFailure(hr, "Table does not exist 'PSW_SetPropertyFromPipe'. Have you authored 'PanelSw:SetPropertyFromPipe' entries in WiX code?");
+	ExitOnFailure(hr, "Table does not exist 'PSW_SetPropertyFromPipe'. Have you authored 'PanelSw:SetPropertyFromPipe' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(SetPropertyFromPipeQuery, &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query on 'PSW_SetPropertyFromPipe'.");
+	ExitOnFailure(hr, "Failed to execute SQL query on 'PSW_SetPropertyFromPipe'.");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
-		BreakExitOnFailure(hr, "Failed to fetch record.");
+		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
 		CWixString pipeName;
 		int timeout = 0;
 
 		hr = WcaGetRecordFormattedString(hRecord, eSetPropertyFromPipeQuery::PipeName, (LPWSTR*)pipeName);
-		BreakExitOnFailure(hr, "Failed to get PipeName.");
+		ExitOnFailure(hr, "Failed to get PipeName.");
 		hr = WcaGetRecordInteger(hRecord, eSetPropertyFromPipeQuery::Timeout, &timeout);
-		BreakExitOnFailure(hr, "Failed to get Timeout.");
+		ExitOnFailure(hr, "Failed to get Timeout.");
 
 		// Sec to mili-sec.
 		timeout *= 1000;
@@ -56,7 +56,7 @@ extern "C" UINT __stdcall SetPropertyFromPipe(MSIHANDLE hInstall)
 		}
 
 		hr = ReadPropertiesFromPipe(pipeName, timeout);
-		BreakExitOnFailure(hr, "Failed to read properties from pipe '%ls'.", (LPCWSTR)pipeName);
+		ExitOnFailure(hr, "Failed to read properties from pipe '%ls'.", (LPCWSTR)pipeName);
 	}
 	hr = S_OK;
 
@@ -148,7 +148,7 @@ static HRESULT ReadPropertiesFromPipe(LPCWSTR szPipeName, UINT nTimeout)
 		if (szName && *szName)
 		{
 			hr = WcaSetProperty(szName, szValue);
-			BreakExitOnFailure(hr, "Failed to set property.");
+			ExitOnFailure(hr, "Failed to set property.");
 		}
 	}
 

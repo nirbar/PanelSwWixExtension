@@ -52,21 +52,21 @@ extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 	bool bIgnoreErrors = false;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_XmlSearch exists.
 	hr = WcaTableExists(L"PSW_RegularExpression");
-	BreakExitOnFailure(hr, "Table does not exist 'PSW_RegularExpression'. Have you authored 'PanelSw:RegularExpression' entries in WiX code?");
+	ExitOnFailure(hr, "Table does not exist 'PSW_RegularExpression'. Have you authored 'PanelSw:RegularExpression' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(RegularExpressionQuery, &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query on 'PSW_RegularExpression'.");
+	ExitOnFailure(hr, "Failed to execute SQL query on 'PSW_RegularExpression'.");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
-		BreakExitOnFailure(hr, "Failed to fetch record.");
+		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
 		CWixString szExpressionFormat, szExpression, szObfuscatedExpression;
@@ -76,25 +76,25 @@ extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 		std::regex_constants::syntax_option_type syntax = (std::regex_constants::syntax_option_type)0;
 
 		hr = WcaGetRecordString(hRecord, eRegularExpressionQuery::Id, (LPWSTR*)sId);
-		BreakExitOnFailure(hr, "Failed to get Id.");
+		ExitOnFailure(hr, "Failed to get Id.");
 		hr = WcaGetRecordFormattedString(hRecord, eRegularExpressionQuery::FilePath, (LPWSTR*)sFilePath);
-		BreakExitOnFailure(hr, "Failed to get FilePath.");
+		ExitOnFailure(hr, "Failed to get FilePath.");
 		hr = WcaGetRecordFormattedString(hRecord, eRegularExpressionQuery::Input, (LPWSTR*)sInput);
-		BreakExitOnFailure(hr, "Failed to get Input.");
+		ExitOnFailure(hr, "Failed to get Input.");
 		hr = WcaGetRecordString(hRecord, eRegularExpressionQuery::Expression, (LPWSTR*)szExpressionFormat);
-		BreakExitOnFailure(hr, "Failed to get Expression.");
+		ExitOnFailure(hr, "Failed to get Expression.");
 		hr = WcaGetRecordFormattedString(hRecord, eRegularExpressionQuery::Replacement, (LPWSTR*)sReplace);
-		BreakExitOnFailure(hr, "Failed to get Replacement.");
+		ExitOnFailure(hr, "Failed to get Replacement.");
 		hr = WcaGetRecordFormattedString(hRecord, eRegularExpressionQuery::DstProperty, (LPWSTR*)sDstProperty);
-		BreakExitOnFailure(hr, "Failed to get DstProperty_.");
+		ExitOnFailure(hr, "Failed to get DstProperty_.");
 		hr = WcaGetRecordInteger(hRecord, eRegularExpressionQuery::Flags, &iFlags);
-		BreakExitOnFailure(hr, "Failed to get Flags.");
+		ExitOnFailure(hr, "Failed to get Flags.");
 		flags.u = *reinterpret_cast<unsigned int*>(&iFlags);
 		hr = WcaGetRecordString(hRecord, eRegularExpressionQuery::Condition, (LPWSTR*)sCondition);
-		BreakExitOnFailure(hr, "Failed to get Condition.");
+		ExitOnFailure(hr, "Failed to get Condition.");
 
 		hr = szExpression.MsiFormat((LPCWSTR)szExpressionFormat, (LPWSTR*)szObfuscatedExpression);
-		BreakExitOnFailure(hr, "Failed to format Expression.");
+		ExitOnFailure(hr, "Failed to format Expression.");
 
 		// Test condition
 		if (!sCondition.IsNullOrEmpty())
@@ -116,7 +116,7 @@ extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 			case MSICONDITION::MSICONDITION_ERROR:
 
 				hr = E_FAIL;
-				BreakExitOnFailure(hr, "Bad Condition field");
+				ExitOnFailure(hr, "Bad Condition field");
 			}
 		}
 		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Executing regular expression query '%ls'", (LPCWSTR)szObfuscatedExpression);
@@ -137,13 +137,13 @@ extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 		if (!sFilePath.IsNullOrEmpty())
 		{
 			hr = SearchInFile(sDstProperty, szExpression, sFilePath, flags, syntax);
-			BreakExitOnFailure(hr, "Failed executing search");
+			ExitOnFailure(hr, "Failed executing search");
 		}
 		// Match in property
 		else if (flags.s.search == SearchFlags::Search)
 		{
 			hr = SearchUnicode(sDstProperty, szExpression, sInput, flags, syntax);
-			BreakExitOnFailure(hr, "Failed executing search");
+			ExitOnFailure(hr, "Failed executing search");
 		}
 		// Replace
 		else
@@ -154,7 +154,7 @@ extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 				std::wstring rep = regex_replace((LPCWSTR)sInput, rx, (LPCWSTR)sReplace);
 
 				hr = WcaSetProperty(sDstProperty, rep.c_str());
-				BreakExitOnFailure(hr, "Failed setting target property");
+				ExitOnFailure(hr, "Failed setting target property");
 			}
 			catch (std::regex_error ex)
 			{
@@ -163,7 +163,7 @@ extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 				{
 					hr = E_FAIL;
 				}
-				BreakExitOnFailure(hr, "Failed evaluating regular expression. %ls", ex.what());
+				ExitOnFailure(hr, "Failed evaluating regular expression. %ls", ex.what());
 			}
 		}
 	}
@@ -188,7 +188,7 @@ static HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR 
 	{
 		wregex rx(szExpression, syntax);
 		bRes = regex_search(szInput, results, rx);
-		BreakExitOnNull((bRes || ((flags.s.result & ResultFlags::MustMatch) == 0)), hr, E_FAIL, "Regex returned no matches");
+		ExitOnNull((bRes || ((flags.s.result & ResultFlags::MustMatch) == 0)), hr, E_FAIL, "Regex returned no matches");
 	}
 	catch (std::regex_error ex)
 	{
@@ -197,7 +197,7 @@ static HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR 
 		{
 			hr = E_FAIL;
 		}
-		BreakExitOnFailure(hr, "Failed evaluating regular expression. %ls", ex.what());
+		ExitOnFailure(hr, "Failed evaluating regular expression. %ls", ex.what());
 	}
 
 	if (!bRes)
@@ -207,10 +207,10 @@ static HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR 
 	}
 
 	hr = sPropName.Format(L"%s_COUNT", szProperty_);
-	BreakExitOnFailure(hr, "Failed formatting string");
+	ExitOnFailure(hr, "Failed formatting string");
 
 	hr = WcaSetIntProperty((LPCWSTR)sPropName, results.size());
-	BreakExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)sPropName);
+	ExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)sPropName);
 
 	// Iterate results
 	curIt = results.begin();
@@ -218,10 +218,10 @@ static HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR 
 	for (size_t i = 0; curIt != endIt; ++i, ++curIt)
 	{
 		hr = sPropName.Format(L"%s_%Iu", szProperty_, i);
-		BreakExitOnFailure(hr, "Failed formatting string");
+		ExitOnFailure(hr, "Failed formatting string");
 
 		hr = WcaSetProperty((LPCWSTR)sPropName, curIt->str().c_str());
-		BreakExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)sPropName);
+		ExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)sPropName);
 	}
 
 LExit:
@@ -238,7 +238,7 @@ static HRESULT SearchMultibyte(LPCWSTR szProperty_, LPCWSTR szExpression, LPCSTR
 	CWixString szCntProp;
 
 	hr = StrAnsiAllocString(&szExpressionA, szExpression, 0, CP_UTF8);
-	BreakExitOnFailure(hr, "Failed converting string to multibyte");
+	ExitOnFailure(hr, "Failed converting string to multibyte");
 
 	// New scope to construct regex in
 	try
@@ -246,7 +246,7 @@ static HRESULT SearchMultibyte(LPCWSTR szProperty_, LPCWSTR szExpression, LPCSTR
 		regex rx(szExpressionA, syntax);
 
 		bRes = regex_search(szInput, results, rx);
-		BreakExitOnNull((bRes || ((flags.s.result & ResultFlags::MustMatch) == 0)), hr, E_FAIL, "Regex returned no matches");
+		ExitOnNull((bRes || ((flags.s.result & ResultFlags::MustMatch) == 0)), hr, E_FAIL, "Regex returned no matches");
 	}
 	catch (std::regex_error ex)
 	{
@@ -265,21 +265,20 @@ static HRESULT SearchMultibyte(LPCWSTR szProperty_, LPCWSTR szExpression, LPCSTR
 	}
 
 	hr = szCntProp.Format(L"%s_COUNT", szProperty_);
-	BreakExitOnFailure(hr, "Failed formatting string");
+	ExitOnFailure(hr, "Failed formatting string");
 
 	hr = ::WcaSetIntProperty(szCntProp, results.size());
-	BreakExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)szCntProp);
+	ExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)szCntProp);
 
 	// Iterate results
-	match_results<LPCSTR>::const_iterator curIt = results.begin();
-	match_results<LPCSTR>::const_iterator endIt = results.end();
-	for (size_t i = 0; curIt != endIt; ++i, ++curIt)
+	size_t i = 0;
+	for each (const std::sub_match<LPCSTR> &match in results)
 	{
-		hr = StrAnsiAllocFormatted(&szPropertyA, "%ls_%Iu", szProperty_, i);
-		BreakExitOnFailure(hr, "Failed formatting ansi string");
+		hr = StrAnsiAllocFormatted(&szPropertyA, "%ls_%Iu", szProperty_, ++i);
+		ExitOnFailure(hr, "Failed formatting ansi string");
 
-		hr = ::MsiSetPropertyA(WcaGetInstallHandle(), szPropertyA, curIt->str().c_str());
-		BreakExitOnFailure(hr, "Failed setting property '%s'", szPropertyA);
+		hr = ::MsiSetPropertyA(WcaGetInstallHandle(), szPropertyA, match.str().c_str());
+		ExitOnFailure(hr, "Failed setting property '%s'", szPropertyA);
 
 		ReleaseNullMem(szPropertyA);
 	}

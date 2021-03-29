@@ -90,7 +90,6 @@
     <ClInclude Include="stdafx.h" />
     <ClInclude Include="SummaryStream.h" />
     <ClInclude Include="targetver.h" />
-    <ClInclude Include="WixBreak.h" />
     <ClInclude Include="WixString.h" />
   </ItemGroup>
   <ItemGroup>

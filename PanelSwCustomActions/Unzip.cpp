@@ -32,34 +32,34 @@ extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall)
 	LPWSTR szCustomActionData = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
-	BreakExitOnFailure(hr, "Failed to initialize");
+	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_DeletePath exists.
 	hr = WcaTableExists(L"PSW_Unzip");
-	BreakExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_Unzip'. Have you authored 'PanelSw:Unzip' entries in WiX code?");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_Unzip'. Have you authored 'PanelSw:Unzip' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `ZipFile`, `TargetFolder`, `Flags`, `Condition` FROM `PSW_Unzip`", &hView);
-	BreakExitOnFailure(hr, "Failed to execute SQL query");
+	ExitOnFailure(hr, "Failed to execute SQL query");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
-		BreakExitOnFailure(hr, "Failed to fetch record.");
+		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
 		CWixString zip, folder, condition;
 		int flags = 0;
 
 		hr = WcaGetRecordFormattedString(hRecord, 1, (LPWSTR*)zip);
-		BreakExitOnFailure(hr, "Failed to get zip file.");
+		ExitOnFailure(hr, "Failed to get zip file.");
 		hr = WcaGetRecordFormattedString(hRecord, 2, (LPWSTR*)folder);
-		BreakExitOnFailure(hr, "Failed to get folder.");
+		ExitOnFailure(hr, "Failed to get folder.");
 		hr = WcaGetRecordInteger(hRecord, 3, &flags);
-		BreakExitOnFailure(hr, "Failed to get flags.");
+		ExitOnFailure(hr, "Failed to get flags.");
 		hr = WcaGetRecordString(hRecord, 4, (LPWSTR*)condition);
-		BreakExitOnFailure(hr, "Failed to get condition.");
+		ExitOnFailure(hr, "Failed to get condition.");
 
 		MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, (LPCWSTR)condition);
 		switch (condRes)
@@ -74,20 +74,20 @@ extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall)
 
 		case MSICONDITION::MSICONDITION_ERROR:
 			hr = E_FAIL;
-			BreakExitOnFailure(hr, "Bad Condition field");
+			ExitOnFailure(hr, "Bad Condition field");
 		}
 
 		ExitOnNull(!zip.IsNullOrEmpty(), hr, E_INVALIDARG, "ZIP file path is empty");
 		ExitOnNull(!folder.IsNullOrEmpty(), hr, E_INVALIDARG, "ZIP target path is empty");
 
 		hr = cad.AddUnzip(zip, folder, (UnzipDetails_UnzipFlags)flags);
-		BreakExitOnFailure(hr, "Failed scheduling zip file extraction");
+		ExitOnFailure(hr, "Failed scheduling zip file extraction");
 	}
 
 	hr = cad.GetCustomActionData(&szCustomActionData);
-	BreakExitOnFailure(hr, "Failed getting custom action data for deferred action.");
+	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
 	hr = WcaDoDeferredAction(L"UnzipExec", szCustomActionData, 0);
-	BreakExitOnFailure(hr, "Failed setting property");
+	ExitOnFailure(hr, "Failed setting property");
 
 LExit:
 	ReleaseStr(szCustomActionData);
@@ -104,20 +104,20 @@ HRESULT CUnzip::AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, UnzipDetails_Unz
 	bool bRes = true;
 
 	hr = AddCommand("CUnzip", &pCmd);
-	BreakExitOnFailure(hr, "Failed to add command");
+	ExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new UnzipDetails();
-	BreakExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
+	ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
 	pDetails->set_zipfile(zipFile, WSTR_BYTE_SIZE(zipFile));
 	pDetails->set_targetfolder(targetFolder, WSTR_BYTE_SIZE(targetFolder));
 	pDetails->set_flags(flags);
 
 	pAny = pCmd->mutable_details();
-	BreakExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
 
 	bRes = pDetails->SerializeToString(pAny);
-	BreakExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
+	ExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
 	return hr;
@@ -137,7 +137,7 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 	LPWSTR szDstFile = nullptr;
 
 	bRes = details.ParseFromString(command);
-	BreakExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking UnzipDetails");
+	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking UnzipDetails");
 
 	zipFileW = (LPCWSTR)details.zipfile().c_str();
 	targetFolderW = (LPCWSTR)details.targetfolder().c_str();
@@ -147,10 +147,10 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Extracting zip file '%s' to '%s'", zipFileA.c_str(), targetFolderA.c_str());
 
 	zipFileStream = new std::ifstream(zipFileA, std::ios::binary);
-	BreakExitOnNull(zipFileStream, hr, E_FAIL, "Failed allocating file stream");
+	ExitOnNull(zipFileStream, hr, E_FAIL, "Failed allocating file stream");
 
 	archive = new ZipArchive(*zipFileStream);
-	BreakExitOnNull(zipFileStream, hr, E_FAIL, "Failed allocating ZIP archive");
+	ExitOnNull(zipFileStream, hr, E_FAIL, "Failed allocating ZIP archive");
 
 	for (ZipArchive::FileHeaders::const_iterator it = archive->headerBegin(), endIt = archive->headerEnd(); it != endIt; ++it)
 	{
@@ -175,13 +175,13 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 			std::string dirA = dir.toString(Poco::Path::Style::PATH_WINDOWS);
 			WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating sub-folder '%s'", dirA.c_str());
 			bRes = ::CreateDirectoryA(dirA.c_str(), nullptr);
-			BreakExitOnNullWithLastError((bRes || (::GetLastError() == ERROR_ALREADY_EXISTS)), hr, "Failed creating folder '%s'", dirA.c_str());
+			ExitOnNullWithLastError((bRes || (::GetLastError() == ERROR_ALREADY_EXISTS)), hr, "Failed creating folder '%s'", dirA.c_str());
 		}
 
 		if (FileExistsEx(szDstFile, nullptr))
 		{
 			hr = ShouldOverwriteFile(szDstFile, details.flags());
-			BreakExitOnFailure(hr, "Failed determining whether or not to overwrite file '%s'", pathA.c_str());
+			ExitOnFailure(hr, "Failed determining whether or not to overwrite file '%s'", pathA.c_str());
 
 			if (hr == S_FALSE)
 			{
@@ -189,10 +189,10 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 			}
 
 			bRes = ::SetFileAttributesA(pathA.c_str(), FILE_ATTRIBUTE_NORMAL);
-			BreakExitOnNullWithLastError(bRes, hr, "Failed clearing attributes of '%s'", pathA.c_str());
+			ExitOnNullWithLastError(bRes, hr, "Failed clearing attributes of '%s'", pathA.c_str());
 
 			bRes = ::DeleteFileA(pathA.c_str());
-			BreakExitOnNullWithLastError(bRes, hr, "Failed deleting '%s'", pathA.c_str());
+			ExitOnNullWithLastError(bRes, hr, "Failed deleting '%s'", pathA.c_str());
 		}
 
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Extracting '%s'", pathA.c_str());
@@ -202,7 +202,7 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 			std::ofstream out(pathA.c_str(), std::ios::binary);
 
 			std::streamsize bytes = Poco::StreamCopier::copyStream(zipin, out);
-			BreakExitOnNull((bytes == it->second.getUncompressedSize()), hr, E_FAIL, "Error extracting file '%s' from zip '%ls': %i / %i bytes written", file.c_str(), zipFileW, bytes, it->second.getUncompressedSize());
+			ExitOnNull((bytes == it->second.getUncompressedSize()), hr, E_FAIL, "Error extracting file '%s' from zip '%ls': %i / %i bytes written", file.c_str(), zipFileW, bytes, it->second.getUncompressedSize());
 		}
 
 		// Set file times, ignore failures.
@@ -380,10 +380,10 @@ HRESULT CUnzip::ShouldOverwriteFile(LPCWSTR szFile, UnzipDetails_UnzipFlags flag
 
 	case UnzipDetails::UnzipFlags::UnzipDetails_UnzipFlags_unmodified:
 		hFile = ::CreateFileW(szFile, GENERIC_READ, FILE_SHARE_WRITE | FILE_SHARE_READ | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-		BreakExitOnNullWithLastError(((hFile != NULL) && (hFile != INVALID_HANDLE_VALUE)), hr, "Failed opening file '%s' to read times", szFile);
+		ExitOnNullWithLastError(((hFile != NULL) && (hFile != INVALID_HANDLE_VALUE)), hr, "Failed opening file '%s' to read times", szFile);
 
 		bRes = ::GetFileTime(hFile, &ftCreate, nullptr, &ftModify);
-		BreakExitOnNullWithLastError(bRes, hr, "Failed getting file times for '%s'", szFile);
+		ExitOnNullWithLastError(bRes, hr, "Failed getting file times for '%s'", szFile);
 
 		ulCreate.HighPart = ftCreate.dwHighDateTime;
 		ulCreate.LowPart = ftCreate.dwLowDateTime;

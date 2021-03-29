@@ -88,7 +88,7 @@ extern "C" UINT __stdcall CommonDeferred(MSIHANDLE hInstall)
 	UINT er = ERROR_SUCCESS;
 
 	hr = CDeferredActionBase::DeferredEntryPoint(hInstall, ReceiverToExecutor);
-	BreakExitOnFailure(hr, "Failed to excute CustomActionData command object");
+	ExitOnFailure(hr, "Failed to excute CustomActionData command object");
 
 LExit :
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
