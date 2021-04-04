@@ -67,7 +67,7 @@
 
   <!-- ReadIniValues -->
   <Fragment>
-    <CustomAction Id="ReadIniValues" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="ReadIniValues" Execute="immediate" Return="check" />
+    <CustomAction Id="ReadIniValues" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="ReadIniValues" Execute="firstSequence" Return="check" />
     <InstallExecuteSequence>
       <Custom Action="ReadIniValues" After="AppSearch" Overridable="yes"/>
     </InstallExecuteSequence>
@@ -78,7 +78,7 @@
 
   <!-- XmlSearch -->
   <Fragment>
-    <CustomAction Id="XmlSearch" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="XmlSearch" Execute="immediate" Return="check" />
+    <CustomAction Id="XmlSearch" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="XmlSearch" Execute="firstSequence" Return="check" />
     <InstallExecuteSequence>
       <Custom Action="XmlSearch" After="AppSearch" Overridable="yes"/>
     </InstallExecuteSequence>
@@ -233,7 +233,7 @@
     <Property Id="ENTERPRISE_RO_DCs" Value="N/A" />
     <Property Id="CERTSVC_DCOM_ACCESS" Value="N/A" />
 
-    <CustomAction Id="AccountNames" BinaryKey="PanelSwCustomActions.dll" DllEntry="AccountNames" />
+    <CustomAction Id="AccountNames" BinaryKey="PanelSwCustomActions.dll" DllEntry="AccountNames" Execute="firstSequence" />
     <InstallUISequence>
       <Custom Action="AccountNames" Before="AppSearch" Overridable="yes" />
     </InstallUISequence>
@@ -602,10 +602,13 @@
 
   <!-- ForceVersion -->
   <Fragment>
-    <CustomAction Id="ForceVersion" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="ForceVersion" Execute="immediate"/>
+    <CustomAction Id="ForceVersion" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="ForceVersion" Execute="firstSequence"/>
     <InstallExecuteSequence>
       <Custom Action="ForceVersion" Before="CostInitialize" Overridable="yes"/>
     </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="ForceVersion" Before="CostInitialize" Overridable="yes"/>
+    </InstallUISequence>
     <UI>
       <ProgressText Action="ForceVersion">!(loc.ForceVersion)</ProgressText>
     </UI>
@@ -674,7 +677,7 @@
 
   <!-- JsonJpath -->
   <Fragment>
-    <CustomAction Id="JsonJpathSearch" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="JsonJpathSearch" Execute="immediate"/>
+    <CustomAction Id="JsonJpathSearch" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="JsonJpathSearch" Execute="firstSequence"/>
     <InstallExecuteSequence>
       <Custom Action="JsonJpathSearch" After="AppSearch" Overridable="yes"/>
     </InstallExecuteSequence>
@@ -688,7 +691,7 @@
 
   <!-- AccountSidSearch -->
   <Fragment>
-    <CustomAction Id="AccountSidSearch" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="AccountSidSearch" Execute="immediate" Return="check" />
+    <CustomAction Id="AccountSidSearch" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="AccountSidSearch" Execute="firstSequence" Return="check" />
     <InstallExecuteSequence>
       <Custom Action="AccountSidSearch" After="AppSearch" Overridable="yes"/>
     </InstallExecuteSequence>
@@ -702,7 +705,7 @@
 
   <!-- VersionCompare -->
   <Fragment>
-    <CustomAction Id="PSW_VersionCompare" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="VersionCompare" Execute="immediate" Return="check" />
+    <CustomAction Id="PSW_VersionCompare" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="VersionCompare" Execute="firstSequence" Return="check" />
     <InstallExecuteSequence>
       <Custom Action="PSW_VersionCompare" After="AppSearch" Overridable="yes"/>
     </InstallExecuteSequence>
@@ -716,7 +719,7 @@
 
   <!-- PathSearch -->
   <Fragment>
-    <CustomAction Id="PSW_PathSearch" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="PathSearch" Execute="immediate" Return="check" />
+    <CustomAction Id="PSW_PathSearch" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="PathSearch" Execute="firstSequence" Return="check" />
     <InstallExecuteSequence>
       <Custom Action="PSW_PathSearch" After="AppSearch" Overridable="yes"/>
     </InstallExecuteSequence>
