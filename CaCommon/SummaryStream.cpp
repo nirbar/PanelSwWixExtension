@@ -10,7 +10,7 @@ CSummaryStream* CSummaryStream::GetInstance()
 	return &_sInst;
 }
 
-CSummaryStream::CSummaryStream(void)
+CSummaryStream::CSummaryStream()
 	: _pTemplate( nullptr)
 {
 }

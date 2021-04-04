@@ -358,7 +358,7 @@ namespace PswManagedCA
                             break;
 
                         default:
-                            session.Log($"Exception with code {ex.ErrorCode} (native {ex.NativeErrorCode}): {ex.ToString()}");
+                            session.Log($"Exception with code {ex.ErrorCode} (native {ex.NativeErrorCode}): {ex}");
                             throw;
                     }
                 }

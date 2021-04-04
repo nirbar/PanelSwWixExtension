@@ -37,6 +37,6 @@ protected:
 
 private:
 	::com::panelsw::ca::CustomActionData _cad;
-	UINT _uCost;
+	UINT _uCost = 0;
 };
 

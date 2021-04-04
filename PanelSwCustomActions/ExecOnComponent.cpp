@@ -948,16 +948,14 @@ LExit:
 // S_OK: Ignore errors and continue
 // E_RETRY: Retry
 // E_FAIL: Abort
-HRESULT CExecOnComponent::SearchStdOut(LPCWSTR szStdOut, const ExecOnDetails &details)
+HRESULT CExecOnComponent::SearchStdOut(LPCWSTR szStdOut, const ExecOnDetails& details)
 {
 	HRESULT hr = S_FALSE;
 	HRESULT localHr = S_OK;
 
-	for (int i = 0; i < details.consoleouputremap_size(); ++i)
+	for (const ConsoleOuputRemap& console : details.consoleouputremap())
 	{
-		const ConsoleOuputRemap &console = details.consoleouputremap(i);
-
-		try 
+		try
 		{
 			bool bRes = true;
 			std::wregex rx((LPCWSTR)console.regex().data());

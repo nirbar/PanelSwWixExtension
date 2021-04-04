@@ -159,8 +159,6 @@ LExit:
 }
 
 CDeferredActionBase::CDeferredActionBase(LPCSTR szId)
-	: _uCost( 0)
-	, _cad()
 {
 	_cad.set_id(szId);
 }

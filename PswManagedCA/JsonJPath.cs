@@ -100,7 +100,6 @@ namespace PswManagedCA
                             JsonFormatting jsonFormat = (JsonFormatting)formatting;
                             switch (jsonFormat)
                             {
-                                case JsonFormatting.Raw:
                                 default:
                                     break;
 
@@ -171,7 +170,7 @@ namespace PswManagedCA
                         }
                         if (errorHandling != null)
                         {
-                            ctlg.ErrorHandling = (Util.ErrorHandling)errorHandling;
+                            ctlg.ErrorHandling = (ErrorHandling)errorHandling;
                         }
 
                         ComponentInfo ci = session.Components[component];
@@ -267,15 +266,15 @@ namespace PswManagedCA
                     switch( session.HandleError(ctlg.ErrorHandling, 27009, ctlg.JPathObfuscated, ctlg.ValueObfuscated, ctlg.FilePath, ex.Message))
                     {
                         case MessageResult.Abort:
-                            session.Log($"Aborted on failure");
+                            session.Log("Aborted on failure");
                             return ActionResult.Failure;
 
                         case MessageResult.Ignore:
-                            session.Log($"Ignored failure");
+                            session.Log("Ignored failure");
                             continue;
 
                         case MessageResult.Retry:
-                            session.Log($"User retried on failure");
+                            session.Log("User retried on failure");
                             goto LRetry;
                     }
                 }

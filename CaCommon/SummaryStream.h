@@ -34,7 +34,7 @@ private:
 
 	// Singleton
 	static CSummaryStream _sInst;
-	CSummaryStream(void);
+	CSummaryStream();
 
 	HRESULT GetProperty( SummaryStreamProperties eProp, LPWSTR* ppProp);
 

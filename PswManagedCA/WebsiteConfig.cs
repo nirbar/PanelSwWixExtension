@@ -119,8 +119,7 @@ namespace PswManagedCA
                 {
                     switch (session.HandleError(ctlg.ErrorHandling, 27007, ctlg.Website, ex.Message))
                     {
-                        default:
-                        case MessageResult.Abort:
+                        default: // Silent / fail
                             session.Log($"User aborted on failure to configure website {ctlg.Website}. {ex.Message}");
                             return ActionResult.Failure;
 

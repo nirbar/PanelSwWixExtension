@@ -43,7 +43,7 @@ public:
 	};
 
 	CRegistryKey();
-	~CRegistryKey(void);
+	~CRegistryKey();
 
 	HRESULT Create( RegRoot root, WCHAR* key,  RegArea area, RegAccess acecss);
 	HRESULT Open( RegRoot root, WCHAR* key,  RegArea area, RegAccess acecss);

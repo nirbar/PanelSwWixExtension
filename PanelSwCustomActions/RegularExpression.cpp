@@ -182,7 +182,6 @@ static HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR 
 	bool bRes = true;
 	match_results<LPCWSTR> results;
 	CWixString sPropName;
-	match_results<LPCWSTR>::const_iterator curIt, endIt;
 
 	try
 	{
@@ -213,14 +212,13 @@ static HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR 
 	ExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)sPropName);
 
 	// Iterate results
-	curIt = results.begin();
-	endIt = results.end();
-	for (size_t i = 0; curIt != endIt; ++i, ++curIt)
+	size_t i = 0;
+	for (const sub_match<LPCWSTR> &match : results)
 	{
 		hr = sPropName.Format(L"%s_%Iu", szProperty_, i);
 		ExitOnFailure(hr, "Failed formatting string");
 
-		hr = WcaSetProperty((LPCWSTR)sPropName, curIt->str().c_str());
+		hr = WcaSetProperty((LPCWSTR)sPropName, match.str().c_str());
 		ExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)sPropName);
 	}
 
@@ -272,7 +270,7 @@ static HRESULT SearchMultibyte(LPCWSTR szProperty_, LPCWSTR szExpression, LPCSTR
 
 	// Iterate results
 	size_t i = 0;
-	for each (const std::sub_match<LPCSTR> &match in results)
+	for (const std::sub_match<LPCSTR> &match : results)
 	{
 		hr = StrAnsiAllocFormatted(&szPropertyA, "%ls_%Iu", szProperty_, ++i);
 		ExitOnFailure(hr, "Failed formatting ansi string");

@@ -33,14 +33,13 @@ namespace PswManagedCA.Util
 
         public static string Obfuscate(this Session session, string msg)
         {
-            string[] hiddenProps = session["MsiHiddenProperties"].Split(new char[] { ';' }, StringSplitOptions.RemoveEmptyEntries);
-            if (hiddenProps != null)
+            string[] hiddenProps = session["MsiHiddenProperties"]
+                .Split(new char[] {';'}, StringSplitOptions.RemoveEmptyEntries);
+            foreach (string p in hiddenProps)
             {
-                foreach (string p in hiddenProps)
-                {
-                    msg = msg.Replace($"[{p}]", "******");
-                }
+                msg = msg.Replace($"[{p}]", "******");
             }
+
             return session.Format(msg);
         }
 
@@ -64,8 +63,7 @@ namespace PswManagedCA.Util
         {
             switch (errorHandling)
             {
-                default: // Silent
-                case ErrorHandling.fail:
+                default: // Silent / fail
                     return MessageResult.Abort;
 
                 case ErrorHandling.ignore:
