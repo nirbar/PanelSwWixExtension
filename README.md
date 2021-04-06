@@ -1,5 +1,3 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/2o8lfou5i3hw41aq/branch/master?svg=true)](https://ci.appveyor.com/project/nirbar/panelswwixextension/branch/master)
-
 PanelSwWixExtension from the creator of [JetBA](https://github.com/nirbar/JetBA-Binaries) is the most comprehensive open source [WiX](http://wixtoolset.org/) extension. 
 
 ## PanelSwWixExtension WiX Elements

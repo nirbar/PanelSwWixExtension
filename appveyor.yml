@@ -1,8 +1,10 @@
 version: 2.24.1.{build}
 skip_non_tags: true
+skip_tags: true
 configuration: Release
 platform: x86
 clone_depth: 1
+image: Visual Studio 2019
 
 init:
   # Set version number when tagged
