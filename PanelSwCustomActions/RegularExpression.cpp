@@ -39,11 +39,11 @@ union RegexFlags
 	} s;
 };
 
-static HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax);
-static HRESULT SearchMultibyte(LPCWSTR szProperty_, LPCWSTR szExpression, LPCSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax);
-static HRESULT SearchInFile(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR szFilePath, RegexFlags flags, std::regex_constants::syntax_option_type syntax);
+static __declspec(nothrow) HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax);
+static __declspec(nothrow) HRESULT SearchMultibyte(LPCWSTR szProperty_, LPCWSTR szExpression, LPCSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax);
+static __declspec(nothrow) HRESULT SearchInFile(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR szFilePath, RegexFlags flags, std::regex_constants::syntax_option_type syntax);
 
-extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
+extern "C" __declspec(nothrow) UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -148,7 +148,7 @@ extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 		// Replace
 		else
 		{
-			try 
+			try
 			{
 				wregex rx((LPCWSTR)szExpression, syntax);
 				std::wstring rep = regex_replace((LPCWSTR)sInput, rx, (LPCWSTR)sReplace);
@@ -176,7 +176,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-static HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax)
+static __declspec(nothrow) HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax)
 {
 	HRESULT hr = S_OK;
 	bool bRes = true;
@@ -212,9 +212,10 @@ static HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR 
 	ExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)sPropName);
 
 	// Iterate results
-	size_t i = 0;
-	for (const sub_match<LPCWSTR> &match : results)
+	for (size_t i = 0; i < results.size(); ++i)
 	{
+		const std::sub_match<LPCWSTR>& match = results[i];
+
 		hr = sPropName.Format(L"%s_%Iu", szProperty_, i);
 		ExitOnFailure(hr, "Failed formatting string");
 
@@ -226,7 +227,7 @@ LExit:
 	return hr;
 }
 
-static HRESULT SearchMultibyte(LPCWSTR szProperty_, LPCWSTR szExpression, LPCSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax)
+static __declspec(nothrow) HRESULT SearchMultibyte(LPCWSTR szProperty_, LPCWSTR szExpression, LPCSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax)
 {
 	HRESULT hr = S_OK;
 	LPSTR szPropertyA = nullptr;
@@ -268,11 +269,12 @@ static HRESULT SearchMultibyte(LPCWSTR szProperty_, LPCWSTR szExpression, LPCSTR
 	hr = ::WcaSetIntProperty(szCntProp, results.size());
 	ExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)szCntProp);
 
-	// Iterate results
-	size_t i = 0;
-	for (const std::sub_match<LPCSTR> &match : results)
+	// Iterate results	
+	for (size_t i = 0; i < results.size(); ++i)
 	{
-		hr = StrAnsiAllocFormatted(&szPropertyA, "%ls_%Iu", szProperty_, ++i);
+		const std::sub_match<LPCSTR>& match = results[i];
+
+		hr = StrAnsiAllocFormatted(&szPropertyA, "%ls_%Iu", szProperty_, i);
 		ExitOnFailure(hr, "Failed formatting ansi string");
 
 		hr = ::MsiSetPropertyA(WcaGetInstallHandle(), szPropertyA, match.str().c_str());
@@ -288,7 +290,7 @@ LExit:
 }
 
 
-static HRESULT SearchInFile(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR szFilePath, RegexFlags flags, std::regex_constants::syntax_option_type syntax)
+static __declspec(nothrow) HRESULT SearchInFile(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR szFilePath, RegexFlags flags, std::regex_constants::syntax_option_type syntax)
 {
 	HRESULT hr = S_OK;
 	bool bRes = true;

@@ -12,12 +12,20 @@ init:
         $v = -join($env:APPVEYOR_REPO_TAG_NAME.TrimStart("v"), ".", $env:APPVEYOR_BUILD_NUMBER)
         Update-AppveyorBuild -Version $v
       }
+
+clone_script:
+- cmd: >-
+    git clone -q --depth=1 -n --branch=%APPVEYOR_REPO_BRANCH% https://github.com/%APPVEYOR_REPO_NAME%.git %APPVEYOR_BUILD_FOLDER%
+    
+    cd %APPVEYOR_BUILD_FOLDER%
+    
+    git checkout -qf %APPVEYOR_REPO_COMMIT%
+    
+    git submodule update --init
     
 before_build:
 - cmd: >-
     choco install windows-adk
-
-    git submodule update --init
 
     nuget restore
 
