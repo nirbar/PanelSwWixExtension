@@ -361,7 +361,7 @@ HRESULT CFileRegex::ExecuteMultibyte(LPCWSTR szFilePath, LPCSTR szFileContent, L
 		{
 			hr = E_FAIL;
 		}
-		ExitOnFailure(hr, "Failed evaluating regular expression. %ls", ex.what());
+		ExitOnFailure(hr, "Failed evaluating regular expression. %s", ex.what());
 	}
 
 	dwSize = szContent.length();
@@ -420,7 +420,7 @@ HRESULT CFileRegex::ExecuteUnicode(LPCWSTR szFilePath, LPCWSTR szFileContent, LP
 		{
 			hr = E_FAIL;
 		}
-		ExitOnFailure(hr, "Failed evaluating regular expression. %ls", ex.what());
+		ExitOnFailure(hr, "Failed evaluating regular expression. %s", ex.what());
 	}
 
 	dwFileSize = szContent.length();

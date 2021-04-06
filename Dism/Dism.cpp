@@ -165,7 +165,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 					{
 						hr = E_FAIL;
 					}
-					ExitOnFailure(hr, "Failed evaluating regular expression. %ls", ex.what());
+					ExitOnFailure(hr, "Failed evaluating regular expression. %s", ex.what());
 				}
 
 				if (!bRes || (results.length() <= 0))
@@ -187,7 +187,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 						{
 							hr = E_FAIL;
 						}
-						ExitOnFailure(hr, "Failed evaluating regular expression. %ls", ex.what());
+						ExitOnFailure(hr, "Failed evaluating regular expression. %s", ex.what());
 					}
 
 					if (bRes && (results.length() > 0))

@@ -163,7 +163,7 @@ extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 				{
 					hr = E_FAIL;
 				}
-				ExitOnFailure(hr, "Failed evaluating regular expression. %ls", ex.what());
+				ExitOnFailure(hr, "Failed evaluating regular expression. %s", ex.what());
 			}
 		}
 	}
@@ -196,7 +196,7 @@ static HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR 
 		{
 			hr = E_FAIL;
 		}
-		ExitOnFailure(hr, "Failed evaluating regular expression. %ls", ex.what());
+		ExitOnFailure(hr, "Failed evaluating regular expression. %s", ex.what());
 	}
 
 	if (!bRes)
@@ -253,7 +253,7 @@ static HRESULT SearchMultibyte(LPCWSTR szProperty_, LPCWSTR szExpression, LPCSTR
 		{
 			hr = E_FAIL;
 		}
-		ExitOnFailure(hr, "Failed evaluating regular expression. %ls", ex.what());
+		ExitOnFailure(hr, "Failed evaluating regular expression. %s", ex.what());
 	}
 
 	if (!bRes)

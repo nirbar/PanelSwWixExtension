@@ -975,7 +975,7 @@ HRESULT CExecOnComponent::SearchStdOut(LPCWSTR szStdOut, const ExecOnDetails& de
 			{
 				hr = E_FAIL;
 			}
-			ExitOnFailure(hr, "Failed evaluating regular expression. %ls", ex.what());
+			ExitOnFailure(hr, "Failed evaluating regular expression. %s", ex.what());
 		}
 
 		switch (console.errorhandling())
