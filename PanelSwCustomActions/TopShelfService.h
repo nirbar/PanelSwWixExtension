@@ -8,15 +8,15 @@ class CTopShelfService :
 {
 public:
 
-	CTopShelfService() : CDeferredActionBase("TopShelf") { }
+	CTopShelfService() noexcept : CDeferredActionBase("TopShelf") { }
 
-	HRESULT AddInstall(LPCWSTR file, LPCWSTR serviceName, LPCWSTR displayName, LPCWSTR description, LPCWSTR instance, LPCWSTR userName, LPCWSTR passowrd, ::com::panelsw::ca::TopShelfServiceDetails_HowToStart howToStart, ::com::panelsw::ca::TopShelfServiceDetails_ServiceAccount account, ::com::panelsw::ca::ErrorHandling promptOnError);
-	HRESULT AddUninstall(LPCWSTR file, LPCWSTR instance);
+	HRESULT AddInstall(LPCWSTR file, LPCWSTR serviceName, LPCWSTR displayName, LPCWSTR description, LPCWSTR instance, LPCWSTR userName, LPCWSTR passowrd, ::com::panelsw::ca::TopShelfServiceDetails_HowToStart howToStart, ::com::panelsw::ca::TopShelfServiceDetails_ServiceAccount account, ::com::panelsw::ca::ErrorHandling promptOnError) noexcept;
+	HRESULT AddUninstall(LPCWSTR file, LPCWSTR instance) noexcept;
 
 protected:
-	// Execute the command object (XML element)
-	HRESULT DeferredExecute(const ::std::string& command) override;
+	
+	HRESULT DeferredExecute(const ::std::string& command) noexcept override;
 
-	HRESULT BuildCommandLine(const ::com::panelsw::ca::TopShelfServiceDetails *pDetails, CWixString *pCommandLine);
+	HRESULT BuildCommandLine(const ::com::panelsw::ca::TopShelfServiceDetails *pDetails, CWixString *pCommandLine) noexcept;
 };
 

@@ -18,9 +18,9 @@ enum eXmlMatch
 	enforceSingle
 };
 
-static HRESULT QueryXml(LPCWSTR pFile, LPCWSTR pExpression, LPCWSTR Language, LPCWSTR Namespaces, eXmlMatch eMatch, LPCWSTR pProperty);
+static HRESULT QueryXml(LPCWSTR pFile, LPCWSTR pExpression, LPCWSTR Language, LPCWSTR Namespaces, eXmlMatch eMatch, LPCWSTR pProperty) noexcept;
 
-extern "C" UINT __stdcall XmlSearch(MSIHANDLE hInstall)
+extern "C" UINT __stdcall XmlSearch(MSIHANDLE hInstall) noexcept
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -112,17 +112,9 @@ LExit:
 	return WcaFinalize(er);
 }
 
-static HRESULT QueryXml(LPCWSTR pFile, LPCWSTR pExpression, LPCWSTR szLanguage, LPCWSTR szNamespaces, eXmlMatch eMatch, LPCWSTR pProperty)
+static HRESULT QueryXml(LPCWSTR pFile, LPCWSTR pExpression, LPCWSTR szLanguage, LPCWSTR szNamespaces, eXmlMatch eMatch, LPCWSTR pProperty) noexcept
 {
 	HRESULT hr = S_OK;
-	CComPtr<IXMLDOMDocument2> pXmlDoc;
-	CComPtr<IXMLDOMNodeList> pNodeList;
-	CComVariant filePath;
-	VARIANT_BOOL isXmlSuccess;
-	LONG nodeCount = 0;
-	LONG maxMatches = 0;
-	CComBSTR result(L"");
-	CComBSTR delimiter(L"[~]");
 
 	ExitOnNull(pFile, hr, E_INVALIDARG, "pFile is null");
 	ExitOnNull(pExpression, hr, E_INVALIDARG, "pExpression is null");
@@ -134,115 +126,137 @@ static HRESULT QueryXml(LPCWSTR pFile, LPCWSTR pExpression, LPCWSTR szLanguage, 
 		ExitFunction();
 	}
 
-	// Create XML doc.
-	hr = ::CoCreateInstance(CLSID_DOMDocument, nullptr, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&pXmlDoc);
-	ExitOnFailure(hr, "Failed to CoCreateInstance CLSID_DOMDocument");
+	try
+	{
+		CComPtr<IXMLDOMDocument2> pXmlDoc;
+		CComPtr<IXMLDOMNodeList> pNodeList;
+		CComVariant filePath;
+		VARIANT_BOOL isXmlSuccess;
+		LONG nodeCount = 0;
+		LONG maxMatches = 0;
+		CComBSTR result(L"");
+		CComBSTR delimiter(L"[~]");
 
-	// Load XML document
-	filePath = pFile;
-	hr = pXmlDoc->load(filePath, &isXmlSuccess);
-	ExitOnFailure(hr, "Failed to load XML");
-	if (!isXmlSuccess)
+		// Create XML doc.
+		hr = ::CoCreateInstance(CLSID_DOMDocument, nullptr, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&pXmlDoc);
+		ExitOnFailure(hr, "Failed to CoCreateInstance CLSID_DOMDocument");
+
+		// Load XML document
+		filePath = pFile;
+		hr = pXmlDoc->load(filePath, &isXmlSuccess);
+		ExitOnFailure(hr, "Failed to load XML");
+		if (!isXmlSuccess)
+		{
+			hr = E_FAIL;
+			ExitOnFailure(hr, "Failed to load XML");
+		}
+
+		// Set language.
+		if (szLanguage && *szLanguage)
+		{
+			static const CComBSTR SelectionLanguage(L"SelectionLanguage");
+			hr = pXmlDoc->setProperty(SelectionLanguage, CComVariant(szLanguage));
+			ExitOnFailure(hr, "Failed setting SelectionLanguage");
+
+			CComVariant varTmp;
+			hr = pXmlDoc->getProperty(SelectionLanguage, &varTmp);
+			ExitOnFailure(hr, "Failed getting namespaces");
+
+			WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "SelectionLanguage is %ls", varTmp.bstrVal);
+		}
+
+		// Set namespaces.
+		if (szNamespaces && *szNamespaces)
+		{
+			static const CComBSTR SelectionNamespaces(L"SelectionNamespaces");
+			hr = pXmlDoc->setProperty(SelectionNamespaces, CComVariant(szNamespaces));
+			ExitOnFailure(hr, "Failed setting namespaces");
+
+			CComVariant varTmp;
+			hr = pXmlDoc->getProperty(SelectionNamespaces, &varTmp);
+			ExitOnFailure(hr, "Failed getting namespaces");
+
+			WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "SelectionNamespaces is %ls", varTmp.bstrVal);
+		}
+
+		// Execute Expression
+		hr = pXmlDoc->selectNodes(CComBSTR(pExpression), &pNodeList);
+		ExitOnFailure(hr, "Failed to select XML nodes");
+		ExitOnNull(pNodeList, hr, E_FAIL, "selectNodes returned NULL");
+
+		// Get match-count
+		hr = pNodeList->get_length(&nodeCount);
+		ExitOnFailure(hr, "Failed to get node count");
+
+		// Validate with request match parameter
+		switch (eMatch)
+		{
+		case first:
+			maxMatches = min(1, nodeCount);
+			break;
+		case all:
+			maxMatches = nodeCount;
+			break;
+		case enforceSingle:
+			if (nodeCount != 1)
+			{
+				hr = E_INVALIDARG;
+				ExitOnFailure(hr, "XmlSreach %i matches. Expected exactly one match", nodeCount);
+			}
+			maxMatches = 1;
+			break;
+		default:
+			hr = E_INVALIDARG;
+			ExitOnFailure(hr, "Wrong match parameter for XmlSreach.");
+			break;
+		}
+
+		if (maxMatches == 0)
+		{
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "No matches found");
+			ExitFunction();
+		}
+
+		for (LONG i = 0; i < maxMatches; ++i)
+		{
+			CComPtr<IXMLDOMNode> pNode;
+			CComVariant nodeValue;
+
+			hr = pNodeList->get_item(i, &pNode);
+			ExitOnFailure(hr, "Failed to get node.");
+			ExitOnNull(pNode.p, hr, E_FAIL, "Failed to get node.");
+
+			hr = pNode->get_nodeValue(&nodeValue);
+			ExitOnFailure(hr, "Failed to get node's value.");
+
+			hr = nodeValue.ChangeType(VT_BSTR);
+			ExitOnFailure(hr, "Failed to get node's value as string.");
+
+			// Add result
+			hr = result.AppendBSTR(nodeValue.bstrVal);
+			ExitOnFailure(hr, "Failed to append result.");
+
+			// Add delimiter (unless this is the last)
+			if (i < maxMatches - 1)
+			{
+				hr = result.AppendBSTR(delimiter);
+				ExitOnFailure(hr, "Failed to append delimiter.");
+			}
+		}
+
+		// Put in property
+		hr = WcaSetProperty(pProperty, (LPWSTR)result);
+	}
+	catch (CAtlException ex)
+	{
+		hr = (HRESULT)ex;
+		ExitOnFailure(hr, "Failed querying XML");
+	}
+	catch (...)
 	{
 		hr = E_FAIL;
-		ExitOnFailure(hr, "Failed to load XML");
+		ExitOnFailure(hr, "Failed querying XML");
 	}
-
-	// Set language.
-	if (szLanguage && *szLanguage)
-	{
-		static const CComBSTR SelectionLanguage(L"SelectionLanguage");
-		hr = pXmlDoc->setProperty(SelectionLanguage, CComVariant(szLanguage));
-		ExitOnFailure(hr, "Failed setting SelectionLanguage");
-
-		CComVariant varTmp;
-		hr = pXmlDoc->getProperty(SelectionLanguage, &varTmp);
-		ExitOnFailure(hr, "Failed getting namespaces");
-
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "SelectionLanguage is %ls", varTmp.bstrVal);
-	}
-
-	// Set namespaces.
-	if (szNamespaces && *szNamespaces)
-	{
-		static const CComBSTR SelectionNamespaces(L"SelectionNamespaces");
-		hr = pXmlDoc->setProperty(SelectionNamespaces, CComVariant(szNamespaces));
-		ExitOnFailure(hr, "Failed setting namespaces");
-
-		CComVariant varTmp;
-		hr = pXmlDoc->getProperty(SelectionNamespaces, &varTmp);
-		ExitOnFailure(hr, "Failed getting namespaces");
-
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "SelectionNamespaces is %ls", varTmp.bstrVal);
-	}
-
-	// Execute Expression
-	hr = pXmlDoc->selectNodes(CComBSTR(pExpression), &pNodeList);
-	ExitOnFailure(hr, "Failed to select XML nodes");
-	ExitOnNull(pNodeList, hr, E_FAIL, "selectNodes returned NULL");
-
-	// Get match-count
-	hr = pNodeList->get_length(&nodeCount);
-	ExitOnFailure(hr, "Failed to get node count");
-
-	// Validate with request match parameter
-	switch (eMatch)
-	{
-	case first:
-		maxMatches = min(1, nodeCount);
-		break;
-	case all:
-		maxMatches = nodeCount;
-		break;
-	case enforceSingle:
-		if (nodeCount != 1)
-		{
-			hr = E_INVALIDARG;
-			ExitOnFailure(hr, "XmlSreach %i matches. Expected exactly one match", nodeCount);
-		}
-		maxMatches = 1;
-		break;
-	default:
-		hr = E_INVALIDARG;
-		ExitOnFailure(hr, "Wrong match parameter for XmlSreach.");
-		break;
-	}
-
-	if (maxMatches == 0)
-	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "No matches found");
-		ExitFunction();
-	}
-
-	for (LONG i = 0; i < maxMatches; ++i)
-	{
-		CComPtr<IXMLDOMNode> pNode;
-		CComVariant nodeValue;
-
-		hr = pNodeList->get_item(i, &pNode);
-		ExitOnFailure(hr, "Failed to get node.");
-		ExitOnNull(pNode.p, hr, E_FAIL, "Failed to get node.");
-
-		hr = pNode->get_nodeValue(&nodeValue);
-		ExitOnFailure(hr, "Failed to get node's value.");
-
-		hr = nodeValue.ChangeType(VT_BSTR);
-		ExitOnFailure(hr, "Failed to get node's value as string.");
-
-		// Add result
-		hr = result.AppendBSTR(nodeValue.bstrVal);
-		ExitOnFailure(hr, "Failed to append result.");
-
-		// Add delimiter (unless this is the last)
-		if (i < maxMatches - 1)
-		{
-			hr = result.AppendBSTR(delimiter);
-			ExitOnFailure(hr, "Failed to append delimiter.");
-		}
-	}
-
-	// Put in property
-	hr = WcaSetProperty(pProperty, (LPWSTR)result);
 
 LExit:
 	return hr;

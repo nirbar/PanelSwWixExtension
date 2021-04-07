@@ -11,7 +11,7 @@ using namespace google::protobuf;
 							  L"WHERE `PSW_TopShelf`.`File_` = `File`.`File`"
 enum TopShelfServiceQuery { Component_ = 1, File_, ServiceName, DisplayName, Description, Instance, Account, UserName, Password, HowToStart, ErrorHandling };
 
-extern "C" UINT __stdcall TopShelf(MSIHANDLE hInstall)
+extern "C" UINT __stdcall TopShelf(MSIHANDLE hInstall) noexcept
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -116,7 +116,7 @@ extern "C" UINT __stdcall TopShelf(MSIHANDLE hInstall)
 		else
 		{
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will uninstall TopShelf service '%ls'", (LPCWSTR)file);
-			
+
 			hr = uninstallRollbackCAD.AddInstall((LPCWSTR)file, (LPCWSTR)serviceName, (LPCWSTR)displayName, (LPCWSTR)description, (LPCWSTR)instance, (LPCWSTR)userName, (LPCWSTR)password, (TopShelfServiceDetails_HowToStart)howToStart, (TopShelfServiceDetails_ServiceAccount)account, (com::panelsw::ca::ErrorHandling)promptOnError);
 			ExitOnFailure(hr, "Failed scheduling service uninstall-rollback");
 
@@ -154,12 +154,12 @@ LExit:
 	return WcaFinalize(er);
 }
 
-HRESULT CTopShelfService::AddInstall(LPCWSTR file, LPCWSTR serviceName, LPCWSTR displayName, LPCWSTR description, LPCWSTR instance, LPCWSTR userName, LPCWSTR passowrd, TopShelfServiceDetails_HowToStart howToStart, TopShelfServiceDetails_ServiceAccount account, com::panelsw::ca::ErrorHandling promptOnError)
+HRESULT CTopShelfService::AddInstall(LPCWSTR file, LPCWSTR serviceName, LPCWSTR displayName, LPCWSTR description, LPCWSTR instance, LPCWSTR userName, LPCWSTR passowrd, TopShelfServiceDetails_HowToStart howToStart, TopShelfServiceDetails_ServiceAccount account, com::panelsw::ca::ErrorHandling promptOnError) noexcept
 {
 	HRESULT hr = S_OK;
-	Command *pCmd = nullptr;
-	TopShelfServiceDetails *pDetails = nullptr;
-	::std::string *pAny = nullptr;
+	Command* pCmd = nullptr;
+	TopShelfServiceDetails* pDetails = nullptr;
+	::std::string* pAny = nullptr;
 	bool bRes = true;
 
 	hr = AddCommand("CTopShelfService", &pCmd);
@@ -190,12 +190,12 @@ LExit:
 	return hr;
 }
 
-HRESULT CTopShelfService::AddUninstall(LPCWSTR file, LPCWSTR instance)
+HRESULT CTopShelfService::AddUninstall(LPCWSTR file, LPCWSTR instance) noexcept
 {
 	HRESULT hr = S_OK;
-	Command *pCmd = nullptr;
-	TopShelfServiceDetails *pDetails = nullptr;
-	::std::string *pAny = nullptr;
+	Command* pCmd = nullptr;
+	TopShelfServiceDetails* pDetails = nullptr;
+	::std::string* pAny = nullptr;
 	bool bRes = true;
 
 	hr = AddCommand("CTopShelfService", &pCmd);
@@ -218,8 +218,7 @@ LExit:
 	return hr;
 }
 
-// Execute the command object (XML element)
-HRESULT CTopShelfService::DeferredExecute(const ::std::string& command)
+HRESULT CTopShelfService::DeferredExecute(const ::std::string& command) noexcept
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -318,7 +317,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfServiceDetails *pDetails, CWixString *pCommandLine)
+HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfServiceDetails* pDetails, CWixString* pCommandLine) noexcept
 {
 	HRESULT hr = S_OK;
 	LPWSTR file = nullptr;

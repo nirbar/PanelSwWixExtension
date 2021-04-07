@@ -18,10 +18,10 @@ enum SqlExecOn
 	, ReinstallRollback = Reinstall * 2
 };
 
-static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, CWixString *pszQuery);
-static HRESULT ReplaceStrings(CWixString *pszQuery, LPCWSTR szQueryId);
+static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, CWixString *pszQuery) noexcept;
+static HRESULT ReplaceStrings(CWixString *pszQuery, LPCWSTR szQueryId) noexcept;
 
-extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
+extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall) noexcept
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -39,8 +39,8 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 	// Ensure tables exist.
 	hr = WcaTableExists(L"PSW_SqlScript");
 	ExitOnFailure((hr == S_OK), "Table does not exist 'PSW_SqlScript'. Have you authored 'PanelSw:SqlScript' entries in WiX code?");
-    hr = WcaTableExists(L"PSW_SqlScript_Replacements");
-    ExitOnFailure((hr == S_OK), "Table does not exist 'PSW_SqlScript_Replacements'. Have you authored 'PanelSw:SqlScript' entries in WiX code?");
+	hr = WcaTableExists(L"PSW_SqlScript_Replacements");
+	ExitOnFailure((hr == S_OK), "Table does not exist 'PSW_SqlScript_Replacements'. Have you authored 'PanelSw:SqlScript' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `Server`, `Instance`, `Database`, `Username`, `Password`, `Binary_`, `On`, `ErrorHandling`, `Port`, `Encrypted`, `ConnectionString` FROM `PSW_SqlScript` ORDER BY `Order`", &hView);
@@ -48,7 +48,7 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
-	{        
+	{
 		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
@@ -207,7 +207,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, CWixString *pszQuery)
+static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, CWixString* pszQuery) noexcept
 {
 	HRESULT hr = S_OK;
 	CWixString szMsiQuery;
@@ -259,7 +259,7 @@ LExit:
 	return hr;
 }
 
-static HRESULT ReplaceStrings(CWixString *pszQuery, LPCWSTR szQueryId)
+static HRESULT ReplaceStrings(CWixString* pszQuery, LPCWSTR szQueryId) noexcept
 {
 	HRESULT hr = S_OK;
 	CWixString szMsiQuery;
@@ -298,7 +298,7 @@ LExit:
 }
 
 // Copied from WiX function ScaSqlStrsReadScripts
-HRESULT CSqlScript::SplitScript(SqlScriptDetails *pDetails, LPCWSTR pwzScript)
+HRESULT CSqlScript::SplitScript(SqlScriptDetails* pDetails, LPCWSTR pwzScript) noexcept
 {
 	DWORD cchScript = ::wcslen(pwzScript);
 	LPCWSTR pwz = nullptr;
@@ -496,16 +496,16 @@ LExit:
 	return hr;
 }
 
-HRESULT CSqlScript::AddExec(LPCWSTR szConnectionString, LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, bool bEncrypted, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, com::panelsw::ca::ErrorHandling errorHandling)
+HRESULT CSqlScript::AddExec(LPCWSTR szConnectionString, LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, bool bEncrypted, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, com::panelsw::ca::ErrorHandling errorHandling) noexcept
 {
-    HRESULT hr = S_OK;
-	::com::panelsw::ca::Command *pCmd = nullptr;
-	SqlScriptDetails *pDetails = nullptr;
-	::std::string *pAny = nullptr;
+	HRESULT hr = S_OK;
+	::com::panelsw::ca::Command* pCmd = nullptr;
+	SqlScriptDetails* pDetails = nullptr;
+	::std::string* pAny = nullptr;
 	bool bRes = true;
 
-    hr = AddCommand("CSqlScript", &pCmd);
-    ExitOnFailure(hr, "Failed to add command");
+	hr = AddCommand("CSqlScript", &pCmd);
+	ExitOnFailure(hr, "Failed to add command");
 
 	pDetails = new SqlScriptDetails();
 	ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
@@ -530,11 +530,10 @@ HRESULT CSqlScript::AddExec(LPCWSTR szConnectionString, LPCWSTR szServer, LPCWST
 	ExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
 
 LExit:
-    return hr;
+	return hr;
 }
 
-// Execute the command object (XML element)
-HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
+HRESULT CSqlScript::DeferredExecute(const ::std::string& command) noexcept
 {
 	HRESULT hr = S_OK;
 	DWORD exitCode = 0;
@@ -635,7 +634,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CSqlScript::ExecuteOne(const CSqlConnection &sqlConn, LPCWSTR szScript, LPWSTR *pszError)
+HRESULT CSqlScript::ExecuteOne(const CSqlConnection& sqlConn, LPCWSTR szScript, LPWSTR* pszError) noexcept
 {
 	HRESULT hr = S_OK;
 	LPWSTR szError = nullptr;

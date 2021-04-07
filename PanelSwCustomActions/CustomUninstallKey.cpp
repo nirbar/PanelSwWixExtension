@@ -10,7 +10,7 @@
 #define CustomUninstallKeyQuery L"SELECT `Id`, `ProductCode`, `Name`, `Data`, `DataType`, `Attributes`, `Condition` FROM `PSW_CustomUninstallKey`"
 enum eCustomUninstallKeyQuery { Id = 1, ProductCode, Name, Data, DataType, Attributes, Condition };
 
-extern "C" UINT __stdcall CustomUninstallKey_Immediate(MSIHANDLE hInstall)
+extern "C" UINT __stdcall CustomUninstallKey_Immediate(MSIHANDLE hInstall) noexcept
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -33,7 +33,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-extern "C" UINT __stdcall CustomUninstallKey_deferred(MSIHANDLE hInstall)
+extern "C" UINT __stdcall CustomUninstallKey_deferred(MSIHANDLE hInstall) noexcept
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -51,16 +51,16 @@ LExit:
 	return WcaFinalize(er);
 }
 
-CCustomUninstallKey::CCustomUninstallKey( MSIHANDLE hInstall)
+CCustomUninstallKey::CCustomUninstallKey( MSIHANDLE hInstall) noexcept
 	: _hInstall( hInstall)
 {
 }
 
-CCustomUninstallKey::~CCustomUninstallKey(void)
+CCustomUninstallKey::~CCustomUninstallKey(void) noexcept
 {
 }
 
-HRESULT CCustomUninstallKey::Execute()
+HRESULT CCustomUninstallKey::Execute() noexcept
 {
 	CRegistryXmlParser parser;
 	LPWSTR customActionData = nullptr;
@@ -78,7 +78,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CCustomUninstallKey::CreateCustomActionData()
+HRESULT CCustomUninstallKey::CreateCustomActionData() noexcept
 {
 	PMSIHANDLE hView;
     PMSIHANDLE hRec;
@@ -199,7 +199,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CCustomUninstallKey::CreateRollbackCustomActionData(CRegistryXmlParser *pRollbackParser, LPCWSTR szProductCode, LPWSTR pId, LPWSTR pName)
+HRESULT CCustomUninstallKey::CreateRollbackCustomActionData(CRegistryXmlParser *pRollbackParser, LPCWSTR szProductCode, LPWSTR pId, LPWSTR pName) noexcept
 {
 	HRESULT hr = S_OK;
 	CRegistryKey key;
@@ -249,7 +249,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CCustomUninstallKey::GetUninstallKey(LPCWSTR szProductCode, LPWSTR keyName)
+HRESULT CCustomUninstallKey::GetUninstallKey(LPCWSTR szProductCode, LPWSTR keyName) noexcept
 {
 	LPWSTR prodCode = nullptr;
 	HRESULT hr = S_OK;

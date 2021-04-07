@@ -6,15 +6,14 @@ class CShellExecute :
 {
 public:
 
-	CShellExecute() : CDeferredActionBase("ShellExec") { }
+	CShellExecute() noexcept : CDeferredActionBase("ShellExec") { }
 
-	HRESULT AddShellExec(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR szVerb, LPCWSTR szWorkingDir, int nShow, bool bWait);
+	HRESULT AddShellExec(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR szVerb, LPCWSTR szWorkingDir, int nShow, bool bWait) noexcept;
 
 protected:
-	// Execute the command object (XML element)
-	HRESULT DeferredExecute(const ::std::string& command) override;
+	
+	HRESULT DeferredExecute(const ::std::string& command) noexcept override;
 
 private:
-	HRESULT Execute(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR szVerb, LPCWSTR szWorkingDir, int nShow, bool bWait);
+	HRESULT Execute(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR szVerb, LPCWSTR szWorkingDir, int nShow, bool bWait) noexcept;
 };
-

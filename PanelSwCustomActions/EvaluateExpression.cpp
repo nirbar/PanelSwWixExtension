@@ -10,7 +10,7 @@
 
 #define QUERY		L"SELECT `Expression`, `Property_` FROM `PSW_EvaluateExpression` ORDER BY `Order`"
 
-extern "C" UINT __stdcall EvaluateExpression(MSIHANDLE hInstall)
+extern "C" UINT __stdcall EvaluateExpression(MSIHANDLE hInstall) noexcept
 {	
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

@@ -5,9 +5,9 @@
 class CSqlQuery : public CSqlClientBase
 {
 public:
-    ~CSqlQuery();
+    virtual ~CSqlQuery() noexcept;
 
-    HRESULT ExecuteQuery(const CSqlConnection &sqlConn, LPCWSTR szQuery, LPWSTR* pszResult, LPWSTR *pszError = nullptr);
+    HRESULT ExecuteQuery(const CSqlConnection &sqlConn, LPCWSTR szQuery, LPWSTR* pszResult, LPWSTR *pszError = nullptr) noexcept;
 
 private:
 

@@ -18,7 +18,7 @@ enum ShellExecuteFlags
 	OnRollback = 4
 };
 
-extern "C" UINT __stdcall PSW_ShellExecute(MSIHANDLE hInstall)
+extern "C" UINT __stdcall PSW_ShellExecute(MSIHANDLE hInstall) noexcept
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -91,21 +91,21 @@ extern "C" UINT __stdcall PSW_ShellExecute(MSIHANDLE hInstall)
 
 		if ((nFlags & ShellExecuteFlags::OnExecute) != 0)
 		{
-			hr = oDeferredShellExecute.AddShellExec( szTarget, szArgs, szVerb, szWorkingDir, nShow, nWait != 0);
+			hr = oDeferredShellExecute.AddShellExec(szTarget, szArgs, szVerb, szWorkingDir, nShow, nWait != 0);
 			ExitOnFailure(hr, "Failed creating custom action data for deferred action.");
 		}
 		if ((nFlags & ShellExecuteFlags::OnCommit) != 0)
 		{
-			hr = oCommitShellExecute.AddShellExec( szTarget, szArgs, szVerb, szWorkingDir, nShow, nWait != 0);
+			hr = oCommitShellExecute.AddShellExec(szTarget, szArgs, szVerb, szWorkingDir, nShow, nWait != 0);
 			ExitOnFailure(hr, "Failed creating custom action data for deferred action.");
 		}
 		if ((nFlags & ShellExecuteFlags::OnRollback) != 0)
 		{
-			hr = oRollbackShellExecute.AddShellExec( szTarget, szArgs, szVerb, szWorkingDir, nShow, nWait != 0);
+			hr = oRollbackShellExecute.AddShellExec(szTarget, szArgs, szVerb, szWorkingDir, nShow, nWait != 0);
 			ExitOnFailure(hr, "Failed creating custom action data for deferred action.");
 		}
 	}
-	
+
 	// Schedule actions.
 	hr = oRollbackShellExecute.GetCustomActionData(&szCustomActionData);
 	ExitOnFailure(hr, "Failed getting custom action data for rollback action.");
@@ -126,12 +126,12 @@ extern "C" UINT __stdcall PSW_ShellExecute(MSIHANDLE hInstall)
 
 LExit:
 	ReleaseStr(szCustomActionData);
-	
+
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
 }
 
-HRESULT CShellExecute::AddShellExec(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR szVerb, LPCWSTR szWorkingDir, int nShow, bool bWait)
+HRESULT CShellExecute::AddShellExec(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR szVerb, LPCWSTR szWorkingDir, int nShow, bool bWait) noexcept
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
@@ -163,8 +163,7 @@ LExit:
 	return hr;
 }
 
-// Execute the command object (XML element)
-HRESULT CShellExecute::DeferredExecute(const ::std::string& command)
+HRESULT CShellExecute::DeferredExecute(const ::std::string& command) noexcept
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -187,7 +186,7 @@ HRESULT CShellExecute::DeferredExecute(const ::std::string& command)
 
 	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "ShellExecute: Target='%ls' Args='%ls' Verb='%ls' WorkingDir='%ls' Show=%i Wait=%i"
 		, szTarget, szArgs, szVerb, szWorkingDir, nShow, bWait);
-	
+
 	hr = Execute(szTarget, szArgs, szVerb, szWorkingDir, nShow, bWait);
 	ExitOnFailure(hr, "Failed to execute \"%ls\" %ls", szTarget, szArgs);
 
@@ -195,79 +194,79 @@ LExit:
 	return hr;
 }
 
-HRESULT CShellExecute::Execute(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR szVerb, LPCWSTR szWorkingDir, int nShow, bool bWait)
+HRESULT CShellExecute::Execute(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR szVerb, LPCWSTR szWorkingDir, int nShow, bool bWait) noexcept
 {
-    HRESULT hr = S_OK;
-    SHELLEXECUTEINFO shExecInfo = {};
+	HRESULT hr = S_OK;
+	SHELLEXECUTEINFO shExecInfo = {};
 	PMSIHANDLE hRecord;
 
 	// Notify progress data
 	hRecord = ::MsiCreateRecord(4);
-	WcaSetRecordString( hRecord, 1, szTarget);
-	WcaSetRecordString( hRecord, 2, szArgs);
-	WcaSetRecordString( hRecord, 3, szVerb);
-	WcaSetRecordString( hRecord, 4, szWorkingDir);
-	WcaProcessMessage( INSTALLMESSAGE::INSTALLMESSAGE_ACTIONDATA, hRecord);
+	WcaSetRecordString(hRecord, 1, szTarget);
+	WcaSetRecordString(hRecord, 2, szArgs);
+	WcaSetRecordString(hRecord, 3, szVerb);
+	WcaSetRecordString(hRecord, 4, szWorkingDir);
+	WcaProcessMessage(INSTALLMESSAGE::INSTALLMESSAGE_ACTIONDATA, hRecord);
 
 
-    shExecInfo.cbSize = sizeof(shExecInfo);
-    shExecInfo.fMask = SEE_MASK_FLAG_DDEWAIT | SEE_MASK_FLAG_NO_UI;
-	if( bWait)
+	shExecInfo.cbSize = sizeof(shExecInfo);
+	shExecInfo.fMask = SEE_MASK_FLAG_DDEWAIT | SEE_MASK_FLAG_NO_UI;
+	if (bWait)
 	{
 		shExecInfo.fMask |= SEE_MASK_NOCLOSEPROCESS;
 	}
 
-    shExecInfo.lpVerb = szVerb;
-    shExecInfo.lpFile = szTarget;
-    shExecInfo.lpParameters = szArgs;
-    shExecInfo.lpDirectory = szWorkingDir;
-    shExecInfo.nShow = nShow;
+	shExecInfo.lpVerb = szVerb;
+	shExecInfo.lpFile = szTarget;
+	shExecInfo.lpParameters = szArgs;
+	shExecInfo.lpDirectory = szWorkingDir;
+	shExecInfo.nShow = nShow;
 
-	if (! ::ShellExecuteEx(&shExecInfo))
-    {
-        switch (reinterpret_cast<DWORD_PTR>(shExecInfo.hInstApp))
-        {
-        case SE_ERR_FNF:
-            hr = HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
-            break;
-        case SE_ERR_PNF:
-            hr = HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND);
-            break;
-        case ERROR_BAD_FORMAT:
-            hr = HRESULT_FROM_WIN32(ERROR_BAD_FORMAT);
-            break;
-        case SE_ERR_ASSOCINCOMPLETE:
-        case SE_ERR_NOASSOC:
-            hr = HRESULT_FROM_WIN32(ERROR_NO_ASSOCIATION);
-            break;
-        case SE_ERR_DDEBUSY: __fallthrough;
-        case SE_ERR_DDEFAIL: __fallthrough;
-        case SE_ERR_DDETIMEOUT:
-            hr = HRESULT_FROM_WIN32(ERROR_DDE_FAIL);
-            break;
-        case SE_ERR_DLLNOTFOUND:
-            hr = HRESULT_FROM_WIN32(ERROR_DLL_NOT_FOUND);
-            break;
-        case SE_ERR_OOM:
-            hr = E_OUTOFMEMORY;
-            break;
-        case SE_ERR_ACCESSDENIED:
-            hr = E_ACCESSDENIED;
-            break;
-        default:
-            hr = E_FAIL;
-        }
-        ExitOnFailure1(hr, "ShellExecEx failed with return code %d", reinterpret_cast<DWORD_PTR>(shExecInfo.hInstApp));
-    }
+	if (!::ShellExecuteEx(&shExecInfo))
+	{
+		switch (reinterpret_cast<DWORD_PTR>(shExecInfo.hInstApp))
+		{
+		case SE_ERR_FNF:
+			hr = HRESULT_FROM_WIN32(ERROR_FILE_NOT_FOUND);
+			break;
+		case SE_ERR_PNF:
+			hr = HRESULT_FROM_WIN32(ERROR_PATH_NOT_FOUND);
+			break;
+		case ERROR_BAD_FORMAT:
+			hr = HRESULT_FROM_WIN32(ERROR_BAD_FORMAT);
+			break;
+		case SE_ERR_ASSOCINCOMPLETE:
+		case SE_ERR_NOASSOC:
+			hr = HRESULT_FROM_WIN32(ERROR_NO_ASSOCIATION);
+			break;
+		case SE_ERR_DDEBUSY: __fallthrough;
+		case SE_ERR_DDEFAIL: __fallthrough;
+		case SE_ERR_DDETIMEOUT:
+			hr = HRESULT_FROM_WIN32(ERROR_DDE_FAIL);
+			break;
+		case SE_ERR_DLLNOTFOUND:
+			hr = HRESULT_FROM_WIN32(ERROR_DLL_NOT_FOUND);
+			break;
+		case SE_ERR_OOM:
+			hr = E_OUTOFMEMORY;
+			break;
+		case SE_ERR_ACCESSDENIED:
+			hr = E_ACCESSDENIED;
+			break;
+		default:
+			hr = E_FAIL;
+		}
+		ExitOnFailure1(hr, "ShellExecEx failed with return code %d", reinterpret_cast<DWORD_PTR>(shExecInfo.hInstApp));
+	}
 
 	if (bWait)
-    {
-		::WaitForSingleObject( shExecInfo.hProcess, INFINITE);
-		::CloseHandle( shExecInfo.hProcess);
+	{
+		::WaitForSingleObject(shExecInfo.hProcess, INFINITE);
+		::CloseHandle(shExecInfo.hProcess);
 		shExecInfo.hProcess = NULL;
-    }
+	}
 
 LExit:
 
-    return hr;
+	return hr;
 }

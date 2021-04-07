@@ -19,7 +19,7 @@ enum TelemetryFlags
 	Secure = 8
 };
 
-extern "C" UINT __stdcall Telemetry(MSIHANDLE hInstall)
+extern "C" UINT __stdcall Telemetry(MSIHANDLE hInstall) noexcept
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -74,7 +74,7 @@ extern "C" UINT __stdcall Telemetry(MSIHANDLE hInstall)
 			, (LPCWSTR)szData
 			, (LPCWSTR)nFlags
 			, (LPCWSTR)szCondition
-			);
+		);
 
 		// Test condition
 		MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, szCondition);
@@ -115,7 +115,7 @@ extern "C" UINT __stdcall Telemetry(MSIHANDLE hInstall)
 			ExitOnFailure(hr, "Failed creating custom action data for rollback action.");
 		}
 	}
-	
+
 	// Schedule actions.
 	hr = oRollbackTelemetry.GetCustomActionData(&szCustomActionData);
 	ExitOnFailure(hr, "Failed getting custom action data for rollback action.");
@@ -141,12 +141,12 @@ LExit:
 	return WcaFinalize(er);
 }
 
-HRESULT CTelemetry::AddPost(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure)
+HRESULT CTelemetry::AddPost(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure) noexcept
 {
 	HRESULT hr = S_OK;
-	::com::panelsw::ca::Command *pCmd = nullptr;
-	TelemetryDetails *pDetails = nullptr;
-	::std::string *pAny = nullptr;
+	::com::panelsw::ca::Command* pCmd = nullptr;
+	TelemetryDetails* pDetails = nullptr;
+	::std::string* pAny = nullptr;
 	bool bRes = true;
 
 	hr = AddCommand("CTelemetry", &pCmd);
@@ -171,8 +171,7 @@ LExit:
 	return hr;
 }
 
-// Execute the command object (XML element)
-HRESULT CTelemetry::DeferredExecute(const ::std::string& command)
+HRESULT CTelemetry::DeferredExecute(const ::std::string& command) noexcept
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -204,7 +203,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CTelemetry::Post(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure)
+HRESULT CTelemetry::Post(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure) noexcept
 {
 	HRESULT hr = S_OK;
 	DWORD dwSize = 0;

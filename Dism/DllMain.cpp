@@ -1,13 +1,9 @@
 #include "stdafx.h"
 
 // DllMain - Initialize and cleanup WiX custom action utils.
-extern "C" BOOL WINAPI DllMain(
-	__in HINSTANCE hInst,
-	__in ULONG ulReason,
-	__in LPVOID
-	)
+extern "C" BOOL WINAPI DllMain(__in HINSTANCE hInst, __in ULONG ulReason, __in LPVOID) noexcept
 {
-	switch(ulReason)
+	switch (ulReason)
 	{
 	case DLL_PROCESS_ATTACH:
 		WcaGlobalInitialize(hInst);

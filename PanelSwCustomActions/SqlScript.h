@@ -8,16 +8,16 @@ class CSqlScript :
 {
 public:
 
-	CSqlScript() : CDeferredActionBase("SqlScript") { }
+	CSqlScript() noexcept : CDeferredActionBase("SqlScript") { }
 
-	HRESULT AddExec(LPCWSTR szConnectionString, LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, bool bEncrypted, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, com::panelsw::ca::ErrorHandling errorHandling);
+	HRESULT AddExec(LPCWSTR szConnectionString, LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, bool bEncrypted, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, com::panelsw::ca::ErrorHandling errorHandling) noexcept;
 
 protected:
-	// Execute the command object (XML element)
-	HRESULT DeferredExecute(const ::std::string& command) override;
+	
+	HRESULT DeferredExecute(const ::std::string& command) noexcept override;
 
 private:
-	HRESULT ExecuteOne(const CSqlConnection &sqlConn, LPCWSTR szScript, LPWSTR *pszError);
+	HRESULT ExecuteOne(const CSqlConnection& sqlConn, LPCWSTR szScript, LPWSTR* pszError) noexcept;
 
-	HRESULT SplitScript(com::panelsw::ca::SqlScriptDetails *pDetails, LPCWSTR szScript);
+	HRESULT SplitScript(com::panelsw::ca::SqlScriptDetails* pDetails, LPCWSTR szScript) noexcept;
 };

@@ -9,7 +9,7 @@ using namespace google::protobuf;
 #define DeletePath_QUERY L"SELECT `Id`, `Path`, `Flags`, `Condition` FROM `PSW_DeletePath`"
 enum DeletePathQuery { Id = 1, Path, Flags, Condition };
 
-extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
+extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall) noexcept
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -128,7 +128,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-HRESULT CFileOperations::AddCopyFile(LPCWSTR szFrom, LPCWSTR szTo, int flags)
+HRESULT CFileOperations::AddCopyFile(LPCWSTR szFrom, LPCWSTR szTo, int flags) noexcept
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
@@ -159,7 +159,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CFileOperations::AddMoveFile(LPCWSTR szFrom, LPCWSTR szTo, int flags)
+HRESULT CFileOperations::AddMoveFile(LPCWSTR szFrom, LPCWSTR szTo, int flags) noexcept
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
@@ -190,7 +190,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CFileOperations::AddDeleteFile(LPCWSTR szPath, int flags)
+HRESULT CFileOperations::AddDeleteFile(LPCWSTR szPath, int flags) noexcept
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
@@ -218,8 +218,7 @@ LExit:
 	return hr;
 }
 
-// Execute the command object (XML element)
-HRESULT CFileOperations::DeferredExecute(const ::std::string& command)
+HRESULT CFileOperations::DeferredExecute(const ::std::string& command) noexcept
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -256,7 +255,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool bIgnoreMissing, bool bIgnoreErrors)
+HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool bIgnoreMissing, bool bIgnoreErrors) noexcept
 {
 	SHFILEOPSTRUCT opInfo;
 	HRESULT hr = S_OK;
@@ -302,7 +301,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bIgnoreErrors)
+HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bIgnoreErrors) noexcept
 {
 	SHFILEOPSTRUCT opInfo;
 	HRESULT hr = S_OK;
@@ -342,7 +341,7 @@ LExit:
 	return hr;
 }
 
-FileRegexDetails::FileEncoding CFileOperations::DetectEncoding(const void* pFileContent, DWORD dwSize)
+FileRegexDetails::FileEncoding CFileOperations::DetectEncoding(const void* pFileContent, DWORD dwSize) noexcept
 {
 	int nTests = IS_TEXT_UNICODE_UNICODE_MASK | IS_TEXT_UNICODE_REVERSE_MASK | IS_TEXT_UNICODE_NOT_UNICODE_MASK | IS_TEXT_UNICODE_NOT_ASCII_MASK;
 	HRESULT hr = S_OK;

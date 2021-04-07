@@ -4,9 +4,9 @@
 #include <wcawow64.h>
 using namespace ::com::panelsw::ca;
 
-static void FirstLog(MSIHANDLE hInstall, LPCSTR szMessage);
+static void FirstLog(MSIHANDLE hInstall, LPCSTR szMessage) noexcept;
 
-HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToExecutorFunc mapFunc)
+HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToExecutorFunc mapFunc) noexcept
 {
 	HRESULT hr = S_OK;
 	HRESULT hrErr = S_OK;
@@ -158,16 +158,16 @@ LExit:
 	return SUCCEEDED(hr) ? hrErr : hr;
 }
 
-CDeferredActionBase::CDeferredActionBase(LPCSTR szId)
+CDeferredActionBase::CDeferredActionBase(LPCSTR szId) noexcept
 {
 	_cad.set_id(szId);
 }
 
-CDeferredActionBase::~CDeferredActionBase()
+CDeferredActionBase::~CDeferredActionBase() noexcept
 {
 }
 
-HRESULT CDeferredActionBase::AddCommand(LPCSTR szHandler, Command **ppCommand)
+HRESULT CDeferredActionBase::AddCommand(LPCSTR szHandler, Command **ppCommand) noexcept
 {
 	HRESULT hr = S_OK;
 	Command *pCmd = nullptr;
@@ -187,12 +187,12 @@ HRESULT CDeferredActionBase::AddCommand(LPCSTR szHandler, Command **ppCommand)
 	return hr;
 }
 
-bool CDeferredActionBase::HasActions() const
+bool CDeferredActionBase::HasActions() const noexcept
 {
 	return (_cad.commands_size() > 0);
 }
 
-HRESULT CDeferredActionBase::GetCustomActionData(LPWSTR *pszCustomActionData)
+HRESULT CDeferredActionBase::GetCustomActionData(LPWSTR *pszCustomActionData) noexcept
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -214,7 +214,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CDeferredActionBase::Prepend(CDeferredActionBase* pOther)
+HRESULT CDeferredActionBase::Prepend(CDeferredActionBase* pOther) noexcept
 {
 	HRESULT hr = S_OK;
 	CustomActionData mergedCad;
@@ -243,7 +243,7 @@ LExit:
 	return hr;
 }
 
-void CDeferredActionBase::LogUnformatted(LOGLEVEL level, PCSTR szFormat, ...)
+void CDeferredActionBase::LogUnformatted(LOGLEVEL level, PCSTR szFormat, ...) noexcept
 {
 	HRESULT hr = S_OK;
 	int nRes = 0;
@@ -301,7 +301,7 @@ LExit:
 	return;
 }
 
-static void FirstLog(MSIHANDLE hInstall, LPCSTR szMessage)
+static void FirstLog(MSIHANDLE hInstall, LPCSTR szMessage) noexcept
 {
 	HRESULT hr = S_OK;
 

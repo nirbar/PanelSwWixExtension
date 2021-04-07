@@ -5,14 +5,12 @@
 #pragma comment (lib, "Advapi32.lib")
 using namespace std;
 
-extern "C" UINT __stdcall AccountNames(MSIHANDLE hInstall)
+extern "C" UINT __stdcall AccountNames(MSIHANDLE hInstall) noexcept
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
 	BOOL bRes = TRUE;
-	map< LPCWSTR, LPCWSTR> mapSid2Property;
-	map< LPCWSTR, LPCWSTR>::iterator itCur;
-	map< LPCWSTR, LPCWSTR>::iterator itEnd;
+	map<LPCWSTR, LPCWSTR> mapSid2Property;
 	PSID pSid = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
@@ -67,9 +65,7 @@ extern "C" UINT __stdcall AccountNames(MSIHANDLE hInstall)
 	mapSid2Property[SDDL_DOMAIN_DOMAIN_CONTROLLERS] = L"DOMAIN_DOMAIN_CONTROLLERS";
 	mapSid2Property[SDDL_DOMAIN_COMPUTERS] = L"DOMAIN_COMPUTERS";
 
-	for (itCur = mapSid2Property.begin(), itEnd = mapSid2Property.end()
-		; itCur != itEnd
-		; ++itCur)
+	for (const pair<LPCWSTR, LPCWSTR> &sidPair: mapSid2Property)
 	{
 		CWixString accountName;
 		DWORD dwNameLen = 0;
@@ -79,18 +75,18 @@ extern "C" UINT __stdcall AccountNames(MSIHANDLE hInstall)
 		CWixString fullName;
 		CWixString property;
 
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Converting SID '%ls'", itCur->first);
-		bRes = ::ConvertStringSidToSid(itCur->first, &pSid);
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Converting SID '%ls'", sidPair.first);
+		bRes = ::ConvertStringSidToSid(sidPair.first, &pSid);
 		if (!bRes)
 		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed converting SID '%ls': Error %u", itCur->first, ::GetLastError());
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed converting SID '%ls': Error %u", sidPair.first, ::GetLastError());
 			goto LForContinue;
 		}
 
 		bRes = ::LookupAccountSid(nullptr, pSid, (LPWSTR)accountName, &dwNameLen, (LPWSTR)domainName, &dwDomainLen, &eUse);
 		if (!bRes && (::GetLastError() != ERROR_INSUFFICIENT_BUFFER))
 		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed getting SID for '%ls': Error %u", itCur->first, ::GetLastError());
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed getting SID for '%ls': Error %u", sidPair.first, ::GetLastError());
 			goto LForContinue;
 		}
 
@@ -108,7 +104,7 @@ extern "C" UINT __stdcall AccountNames(MSIHANDLE hInstall)
 			hr = fullName.Format(L"%s\\%s", (LPCWSTR)domainName, (LPCWSTR)accountName);
 			ExitOnFailure(hr, "Failed formatting string");
 
-			hr = property.Format(L"%s_DOMAIN", itCur->second);
+			hr = property.Format(L"%s_DOMAIN", sidPair.second);
 			ExitOnFailure(hr, "Failed formatting string");
 
 			hr = WcaSetProperty(property, (LPCWSTR)domainName);
@@ -120,16 +116,16 @@ extern "C" UINT __stdcall AccountNames(MSIHANDLE hInstall)
 			ExitOnFailure(hr, "Failed copying string");
 		}
 
-		hr = property.Format(L"%s_NAME", itCur->second);
+		hr = property.Format(L"%s_NAME", sidPair.second);
 		ExitOnFailure(hr, "Failed formatting string");
 
 		hr = WcaSetProperty(property, (LPCWSTR)accountName);
 		ExitOnFailure(hr, "Failed setting property");
 
-		hr = WcaSetProperty(itCur->second, (LPCWSTR)fullName);
+		hr = WcaSetProperty(sidPair.second, (LPCWSTR)fullName);
 		ExitOnFailure(hr, "Failed setting property");
 
-LForContinue:
+	LForContinue:
 
 		if (pSid)
 		{

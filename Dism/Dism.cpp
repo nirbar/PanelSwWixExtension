@@ -21,9 +21,9 @@ enum ErrorHandling
 #define ERROR_ID_PACKAGE	27003
 #define ERROR_ID_FEATURE	27004
 
-static LPCWSTR DismStateString(DismPackageFeatureState state);
-static void ProgressCallback(UINT Current, UINT Total, PVOID UserData);
-static HRESULT HandleError(ErrorHandling nErrorHandling, UINT nErrorId, LPCWSTR szFeature, LPCWSTR szErrorMsg);
+static LPCWSTR DismStateString(DismPackageFeatureState state) noexcept;
+static void ProgressCallback(UINT Current, UINT Total, PVOID UserData) noexcept;
+static HRESULT HandleError(ErrorHandling nErrorHandling, UINT nErrorId, LPCWSTR szFeature, LPCWSTR szErrorMsg) noexcept;
 
 static ULONGLONG nMsiTicksReported_ = 0;
 static HANDLE hCancel_ = NULL;
@@ -57,20 +57,20 @@ struct ProgressReportState
 	- Cost
 	- Error handling
 */
-extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
+extern "C" UINT __stdcall Dism(MSIHANDLE hInstall) noexcept
 {
 	UINT er = ERROR_SUCCESS;
 	HRESULT hr = S_OK;
 	DismSession hSession = DISM_SESSION_DEFAULT;
 	UINT uFeatureNum = 0;
-	DismFeature *pFeatures = nullptr;
-	DismString *pErrorString = nullptr;
+	DismFeature* pFeatures = nullptr;
+	DismString* pErrorString = nullptr;
 	BOOL bDismInit = FALSE;
 	BOOL bRes = TRUE;
 	LPWSTR szCAD = nullptr;
 	LPWSTR szDismLog = nullptr;
 	DWORD dwStateNum = 0;
-	ProgressReportState *pStates = nullptr;
+	ProgressReportState* pStates = nullptr;
 	ProgressReportState currState;
 	errno_t err = 0;
 
@@ -352,7 +352,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-static LPCWSTR DismStateString(DismPackageFeatureState state)
+static LPCWSTR DismStateString(DismPackageFeatureState state) noexcept
 {
 	static LPCWSTR NotPresent = L"Absent";
 	static LPCWSTR UninstallPending = L"Pending Remove";
@@ -388,11 +388,11 @@ static LPCWSTR DismStateString(DismPackageFeatureState state)
 	}
 }
 
-static void ProgressCallback(UINT Current, UINT Total, PVOID UserData)
+static void ProgressCallback(UINT Current, UINT Total, PVOID UserData) noexcept
 {
 	HRESULT hr = S_OK;
 	PMSIHANDLE hRec;
-	ProgressReportState *state = (ProgressReportState*)UserData;
+	ProgressReportState* state = (ProgressReportState*)UserData;
 
 	double ftrCnt = state->dwFeatureNum;
 	if (state->szPackage && *state->szPackage)
@@ -412,7 +412,7 @@ static void ProgressCallback(UINT Current, UINT Total, PVOID UserData)
 	}
 }
 
-static HRESULT HandleError(ErrorHandling nErrorHandling, UINT nErrorId, LPCWSTR szFeature, LPCWSTR szErrorMsg)
+static HRESULT HandleError(ErrorHandling nErrorHandling, UINT nErrorId, LPCWSTR szFeature, LPCWSTR szErrorMsg) noexcept
 {
 	HRESULT hr = S_OK;
 

@@ -6,21 +6,21 @@
 
 #pragma comment( lib, "CaCommon.lib")
 
-CRegistryKey::CRegistryKey(void)
-	: _hKey( NULL)
-	, _hRootKey( NULL)
-	, _area( RegArea::Default)
-	, _samAccess( RegAccess::All)
-{	
-	Close();
-}
-
-CRegistryKey::~CRegistryKey(void)
+CRegistryKey::CRegistryKey(void) noexcept
+	: _hKey(NULL)
+	, _hRootKey(NULL)
+	, _area(RegArea::Default)
+	, _samAccess(RegAccess::All)
 {
 	Close();
 }
 
-HRESULT CRegistryKey::Close()
+CRegistryKey::~CRegistryKey(void) noexcept
+{
+	Close();
+}
+
+HRESULT CRegistryKey::Close() noexcept
 {
 	HRESULT hr = S_OK;
 
@@ -30,7 +30,7 @@ HRESULT CRegistryKey::Close()
 	return hr;
 }
 
-HRESULT CRegistryKey::Create(RegRoot root, WCHAR* key, RegArea area, RegAccess access)
+HRESULT CRegistryKey::Create(RegRoot root, WCHAR* key, RegArea area, RegAccess access) noexcept
 {
 	HRESULT hr = S_OK;
 	HKEY hKey = NULL, hParentKey = NULL;
@@ -67,7 +67,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CRegistryKey::Open(RegRoot root, WCHAR* key, RegArea area, RegAccess access)
+HRESULT CRegistryKey::Open(RegRoot root, WCHAR* key, RegArea area, RegAccess access) noexcept
 {
 	HRESULT hr = S_OK;
 	HKEY hKey = NULL, hParentKey = NULL;
@@ -101,7 +101,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CRegistryKey::Delete()
+HRESULT CRegistryKey::Delete() noexcept
 {
 	HRESULT hr = S_OK;
 	LONG lRes = ERROR_SUCCESS;
@@ -124,7 +124,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CRegistryKey::EnumValues(DWORD dwIndex, LPWSTR* pszName, RegValueType* pdwType)
+HRESULT CRegistryKey::EnumValues(DWORD dwIndex, LPWSTR* pszName, RegValueType* pdwType) noexcept
 {
 	HRESULT hr = S_OK;
 
@@ -140,7 +140,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CRegistryKey::GetStringValue(LPWSTR szName, LPWSTR* pszData)
+HRESULT CRegistryKey::GetStringValue(LPWSTR szName, LPWSTR* pszData) noexcept
 {
 	HRESULT hr = S_OK;
 
@@ -151,7 +151,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CRegistryKey::GetValue(WCHAR* name, BYTE** pData, RegValueType* pType, DWORD* pDataSize)
+HRESULT CRegistryKey::GetValue(WCHAR* name, BYTE** pData, RegValueType* pType, DWORD* pDataSize) noexcept
 {
 	LONG lRes = ERROR_SUCCESS;
 	HRESULT hr = S_OK;
@@ -178,7 +178,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CRegistryKey::SetValue(WCHAR* name, RegValueType type, BYTE* value, DWORD valueSize)
+HRESULT CRegistryKey::SetValue(WCHAR* name, RegValueType type, BYTE* value, DWORD valueSize) noexcept
 {
 	HRESULT hr = S_OK;
 	LONG lRes = ERROR_SUCCESS;
@@ -192,7 +192,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CRegistryKey::SetValueString(WCHAR* name, WCHAR* value)
+HRESULT CRegistryKey::SetValueString(WCHAR* name, WCHAR* value) noexcept
 {
 	HRESULT hr = S_OK;
 
@@ -211,7 +211,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CRegistryKey::DeleteValue(WCHAR* name)
+HRESULT CRegistryKey::DeleteValue(WCHAR* name) noexcept
 {
 	HRESULT hr = S_OK;
 	LONG lRes = ERROR_SUCCESS;
@@ -223,7 +223,7 @@ LExit:
 	return hr;
 }
 
-HKEY CRegistryKey::Root2Handle(RegRoot root)
+HKEY CRegistryKey::Root2Handle(RegRoot root) noexcept
 {
 	switch (root)
 	{
@@ -249,7 +249,7 @@ HKEY CRegistryKey::Root2Handle(RegRoot root)
 	return NULL;
 }
 
-HRESULT CRegistryKey::ParseRoot(LPCWSTR pRootString, RegRoot* peRoot)
+HRESULT CRegistryKey::ParseRoot(LPCWSTR pRootString, RegRoot* peRoot) noexcept
 {
 	HRESULT hr = S_OK;
 
@@ -296,7 +296,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CRegistryKey::ParseArea(LPCWSTR pAreaString, RegArea* peArea)
+HRESULT CRegistryKey::ParseArea(LPCWSTR pAreaString, RegArea* peArea) noexcept
 {
 	HRESULT hr = S_OK;
 
@@ -326,7 +326,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CRegistryKey::ParseValueType(LPCWSTR pTypeString, RegValueType* peType)
+HRESULT CRegistryKey::ParseValueType(LPCWSTR pTypeString, RegValueType* peType) noexcept
 {
 	HRESULT hr = S_OK;
 
@@ -384,7 +384,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CRegistryKey::GetDefaultArea(CRegistryKey::RegArea* pArea)
+HRESULT CRegistryKey::GetDefaultArea(CRegistryKey::RegArea* pArea) noexcept
 {
 	HRESULT hr = S_OK;
 	DWORD dwRes = ERROR_SUCCESS;

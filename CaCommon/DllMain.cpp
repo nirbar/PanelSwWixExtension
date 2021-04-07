@@ -4,7 +4,7 @@
 #include "DeferredActionBase.h"
 
 PROC_FILESYSTEMREDIRECTION _gFsRedirect;
-extern "C" BOOL WINAPI DllMain(HINSTANCE hInst, ULONG ulReason, LPVOID)
+extern "C" BOOL WINAPI DllMain(HINSTANCE hInst, ULONG ulReason, LPVOID) noexcept
 {
 	BOOL bWow64 = FALSE;
 	HANDLE hProc = NULL;

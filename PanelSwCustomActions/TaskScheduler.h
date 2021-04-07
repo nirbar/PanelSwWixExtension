@@ -9,25 +9,25 @@ class CTaskScheduler :
 {
 public:
 
-	CTaskScheduler();
-	virtual ~CTaskScheduler();
+	CTaskScheduler() noexcept;
+	virtual ~CTaskScheduler() noexcept;
 
-	HRESULT AddCreateTask(LPCWSTR szTaskName, LPCWSTR szTaskXml, LPCWSTR szUser, LPCWSTR szPassword);
-	HRESULT AddRemoveTask(LPCWSTR szTaskName);
-	HRESULT AddRollbackTask(LPCWSTR szTaskName, CTaskScheduler* pRollback, CFileOperations* pCommit);
+	HRESULT AddCreateTask(LPCWSTR szTaskName, LPCWSTR szTaskXml, LPCWSTR szUser, LPCWSTR szPassword) noexcept;
+	HRESULT AddRemoveTask(LPCWSTR szTaskName) noexcept;
+	HRESULT AddRollbackTask(LPCWSTR szTaskName, CTaskScheduler* pRollback, CFileOperations* pCommit) noexcept;
 
 protected:
 	// Execute the command object
-	HRESULT DeferredExecute(const ::std::string& command) override;
+	HRESULT DeferredExecute(const ::std::string& command) noexcept override;
 
 private:
-	HRESULT AddBackupTask(LPCWSTR szTaskName, LPCWSTR szBackupFile);
-	HRESULT AddRestoreTask(LPCWSTR szTaskName, LPCWSTR szBackupFile);
+	HRESULT AddBackupTask(LPCWSTR szTaskName, LPCWSTR szBackupFile) noexcept;
+	HRESULT AddRestoreTask(LPCWSTR szTaskName, LPCWSTR szBackupFile) noexcept;
 
-	HRESULT CreateTask(LPCWSTR szTaskName, LPCWSTR szTaskXml, LPCWSTR szUser, LPCWSTR szPassword);
-	HRESULT RemoveTask(LPCWSTR szTaskName);
-	HRESULT BackupTask(LPCWSTR szTaskName, LPCWSTR szBackupFile);
-	HRESULT RestoreTask(LPCWSTR szTaskName, LPCWSTR szBackupFile);
+	HRESULT CreateTask(LPCWSTR szTaskName, LPCWSTR szTaskXml, LPCWSTR szUser, LPCWSTR szPassword) noexcept;
+	HRESULT RemoveTask(LPCWSTR szTaskName) noexcept;
+	HRESULT BackupTask(LPCWSTR szTaskName, LPCWSTR szBackupFile) noexcept;
+	HRESULT RestoreTask(LPCWSTR szTaskName, LPCWSTR szBackupFile) noexcept;
 
 	// Fields
 	bool bComInit_;

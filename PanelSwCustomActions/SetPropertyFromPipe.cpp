@@ -7,9 +7,9 @@ using namespace ::com::panelsw::ca;
 #define SetPropertyFromPipeQuery L"SELECT `PipeName`, `Timeout` FROM `PSW_SetPropertyFromPipe`"
 enum eSetPropertyFromPipeQuery { PipeName = 1, Timeout = 2};
 
-static HRESULT ReadPropertiesFromPipe(LPCWSTR szPipeName, UINT nTimeout);
+static HRESULT ReadPropertiesFromPipe(LPCWSTR szPipeName, UINT nTimeout) noexcept;
 
-extern "C" UINT __stdcall SetPropertyFromPipe(MSIHANDLE hInstall)
+extern "C" UINT __stdcall SetPropertyFromPipe(MSIHANDLE hInstall) noexcept
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -66,7 +66,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-static HRESULT ReadPropertiesFromPipe(LPCWSTR szPipeName, UINT nTimeout)
+static HRESULT ReadPropertiesFromPipe(LPCWSTR szPipeName, UINT nTimeout) noexcept
 {
 	HRESULT hr = S_OK;
 	HANDLE hPipe = INVALID_HANDLE_VALUE;
@@ -75,7 +75,7 @@ static HRESULT ReadPropertiesFromPipe(LPCWSTR szPipeName, UINT nTimeout)
 	OVERLAPPED ovrlp;
 	DWORD dwSize = 0;
 	DWORD dwRes = ERROR_SUCCESS;
-	BYTE *msgBuffer = nullptr;
+	BYTE* msgBuffer = nullptr;
 	SetPropertyFromPipeDetails details;
 	PMSIHANDLE hDummy;
 
@@ -89,7 +89,7 @@ static HRESULT ReadPropertiesFromPipe(LPCWSTR szPipeName, UINT nTimeout)
 		ExitOnNullWithLastError(bRes, hr, "Failed waiting for pipe");
 
 		hPipe = ::CreateFile(szPipeName, GENERIC_READ, 0, nullptr, OPEN_EXISTING, FILE_WRITE_ATTRIBUTES | FILE_FLAG_OVERLAPPED, 0);
-	
+
 	} while ((hPipe == INVALID_HANDLE_VALUE) && (::GetLastError() == ERROR_PIPE_BUSY));
 	ExitOnNullWithLastError((hPipe != INVALID_HANDLE_VALUE), hr, "Failed openning pipe");
 
@@ -142,7 +142,7 @@ static HRESULT ReadPropertiesFromPipe(LPCWSTR szPipeName, UINT nTimeout)
 
 	for (int i = 0; i < details.properties_size(); ++i)
 	{
-		LPCWSTR szName = (LPCWSTR)details.properties(i).name().data();		
+		LPCWSTR szName = (LPCWSTR)details.properties(i).name().data();
 		LPCWSTR szValue = (LPCWSTR)details.properties(i).value().data();
 
 		if (szName && *szName)

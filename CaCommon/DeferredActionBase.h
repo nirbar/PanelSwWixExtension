@@ -11,29 +11,29 @@
 class CDeferredActionBase
 {
 public:
-	CDeferredActionBase(LPCSTR szId);
-	virtual ~CDeferredActionBase();
+	CDeferredActionBase(LPCSTR szId) noexcept;
+	virtual ~CDeferredActionBase() noexcept;
 
 	// Function that maps a receiver name to a CDeferredActionBase inheritor.
 	typedef HRESULT(*ReceiverToExecutorFunc)(LPCSTR szReceiver, CDeferredActionBase** ppExecutor);
-	static HRESULT DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToExecutorFunc mapFunc);
+	static HRESULT DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToExecutorFunc mapFunc) noexcept;
 
-	UINT GetCost() const { return _uCost; }
+	UINT GetCost() const noexcept { return _uCost; }
 
-	HRESULT GetCustomActionData(LPWSTR *pszCustomActionData);
+	HRESULT GetCustomActionData(LPWSTR *pszCustomActionData) noexcept;
 
-	HRESULT Prepend(CDeferredActionBase* pOther);
+	HRESULT Prepend(CDeferredActionBase* pOther) noexcept;
 
-	bool HasActions() const;
+	bool HasActions() const noexcept;
 
-	static void LogUnformatted(LOGLEVEL level, PCSTR szFormat, ...);
+	static void LogUnformatted(LOGLEVEL level, PCSTR szFormat, ...) noexcept;
 
 protected:
 
 	// Overriden by inheriting classes. Execute the command object (XML element)
-	virtual HRESULT DeferredExecute(const ::std::string& command) = 0;
+	virtual HRESULT DeferredExecute(const ::std::string& command) noexcept = 0;
 
-	HRESULT AddCommand(LPCSTR szHandler, ::com::panelsw::ca::Command **ppCommand);
+	HRESULT AddCommand(LPCSTR szHandler, ::com::panelsw::ca::Command **ppCommand) noexcept;
 
 private:
 	::com::panelsw::ca::CustomActionData _cad;

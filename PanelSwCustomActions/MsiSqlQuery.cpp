@@ -1,7 +1,7 @@
 #include "stdafx.h"
 #include "../CaCommon/WixString.h"
 
-extern "C" UINT __stdcall MsiSqlQuery(MSIHANDLE hInstall)
+extern "C" UINT __stdcall MsiSqlQuery(MSIHANDLE hInstall) noexcept
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

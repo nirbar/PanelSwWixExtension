@@ -7,9 +7,9 @@ using namespace std;
 using namespace ::com::panelsw::ca;
 using namespace google::protobuf;
 
-static HRESULT IsInstall(LPCWSTR szComponent, LPCWSTR szCondition);
+static HRESULT IsInstall(LPCWSTR szComponent, LPCWSTR szCondition) noexcept;
 
-extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
+extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall) noexcept
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -155,7 +155,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-static HRESULT IsInstall(LPCWSTR szComponent, LPCWSTR szCondition)
+static HRESULT IsInstall(LPCWSTR szComponent, LPCWSTR szCondition) noexcept
 {
 	HRESULT hr = S_OK;
 
@@ -194,7 +194,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CFileRegex::AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase)
+HRESULT CFileRegex::AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase) noexcept
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command* pCmd = nullptr;
@@ -224,8 +224,7 @@ LExit:
 	return hr;
 }
 
-// Execute the command object (XML element)
-HRESULT CFileRegex::DeferredExecute(const ::std::string& command)
+HRESULT CFileRegex::DeferredExecute(const ::std::string& command) noexcept
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -248,7 +247,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase)
+HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase) noexcept
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -311,7 +310,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CFileRegex::ExecuteMultibyte(LPCWSTR szFilePath, LPCSTR szFileContent, LPCWSTR szRegex, LPCWSTR szReplacement, bool bIgnoreCase)
+HRESULT CFileRegex::ExecuteMultibyte(LPCWSTR szFilePath, LPCSTR szFileContent, LPCWSTR szRegex, LPCWSTR szReplacement, bool bIgnoreCase) noexcept
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -393,7 +392,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CFileRegex::ExecuteUnicode(LPCWSTR szFilePath, LPCWSTR szFileContent, LPCWSTR szRegex, LPCWSTR szReplacement, bool bIgnoreCase)
+HRESULT CFileRegex::ExecuteUnicode(LPCWSTR szFilePath, LPCWSTR szFileContent, LPCWSTR szRegex, LPCWSTR szReplacement, bool bIgnoreCase) noexcept
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;

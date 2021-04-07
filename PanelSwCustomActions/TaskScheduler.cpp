@@ -6,7 +6,7 @@ using namespace google::protobuf;
 #pragma comment(lib, "taskschd.lib")
 #pragma comment(lib, "comsupp.lib")
 
-extern "C" UINT __stdcall TaskScheduler(MSIHANDLE hInstall)
+extern "C" UINT __stdcall TaskScheduler(MSIHANDLE hInstall) noexcept
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -108,7 +108,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-HRESULT CTaskScheduler::AddCreateTask(LPCWSTR szTaskName, LPCWSTR szTaskXml, LPCWSTR szUser, LPCWSTR szPassword)
+HRESULT CTaskScheduler::AddCreateTask(LPCWSTR szTaskName, LPCWSTR szTaskXml, LPCWSTR szUser, LPCWSTR szPassword) noexcept
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
@@ -151,7 +151,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CTaskScheduler::AddRemoveTask(LPCWSTR szTaskName)
+HRESULT CTaskScheduler::AddRemoveTask(LPCWSTR szTaskName) noexcept
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
@@ -178,7 +178,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CTaskScheduler::AddRollbackTask(LPCWSTR szTaskName, CTaskScheduler* pRollback, CFileOperations* pCommit)
+HRESULT CTaskScheduler::AddRollbackTask(LPCWSTR szTaskName, CTaskScheduler* pRollback, CFileOperations* pCommit) noexcept
 {
 	HRESULT hr = S_OK;
 	CComPtr<IRegisteredTask> pTask;
@@ -242,7 +242,7 @@ LExit:
 }
 
 // Execute the command object
-HRESULT CTaskScheduler::DeferredExecute(const ::std::string& command)
+HRESULT CTaskScheduler::DeferredExecute(const ::std::string& command) noexcept
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -308,7 +308,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CTaskScheduler::CreateTask(LPCWSTR szTaskName, LPCWSTR szTaskXml, LPCWSTR szUser, LPCWSTR szPassword)
+HRESULT CTaskScheduler::CreateTask(LPCWSTR szTaskName, LPCWSTR szTaskXml, LPCWSTR szUser, LPCWSTR szPassword) noexcept
 {
 	HRESULT hr = S_OK;
 	CComPtr<ITaskDefinition> pTask;
@@ -330,7 +330,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CTaskScheduler::RemoveTask(LPCWSTR szTaskName)
+HRESULT CTaskScheduler::RemoveTask(LPCWSTR szTaskName) noexcept
 {
 	HRESULT hr = S_OK;
 	
@@ -349,7 +349,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CTaskScheduler::AddBackupTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
+HRESULT CTaskScheduler::AddBackupTask(LPCWSTR szTaskName, LPCWSTR szBackupFile) noexcept
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
@@ -377,7 +377,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CTaskScheduler::AddRestoreTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
+HRESULT CTaskScheduler::AddRestoreTask(LPCWSTR szTaskName, LPCWSTR szBackupFile) noexcept
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
@@ -405,7 +405,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CTaskScheduler::BackupTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
+HRESULT CTaskScheduler::BackupTask(LPCWSTR szTaskName, LPCWSTR szBackupFile) noexcept
 {
 	HRESULT hr = S_OK;
 	CComBSTR xml;
@@ -439,7 +439,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CTaskScheduler::RestoreTask(LPCWSTR szTaskName, LPCWSTR szBackupFile)
+HRESULT CTaskScheduler::RestoreTask(LPCWSTR szTaskName, LPCWSTR szBackupFile) noexcept
 {
 	HRESULT hr = S_OK;
 	LPWSTR szTaskXml = nullptr;
@@ -479,7 +479,7 @@ LExit:
 	return hr;
 }
 
-CTaskScheduler::CTaskScheduler()
+CTaskScheduler::CTaskScheduler() noexcept
 	: CDeferredActionBase("TaskScheduler")
 	, bComInit_(false)
 {
@@ -502,7 +502,7 @@ LExit:
 	;
 }
 
-CTaskScheduler::~CTaskScheduler()
+CTaskScheduler::~CTaskScheduler() noexcept
 {
 	if (bComInit_)
 	{

@@ -9,7 +9,7 @@
 using namespace com::panelsw::ca;
 using namespace google::protobuf;
 
-extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
+extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall) noexcept
 {
 	HRESULT hr = S_OK;
 	DWORD dwRes = ERROR_SUCCESS;
@@ -284,12 +284,12 @@ LExit:
 	return WcaFinalize(dwRes);
 }
 
-HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, LPCWSTR szLoadOrderGroup, LPCWSTR szDependencies, ErrorHandling errorHandling, ServciceConfigDetails_DelayStart delayStart, DWORD dwServiceType)
+HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, LPCWSTR szLoadOrderGroup, LPCWSTR szDependencies, ErrorHandling errorHandling, ServciceConfigDetails_DelayStart delayStart, DWORD dwServiceType) noexcept
 {
 	HRESULT hr = S_OK;
-	::com::panelsw::ca::Command *pCmd = nullptr;
-	ServciceConfigDetails *pDetails = nullptr;
-	::std::string *pAny = nullptr;
+	::com::panelsw::ca::Command* pCmd = nullptr;
+	ServciceConfigDetails* pDetails = nullptr;
+	::std::string* pAny = nullptr;
 	bool bRes = true;
 
 	hr = AddCommand("CServiceConfig", &pCmd);
@@ -321,7 +321,7 @@ HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szComman
 		hr = ::MultiSzLen(szDependencies, &dwLen);
 		ExitOnFailure(hr, "Failed getting multi-string length");
 		dwLen *= sizeof(WCHAR);
-		
+
 		pDetails->set_dependencies(szDependencies, dwLen);
 	}
 	pDetails->set_start((ServciceConfigDetails::ServiceStart)start);
@@ -339,8 +339,7 @@ LExit:
 	return hr;
 }
 
-// Execute the command object (XML element)
-HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
+HRESULT CServiceConfig::DeferredExecute(const ::std::string& command) noexcept
 {
 	HRESULT hr = S_OK;
 	LPCWSTR szServiceName = nullptr;
@@ -393,7 +392,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CServiceConfig::ExecuteOne(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, DWORD dwStart, LPCWSTR szLoadOrderGroup, LPCWSTR szDependencies, ServciceConfigDetails_DelayStart nDelayStart, DWORD dwServiceType)
+HRESULT CServiceConfig::ExecuteOne(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, DWORD dwStart, LPCWSTR szLoadOrderGroup, LPCWSTR szDependencies, ServciceConfigDetails_DelayStart nDelayStart, DWORD dwServiceType) noexcept
 {
 	HRESULT hr = S_OK;
 	SC_HANDLE hManager = NULL;
@@ -435,7 +434,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CServiceConfig::PromptError(LPCWSTR szServiceName, ::com::panelsw::ca::ErrorHandling errorHandling)
+HRESULT CServiceConfig::PromptError(LPCWSTR szServiceName, ::com::panelsw::ca::ErrorHandling errorHandling) noexcept
 {
 	HRESULT hr = S_OK;
 

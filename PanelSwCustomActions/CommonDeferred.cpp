@@ -14,7 +14,7 @@
 #include "XslTransform.h"
 
 // ReceiverToExecutorFunc implementation.
-HRESULT ReceiverToExecutor(LPCSTR szReceiver, CDeferredActionBase** ppExecutor)
+HRESULT ReceiverToExecutor(LPCSTR szReceiver, CDeferredActionBase** ppExecutor) noexcept
 {
 	HRESULT hr = S_OK;
 
@@ -82,7 +82,7 @@ HRESULT ReceiverToExecutor(LPCSTR szReceiver, CDeferredActionBase** ppExecutor)
 	return hr;
 }
 
-extern "C" UINT __stdcall CommonDeferred(MSIHANDLE hInstall)
+extern "C" UINT __stdcall CommonDeferred(MSIHANDLE hInstall) noexcept
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

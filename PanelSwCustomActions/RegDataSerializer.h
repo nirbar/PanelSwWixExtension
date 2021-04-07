@@ -4,28 +4,29 @@
 class CRegDataSerializer
 {
 public:
-	CRegDataSerializer();
-	~CRegDataSerializer();
+	CRegDataSerializer() noexcept;
+	virtual ~CRegDataSerializer() noexcept;
 
-	HRESULT Set(const BYTE* pData, DWORD dwDataType, DWORD dwSize);
-	HRESULT Set(LPCWSTR pDataString, LPCWSTR pDataTypeString);
+	HRESULT Set(const BYTE* pData, DWORD dwDataType, DWORD dwSize) noexcept;
+	HRESULT Set(LPCWSTR pDataString, LPCWSTR pDataTypeString) noexcept;
 
-	BYTE* Data() const { return _bytes; }
-	DWORD Size() const { return _size; }
-	DWORD DataType() const { return _dataType; }
+	BYTE* Data() const noexcept { return _bytes; }
+	DWORD Size() const noexcept { return _size; }
+	DWORD DataType() const noexcept { return _dataType; }
 
-	HRESULT Serialize(LPWSTR* ppDst) const;
+	HRESULT Serialize(LPWSTR* ppDst) const noexcept;
 
-	HRESULT DeSerialize(LPCWSTR pSrc, LPCWSTR sDataType);
+	HRESULT DeSerialize(LPCWSTR pSrc, LPCWSTR sDataType) noexcept;
 
-	HRESULT Release();
+	HRESULT Release() noexcept;
 
 private:
 
-	HRESULT Allocate(DWORD size);
+	HRESULT Allocate(DWORD size) noexcept;
 
-	HRESULT SerializeMultiString(LPWSTR* pDst) const;
-	HRESULT DeSerializeMultiString(LPCWSTR pSrc);
+	//TODO
+	HRESULT SerializeMultiString(LPWSTR* pDst) const noexcept;
+	HRESULT DeSerializeMultiString(LPCWSTR pSrc) noexcept;
 
 
 	BYTE* _bytes;
@@ -33,4 +34,3 @@ private:
 	DWORD _bufSize;
 	DWORD _dataType;
 };
-

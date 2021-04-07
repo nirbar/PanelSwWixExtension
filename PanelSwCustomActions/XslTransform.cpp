@@ -14,10 +14,10 @@
 using namespace com::panelsw::ca;
 using namespace google::protobuf;
 
-static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, LPWSTR *pszXslPath);
-static HRESULT ReplaceStrings(LPCWSTR szXslPath, LPCWSTR szXslId);
+static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, LPWSTR *pszXslPath) noexcept;
+static HRESULT ReplaceStrings(LPCWSTR szXslPath, LPCWSTR szXslId) noexcept;
 
-extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall)
+extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall) noexcept
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -124,7 +124,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, LPWSTR *pszXslFile)
+static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, LPWSTR* pszXslFile) noexcept
 {
 	HRESULT hr = S_OK;
 	CWixString szMsiQuery;
@@ -163,7 +163,7 @@ LExit:
 	return hr;
 }
 
-static HRESULT ReplaceStrings(LPCWSTR szXslPath, LPCWSTR szXslId)
+static HRESULT ReplaceStrings(LPCWSTR szXslPath, LPCWSTR szXslId) noexcept
 {
 	HRESULT hr = S_OK;
 	CWixString szMsiQuery;
@@ -211,7 +211,8 @@ LExit:
 
 	return hr;
 }
-HRESULT CXslTransform::AddExec(LPCWSTR szXmlFilePath, LPCWSTR szXsltPath)
+
+HRESULT CXslTransform::AddExec(LPCWSTR szXmlFilePath, LPCWSTR szXsltPath) noexcept
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command* pCmd = nullptr;
@@ -238,24 +239,13 @@ LExit:
 	return hr;
 }
 
-// Execute the command object (XML element)
-HRESULT CXslTransform::DeferredExecute(const ::std::string& command)
+HRESULT CXslTransform::DeferredExecute(const ::std::string& command) noexcept
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
 	XslTransformDetails details;
 	LPCWSTR szXmlPath = nullptr;
 	LPCWSTR szXslPath = nullptr;
-	CComPtr<IXMLDOMDocument2> pXmlDoc;
-	CComPtr<IXMLDOMDocument2> pOutXmlDoc;
-	CComPtr<IXMLDOMDocument2> pXsl;
-	CComPtr<IXMLDOMParseError2> pError;
-	CComPtr<IXMLDOMNodeList> pNodeList;
-	CComVariant filePath;
-	CComBSTR szErrorReason;
-	CComBSTR szError;
-	CComBSTR xmlTransformed;
-	VARIANT_BOOL isXmlSuccess;
 
 	bRes = details.ParseFromString(command);
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking XslTransformDetails");
@@ -265,95 +255,119 @@ HRESULT CXslTransform::DeferredExecute(const ::std::string& command)
 
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing XSL transform on file '%ls'", szXmlPath);
 
-	// Create XML documents.
-	hr = ::CoCreateInstance(CLSID_DOMDocument, nullptr, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&pXmlDoc);
-	ExitOnFailure(hr, "Failed to CoCreateInstance CLSID_DOMDocument");
-	hr = ::CoCreateInstance(CLSID_DOMDocument, nullptr, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&pXsl);
-	ExitOnFailure(hr, "Failed to CoCreateInstance CLSID_DOMDocument");
-	hr = ::CoCreateInstance(CLSID_DOMDocument, nullptr, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&pOutXmlDoc);
-	ExitOnFailure(hr, "Failed to CoCreateInstance CLSID_DOMDocument");
+	try
+	{
+		CComPtr<IXMLDOMDocument2> pXmlDoc;
+		CComPtr<IXMLDOMDocument2> pOutXmlDoc;
+		CComPtr<IXMLDOMDocument2> pXsl;
+		CComPtr<IXMLDOMParseError2> pError;
+		CComPtr<IXMLDOMNodeList> pNodeList;
+		CComVariant filePath;
+		CComBSTR szErrorReason;
+		CComBSTR szError;
+		CComBSTR xmlTransformed;
+		VARIANT_BOOL isXmlSuccess;
 
-	// Lifting security limitations since XSL are from known source (the developer) and anyway it has local system priveleges
-	hr = pXmlDoc->setProperty(L"AllowXsltScript", CComVariant(true));
-	if (FAILED(hr))
-	{
-		WcaLogError(hr, "Failed setting AllowXsltScript");
-	}
-	hr = pXmlDoc->setProperty(L"AllowDocumentFunction", CComVariant(true));
-	if (FAILED(hr))
-	{
-		WcaLogError(hr, "Failed setting AllowDocumentFunction");
-	}
-	hr = pXmlDoc->setProperty(L"ProhibitDTD", CComVariant(false));
-	if (FAILED(hr))
-	{
-		WcaLogError(hr, "Failed resetting ProhibitDTD");
-	}
-	hr = pXsl->setProperty(L"AllowXsltScript", CComVariant(true));
-	if (FAILED(hr))
-	{
-		WcaLogError(hr, "Failed setting AllowXsltScript");
-	}
-	hr = pXsl->setProperty(L"AllowDocumentFunction", CComVariant(true));
-	if (FAILED(hr))
-	{
-		WcaLogError(hr, "Failed setting AllowDocumentFunction");
-	}
-	hr = pXsl->setProperty(L"ProhibitDTD", CComVariant(false));
-	if (FAILED(hr))
-	{
-		WcaLogError(hr, "Failed resetting ProhibitDTD");
-	}
+		// Create XML documents.
+		hr = ::CoCreateInstance(CLSID_DOMDocument, nullptr, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&pXmlDoc);
+		ExitOnFailure(hr, "Failed to CoCreateInstance CLSID_DOMDocument");
+		hr = ::CoCreateInstance(CLSID_DOMDocument, nullptr, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&pXsl);
+		ExitOnFailure(hr, "Failed to CoCreateInstance CLSID_DOMDocument");
+		hr = ::CoCreateInstance(CLSID_DOMDocument, nullptr, CLSCTX_INPROC_SERVER, IID_IXMLDOMDocument, (void**)&pOutXmlDoc);
+		ExitOnFailure(hr, "Failed to CoCreateInstance CLSID_DOMDocument");
 
-	// Load XML document
-	filePath = szXmlPath;
-	hr = pXmlDoc->load(filePath, &isXmlSuccess);
-	if (FAILED(hr) || !isXmlSuccess)
-	{
-		if (SUCCEEDED(hr))
+		// Lifting security limitations since XSL are from known source (the developer) and anyway it has local system priveleges
+		hr = pXmlDoc->setProperty(L"AllowXsltScript", CComVariant(true));
+		if (FAILED(hr))
 		{
-			hr = E_FAIL;
+			WcaLogError(hr, "Failed setting AllowXsltScript");
 		}
-		if (SUCCEEDED(pXsl->get_parseError((IXMLDOMParseError**)&pError)) && SUCCEEDED(pError->get_srcText(&szError)) && SUCCEEDED(pError->get_reason(&szErrorReason)))
+		hr = pXmlDoc->setProperty(L"AllowDocumentFunction", CComVariant(true));
+		if (FAILED(hr))
 		{
-			ExitOnFailure(hr, "Failed to load XML. %ls: %ls", (LPWSTR)szErrorReason, (LPWSTR)szError);
+			WcaLogError(hr, "Failed setting AllowDocumentFunction");
 		}
-		else
+		hr = pXmlDoc->setProperty(L"ProhibitDTD", CComVariant(false));
+		if (FAILED(hr))
 		{
-			ExitOnFailure(hr, "Failed to load XML");
+			WcaLogError(hr, "Failed resetting ProhibitDTD");
 		}
-	}
+		hr = pXsl->setProperty(L"AllowXsltScript", CComVariant(true));
+		if (FAILED(hr))
+		{
+			WcaLogError(hr, "Failed setting AllowXsltScript");
+		}
+		hr = pXsl->setProperty(L"AllowDocumentFunction", CComVariant(true));
+		if (FAILED(hr))
+		{
+			WcaLogError(hr, "Failed setting AllowDocumentFunction");
+		}
+		hr = pXsl->setProperty(L"ProhibitDTD", CComVariant(false));
+		if (FAILED(hr))
+		{
+			WcaLogError(hr, "Failed resetting ProhibitDTD");
+		}
 
-	filePath = szXslPath;
-	hr = pXsl->load(filePath, &isXmlSuccess);
-	if (FAILED(hr) || !isXmlSuccess)
-	{
-		if (SUCCEEDED(hr))
+		// Load XML document
+		filePath = szXmlPath;
+		hr = pXmlDoc->load(filePath, &isXmlSuccess);
+		if (FAILED(hr) || !isXmlSuccess)
 		{
-			hr = E_FAIL;
+			if (SUCCEEDED(hr))
+			{
+				hr = E_FAIL;
+			}
+			if (SUCCEEDED(pXsl->get_parseError((IXMLDOMParseError**)&pError)) && SUCCEEDED(pError->get_srcText(&szError)) && SUCCEEDED(pError->get_reason(&szErrorReason)))
+			{
+				ExitOnFailure(hr, "Failed to load XML. %ls: %ls", (LPWSTR)szErrorReason, (LPWSTR)szError);
+			}
+			else
+			{
+				ExitOnFailure(hr, "Failed to load XML");
+			}
 		}
-		if (SUCCEEDED(pXsl->get_parseError((IXMLDOMParseError**)&pError)) && SUCCEEDED(pError->get_srcText(&szError)) && SUCCEEDED(pError->get_reason(&szErrorReason)))
-		{
-			ExitOnFailure(hr, "Failed to load XSL. %ls: %ls", (LPWSTR)szErrorReason, (LPWSTR)szError);
-		}
-		else
-		{
-			ExitOnFailure(hr, "Failed to load XSL");
-		}
-	}
 
-	hr = pXmlDoc->transformNodeToObject(pXsl, CComVariant(pOutXmlDoc.p));
-	if (FAILED(hr))
-	{
-		if (SUCCEEDED(pXmlDoc->get_parseError((IXMLDOMParseError**)&pError)) && SUCCEEDED(pError->get_srcText(&szError)) && SUCCEEDED(pError->get_reason(&szErrorReason)))
+		filePath = szXslPath;
+		hr = pXsl->load(filePath, &isXmlSuccess);
+		if (FAILED(hr) || !isXmlSuccess)
 		{
-			ExitOnFailure(hr, "Failed to apply XSL transform. %ls: %ls", (LPWSTR)szErrorReason, (LPWSTR)szError);
+			if (SUCCEEDED(hr))
+			{
+				hr = E_FAIL;
+			}
+			if (SUCCEEDED(pXsl->get_parseError((IXMLDOMParseError**)&pError)) && SUCCEEDED(pError->get_srcText(&szError)) && SUCCEEDED(pError->get_reason(&szErrorReason)))
+			{
+				ExitOnFailure(hr, "Failed to load XSL. %ls: %ls", (LPWSTR)szErrorReason, (LPWSTR)szError);
+			}
+			else
+			{
+				ExitOnFailure(hr, "Failed to load XSL");
+			}
 		}
-	}
-	ExitOnFailure(hr, "Failed to apply XSL transform");
 
-	hr = pOutXmlDoc->save(CComVariant(szXmlPath));
-	ExitOnFailure(hr, "Failed saving XML file '%ls'", szXmlPath);
+		hr = pXmlDoc->transformNodeToObject(pXsl, CComVariant(pOutXmlDoc.p));
+		if (FAILED(hr))
+		{
+			if (SUCCEEDED(pXmlDoc->get_parseError((IXMLDOMParseError**)&pError)) && SUCCEEDED(pError->get_srcText(&szError)) && SUCCEEDED(pError->get_reason(&szErrorReason)))
+			{
+				ExitOnFailure(hr, "Failed to apply XSL transform. %ls: %ls", (LPWSTR)szErrorReason, (LPWSTR)szError);
+			}
+		}
+		ExitOnFailure(hr, "Failed to apply XSL transform");
+
+		hr = pOutXmlDoc->save(CComVariant(szXmlPath));
+		ExitOnFailure(hr, "Failed saving XML file '%ls'", szXmlPath);
+	}
+	catch (CAtlException ex)
+	{
+		hr = (HRESULT)ex;
+		ExitOnFailure(hr, "Failed applying XSLT");
+	}
+	catch (...)
+	{
+		hr = E_FAIL;
+		ExitOnFailure(hr, "Failed applying XSLT");
+	}
 
 LExit:
 

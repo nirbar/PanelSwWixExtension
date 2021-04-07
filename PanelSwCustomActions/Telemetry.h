@@ -6,15 +6,15 @@ class CTelemetry :
 {
 public:
 
-	CTelemetry() : CDeferredActionBase("Telemetry") { }
+	CTelemetry() noexcept : CDeferredActionBase("Telemetry") { }
 
 
-	HRESULT AddPost(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure);
+	HRESULT AddPost(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure) noexcept;
 
 protected:
-	// Execute the command object (XML element)
-	HRESULT DeferredExecute(const ::std::string& command) override;
+
+	HRESULT DeferredExecute(const ::std::string& command) noexcept override;
 
 private:
-	HRESULT Post(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure);
+	HRESULT Post(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure) noexcept;
 };

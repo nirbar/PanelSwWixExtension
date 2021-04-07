@@ -39,11 +39,11 @@ union RegexFlags
 	} s;
 };
 
-static __declspec(nothrow) HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax);
-static __declspec(nothrow) HRESULT SearchMultibyte(LPCWSTR szProperty_, LPCWSTR szExpression, LPCSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax);
-static __declspec(nothrow) HRESULT SearchInFile(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR szFilePath, RegexFlags flags, std::regex_constants::syntax_option_type syntax);
+static HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax) noexcept;
+static HRESULT SearchMultibyte(LPCWSTR szProperty_, LPCWSTR szExpression, LPCSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax) noexcept;
+static HRESULT SearchInFile(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR szFilePath, RegexFlags flags, std::regex_constants::syntax_option_type syntax) noexcept;
 
-extern "C" __declspec(nothrow) UINT __stdcall RegularExpression(MSIHANDLE hInstall)
+extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall) noexcept
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -176,7 +176,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-static __declspec(nothrow) HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax)
+static HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax) noexcept
 {
 	HRESULT hr = S_OK;
 	bool bRes = true;
@@ -227,7 +227,7 @@ LExit:
 	return hr;
 }
 
-static __declspec(nothrow) HRESULT SearchMultibyte(LPCWSTR szProperty_, LPCWSTR szExpression, LPCSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax)
+static HRESULT SearchMultibyte(LPCWSTR szProperty_, LPCWSTR szExpression, LPCSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax) noexcept
 {
 	HRESULT hr = S_OK;
 	LPSTR szPropertyA = nullptr;
@@ -290,7 +290,7 @@ LExit:
 }
 
 
-static __declspec(nothrow) HRESULT SearchInFile(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR szFilePath, RegexFlags flags, std::regex_constants::syntax_option_type syntax)
+static HRESULT SearchInFile(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR szFilePath, RegexFlags flags, std::regex_constants::syntax_option_type syntax) noexcept
 {
 	HRESULT hr = S_OK;
 	bool bRes = true;
