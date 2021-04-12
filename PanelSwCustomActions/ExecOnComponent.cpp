@@ -139,7 +139,7 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall) noexcept
 			hr = WcaOpenExecuteView((LPCWSTR)szSubQuery, &hSubView);
 			ExitOnFailure(hr, "Failed to execute SQL query '%ls'.", (LPCWSTR)szSubQuery);
 
-			hr = WcaFetchSingleRecord(hSubView, &hSubRecord);
+			hr = WcaFetchRecord(hSubView, &hSubRecord);
 			ExitOnFailure(hr, "Failed to fetch Binary record.");
 
 			hr = WcaGetRecordStream(hSubRecord, 1, &pbData, &cbData);
@@ -193,7 +193,7 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall) noexcept
 			hr = WcaOpenExecuteView((LPCWSTR)szSubQuery, &hSubView);
 			ExitOnFailure(hr, "Failed to execute SQL query '%ls'.", (LPCWSTR)szSubQuery);
 
-			hr = WcaFetchSingleRecord(hSubView, &hSubRecord);
+			hr = WcaFetchRecord(hSubView, &hSubRecord);
 			ExitOnFailure(hr, "Failed to fetch User record.");
 
 			hr = WcaGetRecordFormattedString(hSubRecord, 1, (LPWSTR*)domain);

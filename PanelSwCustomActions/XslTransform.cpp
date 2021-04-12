@@ -141,7 +141,7 @@ static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, LPWSTR* pszXsl
 	hr = WcaOpenExecuteView((LPCWSTR)szMsiQuery, &hView);
 	ExitOnFailure(hr, "Failed to execute SQL query '%ls'.", (LPCWSTR)szMsiQuery);
 
-	hr = WcaFetchSingleRecord(hView, &hRecord);
+	hr = WcaFetchRecord(hView, &hRecord);
 	ExitOnFailure(hr, "Failed to fetch binary record.");
 
 	hr = WcaGetRecordStream(hRecord, 1, &pbData, &cbData);
