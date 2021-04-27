@@ -147,6 +147,7 @@ namespace PswManagedCA
                     Directory.CreateDirectory(dir);
                 }
 
+                ZipConstants.DefaultCodePage = 850;
                 using (FileStream fsOut = File.Create(ctlg.DstZipFile))
                 {
                     using (ZipOutputStream zipStream = new ZipOutputStream(fsOut))
