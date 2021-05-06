@@ -55,8 +55,8 @@ namespace PswManagedCA
                         string component = installUtilRec[3] as string;
                         int componentAttr = installUtilRec.GetInteger(4);
 
-                        bool x64 = ((explicitBitness == (int)InstallUtil_Bitness.x64) 
-                            || ((explicitBitness == (int)InstallUtil_Bitness.asComponent) && (componentAttr & msidbComponentAttributes64bit) == componentAttr));
+                        bool x64 = ((explicitBitness == (int)InstallUtil_Bitness.x64)
+                            || ((explicitBitness == (int)InstallUtil_Bitness.asComponent) && (componentAttr & msidbComponentAttributes64bit) == msidbComponentAttributes64bit));
 
                         // Sanity checks
                         if (string.IsNullOrWhiteSpace(ctlg.FileId))
@@ -110,7 +110,7 @@ namespace PswManagedCA
                                     session.Log("Can't get target path for file '{0}'", ctlg.FileId);
                                     return ActionResult.Failure;
                                 }
-
+                                session.Log($"Will configure InstallUtil service '{ctlg.FilePath}'");
                                 all.catalogs_.Add(ctlg);
                                 break;
 
@@ -133,11 +133,12 @@ namespace PswManagedCA
                           where (!c.X64 && (c.ComponentInfo.RequestState >= InstallState.Local))
                           select c);
             if (temp.Count() > 0)
-            {                
-                foreach(InstallUtilCatalog c in temp)
+            {
+                foreach (InstallUtilCatalog c in temp)
                 {
                     c.Action = (c.ComponentInfo.CurrentState < InstallState.Local) ? InstallUtilCatalog.InstallUtilAction.Install : InstallUtilCatalog.InstallUtilAction.Reinstall;
                 }
+                temp = new List<InstallUtilCatalog>(temp.Distinct());
                 using (StringWriter sw = new StringWriter())
                 {
                     srlz.Serialize(sw, temp);
@@ -155,6 +156,7 @@ namespace PswManagedCA
                 {
                     c.Action = InstallUtilCatalog.InstallUtilAction.Uninstall;
                 }
+                temp = new List<InstallUtilCatalog>(temp.Distinct());
                 using (StringWriter sw = new StringWriter())
                 {
                     srlz.Serialize(sw, temp);
@@ -172,6 +174,7 @@ namespace PswManagedCA
                 {
                     c.Action = (c.ComponentInfo.CurrentState < InstallState.Local) ? InstallUtilCatalog.InstallUtilAction.Install : InstallUtilCatalog.InstallUtilAction.Reinstall;
                 }
+                temp = new List<InstallUtilCatalog>(temp.Distinct());
                 using (StringWriter sw = new StringWriter())
                 {
                     srlz.Serialize(sw, temp);
@@ -189,6 +192,7 @@ namespace PswManagedCA
                 {
                     c.Action = InstallUtilCatalog.InstallUtilAction.Uninstall;
                 }
+                temp = new List<InstallUtilCatalog>(temp.Distinct());
                 using (StringWriter sw = new StringWriter())
                 {
                     srlz.Serialize(sw, temp);
@@ -207,6 +211,7 @@ namespace PswManagedCA
                 {
                     c.Action = InstallUtilCatalog.InstallUtilAction.Uninstall;
                 }
+                temp = new List<InstallUtilCatalog>(temp.Distinct());
                 using (StringWriter sw = new StringWriter())
                 {
                     srlz.Serialize(sw, temp);
@@ -238,6 +243,7 @@ namespace PswManagedCA
                     srlz.Serialize(sw, temp);
                     session["PSW_InstallUtil_UninstallExec_x64"] = sw.ToString();
                 }
+                temp = new List<InstallUtilCatalog>(temp.Distinct());
                 foreach (InstallUtilCatalog c in temp)
                 {
                     c.Action = InstallUtilCatalog.InstallUtilAction.Install;
@@ -288,6 +294,7 @@ namespace PswManagedCA
 
         private void Execute(Session session)
         {
+            session.Log($"Configuring {catalogs_.Count} InstallUtil services");
             foreach (InstallUtilCatalog ctlg in catalogs_)
             {
                 // Temporary file for logging
@@ -299,7 +306,7 @@ namespace PswManagedCA
                     // (Un)Install the assembly
                     if (ctlg.ObfuscatedArguments.Count > 0)
                     {
-                        session.Log($"Applying {ctlg.Action} on assembly '{ctlg.FilePath}' with arguments {ctlg.ObfuscatedArguments.Aggregate((a, c) => $"{a} {c}")}");
+                        session.Log($"Applying {ctlg.Action} on assembly '{ctlg.FilePath}' with arguments {ctlg.ObfuscatedArguments.Aggregate((a, c) => $"{a}, {c}")}");
                     }
                     else
                     {
@@ -336,6 +343,7 @@ namespace PswManagedCA
                         case (int)ServiceErrorCode.ERROR_SERVICE_DOES_NOT_EXIST:
                             if (ctlg.Action != InstallUtilCatalog.InstallUtilAction.Uninstall)
                             {
+                                session.Log($"Exception with code {ex.ErrorCode} (native {ex.NativeErrorCode}): {ex}");
                                 throw;
                             }
                             session.Log($"Service {ctlg.FilePath} is not installed anyway");
@@ -344,6 +352,7 @@ namespace PswManagedCA
                         case (int)ServiceErrorCode.ERROR_SERVICE_EXISTS:
                             if (ctlg.Action != InstallUtilCatalog.InstallUtilAction.Reinstall)
                             {
+                                session.Log($"Exception with code {ex.ErrorCode} (native {ex.NativeErrorCode}): {ex}");
                                 throw;
                             }
                             session.Log($"Service {ctlg.FilePath} is already installed");
@@ -352,6 +361,7 @@ namespace PswManagedCA
                         case (int)ServiceErrorCode.ERROR_SERVICE_MARKED_FOR_DELETE:
                             if (ctlg.Action != InstallUtilCatalog.InstallUtilAction.Uninstall)
                             {
+                                session.Log($"Exception with code {ex.ErrorCode} (native {ex.NativeErrorCode}): {ex}");
                                 throw;
                             }
                             session.Log($"Service {ctlg.FilePath} is already marked for delete");
@@ -365,11 +375,15 @@ namespace PswManagedCA
                 finally
                 {
                     // Dump and clear log
-                    if (File.Exists(tmpFile))
+                    try
                     {
-                        session.Log(File.ReadAllText(tmpFile));
-                        File.Delete(tmpFile);
+                        if (File.Exists(tmpFile))
+                        {
+                            session.Log(File.ReadAllText(tmpFile));
+                            File.Delete(tmpFile);
+                        }
                     }
+                    catch { }
                 }
             }
         }
@@ -405,6 +419,23 @@ namespace PswManagedCA
 
             [XmlIgnore]
             public bool X64 { get; set; }
+
+            public override bool Equals(object obj)
+            {
+                if (obj is InstallUtilCatalog ctlg)
+                {
+                    return Action.Equals(ctlg.Action)
+                        && Arguments.SequenceEqual(ctlg.Arguments)
+                        && FilePath.Equals(ctlg.FilePath)
+                        && (X64 == ctlg.X64);
+                }
+                return false;
+            }
+
+            public override int GetHashCode()
+            {
+                return FilePath.GetHashCode();
+            }
         }
     }
 }

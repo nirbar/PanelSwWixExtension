@@ -9,8 +9,55 @@
     <MediaTemplate />
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
-      <Component Id="Test" Directory="INSTALLFOLDER">
-        <File Source="$(var.ProjectDir)Product.wxs">
+      <!-- Configuring:
+        Twice the same service (same file path, action, bitness, and arguments)
+        Once the same service with different arguments
+        Once the same service with different bitness
+        One different service with matching action, bitness, and arguments
+        
+        All in all, 4 services should be scheduled: 1*x64, 3*x86
+      -->
+      <Component Id="Test1" Directory="INSTALLFOLDER">
+        <Condition><![CDATA[1=1]]></Condition>
+        <File Id="Test1" Source="$(var.ProjectDir)Product.wxs">
+          <PanelSW:InstallUtil>
+            <PanelSW:Argument Id="_1" Value="1"/>
+            <PanelSW:Argument Id="_2" Value="3"/>
+          </PanelSW:InstallUtil>
+          <PanelSW:TopShelf Account="custom" Description="MyDesc" Instance="[inst]" ServiceName="qwe" Start="manual" UserName="un" Password="psw" DisplayName="dn" ErrorHandling="prompt" />
+        </File>
+      </Component>
+      <Component Id="Test2" Directory="INSTALLFOLDER">
+        <Condition><![CDATA[2=2]]></Condition>
+        <File Id="Test2" Source="$(var.ProjectDir)Product.wxs">
+          <PanelSW:InstallUtil>
+            <PanelSW:Argument Id="_1" Value="1"/>
+            <PanelSW:Argument Id="_2" Value="3"/>
+          </PanelSW:InstallUtil>
+          <PanelSW:TopShelf Account="custom" Description="MyDesc" Instance="[inst]" ServiceName="qwe" Start="manual" UserName="un" Password="psw" DisplayName="dn" ErrorHandling="prompt" />
+        </File>
+      </Component>
+      <Component Id="Test3" Directory="INSTALLFOLDER">
+        <Condition><![CDATA[2=2]]></Condition>
+        <File Id="Test3" Source="$(var.ProjectDir)Product.wxs">
+          <PanelSW:InstallUtil>
+            <PanelSW:Argument Id="_1" Value="1"/>
+          </PanelSW:InstallUtil>
+          <PanelSW:TopShelf Account="custom" Description="MyDesc" Instance="[inst]" ServiceName="qwe" Start="manual" UserName="un" Password="psw" DisplayName="dn" ErrorHandling="prompt" />
+        </File>
+      </Component>
+      <Component Id="Test4" Directory="INSTALLFOLDER">
+        <Condition><![CDATA[2=2]]></Condition>
+        <File Id="Test4" Source="$(var.ProjectDir)Product.wxs">
+          <PanelSW:InstallUtil Bitness="x64">
+            <PanelSW:Argument Id="_1" Value="1"/>
+            <PanelSW:Argument Id="_2" Value="3"/>
+          </PanelSW:InstallUtil>
+          <PanelSW:TopShelf Account="custom" Description="MyDesc" Instance="[inst]" ServiceName="qwe" Start="manual" UserName="un" Password="psw" DisplayName="dn" ErrorHandling="prompt" />
+        </File>
+      </Component>
+      <Component Id="Other" Directory="INSTALLFOLDER">
+        <File Id="Other" Source="$(var.ProjectDir)Product.wxs" Name="Other.wxs">
           <PanelSW:InstallUtil>
             <PanelSW:Argument Id="_1" Value="1"/>
             <PanelSW:Argument Id="_2" Value="3"/>
