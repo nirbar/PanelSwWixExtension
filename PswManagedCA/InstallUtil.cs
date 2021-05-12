@@ -238,12 +238,12 @@ namespace PswManagedCA
                 {
                     c.Action = InstallUtilCatalog.InstallUtilAction.Uninstall;
                 }
+                temp = new List<InstallUtilCatalog>(temp.Distinct());
                 using (StringWriter sw = new StringWriter())
                 {
                     srlz.Serialize(sw, temp);
                     session["PSW_InstallUtil_UninstallExec_x64"] = sw.ToString();
                 }
-                temp = new List<InstallUtilCatalog>(temp.Distinct());
                 foreach (InstallUtilCatalog c in temp)
                 {
                     c.Action = InstallUtilCatalog.InstallUtilAction.Install;
@@ -369,6 +369,51 @@ namespace PswManagedCA
 
                         default:
                             session.Log($"Exception with code {ex.ErrorCode} (native {ex.NativeErrorCode}): {ex}");
+                            throw;
+                    }
+                }
+                catch (InstallException ex)
+                {
+                    if ((ex.InnerException == null) || !(ex.InnerException is Win32Exception wex))
+                    {
+                        throw;
+                    }
+
+                    // Ignore if:
+                    // - Deleting and service doesn't exist
+                    // - Deleting and service is marked for delete
+                    // - Repairing and service is already installed
+                    switch (wex.NativeErrorCode)
+                    {
+                        case (int)ServiceErrorCode.ERROR_SERVICE_DOES_NOT_EXIST:
+                            if (ctlg.Action != InstallUtilCatalog.InstallUtilAction.Uninstall)
+                            {
+                                session.Log($"Exception with code {wex.ErrorCode} (native {wex.NativeErrorCode}): {ex}");
+                                throw;
+                            }
+                            session.Log($"Service {ctlg.FilePath} is not installed anyway");
+                            break;
+
+                        case (int)ServiceErrorCode.ERROR_SERVICE_EXISTS:
+                            if (ctlg.Action != InstallUtilCatalog.InstallUtilAction.Reinstall)
+                            {
+                                session.Log($"Exception with code {wex.ErrorCode} (native {wex.NativeErrorCode}): {ex}");
+                                throw;
+                            }
+                            session.Log($"Service {ctlg.FilePath} is already installed");
+                            break;
+
+                        case (int)ServiceErrorCode.ERROR_SERVICE_MARKED_FOR_DELETE:
+                            if (ctlg.Action != InstallUtilCatalog.InstallUtilAction.Uninstall)
+                            {
+                                session.Log($"Exception with code {wex.ErrorCode} (native {wex.NativeErrorCode}): {ex}");
+                                throw;
+                            }
+                            session.Log($"Service {ctlg.FilePath} is already marked for delete");
+                            break;
+
+                        default:
+                            session.Log($"Exception with code {wex.ErrorCode} (native {wex.NativeErrorCode}): {ex}");
                             throw;
                     }
                 }

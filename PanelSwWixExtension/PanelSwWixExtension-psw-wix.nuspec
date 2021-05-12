@@ -14,7 +14,7 @@
     <tags>WiX MSI Installer WixToolset XML</tags>
 
     <dependencies>
-      <dependency id="PanelSW.Custom.WiX" version="3.12.0-b93" />
+      <dependency id="PanelSW.Custom.WiX" version="3.12.0-b99" />
     </dependencies>
   </metadata>
 
