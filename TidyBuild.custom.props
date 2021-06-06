@@ -4,6 +4,7 @@
   <PropertyGroup>
     <FullVersion>2.31.5</FullVersion>
     <FullVersion Condition=" '$(APPVEYOR_BUILD_VERSION)'!='' ">$(APPVEYOR_BUILD_VERSION)</FullVersion>
+    <FullVersion Condition=" '$(GITHUB_RUN_NUMBER)'!='' ">$(FullVersion).$(GITHUB_RUN_NUMBER)</FullVersion>
     <ProductName>PanelSwWixExtension</ProductName>
     <Manufacturer>Panel::Software</Manufacturer>
 
