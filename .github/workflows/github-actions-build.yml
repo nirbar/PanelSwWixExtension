@@ -1,0 +1,26 @@
+name: PanelSwWixExtension
+on: [push]
+jobs:
+  PanelSwWixExtension-Build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          submodules: 'true'
+      - uses: microsoft/setup-msbuild@v1.0.2          
+      - run: choco install windows-adk
+      - run: nuget restore
+      - run: cmake.exe -G "Visual Studio 16 2019" -T v141_xp,host=x86 -A Win32 .\protobuf\cmake -Dprotobuf_BUILD_TESTS=OFF -B build\protobuf
+      - run: cmake.exe --build build\protobuf --config Release
+      - run: cmake.exe -G "Visual Studio 16 2019" -T v141_xp,host=x86 -A Win32 .\poco -DPOCO_STATIC=ON -DPOCO_MT=ON -B build\poco
+      - run: cmake.exe --build build\poco --config Release
+      - run: nuget install PanelSW.Custom.WiX -version 3.12.0-b99
+      - run: msbuild PanelSwWixExtension.sln -p:Configuration=Release -p:Platform=x86 -p:NugetDir="" -p:NugetPrereleaseVersion=-psw-wix -p:WixToolPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.3.12.0-b99\tools\bin\" -p:WixSdkPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.3.12.0-b99\tools\sdk\" -p:WixTargetsPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.3.12.0-b99\tools\bin\Wix.targets" -p:WixCATargetsPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.3.12.0-b99\tools\sdk\Wix.CA.targets" -p:WixNativeCATargetsPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.3.12.0-b99\tools\sdk\Wix.NativeCA.targets" -p:WixTasksPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.3.12.0-b99\tools\bin\wixtasks.dll" -p:WixInstallPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.3.12.0-b99\tools\bin\" -p:WixExtDir="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.3.12.0-b99\tools\bin\" -p:LuxTargetsPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.3.12.0-b99\tools\bin\lux.targets"
+      - run: Remove-Item 'build\bin' -Force -Recurse
+      - run: Remove-Item 'build\obj' -Force -Recurse
+      - run: Remove-Item 'build\lib' -Force -Recurse
+      - run: msbuild PanelSwWixExtension.sln -p:Configuration=Release -p:Platform=x86 -p:NugetDir=""
+      - uses: actions/upload-artifact@v2
+        with:
+          name: nuget
+          path: build\nuget-out\*.nupkg
