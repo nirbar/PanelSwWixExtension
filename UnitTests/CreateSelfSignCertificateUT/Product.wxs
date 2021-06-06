@@ -9,7 +9,7 @@
     <MediaTemplate />
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
-      <Component Directory="INSTALLFOLDER" Id="Product.wxs">
+      <Component Directory="INSTALLFOLDER">
         <File Source="$(var.ProjectDir)Product.wxs" />
         <PanelSW:CreateSelfSignCertificate Id="_1" Expiry="200" Password="123654" X500="CN=panel-sw.co.il"/>
       </Component>

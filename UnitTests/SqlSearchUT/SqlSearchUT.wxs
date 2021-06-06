@@ -20,7 +20,7 @@
 
     <Binary SourceFile="$(sys.SOURCEFILEDIR)Script.sql" Id="Script.sql"/>
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-      <Component Id="JustFile">
+      <Component>
         <Condition><![CDATA[NOT SQL_TABLE_EXISTS OR (SQL_TABLE_EXISTS = 0)]]></Condition>
         <File Source="$(sys.SOURCEFILEPATH)"/>
         <PanelSW:SqlScript BinaryKey="Script.sql" ConnectionString="[CONNECTION_STRING]" OnInstall="yes" ErrorHandling="prompt">

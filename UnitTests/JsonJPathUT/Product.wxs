@@ -9,8 +9,8 @@
     <MediaTemplate />
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
-      <Component Id="Test" Directory="INSTALLFOLDER">
-        <File Source="$(var.ProjectDir)JsonObject.json">
+      <Component Directory="INSTALLFOLDER">
+        <File Source="$(var.ProjectDir)Json-Object.json">
           <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == '[HiddenTest]')[\]]" Value='{ "Name": "MyName", "Customer": "Id", "Customer1": "Id1", "Customer2": "Id2", "Customer3": "Id3", "Customer4": "Id4" }'/>
           <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'Contoso')[\]].Name" Value='Contoso "2" \backslashed\ &apos;Quoted&apos;' Formatting="string" />
           <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'MyName')[\]].Customer1" Value='TrUE' Formatting='boolean'/>
@@ -19,7 +19,7 @@
           <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'MyName')[\]].Customer4" Value='[HiddenTest]' Formatting='boolean'/>
           <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'Missing')[\]].Customer4" Value='[HiddenTest]' Formatting='boolean' ErrorHandling='prompt'/>
         </File>
-        <PanelSW:JsonJPath FilePath='[#JsonObject.json]' JPath="$.Manufacturers[\[]?(@.Name == '[HiddenTest]')[\]]" Value='{ "Customer": "Id", "Customer1": "Id1", "Customer2": "Id2", "Customer3": "Id3", "Customer4": "Id4" }' ErrorHandling='ignore'/>
+        <PanelSW:JsonJPath FilePath='[#Json_Object.json]' JPath="$.Manufacturers[\[]?(@.Name == '[HiddenTest]')[\]]" Value='{ "Customer": "Id", "Customer1": "Id1", "Customer2": "Id2", "Customer3": "Id3", "Customer4": "Id4" }' ErrorHandling='ignore'/>
       </Component>
     </Feature>
 

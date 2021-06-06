@@ -10,11 +10,11 @@
 
     <Property Id="DEFAULT_WEB_SITE" Value="Default Web Site"/>
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
-      <Component Id="Product.wxs" Directory="INSTALLFOLDER">
+      <Component Directory="INSTALLFOLDER">
         <File Source="$(sys.SOURCEFILEPATH)"/>
         <PanelSW:WebsiteConfig Website="[DEFAULT_WEB_SITE]" Stop="yes"/>
       </Component>
-      <Component Id="Product1.wxs" Directory="INSTALLFOLDER">
+      <Component Directory="INSTALLFOLDER">
         <Condition><![CDATA[1 = 0]]></Condition>
         <File Source="$(sys.SOURCEFILEPATH)" Name="Product1.wxs"/>
         <PanelSW:WebsiteConfig Website="Default Web Site"/>

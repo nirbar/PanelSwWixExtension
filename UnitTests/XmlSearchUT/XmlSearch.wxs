@@ -74,7 +74,7 @@
     <Binary SourceFile="$(sys.SOURCEFILEDIR)XSLTFile1.xslt" Id="XslTransform"/>
     <Property Id="FILE_NAME" Value="someName.xml" Hidden="yes"/>
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-      <Component Id="Product.wxs">
+      <Component>
         <File Source="$(sys.SOURCEFILEPATH)">
           <PanelSW:XslTransform BinaryKey="XslTransform">
             <!-- Expecting to get <File Name="someNAME.xml" -->
@@ -83,7 +83,7 @@
         </File>
 
         <!--Expecting to do nothing since [FILE_NAME] was already replaced -->
-        <PanelSW:XslTransform BinaryKey="XslTransform" FilePath="[#Product.wxs]">
+        <PanelSW:XslTransform BinaryKey="XslTransform" FilePath="[#XmlSearch.wxs]">
           <PanelSW:Replace Text="\[\[]FILE_NAME\[\]]" Replacement="[SOME_TEXT]"/>
         </PanelSW:XslTransform>
       </Component>

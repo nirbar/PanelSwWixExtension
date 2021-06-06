@@ -133,14 +133,14 @@ namespace PswManagedCA
                         }
 
                         // Sanity checks
-                        if (string.IsNullOrWhiteSpace(fileId) == string.IsNullOrEmpty(component))
+                        if (string.IsNullOrWhiteSpace(component))
                         {
-                            session.Log("Either File_ or Component and FilePath must be supplied");
+                            session.Log("Component must be supplied");
                             return ActionResult.Failure;
                         }
-                        if (string.IsNullOrWhiteSpace(filePath) != string.IsNullOrEmpty(component))
+                        if (string.IsNullOrWhiteSpace(fileId) == string.IsNullOrEmpty(filePath))
                         {
-                            session.Log("Either File_ or Component and FilePath must be supplied");
+                            session.Log("Either File_ or FilePath must be supplied");
                             return ActionResult.Failure;
                         }
 
@@ -151,23 +151,8 @@ namespace PswManagedCA
                         else // Get component by file Id
                         {
                             ctlg.FilePath = session.Format($"[#{fileId}]");
-                            using (View componentView = session.Database.OpenView($"SELECT `Component_` FROM `File` WHERE `File`='{fileId}'"))
-                            {
-                                componentView.Execute(null);
-                                foreach (Record rec1 in componentView)
-                                {
-                                    using (rec1)
-                                    {
-                                        component = rec1[1] as string;
-                                    }
-                                }
-                            }
                         }
-                        if (string.IsNullOrWhiteSpace(component))
-                        {
-                            session.Log("Did not find component");
-                            return ActionResult.Failure;
-                        }
+
                         if (errorHandling != null)
                         {
                             ctlg.ErrorHandling = (ErrorHandling)errorHandling;

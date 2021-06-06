@@ -10,7 +10,7 @@
     <Property Id="HIDE_ME" Hidden="yes" Value="123"/>
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
-      <Component Id="Test" Directory="INSTALLFOLDER">
+      <Component Directory="INSTALLFOLDER">
         <File Source="$(var.ProjectDir)Product.wxs" />
 
         <!-- Change and revert service configuration -->

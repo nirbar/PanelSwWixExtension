@@ -22,7 +22,7 @@
     <Property Id="TASK_PASSWORD"/>
 
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-      <Component Id="Test" Guid="*">
+      <Component>
         <File Source="$(sys.SOURCEFILEPATH)" />
       </Component>
       <Component Id="TASK_USER" Guid="{43081895-EEA9-454F-A0CA-1DC17302B49B}">

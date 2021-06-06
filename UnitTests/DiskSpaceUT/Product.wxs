@@ -19,6 +19,10 @@
       </Directory>
     </Directory>
 
+    <DirectoryRef Id="INSTALLFOLDER">
+      <PanelSW:DiskSpace/>
+    </DirectoryRef>
+
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
 
     <ComponentGroup Id="ProductComponents">
@@ -29,7 +33,7 @@
 
     <CustomAction Error="30000" Id="DiskSpaceCheck"/>
     <InstallExecuteSequence>
-      <Custom Action="DiskSpaceCheck" After="DiskSpace"><![CDATA[Not Installed And (ProgramFilesFolder_DISK_FREE_SPACE_GB < 20)]]></Custom>
+      <Custom Action="DiskSpaceCheck" After="DiskSpace"><![CDATA[Not Installed And ((ProgramFilesFolder_DISK_FREE_SPACE_GB < 20) OR (INSTALLFOLDER_DISK_FREE_SPACE_GB < 20))]]></Custom>
     </InstallExecuteSequence>
     <UI>
       <Error Id="30000"><![CDATA[20GB Disk Free Space Required]]></Error>

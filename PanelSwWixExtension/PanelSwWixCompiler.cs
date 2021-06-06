@@ -1,7 +1,6 @@
 using Microsoft.Tools.WindowsInstallerXml;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Reflection;
 using System.Xml;
 using System.Xml.Schema;
@@ -53,7 +52,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         case "FileRegex":
-                            ParseFileRegex(element, parentElement);
+                            ParseFileRegex(element, null, null);
                             break;
 
                         case "ReadIniValues":
@@ -102,18 +101,24 @@ namespace PanelSw.Wix.Extensions
                     }
                     break;
 
+                case "DirectoryRef":
                 case "Directory":
-                    switch (element.LocalName)
                     {
-                        case "DiskSpace":
-                            ParseDiskSpaceElement(element);
-                            break;
+                        string directoryId = contextValues[0];
+                        string diskId = contextValues[1];
 
-                        default:
-                            Core.UnexpectedElement(parentElement, element);
-                            break;
+                        switch (element.LocalName)
+                        {
+                            case "DiskSpace":
+                                ParseDiskSpaceElement(element, directoryId);
+                                break;
+
+                            default:
+                                Core.UnexpectedElement(parentElement, element);
+                                break;
+                        }
+                        break;
                     }
-                    break;
 
                 case "Property":
                     switch (element.LocalName)
@@ -173,87 +178,100 @@ namespace PanelSw.Wix.Extensions
                     break;
 
                 case "Component":
-                    switch (element.LocalName)
                     {
-                        case "JsonJPath":
-                            ParseJsonJPathElement(element, parentElement);
-                            break;
+                        string componentId = contextValues[0];
+                        string directoryId = contextValues[1];
+                        bool isWin64 = bool.Parse(contextValues[2]);
 
-                        case "TaskScheduler":
-                            ParseTaskSchedulerElement(parentElement, element);
-                            break;
+                        switch (element.LocalName)
+                        {
+                            case "JsonJPath":
+                                ParseJsonJPathElement(element, componentId, null);
+                                break;
 
-                        case "ExecOn":
-                        case "ExecOnComponent":
-                            ParseExecOnComponentElement(parentElement, element);
-                            break;
+                            case "TaskScheduler":
+                                ParseTaskSchedulerElement(element, componentId);
+                                break;
 
-                        case "Dism":
-                            ParseDismElement(parentElement, element);
-                            break;
+                            case "ExecOn":
+                            case "ExecOnComponent":
+                                ParseExecOnComponentElement(element, componentId);
+                                break;
 
-                        case "ServiceConfig":
-                            ParseServiceConfigElement(parentElement, element);
-                            break;
+                            case "Dism":
+                                ParseDismElement(element, componentId);
+                                break;
 
-                        case "BackupAndRestore":
-                            ParseBackupAndRestoreElement(parentElement, element);
-                            break;
+                            case "ServiceConfig":
+                                ParseServiceConfigElement(element, componentId);
+                                break;
 
-                        case "CreateSelfSignCertificate":
-                            ParseCreateSelfSignCertificateElement(parentElement, element);
-                            break;
+                            case "BackupAndRestore":
+                                ParseBackupAndRestoreElement(element, componentId);
+                                break;
 
-                        case "SqlScript":
-                            ParseSqlScriptElement(parentElement, element);
-                            break;
+                            case "CreateSelfSignCertificate":
+                                ParseCreateSelfSignCertificateElement(element, componentId);
+                                break;
 
-                        case "WebsiteConfig":
-                            ParseWebsiteConfigElement(parentElement, element);
-                            break;
+                            case "SqlScript":
+                                ParseSqlScriptElement(element, componentId);
+                                break;
 
-                        case "XslTransform":
-                            ParseXslTransform(parentElement, element);
-                            break;
+                            case "WebsiteConfig":
+                                ParseWebsiteConfigElement(element, componentId);
+                                break;
 
-                        default:
-                            Core.UnexpectedElement(parentElement, element);
-                            break;
+                            case "XslTransform":
+                                ParseXslTransform(element, componentId, null);
+                                break;
+
+                            default:
+                                Core.UnexpectedElement(parentElement, element);
+                                break;
+                        }
+                        break;
                     }
-                    break;
 
                 case "File":
-                    switch (element.LocalName)
                     {
-                        case "JsonJPath":
-                            ParseJsonJPathElement(element, parentElement);
-                            break;
+                        string fileId = contextValues[0];
+                        string componentId = contextValues[1];
+                        bool isWin64 = bool.Parse(contextValues[2]);
+                        string directoryId = contextValues[3];
 
-                        case "InstallUtil":
-                            ParseInstallUtilElement(element, parentElement);
-                            break;
+                        switch (element.LocalName)
+                        {
+                            case "JsonJPath":
+                                ParseJsonJPathElement(element, componentId, fileId);
+                                break;
 
-                        case "TopShelf":
-                            ParseTopShelfElement(element, parentElement);
-                            break;
+                            case "InstallUtil":
+                                ParseInstallUtilElement(element, fileId);
+                                break;
 
-                        case "AlwaysOverwriteFile":
-                        case "ForceVersion":
-                            ParseForceVersionElement(element, parentElement);
-                            break;
+                            case "TopShelf":
+                                ParseTopShelfElement(element, fileId);
+                                break;
 
-                        case "FileRegex":
-                            ParseFileRegex(element, parentElement);
-                            break;
+                            case "AlwaysOverwriteFile":
+                            case "ForceVersion":
+                                ParseForceVersionElement(element, fileId);
+                                break;
 
-                        case "XslTransform":
-                            ParseXslTransform(parentElement, element);
-                            break;
-                        default:
-                            Core.UnexpectedElement(parentElement, element);
-                            break;
+                            case "FileRegex":
+                                ParseFileRegex(element, componentId, fileId);
+                                break;
+
+                            case "XslTransform":
+                                ParseXslTransform(element, componentId, fileId);
+                                break;
+                            default:
+                                Core.UnexpectedElement(parentElement, element);
+                                break;
+                        }
+                        break;
                     }
-                    break;
                 default:
                     Core.UnexpectedElement(parentElement, element);
                     break;
@@ -414,18 +432,16 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseWebsiteConfigElement(XmlElement parentElement, XmlElement element)
+        private void ParseWebsiteConfigElement(XmlElement element, string component)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
             string id = "web" + Guid.NewGuid().ToString("N");
-            string component = null;
             string website = null;
             bool stop = false;
             bool start = false;
             YesNoDefaultType autoStart = YesNoDefaultType.Default;
             ErrorHandling promptOnError = ErrorHandling.fail;
 
-            component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
             foreach (XmlAttribute attrib in element.Attributes)
             {
                 if ((0 != attrib.NamespaceURI.Length) && (attrib.NamespaceURI != schema.TargetNamespace))
@@ -473,7 +489,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(component))
             {
-                Core.OnMessage(WixErrors.ParentElementAttributeRequired(sourceLineNumbers, parentElement.LocalName, "Id", element.LocalName));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, "Component", "Id"));
             }
             if (string.IsNullOrEmpty(website))
             {
@@ -618,37 +634,6 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private string GetFileComponentId(XmlElement fileElement)
-        {
-            if (!fileElement.LocalName.Equals("File") || !(fileElement.ParentNode is XmlElement component) || !component.LocalName.Equals("Component"))
-            {
-                return null;
-            }
-
-            string id = component.GetAttribute("Id");
-            if (string.IsNullOrEmpty(id))
-            {
-                id = GetFileId(fileElement); //TODO: May yield wrong component Id if there's another key-path
-            }
-            return id;
-        }
-
-        private string GetFileId(XmlElement fileElement)
-        {
-            string file = fileElement.GetAttribute("Id");
-            if (string.IsNullOrEmpty(file))
-            {
-                file = fileElement.GetAttribute("Name");
-                if (string.IsNullOrEmpty(file))
-                {
-                    file = fileElement.GetAttribute("Source");
-                    file = Path.GetFileName(file);
-                }
-                file = CompilerCore.GetIdentifierFromName(file);
-            }
-            return file;
-        }
-
         private enum JsonFormatting
         {
             Raw,
@@ -656,36 +641,15 @@ namespace PanelSw.Wix.Extensions
             Boolean
         }
 
-        private void ParseJsonJPathElement(XmlElement node, XmlElement parentElement)
+        private void ParseJsonJPathElement(XmlElement node, string component_, string file_)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
             string id = "jpt" + Guid.NewGuid().ToString("N");
             string jpath = null;
             string value = null;
-            string file_ = null;
             string filePath = null;
-            string component_ = null;
             JsonFormatting jsonFormatting = JsonFormatting.Raw;
             ErrorHandling promptOnError = ErrorHandling.fail;
-
-            switch (parentElement.LocalName)
-            {
-                case "Component":
-                    component_ = parentElement.GetAttribute("Id");
-                    if (string.IsNullOrEmpty(component_))
-                    {
-                        Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, node.LocalName, "Id", parentElement.LocalName));
-                    }
-                    break;
-
-                case "File":
-                    file_ = GetFileId(parentElement);
-                    if (string.IsNullOrEmpty(file_))
-                    {
-                        Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, node.LocalName, "Id", parentElement.LocalName));
-                    }
-                    break;
-            }
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -734,17 +698,9 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            if (string.IsNullOrEmpty(file_) && string.IsNullOrEmpty(component_))
-            {
-                Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, node.LocalName, parentElement.LocalName, "FilePath"));
-            }
-            if (string.IsNullOrEmpty(component_) != string.IsNullOrEmpty(filePath))
-            {
-                Core.OnMessage(WixErrors.UnexpectedAttribute(sourceLineNumbers, node.LocalName, "FilePath"));
-            }
             if (string.IsNullOrEmpty(file_) == string.IsNullOrEmpty(filePath))
             {
-                Core.OnMessage(WixErrors.UnexpectedAttribute(sourceLineNumbers, node.LocalName, "FilePath"));
+                Core.OnMessage(WixErrors.IllegalAttributeWhenNested(sourceLineNumbers, node.LocalName, "FilePath", "File"));
             }
             if (string.IsNullOrEmpty(jpath))
             {
@@ -771,10 +727,9 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseDiskSpaceElement(XmlElement element)
+        private void ParseDiskSpaceElement(XmlElement element, string directory)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
-            string directory = element.ParentNode.Attributes["Id"].Value;
 
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "DiskSpace");
             if (!Core.EncounteredError)
@@ -830,23 +785,15 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseCreateSelfSignCertificateElement(XmlElement parentElement, XmlElement element)
+        private void ParseCreateSelfSignCertificateElement(XmlElement element, string component)
         {
-            SourceLineNumberCollection parentsourceLineNumbers = Preprocessor.GetSourceLineNumbers(parentElement);
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
             string id = null;
-            string component = null;
             string password = null;
             string x500 = null;
             string subjectAltName = null;
             int expiry = 0;
             bool deleteOnCommit = true;
-
-            component = Core.GetAttributeValue(parentsourceLineNumbers, parentElement.Attributes["Id"]);
-            if (string.IsNullOrEmpty(component))
-            {
-                Core.OnMessage(WixErrors.ParentElementAttributeRequired(sourceLineNumbers, parentElement.LocalName, "Id", element.LocalName));
-            }
 
             foreach (XmlAttribute attrib in element.Attributes)
             {
@@ -889,6 +836,10 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
+            if (string.IsNullOrEmpty(component))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, "Component", "Id"));
+            }
             if (string.IsNullOrEmpty(id))
             {
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "Id"));
@@ -919,21 +870,13 @@ namespace PanelSw.Wix.Extensions
             BackupAndRestore_deferred_After_RemoveExistingProducts
         }
 
-        private void ParseBackupAndRestoreElement(XmlElement parentElement, XmlElement element)
+        private void ParseBackupAndRestoreElement(XmlElement element, string component)
         {
-            SourceLineNumberCollection parentsourceLineNumbers = Preprocessor.GetSourceLineNumbers(parentElement);
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
             string id = null;
             string filepath = null;
-            string component = null;
             BackupAndRestore_deferred_Schedule restoreSchedule = BackupAndRestore_deferred_Schedule.BackupAndRestore_deferred_Before_InstallFiles;
             DeletePathFlags flags = 0;
-
-            component = Core.GetAttributeValue(parentsourceLineNumbers, parentElement.Attributes["Id"]);
-            if (string.IsNullOrEmpty(component))
-            {
-                Core.OnMessage(WixErrors.ParentElementAttributeRequired(sourceLineNumbers, parentElement.LocalName, "Id", element.LocalName));
-            }
 
             foreach (XmlAttribute attrib in element.Attributes)
             {
@@ -1005,6 +948,10 @@ namespace PanelSw.Wix.Extensions
             {
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "Path"));
             }
+            if (string.IsNullOrEmpty(component))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, "Component", "Id"));
+            }
 
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "BackupAndRestore");
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "Property", restoreSchedule.ToString());
@@ -1026,11 +973,10 @@ namespace PanelSw.Wix.Extensions
             x64 = 2
         }
 
-        private void ParseInstallUtilElement(XmlNode node, XmlElement parentElement)
+        private void ParseInstallUtilElement(XmlNode node, string file)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
             InstallUtil_Bitness bitness = InstallUtil_Bitness.asComponent;
-            string file = GetFileId(parentElement);
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -1059,7 +1005,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(file))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, "File", "Id"));
             }
 
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "PSW_InstallUtilSched");
@@ -1123,10 +1069,9 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseForceVersionElement(XmlNode node, XmlElement parentElement)
+        private void ParseForceVersionElement(XmlNode node, string file)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
-            string file = GetFileId(parentElement);
             string version = "65535.65535.65535.65535";
 
             if (node.LocalName.Equals("AlwaysOverwriteFile"))
@@ -1153,7 +1098,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(file))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, "File", "Id"));
             }
 
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "ForceVersion");
@@ -1191,7 +1136,7 @@ namespace PanelSw.Wix.Extensions
             prompt = 2
         }
 
-        private void ParseTopShelfElement(XmlNode node, XmlElement parentElement)
+        private void ParseTopShelfElement(XmlNode node, string file)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
             TopShelf_Account account = TopShelf_Account.none;
@@ -1203,7 +1148,6 @@ namespace PanelSw.Wix.Extensions
             string userName = null;
             string password = null;
             ErrorHandling promptOnError = ErrorHandling.fail;
-            string file = GetFileId(parentElement);
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -1286,7 +1230,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(file))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, parentElement.LocalName, "Id"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, "File", "Id"));
             }
             if (string.IsNullOrEmpty(userName) != (account != TopShelf_Account.custom))
             {
@@ -1372,11 +1316,10 @@ namespace PanelSw.Wix.Extensions
             ReinstallRollback = Reinstall * 2,
         }
 
-        private void ParseSqlScriptElement(XmlElement parentElement, XmlElement element)
+        private void ParseSqlScriptElement(XmlElement element, string component)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
             string id = "sql" + Guid.NewGuid().ToString("N");
-            string component = null;
             string binary = null;
             string server = null;
             string connectionString = null;
@@ -1390,8 +1333,6 @@ namespace PanelSw.Wix.Extensions
             int order = 1000000000 + GetLineNumber(sourceLineNumbers);
             SqlExecOn sqlExecOn = SqlExecOn.None;
             YesNoType aye;
-
-            component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
 
             foreach (XmlAttribute attrib in element.Attributes)
             {
@@ -1523,7 +1464,7 @@ namespace PanelSw.Wix.Extensions
             }
             if (string.IsNullOrEmpty(component))
             {
-                Core.OnMessage(WixErrors.ParentElementAttributeRequired(sourceLineNumbers, parentElement.LocalName, "Id", element.LocalName));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, "Component", "Id"));
             }
             if (string.IsNullOrEmpty(binary))
             {
@@ -1610,29 +1551,13 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseXslTransform(XmlElement parentElement, XmlElement element)
+        private void ParseXslTransform(XmlElement element, string component, string file)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
             string id = "xsl" + Guid.NewGuid().ToString("N");
-            string file = null;
-            string component = null;
             string filePath = null;
             string binary = null;
             int order = 1000000000 + GetLineNumber(sourceLineNumbers);
-
-            if (parentElement.LocalName.Equals("Component"))
-            {
-                component = parentElement.GetAttribute("Id");
-                if (string.IsNullOrEmpty(component))
-                {
-                    Core.OnMessage(WixErrors.ParentElementAttributeRequired(sourceLineNumbers, parentElement.LocalName, "Id", element.LocalName));
-                }
-            }
-            else if (parentElement.LocalName.Equals("File"))
-            {
-                file = GetFileId(parentElement);
-                component = GetFileComponentId(parentElement);
-            }
 
             foreach (XmlAttribute attrib in element.Attributes)
             {
@@ -1671,7 +1596,7 @@ namespace PanelSw.Wix.Extensions
             }
             if (string.IsNullOrEmpty(component))
             {
-                Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, parentElement.LocalName, "Id", parentElement.ParentNode.LocalName));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, "Component", "Id"));
             }
             if (string.IsNullOrEmpty(binary))
             {
@@ -1746,11 +1671,10 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseExecOnComponentElement(XmlElement parentElement, XmlElement element)
+        private void ParseExecOnComponentElement(XmlElement element, string component)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
             string id = null;
-            string component = null;
             string binary = null;
             string command = null;
             string workDir = null;
@@ -1759,8 +1683,6 @@ namespace PanelSw.Wix.Extensions
             int order = 1000000000 + GetLineNumber(sourceLineNumbers);
             YesNoType aye;
             string user = null;
-
-            component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
 
             if (element.HasAttribute("IgnoreExitCode") && element.HasAttribute("ErrorHandling"))
             {
@@ -1935,7 +1857,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(component))
             {
-                Core.OnMessage(WixErrors.ParentElementAttributeRequired(sourceLineNumbers, parentElement.LocalName, "Id", element.LocalName));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, "Component", "Id"));
             }
             if (string.IsNullOrEmpty(id))
             {
@@ -2149,7 +2071,7 @@ namespace PanelSw.Wix.Extensions
             autoDelayed = 5
         }
 
-        private void ParseServiceConfigElement(XmlElement parentElement, XmlElement element)
+        private void ParseServiceConfigElement(XmlElement element, string component)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
             string id = null;
@@ -2157,12 +2079,9 @@ namespace PanelSw.Wix.Extensions
             string commandLine = null;
             string account = null;
             string password = null;
-            string component = null;
             string loadOrderGroup = null;
             ServiceStart start = ServiceStart.unchanged;
             ErrorHandling errorHandling = ErrorHandling.fail;
-
-            component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
 
             foreach (XmlAttribute attrib in element.Attributes)
             {
@@ -2223,7 +2142,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(component))
             {
-                Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, parentElement.LocalName, "Id", parentElement.LocalName));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, "Component", "Id"));
             }
             if (string.IsNullOrEmpty(service))
             {
@@ -2310,18 +2229,15 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseDismElement(XmlElement parentElement, XmlElement element)
+        private void ParseDismElement(XmlElement element, string component)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
             string id = null;
             string features = null;
             string exclude = null;
-            string component = null;
             string package = null;
             ErrorHandling promptOnError = ErrorHandling.fail;
             int cost = 20971520; // 20 MB.
-
-            component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
 
             foreach (XmlAttribute attrib in element.Attributes)
             {
@@ -2379,7 +2295,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(component))
             {
-                Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, parentElement.LocalName, "Id", ""));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, "Component", "Id"));
             }
             if (string.IsNullOrEmpty(features) && string.IsNullOrEmpty(package))
             {
@@ -2405,17 +2321,14 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseTaskSchedulerElement(XmlElement parentElement, XmlElement element)
+        private void ParseTaskSchedulerElement(XmlElement element, string component)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
             string id = "tsk" + Guid.NewGuid().ToString("N");
             string taskXml = null;
             string taskName = null;
-            string component = null;
             string user = null;
             string password = null;
-
-            component = Core.GetAttributeValue(sourceLineNumbers, parentElement.Attributes["Id"]);
 
             foreach (XmlAttribute attrib in element.Attributes)
             {
@@ -2473,7 +2386,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(component))
             {
-                Core.OnMessage(WixErrors.ExpectedParentWithAttribute(sourceLineNumbers, parentElement.LocalName, "Id", ""));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, "Component", "Id"));
             }
             if (string.IsNullOrWhiteSpace(taskXml))
             {
@@ -4021,12 +3934,10 @@ namespace PanelSw.Wix.Extensions
             ReverseUnicode
         };
 
-        private void ParseFileRegex(XmlNode node, XmlElement parentElement)
+        private void ParseFileRegex(XmlNode node, string component, string fileId)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
             string id = null;
-            string fileId = null;
-            string component = null;
             string filepath = null;
             string condition = null;
             string regex = null;
@@ -4034,12 +3945,6 @@ namespace PanelSw.Wix.Extensions
             FileEncoding encoding = FileEncoding.AutoDetect;
             bool ignoreCase = false;
             int order = 1000000000 + GetLineNumber(sourceLineNumbers);
-
-            if (parentElement.LocalName.Equals("File"))
-            {
-                fileId = GetFileId(parentElement);
-                component = GetFileComponentId(parentElement);
-            }
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -4094,8 +3999,8 @@ namespace PanelSw.Wix.Extensions
             }
             if (string.IsNullOrEmpty(fileId) == string.IsNullOrEmpty(filepath))
             {
-                // Either under File or specify FilePath, not both!
-                Core.OnMessage(WixErrors.ExpectedAttributeInElementOrParent(sourceLineNumbers, node.LocalName, "FilePath", parentElement.LocalName));
+                // Either under File or specify FilePath, not both
+                Core.OnMessage(WixErrors.IllegalAttributeWhenNested(sourceLineNumbers, node.LocalName, "FilePath", "Product"));
             }
 
             // find unexpected child elements

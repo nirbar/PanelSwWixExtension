@@ -27,7 +27,7 @@
     </WixExtension>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="JsonObject.json" />
+    <Content Include="Json-Object.json" />
     <Content Include="packages.config" />
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />

@@ -1,5 +1,8 @@
+[![PanelSwWixExtension](https://github.com/nirbar/PanelSwWixExtension/actions/workflows/github-actions-build.yml/badge.svg?branch=master)](https://github.com/nirbar/PanelSwWixExtension/actions/workflows/github-actions-build.yml)
+
 PanelSwWixExtension from the creator of [JetBA](https://github.com/nirbar/JetBA-Binaries) is the most comprehensive open source [WiX](http://wixtoolset.org/) extension. 
 I would like to thank JetBrains for their [support](https://www.jetbrains.com/community/opensource/) of this project
+
 ## PanelSwWixExtension WiX Elements
 
 - Immediate Actions:

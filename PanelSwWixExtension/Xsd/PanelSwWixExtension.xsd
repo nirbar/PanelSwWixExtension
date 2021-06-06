@@ -187,6 +187,7 @@
     <xs:annotation>
       <xs:appinfo>
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Directory" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="DirectoryRef" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Calculate disk free space for a directory. The free space is set to property '*DirectoryId*_DISK_FREE_SPACE' in bytes, and to property '*DirectoryId*_DISK_FREE_SPACE_GB' in gigabytes.
