@@ -10,6 +10,8 @@ message UnzipDetails{
 		unmodified = 2;
 
 		delete = 16;
+
+		createRoot = 32;
 	}
 
     bytes zipFile = 1;

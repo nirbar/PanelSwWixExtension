@@ -157,28 +157,46 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command) noexcept
 		for (ZipArchive::FileHeaders::const_iterator it = archive->headerBegin(), endIt = archive->headerEnd(); it != endIt; ++it)
 		{
 			std::string file = it->second.getFileName();
+			if ((details.flags() & UnzipDetails::UnzipFlags::UnzipDetails_UnzipFlags_createRoot) == 0)
+			{
+				size_t i1 = file.find_first_of('/');
+				size_t i2 = file.find_first_of('\\');
+				if ((i1 > 0) && (i1 < file.length() - 1) && ((i1 < i2) || (i2 <= 0)))
+				{
+					file = file.substr(i1 + 1);
+				}
+				else if ((i2 > 0) && (i2 < file.length() - 1) && ((i2 < i1) || (i1 <= 0)))
+				{
+					file = file.substr(i2 + 1);
+				}
+				else
+				{
+					WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File '%s' is directly in ZIP root so 'SkipRoot' does not apply to it", file.c_str());
+				}
+			}
+
 			Poco::Path path(targetFolderA);
 			path.append(file);
 			std::string pathA = path.toString(Poco::Path::Style::PATH_WINDOWS).c_str();
 
 			hr = StrAllocStringAnsi(&szDstFile, pathA.c_str(), 0, CP_UTF8);
-			ExitOnFailure(hr, "Failed converting ANSI string to wide")
+			ExitOnFailure(hr, "Failed converting ANSI string to wide");
 
-				// Create missing folders
-				while (!::PathIsDirectoryA(path.parent().toString(Poco::Path::Style::PATH_WINDOWS).c_str()))
+			// Create missing folders
+			while (!::PathIsDirectoryA(path.parent().toString(Poco::Path::Style::PATH_WINDOWS).c_str()))
+			{
+				// Find first missing folder.
+				Poco::Path dir = path.parent();
+				while (!::PathIsDirectoryA(dir.parent().toString(Poco::Path::Style::PATH_WINDOWS).c_str()) && !::PathIsRootA(dir.parent().toString(Poco::Path::Style::PATH_WINDOWS).c_str()))
 				{
-					// Find first missing folder.
-					Poco::Path dir = path.parent();
-					while (!::PathIsDirectoryA(dir.parent().toString(Poco::Path::Style::PATH_WINDOWS).c_str()) && !::PathIsRootA(dir.parent().toString(Poco::Path::Style::PATH_WINDOWS).c_str()))
-					{
-						dir = dir.parent();
-					}
-
-					std::string dirA = dir.toString(Poco::Path::Style::PATH_WINDOWS);
-					WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating sub-folder '%s'", dirA.c_str());
-					bRes = ::CreateDirectoryA(dirA.c_str(), nullptr);
-					ExitOnNullWithLastError((bRes || (::GetLastError() == ERROR_ALREADY_EXISTS)), hr, "Failed creating folder '%s'", dirA.c_str());
+					dir = dir.parent();
 				}
+
+				std::string dirA = dir.toString(Poco::Path::Style::PATH_WINDOWS);
+				WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating sub-folder '%s'", dirA.c_str());
+				bRes = ::CreateDirectoryA(dirA.c_str(), nullptr);
+				ExitOnNullWithLastError((bRes || (::GetLastError() == ERROR_ALREADY_EXISTS)), hr, "Failed creating folder '%s'", dirA.c_str());
+			}
 
 			if (FileExistsEx(szDstFile, nullptr))
 			{

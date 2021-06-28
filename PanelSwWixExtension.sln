@@ -47,6 +47,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{096EB3BA-5DCA-4121-8407-C93F31997339}"
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
+		.github\workflows\github-actions-build.yml = .github\workflows\github-actions-build.yml
 		nuget.config = nuget.config
 		Nuget\PanelSwWixExtension.props = Nuget\PanelSwWixExtension.props
 		README.md = README.md

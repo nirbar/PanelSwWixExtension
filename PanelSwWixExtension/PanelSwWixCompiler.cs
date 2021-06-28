@@ -4237,7 +4237,10 @@ namespace PanelSw.Wix.Extensions
             OverwriteMask = 0x3,
 
             // Delete ZIP after extract
-            Delete = 0x10
+            Delete = 0x10,
+
+            // 
+            CreateRoot = 0x20,
         };
 
         private void ParseUnzip(XmlNode node)
@@ -4247,7 +4250,7 @@ namespace PanelSw.Wix.Extensions
             string zipFile = null;
             string dstDir = null;
             string condition = null;
-            UnzipFlags flags = UnzipFlags.Unmodified;
+            UnzipFlags flags = UnzipFlags.Unmodified | UnzipFlags.CreateRoot;
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -4263,6 +4266,15 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "TargetFolder":
                             dstDir = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "CreateRootFolder":
+                            {
+                                YesNoType aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                                if (aye == YesNoType.No)
+                                {
+                                    flags &= ~UnzipFlags.CreateRoot;
+                                }
+                            }
                             break;
                         case "DeleteZip":
                             {
