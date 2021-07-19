@@ -1,5 +1,6 @@
 #include "FileOperations.h"
 #include <strutil.h>
+#include <pathutil.h>
 #include "../CaCommon/WixString.h"
 #include <Shellapi.h>
 #include <Shlwapi.h>
@@ -19,8 +20,6 @@ extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall) noexcept
 	CFileOperations rollbackCAD;
 	CFileOperations deferredCAD;
 	CFileOperations commitCAD;
-	WCHAR shortTempPath[MAX_PATH + 1];
-	WCHAR longTempPath[MAX_PATH + 1];
 	DWORD dwRes = 0;
 	LPWSTR szCustomActionData = nullptr;
 
@@ -36,15 +35,6 @@ extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall) noexcept
 	hr = WcaOpenExecuteView(BackupAndRestore_QUERY, &hView);
 	ExitOnFailure(hr, "Failed to execute SQL query '%ls'.", BackupAndRestore_QUERY);
 
-	// Get temporay folder
-	dwRes = ::GetTempPath(MAX_PATH, shortTempPath);
-	ExitOnNullWithLastError(dwRes, hr, "Failed getting temporary folder");
-	ExitOnNull((dwRes <= MAX_PATH), hr, E_FAIL, "Temporary folder path too long");
-
-	dwRes = ::GetLongPathName(shortTempPath, longTempPath, MAX_PATH + 1);
-	ExitOnNullWithLastError(dwRes, hr, "Failed expanding temporary folder");
-	ExitOnNull((dwRes <= MAX_PATH), hr, E_FAIL, "Temporary folder expanded path too long");
-
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
@@ -52,7 +42,7 @@ extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall) noexcept
 
 		// Get fields
 		CWixString szId, szPath, szComponent;
-		WCHAR szTempFile[MAX_PATH + 1];
+		CWixString szTempFile;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
 		int flags = 0;
 		bool bIgnoreMissing;
@@ -77,8 +67,8 @@ extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall) noexcept
 		}
 
 		// Generate temp file name.
-		dwRes = ::GetTempFileName(longTempPath, L"BNR", 0, szTempFile);
-		ExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
+		hr = PathCreateTempFile(nullptr, L"BNR%05i.tmp", INFINITE, FILE_ATTRIBUTE_NORMAL, (LPWSTR*)szTempFile, nullptr);
+		ExitOnFailure(hr, "Failed getting temporary file name");
 
 		bIsFolder = ::PathIsDirectory(szPath);
 		if (bIsFolder) // For folders, we'll delete the file that holds the same name. For files, we'll simply overwrite.

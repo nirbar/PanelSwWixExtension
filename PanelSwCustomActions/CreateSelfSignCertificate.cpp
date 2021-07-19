@@ -1,5 +1,6 @@
 #include "stdafx.h"
 #include <WixString.h>
+#include <pathutil.h>
 #include <memutil.h>
 #include <Wincrypt.h>
 #include "FileOperations.h"
@@ -32,7 +33,6 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall) noexcept
 	CERT_EXTENSIONS extArray;
 	HANDLE hFile = INVALID_HANDLE_VALUE;
 	DWORD dwRes = ERROR_SUCCESS;
-	WCHAR szTempPath[MAX_PATH + 1];
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
 	SYSTEMTIME startTime;
@@ -69,9 +69,6 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall) noexcept
 	bRes = ::SystemTimeToFileTime(&startTime, &startFileTime);
 	ExitOnNullWithLastError(bRes, hr, "Failed converting SYSTEMTIME: %i-%i-%i %i:%i:%i", startTime.wYear, startTime.wMonth, startTime.wDay, startTime.wHour, startTime.wMinute, startTime.wMonth);
 
-	dwRes = ::GetTempPath(MAX_PATH, szTempPath);
-	ExitOnNullWithLastError(dwRes, hr, "Failed getting temporary folder");
-
 	::CryptAcquireContext(&hCrypt, CERT_CONTAINER, nullptr, PROV_RSA_FULL, CRYPT_DELETEKEYSET | CRYPT_SILENT); // Make sure the container is removed
 
 	bRes = ::CryptAcquireContext(&hCrypt, CERT_CONTAINER, nullptr, PROV_RSA_FULL, CRYPT_NEWKEYSET | CRYPT_SILENT);
@@ -88,7 +85,7 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall) noexcept
 	{
 		ExitOnFailure(hr, "Failed to fetch record.");
 		
-		WCHAR szFile[MAX_PATH + 1];
+		CWixString szFile;
 		SYSTEMTIME endTime;
 		FILETIME endFileTime;
 		CWixString x500; // Signed to, i.e. "CN=Panel-SW.com"
@@ -191,8 +188,8 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall) noexcept
 		bRes = ::PFXExportCertStoreEx(hStore, &cryptBlob, password, nullptr, EXPORT_PRIVATE_KEYS | REPORT_NOT_ABLE_TO_EXPORT_PRIVATE_KEY | REPORT_NO_PRIVATE_KEY);
 		ExitOnNullWithLastError(bRes, hr, "Failed exporting certificate memory store");
 
-		dwRes = ::GetTempFileName(szTempPath, L"PFX", 0, szFile);
-		ExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
+		hr = PathCreateTempFile(nullptr, L"PFX%05i.tmp", INFINITE, FILE_ATTRIBUTE_NORMAL, (LPWSTR*)szFile, nullptr);
+		ExitOnFailure(hr, "Failed getting temporary file name");
 
 		if (deleteOnCommit)
 		{

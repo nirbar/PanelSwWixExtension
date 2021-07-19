@@ -1,5 +1,8 @@
 name: PanelSwWixExtension
-on: [push]
+on:
+  create:
+    tags:
+      - v*
 jobs:
   PanelSwWixExtension-Build:
     runs-on: windows-latest

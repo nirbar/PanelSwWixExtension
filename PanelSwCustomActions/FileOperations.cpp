@@ -1,5 +1,6 @@
 #include "FileOperations.h"
 #include "../CaCommon/WixString.h"
+#include <pathutil.h>
 #include <Shellapi.h>
 #include <Shlwapi.h>
 #include "fileOperationsDetails.pb.h"
@@ -18,8 +19,6 @@ extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall) noexcept
 	CFileOperations rollbackCAD;
 	CFileOperations deferredFileCAD;
 	CFileOperations commitCAD;
-	WCHAR shortTempPath[MAX_PATH + 1];
-	WCHAR longTempPath[MAX_PATH + 1];
 	DWORD dwRes = 0;
 	LPWSTR szCustomActionData = nullptr;
 
@@ -34,15 +33,6 @@ extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall) noexcept
 	// Execute view
 	hr = WcaOpenExecuteView(DeletePath_QUERY, &hView);
 	ExitOnFailure(hr, "Failed to execute SQL query '%ls'.", DeletePath_QUERY);
-
-	// Get temporay folder
-	dwRes = ::GetTempPath(MAX_PATH, shortTempPath);
-	ExitOnNullWithLastError(dwRes, hr, "Failed getting temporary folder");
-	ExitOnNull((dwRes <= MAX_PATH), hr, E_FAIL, "Temporary folder path too long");
-
-	dwRes = ::GetLongPathName(shortTempPath, longTempPath, MAX_PATH + 1);
-	ExitOnNullWithLastError(dwRes, hr, "Failed expanding temporary folder");
-	ExitOnNull((dwRes <= MAX_PATH), hr, E_FAIL, "Temporary folder expanded path too long");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
@@ -82,11 +72,8 @@ extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall) noexcept
 		}
 
 		// Generate temp file name.
-		hr = tempFile.Allocate(MAX_PATH + 1);
-		ExitOnFailure(hr, "Failed allocating memory");
-
-		dwRes = ::GetTempFileName(longTempPath, L"DLT", 0, (LPWSTR)tempFile);
-		ExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
+		hr = PathCreateTempFile(nullptr, L"DLT%05i.tmp", INFINITE, FILE_ATTRIBUTE_NORMAL, (LPWSTR*)tempFile, nullptr);
+		ExitOnFailure(hr, "Failed getting temporary file name");
 
 		hr = rollbackCAD.AddDeleteFile((LPCWSTR)szFilePath, flags | CFileOperations::FileOperationsAttributes::IgnoreMissingPath); // Delete the target path. Done for case where the source is folder rather than file.
 		ExitOnFailure(hr, "Failed creating custom action data for deferred file action.");

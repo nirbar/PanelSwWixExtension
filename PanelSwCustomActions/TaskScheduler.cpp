@@ -1,4 +1,5 @@
 #include "TaskScheduler.h"
+#include <pathutil.h>
 #include "../CaCommon/WixString.h"
 #include "taskSchedulerDetails.pb.h"
 using namespace ::com::panelsw::ca;
@@ -212,16 +213,12 @@ HRESULT CTaskScheduler::AddRollbackTask(LPCWSTR szTaskName, CTaskScheduler* pRol
 	if (hr == E_ACCESSDENIED)
 	{
 		CComPtr<IXMLDOMElement> pElem;
-		WCHAR szTempFolder[MAX_PATH];
-		WCHAR szBackupFile[MAX_PATH];
+		CWixString szBackupFile;
 		DWORD dwRes = ERROR_SUCCESS;
 
 		// Get temp folder
-		dwRes = ::GetTempPath(MAX_PATH, szTempFolder);
-		ExitOnNullWithLastError(dwRes, hr, "Failed getting temporary folder");
-
-		dwRes = ::GetTempFileName(szTempFolder, L"TSK", 0, szBackupFile);
-		ExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
+		hr = PathCreateTempFile(nullptr, L"TSK%05i.tmp", INFINITE, FILE_ATTRIBUTE_NORMAL, (LPWSTR*)szBackupFile, nullptr);
+		ExitOnFailure(hr, "Failed getting temporary file name");
 
 		hr = AddBackupTask(szTaskName, szBackupFile);
 		ExitOnFailure(hr, "Failed setting action data to backup task");

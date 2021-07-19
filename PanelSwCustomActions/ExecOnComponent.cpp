@@ -5,6 +5,7 @@
 #include <regex>
 #include <wcautil.h>
 #include <memutil.h>
+#include <pathutil.h>
 #include <shlwapi.h>
 #include <procutil.h>
 #include "google\protobuf\any.h"
@@ -58,10 +59,7 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall) noexcept
 	CFileOperations commitCAD;
 	BYTE* pbData = nullptr;
 	DWORD cbData = 0;
-	WCHAR shortTempPath[MAX_PATH + 1];
-	WCHAR longTempPath[MAX_PATH + 1];
 	DWORD dwRes = 0;
-	WCHAR szTempFile[MAX_PATH + 1];
 	HANDLE hFile = INVALID_HANDLE_VALUE;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
@@ -77,15 +75,6 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall) noexcept
 	ExitOnFailure((hr == S_OK), "Table does not exist 'PSW_ExecOnComponent_Environment'. Have you authored 'PanelSw:ExecOnComponent' entries in WiX code?");
 	hr = WcaTableExists(L"PSW_ExecOn_ConsoleOutput");
 	ExitOnFailure((hr == S_OK), "Table does not exist 'PSW_ExecOn_ConsoleOutput'. Have you authored 'PanelSw:ExecOnComponent' entries in WiX code?");
-
-	// Get temporay folder
-	dwRes = ::GetTempPath(MAX_PATH, shortTempPath);
-	ExitOnNullWithLastError(dwRes, hr, "Failed getting temporary folder");
-	ExitOnNull((dwRes <= MAX_PATH), hr, E_FAIL, "Temporary folder path too long");
-
-	dwRes = ::GetLongPathName(shortTempPath, longTempPath, MAX_PATH + 1);
-	ExitOnNullWithLastError(dwRes, hr, "Failed expanding temporary folder");
-	ExitOnNull((dwRes <= MAX_PATH), hr, E_FAIL, "Temporary folder expanded path too long");
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `Binary_`, `Command`, `WorkingDirectory`, `Flags`, `ErrorHandling`, `User_` FROM `PSW_ExecOnComponent` ORDER BY `Order`", &hView);
@@ -103,6 +92,7 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall) noexcept
 		CWixString szId, szComponent, szBinary, szCommand, szCommandFormat, workDir;
 		CWixString userId, domain, user, password;
 		CWixString szSubQuery;
+		CWixString szTempFile;
 		int nFlags = 0;
 		int errorHandling = ErrorHandling::fail;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
@@ -148,8 +138,8 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall) noexcept
 			hSubRecord = NULL;
 			hSubView = NULL;
 
-			dwRes = ::GetTempFileName(longTempPath, L"EXE", 0, szTempFile);
-			ExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
+			hr = PathCreateTempFile(nullptr, L"EXE%05i.tmp", INFINITE, FILE_ATTRIBUTE_NORMAL, (LPWSTR*)szTempFile, nullptr);
+			ExitOnFailure(hr, "Failed getting temporary file name");
 
 			szExtension = ::PathFindExtension((LPCWSTR)szBinary);
 			if (szExtension && *szExtension)
