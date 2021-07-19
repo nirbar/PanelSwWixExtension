@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
+  <Product Id="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}" Name="RegexUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate />
+
+    <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
+      <Component Directory="INSTALLFOLDER">
+        <File Source="$(sys.SOURCEFILEPATH)">
+          <PanelSW:FileRegex Regex="\bRegularExpressio(\w)\b" Replacement="$1_RegularExpressio" IgnoreCase="no"/>
+          <PanelSW:FileRegex Regex="&lt;!-(-.*-)-&gt;" Replacement="- Hi $1 -" IgnoreCase="no" Condition="SKIP_ME"/>
+        </File>
+      </Component>
+      <Component Directory="INSTALLFOLDER">
+        <File Source="$(var.ProjectDir)Unicode.ini">
+          <PanelSW:FileRegex Regex="\[BSMALL]=" Replacement="[MB460]" Encoding="AutoDetect"/>
+        </File>
+      </Component>
+    </Feature>
+    <PanelSW:FileRegex FilePath="[SOMEWHERE]" Regex="\bCurrentMappingFile=" Replacement="[NEWMAPPINGFILE]" Encoding="Unicode" Condition="SOMEWHERE"/>
+    <PanelSW:FileRegex FilePath="[INSTALLFOLDER]RegexUT.wxs" Regex="$$(?![\[]\r\n[\]])" Replacement="new file end" Order="1" Condition="$RegexUT.wxs >= 3"/>
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+      </Directory>
+    </Directory>
+
+    <Property Id="MSIFASTINSTALL" Value="1"></Property>
+
+    <Property Id="MY_INPUT" Value="Test Text" />
+    <Property Id="REGEX_MATCH">
+      <PanelSW:RegularExpression Input="My Input is [MY_INPUT]"
+                                 Expression="is (.*)"/>
+    </Property>
+    <PanelSW:RegularExpression Input="My Input is [MY_INPUT]"
+                               DstProperty="REGEX_REPLACE"
+                               Replacement="IS YOUR INPUT"
+                               IgnoreCase="yes"
+                               Expression="\bIS\b\s+(.*)" Order="0"
+                               />
+    <PanelSW:RegularExpression Input="My Input is [MY_INPUT]"
+                               DstProperty="REGEX_REPLACE_3"
+                               Replacement="IS YOUR INPUT"
+                               IgnoreCase="yes"
+                               Expression="\bS\b\s+(.*)"
+                               />
+    <PanelSW:RegularExpression Input="[REGEX_REPLACE]"
+                               DstProperty="REGEX_REPLACE"
+                               Replacement="OUR"
+                               Expression="YOUR" Order="1"
+                               />
+    <PanelSW:RegularExpression FilePath="[System64Folder]drivers\etc\hosts"
+                               DstProperty="HOSTS"
+                               Expression=".*127\.0\.0\.1.*"
+                               />
+    <CustomAction Id="TextRegexMatch" Error="REGEX_MATCH_1 Should be '[MY_INPUT]'" Execute="immediate" />
+    <CustomAction Id="TextRegexReplace" Error="REGEX_REPLACE Should be 'My Input IS OUR INPUT'" Execute="immediate" />
+    <CustomAction Id="TextRegexReplace2" Error="REGEX_REPLACE_3 Should be 'My Input is Test Text'" Execute="immediate" />
+    <InstallUISequence>
+      <Custom Action="TextRegexMatch" After="RegularExpression"><![CDATA[REGEX_MATCH_1<>MY_INPUT]]></Custom>
+      <Custom Action="TextRegexReplace" After="TextRegexMatch"><![CDATA[REGEX_REPLACE<>"My Input IS OUR INPUT"]]></Custom>
+      <Custom Action="TextRegexReplace2" After="TextRegexMatch"><![CDATA[REGEX_REPLACE_3<>"My Input is Test Text"]]></Custom>
+    </InstallUISequence>
+
+    <Property Id="MB460" Value="MB460=" Hidden="yes"/>
+    <Property Id="BSMALL" Value="bSmall" Hidden="yes"/>
+    <Property Id="NEWMAPPINGFILE" Value="NewMappingFile=" />
+  </Product>
+</Wix>

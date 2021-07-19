@@ -9,9 +9,9 @@ public:
 
 	CFileRegex() noexcept : CDeferredActionBase("FileRegex") { }
 
-	HRESULT AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, ::com::panelsw::ca::FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase) noexcept;
+	HRESULT AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, LPCWSTR szRegexObfuscated, LPCWSTR szReplacementObfuscated, ::com::panelsw::ca::FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase) noexcept;
 
-	HRESULT Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, ::com::panelsw::ca::FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase) noexcept;
+	HRESULT Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, LPCWSTR szRegexObfuscated, LPCWSTR szReplacementObfuscated, ::com::panelsw::ca::FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase) noexcept;
 
 protected:
 	

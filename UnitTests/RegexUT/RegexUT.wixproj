@@ -18,7 +18,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Product.wxs" />
+    <Compile Include="RegexUT.wxs" />
   </ItemGroup>
   <ItemGroup>
     <WixExtension Include="PanelSwWixExtension">

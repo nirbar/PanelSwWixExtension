@@ -199,9 +199,7 @@ static HRESULT ReplaceStrings(LPCWSTR szXslPath, LPCWSTR szXslId) noexcept
 
 		if (!szText.IsNullOrEmpty())
 		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Replacing regex '%ls' with '%ls' in XSL transform", (LPCWSTR)szTextObf, (LPCWSTR)szReplacementObf);
-
-			hr = fileRegex.Execute(szXslPath, szText, szReplacement, com::panelsw::ca::FileRegexDetails_FileEncoding::FileRegexDetails_FileEncoding_None, false);
+			hr = fileRegex.Execute(szXslPath, szText, szReplacement, szTextObf, szReplacementObf, com::panelsw::ca::FileRegexDetails_FileEncoding::FileRegexDetails_FileEncoding_None, false);
 			ExitOnFailure(hr, "Failed to replace strings in SQL script.");
 		}
 	}

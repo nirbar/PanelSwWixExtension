@@ -2,7 +2,9 @@
 #include "FileOperations.h"
 #include "../CaCommon/WixString.h"
 #include <regex>
+#include <dictutil.h>
 #include <memutil.h>
+#include <pathutil.h>
 using namespace std;
 using namespace ::com::panelsw::ca;
 using namespace google::protobuf;
@@ -15,12 +17,11 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall) noexcept
 	UINT er = ERROR_SUCCESS;
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
+	STRINGDICT_HANDLE hPrevFiles = nullptr;
 	CFileRegex oDeferredFileRegex;
 	CFileOperations rollbackCAD;
 	CFileOperations deferredFileCAD;
 	CFileOperations commitCAD;
-	WCHAR shortTempPath[MAX_PATH + 1];
-	WCHAR longTempPath[MAX_PATH + 1];
 	LPWSTR szCustomActionData = nullptr;
 	DWORD dwRes = 0;
 
@@ -32,18 +33,12 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall) noexcept
 	hr = WcaTableExists(L"PSW_FileRegex");
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_FileRegex'. Have you authored 'PanelSw:FileRegex' entries in WiX code?");
 
-	// Get temporary folder
-	dwRes = ::GetTempPath(MAX_PATH, shortTempPath);
-	ExitOnNullWithLastError(dwRes, hr, "Failed getting temporary folder");
-	ExitOnNull((dwRes <= MAX_PATH), hr, E_FAIL, "Temporary folder path too long");
-
-	dwRes = ::GetLongPathName(shortTempPath, longTempPath, MAX_PATH + 1);
-	ExitOnNullWithLastError(dwRes, hr, "Failed expanding temporary folder");
-	ExitOnNull((dwRes <= MAX_PATH), hr, E_FAIL, "Temporary folder expanded path too long");
-
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `Component_`, `File_`, `FilePath`, `Regex`, `Replacement`, `IgnoreCase`, `Encoding`, `Condition` FROM `PSW_FileRegex` ORDER BY `Order`", &hView);
 	ExitOnFailure(hr, "Failed to execute SQL query.");
+
+	hr = DictCreateStringList(&hPrevFiles, 100, DICT_FLAG::DICT_FLAG_CASEINSENSITIVE);
+	ExitOnFailure(hr, "Failed to create string-dictionary.");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
@@ -53,7 +48,6 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall) noexcept
 		// Get fields
 		CWixString szComponent, szFileId, szFileFormat, szFilePath, szRegexUnformatted, szReplacementUnformatted, szCondition;
 		CWixString szRegex, szRegexObfuscated, szReplacement, szReplacementObfuscated;
-		CWixString tempFile;
 		int nIgnoreCase = 0;
 		int nEncoding = 0;
 
@@ -109,25 +103,34 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall) noexcept
 
 		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Will replace matches of regex '%ls' with '%ls' on file '%ls'", (LPCWSTR)szRegexObfuscated, (LPCWSTR)szReplacementObfuscated, (LPCWSTR)szFilePath);
 
-		// Generate temp file name.
-		hr = tempFile.Allocate(MAX_PATH + 1);
-		ExitOnFailure(hr, "Failed allocating memory");
-
-		dwRes = ::GetTempFileName(longTempPath, L"RGX", 0, (LPWSTR)tempFile);
-		ExitOnNullWithLastError(dwRes, hr, "Failed getting temporary file name");
-
-		hr = rollbackCAD.AddMoveFile((LPCWSTR)tempFile, szFilePath);
-		ExitOnFailure(hr, "Failed creating custom action data for rollback action.");
-
-		// Add deferred data to copy file szFilePath -> tempFile.
-		hr = deferredFileCAD.AddCopyFile(szFilePath, (LPCWSTR)tempFile);
-		ExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
-
-		hr = oDeferredFileRegex.AddFileRegex(szFilePath, szRegex, szReplacement, (FileRegexDetails::FileEncoding)nEncoding, nIgnoreCase != 0);
+		hr = oDeferredFileRegex.AddFileRegex(szFilePath, szRegex, szReplacement, szRegexObfuscated, szReplacementObfuscated, (FileRegexDetails::FileEncoding)nEncoding, nIgnoreCase != 0);
 		ExitOnFailure(hr, "Failed creating custom action data for deferred action.");
 
-		hr = commitCAD.AddDeleteFile((LPCWSTR)tempFile);
-		ExitOnFailure(hr, "Failed creating custom action data for commit action.");
+		// Once per file: Backup it up before applying replacements; Restore on failure; Delete on commit.
+		hr = DictKeyExists(hPrevFiles, szFilePath);
+		if (hr != E_NOTFOUND)
+		{
+			ExitOnFailure(hr, "Failed searching file in index");
+		}
+		else
+		{
+			CWixString tempFile;
+
+			hr = PathCreateTempFile(nullptr, L"RGX%05i.tmp", INFINITE, FILE_ATTRIBUTE_NORMAL, (LPWSTR*)tempFile, nullptr);
+			ExitOnFailure(hr, "Failed getting temporary file name");
+
+			hr = rollbackCAD.AddMoveFile((LPCWSTR)tempFile, szFilePath);
+			ExitOnFailure(hr, "Failed creating custom action data for rollback action.");
+
+			hr = deferredFileCAD.AddCopyFile(szFilePath, (LPCWSTR)tempFile);
+			ExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
+
+			hr = commitCAD.AddDeleteFile((LPCWSTR)tempFile);
+			ExitOnFailure(hr, "Failed creating custom action data for commit action.");
+
+			hr = DictAddKey(hPrevFiles, szFilePath);
+			ExitOnFailure(hr, "Failed indexing file path");
+		}
 	}
 
 	hr = rollbackCAD.GetCustomActionData(&szCustomActionData);
@@ -151,6 +154,8 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall) noexcept
 
 LExit:
 	ReleaseStr(szCustomActionData);
+	DictDestroy(hPrevFiles);
+
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
 }
@@ -194,7 +199,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CFileRegex::AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase) noexcept
+HRESULT CFileRegex::AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, LPCWSTR szRegexObfuscated, LPCWSTR szReplacementObfuscated, FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase) noexcept
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command* pCmd = nullptr;
@@ -210,7 +215,9 @@ HRESULT CFileRegex::AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR sz
 
 	pDetails->set_file(szFilePath, WSTR_BYTE_SIZE(szFilePath));
 	pDetails->set_expression(szRegex, WSTR_BYTE_SIZE(szRegex));
+	pDetails->set_expressionobfuscated(szRegexObfuscated, WSTR_BYTE_SIZE(szRegexObfuscated));
 	pDetails->set_replacement(szReplacement, WSTR_BYTE_SIZE(szReplacement));
+	pDetails->set_replacementobfuscated(szReplacementObfuscated, WSTR_BYTE_SIZE(szReplacementObfuscated));
 	pDetails->set_encoding(eEncoding);
 	pDetails->set_ignorecase(bIgnoreCase);
 
@@ -232,6 +239,8 @@ HRESULT CFileRegex::DeferredExecute(const ::std::string& command) noexcept
 	LPCWSTR szFile = nullptr;
 	LPCWSTR szExpression = nullptr;
 	LPCWSTR szReplacement = nullptr;
+	LPCWSTR szRegexObfuscated = nullptr;
+	LPCWSTR szReplacementObfuscated = nullptr;
 
 	bRes = details.ParseFromString(command);
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking FileOperationsDetails");
@@ -239,15 +248,17 @@ HRESULT CFileRegex::DeferredExecute(const ::std::string& command) noexcept
 	szFile = (LPCWSTR)details.file().data();
 	szExpression = (LPCWSTR)details.expression().data();
 	szReplacement = (LPCWSTR)details.replacement().data();
+	szRegexObfuscated = (LPCWSTR)details.expressionobfuscated().data();
+	szReplacementObfuscated = (LPCWSTR)details.replacementobfuscated().data();
 
-	hr = Execute(szFile, szExpression, szReplacement, details.encoding(), details.ignorecase());
+	hr = Execute(szFile, szExpression, szReplacement, szRegexObfuscated, szReplacementObfuscated, details.encoding(), details.ignorecase());
 	ExitOnFailure(hr, "Failed to execute file regular expression");
 
 LExit:
 	return hr;
 }
 
-HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase) noexcept
+HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, LPCWSTR szRegexObfuscated, LPCWSTR szReplacementObfuscated, FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase) noexcept
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -257,6 +268,8 @@ HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szRepla
 	HANDLE hFile = INVALID_HANDLE_VALUE;
 	void* pFileContents = nullptr;
 	FileRegexDetails::FileEncoding eDetectedEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_None;
+
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Replacing regex '%ls' matches with '%ls' in file '%ls'", szRegexObfuscated, szReplacementObfuscated, szFilePath);
 
 	hFile = ::CreateFile(szFilePath, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 	ExitOnNullWithLastError((hFile != INVALID_HANDLE_VALUE), hr, "Failed opening file");
