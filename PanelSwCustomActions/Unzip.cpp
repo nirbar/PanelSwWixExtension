@@ -236,11 +236,8 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command) noexcept
 
 					pathA = szSrcFileA;
 
-					bRes = ::MoveFileExW(szSrcFile, szDstFile, MOVEFILE_DELAY_UNTIL_REBOOT);
+					bRes = ::MoveFileExW(szSrcFile, szDstFile, MOVEFILE_DELAY_UNTIL_REBOOT | MOVEFILE_REPLACE_EXISTING);
 					ExitOnNullWithLastError(bRes, hr, "Failed deferring file copy to after reboot");
-
-					// Delete the file after copying it, but no need to fail on error here
-					::MoveFileExW(szSrcFile, nullptr, MOVEFILE_DELAY_UNTIL_REBOOT);
 
 					hr = WcaDeferredActionRequiresReboot();
 					ExitOnFailure(hr, "Failed requiring reboot");

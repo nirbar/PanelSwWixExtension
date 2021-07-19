@@ -1,6 +1,6 @@
 name: PanelSwWixExtension
 on:
-  create:
+  push:
     tags:
       - v*
 jobs:
