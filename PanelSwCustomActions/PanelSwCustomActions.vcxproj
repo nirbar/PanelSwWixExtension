@@ -68,6 +68,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="AccountNames.cpp" />
+    <ClCompile Include="CheckRebootRequired.cpp" />
     <ClCompile Include="ForceVersion.cpp" />
     <ClCompile Include="AccountSidSearch.cpp" />
     <ClCompile Include="BackupAndRestore.cpp" />

@@ -45,3 +45,4 @@ EXPORTS
 	PathSearch
 	XslTransform
 	ToLowerCase
+	CheckRebootRequired

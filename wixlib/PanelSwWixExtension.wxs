@@ -295,7 +295,7 @@
     <CustomAction Id="ExecOnComponent_Imp_BeforeStart_deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" HideTarget="yes" />
     <CustomAction Id="ExecOnComponent_Imp_AfterStart_rollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" HideTarget="yes" />
     <CustomAction Id="ExecOnComponent_Imp_AfterStart_deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" HideTarget="yes" />
-    <CustomActionRef Id="WixCheckRebootRequired"/>
+    <CustomActionRef Id="PSW_CheckRebootRequired"/>
 
     <InstallExecuteSequence>
       <Custom Action="ExecOnComponent" Before="InstallInitialize" Overridable="yes"/>
@@ -349,6 +349,7 @@
     <CustomAction Id="DismSched" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="DismSched" Execute="immediate"/>
     <CustomAction Id="DismX86" SuppressModularization="yes" BinaryKey="DismX86.dll" DllEntry="Dism" Execute="deferred" Impersonate="no" HideTarget="yes"/>
     <CustomAction Id="DismX64" SuppressModularization="yes" BinaryKey="DismX64.dll" DllEntry="Dism" Execute="deferred" Impersonate="no" HideTarget="yes"/>
+    <CustomActionRef Id="PSW_CheckRebootRequired"/>
 
     <InstallExecuteSequence>
       <Custom Action="DismSched" Before="StopServices" Overridable="yes"><![CDATA[(VersionNT > 601)]]></Custom>
@@ -397,6 +398,7 @@
   <Fragment>
     <CustomAction Id="UnzipSched" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="Unzip" Execute="immediate"/>
     <CustomAction Id="UnzipExec" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" />
+    <CustomActionRef Id="PSW_CheckRebootRequired"/>
 
     <InstallExecuteSequence>
       <Custom Action="UnzipSched" After="DuplicateFiles" Overridable="yes"/>
@@ -412,7 +414,7 @@
     <CustomAction Id="PSW_ServiceConfig" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="ServiceConfig" Execute="immediate"/>
     <CustomAction Id="PSW_ServiceConfigRlbk" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" HideTarget="yes"/>
     <CustomAction Id="PSW_ServiceConfigExec" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes"/>
-    <CustomActionRef Id="WixCheckRebootRequired"/>
+    <CustomActionRef Id="PSW_CheckRebootRequired"/>
 
     <InstallExecuteSequence>
       <Custom Action="PSW_ServiceConfig" After="InstallServices" Overridable="yes"/>
@@ -742,6 +744,17 @@
     </InstallExecuteSequence>
     <UI>
       <ProgressText Action="PSW_ToLowerCase">!(loc.PSW_ToLowerCase)</ProgressText>
+    </UI>
+  </Fragment>
+
+  <Fragment>
+    <CustomAction Id="PSW_CheckRebootRequired" BinaryKey="PanelSwCustomActions.dll" DllEntry="CheckRebootRequired" Execute="immediate" Return="ignore" SuppressModularization="yes" />
+
+    <InstallExecuteSequence>
+      <Custom Action="PSW_CheckRebootRequired" After="InstallFinalize" Overridable="yes"><![CDATA[VersionNT > 400]]></Custom>
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="PSW_CheckRebootRequired">!(loc.PSW_CheckRebootRequired)</ProgressText>
     </UI>
   </Fragment>
 

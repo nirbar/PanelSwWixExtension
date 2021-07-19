@@ -47,6 +47,7 @@
   <String Overridable="yes" Id="PSW_PathSearch"><![CDATA[חיפוש קבצים במשתנה סביבה PATH]]></String>
   <String Overridable="yes" Id="PSW_XslTransform"><![CDATA[עדכון קבצי XML]]></String>
   <String Overridable="yes" Id="PSW_ToLowerCase"><![CDATA[ממיר לאותיות קטנות]]></String>
+  <String Overridable="yes" Id="PSW_CheckRebootRequired"><![CDATA[בדיקת הצורך באתחול]]></String>
   <String Overridable="yes" Id="JsonJpathFailure">
     <![CDATA[שגיאה בכתיבת ערך JsonJpath '[2]' ל- '[3]' בקובץ '[4]'.
 [5]]]>
