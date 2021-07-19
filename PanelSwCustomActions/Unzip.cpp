@@ -6,6 +6,8 @@
 #include "..\poco\Foundation\include\Poco\Delegate.h"
 #include "..\poco\Foundation\include\Poco\StreamCopier.h"
 #include "unzipDetails.pb.h"
+#include <memutil.h>
+#include <pathutil.h>
 #include <fileutil.h>
 #include <Windows.h>
 #include <fstream>
@@ -134,6 +136,8 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command) noexcept
 	std::string zipFileA;
 	std::string targetFolderA;
 	std::istream* zipFileStream = nullptr;
+	LPSTR szSrcFileA = nullptr;
+	LPWSTR szSrcFile = nullptr;
 	LPWSTR szDstFile = nullptr;
 
 	bRes = details.ParseFromString(command);
@@ -198,6 +202,13 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command) noexcept
 				ExitOnNullWithLastError((bRes || (::GetLastError() == ERROR_ALREADY_EXISTS)), hr, "Failed creating folder '%s'", dirA.c_str());
 			}
 
+			if (it->second.isDirectory())
+			{
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Creating folder '%s'", pathA.c_str());
+				::CreateDirectoryA(pathA.c_str(), nullptr); // Ignore failure to create empty folders. Folders with files will fail when extracting the files.
+				continue;
+			}
+
 			if (FileExistsEx(szDstFile, nullptr))
 			{
 				hr = ShouldOverwriteFile(szDstFile, details.flags());
@@ -212,6 +223,25 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command) noexcept
 				ExitOnNullWithLastError(bRes, hr, "Failed clearing attributes of '%s'", pathA.c_str());
 
 				bRes = ::DeleteFileA(pathA.c_str());
+				if (!bRes && ((::GetLastError() == ERROR_ACCESS_DENIED) || (::GetLastError() == ERROR_SHARING_VIOLATION) || (::GetLastError() == ERROR_LOCK_VIOLATION)))
+				{
+					WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Extraction of '%s' requires reboot", pathA.c_str());
+					bRes = true;
+
+					hr = PathCreateTempFile(nullptr, L"UZP%05i.tmp", INFINITE, FILE_ATTRIBUTE_NORMAL, &szSrcFile, nullptr);
+					ExitOnFailure(hr, "Failed creating temporary file");
+
+					hr = StrAnsiAllocString(&szSrcFileA, szSrcFile, 0, CP_UTF8);
+					ExitOnFailure(hr, "Failed copying UTF-8 string");
+
+					pathA = szSrcFileA;
+
+					bRes = ::MoveFileExW(szSrcFile, szDstFile, MOVEFILE_DELAY_UNTIL_REBOOT);
+					ExitOnNullWithLastError(bRes, hr, "Failed deferring file copy to after reboot");
+
+					hr = WcaDeferredActionRequiresReboot();
+					ExitOnFailure(hr, "Failed requiring reboot");
+				}
 				ExitOnNullWithLastError(bRes, hr, "Failed deleting '%s'", pathA.c_str());
 			}
 
@@ -231,6 +261,8 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command) noexcept
 				SetFileTimes(pathA.c_str(), it->second.getExtraField());
 			}
 			ReleaseNullStr(szDstFile);
+			ReleaseNullStr(szSrcFile);
+			ReleaseNullMem(szSrcFileA);
 		}
 
 		// Release stream so we can delete the zip file
@@ -275,7 +307,10 @@ LExit:
 	{
 		delete zipFileStream;
 	}
+	ReleaseStr(szSrcFile);
 	ReleaseStr(szDstFile);
+	ReleaseNullMem(szSrcFileA);
+	
 	return hr;
 }
 
@@ -410,21 +445,21 @@ HRESULT CUnzip::ShouldOverwriteFile(LPCWSTR szFile, UnzipDetails_UnzipFlags flag
 	{
 	case UnzipDetails::UnzipFlags::UnzipDetails_UnzipFlags_never:
 	default:
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will not overwrite '%s' due to NeverOverwrite flag", szFile);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will not overwrite '%ls' due to NeverOverwrite flag", szFile);
 		hr = S_FALSE;
 		break;
 
 	case UnzipDetails::UnzipFlags::UnzipDetails_UnzipFlags_always:
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will overwrite '%s' due to AlwaysOverwrite flag", szFile);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will overwrite '%ls' due to AlwaysOverwrite flag", szFile);
 		hr = S_OK;
 		break;
 
 	case UnzipDetails::UnzipFlags::UnzipDetails_UnzipFlags_unmodified:
 		hFile = ::CreateFileW(szFile, GENERIC_READ, FILE_SHARE_WRITE | FILE_SHARE_READ | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-		ExitOnNullWithLastError(((hFile != NULL) && (hFile != INVALID_HANDLE_VALUE)), hr, "Failed opening file '%s' to read times", szFile);
+		ExitOnNullWithLastError(((hFile != NULL) && (hFile != INVALID_HANDLE_VALUE)), hr, "Failed opening file '%ls' to read times", szFile);
 
 		bRes = ::GetFileTime(hFile, &ftCreate, nullptr, &ftModify);
-		ExitOnNullWithLastError(bRes, hr, "Failed getting file times for '%s'", szFile);
+		ExitOnNullWithLastError(bRes, hr, "Failed getting file times for '%ls'", szFile);
 
 		ulCreate.HighPart = ftCreate.dwHighDateTime;
 		ulCreate.LowPart = ftCreate.dwLowDateTime;
@@ -435,12 +470,12 @@ HRESULT CUnzip::ShouldOverwriteFile(LPCWSTR szFile, UnzipDetails_UnzipFlags flag
 		if (ulModify.QuadPart > ulCreate.QuadPart)
 		{
 			hr = S_FALSE;
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will not overwrite '%s' due to OverwriteUnmodified flag- file has been modified since created", szFile);
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will not overwrite '%ls' due to OverwriteUnmodified flag- file has been modified since created", szFile);
 		}
 		else
 		{
 			hr = S_OK;
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will overwrite '%s' due to OverwriteUnmodified flag- file isn't modified", szFile);
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will overwrite '%ls' due to OverwriteUnmodified flag- file isn't modified", szFile);
 		}
 
 		break;

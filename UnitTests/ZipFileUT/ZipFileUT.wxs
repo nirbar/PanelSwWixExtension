@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
   <Product Id="{769C11E5-D811-4CE3-BE79-CC23725E6B38}" Name="$(var.ProjectName)" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{8DC7207F-59B4-45E6-90B0-75769F8040B8}">
     <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
 
@@ -24,18 +25,21 @@
     <PanelSW:Unzip Id="_1" TargetFolder="[INSTALLFOLDER]" ZipFile="[INSTALLFOLDER]1.zip" OverwriteMode="Unmodified"><![CDATA[Not Installed]]></PanelSW:Unzip>
     <PanelSW:Unzip Id="_2" TargetFolder="[WindowsVolume]1\2\3" ZipFile="[INSTALLFOLDER]1.zip" Overwrite="yes"><![CDATA[Not Installed]]></PanelSW:Unzip>
     <PanelSW:Unzip TargetFolder="[WindowsVolume]1\2\4" ZipFile="[INSTALLFOLDER]1.zip" Overwrite="yes" DeleteZip="yes" CreateRootFolder="no"><![CDATA[Not Installed]]></PanelSW:Unzip>
+    <PanelSW:Unzip TargetFolder="[INSTALLFOLDER]npp" ZipFile="[#npp.7.7.1.bin.zip]" OverwriteMode="Always"><![CDATA[&ProductFeature >= 3]]></PanelSW:Unzip>
 
     <ComponentGroup Id="ProductComponents">
       <Component Directory="INSTALLFOLDER">
         <File Source="$(sys.SOURCEFILEPATH)"/>
         <RemoveFile On="both" Name="1.zip" Id="_1"/>
-        <util:XmlFile ElementPath="//*[\[]local-name()='Property'[\]]" Name="Nir" Value="Bar" Action="setValue" File="[#Product.wxs]" SelectionLanguage="XPath" Id="NirBar" PreserveModifiedDate="no"/>
       </Component>
       <Component Directory="INSTALLFOLDER">
         <File Source="$(var.ProjectDir)SizeZero.txt" />
       </Component>
       <Component Directory="INSTALLFOLDER1">
         <File Source="$(var.ProjectDir)ZipFileUT.wixproj" ReadOnly="yes" />
+      </Component>
+      <Component Directory="INSTALLFOLDER">
+        <File Source="D:\Tools\npp.7.7.1.bin.zip" />
       </Component>
     </ComponentGroup>
     
