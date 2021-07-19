@@ -14,7 +14,8 @@
     <tags>WiX MSI Installer WixToolset XML</tags>
 
     <dependencies>
-      <dependency id="PanelSW.Custom.WiX" version="3.12.0-b99" />
+      <!--Make sure to change in .github\workflows\github-actions-build.yml -->
+      <dependency id="PanelSW.Custom.WiX" version="3.12.0-c101" />
     </dependencies>
   </metadata>
 
