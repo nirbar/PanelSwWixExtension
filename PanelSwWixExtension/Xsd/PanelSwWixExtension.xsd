@@ -532,6 +532,46 @@
     </xs:complexType>
   </xs:element>
 
+  <xs:element name="WmiSearch">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
+      </xs:appinfo>
+      <xs:documentation><![CDATA[Execute WQL query]]></xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Namespace" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>WMI namespace. Defaults to "ROOT\CIMV2". This is a formatted field</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Query" use="required">
+            <xs:annotation>
+              <xs:documentation>WQL query. Should return a single result at most. This is a formatted field</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="ResultProperty" use="optional">
+            <xs:annotation>
+              <xs:documentation>The property of the returned object that should be used as the result. If not specified, then the object path is returned. This is a formatted field</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Condition" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Condition on executing the query.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Order" type="xs:integer" use="optional">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Order of query execution, defaults to line number. Commands with explicit order field will be executed before commands with implicit order]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="InstallUtil">
     <xs:annotation>
       <xs:appinfo>

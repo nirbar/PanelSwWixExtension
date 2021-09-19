@@ -107,6 +107,7 @@
     <ClCompile Include="TopShelfService.cpp" />
     <ClCompile Include="Unzip.cpp" />
     <ClCompile Include="VersionCompare.cpp" />
+    <ClCompile Include="WmiSearch.cpp" />
     <ClCompile Include="XmlSearch.cpp" />
     <ClCompile Include="XslTransform.cpp" />
   </ItemGroup>

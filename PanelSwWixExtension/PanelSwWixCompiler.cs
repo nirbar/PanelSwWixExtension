@@ -139,6 +139,10 @@ namespace PanelSw.Wix.Extensions
                             ParseXmlSearchElement(element);
                             break;
 
+                        case "WmiSearch":
+                            ParseWmiSearchElement(element);
+                            break;
+
                         case "SqlSearch":
                             ParseSqlSearchElement(element);
                             break;
@@ -3423,6 +3427,85 @@ namespace PanelSw.Wix.Extensions
                 row[i++] = order;
                 row[i++] = (int)errorHandling;
                 row[i++] = connectionString;
+            }
+        }
+
+        private void ParseWmiSearchElement(XmlNode node)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string id = "wmi" + Guid.NewGuid().ToString("N");
+            string property = null;
+            string nmspace = null;
+            string query = null;
+            string resultProp = null;
+            string condition = null;
+            int order = 1000000000 + GetLineNumber(sourceLineNumbers);
+
+            if (!node.ParentNode.LocalName.Equals("Property"))
+            {
+                Core.UnexpectedElement(node.ParentNode, node);
+            }
+            property = node.ParentNode.Attributes["Id"].Value;
+            if (string.IsNullOrWhiteSpace(property))
+            {
+                Core.OnMessage(WixErrors.ParentElementAttributeRequired(sourceLineNumbers, node.ParentNode.LocalName, "Id", node.LocalName));
+            }
+            if (!property.ToUpper().Equals(property))
+            {
+                Core.OnMessage(WixErrors.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
+            }
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName)
+                    {
+                        case "Namespace":
+                            nmspace = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Query":
+                            query = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "ResultProperty":
+                            resultProp = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Condition":
+                            condition = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Order":
+                            order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
+                            break;
+
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+                else
+                {
+                    Core.UnsupportedExtensionAttribute(sourceLineNumbers, attrib);
+                }
+            }
+
+            if (string.IsNullOrEmpty(query))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Query"));
+            }
+
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "WmiSearch");
+
+            if (!Core.EncounteredError)
+            {
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_WmiSearch");
+                int i = 0;
+                row[i++] = id;
+                row[i++] = property;
+                row[i++] = condition;
+                row[i++] = nmspace;
+                row[i++] = query;
+                row[i++] = resultProp;
+                row[i++] = order;
             }
         }
 

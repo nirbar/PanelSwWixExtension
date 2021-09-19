@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
+
+  <Product Id="*" Name="WmiSearchUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="d377fd04-a940-4ed2-8d55-e2f1f6f39d2d">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perUser" />
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate />
+    <Property Id="MSIFASTINSTALL" Value="1"></Property>
+
+    <Feature Id="ProductFeature" Title="WmiSearchUT" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="WmiSearchUT" />
+      </Directory>
+    </Directory>
+
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component>
+        <File Source="$(sys.SOURCEFILEPATH)"/>
+      </Component>
+    </ComponentGroup>
+
+    <Property Id="WMI_RESULT">
+      <PanelSW:WmiSearch Query="SELECT * FROM Win32_LogonSession"/>
+      <PanelSW:WmiSearch Query="SELECT * FROM Win32_LogonSession" ResultProperty="StartTime"/>
+    </Property>
+    <Condition Message="Expected a WMI result"><![CDATA[WMI_RESULT]]></Condition>
+
+    <CustomActionRef Id="TerminateSuccessfully_Immediate"/>
+    <InstallExecuteSequence>
+      <Custom Action="TerminateSuccessfully_Immediate" After="LaunchConditions"/>
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="TerminateSuccessfully_Immediate" After="LaunchConditions"/>
+    </InstallUISequence>
+    
+  </Product>
+</Wix>

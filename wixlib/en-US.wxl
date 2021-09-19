@@ -50,4 +50,5 @@
   <String Overridable="yes" Id="PSW_CheckRebootRequired"><![CDATA[Checking whether or not reboot is required]]></String>
   <String Overridable="yes" Id="JsonJpathFailure"><![CDATA[Failed setting JsonJpath '[2]' to '[3]' in file '[4]'.
 [5]]]></String>
+  <String Overridable="yes" Id="WmiSearch"><![CDATA[Executing WMI queries]]></String>
 </WixLocalization>

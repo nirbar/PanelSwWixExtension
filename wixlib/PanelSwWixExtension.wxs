@@ -758,4 +758,18 @@
     </UI>
   </Fragment>
 
+  <!-- WmiSearch -->
+  <Fragment>
+    <CustomAction Id="WmiSearch" BinaryKey="PanelSwCustomActions.dll" DllEntry="WmiSearch" Execute="firstSequence" />
+    <InstallExecuteSequence>
+      <Custom Action="WmiSearch" After="AppSearch" Overridable="yes"/>
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="WmiSearch" After="AppSearch" Overridable="yes"/>
+    </InstallUISequence>
+    <UI>
+      <ProgressText Action="WmiSearch">!(loc.WmiSearch)</ProgressText>
+    </UI>
+  </Fragment>
+
 </Wix>

@@ -46,3 +46,4 @@ EXPORTS
 	XslTransform
 	ToLowerCase
 	CheckRebootRequired
+	WmiSearch

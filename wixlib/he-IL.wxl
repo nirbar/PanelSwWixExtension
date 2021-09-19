@@ -52,4 +52,5 @@
     <![CDATA[שגיאה בכתיבת ערך JsonJpath '[2]' ל- '[3]' בקובץ '[4]'.
 [5]]]>
   </String>
+  <String Overridable="yes" Id="WmiSearch"><![CDATA[מבצע שאילתות WMI]]></String>
 </WixLocalization>
