@@ -15,7 +15,7 @@
 
     <dependencies>
       <!--Make sure to change in .github\workflows\github-actions-build.yml -->
-      <dependency id="PanelSW.Custom.WiX" version="3.12.0-c101" />
+      <dependency id="PanelSW.Custom.WiX" version="3.12.0-c105" />
     </dependencies>
   </metadata>
 

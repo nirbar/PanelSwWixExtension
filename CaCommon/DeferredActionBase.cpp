@@ -167,6 +167,16 @@ CDeferredActionBase::~CDeferredActionBase() noexcept
 {
 }
 
+UINT CDeferredActionBase::GetCost() const noexcept
+{
+	UINT cost = 0;
+	for each (const Command cmd in _cad.commands())
+	{
+		cost += cmd.cost();
+	}
+	return cost;
+}
+
 HRESULT CDeferredActionBase::AddCommand(LPCSTR szHandler, Command **ppCommand) noexcept
 {
 	HRESULT hr = S_OK;

@@ -18,7 +18,7 @@ public:
 	typedef HRESULT(*ReceiverToExecutorFunc)(LPCSTR szReceiver, CDeferredActionBase** ppExecutor);
 	static HRESULT DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToExecutorFunc mapFunc) noexcept;
 
-	UINT GetCost() const noexcept { return _uCost; }
+	UINT GetCost() const noexcept;
 
 	HRESULT GetCustomActionData(LPWSTR *pszCustomActionData) noexcept;
 
@@ -37,6 +37,5 @@ protected:
 
 private:
 	::com::panelsw::ca::CustomActionData _cad;
-	UINT _uCost = 0;
 };
 

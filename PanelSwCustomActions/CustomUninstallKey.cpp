@@ -24,7 +24,6 @@ extern "C" UINT __stdcall CustomUninstallKey_Immediate(MSIHANDLE hInstall) noexc
 	hr = WcaTableExists(L"PSW_CustomUninstallKey");
 	ExitOnFailure(hr, "Table does not exist 'PSW_CustomUninstallKey'. Have you authored 'PanelSw:CustomUninstallKey' entries in WiX code?");
 
-	// TODO: Add your custom action code here.
 	hr = data.CreateCustomActionData();
 	ExitOnFailure(hr, "Failed");
 

@@ -73,7 +73,6 @@ private:
 	HKEY _hRootKey;
 	WCHAR _keyName[MAX_PATH];
 
-	// TODO: x86/x64 registry area.
 	RegArea _area;
 	RegAccess _samAccess;
 };
