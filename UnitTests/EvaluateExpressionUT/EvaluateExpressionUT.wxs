@@ -27,7 +27,7 @@
       <PanelSW:Evaluate Expression="[TEST] + 1" Order="1"/>
     </Property>
 
-    <Property Id="PI" Value="3.14159265358979323846">
+    <Property Id="PI" Value="pi">
       <PanelSW:Evaluate Expression="[PI] * 2"/>
       <PanelSW:Evaluate Expression="[PI] + 1" Order="1"/>
     </Property>

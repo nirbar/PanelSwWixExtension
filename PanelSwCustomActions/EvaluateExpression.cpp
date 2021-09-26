@@ -38,6 +38,7 @@ extern "C" UINT __stdcall EvaluateExpression(MSIHANDLE hInstall) noexcept
 		bool bRes = true;
 		exprtk::expression<double> expr;
 		exprtk::parser<double> parser;
+		exprtk::symbol_table<double> symbols;
 
 		hr = WcaGetRecordFormattedString(hRecord, 1, (LPWSTR*)expression);
 		ExitOnFailure(hr, "Failed to get expression.");
@@ -46,8 +47,13 @@ extern "C" UINT __stdcall EvaluateExpression(MSIHANDLE hInstall) noexcept
 		hr = expression.ToAnsiString(&szAnsiExpression);
 		ExitOnFailure(hr, "Failed to get expression as ANSI string.");
 
+		if (symbols.add_constants())
+		{
+			expr.register_symbol_table(symbols);
+		}
+
 		bRes = parser.compile(szAnsiExpression, expr);
-		ExitOnNull(bRes, hr, E_FAIL, "Failed compiling expression '%s'", szAnsiExpression);
+		ExitOnNull(bRes, hr, E_FAIL, "Failed compiling expression '%s'. %s", szAnsiExpression, parser.error().c_str());
 
 		if (expr.value() == (int)expr.value())
 		{
