@@ -10,7 +10,7 @@
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <Component Directory="INSTALLFOLDER">
-        <File Source="$(var.ProjectDir)Product.wxs" />
+        <File Source="$(sys.SOURCEFILEPATH)" />
       </Component>
     </Feature>
 
@@ -27,14 +27,22 @@
       <PanelSW:Evaluate Expression="[TEST] + 1" Order="1"/>
     </Property>
 
+    <Property Id="PI" Value="3.14159265358979323846">
+      <PanelSW:Evaluate Expression="[PI] * 2"/>
+      <PanelSW:Evaluate Expression="[PI] + 1" Order="1"/>
+    </Property>
+
     <CustomActionRef Id="WixExitEarlyWithSuccess" />
     <CustomAction Id="BadResult" Error="29000"/>
+    <CustomAction Id="BadPiResult" Error="29001"/>
     <UI>
       <Error Id="29000"><![CDATA[TEST evaluated to [TEST]]]></Error>
+      <Error Id="29001"><![CDATA[PI evaluated to [PI]]]></Error>
     </UI>
     <InstallExecuteSequence>
-      <Custom Action="WixExitEarlyWithSuccess" After="EvaluateExpression"><![CDATA[TEST=5]]></Custom>
-      <Custom Action="BadResult" After="EvaluateExpression"><![CDATA[TEST<>5]]></Custom>
+      <Custom Action="BadResult" After="EvaluateExpression"><![CDATA[TEST <> 6]]></Custom>
+      <Custom Action="BadPiResult" After="BadResult"><![CDATA[PI <> "8.283186"]]></Custom>
+      <Custom Action="WixExitEarlyWithSuccess" After="BadPiResult"/>
     </InstallExecuteSequence>
   </Product>
 </Wix>

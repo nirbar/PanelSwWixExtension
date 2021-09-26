@@ -29,7 +29,7 @@ extern "C" UINT __stdcall WmiSearch(MSIHANDLE hInstall) noexcept
 	hr = WcaOpenExecuteView(L"SELECT `Property_`, `Condition`, `Namespace`, `Query`, `ResultProperty` FROM `PSW_WmiSearch` ORDER BY `Order`", &hView);
 	ExitOnFailure(hr, "Failed to execute SQL query on 'PSW_WmiSearch'.");
 
-	hr = CoInitializeEx(0, COINIT_MULTITHREADED);
+	hr = CoInitializeEx(nullptr, COINIT_MULTITHREADED);
 	ExitOnFailure(hr, "Failed to initialize COM");
 	bComInit = true;
 
@@ -100,8 +100,6 @@ static HRESULT ExecuteOne(LPCWSTR szNamespace, LPCWSTR szQuery, LPCWSTR szResult
 	CComPtr<IWbemLocator> wbemLocator;
 	CComPtr<IWbemServices> wbemSvc;
 	CComPtr<IEnumWbemClassObject> wqlEnumerator;
-	CWixString szResult;
-	CWixString szError;
 
 	hr = CoCreateInstance(CLSID_WbemLocator, 0, CLSCTX_INPROC_SERVER, IID_IWbemLocator, (LPVOID*)&wbemLocator);
 	ExitOnFailure(hr, "Failed initializing IWbemLocator");

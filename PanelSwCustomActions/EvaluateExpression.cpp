@@ -34,9 +34,8 @@ extern "C" UINT __stdcall EvaluateExpression(MSIHANDLE hInstall) noexcept
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
 		ExitOnFailure(hr, "Failed to fetch record.");
-		CWixString expression, property_;
+		CWixString expression, property_, value;
 		bool bRes = true;
-		double value = 0;
 		exprtk::expression<double> expr;
 		exprtk::parser<double> parser;
 
@@ -50,9 +49,18 @@ extern "C" UINT __stdcall EvaluateExpression(MSIHANDLE hInstall) noexcept
 		bRes = parser.compile(szAnsiExpression, expr);
 		ExitOnNull(bRes, hr, E_FAIL, "Failed compiling expression '%s'", szAnsiExpression);
 
-		value = expr.value();
+		if (expr.value() == (int)expr.value())
+		{
+			hr = value.Format(L"%i", (int)expr.value());
+			ExitOnFailure(hr, "Failed to format result");
+		}
+		else
+		{
+			hr = value.Format(L"%f", expr.value());
+			ExitOnFailure(hr, "Failed to format result");
+		}
 
-		hr = WcaSetIntProperty(property_, (int)value);
+		hr = WcaSetProperty(property_, value);
 		ExitOnFailure(hr, "Failed to set property.");
 
 		ReleaseNullMem(szAnsiExpression);
