@@ -14,7 +14,7 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
   - *AccountSidSearch*: Lookup an account's SID by account name.
   - *JsonJpathSearch*: Read JSON values
   - *DiskSpace*: Calculate available disk space for a target directory
-  - *CertificateHashSearch*: Find a certificate has in local system MY store.
+  - *CertificateHashSearch*: Find a certificate hash in local system MY store.
   - *Evaluate*: Evaluate mathematical expressions and store result in property.
   - *SetPropertyFromPipe*: Allows setting property from a pipe.
   - *SqlSearch*: Execute a SQL query and place result in a property.
@@ -34,7 +34,7 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
   - *CustomUninstallKey*: Overwrite registry values in the product's [Uninstall](http://msdn.microsoft.com/en-us/library/aa372105%28v=vs.85%29.aspx) registry key
   - *RemoveRegistryValue*: Removes registry values. Complements the standard [RemoveRegistryValue](http://wixtoolset.org/documentation/manual/v3/xsd/wix/removeregistryvalue.html) WiX element that will only remove registry values during installation.
   - *ExecOn*: Execute a custom command on component action.
-  - *TaskScheduler*: Add a task to Windows Task Scheduler. Task definition XML should be in inner text.
+  - *TaskScheduler*: Add a task to Windows Task Scheduler.
   - *DeletePath*: Delete folder or file specified by a path.
   - *FileRegex*: Execute a Regular Expression to perform find & replace operations within files.
   - *ShellExecute*: Call ShellExecuteEx with parameters.
