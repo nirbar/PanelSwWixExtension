@@ -1922,6 +1922,27 @@ Remove registry values.
     </xs:complexType>
   </xs:element>
 
+  <xs:element name="RestartLocalResources">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
+      </xs:appinfo>
+      <xs:documentation><![CDATA[Register processes with the Restart Manager if they reside in the specified folder]]></xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Replace" />
+      </xs:choice>
+      <xs:attribute name="Path" type="xs:string" use="required">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Folder path]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="SqlScript">
     <xs:annotation>
       <xs:appinfo>

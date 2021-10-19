@@ -380,4 +380,10 @@
     <columnDefinition name="ResultProperty" type="string" length="0" modularize="property" category="formatted" nullable="yes"/>
     <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
   </tableDefinition>
+
+  <tableDefinition name="PSW_RestartLocalResources">
+    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="Path" type="string" length="72" modularize="column" category="formatted" />
+    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
+  </tableDefinition>
 </tableDefinitions>

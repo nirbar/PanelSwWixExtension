@@ -12,6 +12,7 @@
 #include "Unzip.h"
 #include "SqlScript.h"
 #include "XslTransform.h"
+#include "RestartLocalResources.h"
 
 // ReceiverToExecutorFunc implementation.
 HRESULT ReceiverToExecutor(LPCSTR szReceiver, CDeferredActionBase** ppExecutor) noexcept
@@ -73,6 +74,11 @@ HRESULT ReceiverToExecutor(LPCSTR szReceiver, CDeferredActionBase** ppExecutor) 
 	{
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating XslTransform handler");
 		(*ppExecutor) = new CXslTransform();
+	}
+	else if (0 == ::strcmp(szReceiver, "CRestartLocalResources"))
+	{
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating RestartLocalResources handler");
+		(*ppExecutor) = new CRestartLocalResources();
 	}
 	else
 	{

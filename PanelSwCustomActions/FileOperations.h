@@ -22,6 +22,7 @@ public:
 	HRESULT DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bIgnoreErrors) noexcept;
 
 	static ::com::panelsw::ca::FileRegexDetails::FileEncoding DetectEncoding(const void* pFileContent, DWORD dwSize) noexcept;
+	static HRESULT PathToDevicePath(LPCWSTR szPath, LPWSTR* pszDevicePath) noexcept;
 
 protected:
 	

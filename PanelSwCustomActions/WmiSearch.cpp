@@ -61,7 +61,7 @@ extern "C" UINT __stdcall WmiSearch(MSIHANDLE hInstall) noexcept
 			MSICONDITION condRes = MSICONDITION::MSICONDITION_NONE;
 
 			condRes = ::MsiEvaluateCondition(hInstall, szCondition);
-			ExitOnNullWithLastError((condRes != MSICONDITION::MSICONDITION_ERROR), hr, "Failed evaluating condition '%ls'", szCondition);
+			ExitOnNullWithLastError((condRes != MSICONDITION::MSICONDITION_ERROR), hr, "Failed evaluating condition '%ls'", (LPCWSTR)szCondition);
 
 			hr = (condRes == MSICONDITION::MSICONDITION_FALSE) ? S_FALSE : S_OK;
 			WcaLog(LOGMSG_STANDARD, "Condition '%ls' evaluated to %i", (LPCWSTR)szCondition, (1 - (int)hr));

@@ -51,4 +51,5 @@
   <String Overridable="yes" Id="JsonJpathFailure"><![CDATA[Failed setting JsonJpath '[2]' to '[3]' in file '[4]'.
 [5]]]></String>
   <String Overridable="yes" Id="WmiSearch"><![CDATA[Executing WMI queries]]></String>
+  <String Overridable="yes" Id="RestartLocalResources"><![CDATA[Restarting resources]]></String>
 </WixLocalization>

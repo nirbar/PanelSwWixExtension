@@ -772,4 +772,18 @@
     </UI>
   </Fragment>
 
+  <!-- RestartLocalResources -->
+  <Fragment>
+    <CustomAction Id="RestartLocalResources" BinaryKey="PanelSwCustomActions.dll" DllEntry="RestartLocalResources" Execute="immediate" SuppressModularization="yes"/>
+    <CustomAction Id="RestartLocalResourcesExec" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" Return="ignore" SuppressModularization="yes" HideTarget="yes" />
+    <InstallExecuteSequence>
+      <Custom Action="RestartLocalResources" Before="InstallValidate"/>
+      <Custom Action="RestartLocalResourcesExec" Before="RemoveFiles"/>
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="RestartLocalResources">!(loc.RestartLocalResources)</ProgressText>
+      <ProgressText Action="RestartLocalResourcesExec">!(loc.RestartLocalResources)</ProgressText>
+    </UI>
+  </Fragment>
+
 </Wix>

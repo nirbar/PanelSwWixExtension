@@ -105,6 +105,9 @@
     <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\xslTransformDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
+    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\restartLocalResourcesDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\customActionData.pb.h">
@@ -152,6 +155,9 @@
     <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\xslTransformDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
+    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\restartLocalResourcesDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="command.proto" />
@@ -161,6 +167,7 @@
     <None Include="fileOperationsDetails.proto" />
     <None Include="fileRegexDetails.proto" />
     <None Include="packages.config" />
+    <None Include="restartLocalResourcesDetails.proto" />
     <None Include="servciceConfigDetails.proto" />
     <None Include="setPropertyFromPipeDetails.proto" />
     <None Include="shellExecDetails.proto" />

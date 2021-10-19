@@ -82,6 +82,7 @@
     <ClCompile Include="ExecOnComponent.cpp" />
     <ClCompile Include="FileOperations.cpp" />
     <ClCompile Include="FileRegex.cpp" />
+    <ClCompile Include="RestartLocalResources.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="MsiSqlQuery.cpp" />
     <ClCompile Include="PathSearch.cpp" />
@@ -119,6 +120,7 @@
     <ClInclude Include="CustomUninstallKey.h" />
     <ClInclude Include="RegistryKey.h" />
     <ClInclude Include="RegistryXmlParser.h" />
+    <ClInclude Include="RestartLocalResources.h" />
     <ClInclude Include="ServiceConfig.h" />
     <ClInclude Include="ShellExecute.h" />
     <ClInclude Include="SqlScript.h" />

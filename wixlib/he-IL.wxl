@@ -53,4 +53,5 @@
 [5]]]>
   </String>
   <String Overridable="yes" Id="WmiSearch"><![CDATA[מבצע שאילתות WMI]]></String>
+  <String Overridable="yes" Id="RestartLocalResources"><![CDATA[מאתחל תהליכים רצים]]></String>
 </WixLocalization>

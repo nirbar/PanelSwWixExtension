@@ -47,3 +47,4 @@ EXPORTS
 	ToLowerCase
 	CheckRebootRequired
 	WmiSearch
+	RestartLocalResources

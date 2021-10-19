@@ -79,6 +79,10 @@ namespace PanelSw.Wix.Extensions
                             ParseRegularExpression(element);
                             break;
 
+                        case "RestartLocalResources":
+                            ParseRestartLocalResources(element);
+                            break;
+
                         case "DeletePath":
                             ParseDeletePath(element);
                             break;
@@ -4006,6 +4010,62 @@ namespace PanelSw.Wix.Extensions
                 row[6] = flags;
                 row[7] = condition;
                 row[8] = order;
+            }
+        }
+
+        private void ParseRestartLocalResources(XmlNode node)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string id = "rst" + Guid.NewGuid().ToString("N");
+            string path = null;
+            string condition = null;
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName)
+                    {
+                        case "Path":
+                            path = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(path))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Path"));
+            }
+
+            // find unexpected child elements
+            foreach (XmlNode child in node.ChildNodes)
+            {
+                if (XmlNodeType.Element == child.NodeType)
+                {
+                    if (child.NamespaceURI == schema.TargetNamespace)
+                    {
+                        Core.UnexpectedElement(node, child);
+                    }
+                }
+                else if (((XmlNodeType.CDATA == child.NodeType) || (XmlNodeType.Text == child.NodeType)) && string.IsNullOrEmpty(condition))
+                {
+                    condition = child.Value.Trim();
+                }
+            }
+
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "RestartLocalResources");
+
+            if (!Core.EncounteredError)
+            {
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_RestartLocalResources");
+                row[0] = id;
+                row[1] = path;
+                row[2] = condition;
             }
         }
 

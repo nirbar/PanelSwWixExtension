@@ -427,3 +427,41 @@ FileRegexDetails::FileEncoding CFileOperations::DetectEncoding(const void* pFile
 LExit:
 	return eEncoding;
 }
+
+HRESULT CFileOperations::PathToDevicePath(LPCWSTR szPath, LPWSTR* pszDevicePath) noexcept
+{
+	HRESULT hr = S_OK;
+	LPWSTR szDevicePath = nullptr;
+	LPWSTR szDrive = nullptr;
+	LPCWSTR szVolumeEnd = nullptr;
+	WCHAR szDosName[MAX_PATH + 1];
+	DWORD dwRes = ERROR_SUCCESS;
+
+	szVolumeEnd = wcschr(szPath, L':');
+	if ((szVolumeEnd == nullptr) || (szVolumeEnd == szPath))
+	{
+		hr = StrAllocString(pszDevicePath, szPath, 0);
+		ExitOnFailure(hr, "Failed copying string");
+		ExitFunction();
+	}
+
+	hr = StrAllocString(&szDrive, szPath, szVolumeEnd - szPath + 1); // Copy C:
+	ExitOnFailure(hr, "Failed copying string");
+
+	::ZeroMemory(szDosName, ARRAYSIZE(szDosName) * sizeof(WCHAR));
+
+	dwRes = ::QueryDosDevice(szDrive, szDosName, ARRAYSIZE(szDosName));
+	ExitOnNullWithLastError(dwRes, hr, "Failed getting device path for drive '%ls'", szDrive);
+
+	hr = StrAllocFormatted(&szDevicePath, L"%ls%ls", szDosName, szVolumeEnd + 1);
+	ExitOnFailure(hr, "Failed formatting device path");
+
+	*pszDevicePath = szDevicePath;
+	szDevicePath = nullptr;
+
+LExit:
+	ReleaseStr(szDevicePath);
+	ReleaseStr(szDrive);
+
+	return hr;
+}
