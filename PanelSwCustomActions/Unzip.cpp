@@ -39,6 +39,7 @@ extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall) noexcept
 
 	// Ensure table PSW_DeletePath exists.
 	hr = WcaTableExists(L"PSW_Unzip");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_Unzip'");
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_Unzip'. Have you authored 'PanelSw:Unzip' entries in WiX code?");
 
 	// Execute view

@@ -24,7 +24,8 @@ extern "C" UINT __stdcall EvaluateExpression(MSIHANDLE hInstall) noexcept
 
 	// Ensure table PSW_DeletePath exists.
 	hr = WcaTableExists(L"PSW_EvaluateExpression");
-	ExitOnFailure(hr, "Table does not exist 'PSW_BackupAndRestore'. Have you authored 'PanelSw:Evaluate' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_EvaluateExpression'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_EvaluateExpression'. Have you authored 'PanelSw:Evaluate' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(QUERY, &hView);

@@ -16,6 +16,7 @@ extern "C" UINT __stdcall ReadIniValues(MSIHANDLE hInstall) noexcept
 
 	// Ensure table PSW_ReadIniValues exists.
 	hr = WcaTableExists(L"PSW_ReadIniValues");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_ReadIniValues'");
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ReadIniValues'. Have you authored 'PanelSw:ReadIniValues' entries in WiX code?");
 
 	// Execute view

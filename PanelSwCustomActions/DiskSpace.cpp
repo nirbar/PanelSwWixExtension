@@ -16,6 +16,7 @@ extern "C" UINT __stdcall DiskSpace(MSIHANDLE hInstall) noexcept
 
 	// Ensure table PSW_DeletePath exists.
 	hr = WcaTableExists(L"PSW_DiskSpace");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_DiskSpace'");
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_DiskSpace'. Have you authored 'PanelSw:DiskSpace' entries in WiX code?");
 
 	// Execute view

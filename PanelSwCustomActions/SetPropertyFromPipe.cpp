@@ -22,7 +22,8 @@ extern "C" UINT __stdcall SetPropertyFromPipe(MSIHANDLE hInstall) noexcept
 
 	// Ensure table PSW_XmlSearch exists.
 	hr = WcaTableExists(L"PSW_SetPropertyFromPipe");
-	ExitOnFailure(hr, "Table does not exist 'PSW_SetPropertyFromPipe'. Have you authored 'PanelSw:SetPropertyFromPipe' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_SetPropertyFromPipe'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_SetPropertyFromPipe'. Have you authored 'PanelSw:SetPropertyFromPipe' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(SetPropertyFromPipeQuery, &hView);

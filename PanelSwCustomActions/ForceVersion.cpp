@@ -14,7 +14,8 @@ extern "C" UINT __stdcall ForceVersion(MSIHANDLE hInstall) noexcept
 
 	// Ensure table PSW_XmlSearch exists.
 	hr = WcaTableExists(L"PSW_ForceVersion");
-	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table 'PSW_ForceVersion' does not exist. Have you authored 'PanelSw:ForceVersion' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_ForceVersion'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ForceVersion'. Have you authored 'PanelSw:ForceVersion' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `File`, `Version` FROM `PSW_ForceVersion`", &hView);

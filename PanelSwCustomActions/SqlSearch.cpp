@@ -19,7 +19,8 @@ extern "C" UINT __stdcall SqlSearch(MSIHANDLE hInstall) noexcept
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	hr = WcaTableExists(L"PSW_SqlSearch");
-	ExitOnFailure(hr, "Table does not exist 'PSW_SqlSearch'. Have you authored 'PanelSw:SqlSearch' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_SqlSearch'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_SqlSearch'. Have you authored 'PanelSw:SqlSearch' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `Property_`, `Server`, `Instance`, `Database`, `Username`, `Password`, `Query`, `Condition`, `Port`, `Encrypted`, `ErrorHandling`, `ConnectionString` FROM `PSW_SqlSearch` ORDER BY `Order`", &hView);

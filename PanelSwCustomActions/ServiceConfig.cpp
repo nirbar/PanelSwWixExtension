@@ -29,8 +29,10 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall) noexcept
 
 	// Ensure tables exist.
 	hr = WcaTableExists(L"PSW_ServiceConfig");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_ServiceConfig'");
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ServiceConfig'. Have you authored 'PanelSw:ServiceConfig' entries in WiX code?");
 	hr = WcaTableExists(L"PSW_ServiceConfig_Dependency");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_ServiceConfig_Dependency'");
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ServiceConfig_Dependency'. Have you authored 'PanelSw:ServiceConfig' entries in WiX code?");
 
 	// Execute view

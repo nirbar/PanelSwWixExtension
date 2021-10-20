@@ -23,7 +23,8 @@ extern "C" UINT __stdcall RemoveRegistryValue_Immediate(MSIHANDLE hInstall) noex
 
 	// Ensure table PSW_RemoveRegistryValue exists.
 	hr = WcaTableExists(L"PSW_RemoveRegistryValue");
-	ExitOnFailure(hr, "Table does not exist 'PSW_RemoveRegistryValue'. Have you authored 'PanelSw:RemoveRegistryValue' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_RemoveRegistryValue'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_RemoveRegistryValue'. Have you authored 'PanelSw:RemoveRegistryValue' entries in WiX code?");
 
 	hr = WcaOpenExecuteView(RemoveRegistryValueQuery, &hView);
 	ExitOnFailure(hr, "Failed to execute view");

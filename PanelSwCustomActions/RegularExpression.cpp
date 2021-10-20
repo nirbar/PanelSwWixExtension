@@ -57,7 +57,8 @@ extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall) noexcept
 
 	// Ensure table PSW_XmlSearch exists.
 	hr = WcaTableExists(L"PSW_RegularExpression");
-	ExitOnFailure(hr, "Table does not exist 'PSW_RegularExpression'. Have you authored 'PanelSw:RegularExpression' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_RegularExpression'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_RegularExpression'. Have you authored 'PanelSw:RegularExpression' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(RegularExpressionQuery, &hView);

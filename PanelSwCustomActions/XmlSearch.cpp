@@ -36,7 +36,8 @@ extern "C" UINT __stdcall XmlSearch(MSIHANDLE hInstall) noexcept
 
 	// Ensure table PSW_XmlSearch exists.
 	hr = WcaTableExists(L"PSW_XmlSearch");
-	ExitOnFailure(hr, "Table does not exist 'PSW_XmlSearch'. Have you authored 'PanelSw:XmlSearch' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_XmlSearch'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_XmlSearch'. Have you authored 'PanelSw:XmlSearch' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(XmlSearchQuery, &hView);

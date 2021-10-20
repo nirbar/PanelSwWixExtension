@@ -15,6 +15,7 @@ extern "C" UINT __stdcall PathSearch(MSIHANDLE hInstall) noexcept
 
 	// Ensure table PSW_XmlSearch exists.
 	hr = WcaTableExists(L"PSW_PathSearch");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_PathSearch'");
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_PathSearch'. Have you authored 'PanelSw:PathSearch' entries in WiX code?");
 
 	// Execute view

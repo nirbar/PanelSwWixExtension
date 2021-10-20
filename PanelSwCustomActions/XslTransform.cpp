@@ -33,9 +33,11 @@ extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall) noexcept
 
 	// Ensure tables exist.
 	hr = WcaTableExists(L"PSW_XslTransform");
-	ExitOnFailure((hr == S_OK), "Table does not exist 'PSW_XslTransform'. Have you authored 'PanelSw:XslTransform' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_XslTransform'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_XslTransform'. Have you authored 'PanelSw:XslTransform' entries in WiX code?");
 	hr = WcaTableExists(L"PSW_XslTransform_Replacements");
-	ExitOnFailure((hr == S_OK), "Table does not exist 'PSW_XslTransform_Replacements'. Have you authored 'PanelSw:XslTransform' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_XslTransform_Replacements'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_XslTransform_Replacements'. Have you authored 'PanelSw:XslTransform' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `File_`, `FilePath`, `XslBinary_` FROM `PSW_XslTransform` ORDER BY `Order`", &hView);

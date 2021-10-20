@@ -29,7 +29,8 @@ extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall) noexcept
 
 	// Ensure table PSW_DeletePath exists.
 	hr = WcaTableExists(L"PSW_BackupAndRestore");
-	ExitOnFailure(hr, "Table does not exist 'PSW_BackupAndRestore'. Have you authored 'PanelSw:BackupAndRestore' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_BackupAndRestore'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_BackupAndRestore'. Have you authored 'PanelSw:BackupAndRestore' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(BackupAndRestore_QUERY, &hView);

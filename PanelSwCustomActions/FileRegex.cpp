@@ -31,6 +31,7 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall) noexcept
 
 	// Ensure table PSW_FileRegex exists.
 	hr = WcaTableExists(L"PSW_FileRegex");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_FileRegex'");
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_FileRegex'. Have you authored 'PanelSw:FileRegex' entries in WiX code?");
 
 	// Execute view

@@ -27,7 +27,8 @@ extern "C" UINT __stdcall TopShelf(MSIHANDLE hInstall) noexcept
 
 	// Ensure table PSW_DeletePath exists.
 	hr = WcaTableExists(L"PSW_TopShelf");
-	ExitOnFailure(hr, "Table does not exist 'PSW_DeletePath'. Have you authored 'PanelSw:DeletePath' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_TopShelf'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_TopShelf'. Have you authored 'PanelSw:TopShelf' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(TopShelfService_QUERY, &hView);

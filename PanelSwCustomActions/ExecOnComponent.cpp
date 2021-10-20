@@ -68,13 +68,17 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall) noexcept
 
 	// Ensure tables exist.
 	hr = WcaTableExists(L"PSW_ExecOnComponent");
-	ExitOnFailure((hr == S_OK), "Table does not exist 'PSW_ExecOnComponent'. Have you authored 'PanelSw:ExecOnComponent' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_ExecOnComponent'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ExecOnComponent'. Have you authored 'PanelSw:ExecOn' entries in WiX code?");
 	hr = WcaTableExists(L"PSW_ExecOnComponent_ExitCode");
-	ExitOnFailure((hr == S_OK), "Table does not exist 'PSW_ExecOnComponent_ExitCode'. Have you authored 'PanelSw:ExecOnComponent' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_ExecOnComponent_ExitCode'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ExecOnComponent_ExitCode'. Have you authored 'PanelSw:ExecOn' entries in WiX code?");
 	hr = WcaTableExists(L"PSW_ExecOnComponent_Environment");
-	ExitOnFailure((hr == S_OK), "Table does not exist 'PSW_ExecOnComponent_Environment'. Have you authored 'PanelSw:ExecOnComponent' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_ExecOnComponent_Environment'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ExecOnComponent_Environment'. Have you authored 'PanelSw:ExecOn' entries in WiX code?");
 	hr = WcaTableExists(L"PSW_ExecOn_ConsoleOutput");
-	ExitOnFailure((hr == S_OK), "Table does not exist 'PSW_ExecOn_ConsoleOutput'. Have you authored 'PanelSw:ExecOnComponent' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_ExecOn_ConsoleOutput'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ExecOn_ConsoleOutput'. Have you authored 'PanelSw:ExecOn' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `Binary_`, `Command`, `WorkingDirectory`, `Flags`, `ErrorHandling`, `User_` FROM `PSW_ExecOnComponent` ORDER BY `Order`", &hView);

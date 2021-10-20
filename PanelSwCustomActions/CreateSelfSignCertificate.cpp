@@ -59,7 +59,8 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall) noexcept
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	hr = WcaTableExists(L"PSW_SelfSignCertificate");
-	ExitOnFailure(hr, "Table does not exist 'PSW_SelfSignCertificate'. Have you authored 'PanelSw:SelfSignCertificate' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_SelfSignCertificate'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_SelfSignCertificate'. Have you authored 'PanelSw:SelfSignCertificate' entries in WiX code?");
 	
 	// Execute view
 	hr = WcaOpenExecuteView(SelfSignCertificate_QUERY, &hView);

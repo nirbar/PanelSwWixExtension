@@ -23,7 +23,8 @@ extern "C" UINT __stdcall WmiSearch(MSIHANDLE hInstall) noexcept
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	hr = WcaTableExists(L"PSW_WmiSearch");
-	ExitOnFailure(hr, "Table does not exist 'PSW_WmiSearch'. Have you authored 'PanelSw:WmiSearch' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_WmiSearch'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_WmiSearch'. Have you authored 'PanelSw:WmiSearch' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `Property_`, `Condition`, `Namespace`, `Query`, `ResultProperty` FROM `PSW_WmiSearch` ORDER BY `Order`", &hView);

@@ -36,7 +36,8 @@ extern "C" UINT __stdcall Telemetry(MSIHANDLE hInstall) noexcept
 
 	// Ensure table PSW_Telemetry exists.
 	hr = WcaTableExists(L"PSW_Telemetry");
-	ExitOnFailure(hr, "Table does not exist 'PSW_Telemetry'. Have you authored 'PanelSw:Telemetry' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_Telemetry'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_Telemetry'. Have you authored 'PanelSw:Telemetry' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(TELEMETRY_QUERY, &hView);

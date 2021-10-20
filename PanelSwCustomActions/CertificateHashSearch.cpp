@@ -23,6 +23,7 @@ extern "C" UINT __stdcall CertificateHashSearch(MSIHANDLE hInstall) noexcept
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	hr = WcaTableExists(L"PSW_CertificateHashSearch");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_CertificateHashSearch'");
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_CertificateHashSearch'. Have you authored 'PanelSw:CertificateHashSearch' entries in WiX code?");
 	
 	// Execute view

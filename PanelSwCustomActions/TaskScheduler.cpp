@@ -27,7 +27,8 @@ extern "C" UINT __stdcall TaskScheduler(MSIHANDLE hInstall) noexcept
 
 	// Ensure table PSW_FileRegex exists.
 	hr = WcaTableExists(L"PSW_TaskScheduler");
-	ExitOnFailure(hr, "Table does not exist 'PSW_TaskScheduler'. Have you authored 'PanelSw:TaskScheduler' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_TaskScheduler'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_TaskScheduler'. Have you authored 'PanelSw:TaskScheduler' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `TaskName`, `Component_`, `TaskXml`, `User`, `Password` FROM `PSW_TaskScheduler`", &hView);

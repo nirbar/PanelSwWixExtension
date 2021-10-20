@@ -38,9 +38,11 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall) noexcept
 
 	// Ensure tables exist.
 	hr = WcaTableExists(L"PSW_SqlScript");
-	ExitOnFailure((hr == S_OK), "Table does not exist 'PSW_SqlScript'. Have you authored 'PanelSw:SqlScript' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_SqlScript'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_SqlScript'. Have you authored 'PanelSw:SqlScript' entries in WiX code?");
 	hr = WcaTableExists(L"PSW_SqlScript_Replacements");
-	ExitOnFailure((hr == S_OK), "Table does not exist 'PSW_SqlScript_Replacements'. Have you authored 'PanelSw:SqlScript' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_SqlScript_Replacements'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_SqlScript_Replacements'. Have you authored 'PanelSw:SqlScript' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `Server`, `Instance`, `Database`, `Username`, `Password`, `Binary_`, `On`, `ErrorHandling`, `Port`, `Encrypted`, `ConnectionString` FROM `PSW_SqlScript` ORDER BY `Order`", &hView);

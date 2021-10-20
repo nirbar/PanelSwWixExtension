@@ -14,7 +14,8 @@ extern "C" UINT __stdcall MsiSqlQuery(MSIHANDLE hInstall) noexcept
 
 	// Ensure table PSW_XmlSearch exists.
 	hr = WcaTableExists(L"PSW_MsiSqlQuery");
-	ExitOnFailure(hr, "Table does not exist 'PSW_MsiSqlQuery'. Have you authored 'PanelSw:MsiSqlQuery' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_MsiSqlQuery'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_MsiSqlQuery'. Have you authored 'PanelSw:MsiSqlQuery' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `Id`, `Property_`, `Query`, `Condition` FROM `PSW_MsiSqlQuery`", &hView);

@@ -16,7 +16,8 @@ extern "C" UINT __stdcall VersionCompare(MSIHANDLE hInstall) noexcept
 
 	// Ensure table PSW_XmlSearch exists.
 	hr = WcaTableExists(L"PSW_VersionCompare");
-	ExitOnNull((hr == S_OK), hr, E_INVALIDSTATE, "Table does not exist 'PSW_VersionCompare'. Have you authored 'PanelSw:VersionCompare' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_VersionCompare'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_VersionCompare'. Have you authored 'PanelSw:VersionCompare' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `Property_`, `Version1`, `Version2` FROM `PSW_VersionCompare`", &hView);

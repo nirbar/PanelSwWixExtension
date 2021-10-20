@@ -35,7 +35,8 @@ extern "C" UINT __stdcall PSW_ShellExecute(MSIHANDLE hInstall) noexcept
 
 	// Ensure table PSW_ShellExecute exists.
 	hr = WcaTableExists(L"PSW_ShellExecute");
-	ExitOnFailure(hr, "Table does not exist 'PSW_ShellExecute'. Have you authored 'PanelSw:ShellExecute' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_ShellExecute'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ShellExecute'. Have you authored 'PanelSw:ShellExecute' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(ShellExecute_QUERY, &hView);

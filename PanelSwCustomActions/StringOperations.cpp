@@ -184,7 +184,8 @@ extern "C" UINT __stdcall ToLowerCase(MSIHANDLE hInstall) noexcept
 
 	// Ensure table PSW_XmlSearch exists.
 	hr = WcaTableExists(L"PSW_ToLowerCase");
-	ExitOnFailure(hr, "Table does not exist 'PSW_ToLowerCase'. Have you authored 'PanelSw:ToLowerCase' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_ToLowerCase'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ToLowerCase'. Have you authored 'PanelSw:ToLowerCase' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(L"SELECT `Property_` FROM `PSW_ToLowerCase`", &hView);
