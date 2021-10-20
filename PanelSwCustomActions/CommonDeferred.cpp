@@ -15,7 +15,7 @@
 #include "RestartLocalResources.h"
 
 // ReceiverToExecutorFunc implementation.
-HRESULT ReceiverToExecutor(LPCSTR szReceiver, CDeferredActionBase** ppExecutor) noexcept
+HRESULT ReceiverToExecutor(LPCSTR szReceiver, CDeferredActionBase** ppExecutor)
 {
 	HRESULT hr = S_OK;
 
@@ -88,7 +88,7 @@ HRESULT ReceiverToExecutor(LPCSTR szReceiver, CDeferredActionBase** ppExecutor) 
 	return hr;
 }
 
-extern "C" UINT __stdcall CommonDeferred(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall CommonDeferred(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

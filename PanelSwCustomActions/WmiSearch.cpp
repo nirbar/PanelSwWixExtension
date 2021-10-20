@@ -8,9 +8,9 @@
 #pragma comment(lib, "wbemuuid.lib")
 using namespace ::com::panelsw::ca;
 
-static HRESULT ExecuteOne(LPCWSTR szNamespace, LPCWSTR szQuery, LPCWSTR szResultProperty, LPCWSTR szProperty) noexcept;
+static HRESULT ExecuteOne(LPCWSTR szNamespace, LPCWSTR szQuery, LPCWSTR szResultProperty, LPCWSTR szProperty);
 
-extern "C" UINT __stdcall WmiSearch(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall WmiSearch(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -95,7 +95,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-static HRESULT ExecuteOne(LPCWSTR szNamespace, LPCWSTR szQuery, LPCWSTR szResultProperty, LPCWSTR szProperty) noexcept
+static HRESULT ExecuteOne(LPCWSTR szNamespace, LPCWSTR szQuery, LPCWSTR szResultProperty, LPCWSTR szProperty)
 {
 	HRESULT hr = S_OK;
 	CComPtr<IWbemLocator> wbemLocator;

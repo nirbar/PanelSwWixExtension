@@ -41,9 +41,9 @@ enum Flags
 	Impersonate = 2 * ASync,
 };
 
-static HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, CExecOnComponent::ExitCodeMap *pExitCodeMap, std::vector<ConsoleOuputRemap> *pConsoleOuput, CExecOnComponent::EnvironmentMap *pEnv, int nFlags, int errorHandling, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart, CExecOnComponent* pBeforeStopImp, CExecOnComponent* pAfterStopImp, CExecOnComponent* pBeforeStartImp, CExecOnComponent* pAfterStartImp) noexcept;
+static HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, CExecOnComponent::ExitCodeMap *pExitCodeMap, std::vector<ConsoleOuputRemap> *pConsoleOuput, CExecOnComponent::EnvironmentMap *pEnv, int nFlags, int errorHandling, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart, CExecOnComponent* pBeforeStopImp, CExecOnComponent* pAfterStopImp, CExecOnComponent* pBeforeStartImp, CExecOnComponent* pAfterStartImp);
 
-extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -463,7 +463,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, CExecOnComponent::ExitCodeMap* pExitCodeMap, std::vector<ConsoleOuputRemap>* pConsoleOuput, CExecOnComponent::EnvironmentMap* pEnv, int nFlags, int errorHandling, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart, CExecOnComponent* pBeforeStopImp, CExecOnComponent* pAfterStopImp, CExecOnComponent* pBeforeStartImp, CExecOnComponent* pAfterStartImp) noexcept
+HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, CExecOnComponent::ExitCodeMap* pExitCodeMap, std::vector<ConsoleOuputRemap>* pConsoleOuput, CExecOnComponent::EnvironmentMap* pEnv, int nFlags, int errorHandling, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart, CExecOnComponent* pBeforeStopImp, CExecOnComponent* pAfterStopImp, CExecOnComponent* pBeforeStartImp, CExecOnComponent* pAfterStartImp)
 {
 	HRESULT hr = S_OK;
 
@@ -524,7 +524,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CExecOnComponent::AddExec(LPCWSTR szCommand, LPCWSTR szObfuscatedCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, ExitCodeMap* pExitCodeMap, vector<ConsoleOuputRemap>* pConsoleOuput, EnvironmentMap* pEnv, int nFlags, ErrorHandling errorHandling) noexcept
+HRESULT CExecOnComponent::AddExec(LPCWSTR szCommand, LPCWSTR szObfuscatedCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, ExitCodeMap* pExitCodeMap, vector<ConsoleOuputRemap>* pConsoleOuput, EnvironmentMap* pEnv, int nFlags, ErrorHandling errorHandling)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command* pCmd = nullptr;
@@ -581,7 +581,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command) noexcept
+HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command)
 {
 	HRESULT hr = S_OK;
 	DWORD exitCode = 0;
@@ -826,7 +826,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CExecOnComponent::LogProcessOutput(HANDLE hStdErrOut, LPWSTR* pszText /* Need to detect whether this is unicode or multibyte */) noexcept
+HRESULT CExecOnComponent::LogProcessOutput(HANDLE hStdErrOut, LPWSTR* pszText /* Need to detect whether this is unicode or multibyte */)
 {
 	const int OUTPUT_BUFFER_SIZE = 1024;
 	DWORD dwBytes = OUTPUT_BUFFER_SIZE;
@@ -941,7 +941,7 @@ LExit:
 // S_OK: Ignore errors and continue
 // E_RETRY: Retry
 // E_FAIL: Abort
-HRESULT CExecOnComponent::SearchStdOut(LPCWSTR szStdOut, const ExecOnDetails& details) noexcept
+HRESULT CExecOnComponent::SearchStdOut(LPCWSTR szStdOut, const ExecOnDetails& details)
 {
 	HRESULT hr = S_FALSE;
 	HRESULT localHr = S_OK;
@@ -1031,7 +1031,7 @@ LExit:
 	return (SUCCEEDED(localHr) ? hr : localHr);
 }
 
-HRESULT CExecOnComponent::SetEnvironment(const ::google::protobuf::Map<std::string, std::string>& customEnv) noexcept
+HRESULT CExecOnComponent::SetEnvironment(const ::google::protobuf::Map<std::string, std::string>& customEnv)
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;

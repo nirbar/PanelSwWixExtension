@@ -18,9 +18,9 @@ enum eXmlMatch
 	enforceSingle
 };
 
-static HRESULT QueryXml(LPCWSTR pFile, LPCWSTR pExpression, LPCWSTR Language, LPCWSTR Namespaces, eXmlMatch eMatch, LPCWSTR pProperty) noexcept;
+static HRESULT QueryXml(LPCWSTR pFile, LPCWSTR pExpression, LPCWSTR Language, LPCWSTR Namespaces, eXmlMatch eMatch, LPCWSTR pProperty);
 
-extern "C" UINT __stdcall XmlSearch(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall XmlSearch(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -113,7 +113,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-static HRESULT QueryXml(LPCWSTR pFile, LPCWSTR pExpression, LPCWSTR szLanguage, LPCWSTR szNamespaces, eXmlMatch eMatch, LPCWSTR pProperty) noexcept
+static HRESULT QueryXml(LPCWSTR pFile, LPCWSTR pExpression, LPCWSTR szLanguage, LPCWSTR szNamespaces, eXmlMatch eMatch, LPCWSTR pProperty)
 {
 	HRESULT hr = S_OK;
 

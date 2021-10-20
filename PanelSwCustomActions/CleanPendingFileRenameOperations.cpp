@@ -12,7 +12,7 @@ using namespace std;
 #define CleanPendingFileRenameOperationsSched_QUERY L"SELECT `File`, `Component_` FROM `File`"
 enum CleanPendingFileRenameOperationsSchedQuery { File = 1, Component = 2 };
 
-extern "C" UINT __stdcall CleanPendingFileRenameOperationsSched(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall CleanPendingFileRenameOperationsSched(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -150,7 +150,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-extern "C" UINT __stdcall CleanPendingFileRenameOperations(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall CleanPendingFileRenameOperations(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

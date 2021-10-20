@@ -9,17 +9,17 @@ class CUnzip :
 {
 public:
 
-	CUnzip() noexcept : CDeferredActionBase("Unzip") { }
+	CUnzip() : CDeferredActionBase("Unzip") { }
 
-	HRESULT AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, ::com::panelsw::ca::UnzipDetails_UnzipFlags flags) noexcept;
+	HRESULT AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, ::com::panelsw::ca::UnzipDetails_UnzipFlags flags);
 
 protected:
-	HRESULT DeferredExecute(const ::std::string& command) noexcept override;
+	HRESULT DeferredExecute(const ::std::string& command) override;
 
 private:
-	HRESULT ShouldOverwriteFile(LPCWSTR szFile, ::com::panelsw::ca::UnzipDetails_UnzipFlags flags) noexcept;
+	HRESULT ShouldOverwriteFile(LPCWSTR szFile, ::com::panelsw::ca::UnzipDetails_UnzipFlags flags);
 
-	HRESULT SetFileTimes(LPCSTR szFilePath, const std::string& extradField) noexcept;
+	HRESULT SetFileTimes(LPCSTR szFilePath, const std::string& extradField);
 
 #pragma pack(push, 1)
 	struct ExtraDataHeader
@@ -66,5 +66,5 @@ private:
 	};
 #pragma pack(pop)
 
-	HRESULT FindTimeInEntry(const std::string& extradField, FILETIME* createTime, FILETIME* accessTime, FILETIME* modifyTime) noexcept;
+	HRESULT FindTimeInEntry(const std::string& extradField, FILETIME* createTime, FILETIME* accessTime, FILETIME* modifyTime);
 };

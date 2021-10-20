@@ -2,7 +2,7 @@
 #include <wcautil.h>
 #include <strutil.h>
 
-HRESULT CSqlClientBase::LogDiagnosticRecord(SQLHANDLE hHandle, SQLSMALLINT hType, SQLRETURN nRetCode, LPWSTR* pszText) noexcept
+HRESULT CSqlClientBase::LogDiagnosticRecord(SQLHANDLE hHandle, SQLSMALLINT hType, SQLRETURN nRetCode, LPWSTR* pszText)
 {
     SQLSMALLINT iRec = 1;
     SQLINTEGER iError = 0;

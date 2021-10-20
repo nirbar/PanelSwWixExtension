@@ -23,7 +23,7 @@ using namespace Poco::Zip;
 - Support rollback (copy current target-folder to temp before decompressing over it).
 */
 
-extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -98,7 +98,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-HRESULT CUnzip::AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, UnzipDetails_UnzipFlags flags) noexcept
+HRESULT CUnzip::AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, UnzipDetails_UnzipFlags flags)
 {
 	HRESULT hr = S_OK;
 	Command* pCmd = nullptr;
@@ -126,7 +126,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CUnzip::DeferredExecute(const ::std::string& command) noexcept
+HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 {
 	HRESULT hr = S_OK;
 	bool bRes = true;
@@ -315,7 +315,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CUnzip::SetFileTimes(LPCSTR szFilePath, const std::string& extradField) noexcept
+HRESULT CUnzip::SetFileTimes(LPCSTR szFilePath, const std::string& extradField)
 {
 	HRESULT hr = S_OK;
 	HANDLE hFile = INVALID_HANDLE_VALUE;
@@ -364,7 +364,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CUnzip::FindTimeInEntry(const std::string& extradField, FILETIME* createTime, FILETIME* accessTime, FILETIME* modifyTime) noexcept
+HRESULT CUnzip::FindTimeInEntry(const std::string& extradField, FILETIME* createTime, FILETIME* accessTime, FILETIME* modifyTime)
 {
 	HRESULT hr = S_OK;
 
@@ -432,7 +432,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CUnzip::ShouldOverwriteFile(LPCWSTR szFile, UnzipDetails_UnzipFlags flags) noexcept
+HRESULT CUnzip::ShouldOverwriteFile(LPCWSTR szFile, UnzipDetails_UnzipFlags flags)
 {
 	HRESULT hr = S_OK;
 	bool bRes = true;

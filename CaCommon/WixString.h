@@ -6,7 +6,7 @@
 class CWixString
 {
 public:
-	CWixString() noexcept
+	CWixString()
 		: _pS(nullptr)
 		, _dwCapacity(0)
 		, _pTokenContext(nullptr)
@@ -14,7 +14,7 @@ public:
 
 	}
 
-	CWixString(const WCHAR* pS) noexcept
+	CWixString(const WCHAR* pS)
 		: _pS(nullptr)
 		, _dwCapacity(0)
 		, _pTokenContext(nullptr)
@@ -22,7 +22,7 @@ public:
 		Copy(pS);
 	}
 
-	CWixString(DWORD dwSize) noexcept
+	CWixString(DWORD dwSize)
 		: _pS(nullptr)
 		, _dwCapacity(0)
 		, _pTokenContext(nullptr)
@@ -30,25 +30,25 @@ public:
 		Allocate(dwSize);
 	}
 
-	~CWixString() noexcept
+	~CWixString()
 	{
 		Release();
 	}
 
 #pragma region Copy C-tor, Assignment operators
 
-	CWixString(const CWixString& other) noexcept
+	CWixString(const CWixString& other)
 	{
 		Copy((LPCWSTR)other);
 	}
 
-	CWixString& operator=(const CWixString& other) noexcept
+	CWixString& operator=(const CWixString& other)
 	{
 		Copy((LPCWSTR)other);
 		return *this;
 	}
 
-	CWixString& operator=(LPCWSTR szOther) noexcept
+	CWixString& operator=(LPCWSTR szOther)
 	{
 		Copy(szOther);
 		return *this;
@@ -56,7 +56,7 @@ public:
 
 #pragma endregion
 
-	HRESULT Allocate(DWORD dwSize) noexcept
+	HRESULT Allocate(DWORD dwSize)
 	{
 		HRESULT hr = S_OK;
 
@@ -75,7 +75,7 @@ public:
 		return hr;
 	}
 
-	HRESULT SecureRelease() noexcept
+	HRESULT SecureRelease()
 	{
 		HRESULT hr = S_OK;
 
@@ -88,7 +88,7 @@ public:
 		return hr;
 	}
 
-	HRESULT Release() noexcept
+	HRESULT Release()
 	{
 		HRESULT hr = S_OK;
 
@@ -106,7 +106,7 @@ public:
 		return hr;
 	}
 
-	LPWSTR Detach() noexcept
+	LPWSTR Detach()
 	{
 		LPWSTR pS = _pS;
 		_pS = nullptr;
@@ -115,7 +115,7 @@ public:
 		return pS;
 	}
 
-	HRESULT Copy(const WCHAR* pS, DWORD dwMax = INFINITE - 1) noexcept
+	HRESULT Copy(const WCHAR* pS, DWORD dwMax = INFINITE - 1)
 	{
 		DWORD dwSize = 0;
 		HRESULT hr = S_OK;
@@ -145,7 +145,7 @@ public:
 		return hr;
 	}
 
-	HRESULT ReplaceAll(LPCWSTR from, LPCWSTR to) noexcept
+	HRESULT ReplaceAll(LPCWSTR from, LPCWSTR to)
 	{
 		HRESULT hr = S_OK;
 
@@ -156,7 +156,7 @@ public:
 		return hr;
 	}
 
-	HRESULT Format(LPCWSTR stFormat, ...) noexcept
+	HRESULT Format(LPCWSTR stFormat, ...)
 	{
 		HRESULT hr = S_OK;
 		va_list va;
@@ -184,7 +184,7 @@ public:
 	// Expand MSI-formatted string.
 	// stFormat: MSI format string
 	// szObfuscated: If not NULL, will receive the expanded string with hidden properties obfuscated.
-	HRESULT MsiFormat(LPCWSTR stFormat, LPWSTR* pszObfuscated = nullptr) noexcept
+	HRESULT MsiFormat(LPCWSTR stFormat, LPWSTR* pszObfuscated = nullptr)
 	{
 		HRESULT hr = S_OK;
 		LPWSTR szNew = nullptr;
@@ -273,7 +273,7 @@ public:
 		return hr;
 	}
 
-	HRESULT AppnedFormat(LPCWSTR szFormat, ...) noexcept
+	HRESULT AppnedFormat(LPCWSTR szFormat, ...)
 	{
 		HRESULT hr = S_OK;
 		va_list va;
@@ -304,7 +304,7 @@ public:
 		return hr;
 	}
 
-	HRESULT ToAnsiString(LPSTR* pszStr) noexcept
+	HRESULT ToAnsiString(LPSTR* pszStr)
 	{
 		HRESULT hr = StrAnsiAllocFormatted(pszStr, "%ls", _pS);
 		return hr;
@@ -312,7 +312,7 @@ public:
 
 #pragma region Tokenize
 
-	HRESULT Tokenize(LPCWSTR delimiters, LPCWSTR* firstToken) noexcept
+	HRESULT Tokenize(LPCWSTR delimiters, LPCWSTR* firstToken)
 	{
 		_pTokenContext = nullptr;
 		(*firstToken) = ::wcstok_s(_pS, delimiters, &_pTokenContext);
@@ -320,7 +320,7 @@ public:
 		return ((*firstToken) == nullptr) ? E_NOMOREITEMS : S_OK;
 	}
 
-	HRESULT NextToken(LPCWSTR delimiters, LPCWSTR* nextToken) noexcept
+	HRESULT NextToken(LPCWSTR delimiters, LPCWSTR* nextToken)
 	{
 		(*nextToken) = ::wcstok_s(nullptr, delimiters, &_pTokenContext);
 
@@ -329,7 +329,7 @@ public:
 
 #pragma endregion	
 
-	DWORD Capacity() const noexcept
+	DWORD Capacity() const
 	{
 		if (_dwCapacity > 0)
 		{
@@ -344,7 +344,7 @@ public:
 		return 0;
 	}
 
-	DWORD StrLen() const noexcept
+	DWORD StrLen() const
 	{
 		if (_pS != nullptr)
 		{
@@ -354,34 +354,34 @@ public:
 		return 0;
 	}
 
-	operator const WCHAR* () const noexcept
+	operator const WCHAR* () const
 	{
 		return _pS;
 	}
 
-	operator WCHAR* () noexcept
+	operator WCHAR* ()
 	{
 		return _pS;
 	}
 
-	operator WCHAR** () noexcept
+	operator WCHAR** ()
 	{
 		Release();
 
 		return &_pS;
 	}
 
-	BOOL IsNullOrEmpty() const noexcept
+	BOOL IsNullOrEmpty() const
 	{
 		return ((_pS == nullptr) || (*_pS == NULL));
 	}
 
-	BOOL operator==(const DWORD_PTR dw) const noexcept
+	BOOL operator==(const DWORD_PTR dw) const
 	{
 		return (_pS == (WCHAR*)dw);
 	}
 
-	BOOL Equals(LPCWSTR szOther) noexcept
+	BOOL Equals(LPCWSTR szOther)
 	{
 		if (IsNullOrEmpty())
 		{
@@ -391,7 +391,7 @@ public:
 		return (::wcscmp(_pS, szOther) == 0);
 	}
 
-	BOOL EqualsIgnoreCase(LPCWSTR szOther) noexcept
+	BOOL EqualsIgnoreCase(LPCWSTR szOther)
 	{
 		if (IsNullOrEmpty())
 		{
@@ -401,7 +401,7 @@ public:
 		return (::_wcsicmp(_pS, szOther) == 0);
 	}
 
-	DWORD Count(WCHAR c) const noexcept
+	DWORD Count(WCHAR c) const
 	{
 		DWORD cnt = 0;
 		LPCWSTR pos = _pS;
@@ -419,7 +419,7 @@ public:
 		return cnt;
 	}
 
-	DWORD Find(LPCWSTR szOther) const noexcept
+	DWORD Find(LPCWSTR szOther) const
 	{
 		LPCWSTR pOther = nullptr;
 
@@ -437,7 +437,7 @@ public:
 		return (pOther - _pS);
 	}
 
-	DWORD Find(WCHAR cOther) const noexcept
+	DWORD Find(WCHAR cOther) const
 	{
 		LPCWSTR pOther = nullptr;
 
@@ -455,7 +455,7 @@ public:
 		return (pOther - _pS);
 	}
 
-	DWORD RFind(WCHAR cOther) const noexcept
+	DWORD RFind(WCHAR cOther) const
 	{
 		LPCWSTR pOther = nullptr;
 
@@ -473,7 +473,7 @@ public:
 		return (pOther - _pS);
 	}
 
-	DWORD FindIgnoreCase(LPCWSTR szOther) const noexcept
+	DWORD FindIgnoreCase(LPCWSTR szOther) const
 	{
 		LPCWSTR pOther = nullptr;
 

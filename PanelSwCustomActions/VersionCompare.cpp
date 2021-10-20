@@ -2,7 +2,7 @@
 #include "../CaCommon/WixString.h"
 #include <fileutil.h>
 
-extern "C" UINT __stdcall VersionCompare(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall VersionCompare(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

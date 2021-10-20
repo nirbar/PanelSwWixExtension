@@ -6,11 +6,11 @@ class CXslTransform :
 {
 public:
 
-	CXslTransform() noexcept : CDeferredActionBase("XslTransform") { }
+	CXslTransform() : CDeferredActionBase("XslTransform") { }
 
-	HRESULT AddExec(LPCWSTR szXmlFilePath, LPCWSTR szXslt) noexcept;
+	HRESULT AddExec(LPCWSTR szXmlFilePath, LPCWSTR szXslt);
 
 protected:
 
-	HRESULT DeferredExecute(const ::std::string& command) noexcept override;
+	HRESULT DeferredExecute(const ::std::string& command) override;
 };

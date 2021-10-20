@@ -10,7 +10,7 @@ using namespace google::protobuf;
 #define DeletePath_QUERY L"SELECT `Id`, `Path`, `Flags`, `Condition` FROM `PSW_DeletePath`"
 enum DeletePathQuery { Id = 1, Path, Flags, Condition };
 
-extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -116,7 +116,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-HRESULT CFileOperations::AddCopyFile(LPCWSTR szFrom, LPCWSTR szTo, int flags) noexcept
+HRESULT CFileOperations::AddCopyFile(LPCWSTR szFrom, LPCWSTR szTo, int flags)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
@@ -147,7 +147,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CFileOperations::AddMoveFile(LPCWSTR szFrom, LPCWSTR szTo, int flags) noexcept
+HRESULT CFileOperations::AddMoveFile(LPCWSTR szFrom, LPCWSTR szTo, int flags)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
@@ -178,7 +178,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CFileOperations::AddDeleteFile(LPCWSTR szPath, int flags) noexcept
+HRESULT CFileOperations::AddDeleteFile(LPCWSTR szPath, int flags)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
@@ -206,7 +206,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CFileOperations::DeferredExecute(const ::std::string& command) noexcept
+HRESULT CFileOperations::DeferredExecute(const ::std::string& command)
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -243,7 +243,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool bIgnoreMissing, bool bIgnoreErrors) noexcept
+HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool bIgnoreMissing, bool bIgnoreErrors)
 {
 	SHFILEOPSTRUCT opInfo;
 	HRESULT hr = S_OK;
@@ -289,7 +289,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bIgnoreErrors) noexcept
+HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bIgnoreErrors)
 {
 	SHFILEOPSTRUCT opInfo;
 	HRESULT hr = S_OK;
@@ -329,7 +329,7 @@ LExit:
 	return hr;
 }
 
-FileRegexDetails::FileEncoding CFileOperations::DetectEncoding(const void* pFileContent, DWORD dwSize) noexcept
+FileRegexDetails::FileEncoding CFileOperations::DetectEncoding(const void* pFileContent, DWORD dwSize)
 {
 	int nTests = IS_TEXT_UNICODE_UNICODE_MASK | IS_TEXT_UNICODE_REVERSE_MASK | IS_TEXT_UNICODE_NOT_UNICODE_MASK | IS_TEXT_UNICODE_NOT_ASCII_MASK;
 	HRESULT hr = S_OK;
@@ -429,7 +429,7 @@ LExit:
 	return eEncoding;
 }
 
-HRESULT CFileOperations::PathToDevicePath(LPCWSTR szPath, LPWSTR* pszDevicePath) noexcept
+HRESULT CFileOperations::PathToDevicePath(LPCWSTR szPath, LPWSTR* pszDevicePath)
 {
 	HRESULT hr = S_OK;
 	CWixString szDevicePath;

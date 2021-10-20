@@ -5,17 +5,17 @@
 CSummaryStream CSummaryStream::_sInst;
 
 
-CSummaryStream* CSummaryStream::GetInstance() noexcept
+CSummaryStream* CSummaryStream::GetInstance()
 {
 	return &_sInst;
 }
 
-CSummaryStream::CSummaryStream() noexcept
+CSummaryStream::CSummaryStream()
 	: _pTemplate( nullptr)
 {
 }
 
-HRESULT CSummaryStream::IsPackageX64( bool *pIsX64) noexcept
+HRESULT CSummaryStream::IsPackageX64( bool *pIsX64)
 {
 	HRESULT hr = S_OK;
 
@@ -43,7 +43,7 @@ LExit:
 	return hr; 
 }
 
-HRESULT CSummaryStream::GetProperty( SummaryStreamProperties eProp, LPWSTR *ppProp) noexcept
+HRESULT CSummaryStream::GetProperty( SummaryStreamProperties eProp, LPWSTR *ppProp)
 {
 	HRESULT hr = S_OK;
 	DWORD dwRes = ERROR_SUCCESS;

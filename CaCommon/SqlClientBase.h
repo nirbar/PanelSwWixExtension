@@ -12,6 +12,6 @@
 class CSqlClientBase
 {
 protected:
-    HRESULT LogDiagnosticRecord(SQLHANDLE hHandle, SQLSMALLINT hType, SQLRETURN nRetCode, LPWSTR *pszText = nullptr) noexcept;
+    HRESULT LogDiagnosticRecord(SQLHANDLE hHandle, SQLSMALLINT hType, SQLRETURN nRetCode, LPWSTR *pszText = nullptr);
 };
 

@@ -10,7 +10,7 @@
 #define WI_MULTISTRING_NULL L"[~]"
 #define WI_MULTISTRING_NULL_SIZE 3
 
-CRegDataSerializer::CRegDataSerializer() noexcept
+CRegDataSerializer::CRegDataSerializer()
 	:_bytes(nullptr)
 	, _size(0)
 	, _bufSize(0)
@@ -18,12 +18,12 @@ CRegDataSerializer::CRegDataSerializer() noexcept
 {
 }
 
-CRegDataSerializer::~CRegDataSerializer() noexcept
+CRegDataSerializer::~CRegDataSerializer()
 {
 	Release();
 }
 
-HRESULT CRegDataSerializer::Release() noexcept
+HRESULT CRegDataSerializer::Release()
 {
 	if (_bytes)
 	{
@@ -38,7 +38,7 @@ HRESULT CRegDataSerializer::Release() noexcept
 	return S_OK;
 }
 
-HRESULT CRegDataSerializer::Allocate(DWORD size) noexcept
+HRESULT CRegDataSerializer::Allocate(DWORD size)
 {
 	HRESULT hr = S_OK;
 
@@ -60,7 +60,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CRegDataSerializer::Set(const BYTE* pData, DWORD dwDataType, DWORD dwSize) noexcept
+HRESULT CRegDataSerializer::Set(const BYTE* pData, DWORD dwDataType, DWORD dwSize)
 {
 	HRESULT hr = S_OK;
 	errno_t err;
@@ -79,7 +79,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CRegDataSerializer::Set(LPCWSTR pDataString, LPCWSTR pDataTypeString) noexcept
+HRESULT CRegDataSerializer::Set(LPCWSTR pDataString, LPCWSTR pDataTypeString)
 {
 	HRESULT hr = S_OK;
 	DWORD dwSize = 0;
@@ -144,7 +144,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CRegDataSerializer::Serialize(LPWSTR* ppDst) const noexcept
+HRESULT CRegDataSerializer::Serialize(LPWSTR* ppDst) const
 {
 	HRESULT hr = S_OK;
 	errno_t err = ERROR_SUCCESS;
@@ -174,7 +174,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CRegDataSerializer::DeSerialize(LPCWSTR pSrc, LPCWSTR sDataType) noexcept
+HRESULT CRegDataSerializer::DeSerialize(LPCWSTR pSrc, LPCWSTR sDataType)
 {
 	HRESULT hr = S_OK;
 	errno_t err = ERROR_SUCCESS;

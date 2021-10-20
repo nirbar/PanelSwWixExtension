@@ -4,9 +4,9 @@
 #include <wcawow64.h>
 using namespace ::com::panelsw::ca;
 
-static void FirstLog(MSIHANDLE hInstall, LPCSTR szMessage) noexcept;
+static void FirstLog(MSIHANDLE hInstall, LPCSTR szMessage);
 
-HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToExecutorFunc mapFunc) noexcept
+HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToExecutorFunc mapFunc)
 {
 	HRESULT hr = S_OK;
 	HRESULT hrErr = S_OK;
@@ -158,16 +158,16 @@ LExit:
 	return SUCCEEDED(hr) ? hrErr : hr;
 }
 
-CDeferredActionBase::CDeferredActionBase(LPCSTR szId) noexcept
+CDeferredActionBase::CDeferredActionBase(LPCSTR szId)
 {
 	_cad.set_id(szId);
 }
 
-CDeferredActionBase::~CDeferredActionBase() noexcept
+CDeferredActionBase::~CDeferredActionBase()
 {
 }
 
-UINT CDeferredActionBase::GetCost() const noexcept
+UINT CDeferredActionBase::GetCost() const
 {
 	UINT cost = 0;
 	for each (const Command cmd in _cad.commands())
@@ -177,7 +177,7 @@ UINT CDeferredActionBase::GetCost() const noexcept
 	return cost;
 }
 
-HRESULT CDeferredActionBase::AddCommand(LPCSTR szHandler, Command **ppCommand) noexcept
+HRESULT CDeferredActionBase::AddCommand(LPCSTR szHandler, Command **ppCommand)
 {
 	HRESULT hr = S_OK;
 	Command *pCmd = nullptr;
@@ -197,12 +197,12 @@ HRESULT CDeferredActionBase::AddCommand(LPCSTR szHandler, Command **ppCommand) n
 	return hr;
 }
 
-bool CDeferredActionBase::HasActions() const noexcept
+bool CDeferredActionBase::HasActions() const
 {
 	return (_cad.commands_size() > 0);
 }
 
-HRESULT CDeferredActionBase::GetCustomActionData(LPWSTR *pszCustomActionData) noexcept
+HRESULT CDeferredActionBase::GetCustomActionData(LPWSTR *pszCustomActionData)
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -224,7 +224,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CDeferredActionBase::Prepend(CDeferredActionBase* pOther) noexcept
+HRESULT CDeferredActionBase::Prepend(CDeferredActionBase* pOther)
 {
 	HRESULT hr = S_OK;
 	CustomActionData mergedCad;
@@ -253,7 +253,7 @@ LExit:
 	return hr;
 }
 
-void CDeferredActionBase::LogUnformatted(LOGLEVEL level, PCSTR szFormat, ...) noexcept
+void CDeferredActionBase::LogUnformatted(LOGLEVEL level, PCSTR szFormat, ...)
 {
 	HRESULT hr = S_OK;
 	int nRes = 0;
@@ -311,7 +311,7 @@ LExit:
 	return;
 }
 
-static void FirstLog(MSIHANDLE hInstall, LPCSTR szMessage) noexcept
+static void FirstLog(MSIHANDLE hInstall, LPCSTR szMessage)
 {
 	HRESULT hr = S_OK;
 

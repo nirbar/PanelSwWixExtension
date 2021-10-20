@@ -11,7 +11,7 @@ using namespace google::protobuf;
 #define BackupAndRestore_QUERY L"SELECT `Id`, `Component_`, `Path`, `Flags` FROM `PSW_BackupAndRestore`"
 enum BackupAndRestoreQuery { Id = 1, Component, Path, Flags, Condition };
 
-extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

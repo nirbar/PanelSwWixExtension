@@ -6,14 +6,14 @@ class CShellExecute :
 {
 public:
 
-	CShellExecute() noexcept : CDeferredActionBase("ShellExec") { }
+	CShellExecute() : CDeferredActionBase("ShellExec") { }
 
-	HRESULT AddShellExec(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR szVerb, LPCWSTR szWorkingDir, int nShow, bool bWait) noexcept;
+	HRESULT AddShellExec(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR szVerb, LPCWSTR szWorkingDir, int nShow, bool bWait);
 
 protected:
 	
-	HRESULT DeferredExecute(const ::std::string& command) noexcept override;
+	HRESULT DeferredExecute(const ::std::string& command) override;
 
 private:
-	HRESULT Execute(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR szVerb, LPCWSTR szWorkingDir, int nShow, bool bWait) noexcept;
+	HRESULT Execute(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR szVerb, LPCWSTR szWorkingDir, int nShow, bool bWait);
 };

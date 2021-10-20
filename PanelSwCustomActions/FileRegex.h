@@ -7,19 +7,19 @@ class CFileRegex :
 {
 public:
 
-	CFileRegex() noexcept : CDeferredActionBase("FileRegex") { }
+	CFileRegex() : CDeferredActionBase("FileRegex") { }
 
-	HRESULT AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, LPCWSTR szRegexObfuscated, LPCWSTR szReplacementObfuscated, ::com::panelsw::ca::FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase) noexcept;
+	HRESULT AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, LPCWSTR szRegexObfuscated, LPCWSTR szReplacementObfuscated, ::com::panelsw::ca::FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase);
 
-	HRESULT Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, LPCWSTR szRegexObfuscated, LPCWSTR szReplacementObfuscated, ::com::panelsw::ca::FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase) noexcept;
+	HRESULT Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, LPCWSTR szRegexObfuscated, LPCWSTR szReplacementObfuscated, ::com::panelsw::ca::FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase);
 
 protected:
 	
-	HRESULT DeferredExecute(const ::std::string& command) noexcept override;
+	HRESULT DeferredExecute(const ::std::string& command) override;
 
 private:
 
-	HRESULT ExecuteMultibyte(LPCWSTR szFilePath, LPCSTR szFileContent, LPCWSTR szRegex, LPCWSTR szReplacement, bool bIgnoreCase) noexcept;
+	HRESULT ExecuteMultibyte(LPCWSTR szFilePath, LPCSTR szFileContent, LPCWSTR szRegex, LPCWSTR szReplacement, bool bIgnoreCase);
 
-	HRESULT ExecuteUnicode(LPCWSTR szFilePath, LPCWSTR szFileContent, LPCWSTR szRegex, LPCWSTR szReplacement, bool bIgnoreCase) noexcept;
+	HRESULT ExecuteUnicode(LPCWSTR szFilePath, LPCWSTR szFileContent, LPCWSTR szRegex, LPCWSTR szReplacement, bool bIgnoreCase);
 };

@@ -6,9 +6,9 @@
 using namespace ::com::panelsw::ca;
 #include "SqlScript.h"
 
-static HRESULT ExecuteOne(LPCWSTR szConnectionString, LPCWSTR szServer, LPCWSTR szInstance, int nPort, LPCWSTR szDatabase, LPCWSTR szUsername, LPCWSTR szPassword, bool bEncrypted, ErrorHandling errorHandling, LPCWSTR szPropertyName, LPCWSTR szQuery) noexcept;
+static HRESULT ExecuteOne(LPCWSTR szConnectionString, LPCWSTR szServer, LPCWSTR szInstance, int nPort, LPCWSTR szDatabase, LPCWSTR szUsername, LPCWSTR szPassword, bool bEncrypted, ErrorHandling errorHandling, LPCWSTR szPropertyName, LPCWSTR szQuery);
 
-extern "C" UINT __stdcall SqlSearch(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall SqlSearch(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -101,7 +101,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-static HRESULT ExecuteOne(LPCWSTR szConnectionString, LPCWSTR szServer, LPCWSTR szInstance, int nPort, LPCWSTR szDatabase, LPCWSTR szUsername, LPCWSTR szPassword, bool bEncrypted, ErrorHandling errorHandling, LPCWSTR szPropertyName, LPCWSTR szQuery) noexcept
+static HRESULT ExecuteOne(LPCWSTR szConnectionString, LPCWSTR szServer, LPCWSTR szInstance, int nPort, LPCWSTR szDatabase, LPCWSTR szUsername, LPCWSTR szPassword, bool bEncrypted, ErrorHandling errorHandling, LPCWSTR szPropertyName, LPCWSTR szQuery)
 {
 	HRESULT hr = S_OK;
 	CSqlConnection sqlConn;

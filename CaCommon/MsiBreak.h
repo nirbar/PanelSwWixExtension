@@ -1,5 +1,5 @@
 #pragma once
 #include "stdafx.h"
 
-HRESULT MsiDebugBreak() noexcept;
-HRESULT MsiBreak() noexcept;
+HRESULT MsiDebugBreak();
+HRESULT MsiBreak();

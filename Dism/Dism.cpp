@@ -21,9 +21,9 @@ enum ErrorHandling
 #define ERROR_ID_PACKAGE	27003
 #define ERROR_ID_FEATURE	27004
 
-static LPCWSTR DismStateString(DismPackageFeatureState state) noexcept;
-static void ProgressCallback(UINT Current, UINT Total, PVOID UserData) noexcept;
-static HRESULT HandleError(ErrorHandling nErrorHandling, UINT nErrorId, LPCWSTR szFeature, LPCWSTR szErrorMsg) noexcept;
+static LPCWSTR DismStateString(DismPackageFeatureState state);
+static void ProgressCallback(UINT Current, UINT Total, PVOID UserData);
+static HRESULT HandleError(ErrorHandling nErrorHandling, UINT nErrorId, LPCWSTR szFeature, LPCWSTR szErrorMsg);
 
 static ULONGLONG nMsiTicksReported_ = 0;
 static HANDLE hCancel_ = NULL;
@@ -57,7 +57,7 @@ struct ProgressReportState
 	- Cost
 	- Error handling
 */
-extern "C" UINT __stdcall Dism(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 {
 	UINT er = ERROR_SUCCESS;
 	HRESULT hr = S_OK;
@@ -352,7 +352,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-static LPCWSTR DismStateString(DismPackageFeatureState state) noexcept
+static LPCWSTR DismStateString(DismPackageFeatureState state)
 {
 	static LPCWSTR NotPresent = L"Absent";
 	static LPCWSTR UninstallPending = L"Pending Remove";
@@ -388,7 +388,7 @@ static LPCWSTR DismStateString(DismPackageFeatureState state) noexcept
 	}
 }
 
-static void ProgressCallback(UINT Current, UINT Total, PVOID UserData) noexcept
+static void ProgressCallback(UINT Current, UINT Total, PVOID UserData)
 {
 	HRESULT hr = S_OK;
 	PMSIHANDLE hRec;
@@ -412,7 +412,7 @@ static void ProgressCallback(UINT Current, UINT Total, PVOID UserData) noexcept
 	}
 }
 
-static HRESULT HandleError(ErrorHandling nErrorHandling, UINT nErrorId, LPCWSTR szFeature, LPCWSTR szErrorMsg) noexcept
+static HRESULT HandleError(ErrorHandling nErrorHandling, UINT nErrorId, LPCWSTR szFeature, LPCWSTR szErrorMsg)
 {
 	HRESULT hr = S_OK;
 

@@ -4,9 +4,9 @@ class CSummaryStream
 public:
 
 	// Singleton
-	static CSummaryStream* GetInstance() noexcept;
+	static CSummaryStream* GetInstance();
 
-	HRESULT IsPackageX64( bool *pIsX64) noexcept;
+	HRESULT IsPackageX64( bool *pIsX64);
 
 
 private:
@@ -34,9 +34,9 @@ private:
 
 	// Singleton
 	static CSummaryStream _sInst;
-	CSummaryStream() noexcept;
+	CSummaryStream();
 
-	HRESULT GetProperty( SummaryStreamProperties eProp, LPWSTR* ppProp) noexcept;
+	HRESULT GetProperty( SummaryStreamProperties eProp, LPWSTR* ppProp);
 
 
 	WCHAR* _pTemplate;

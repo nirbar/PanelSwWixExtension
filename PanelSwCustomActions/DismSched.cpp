@@ -17,7 +17,7 @@ using namespace std;
 	- Cost
 	- Error handling
 */ 
-extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 {
 	UINT er = ERROR_SUCCESS;
 	HRESULT hr = S_OK;

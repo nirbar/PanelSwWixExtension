@@ -42,32 +42,32 @@ public:
 		Users
 	};
 
-	CRegistryKey() noexcept;
-	virtual ~CRegistryKey() noexcept;
+	CRegistryKey();
+	virtual ~CRegistryKey();
 
-	HRESULT Create(RegRoot root, WCHAR* key, RegArea area, RegAccess acecss) noexcept;
-	HRESULT Open(RegRoot root, WCHAR* key, RegArea area, RegAccess acecss) noexcept;
-	HRESULT Delete() noexcept;
+	HRESULT Create(RegRoot root, WCHAR* key, RegArea area, RegAccess acecss);
+	HRESULT Open(RegRoot root, WCHAR* key, RegArea area, RegAccess acecss);
+	HRESULT Delete();
 
-	HRESULT Close() noexcept;
+	HRESULT Close();
 
-	HRESULT EnumValues(DWORD dwIndex, LPWSTR* pszName, RegValueType* pdwType) noexcept;
-	HRESULT GetValue(WCHAR* name, BYTE** pData, RegValueType* pType, DWORD* pDataSize) noexcept;
-	HRESULT GetStringValue(LPWSTR szName, LPWSTR* pszData) noexcept;
+	HRESULT EnumValues(DWORD dwIndex, LPWSTR* pszName, RegValueType* pdwType);
+	HRESULT GetValue(WCHAR* name, BYTE** pData, RegValueType* pType, DWORD* pDataSize);
+	HRESULT GetStringValue(LPWSTR szName, LPWSTR* pszData);
 
-	HRESULT SetValueString(WCHAR* name, WCHAR* value) noexcept;
-	HRESULT SetValue(WCHAR* name, RegValueType type, BYTE* value, DWORD valueSize) noexcept;
+	HRESULT SetValueString(WCHAR* name, WCHAR* value);
+	HRESULT SetValue(WCHAR* name, RegValueType type, BYTE* value, DWORD valueSize);
 
-	HRESULT DeleteValue(WCHAR* name) noexcept;
+	HRESULT DeleteValue(WCHAR* name);
 
-	static HRESULT ParseRoot(LPCWSTR pRootString, RegRoot* peRoot) noexcept;
-	static HRESULT ParseArea(LPCWSTR pAreaString, RegArea* peArea) noexcept;
-	static HRESULT ParseValueType(LPCWSTR pTypeString, RegValueType* peType) noexcept;
-	static HRESULT GetDefaultArea(RegArea* pArea) noexcept;
+	static HRESULT ParseRoot(LPCWSTR pRootString, RegRoot* peRoot);
+	static HRESULT ParseArea(LPCWSTR pAreaString, RegArea* peArea);
+	static HRESULT ParseValueType(LPCWSTR pTypeString, RegValueType* peType);
+	static HRESULT GetDefaultArea(RegArea* pArea);
 
 private:
 
-	HKEY Root2Handle(RegRoot root) noexcept;
+	HKEY Root2Handle(RegRoot root);
 
 	CHKEY _hKey;
 	HKEY _hRootKey;

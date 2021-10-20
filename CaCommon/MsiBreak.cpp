@@ -1,7 +1,7 @@
 #include "MsiBreak.h"
 #include <strsafe.h>
 
-HRESULT MsiDebugBreak() noexcept
+HRESULT MsiDebugBreak()
 {
 	HRESULT hr = S_OK;
 	WCHAR szTest[10];
@@ -28,7 +28,7 @@ LExit:
 	return hr;
 }
 
-HRESULT MsiBreak() noexcept
+HRESULT MsiBreak()
 {
 	HRESULT hr = S_OK;
 	DWORD dwPrcId = 0;

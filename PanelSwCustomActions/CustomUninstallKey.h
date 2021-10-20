@@ -7,12 +7,12 @@
 class CCustomUninstallKey
 {
 public:
-	CCustomUninstallKey( MSIHANDLE hInstall) noexcept;
-	virtual ~CCustomUninstallKey(void) noexcept;
+	CCustomUninstallKey( MSIHANDLE hInstall);
+	virtual ~CCustomUninstallKey(void);
 
-	HRESULT Execute() noexcept;
+	HRESULT Execute();
 	
-	HRESULT CreateCustomActionData() noexcept;
+	HRESULT CreateCustomActionData();
 
 private:
 	enum Attributes
@@ -22,9 +22,9 @@ private:
         Delete = 2
     };
 
-	HRESULT CreateRollbackCustomActionData( CRegistryXmlParser *pRollbackParser, LPCWSTR szProductCode, LPWSTR pId, LPWSTR pName) noexcept;
+	HRESULT CreateRollbackCustomActionData( CRegistryXmlParser *pRollbackParser, LPCWSTR szProductCode, LPWSTR pId, LPWSTR pName);
 
-	HRESULT GetUninstallKey(LPCWSTR szProductCode, LPWSTR keyName) noexcept;
+	HRESULT GetUninstallKey(LPCWSTR szProductCode, LPWSTR keyName);
 
 	MSIHANDLE _hInstall;
 };

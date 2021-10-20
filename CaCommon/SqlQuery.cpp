@@ -2,7 +2,7 @@
 #include <memutil.h>
 #include <strutil.h>
 
-CSqlQuery::~CSqlQuery() noexcept
+CSqlQuery::~CSqlQuery()
 {
     if (hStmt_)
     {
@@ -10,7 +10,7 @@ CSqlQuery::~CSqlQuery() noexcept
     }
 }
 
-HRESULT CSqlQuery::ExecuteQuery(const CSqlConnection &sqlConn, LPCWSTR szQuery, LPWSTR* pszResult, LPWSTR* pszError) noexcept
+HRESULT CSqlQuery::ExecuteQuery(const CSqlConnection &sqlConn, LPCWSTR szQuery, LPWSTR* pszResult, LPWSTR* pszError)
 {
     HRESULT hr = S_OK;
     SQLRETURN sr = SQL_SUCCESS;

@@ -23,14 +23,14 @@ struct
 {
     WCHAR szFullExePath[MAX_PATH + 1];
 
-    bool operator()(const CWixString& folder) const noexcept
+    bool operator()(const CWixString& folder) const
     {
         HRESULT hr = PathDirectoryContainsPath((LPCWSTR)folder, szFullExePath);
         return (hr == S_OK);
     }
 } visInFolder;
 
-extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall)
 {
     HRESULT hr = S_OK;
     UINT er = ERROR_SUCCESS;
@@ -179,7 +179,7 @@ LExit:
     return WcaFinalize(er);
 }
 
-HRESULT CRestartLocalResources::AddRestartLocalResources(LPCWSTR szFilePath, DWORD dwProcId) noexcept
+HRESULT CRestartLocalResources::AddRestartLocalResources(LPCWSTR szFilePath, DWORD dwProcId)
 {
     HRESULT hr = S_OK;
     ::com::panelsw::ca::Command* pCmd = nullptr;
@@ -206,7 +206,7 @@ LExit:
     return hr;
 }
 
-HRESULT CRestartLocalResources::DeferredExecute(const ::std::string& command) noexcept
+HRESULT CRestartLocalResources::DeferredExecute(const ::std::string& command)
 {
     HRESULT hr = S_OK;
     BOOL bRes = TRUE;
@@ -225,7 +225,7 @@ LExit:
     return hr;
 }
 
-HRESULT CRestartLocalResources::Execute(LPCWSTR szFilePath, DWORD dwProcId) noexcept
+HRESULT CRestartLocalResources::Execute(LPCWSTR szFilePath, DWORD dwProcId)
 {
     HRESULT hr = S_OK;
     HANDLE hProcess = NULL;
@@ -257,7 +257,7 @@ LExit:
     return hr;
 }
 
-BOOL CALLBACK CRestartLocalResources::KillWindowsProc(HWND hwnd, LPARAM lParam) noexcept
+BOOL CALLBACK CRestartLocalResources::KillWindowsProc(HWND hwnd, LPARAM lParam)
 {
     DWORD dwMyProcId = static_cast<DWORD>(lParam);
     DWORD dwOtherProcId = 0;

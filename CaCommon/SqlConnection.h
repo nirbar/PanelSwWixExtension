@@ -9,18 +9,18 @@ class CSqlConnection : CSqlClientBase
 {
 public:
 
-    CSqlConnection() noexcept;
-    virtual ~CSqlConnection() noexcept;
+    CSqlConnection();
+    virtual ~CSqlConnection();
 
-    HRESULT Connect(LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, bool bEncrypted, LPWSTR* pszError = nullptr) noexcept;
+    HRESULT Connect(LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, bool bEncrypted, LPWSTR* pszError = nullptr);
 
-    HRESULT Connect(LPCWSTR szConnectionString, LPWSTR *pszError = nullptr) noexcept;
+    HRESULT Connect(LPCWSTR szConnectionString, LPWSTR *pszError = nullptr);
 
-    bool IsConnected() const noexcept;
+    bool IsConnected() const;
 
-    LPCWSTR ConnectionString() const noexcept;
+    LPCWSTR ConnectionString() const;
 
-    const SQLHDBC DatabaseHandle() const noexcept;
+    const SQLHDBC DatabaseHandle() const;
 
 private:
     SQLHENV hEnv_ = NULL;

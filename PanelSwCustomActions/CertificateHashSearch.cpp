@@ -4,11 +4,11 @@
 #include <Wincrypt.h>
 #pragma comment (lib, "Crypt32.lib")
 
-static HRESULT RegBinaryToMem(CWixString &binaryStr, BYTE** ppBytes, DWORD *pSize) noexcept;
-static HRESULT SearchIssuerAndSerial(HCERTSTORE hMachineStore, CWixString &issuer, CWixString &serial, PCCERT_CONTEXT *ppCertContext) noexcept;
-static HRESULT SearchByFriendlyName(HCERTSTORE hMachineStore, LPCWSTR friendlyName, PCCERT_CONTEXT *ppCertContext) noexcept;
+static HRESULT RegBinaryToMem(CWixString &binaryStr, BYTE** ppBytes, DWORD *pSize);
+static HRESULT SearchIssuerAndSerial(HCERTSTORE hMachineStore, CWixString &issuer, CWixString &serial, PCCERT_CONTEXT *ppCertContext);
+static HRESULT SearchByFriendlyName(HCERTSTORE hMachineStore, LPCWSTR friendlyName, PCCERT_CONTEXT *ppCertContext);
 
-extern "C" UINT __stdcall CertificateHashSearch(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall CertificateHashSearch(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -121,7 +121,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-static HRESULT SearchIssuerAndSerial(HCERTSTORE hMachineStore, CWixString &issuer, CWixString &serial, PCCERT_CONTEXT *ppCertContext) noexcept
+static HRESULT SearchIssuerAndSerial(HCERTSTORE hMachineStore, CWixString &issuer, CWixString &serial, PCCERT_CONTEXT *ppCertContext)
 {
 	HRESULT hr = S_OK;
 	CERT_INFO certInfo;
@@ -164,7 +164,7 @@ LExit:
 	return hr;
 }
 
-static HRESULT SearchByFriendlyName(HCERTSTORE hMachineStore, LPCWSTR friendlyName, PCCERT_CONTEXT *ppCertContext) noexcept
+static HRESULT SearchByFriendlyName(HCERTSTORE hMachineStore, LPCWSTR friendlyName, PCCERT_CONTEXT *ppCertContext)
 {
 	HRESULT hr = S_OK;
 	PCCERT_CONTEXT pCertContext = nullptr;
@@ -203,7 +203,7 @@ LExit:
 	return hr;
 }
 
-static HRESULT RegBinaryToMem(CWixString &binaryStr, BYTE** ppBytes, DWORD *pSize) noexcept
+static HRESULT RegBinaryToMem(CWixString &binaryStr, BYTE** ppBytes, DWORD *pSize)
 {
 	HRESULT hr = S_OK;
 	

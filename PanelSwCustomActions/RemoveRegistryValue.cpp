@@ -7,7 +7,7 @@
 #define RemoveRegistryValueQuery L"SELECT `Id`, `Root`, `Key`, `Name`, `Area`, `Attributes`, `Condition` FROM `PSW_RemoveRegistryValue`"
 enum eRemoveRegistryValueQuery { Id = 1, Root, Key, Name, Area, Attributes, Condition };
 
-extern "C" UINT __stdcall RemoveRegistryValue_Immediate(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall RemoveRegistryValue_Immediate(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -137,7 +137,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-extern "C" UINT __stdcall RemoveRegistryValue_Deferred(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall RemoveRegistryValue_Deferred(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

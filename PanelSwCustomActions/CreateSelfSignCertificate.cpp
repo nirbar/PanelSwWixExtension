@@ -11,7 +11,7 @@ enum SelfSignCertificateQuery { Id = 1, Component, X500, SubjectAltNames, Expiry
 
 #define CERT_CONTAINER		L"Panel-SW.co.il"
 
-extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

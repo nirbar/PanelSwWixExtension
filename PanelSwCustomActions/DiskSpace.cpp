@@ -2,7 +2,7 @@
 #include <Shlwapi.h>
 #pragma comment(lib, "Shlwapi.lib")
 
-extern "C" UINT __stdcall DiskSpace(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall DiskSpace(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

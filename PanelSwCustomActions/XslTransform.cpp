@@ -14,10 +14,10 @@
 using namespace com::panelsw::ca;
 using namespace google::protobuf;
 
-static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, LPWSTR *pszXslPath) noexcept;
-static HRESULT ReplaceStrings(LPCWSTR szXslPath, LPCWSTR szXslId) noexcept;
+static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, LPWSTR *pszXslPath);
+static HRESULT ReplaceStrings(LPCWSTR szXslPath, LPCWSTR szXslId);
 
-extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -126,7 +126,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, LPWSTR* pszXslFile) noexcept
+static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, LPWSTR* pszXslFile)
 {
 	HRESULT hr = S_OK;
 	CWixString szMsiQuery;
@@ -165,7 +165,7 @@ LExit:
 	return hr;
 }
 
-static HRESULT ReplaceStrings(LPCWSTR szXslPath, LPCWSTR szXslId) noexcept
+static HRESULT ReplaceStrings(LPCWSTR szXslPath, LPCWSTR szXslId)
 {
 	HRESULT hr = S_OK;
 	CWixString szMsiQuery;
@@ -212,7 +212,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CXslTransform::AddExec(LPCWSTR szXmlFilePath, LPCWSTR szXsltPath) noexcept
+HRESULT CXslTransform::AddExec(LPCWSTR szXmlFilePath, LPCWSTR szXsltPath)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command* pCmd = nullptr;
@@ -239,7 +239,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CXslTransform::DeferredExecute(const ::std::string& command) noexcept
+HRESULT CXslTransform::DeferredExecute(const ::std::string& command)
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;

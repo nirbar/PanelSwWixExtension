@@ -7,17 +7,17 @@ class CRestartLocalResources :
 {
 public:
 
-	CRestartLocalResources() noexcept : CDeferredActionBase("RestartLocalResources") { }
+	CRestartLocalResources() : CDeferredActionBase("RestartLocalResources") { }
 
-	HRESULT AddRestartLocalResources(LPCWSTR szFilePath, DWORD dwProcId) noexcept;
+	HRESULT AddRestartLocalResources(LPCWSTR szFilePath, DWORD dwProcId);
 
 protected:
 	
-	HRESULT DeferredExecute(const ::std::string& command) noexcept override;
+	HRESULT DeferredExecute(const ::std::string& command) override;
 
 private:
 
-	HRESULT Execute(LPCWSTR szFilePath, DWORD dwProcId) noexcept;
+	HRESULT Execute(LPCWSTR szFilePath, DWORD dwProcId);
 
-	static BOOL CALLBACK KillWindowsProc(HWND hwnd, LPARAM lParam) noexcept;
+	static BOOL CALLBACK KillWindowsProc(HWND hwnd, LPARAM lParam);
 };

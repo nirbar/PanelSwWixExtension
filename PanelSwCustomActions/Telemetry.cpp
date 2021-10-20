@@ -19,7 +19,7 @@ enum TelemetryFlags
 	Secure = 8
 };
 
-extern "C" UINT __stdcall Telemetry(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall Telemetry(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -142,7 +142,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-HRESULT CTelemetry::AddPost(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure) noexcept
+HRESULT CTelemetry::AddPost(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command* pCmd = nullptr;
@@ -172,7 +172,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CTelemetry::DeferredExecute(const ::std::string& command) noexcept
+HRESULT CTelemetry::DeferredExecute(const ::std::string& command)
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -204,7 +204,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CTelemetry::Post(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure) noexcept
+HRESULT CTelemetry::Post(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWSTR szData, BOOL bSecure)
 {
 	HRESULT hr = S_OK;
 	DWORD dwSize = 0;

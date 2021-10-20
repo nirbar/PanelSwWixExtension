@@ -3,7 +3,7 @@
 #define SplitProp L"PROPERTY_TO_SPLIT"
 #define SplitTokenProp L"STRING_SPLIT_TOKEN"
 
-extern "C" UINT __stdcall SplitString(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall SplitString(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -80,7 +80,7 @@ LExit:
 
 #define TrimProp L"PROPERTY_TO_TRIM"
 
-extern "C" UINT __stdcall TrimString(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall TrimString(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -170,7 +170,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-extern "C" UINT __stdcall ToLowerCase(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall ToLowerCase(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

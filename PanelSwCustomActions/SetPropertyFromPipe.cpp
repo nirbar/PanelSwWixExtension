@@ -7,9 +7,9 @@ using namespace ::com::panelsw::ca;
 #define SetPropertyFromPipeQuery L"SELECT `PipeName`, `Timeout` FROM `PSW_SetPropertyFromPipe`"
 enum eSetPropertyFromPipeQuery { PipeName = 1, Timeout = 2};
 
-static HRESULT ReadPropertiesFromPipe(LPCWSTR szPipeName, UINT nTimeout) noexcept;
+static HRESULT ReadPropertiesFromPipe(LPCWSTR szPipeName, UINT nTimeout);
 
-extern "C" UINT __stdcall SetPropertyFromPipe(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall SetPropertyFromPipe(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -67,7 +67,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-static HRESULT ReadPropertiesFromPipe(LPCWSTR szPipeName, UINT nTimeout) noexcept
+static HRESULT ReadPropertiesFromPipe(LPCWSTR szPipeName, UINT nTimeout)
 {
 	HRESULT hr = S_OK;
 	HANDLE hPipe = INVALID_HANDLE_VALUE;

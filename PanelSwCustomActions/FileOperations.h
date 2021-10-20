@@ -12,20 +12,20 @@ public:
 		, IgnoreErrors = 2 * IgnoreMissingPath
 	};
 
-	CFileOperations() noexcept : CDeferredActionBase("FileOperations") { }
+	CFileOperations() : CDeferredActionBase("FileOperations") { }
 
-	HRESULT AddCopyFile(LPCWSTR szFrom, LPCWSTR szTo, int flags = 0) noexcept;
-	HRESULT AddMoveFile(LPCWSTR szFrom, LPCWSTR szTo, int flags = 0) noexcept;
-	HRESULT AddDeleteFile(LPCWSTR szFile, int flags = 0) noexcept;
+	HRESULT AddCopyFile(LPCWSTR szFrom, LPCWSTR szTo, int flags = 0);
+	HRESULT AddMoveFile(LPCWSTR szFrom, LPCWSTR szTo, int flags = 0);
+	HRESULT AddDeleteFile(LPCWSTR szFile, int flags = 0);
 
-	HRESULT CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool bIgnoreMissing, bool bIgnoreErrors) noexcept;
-	HRESULT DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bIgnoreErrors) noexcept;
+	HRESULT CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool bIgnoreMissing, bool bIgnoreErrors);
+	HRESULT DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bIgnoreErrors);
 
-	static ::com::panelsw::ca::FileRegexDetails::FileEncoding DetectEncoding(const void* pFileContent, DWORD dwSize) noexcept;
-	static HRESULT PathToDevicePath(LPCWSTR szPath, LPWSTR* pszDevicePath) noexcept;
+	static ::com::panelsw::ca::FileRegexDetails::FileEncoding DetectEncoding(const void* pFileContent, DWORD dwSize);
+	static HRESULT PathToDevicePath(LPCWSTR szPath, LPWSTR* pszDevicePath);
 
 protected:
 	
-	HRESULT DeferredExecute(const ::std::string& command) noexcept override;
+	HRESULT DeferredExecute(const ::std::string& command) override;
 };
 

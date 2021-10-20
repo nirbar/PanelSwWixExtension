@@ -1,6 +1,6 @@
 #include "SqlConnection.h"
 
-CSqlConnection::CSqlConnection() noexcept
+CSqlConnection::CSqlConnection()
 {
 	SQLRETURN sr = SQL_SUCCESS;
     HRESULT hr = S_OK;
@@ -18,7 +18,7 @@ LExit:
 	return;
 }
 
-CSqlConnection::~CSqlConnection() noexcept
+CSqlConnection::~CSqlConnection()
 {
     if (hDbc_)
     {
@@ -36,7 +36,7 @@ CSqlConnection::~CSqlConnection() noexcept
 }
 
 // https://docs.microsoft.com/en-us/sql/relational-databases/native-client/applications/using-connection-string-keywords-with-sql-server-native-client
-HRESULT CSqlConnection::Connect(LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, bool bEncrypted, LPWSTR* pszError) noexcept
+HRESULT CSqlConnection::Connect(LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, bool bEncrypted, LPWSTR* pszError)
 {
     CWixString szConnString;
     CWixString szServerTmp;
@@ -108,7 +108,7 @@ LExit:
 }
 
 
-HRESULT CSqlConnection::Connect(LPCWSTR szConnectionString, LPWSTR* pszError) noexcept
+HRESULT CSqlConnection::Connect(LPCWSTR szConnectionString, LPWSTR* pszError)
 {
     HRESULT hr = S_OK;
     SQLRETURN sr = SQL_SUCCESS;
@@ -138,17 +138,17 @@ LExit:
     return hr;
 }
 
-bool CSqlConnection::IsConnected() const noexcept
+bool CSqlConnection::IsConnected() const
 {
     return bConnected_;
 }
 
-LPCWSTR CSqlConnection::ConnectionString() const noexcept
+LPCWSTR CSqlConnection::ConnectionString() const
 {
     return (LPCWSTR)szConnectionString_;
 }
 
-const SQLHDBC CSqlConnection::DatabaseHandle() const noexcept
+const SQLHDBC CSqlConnection::DatabaseHandle() const
 {
     return hDbc_;
 }

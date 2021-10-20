@@ -18,7 +18,7 @@ enum ShellExecuteFlags
 	OnRollback = 4
 };
 
-extern "C" UINT __stdcall PSW_ShellExecute(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall PSW_ShellExecute(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -132,7 +132,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-HRESULT CShellExecute::AddShellExec(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR szVerb, LPCWSTR szWorkingDir, int nShow, bool bWait) noexcept
+HRESULT CShellExecute::AddShellExec(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR szVerb, LPCWSTR szWorkingDir, int nShow, bool bWait)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command *pCmd = nullptr;
@@ -164,7 +164,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CShellExecute::DeferredExecute(const ::std::string& command) noexcept
+HRESULT CShellExecute::DeferredExecute(const ::std::string& command)
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -195,7 +195,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CShellExecute::Execute(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR szVerb, LPCWSTR szWorkingDir, int nShow, bool bWait) noexcept
+HRESULT CShellExecute::Execute(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR szVerb, LPCWSTR szWorkingDir, int nShow, bool bWait)
 {
 	HRESULT hr = S_OK;
 	SHELLEXECUTEINFO shExecInfo = {};

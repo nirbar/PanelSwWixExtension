@@ -3,7 +3,7 @@
 #include "..\CaCommon\WixString.h"
 #include <errno.h>
 
-extern "C" UINT __stdcall ReadIniValues(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall ReadIniValues(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;

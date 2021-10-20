@@ -18,10 +18,10 @@ enum SqlExecOn
 	, ReinstallRollback = Reinstall * 2
 };
 
-static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, CWixString *pszQuery) noexcept;
-static HRESULT ReplaceStrings(CWixString *pszQuery, LPCWSTR szQueryId) noexcept;
+static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, CWixString *pszQuery);
+static HRESULT ReplaceStrings(CWixString *pszQuery, LPCWSTR szQueryId);
 
-extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -209,7 +209,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, CWixString* pszQuery) noexcept
+static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, CWixString* pszQuery)
 {
 	HRESULT hr = S_OK;
 	CWixString szMsiQuery;
@@ -261,7 +261,7 @@ LExit:
 	return hr;
 }
 
-static HRESULT ReplaceStrings(CWixString* pszQuery, LPCWSTR szQueryId) noexcept
+static HRESULT ReplaceStrings(CWixString* pszQuery, LPCWSTR szQueryId)
 {
 	HRESULT hr = S_OK;
 	CWixString szMsiQuery;
@@ -300,7 +300,7 @@ LExit:
 }
 
 // Copied from WiX function ScaSqlStrsReadScripts
-HRESULT CSqlScript::SplitScript(SqlScriptDetails* pDetails, LPCWSTR pwzScript) noexcept
+HRESULT CSqlScript::SplitScript(SqlScriptDetails* pDetails, LPCWSTR pwzScript)
 {
 	DWORD cchScript = ::wcslen(pwzScript);
 	LPCWSTR pwz = nullptr;
@@ -498,7 +498,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CSqlScript::AddExec(LPCWSTR szConnectionString, LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, bool bEncrypted, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, com::panelsw::ca::ErrorHandling errorHandling) noexcept
+HRESULT CSqlScript::AddExec(LPCWSTR szConnectionString, LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, bool bEncrypted, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, com::panelsw::ca::ErrorHandling errorHandling)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command* pCmd = nullptr;
@@ -535,7 +535,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CSqlScript::DeferredExecute(const ::std::string& command) noexcept
+HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 {
 	HRESULT hr = S_OK;
 	DWORD exitCode = 0;
@@ -636,7 +636,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CSqlScript::ExecuteOne(const CSqlConnection& sqlConn, LPCWSTR szScript, LPWSTR* pszError) noexcept
+HRESULT CSqlScript::ExecuteOne(const CSqlConnection& sqlConn, LPCWSTR szScript, LPWSTR* pszError)
 {
 	HRESULT hr = S_OK;
 	LPWSTR szError = nullptr;

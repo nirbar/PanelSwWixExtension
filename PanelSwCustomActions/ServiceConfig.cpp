@@ -9,7 +9,7 @@
 using namespace com::panelsw::ca;
 using namespace google::protobuf;
 
-extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	DWORD dwRes = ERROR_SUCCESS;
@@ -286,7 +286,7 @@ LExit:
 	return WcaFinalize(dwRes);
 }
 
-HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, LPCWSTR szLoadOrderGroup, LPCWSTR szDependencies, ErrorHandling errorHandling, ServciceConfigDetails_DelayStart delayStart, DWORD dwServiceType) noexcept
+HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, LPCWSTR szLoadOrderGroup, LPCWSTR szDependencies, ErrorHandling errorHandling, ServciceConfigDetails_DelayStart delayStart, DWORD dwServiceType)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command* pCmd = nullptr;
@@ -341,7 +341,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CServiceConfig::DeferredExecute(const ::std::string& command) noexcept
+HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 {
 	HRESULT hr = S_OK;
 	LPCWSTR szServiceName = nullptr;
@@ -394,7 +394,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CServiceConfig::ExecuteOne(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, DWORD dwStart, LPCWSTR szLoadOrderGroup, LPCWSTR szDependencies, ServciceConfigDetails_DelayStart nDelayStart, DWORD dwServiceType) noexcept
+HRESULT CServiceConfig::ExecuteOne(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, DWORD dwStart, LPCWSTR szLoadOrderGroup, LPCWSTR szDependencies, ServciceConfigDetails_DelayStart nDelayStart, DWORD dwServiceType)
 {
 	HRESULT hr = S_OK;
 	SC_HANDLE hManager = NULL;
@@ -436,7 +436,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CServiceConfig::PromptError(LPCWSTR szServiceName, ::com::panelsw::ca::ErrorHandling errorHandling) noexcept
+HRESULT CServiceConfig::PromptError(LPCWSTR szServiceName, ::com::panelsw::ca::ErrorHandling errorHandling)
 {
 	HRESULT hr = S_OK;
 

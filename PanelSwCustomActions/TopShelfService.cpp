@@ -11,7 +11,7 @@ using namespace google::protobuf;
 							  L"WHERE `PSW_TopShelf`.`File_` = `File`.`File`"
 enum TopShelfServiceQuery { Component_ = 1, File_, ServiceName, DisplayName, Description, Instance, Account, UserName, Password, HowToStart, ErrorHandling };
 
-extern "C" UINT __stdcall TopShelf(MSIHANDLE hInstall) noexcept
+extern "C" UINT __stdcall TopShelf(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
 	UINT er = ERROR_SUCCESS;
@@ -155,7 +155,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-HRESULT CTopShelfService::AddInstall(LPCWSTR file, LPCWSTR serviceName, LPCWSTR displayName, LPCWSTR description, LPCWSTR instance, LPCWSTR userName, LPCWSTR passowrd, TopShelfServiceDetails_HowToStart howToStart, TopShelfServiceDetails_ServiceAccount account, com::panelsw::ca::ErrorHandling promptOnError) noexcept
+HRESULT CTopShelfService::AddInstall(LPCWSTR file, LPCWSTR serviceName, LPCWSTR displayName, LPCWSTR description, LPCWSTR instance, LPCWSTR userName, LPCWSTR passowrd, TopShelfServiceDetails_HowToStart howToStart, TopShelfServiceDetails_ServiceAccount account, com::panelsw::ca::ErrorHandling promptOnError)
 {
 	HRESULT hr = S_OK;
 	Command* pCmd = nullptr;
@@ -191,7 +191,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CTopShelfService::AddUninstall(LPCWSTR file, LPCWSTR instance) noexcept
+HRESULT CTopShelfService::AddUninstall(LPCWSTR file, LPCWSTR instance)
 {
 	HRESULT hr = S_OK;
 	Command* pCmd = nullptr;
@@ -219,7 +219,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CTopShelfService::DeferredExecute(const ::std::string& command) noexcept
+HRESULT CTopShelfService::DeferredExecute(const ::std::string& command)
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -318,7 +318,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfServiceDetails* pDetails, CWixString* pCommandLine) noexcept
+HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfServiceDetails* pDetails, CWixString* pCommandLine)
 {
 	HRESULT hr = S_OK;
 	LPWSTR file = nullptr;
