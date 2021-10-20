@@ -7,25 +7,25 @@ class CWixString
 {
 public:
 	CWixString() noexcept
-		: _pS(NULL)
+		: _pS(nullptr)
 		, _dwCapacity(0)
-		, _pTokenContext(NULL)
+		, _pTokenContext(nullptr)
 	{
 
 	}
 
 	CWixString(const WCHAR* pS) noexcept
-		: _pS(NULL)
+		: _pS(nullptr)
 		, _dwCapacity(0)
-		, _pTokenContext(NULL)
+		, _pTokenContext(nullptr)
 	{
 		Copy(pS);
 	}
 
 	CWixString(DWORD dwSize) noexcept
-		: _pS(NULL)
+		: _pS(nullptr)
 		, _dwCapacity(0)
-		, _pTokenContext(NULL)
+		, _pTokenContext(nullptr)
 	{
 		Allocate(dwSize);
 	}
@@ -79,7 +79,7 @@ public:
 	{
 		HRESULT hr = S_OK;
 
-		if (_pS != NULL)
+		if (_pS != nullptr)
 		{
 			SecureZeroMemory(_pS, _dwCapacity);
 			hr = Release();
@@ -92,17 +92,27 @@ public:
 	{
 		HRESULT hr = S_OK;
 
-		if (_pS != NULL)
+		if (_pS != nullptr)
 		{
 			hr = StrFree(_pS);
 			ExitOnFailure(hr, "Failed to free memory");
 
-			_pS = NULL;
+			_pS = nullptr;
 			_dwCapacity = 0;
+			_pTokenContext = nullptr;
 		}
 
 	LExit:
 		return hr;
+	}
+
+	LPWSTR Detach() noexcept
+	{
+		LPWSTR pS = _pS;
+		_pS = nullptr;
+		_dwCapacity = 0;
+		_pTokenContext = nullptr;
+		return pS;
 	}
 
 	HRESULT Copy(const WCHAR* pS, DWORD dwMax = INFINITE - 1) noexcept
@@ -111,7 +121,7 @@ public:
 		HRESULT hr = S_OK;
 		errno_t err = ERROR_SUCCESS;
 
-		if ((pS == NULL) || (*pS == NULL))
+		if ((pS == nullptr) || (*pS == NULL))
 		{
 			hr = Release();
 			ExitOnFailure(hr, "Failed to release string");
@@ -304,17 +314,17 @@ public:
 
 	HRESULT Tokenize(LPCWSTR delimiters, LPCWSTR* firstToken) noexcept
 	{
-		_pTokenContext = NULL;
+		_pTokenContext = nullptr;
 		(*firstToken) = ::wcstok_s(_pS, delimiters, &_pTokenContext);
 
-		return ((*firstToken) == NULL) ? E_NOMOREITEMS : S_OK;
+		return ((*firstToken) == nullptr) ? E_NOMOREITEMS : S_OK;
 	}
 
 	HRESULT NextToken(LPCWSTR delimiters, LPCWSTR* nextToken) noexcept
 	{
-		(*nextToken) = ::wcstok_s(NULL, delimiters, &_pTokenContext);
+		(*nextToken) = ::wcstok_s(nullptr, delimiters, &_pTokenContext);
 
-		return ((*nextToken) == NULL) ? E_NOMOREITEMS : S_OK;
+		return ((*nextToken) == nullptr) ? E_NOMOREITEMS : S_OK;
 	}
 
 #pragma endregion	
@@ -326,7 +336,7 @@ public:
 			return _dwCapacity;
 		}
 
-		if (_pS != NULL)
+		if (_pS != nullptr)
 		{
 			return (1 + ::wcslen(_pS));
 		}
@@ -336,7 +346,7 @@ public:
 
 	DWORD StrLen() const noexcept
 	{
-		if (_pS != NULL)
+		if (_pS != nullptr)
 		{
 			return ::wcslen(_pS);
 		}
@@ -363,7 +373,7 @@ public:
 
 	BOOL IsNullOrEmpty() const noexcept
 	{
-		return ((_pS == NULL) || (*_pS == NULL));
+		return ((_pS == nullptr) || (*_pS == NULL));
 	}
 
 	BOOL operator==(const DWORD_PTR dw) const noexcept
@@ -411,7 +421,7 @@ public:
 
 	DWORD Find(LPCWSTR szOther) const noexcept
 	{
-		LPCWSTR pOther = NULL;
+		LPCWSTR pOther = nullptr;
 
 		if (IsNullOrEmpty())
 		{
@@ -419,7 +429,7 @@ public:
 		}
 
 		pOther = ::wcsstr(_pS, szOther);
-		if (pOther == NULL)
+		if (pOther == nullptr)
 		{
 			return INFINITE;
 		}
@@ -429,7 +439,7 @@ public:
 
 	DWORD Find(WCHAR cOther) const noexcept
 	{
-		LPCWSTR pOther = NULL;
+		LPCWSTR pOther = nullptr;
 
 		if (IsNullOrEmpty())
 		{
@@ -437,7 +447,7 @@ public:
 		}
 
 		pOther = ::wcschr(_pS, cOther);
-		if (pOther == NULL)
+		if (pOther == nullptr)
 		{
 			return INFINITE;
 		}
@@ -447,7 +457,7 @@ public:
 
 	DWORD RFind(WCHAR cOther) const noexcept
 	{
-		LPCWSTR pOther = NULL;
+		LPCWSTR pOther = nullptr;
 
 		if (IsNullOrEmpty())
 		{
@@ -455,7 +465,7 @@ public:
 		}
 
 		pOther = ::wcsrchr(_pS, cOther);
-		if (pOther == NULL)
+		if (pOther == nullptr)
 		{
 			return INFINITE;
 		}
@@ -465,7 +475,7 @@ public:
 
 	DWORD FindIgnoreCase(LPCWSTR szOther) const noexcept
 	{
-		LPCWSTR pOther = NULL;
+		LPCWSTR pOther = nullptr;
 
 		if (IsNullOrEmpty())
 		{
@@ -473,7 +483,7 @@ public:
 		}
 
 		LPCWSTR wzSource = _pS;
-		LPCWSTR wzSearch = NULL;
+		LPCWSTR wzSearch = nullptr;
 		DWORD_PTR cchSourceIndex = 0;
 
 		// Walk through wzString (the source string) one character at a time

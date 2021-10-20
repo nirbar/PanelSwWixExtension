@@ -431,8 +431,8 @@ LExit:
 HRESULT CFileOperations::PathToDevicePath(LPCWSTR szPath, LPWSTR* pszDevicePath) noexcept
 {
 	HRESULT hr = S_OK;
-	LPWSTR szDevicePath = nullptr;
-	LPWSTR szDrive = nullptr;
+	CWixString szDevicePath;
+	CWixString szDrive;
 	LPCWSTR szVolumeEnd = nullptr;
 	WCHAR szDosName[MAX_PATH + 1];
 	DWORD dwRes = ERROR_SUCCESS;
@@ -445,7 +445,7 @@ HRESULT CFileOperations::PathToDevicePath(LPCWSTR szPath, LPWSTR* pszDevicePath)
 		ExitFunction();
 	}
 
-	hr = StrAllocString(&szDrive, szPath, szVolumeEnd - szPath + 1); // Copy C:
+	hr = szDrive.Copy(szPath, szVolumeEnd - szPath + 1); // Copy C:
 	ExitOnFailure(hr, "Failed copying string");
 
 	::ZeroMemory(szDosName, ARRAYSIZE(szDosName) * sizeof(WCHAR));
@@ -453,15 +453,12 @@ HRESULT CFileOperations::PathToDevicePath(LPCWSTR szPath, LPWSTR* pszDevicePath)
 	dwRes = ::QueryDosDevice(szDrive, szDosName, ARRAYSIZE(szDosName));
 	ExitOnNullWithLastError(dwRes, hr, "Failed getting device path for drive '%ls'", szDrive);
 
-	hr = StrAllocFormatted(&szDevicePath, L"%ls%ls", szDosName, szVolumeEnd + 1);
+	hr = szDevicePath.Format(L"%ls%ls", szDosName, szVolumeEnd + 1);
 	ExitOnFailure(hr, "Failed formatting device path");
 
-	*pszDevicePath = szDevicePath;
-	szDevicePath = nullptr;
+	*pszDevicePath = szDevicePath.Detach();
 
 LExit:
-	ReleaseStr(szDevicePath);
-	ReleaseStr(szDrive);
 
 	return hr;
 }
