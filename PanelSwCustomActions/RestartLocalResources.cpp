@@ -23,7 +23,7 @@ struct
 {
     WCHAR szFullExePath[MAX_PATH + 1];
 
-    bool operator()(const CWixString& folder) const
+    bool operator()(const CWixString& folder) const noexcept
     {
         HRESULT hr = PathDirectoryContainsPath((LPCWSTR)folder, szFullExePath);
         return (hr == S_OK);
@@ -49,7 +49,8 @@ extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall) noexcept
     WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
     hr = WcaTableExists(L"PSW_RestartLocalResources");
-    ExitOnFailure(hr, "Table does not exist 'PSW_RestartLocalResources'. Have you authored 'PanelSw:RestartLocalResources' entries in WiX code?");
+    ExitOnFailure(hr, "Failed to check if table exists 'PSW_RestartLocalResources'");
+    ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_RestartLocalResources'. Have you authored 'PanelSw:RestartLocalResources' entries in WiX code?");
 
     // Execute view
     hr = WcaOpenExecuteView(L"SELECT `Path`, `Condition` FROM `PSW_RestartLocalResources`", &hView);
@@ -74,7 +75,7 @@ extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall) noexcept
         {
             MSICONDITION condRes = MSICONDITION::MSICONDITION_NONE;
 
-            condRes = ::MsiEvaluateCondition(hInstall, szCondition);
+            condRes = ::MsiEvaluateCondition(hInstall, (LPCWSTR)szCondition);
             ExitOnNullWithLastError((condRes != MSICONDITION::MSICONDITION_ERROR), hr, "Failed evaluating condition '%ls'", (LPCWSTR)szCondition);
 
             hr = (condRes == MSICONDITION::MSICONDITION_FALSE) ? S_FALSE : S_OK;
@@ -165,7 +166,7 @@ extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall) noexcept
         hr = cad.GetCustomActionData((LPWSTR*)szCustomActionData);
         ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
         
-        hr = WcaSetProperty(L"RestartLocalResourcesExec", szCustomActionData);
+        hr = WcaSetProperty(L"RestartLocalResourcesExec", (LPCWSTR)szCustomActionData);
         ExitOnFailure(hr, "Failed to set property.");
     }
 

@@ -28,7 +28,8 @@ extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall) noexcept
 
 	// Ensure table PSW_DeletePath exists.
 	hr = WcaTableExists(L"PSW_DeletePath");
-	ExitOnFailure(hr, "Table does not exist 'PSW_DeletePath'. Have you authored 'PanelSw:DeletePath' entries in WiX code?");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_DeletePath'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_DeletePath'. Have you authored 'PanelSw:DeletePath' entries in WiX code?");
 
 	// Execute view
 	hr = WcaOpenExecuteView(DeletePath_QUERY, &hView);
@@ -450,15 +451,14 @@ HRESULT CFileOperations::PathToDevicePath(LPCWSTR szPath, LPWSTR* pszDevicePath)
 
 	::ZeroMemory(szDosName, ARRAYSIZE(szDosName) * sizeof(WCHAR));
 
-	dwRes = ::QueryDosDevice(szDrive, szDosName, ARRAYSIZE(szDosName));
-	ExitOnNullWithLastError(dwRes, hr, "Failed getting device path for drive '%ls'", szDrive);
+	dwRes = ::QueryDosDevice((LPCWSTR)szDrive, szDosName, ARRAYSIZE(szDosName));
+	ExitOnNullWithLastError(dwRes, hr, "Failed getting device path for drive '%ls'", (LPCWSTR)szDrive);
 
-	hr = szDevicePath.Format(L"%ls%ls", szDosName, szVolumeEnd + 1);
+	hr = szDevicePath.Format(L"%s%s", szDosName, szVolumeEnd + 1);
 	ExitOnFailure(hr, "Failed formatting device path");
 
 	*pszDevicePath = szDevicePath.Detach();
 
 LExit:
-
 	return hr;
 }
