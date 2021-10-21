@@ -86,7 +86,7 @@ extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall)
             }
         }
 
-        hr = CFileOperations::PathToDevicePath(szPath, (LPWSTR*)szDevicePath);
+        hr = CFileOperations::PathToDevicePath((LPCWSTR)szPath, (LPWSTR*)szDevicePath);
         ExitOnFailure(hr, "Failed to get target folder in device path form");
 
         lstFolders.push_back(szDevicePath);
@@ -111,7 +111,7 @@ extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall)
     }
     else
     {
-        hr = RmuJoinSession(&pSession, szSessionKey);
+        hr = RmuJoinSession(&pSession, (LPCWSTR)szSessionKey);
         if (FAILED(hr))
         {
             WcaLogError(hr, "Failed to join RestartManager session '%ls'.", (LPCWSTR)szSessionKey);

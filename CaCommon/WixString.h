@@ -7,25 +7,16 @@ class CWixString
 {
 public:
 	CWixString()
-		: _pS(nullptr)
-		, _dwCapacity(0)
-		, _pTokenContext(nullptr)
 	{
 
 	}
 
-	CWixString(const WCHAR* pS)
-		: _pS(nullptr)
-		, _dwCapacity(0)
-		, _pTokenContext(nullptr)
+	CWixString(LPCWSTR pS)
 	{
 		Copy(pS);
 	}
 
 	CWixString(DWORD dwSize)
-		: _pS(nullptr)
-		, _dwCapacity(0)
-		, _pTokenContext(nullptr)
 	{
 		Allocate(dwSize);
 	}
@@ -35,11 +26,26 @@ public:
 		Release();
 	}
 
-#pragma region Copy C-tor, Assignment operators
+#pragma region Copy, move c-tors, assignment operators
 
 	CWixString(const CWixString& other)
 	{
 		Copy((LPCWSTR)other);
+	}
+
+	CWixString(CWixString&& other)
+	{
+		_dwCapacity = other._dwCapacity;
+		_pTokenContext = other._pTokenContext;
+		_pS = other.Detach();
+	}
+
+	CWixString& operator=(CWixString&& other)
+	{
+		_dwCapacity = other._dwCapacity;
+		_pTokenContext = other._pTokenContext;
+		_pS = other.Detach();
+		return *this;
 	}
 
 	CWixString& operator=(const CWixString& other)
@@ -115,13 +121,13 @@ public:
 		return pS;
 	}
 
-	HRESULT Copy(const WCHAR* pS, DWORD dwMax = INFINITE - 1)
+	HRESULT Copy(LPCWSTR pS, DWORD dwMax = INFINITE - 1)
 	{
 		DWORD dwSize = 0;
 		HRESULT hr = S_OK;
 		errno_t err = ERROR_SUCCESS;
 
-		if ((pS == nullptr) || (*pS == NULL))
+		if (pS == nullptr)
 		{
 			hr = Release();
 			ExitOnFailure(hr, "Failed to release string");
@@ -514,7 +520,7 @@ public:
 
 private:
 
-	WCHAR* _pS;
-	WCHAR* _pTokenContext;
-	DWORD _dwCapacity;
+	LPWSTR _pS = nullptr;
+	LPWSTR _pTokenContext = nullptr;
+	DWORD _dwCapacity = 0;
 };
