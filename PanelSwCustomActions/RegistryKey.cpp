@@ -70,7 +70,7 @@ LExit:
 HRESULT CRegistryKey::Open(RegRoot root, WCHAR* key, RegArea area, RegAccess access)
 {
 	HRESULT hr = S_OK;
-	HKEY hKey = NULL, hParentKey = NULL;
+	HKEY hParentKey = NULL;
 	LONG lRes;
 
 	ExitOnNull(key, hr, E_INVALIDARG, "key is NULL");
@@ -89,11 +89,10 @@ HRESULT CRegistryKey::Open(RegRoot root, WCHAR* key, RegArea area, RegAccess acc
 		ExitOnFailure(hr, "Failed to get default registry area");
 	}
 
-	lRes = ::RegOpenKeyExW(hParentKey, key, 0, _samAccess | _area, &hKey);
+	lRes = ::RegOpenKeyExW(hParentKey, key, 0, _samAccess | _area, &_hKey);
 	hr = HRESULT_FROM_WIN32(lRes);
 	ExitOnFailure(hr, "Failed to open registry key");
 
-	_hKey = hKey;
 	_hRootKey = hParentKey;
 	wcscpy_s<MAX_PATH>(_keyName, key);
 
@@ -388,15 +387,14 @@ HRESULT CRegistryKey::GetDefaultArea(CRegistryKey::RegArea* pArea)
 {
 	HRESULT hr = S_OK;
 	DWORD dwRes = ERROR_SUCCESS;
-	bool bIsX64 = false;
 
 	ExitOnNull(pArea, hr, E_INVALIDARG, "pArea is NULL");
 	(*pArea) = RegArea::Default;
 
-	hr = CSummaryStream::GetInstance()->IsPackageX64(&bIsX64);
+	hr = CSummaryStream::IsPackageX64();
 	ExitOnFailure(hr, "Failed determining package bitness");
 
-	(*pArea) = bIsX64 ? RegArea::X64 : RegArea::X86;
+	(*pArea) = (hr == S_OK) ? RegArea::X64 : RegArea::X86;
 
 LExit:
 	return hr;

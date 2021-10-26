@@ -4,7 +4,7 @@ template <class T, class D> class CAutoRelease
 {
 public:
 
-	CAutoRelease( T obj)
+	CAutoRelease(T obj)
 		: _obj(obj)
 	{
 	}
@@ -19,7 +19,7 @@ public:
 		D(_obj);
 	}
 
-	T& operator=( T& other)
+	T& operator=(T& other)
 	{
 		Release();
 		_obj = other;
@@ -31,10 +31,16 @@ public:
 		return _obj;
 	}
 
+	T* operator &()
+	{
+		Release();
+		return &_obj;
+	}
+
 private:
 	T _obj;
 };
 
-typedef CAutoRelease<HKEY, decltype( ::RegCloseKey)> CHKEY;
-typedef CAutoRelease<HANDLE, decltype( ::CloseHandle)> CHANDLE;
-typedef CAutoRelease<SC_HANDLE, decltype( ::CloseServiceHandle)> CSC_HANDLE;
+typedef CAutoRelease<HKEY, decltype(::RegCloseKey)> CHKEY;
+typedef CAutoRelease<HANDLE, decltype(::CloseHandle)> CHANDLE;
+typedef CAutoRelease<SC_HANDLE, decltype(::CloseServiceHandle)> CSC_HANDLE;
