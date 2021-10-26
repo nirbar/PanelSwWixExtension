@@ -62,9 +62,6 @@
     <ClInclude Include="DeferredActionBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="AutoRelease.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\customActionData.pb.h">
       <Filter>Header Files</Filter>
     </ClInclude>

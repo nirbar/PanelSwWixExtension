@@ -81,7 +81,6 @@
     <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\command.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="AutoRelease.h" />
     <ClInclude Include="DeferredActionBase.h" />
     <ClInclude Include="MsiBreak.h" />
     <ClInclude Include="SqlClientBase.h" />

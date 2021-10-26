@@ -29,7 +29,6 @@
     <file src="..\CaCommon\SqlQuery.h" target="tools\include"/>
     <file src="..\CaCommon\SummaryStream.h" target="tools\include"/>
     <file src="..\CaCommon\WixString.h" target="tools\include"/>
-    <file src="..\CaCommon\AutoRelease.h" target="tools\include"/>
     <file src=".\Xsd\PanelSwWixExtension.xsd" target="content"/>
     <file src="..\LICENSE" target="LICENSE" />
   </files>

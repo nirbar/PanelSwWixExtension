@@ -1,7 +1,6 @@
 #pragma once
 
 #include <Windows.h>
-#include "..\CaCommon\AutoRelease.h"
 
 class CRegistryKey
 {
@@ -69,7 +68,7 @@ private:
 
 	HKEY Root2Handle(RegRoot root);
 
-	CHKEY _hKey;
+	HKEY _hKey;
 	HKEY _hRootKey;
 	WCHAR _keyName[MAX_PATH];
 

@@ -24,6 +24,12 @@ HRESULT CRegistryKey::Close()
 {
 	HRESULT hr = S_OK;
 
+	if (_hKey)
+	{
+		RegCloseKey(_hKey);
+		_hKey = nullptr;
+	}
+
 	_hRootKey = NULL;
 	::memset(_keyName, 0, sizeof(WCHAR) * MAX_PATH);
 
@@ -35,7 +41,6 @@ HRESULT CRegistryKey::Create(RegRoot root, WCHAR* key, RegArea area, RegAccess a
 	HRESULT hr = S_OK;
 	HKEY hKey = NULL, hParentKey = NULL;
 	LONG lRes;
-
 
 	hr = Close();
 	ExitOnFailure(hr, "Failed to close registry key");
