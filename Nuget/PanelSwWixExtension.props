@@ -10,20 +10,4 @@
       <Name>PanelSwWixExtension</Name>
     </WixExtension>
   </ItemGroup>
-
-  <!-- Properties and Items used in C++ projects -->
-  <ItemGroup>
-    <AdditionalIncludeDirectories Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\include'))"/>
-    <AdditionalLibraryDirectories Include="$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\lib'))"/>
-  </ItemGroup>
-  <ItemDefinitionGroup>
-    <ClCompile>
-      <AdditionalIncludeDirectories>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\include'));%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-    </ClCompile>
-    <Link>
-      <AdditionalLibraryDirectories>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\lib'));%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(MSBuildThisFileDirectory)..\tools\lib\CaCommon.lib;%(AdditionalDependencies)</AdditionalDependencies>
-    </Link>
-  </ItemDefinitionGroup>
-
 </Project>

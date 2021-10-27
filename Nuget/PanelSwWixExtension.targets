@@ -1,7 +1,31 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- Properties and Items used in C++ projects -->
+  <PropertyGroup Condition="'$(MSBuildProjectExtension)'=='.vcxproj'">
+    <PanelSwLibPath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\lib\'))</PanelSwLibPath>
+    <PanelSwIncPath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\include\'))</PanelSwIncPath>    
+    
+    <LibraryPath>$(PanelSwLibPath);$(LibraryPath)</LibraryPath>
+    <IncludePath>$(PanelSwIncPath);$(IncludePath)</IncludePath>
+  </PropertyGroup>
+  
   <ItemGroup Condition="'$(MSBuildProjectExtension)'=='.vcxproj'">
     <Xsd Remove="PanelSwWixExtension.xsd"/>
-    <None Include="$(MSBuildProjectDirectory)PanelSwWixExtension.xsd" Condition="Exists('$(MSBuildProjectDirectory)PanelSwWixExtension.xsd')"/>
+    <Xsd Remove="$(MSBuildProjectDirectory)\PanelSwWixExtension.xsd"/>
+
+    <AdditionalIncludeDirectories Include="$(PanelSwIncPath)"/>
+    <AdditionalLibraryDirectories Include="$(PanelSwLibPath)"/>
   </ItemGroup>
+  
+  <ItemDefinitionGroup Condition="'$(MSBuildProjectExtension)'=='.vcxproj'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(PanelSwIncPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories>$(PanelSwLibPath);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>$(PanelSwLibPath)CaCommon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+
 </Project>
