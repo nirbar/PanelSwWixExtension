@@ -31,9 +31,6 @@
     <ClCompile Include="CustomUninstallKey.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RegistryKey.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="RegistryXmlParser.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -165,9 +162,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="CustomUninstallKey.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="RegistryKey.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="RegistryXmlParser.h">

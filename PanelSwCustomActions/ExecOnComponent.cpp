@@ -1,5 +1,5 @@
 #include "ExecOnComponent.h"
-#include "RegistryKey.h"
+#include "../CaCommon/RegistryKey.h"
 #include "FileOperations.h"
 #include "../CaCommon/WixString.h"
 #include <regex>

@@ -1,6 +1,6 @@
 #include "stdafx.h"
 #include "RegDataSerializer.h"
-#include "RegistryKey.h"
+#include "../CaCommon/RegistryKey.h"
 #include <memory>
 #include <strutil.h>
 #include <memutil.h>

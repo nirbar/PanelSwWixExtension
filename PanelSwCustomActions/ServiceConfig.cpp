@@ -1,5 +1,5 @@
 #include "ServiceConfig.h"
-#include "RegistryKey.h"
+#include "../CaCommon/RegistryKey.h"
 #include "../CaCommon/WixString.h"
 #include <wcautil.h>
 #include <procutil.h>

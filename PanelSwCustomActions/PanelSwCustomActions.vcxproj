@@ -44,7 +44,7 @@
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>libprotobuf-lite.lib;ProtoCaLib.lib;msi.lib;dutil.lib;wcautil.lib;Version.lib;Shell32.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>CaCommon.lib;libprotobuf-lite.lib;ProtoCaLib.lib;msi.lib;dutil.lib;wcautil.lib;Version.lib;Shell32.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(WIX)SDK\VS2017\lib\x86;$(WixToolPath)\..\SDK\VS2017\lib\x86;..\build\protobuf\$(Configuration);..\build\poco\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -89,7 +89,6 @@
     <ClCompile Include="RegDataSerializer.cpp" />
     <ClCompile Include="CustomUninstallKey.cpp" />
     <ClCompile Include="ReadIniValues.cpp" />
-    <ClCompile Include="RegistryKey.cpp" />
     <ClCompile Include="RegistryXmlParser.cpp" />
     <ClCompile Include="RegularExpression.cpp" />
     <ClCompile Include="RemoveRegistryValue.cpp" />
@@ -118,7 +117,6 @@
     <ClInclude Include="FileRegex.h" />
     <ClInclude Include="RegDataSerializer.h" />
     <ClInclude Include="CustomUninstallKey.h" />
-    <ClInclude Include="RegistryKey.h" />
     <ClInclude Include="RegistryXmlParser.h" />
     <ClInclude Include="RestartLocalResources.h" />
     <ClInclude Include="ServiceConfig.h" />

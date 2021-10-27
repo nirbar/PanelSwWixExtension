@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "RegistryXmlParser.h"
-#include "RegistryKey.h"
+#include "../CaCommon/RegistryKey.h"
 #include "RegDataSerializer.h"
 #include <strutil.h>
 #pragma comment( lib, "msxml2.lib")

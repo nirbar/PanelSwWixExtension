@@ -5,7 +5,7 @@
 #include <objbase.h>
 #include <msxml.h>
 #include <atlbase.h>
-#include "RegistryKey.h"
+#include "../CaCommon/RegistryKey.h"
 
 class CRegistryXmlParser
 {

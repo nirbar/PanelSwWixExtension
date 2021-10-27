@@ -1,7 +1,7 @@
 
 #include "stdafx.h"
 #include "CustomUninstallKey.h"
-#include "RegistryKey.h"
+#include "../CaCommon/RegistryKey.h"
 #include "RegDataSerializer.h"
 #include <strutil.h>
 

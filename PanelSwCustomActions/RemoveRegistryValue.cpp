@@ -1,5 +1,5 @@
 #include "stdafx.h"
-#include "RegistryKey.h"
+#include "../CaCommon/RegistryKey.h"
 #include "RegistryXmlParser.h"
 #include "RegDataSerializer.h"
 #include <strutil.h>
