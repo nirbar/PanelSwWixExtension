@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\TidyBuild.1.1.1\build\TidyBuild.props" Condition="Exists('..\packages\TidyBuild.1.1.1\build\TidyBuild.props')" />
+  <Import Project="..\packages\TidyBuild.1.2.0\build\TidyBuild.props" Condition="Exists('..\packages\TidyBuild.1.2.0\build\TidyBuild.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
@@ -31,21 +31,21 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
-    <LibraryPath>$(OutDir)..\CaCommon\;$(OutDir)..\ProtoCaLib\;$(WIX)SDK\VS2017\lib\x86;$(WixToolPath)\..\SDK\VS2017\lib\x86;$(LibraryPath)</LibraryPath>
-    <IncludePath>$(SolutionDir)CaCommon;$(SolutionDir)poco\Zip\include;$(SolutionDir)poco\Foundation\include;$(WIX)SDK\VS2017\inc;$(WixToolPath)\..\SDK\inc;$(IncludePath)</IncludePath>
+    <LibraryPath>$(OutDir)\..\CaCommon\;$(OutDir)\..\ProtoCaLib;$(BuildFolder)\poco\lib\$(Configuration);$(WixSdkPath)\$(WixPlatformToolset)\lib\x86;$(WIX)SDK\VS2017\lib\x86;$(LibraryPath)</LibraryPath>
+    <IncludePath>$(SolutionDir)\CaCommon;$(SolutionDir)\poco\Zip\include;$(SolutionDir)\poco\Foundation\include;$(WixSdkPath)\inc;$(WIX)SDK\VS2017\inc;$(IncludePath)</IncludePath>
     <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>..\protobuf\src;$(IntDir)..\Protobuf;$(WIX)SDK\VS2017\inc;$(WixToolPath)\..\SDK\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\protobuf\src;$(IntDir)\..\Protobuf;$(WixSdkPath)\inc;$(WIX)SDK\VS2017\inc;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;CUSTOMACTIONTEST_EXPORTS;FullVersion="$(FullVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
       <AdditionalDependencies>CaCommon.lib;libprotobuf-lite.lib;ProtoCaLib.lib;msi.lib;dutil.lib;wcautil.lib;Version.lib;Shell32.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(WIX)SDK\VS2017\lib\x86;$(WixToolPath)\..\SDK\VS2017\lib\x86;..\build\protobuf\$(Configuration);..\build\poco\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(WixSdkPath)\$(WixPlatformToolset)\lib\x86;$(WIX)SDK\VS2017\lib\x86;$(BuildFolder)\protobuf\$(Configuration);$(BuildFolder)\poco\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
@@ -126,37 +126,37 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TaskScheduler.h" />
     <ClInclude Include="Telemetry.h" />
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\execOnDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\execOnDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\fileOperationsDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\fileOperationsDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\fileRegexDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\fileRegexDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\servciceConfigDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\servciceConfigDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\shellExecDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\shellExecDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\taskSchedulerDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\taskSchedulerDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\telemetryDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\telemetryDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\topShelfServiceDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\topShelfServiceDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\setPropertyFromPipeDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\setPropertyFromPipeDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\unzipDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\unzipDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\registryValueDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\registryValueDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
     <ClInclude Include="TopShelfService.h" />
@@ -168,22 +168,22 @@
     <None Include="PanelSwCustomActions.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <Target Name="BuildPoco" BeforeTargets="PrepareForBuild" Condition="!Exists('$(SolutionDir)build\poco\lib\$(Configuration)\PocoZipmt.lib')">
-    <MakeDir Directories="$(SolutionDir)build\poco;$(IntDir)..\poco" />
+  <Target Name="BuildPoco" BeforeTargets="PrepareForBuild" Condition="!Exists('$(BuildFolder)\poco\lib\$(Configuration)\PocoZipmt.lib')">
+    <MakeDir Directories="$(BuildFolder)\poco;$(IntDir)\..\poco" />
     <MakeDir Directories="" />
-    <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; -G &quot;Visual Studio 15 2017&quot; -T $(PlatformToolset) -DPOCO_STATIC=ON -DPOCO_MT=ON ..\..\poco" WorkingDirectory="$(SolutionDir)build\poco" />
-    <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; --build . --config $(Configuration)" WorkingDirectory="$(SolutionDir)build\poco" />
+    <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; -G &quot;$(CMakeVsVersion)&quot; -T $(PlatformToolset),host=x86 -A Win32 -DPOCO_STATIC=ON -DPOCO_MT=ON ..\..\poco" WorkingDirectory="$(BuildFolder)\poco" />
+    <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; --build . --config $(Configuration)" WorkingDirectory="$(BuildFolder)\poco" />
   </Target>
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
-    <Import Project="..\packages\TidyBuild.1.1.1\build\TidyBuild.targets" Condition="Exists('..\packages\TidyBuild.1.1.1\build\TidyBuild.targets')" />
+    <Import Project="..\packages\TidyBuild.1.2.0\build\TidyBuild.targets" Condition="Exists('..\packages\TidyBuild.1.2.0\build\TidyBuild.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets'))" />
-    <Error Condition="!Exists('..\packages\TidyBuild.1.1.1\build\TidyBuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.1.1\build\TidyBuild.props'))" />
-    <Error Condition="!Exists('..\packages\TidyBuild.1.1.1\build\TidyBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.1.1\build\TidyBuild.targets'))" />
+    <Error Condition="!Exists('..\packages\TidyBuild.1.2.0\build\TidyBuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.2.0\build\TidyBuild.props'))" />
+    <Error Condition="!Exists('..\packages\TidyBuild.1.2.0\build\TidyBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.2.0\build\TidyBuild.targets'))" />
   </Target>
 </Project>

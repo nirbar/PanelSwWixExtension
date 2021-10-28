@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="4.0" DefaultTargets="Build" InitialTargets="EnsureWixToolsetInstalled" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\TidyBuild.1.1.1\build\TidyBuild.props" Condition="Exists('..\packages\TidyBuild.1.1.1\build\TidyBuild.props')" />
+  <Import Project="..\packages\TidyBuild.1.2.0\build\TidyBuild.props" Condition="Exists('..\packages\TidyBuild.1.2.0\build\TidyBuild.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
@@ -18,8 +18,8 @@
     </NuGetPackageImportStamp>
   </PropertyGroup>
   <PropertyGroup>
-    <OutputPath>$(OutputPath)$(Platform)\</OutputPath>
-    <IntermediateOutputPath>$(IntermediateOutputPath)$(Platform)\</IntermediateOutputPath>
+    <OutputPath>$(OutputPath)\$(Platform)\</OutputPath>
+    <IntermediateOutputPath>$(IntermediateOutputPath)\$(Platform)\</IntermediateOutputPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <DefineConstants>TRACE</DefineConstants>
@@ -52,7 +52,7 @@
     <Reference Include="System.Configuration.Install" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.Deployment.WindowsInstaller">
-      <HintPath>$(WixToolPath)\..\SDK\Microsoft.Deployment.WindowsInstaller.dll</HintPath>
+      <HintPath>$(WixSdkPath)\Microsoft.Deployment.WindowsInstaller.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
@@ -64,7 +64,7 @@
     <Compile Include="ZipFile.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Content Include="CustomAction.config" />
-    <Compile Include="$(IntermediateOutputPath)BuildVersion.cs">
+    <Compile Include="$(IntermediateOutputPath)\BuildVersion.cs">
       <Link>BuildVersion.cs</Link>
       <AutoGen>True</AutoGen>
     </Compile>
@@ -85,8 +85,8 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets'))" />
-    <Error Condition="!Exists('..\packages\TidyBuild.1.1.1\build\TidyBuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.1.1\build\TidyBuild.props'))" />
-    <Error Condition="!Exists('..\packages\TidyBuild.1.1.1\build\TidyBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.1.1\build\TidyBuild.targets'))" />
+    <Error Condition="!Exists('..\packages\TidyBuild.1.2.0\build\TidyBuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.2.0\build\TidyBuild.props'))" />
+    <Error Condition="!Exists('..\packages\TidyBuild.1.2.0\build\TidyBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.2.0\build\TidyBuild.targets'))" />
   </Target>
-  <Import Project="..\packages\TidyBuild.1.1.1\build\TidyBuild.targets" Condition="Exists('..\packages\TidyBuild.1.1.1\build\TidyBuild.targets')" />
+  <Import Project="..\packages\TidyBuild.1.2.0\build\TidyBuild.targets" Condition="Exists('..\packages\TidyBuild.1.2.0\build\TidyBuild.targets')" />
 </Project>

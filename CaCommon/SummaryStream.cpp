@@ -120,7 +120,7 @@ HRESULT CSummaryStream::GetSummaryStreamProperty(SummaryStreamProperties iProper
 
 	dwRes = ::MsiSummaryInfoGetProperty(hSummaryInfo, iProperty, &uiDataType, piValue, &ftJunk, L"", &dwDataSize);
 	ExitOnWin32Error(dwRes, hr, "Failed to get summary stream property");
-	ExitOnNull((uiDataType == VT_I4), hr, E_INVALIDARG, "Property data type is %u. Expected VT_I4", uiDataType);
+	ExitOnNull(((uiDataType == VT_I4) || (uiDataType == VT_I2)), hr, E_INVALIDARG, "Property data type is %u. Expected VT_I4", uiDataType);
 
 LExit:
 	return hr;

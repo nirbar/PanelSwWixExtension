@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <Import Project="$(MSBuildThisFileDirectory)TidyBuild.user.props" Condition="Exists('$(MSBuildThisFileDirectory)TidyBuild.user.props')"/>
   <PropertyGroup>
-    <FullVersion>2.34.4</FullVersion>
+    <FullVersion>2.34.5</FullVersion>
     <FullVersion Condition=" '$(APPVEYOR_BUILD_VERSION)'!='' ">$(APPVEYOR_BUILD_VERSION)</FullVersion>
     <FullVersion Condition=" '$(GITHUB_RUN_NUMBER)'!='' ">$(FullVersion).$(GITHUB_RUN_NUMBER)</FullVersion>
     <ProductName>PanelSwWixExtension</ProductName>
@@ -11,18 +11,10 @@
     <!--
     <NugetPrereleaseVersion>-psw-wix</NugetPrereleaseVersion>
     -->
-
-    <!-- Output folder -->
-    <OutputPath>$(MSBuildThisFileDirectory)build\bin\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
-    <IntermediateOutputPath>$(MSBuildThisFileDirectory)build\obj\$(Configuration)\$(MSBuildProjectName)\</IntermediateOutputPath>
-    <OutDir>$(OutputPath)</OutDir>
-    <IntDir>$(IntermediateOutputPath)</IntDir>
-    <OutputDirectory>$(OutputPath)</OutputDirectory>
-    <IntermediateDirectory>$(IntermediateOutputPath)</IntermediateDirectory>
     
     <!-- CMake -->
-    <CMakeDir Condition="'$(CMakeDir)'==''">$(MSBuildThisFileDirectory)..\..\Tools\cmake-3.11.3-win32-x86\</CMakeDir>
-    <CMakeVsVersion Condition="'$(CMakeVsVersion)'==''">Visual Studio 15 2017</CMakeVsVersion>
+    <CMakeDir Condition="'$(CMakeDir)'==''">D:\Tools\cmake-3.21.3-windows-x86_64\</CMakeDir>
+    <CMakeVsVersion Condition="'$(CMakeVsVersion)'==''">Visual Studio 16 2019</CMakeVsVersion>
     <PlatformToolset Condition="'$(PlatformToolset)'==''">v141_xp</PlatformToolset>
     <XPDeprecationWarning>false</XPDeprecationWarning>
 

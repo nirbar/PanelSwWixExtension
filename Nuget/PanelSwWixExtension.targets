@@ -3,11 +3,12 @@
 
   <!-- Properties and Items used in C++ projects -->
   <PropertyGroup Condition="'$(MSBuildProjectExtension)'=='.vcxproj'">
-    <PanelSwLibPath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\lib\'))</PanelSwLibPath>
-    <PanelSwIncPath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\include\'))</PanelSwIncPath>    
-    
-    <LibraryPath>$(PanelSwLibPath);$(LibraryPath)</LibraryPath>
+    <PanelSwIncPath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\include\'))</PanelSwIncPath>
     <IncludePath>$(PanelSwIncPath);$(IncludePath)</IncludePath>
+
+    <PanelSwLibPath Condition="'$(PlatformToolset)'=='v141_xp' OR '$(PlatformToolset)'=='v140_xp'">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\lib\v141_xp\'))</PanelSwLibPath>
+    <PanelSwLibPath Condition="'$(PlatformToolset)'=='v142' OR '$(PlatformToolset)'=='v141' OR '$(PlatformToolset)'=='v140'">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\lib\v142\'))</PanelSwLibPath>
+    <LibraryPath Condition="'$(PanelSwLibPath)' != ''">$(PanelSwLibPath);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   
   <ItemGroup Condition="'$(MSBuildProjectExtension)'=='.vcxproj'">
@@ -15,7 +16,7 @@
     <Xsd Remove="$(MSBuildProjectDirectory)\PanelSwWixExtension.xsd"/>
 
     <AdditionalIncludeDirectories Include="$(PanelSwIncPath)"/>
-    <AdditionalLibraryDirectories Include="$(PanelSwLibPath)"/>
+    <AdditionalLibraryDirectories Include="$(PanelSwLibPath)" Condition="'$(PanelSwLibPath)' != ''"/>
   </ItemGroup>
   
   <ItemDefinitionGroup Condition="'$(MSBuildProjectExtension)'=='.vcxproj'">
@@ -23,8 +24,8 @@
       <AdditionalIncludeDirectories>$(PanelSwIncPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalLibraryDirectories>$(PanelSwLibPath);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>$(PanelSwLibPath)CaCommon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories Condition="'$(PanelSwLibPath)' != ''">$(PanelSwLibPath);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies Condition="'$(PanelSwLibPath)' != ''">$(PanelSwLibPath)\CaCommon.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
 

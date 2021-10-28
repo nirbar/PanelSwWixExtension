@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\TidyBuild.1.1.1\build\TidyBuild.props" Condition="Exists('..\packages\TidyBuild.1.1.1\build\TidyBuild.props')" />
+  <Import Project="..\packages\TidyBuild.1.2.0\build\TidyBuild.props" Condition="Exists('..\packages\TidyBuild.1.2.0\build\TidyBuild.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
@@ -32,14 +32,14 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>..\protobuf\src;$(IntDir)..\Protobuf;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>..\protobuf\src;$(IntDir)\..\Protobuf;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;CUSTOMACTIONTEST_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>NotUsing</PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
       <AdditionalDependencies>libprotobuf-lite.lib;Version.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>..\build\protobuf\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(BuildFolder)\protobuf\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -47,115 +47,119 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <Optimization>MaxSpeed</Optimization>
+      <Optimization>MinSpace</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
     </Link>
+    <Lib>
+      <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
+    </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\customActionData.pb.cc">
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\customActionData.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\ErrorHandling.pb.cc">
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\ErrorHandling.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\command.pb.cc">
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\command.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\setPropertyFromPipeDetails.pb.cc">
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\setPropertyFromPipeDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\execOnDetails.pb.cc">
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\execOnDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\fileOperationsDetails.pb.cc">
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\fileOperationsDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\fileRegexDetails.pb.cc">
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\fileRegexDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\servciceConfigDetails.pb.cc">
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\servciceConfigDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\shellExecDetails.pb.cc">
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\shellExecDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\sqlScriptDetails.pb.cc">
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\sqlScriptDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\taskSchedulerDetails.pb.cc">
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\taskSchedulerDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\telemetryDetails.pb.cc">
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\telemetryDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\topShelfServiceDetails.pb.cc">
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\topShelfServiceDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\unzipDetails.pb.cc">
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\unzipDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\xslTransformDetails.pb.cc">
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\xslTransformDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
-    <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\restartLocalResourcesDetails.pb.cc">
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\restartLocalResourcesDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\customActionData.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\customActionData.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\ErrorHandling.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\ErrorHandling.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\command.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\command.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\execOnDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\execOnDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\setPropertyFromPipeDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\setPropertyFromPipeDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\fileOperationsDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\fileOperationsDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\fileRegexDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\fileRegexDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\servciceConfigDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\servciceConfigDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\shellExecDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\shellExecDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\sqlScriptDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\sqlScriptDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\taskSchedulerDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\taskSchedulerDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\telemetryDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\telemetryDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\topShelfServiceDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\topShelfServiceDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\unzipDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\unzipDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\xslTransformDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\xslTransformDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\restartLocalResourcesDetails.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\restartLocalResourcesDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
   </ItemGroup>
@@ -181,27 +185,27 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
-    <Import Project="..\packages\TidyBuild.1.1.1\build\TidyBuild.targets" Condition="Exists('..\packages\TidyBuild.1.1.1\build\TidyBuild.targets')" />
+    <Import Project="..\packages\TidyBuild.1.2.0\build\TidyBuild.targets" Condition="Exists('..\packages\TidyBuild.1.2.0\build\TidyBuild.targets')" />
   </ImportGroup>
-  <Target Name="BuildProtobuf" BeforeTargets="ProtoBuffCompile" Condition="!Exists('$(SolutionDir)build\protobuf\$(Configuration)\protoc.exe')">
-    <MakeDir Directories="$(SolutionDir)build\protobuf" />
-    <MakeDir Directories="$(IntDir)..\protobuf" />
-    <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; -G &quot;$(CMakeVsVersion)&quot; -T $(PlatformToolset) ..\..\protobuf\cmake -Dprotobuf_BUILD_TESTS=OFF" WorkingDirectory="$(SolutionDir)build\protobuf" />
-    <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; --build . --config $(Configuration)" WorkingDirectory="$(SolutionDir)build\protobuf" />
+  <Target Name="BuildProtobuf" BeforeTargets="ProtoBuffCompile" Condition="!Exists('$(BuildFolder)\protobuf\$(Configuration)\protoc.exe')">
+    <MakeDir Directories="$(BuildFolder)\protobuf" />
+    <MakeDir Directories="$(IntDir)\..\protobuf" />
+    <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; -G &quot;$(CMakeVsVersion)&quot; -A Win32 -T $(PlatformToolset),host=x86 ..\..\protobuf\cmake -Dprotobuf_BUILD_TESTS=OFF" WorkingDirectory="$(BuildFolder)\protobuf" />
+    <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; --build . --config $(Configuration)" WorkingDirectory="$(BuildFolder)\protobuf" />
   </Target>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets'))" />
-    <Error Condition="!Exists('..\packages\TidyBuild.1.1.1\build\TidyBuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.1.1\build\TidyBuild.props'))" />
-    <Error Condition="!Exists('..\packages\TidyBuild.1.1.1\build\TidyBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.1.1\build\TidyBuild.targets'))" />
+    <Error Condition="!Exists('..\packages\TidyBuild.1.2.0\build\TidyBuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.2.0\build\TidyBuild.props'))" />
+    <Error Condition="!Exists('..\packages\TidyBuild.1.2.0\build\TidyBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.2.0\build\TidyBuild.targets'))" />
   </Target>
   <ItemGroup>
     <ProtoFiles Include="*.proto" />
   </ItemGroup>
-  <Target Name="ProtoBuffCompile" BeforeTargets="PrepareForBuild" Inputs="@(ProtoFiles)" Outputs="$(IntDir)..\Protobuf\%(ProtoFiles.FileName).pb.h;$(IntDir)..\Protobuf\%(ProtoFiles.FileName).pb.cc">
-    <MakeDir Directories="$(IntDir)..\protobuf" />
-    <Exec Command="&quot;$(SolutionDir)build\protobuf\$(Configuration)\protoc.exe&quot; &quot;--proto_path=$(MSBuildProjectDirectory)&quot; &quot;--proto_path=$(SolutionDir)protobuf\src&quot; &quot;--cpp_out=$(IntDir)..\Protobuf&quot; @(ProtoFiles, ' ')" />
+  <Target Name="ProtoBuffCompile" BeforeTargets="PrepareForBuild" Inputs="@(ProtoFiles)" Outputs="$(IntDir)\..\Protobuf\%(ProtoFiles.FileName).pb.h;$(IntDir)\..\Protobuf\%(ProtoFiles.FileName).pb.cc">
+    <MakeDir Directories="$(IntDir)\..\protobuf" />
+    <Exec Command="&quot;$(BuildFolder)\protobuf\$(Configuration)\protoc.exe&quot; &quot;--proto_path=$(MSBuildProjectDirectory)&quot; &quot;--proto_path=$(SolutionDir)\protobuf\src&quot; &quot;--cpp_out=$(IntDir)\..\Protobuf&quot; @(ProtoFiles, ' ')" />
   </Target>
 </Project>

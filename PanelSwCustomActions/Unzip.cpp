@@ -14,6 +14,7 @@
 #include <shlwapi.h>
 #pragma comment (lib, "Iphlpapi.lib")
 #pragma comment (lib, "Shlwapi.lib")
+#pragma comment (lib, "PocoZipmt.lib")
 using namespace ::com::panelsw::ca;
 using namespace google::protobuf;
 using namespace Poco::Zip;

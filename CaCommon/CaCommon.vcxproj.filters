@@ -65,10 +65,10 @@
     <ClInclude Include="DeferredActionBase.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\customActionData.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\customActionData.pb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="..\build\obj\$(Configuration)\Protobuf\command.pb.h">
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\command.pb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="SqlConnection.h">

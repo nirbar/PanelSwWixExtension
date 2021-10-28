@@ -19,12 +19,19 @@ jobs:
         run: |
           choco install windows-adk
           nuget restore
+          cmake.exe -G "Visual Studio 16 2019" -T v142,host=x86 -A Win32 .\protobuf\cmake -Dprotobuf_BUILD_TESTS=OFF -B build-v142\protobuf
+          cmake.exe --build build-v142\protobuf --config Release
           cmake.exe -G "Visual Studio 16 2019" -T v141_xp,host=x86 -A Win32 .\protobuf\cmake -Dprotobuf_BUILD_TESTS=OFF -B build\protobuf
           cmake.exe --build build\protobuf --config Release
           cmake.exe -G "Visual Studio 16 2019" -T v141_xp,host=x86 -A Win32 .\poco -DPOCO_STATIC=ON -DPOCO_MT=ON -B build\poco
           cmake.exe --build build\poco --config Release
 
-      - name: Build for default WiX
+      - name: Build CaCommon v142
+        run: |
+          msbuild ProtoCaLib\ProtoCaLib.vcxproj -p:Configuration=Release -p:Platform=x86 -p:PlatformToolset=v142 -p:BuildFolder="$env:GITHUB_WORKSPACE\build-v142" -p:SolutionDir="$env:GITHUB_WORKSPACE"
+          msbuild CaCommon\CaCommon.vcxproj -p:Configuration=Release -p:Platform=x86 -p:PlatformToolset=v142 -p:BuildFolder="$env:GITHUB_WORKSPACE\build-v142" -p:SolutionDir="$env:GITHUB_WORKSPACE"
+
+      - name: Build PanelSwWixExtension for default WiX
         run: msbuild PanelSwWixExtension.sln -p:Configuration=Release -p:Platform=x86 -p:NugetDir=""
 
       - name: Clean
@@ -32,9 +39,12 @@ jobs:
           Remove-Item "build\bin" -Force -Recurse
           Remove-Item "build\obj" -Force -Recurse
           Remove-Item "build\lib" -Force -Recurse
+          Remove-Item "build-v142\bin\Release\CaCommon" -Force -Recurse
+          Remove-Item "build-v142\obj\Release\CaCommon" -Force -Recurse
 
-      - name: Update nuspec dependency for custom WiX build
+      - name: Update nuspec dependency on custom WiX version
         run: |
+          nuget install PanelSW.Custom.WiX -version $env:CUSTOM_WIX_VERSION
           $xmlDoc = New-Object System.Xml.XmlDocument
           $file = [System.IO.Path]::Combine($env:GITHUB_WORKSPACE, "PanelSwWixExtension", "PanelSwWixExtension-psw-wix.nuspec")
           [xml]$xmlDoc = Get-Content $file
@@ -43,10 +53,13 @@ jobs:
           $xmlDoc.Save($file)
 
           git diff -w
+          
+      - name: Build CaCommon v142 for custom WiX
+        run: |
+          msbuild CaCommon\CaCommon.vcxproj -p:Configuration=Release -p:Platform=x86 -p:PlatformToolset=v142 -p:BuildFolder="$env:GITHUB_WORKSPACE\build-v142" -p:SolutionDir="$env:GITHUB_WORKSPACE" -p:WixToolPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.$env:CUSTOM_WIX_VERSION\tools\bin\" -p:WixSdkPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.$env:CUSTOM_WIX_VERSION\tools\sdk\" -p:WixTargetsPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.$env:CUSTOM_WIX_VERSION\tools\bin\Wix.targets" -p:WixCATargetsPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.$env:CUSTOM_WIX_VERSION\tools\sdk\Wix.CA.targets" -p:WixNativeCATargetsPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.$env:CUSTOM_WIX_VERSION\tools\sdk\Wix.NativeCA.targets" -p:WixTasksPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.$env:CUSTOM_WIX_VERSION\tools\bin\wixtasks.dll" -p:WixInstallPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.$env:CUSTOM_WIX_VERSION\tools\bin\" -p:WixExtDir="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.$env:CUSTOM_WIX_VERSION\tools\bin\" -p:LuxTargetsPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.$env:CUSTOM_WIX_VERSION\tools\bin\lux.targets"
 
-      - name: Build for custom WiX
+      - name: Build PanelSwWixExtension for custom WiX
         run: |          
-          nuget install PanelSW.Custom.WiX -version $env:CUSTOM_WIX_VERSION
           msbuild PanelSwWixExtension.sln -p:Configuration=Release -p:Platform=x86 -p:NugetDir="" -p:NugetPrereleaseVersion=-psw-wix -p:WixToolPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.$env:CUSTOM_WIX_VERSION\tools\bin\" -p:WixSdkPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.$env:CUSTOM_WIX_VERSION\tools\sdk\" -p:WixTargetsPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.$env:CUSTOM_WIX_VERSION\tools\bin\Wix.targets" -p:WixCATargetsPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.$env:CUSTOM_WIX_VERSION\tools\sdk\Wix.CA.targets" -p:WixNativeCATargetsPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.$env:CUSTOM_WIX_VERSION\tools\sdk\Wix.NativeCA.targets" -p:WixTasksPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.$env:CUSTOM_WIX_VERSION\tools\bin\wixtasks.dll" -p:WixInstallPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.$env:CUSTOM_WIX_VERSION\tools\bin\" -p:WixExtDir="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.$env:CUSTOM_WIX_VERSION\tools\bin\" -p:LuxTargetsPath="$env:GITHUB_WORKSPACE\PanelSW.Custom.WiX.$env:CUSTOM_WIX_VERSION\tools\bin\lux.targets"
 
       - uses: actions/upload-artifact@v2

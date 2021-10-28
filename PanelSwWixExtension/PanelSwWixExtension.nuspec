@@ -17,16 +17,22 @@
   <files>
     <file src="..\Nuget\*" target="build" />
     <file src="..\build\bin\Release\PanelSwWixExtension\PanelSwWixExtension.dll" target="tools\lib"/>
-    <file src="..\build\bin\Release\CaCommon\CaCommon.lib" target="tools\lib"/>
+    <file src=".\Xsd\PanelSwWixExtension.xsd" target="content"/>
+    <file src="..\LICENSE" target="LICENSE" />
+
+    <!-- lib -->
+    <file src="..\build\bin\Release\CaCommon\CaCommon.lib" target="tools\lib\v141_xp"/>
+    <file src="..\build-v142\bin\Release\CaCommon\CaCommon.lib" target="tools\lib\v142"/>
+    <!-- inc -->
     <file src="..\CaCommon\DeferredActionBase.h" target="tools\include"/>
+    <file src="..\CaCommon\RegistryKey.h" target="tools\include"/>
     <file src="..\CaCommon\SqlClientBase.h" target="tools\include"/>
     <file src="..\CaCommon\SqlConnection.h" target="tools\include"/>
     <file src="..\CaCommon\SqlQuery.h" target="tools\include"/>
     <file src="..\CaCommon\SummaryStream.h" target="tools\include"/>
     <file src="..\CaCommon\WixString.h" target="tools\include"/>
-    <file src="..\CaCommon\RegistryKey.h" target="tools\include"/>
-    <file src=".\Xsd\PanelSwWixExtension.xsd" target="content"/>
-    <file src="..\LICENSE" target="LICENSE" />
+    <file src="..\build\obj\Release\protobuf\command.pb.h" target="tools\include"/>
+    <file src="..\build\obj\Release\protobuf\customActionData.pb.h" target="tools\include"/>
   </files>
 
 </package>
