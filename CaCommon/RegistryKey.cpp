@@ -32,7 +32,7 @@ void CRegistryKey::Close()
 	_keyName[0] = NULL;
 }
 
-HRESULT CRegistryKey::Create(RegRoot root, WCHAR* key, RegArea area, RegAccess access)
+HRESULT CRegistryKey::Create(RegRoot root, LPCWSTR key, RegArea area, RegAccess access)
 {
 	HRESULT hr = S_OK;
 	HKEY hKey = NULL, hParentKey = NULL;
@@ -63,7 +63,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CRegistryKey::Open(RegRoot root, WCHAR* key, RegArea area, RegAccess access)
+HRESULT CRegistryKey::Open(RegRoot root, LPCWSTR key, RegArea area, RegAccess access)
 {
 	HRESULT hr = S_OK;
 	HKEY hParentKey = NULL;

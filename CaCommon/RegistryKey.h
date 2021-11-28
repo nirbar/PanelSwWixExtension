@@ -44,8 +44,8 @@ public:
 	CRegistryKey();
 	virtual ~CRegistryKey();
 
-	HRESULT Create(RegRoot root, WCHAR* key, RegArea area, RegAccess acecss);
-	HRESULT Open(RegRoot root, WCHAR* key, RegArea area, RegAccess acecss);
+	HRESULT Create(RegRoot root, LPCWSTR key, RegArea area, RegAccess acecss);
+	HRESULT Open(RegRoot root, LPCWSTR key, RegArea area, RegAccess acecss);
 	HRESULT Delete();
 
 	void Close();
