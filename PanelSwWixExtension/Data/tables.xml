@@ -59,7 +59,7 @@
     <columnDefinition name="File_" type="string" length="72" modularize="column" category="identifier" keyTable="File" keyColumn="1" nullable="yes" />
     <columnDefinition name="FilePath" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
     <columnDefinition name="Regex" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Replacement" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Replacement" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
     <columnDefinition name="IgnoreCase" type="number" length="2" nullable="yes" minValue="0" maxValue="127" />
     <columnDefinition name="Encoding" type="number" length="2" nullable="no" minValue="0" maxValue="127" />
     <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />

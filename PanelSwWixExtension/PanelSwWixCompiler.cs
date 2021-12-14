@@ -1510,7 +1510,7 @@ namespace PanelSw.Wix.Extensions
                                             break;
 
                                         case "Replacement":
-                                            to = Core.GetAttributeValue(repLines, a);
+                                            to = Core.GetAttributeValue(repLines, a, true);
                                             break;
 
                                         case "Order":
@@ -1638,7 +1638,7 @@ namespace PanelSw.Wix.Extensions
                                             break;
 
                                         case "Replacement":
-                                            to = Core.GetAttributeValue(repLines, a);
+                                            to = Core.GetAttributeValue(repLines, a, true);
                                             break;
 
                                         case "Order":
@@ -4108,7 +4108,7 @@ namespace PanelSw.Wix.Extensions
                             regex = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Replacement":
-                            replacement = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            replacement = Core.GetAttributeValue(sourceLineNumbers, attrib, true);
                             break;
                         case "IgnoreCase":
                             ignoreCase = true;
