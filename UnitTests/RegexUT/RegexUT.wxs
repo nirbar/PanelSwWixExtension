@@ -57,14 +57,28 @@
                                DstProperty="HOSTS"
                                Expression=".*127\.0\.0\.1.*"
                                />
+    <Property Id="REPLACE_WITH_EMPTY" Value="1 0 0">
+      <PanelSW:RegularExpression Input="[REPLACE_WITH_EMPTY]" Expression="0" Replacement=""/>
+    </Property>
+    
     <CustomAction Id="TextRegexMatch" Error="REGEX_MATCH_1 Should be '[MY_INPUT]'" Execute="immediate" />
     <CustomAction Id="TextRegexReplace" Error="REGEX_REPLACE Should be 'My Input IS OUR INPUT'" Execute="immediate" />
     <CustomAction Id="TextRegexReplace2" Error="REGEX_REPLACE_3 Should be 'My Input is Test Text'" Execute="immediate" />
+    <CustomAction Id="TextRegexReplace3" Error="REPLACE_WITH_EMPTY Should be '1  '" Execute="immediate" />
+    <CustomActionRef Id="TerminateSuccessfully_Immediate"/>
     <InstallUISequence>
       <Custom Action="TextRegexMatch" After="RegularExpression"><![CDATA[REGEX_MATCH_1<>MY_INPUT]]></Custom>
       <Custom Action="TextRegexReplace" After="TextRegexMatch"><![CDATA[REGEX_REPLACE<>"My Input IS OUR INPUT"]]></Custom>
       <Custom Action="TextRegexReplace2" After="TextRegexMatch"><![CDATA[REGEX_REPLACE_3<>"My Input is Test Text"]]></Custom>
+      <Custom Action="TextRegexReplace3" After="TextRegexMatch"><![CDATA[REPLACE_WITH_EMPTY<>"1  "]]></Custom>
     </InstallUISequence>
+    <InstallExecuteSequence>
+      <Custom Action="TextRegexMatch" After="RegularExpression"><![CDATA[REGEX_MATCH_1<>MY_INPUT]]></Custom>
+      <Custom Action="TextRegexReplace" After="TextRegexMatch"><![CDATA[REGEX_REPLACE<>"My Input IS OUR INPUT"]]></Custom>
+      <Custom Action="TextRegexReplace2" After="TextRegexMatch"><![CDATA[REGEX_REPLACE_3<>"My Input is Test Text"]]></Custom>
+      <Custom Action="TextRegexReplace3" After="TextRegexMatch"><![CDATA[REPLACE_WITH_EMPTY<>"1  "]]></Custom>
+      <Custom Action="TerminateSuccessfully_Immediate" Before="InstallInitialize"/>
+    </InstallExecuteSequence>
 
     <Property Id="MB460" Value="MB460=" Hidden="yes"/>
     <Property Id="BSMALL" Value="bSmall" Hidden="yes"/>

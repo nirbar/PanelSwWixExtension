@@ -3919,7 +3919,7 @@ namespace PanelSw.Wix.Extensions
                             regex = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Replacement":
-                            replacement = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            replacement = Core.GetAttributeValue(sourceLineNumbers, attrib, true);
                             flags |= (int)RegexSearchFlags.Replace;
                             break;
                         case "DstProperty":
