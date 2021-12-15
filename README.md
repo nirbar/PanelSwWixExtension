@@ -7,6 +7,7 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
 ## PanelSwWixExtension WiX Elements
 
 - Immediate Actions:
+  - *Md5Hash*: Computes MD5 hash.
   - *WmiSearch*: Execute a WMI query.
   - *PathSearch*: Search for a file on PATH environment variable folder list.
   - *VersionCompare*: Compare two versions, set result to property as -1, 0, or 1
@@ -136,5 +137,5 @@ After building a unit test project, you'll need to shutdown Visual Studio before
 This is due to the unfortunate habit of Visual Studio to hold the extension file in use.
 You may find it convenient to build unit test projects from a command prompt to workaround this limitation
 ~~~~~~~~~~~~
-MSBuild UnitTests\RestartLocalResourcesUT\RestartLocalResourcesUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
+MSBuild UnitTests\Md5HashUT\Md5HashUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
 ~~~~~~~~~~~~

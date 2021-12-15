@@ -114,6 +114,8 @@ Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "WmiSearchUT", "UnitTests\Wm
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "RestartLocalResourcesUT", "UnitTests\RestartLocalResourcesUT\RestartLocalResourcesUT.wixproj", "{71CA675A-453F-4756-924F-CD36C6C162E8}"
 EndProject
+Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "Md5HashUT", "UnitTests\Md5HashUT\Md5HashUT.wixproj", "{42520F9E-9D2A-4FD8-B747-2CC03120F588}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Release|x86 = Release|x86
@@ -170,6 +172,8 @@ Global
 		{426A6EC1-D3D6-4A88-85B9-4595A04E6D4A}.Release|x86.Build.0 = Release|x86
 		{71CA675A-453F-4756-924F-CD36C6C162E8}.Release|x86.ActiveCfg = Release|x86
 		{71CA675A-453F-4756-924F-CD36C6C162E8}.Release|x86.Build.0 = Release|x86
+		{42520F9E-9D2A-4FD8-B747-2CC03120F588}.Release|x86.ActiveCfg = Release|x86
+		{42520F9E-9D2A-4FD8-B747-2CC03120F588}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -210,6 +214,7 @@ Global
 		{60408F7C-8FEB-4F24-A437-6DE8850223AB} = {B533D9FC-4927-4A05-892D-B90E8BEDCF5D}
 		{426A6EC1-D3D6-4A88-85B9-4595A04E6D4A} = {B533D9FC-4927-4A05-892D-B90E8BEDCF5D}
 		{71CA675A-453F-4756-924F-CD36C6C162E8} = {B533D9FC-4927-4A05-892D-B90E8BEDCF5D}
+		{42520F9E-9D2A-4FD8-B747-2CC03120F588} = {B533D9FC-4927-4A05-892D-B90E8BEDCF5D}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {F5B6389D-77ED-4938-A322-8DFCA4D9FEF5}

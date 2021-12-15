@@ -48,3 +48,4 @@ EXPORTS
 	CheckRebootRequired
 	WmiSearch
 	RestartLocalResources
+	Md5Hash

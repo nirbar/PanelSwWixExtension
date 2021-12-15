@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
+  <Product Id="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}" Name="Md5HashUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate />
+
+    <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
+      <Component Directory="INSTALLFOLDER">
+        <File Source="$(sys.SOURCEFILEPATH)"/>
+      </Component>
+    </Feature>
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+      </Directory>
+    </Directory>
+
+    <Property Id="MSIFASTINSTALL" Value="1"></Property>
+
+    <Property Id="TEST_1">
+      <PanelSW:Md5Hash Plain="PANELSWWIXEXTENSION"/>
+    </Property>
+    <Property Id="TEST_2">
+      <PanelSW:Md5Hash Plain="panelswwixextension"/>
+    </Property>
+    
+    <CustomAction Id="Test1" Error="TEST_1 Should be '0CFBC78A1BD97175288A927F31900F84'" Execute="immediate" />
+    <CustomAction Id="Test2" Error="TEST_2 Should be '5A20070785F438E51DF985FFC8C37689'" Execute="immediate" />
+    <CustomActionRef Id="TerminateSuccessfully_Immediate"/>
+    <InstallUISequence>
+      <Custom Action="Test1" After="Md5Hash"><![CDATA[TEST_1<>"0CFBC78A1BD97175288A927F31900F84"]]></Custom>
+      <Custom Action="Test2" After="Md5Hash"><![CDATA[TEST_2<>"5A20070785F438E51DF985FFC8C37689"]]></Custom>
+    </InstallUISequence>
+    <InstallExecuteSequence>
+      <Custom Action="Test1" After="Md5Hash"><![CDATA[TEST_1<>"0CFBC78A1BD97175288A927F31900F84"]]></Custom>
+      <Custom Action="Test2" After="Md5Hash"><![CDATA[TEST_2<>"5A20070785F438E51DF985FFC8C37689"]]></Custom>
+      <Custom Action="TerminateSuccessfully_Immediate" Before="InstallInitialize"/>
+    </InstallExecuteSequence>
+  </Product>
+</Wix>

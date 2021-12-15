@@ -32,6 +32,28 @@
     </xs:annotation>
   </xs:attribute>
 
+  <xs:element name="Md5Hash">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Computes a MD5 hash and stores it in the property]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Plain" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Text to compute MD5 for. The text is converted to ANSI string and then hashed. This field is formatted</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="PathSearch">
     <xs:annotation>
       <xs:appinfo>

@@ -772,6 +772,20 @@
     </UI>
   </Fragment>
 
+  <!-- Md5Hash -->
+  <Fragment>
+    <CustomAction Id="Md5Hash" BinaryKey="PanelSwCustomActions.dll" DllEntry="Md5Hash" Execute="firstSequence" />
+    <InstallExecuteSequence>
+      <Custom Action="Md5Hash" After="AppSearch" Overridable="yes"/>
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="Md5Hash" After="AppSearch" Overridable="yes"/>
+    </InstallUISequence>
+    <UI>
+      <ProgressText Action="Md5Hash">!(loc.Md5Hash)</ProgressText>
+    </UI>
+  </Fragment>
+
   <!-- RestartLocalResources -->
   <Fragment>
     <CustomAction Id="RestartLocalResources" BinaryKey="PanelSwCustomActions.dll" DllEntry="RestartLocalResources" Execute="immediate" SuppressModularization="yes"/>
