@@ -27,17 +27,23 @@
     <Property Id="TEST_2">
       <PanelSW:Md5Hash Plain="panelswwixextension"/>
     </Property>
+    <Property Id="TEST_3">
+      <PanelSW:Md5Hash Plain="[nothing]"/>
+    </Property>
     
     <CustomAction Id="Test1" Error="TEST_1 Should be '0CFBC78A1BD97175288A927F31900F84'" Execute="immediate" />
     <CustomAction Id="Test2" Error="TEST_2 Should be '5A20070785F438E51DF985FFC8C37689'" Execute="immediate" />
+    <CustomAction Id="Test3" Error="TEST_3 Should be empty" Execute="immediate" />
     <CustomActionRef Id="TerminateSuccessfully_Immediate"/>
     <InstallUISequence>
       <Custom Action="Test1" After="Md5Hash"><![CDATA[TEST_1<>"0CFBC78A1BD97175288A927F31900F84"]]></Custom>
       <Custom Action="Test2" After="Md5Hash"><![CDATA[TEST_2<>"5A20070785F438E51DF985FFC8C37689"]]></Custom>
+      <Custom Action="Test3" After="Md5Hash"><![CDATA[TEST_3]]></Custom>
     </InstallUISequence>
     <InstallExecuteSequence>
       <Custom Action="Test1" After="Md5Hash"><![CDATA[TEST_1<>"0CFBC78A1BD97175288A927F31900F84"]]></Custom>
       <Custom Action="Test2" After="Md5Hash"><![CDATA[TEST_2<>"5A20070785F438E51DF985FFC8C37689"]]></Custom>
+      <Custom Action="Test3" After="Md5Hash"><![CDATA[TEST_3]]></Custom>
       <Custom Action="TerminateSuccessfully_Immediate" Before="InstallInitialize"/>
     </InstallExecuteSequence>
   </Product>

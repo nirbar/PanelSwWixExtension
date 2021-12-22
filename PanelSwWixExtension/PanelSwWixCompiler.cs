@@ -284,9 +284,156 @@ namespace PanelSw.Wix.Extensions
                         }
                         break;
                     }
+
+                case "PatchFamily":
+                    switch (element.LocalName)
+                    {
+                        case "CustomPatchRef":
+                            ParseCustomPatchRefElement(element);
+                            break;
+                        default:
+                            Core.UnexpectedElement(parentElement, element);
+                            break;
+                    }
+                    break;
+
                 default:
                     Core.UnexpectedElement(parentElement, element);
                     break;
+            }
+        }
+
+        private void ParseCustomPatchRefElement(XmlElement element)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
+            string table = null;
+            string key = null;
+
+            foreach (XmlAttribute attrib in element.Attributes)
+            {
+                if ((0 != attrib.NamespaceURI.Length) && (attrib.NamespaceURI != schema.TargetNamespace))
+                {
+                    continue;
+                }
+
+                switch (attrib.LocalName)
+                {
+                    case "Table":
+                        table = Core.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                        break;
+                    case "Key":
+                        key = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+                    default:
+                        Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                        break;
+                }
+            }
+
+            if (string.IsNullOrEmpty(table))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "Table"));
+            }
+            if (string.IsNullOrEmpty(key))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "Key"));
+            }
+
+            List<string> customActions = new List<string>();
+            switch (table)
+            {
+                case "PSW_XmlSearch":
+                    customActions.Add("XmlSearch");
+                    break;
+                case "PSW_FileRegex":
+                    customActions.Add("FileRegex_Immediate");
+                    customActions.Add("FileRegex_rollback");
+                    customActions.Add("FileRegex_deferred");
+                    customActions.Add("FileRegex_commit");
+                    break;
+                case "PSW_CustomUninstallKey":
+                    customActions.Add("CustomUninstallKey_Immediate");
+                    customActions.Add("CustomUninstallKey_deferred");
+                    customActions.Add("CustomUninstallKey_rollback");
+                    break;
+                case "PSW_ReadIniValues":
+                    customActions.Add("ReadIniValues");
+                    break;
+                case "PSW_RemoveRegistryValue":
+                    customActions.Add("RemoveRegistryValue_Immediate");
+                    customActions.Add("RemoveRegistryValue_deferred");
+                    customActions.Add("RemoveRegistryValue_rollback");
+                    break;
+                case "PSW_RegularExpression":
+                    customActions.Add("RegularExpression");
+                    break;
+                case "PSW_Telemetry":
+                    customActions.Add("Telemetry");
+                    customActions.Add("Telemetry_deferred");
+                    customActions.Add("Telemetry_rollback");
+                    customActions.Add("Telemetry_commit");
+                    break;
+                case "PSW_ShellExecute":
+                    customActions.Add("ShellExecute_Immediate");
+                    customActions.Add("ShellExecute_deferred");
+                    customActions.Add("ShellExecute_rollback");
+                    customActions.Add("ShellExecute_commit");
+                    break;
+
+                //TODO When referencing a table row, reference the relevant custom action
+                case "PSW_MsiSqlQuery":
+                case "PSW_DeletePath":
+                case "PSW_TaskScheduler":
+                case "PSW_ExecOnComponent":
+                case "PSW_ExecOnComponent_ExitCode":
+                case "PSW_ExecOn_ConsoleOutput":
+                case "PSW_ExecOnComponent_Environment":
+                case "PSW_Dism":
+                case "PSW_ZipFile":
+                case "PSW_Unzip":
+                case "PSW_ServiceConfig":
+                case "PSW_ServiceConfig_Dependency":
+                case "PSW_InstallUtil":
+                case "PSW_InstallUtil_Arg":
+                case "PSW_SqlSearch":
+                case "PSW_BackupAndRestore":
+                case "PSW_TopShelf":
+                case "PSW_SelfSignCertificate":
+                case "PSW_ForceVersion":
+                case "PSW_SetPropertyFromPipe":
+                case "PSW_EvaluateExpression":
+                case "PSW_CertificateHashSearch":
+                case "PSW_DiskSpace":
+                case "PSW_JsonJPath":
+                case "PSW_JsonJpathSearch":
+                case "PSW_AccountSidSearch":
+                case "PSW_XslTransform":
+                case "PSW_XslTransform_Replacements":
+                case "PSW_SqlScript":
+                case "PSW_SqlScript_Replacements":
+                case "PSW_WebsiteConfig":
+                case "PSW_VersionCompare":
+                case "PSW_PathSearch":
+                case "PSW_ToLowerCase":
+                case "PSW_WmiSearch":
+                case "PSW_RestartLocalResources":
+                case "PSW_Md5Hash":
+                    break;
+            }
+
+            if (!Core.EncounteredError)
+            {
+                Row patchReferenceRow;
+                foreach (string ca in customActions)
+                {
+                    patchReferenceRow = Core.CreateRow(sourceLineNumbers, "WixPatchRef");
+                    patchReferenceRow[0] = "CustomAction";
+                    patchReferenceRow[1] = ca;
+                }
+
+                patchReferenceRow = Core.CreateRow(sourceLineNumbers, "WixPatchRef");
+                patchReferenceRow[0] = table;
+                patchReferenceRow[1] = key;
             }
         }
 
