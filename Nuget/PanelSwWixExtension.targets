@@ -12,8 +12,8 @@
   </PropertyGroup>
   
   <ItemGroup Condition="'$(MSBuildProjectExtension)'=='.vcxproj'">
-    <Xsd Remove="PanelSwWixExtension.xsd"/>
-    <Xsd Remove="$(MSBuildProjectDirectory)\PanelSwWixExtension.xsd"/>
+    <Xsd Remove="PanelSwWixExtension.xsd" Condition='$([System.Version]::Parse("$(MSBuildVersion)").CompareTo($([System.Version]::Parse("15.0")))) &gt;= 0'/>
+    <Xsd Remove="$(MSBuildProjectDirectory)\PanelSwWixExtension.xsd" Condition='$([System.Version]::Parse("$(MSBuildVersion)").CompareTo($([System.Version]::Parse("15.0")))) &gt;= 0'/>
 
     <AdditionalIncludeDirectories Include="$(PanelSwIncPath)"/>
     <AdditionalLibraryDirectories Include="$(PanelSwLibPath)" Condition="'$(PanelSwLibPath)' != ''"/>

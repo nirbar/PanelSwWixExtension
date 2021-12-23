@@ -28,6 +28,8 @@ namespace PanelSw.Wix.Extensions
             delayedTables.Add("PSW_ExecOn_ConsoleOutput");
             delayedTables.Add("PSW_ExecOnComponent_Environment");
             delayedTables.Add("PSW_ServiceConfig_Dependency");
+            
+            IncludeWixTables(output, tableForeignKeys);
 
             // Include internal tables except those that will be resolved later
             foreach (TableDefinition td in tableDefinitions_)
@@ -70,6 +72,34 @@ namespace PanelSw.Wix.Extensions
             tableForeignKeys["PSW_ExecOnComponent_Environment"].Add(new ForeignRelation(0, execOnTable, 0));
             tableForeignKeys["PSW_ServiceConfig_Dependency"].Add(new ForeignRelation(0, serviceConfigTable, 0));
             AssignSectionIdToTables(output, tableForeignKeys);
+        }
+
+        // Include some WiX/MSI tables
+        private static void IncludeWixTables(Output output, Dictionary<string, List<ForeignRelation>> tableForeignKeys)
+        {
+            tableForeignKeys["AppSearch"] = new List<ForeignRelation>();
+            tableForeignKeys["Signature"] = new List<ForeignRelation>();
+            tableForeignKeys["RegLocator"] = new List<ForeignRelation>();
+            tableForeignKeys["IniLocator"] = new List<ForeignRelation>();
+            tableForeignKeys["CompLocator"] = new List<ForeignRelation>();
+            tableForeignKeys["DrLocator"] = new List<ForeignRelation>();
+
+            Table signatureTable = output.Tables["Signature"];
+            Table appSearchTable = output.Tables["AppSearch"];
+            Table regLocatorTable = output.Tables["RegLocator"];
+            Table compLocatorTable = output.Tables["CompLocator"];
+            Table drLocatorTable = output.Tables["DrLocator"];
+
+            tableForeignKeys["AppSearch"].Add(new ForeignRelation(1, signatureTable, 0));
+            tableForeignKeys["RegLocator"].Add(new ForeignRelation(0, signatureTable, 0));
+            tableForeignKeys["IniLocator"].Add(new ForeignRelation(0, signatureTable, 0));
+            tableForeignKeys["CompLocator"].Add(new ForeignRelation(0, signatureTable, 0));
+            tableForeignKeys["DrLocator"].Add(new ForeignRelation(0, signatureTable, 0));
+
+            tableForeignKeys["Signature"].Add(new ForeignRelation(0, appSearchTable, 1));
+            tableForeignKeys["Signature"].Add(new ForeignRelation(0, regLocatorTable, 0));
+            tableForeignKeys["Signature"].Add(new ForeignRelation(0, compLocatorTable, 0));
+            tableForeignKeys["Signature"].Add(new ForeignRelation(0, drLocatorTable, 0));
         }
 
         private uint sectionId_ = 0;
