@@ -17,7 +17,7 @@ namespace PanelSw.Wix.Extensions
         private TableDefinitionCollection tableDefinitions;
 
         public override BinderExtension BinderExtension => binder_ ?? (binder_ = new PanelSwWixBinder());
-        public override UnbinderExtension UnbinderExtension => unbinder_ ?? (unbinder_ = new PanelSwWixUnbinder());
+        public override UnbinderExtension UnbinderExtension => unbinder_ ?? (unbinder_ = new PanelSwWixUnbinder(TableDefinitions));
 
         /// <summary>
         /// Gets the optional compiler extension.
