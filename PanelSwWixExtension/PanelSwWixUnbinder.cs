@@ -54,9 +54,9 @@ namespace PanelSw.Wix.Extensions
             tableForeignKeys["PSW_InstallUtil_Arg"].Add(new ForeignRelation(0, fileTable, 0));
             tableForeignKeys["PSW_SqlSearch"].Add(new ForeignRelation(1, propertyTable, 1));
 
-            int i = AssignSectionIdToTables(output, tableForeignKeys, 0);
+            AssignSectionIdToTables(output, tableForeignKeys);
 
-            // Add foreign relations to internal tables that cross-reference other internal tables
+            // Add foreign relations for internal tables that reference other internal tables
             tableForeignKeys.Clear();
             foreach (string table in delayedTables)
             {
@@ -69,10 +69,11 @@ namespace PanelSw.Wix.Extensions
             tableForeignKeys["PSW_ExecOn_ConsoleOutput"].Add(new ForeignRelation(1, execOnTable, 0));
             tableForeignKeys["PSW_ExecOnComponent_Environment"].Add(new ForeignRelation(0, execOnTable, 0));
             tableForeignKeys["PSW_ServiceConfig_Dependency"].Add(new ForeignRelation(0, serviceConfigTable, 0));
-            AssignSectionIdToTables(output, tableForeignKeys, i);
+            AssignSectionIdToTables(output, tableForeignKeys);
         }
 
-        private int AssignSectionIdToTables(Output output, Dictionary<string, List<ForeignRelation>> tableForeignKeys, int i)
+        private uint sectionId_ = 0;
+        private void AssignSectionIdToTables(Output output, Dictionary<string, List<ForeignRelation>> tableForeignKeys)
         {
             foreach (Table t in output.Tables)
             {
@@ -95,13 +96,11 @@ namespace PanelSw.Wix.Extensions
                         }
                         if (string.IsNullOrEmpty(r.SectionId))
                         {
-                            r.SectionId = $"psw.section.{++i}";
+                            r.SectionId = $"psw.section.{++sectionId_}";
                         }
                     }
                 }
             }
-
-            return i;
         }
 
         private bool AssignForeignSectionId(Row targetRow, ForeignRelation foreignRelation)

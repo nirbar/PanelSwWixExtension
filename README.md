@@ -25,6 +25,7 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
   - *MsiSqlQuery*: Execute a MSI-SQL query on the MSI database.
   - *CreateSelfSignCertificate*: Create a self-sign certificate that can then be installed by WixIisExtension.
   - *ToLowerCase*: Convert property value to lowercase.
+  - *CustomPatchRef* Support referencing custom table rows in a patch
 - Deferred Actions:
   - *RestartLocalResources*: Register processes with the Restart Manager if they reside in the specified folder
   - *XslTransform*: Apply a XSL transform on an installed XML file

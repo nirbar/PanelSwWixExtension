@@ -541,6 +541,10 @@ namespace PanelSw.Wix.Extensions
                 }
 
                 patchReferenceRow = Core.CreateRow(sourceLineNumbers, "WixPatchRef");
+                patchReferenceRow[0] = "Binary";
+                patchReferenceRow[1] = "PanelSwCustomActions.dll";
+
+                patchReferenceRow = Core.CreateRow(sourceLineNumbers, "WixPatchRef");
                 patchReferenceRow[0] = table;
                 patchReferenceRow[1] = key;
             }
