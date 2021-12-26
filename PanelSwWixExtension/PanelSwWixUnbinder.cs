@@ -1,4 +1,5 @@
 ﻿using Microsoft.Tools.WindowsInstallerXml;
+using System;
 using System.Collections.Generic;
 
 namespace PanelSw.Wix.Extensions
@@ -72,34 +73,226 @@ namespace PanelSw.Wix.Extensions
             tableForeignKeys["PSW_ExecOnComponent_Environment"].Add(new ForeignRelation(0, execOnTable, 0));
             tableForeignKeys["PSW_ServiceConfig_Dependency"].Add(new ForeignRelation(0, serviceConfigTable, 0));
             AssignSectionIdToTables(output, tableForeignKeys);
+
+            ResolveAppSearch(output);
         }
 
         // Include some WiX/MSI tables
-        private static void IncludeWixTables(Output output, Dictionary<string, List<ForeignRelation>> tableForeignKeys)
+        private void IncludeWixTables(Output output, Dictionary<string, List<ForeignRelation>> tableForeignKeys)
         {
+            Table propertyTable = output.Tables["Property"];
+          
             tableForeignKeys["AppSearch"] = new List<ForeignRelation>();
-            tableForeignKeys["Signature"] = new List<ForeignRelation>();
-            tableForeignKeys["RegLocator"] = new List<ForeignRelation>();
-            tableForeignKeys["IniLocator"] = new List<ForeignRelation>();
-            tableForeignKeys["CompLocator"] = new List<ForeignRelation>();
-            tableForeignKeys["DrLocator"] = new List<ForeignRelation>();
+            tableForeignKeys["AppSearch"].Add(new ForeignRelation(0, propertyTable, 0));
+        }
+
+        private void ResolveAppSearch(Output output)
+        {
+            Table appSearchTable = output.Tables["AppSearch"];
+            if (appSearchTable != null)
+            {
+                foreach (Row appSearchRow in appSearchTable.Rows)
+                {
+                    ResolveAppSearchTree(output, appSearchRow);
+                }
+            }
+        }
+
+        // Locator Types
+        private void ResolveAppSearchTree(Output output, Row appSearchRow)
+        {
+            Table signatureTable = output.Tables["Signature"];
+            string key = appSearchRow.Fields[1].Data as string;
+            if (signatureTable != null)
+            {
+                foreach (Row signatureRow in signatureTable.Rows)
+                {
+                    if (key.Equals(signatureRow.Fields[0].Data))
+                    {
+                        signatureRow.SectionId = appSearchRow.SectionId;
+                    }
+                }
+            }
+
+            Table regLocatorTable = output.Tables["RegLocator"];
+            if (regLocatorTable != null)
+            {
+                foreach (Row regRow in regLocatorTable.Rows)
+                {
+                    if (key.Equals(regRow.Fields[0].Data))
+                    {
+                        regRow.SectionId = appSearchRow.SectionId;
+                        ResolveRegLocatorTree(output, regRow);
+                    }
+                }
+            }
+
+            Table compLocatorTable = output.Tables["CompLocator"];
+            if (compLocatorTable != null)
+            {
+                foreach (Row compRow in compLocatorTable.Rows)
+                {
+                    if (key.Equals(compRow.Fields[0].Data))
+                    {
+                        compRow.SectionId = appSearchRow.SectionId;
+                        ResolveCompLocatorTree(output, compRow);
+                    }
+                }
+            }
+
+            Table drLocatorTable = output.Tables["DrLocator"];
+            if (drLocatorTable != null)
+            {
+                foreach (Row drRow in drLocatorTable.Rows)
+                {
+                    if (key.Equals(drRow.Fields[0].Data))
+                    {
+                        drRow.SectionId = appSearchRow.SectionId;
+                        ResolveDrLocatorTree(output, drRow);
+                    }
+                }
+            }
+
+            Table iniLocatorTable = output.Tables["IniLocator"];
+            if (iniLocatorTable != null)
+            {
+                foreach (Row iniRow in iniLocatorTable.Rows)
+                {
+                    if (key.Equals(iniRow.Fields[0].Data))
+                    {
+                        iniRow.SectionId = appSearchRow.SectionId;
+                        ResolveIniLocatorTree(output, iniRow);
+                    }
+                }
+            }
+        }
+
+        private void ResolveIniLocatorTree(Output output, Row iniRow)
+        {
+            string key = iniRow.Fields[0]?.Data as string;
 
             Table signatureTable = output.Tables["Signature"];
-            Table appSearchTable = output.Tables["AppSearch"];
-            Table regLocatorTable = output.Tables["RegLocator"];
-            Table compLocatorTable = output.Tables["CompLocator"];
-            Table drLocatorTable = output.Tables["DrLocator"];
+            if (signatureTable != null)
+            {
+                foreach (Row signatureRow in signatureTable.Rows)
+                {
+                    if (key.Equals(signatureRow.Fields[0].Data))
+                    {
+                        signatureRow.SectionId = iniRow.SectionId;
+                    }
+                }
+            }
+        }
 
-            tableForeignKeys["AppSearch"].Add(new ForeignRelation(1, signatureTable, 0));
-            tableForeignKeys["RegLocator"].Add(new ForeignRelation(0, signatureTable, 0));
-            tableForeignKeys["IniLocator"].Add(new ForeignRelation(0, signatureTable, 0));
-            tableForeignKeys["CompLocator"].Add(new ForeignRelation(0, signatureTable, 0));
-            tableForeignKeys["DrLocator"].Add(new ForeignRelation(0, signatureTable, 0));
+        private void ResolveCompLocatorTree(Output output, Row compRow)
+        {
+            string key = compRow.Fields[0]?.Data as string;
+            // File?
+            Table signatureTable = output.Tables["Signature"];
+            if (signatureTable != null)
+            {
+                foreach (Row signatureRow in signatureTable.Rows)
+                {
+                    if (key.Equals(signatureRow.Fields[0].Data))
+                    {
+                        signatureRow.SectionId = compRow.SectionId;
+                    }
+                }
+            }
+        }
 
-            tableForeignKeys["Signature"].Add(new ForeignRelation(0, appSearchTable, 1));
-            tableForeignKeys["Signature"].Add(new ForeignRelation(0, regLocatorTable, 0));
-            tableForeignKeys["Signature"].Add(new ForeignRelation(0, compLocatorTable, 0));
-            tableForeignKeys["Signature"].Add(new ForeignRelation(0, drLocatorTable, 0));
+        private void ResolveRegLocatorTree(Output output, Row regRow)
+        {
+            string key = regRow.Fields[0]?.Data as string;
+
+            // File?
+            Table signatureTable = output.Tables["Signature"];
+            if (signatureTable != null)
+            {
+                foreach (Row signatureRow in signatureTable.Rows)
+                {
+                    if (key.Equals(signatureRow.Fields[0].Data))
+                    {
+                        signatureRow.SectionId = regRow.SectionId;
+                    }
+                }
+            }
+        }
+
+        private void ResolveDrLocatorTree(Output output, Row drRow)
+        {
+            string key = drRow.Fields[0].Data as string;
+         
+            // File?
+            Table signatureTable = output.Tables["Signature"];
+            if (signatureTable != null)
+            {
+                foreach (Row signatureRow in signatureTable.Rows)
+                {
+                    if (key.Equals(signatureRow.Fields[0].Data))
+                    {
+                        signatureRow.SectionId = drRow.SectionId;
+                    }
+                }
+            }
+
+            // Parent?
+            string parent = drRow.Fields[1]?.Data as string;
+            if (!string.IsNullOrEmpty(parent))
+            {
+                Table drLocatorTable = drRow.Table;
+                foreach (Row otherDrRow in drLocatorTable.Rows)
+                {
+                    if (drRow.Equals(otherDrRow))
+                    {
+                        continue;
+                    }
+
+                    if (parent.Equals(otherDrRow.Fields[0].Data))
+                    {
+                        otherDrRow.SectionId = drRow.SectionId;
+                        ResolveDrLocatorTree(output, otherDrRow);
+                    }
+                }
+                Table regLocatorTable = output.Tables["RegLocator"];
+                if (regLocatorTable != null)
+                {
+                    foreach (Row regRow in regLocatorTable.Rows)
+                    {
+                        if (parent.Equals(regRow.Fields[0].Data))
+                        {
+                            regRow.SectionId = drRow.SectionId;
+                            ResolveRegLocatorTree(output, regRow);
+                        }
+                    }
+                }
+
+                Table compLocatorTable = output.Tables["CompLocator"];
+                if (compLocatorTable != null)
+                {
+                    foreach (Row compRow in compLocatorTable.Rows)
+                    {
+                        if (parent.Equals(compRow.Fields[0].Data))
+                        {
+                            compRow.SectionId = drRow.SectionId;
+                            ResolveCompLocatorTree(output, compRow);
+                        }
+                    }
+                }
+
+                Table iniLocatorTable = output.Tables["IniLocator"];
+                if (iniLocatorTable != null)
+                {
+                    foreach (Row iniRow in iniLocatorTable.Rows)
+                    {
+                        if (parent.Equals(iniRow.Fields[0].Data))
+                        {
+                            iniRow.SectionId = drRow.SectionId;
+                            ResolveIniLocatorTree(output, iniRow);
+                        }
+                    }
+                }
+            }
         }
 
         private uint sectionId_ = 0;
