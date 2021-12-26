@@ -1386,6 +1386,7 @@ Delete folder or file specified by a path.
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[
@@ -1432,7 +1433,7 @@ Execute a Regular Expression to replace or find matches in property values.
           </xs:attribute>
           <xs:attribute name="DstProperty" type="xs:string" use="optional">
             <xs:annotation>
-              <xs:documentation>Target property. For matches, this will be used as a base property name and results will be placed in property names like DSTPROP_0, DSTPROP_1; Result count will be placed in property DSTPROP_COUNT. For replace operations this will be the name of the target property.</xs:documentation>
+              <xs:documentation>Target property. For matches, this will be used as a base property name and results will be placed in property names like DSTPROP_0, DSTPROP_1; Result count, if larger than 0, will be placed in property DSTPROP (and in DSTPROP_COUNT for compitability with prior releases). For replace operations this will be the name of the target property.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="IgnoreCase" type="wix:YesNoType" use="optional">

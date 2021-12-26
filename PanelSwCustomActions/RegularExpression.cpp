@@ -39,9 +39,9 @@ union RegexFlags
 	} s;
 };
 
-static HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax);
-static HRESULT SearchMultibyte(LPCWSTR szProperty_, LPCWSTR szExpression, LPCSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax);
-static HRESULT SearchInFile(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR szFilePath, RegexFlags flags, std::regex_constants::syntax_option_type syntax);
+static HRESULT SearchUnicode(LPCWSTR szProperty, LPCWSTR szExpression, LPCWSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax);
+static HRESULT SearchMultibyte(LPCWSTR szProperty, LPCWSTR szExpression, LPCSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax);
+static HRESULT SearchInFile(LPCWSTR szProperty, LPCWSTR szExpression, LPCWSTR szFilePath, RegexFlags flags, std::regex_constants::syntax_option_type syntax);
 
 extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 {
@@ -177,7 +177,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-static HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax)
+static HRESULT SearchUnicode(LPCWSTR szProperty, LPCWSTR szExpression, LPCWSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax)
 {
 	HRESULT hr = S_OK;
 	bool bRes = true;
@@ -206,8 +206,11 @@ static HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR 
 		ExitFunction1(hr = S_FALSE);
 	}
 
-	hr = sPropName.Format(L"%s_COUNT", szProperty_);
+	hr = sPropName.Format(L"%s_COUNT", szProperty);
 	ExitOnFailure(hr, "Failed formatting string");
+
+	hr = WcaSetIntProperty(szProperty, results.size());
+	ExitOnFailure(hr, "Failed setting property '%ls'", szProperty);
 
 	hr = WcaSetIntProperty((LPCWSTR)sPropName, results.size());
 	ExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)sPropName);
@@ -217,7 +220,7 @@ static HRESULT SearchUnicode(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR 
 	{
 		const std::sub_match<LPCWSTR>& match = results[i];
 
-		hr = sPropName.Format(L"%s_%Iu", szProperty_, i);
+		hr = sPropName.Format(L"%s_%Iu", szProperty, i);
 		ExitOnFailure(hr, "Failed formatting string");
 
 		hr = WcaSetProperty((LPCWSTR)sPropName, match.str().c_str());
@@ -228,7 +231,7 @@ LExit:
 	return hr;
 }
 
-static HRESULT SearchMultibyte(LPCWSTR szProperty_, LPCWSTR szExpression, LPCSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax)
+static HRESULT SearchMultibyte(LPCWSTR szProperty, LPCWSTR szExpression, LPCSTR szInput, RegexFlags flags, std::regex_constants::syntax_option_type syntax)
 {
 	HRESULT hr = S_OK;
 	LPSTR szPropertyA = nullptr;
@@ -264,8 +267,11 @@ static HRESULT SearchMultibyte(LPCWSTR szProperty_, LPCWSTR szExpression, LPCSTR
 		ExitFunction1(hr = S_FALSE);
 	}
 
-	hr = szCntProp.Format(L"%s_COUNT", szProperty_);
+	hr = szCntProp.Format(L"%s_COUNT", szProperty);
 	ExitOnFailure(hr, "Failed formatting string");
+
+	hr = WcaSetIntProperty(szProperty, results.size());
+	ExitOnFailure(hr, "Failed setting property '%ls'", szProperty);
 
 	hr = ::WcaSetIntProperty(szCntProp, results.size());
 	ExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)szCntProp);
@@ -275,7 +281,7 @@ static HRESULT SearchMultibyte(LPCWSTR szProperty_, LPCWSTR szExpression, LPCSTR
 	{
 		const std::sub_match<LPCSTR>& match = results[i];
 
-		hr = StrAnsiAllocFormatted(&szPropertyA, "%ls_%Iu", szProperty_, i);
+		hr = StrAnsiAllocFormatted(&szPropertyA, "%ls_%Iu", szProperty, i);
 		ExitOnFailure(hr, "Failed formatting ansi string");
 
 		hr = ::MsiSetPropertyA(WcaGetInstallHandle(), szPropertyA, match.str().c_str());
@@ -291,7 +297,7 @@ LExit:
 }
 
 
-static HRESULT SearchInFile(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR szFilePath, RegexFlags flags, std::regex_constants::syntax_option_type syntax)
+static HRESULT SearchInFile(LPCWSTR szProperty, LPCWSTR szExpression, LPCWSTR szFilePath, RegexFlags flags, std::regex_constants::syntax_option_type syntax)
 {
 	HRESULT hr = S_OK;
 	bool bRes = true;
@@ -325,12 +331,12 @@ static HRESULT SearchInFile(LPCWSTR szProperty_, LPCWSTR szExpression, LPCWSTR s
 	eDetectedEncoding = CFileOperations::DetectEncoding(pFileContents, dwFileSize);
 	if (eDetectedEncoding == FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_MultiByte)
 	{
-		hr = SearchMultibyte(szProperty_, szExpression, (LPCSTR)pFileContents, flags, syntax);
+		hr = SearchMultibyte(szProperty, szExpression, (LPCSTR)pFileContents, flags, syntax);
 		ExitOnFailure(hr, "Failed executing multibyte regular expression");
 	}
 	else
 	{
-		hr = SearchUnicode(szProperty_, szExpression, (LPCWSTR)pFileContents, flags, syntax);
+		hr = SearchUnicode(szProperty, szExpression, (LPCWSTR)pFileContents, flags, syntax);
 		ExitOnFailure(hr, "Failed executing unicode regular expression");
 	}
 
