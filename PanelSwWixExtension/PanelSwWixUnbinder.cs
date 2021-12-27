@@ -17,6 +17,11 @@ namespace PanelSw.Wix.Extensions
         //   1. They have been explictly ref'ed by it (i.e. CustomPatchRef)
         //   2. They were implictly ref'ed by it (have same SectionId as another element that was ref'ed in the patch)
         //      For this case we attempt to assign section ID of a foreign row where possible
+        //TODO Known Issues
+        // 1. When an implicit PSW_xxx table is referenced is a patch, the related custom action isn't references. 
+        //    Thus, if v1 had no RegularExpression, and v2 does have, then referencing the search with PropertyRef will not include the custom action, but will include the PSW_RegularExpression table
+        //    Referencing the PSW_RegularExpression using a "CustomPatchRef" solves it
+        // 2. When an DrLocator entry is reused by several AppSearch entries, it's SectionId is set by only one of the searches
         public override void GenerateSectionIds(Output output)
         {
             Table componentTable = output.Tables["Component"];
