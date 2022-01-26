@@ -67,6 +67,9 @@
     <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\customActionData.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\concatFilesDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
     <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\ErrorHandling.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
@@ -117,6 +120,9 @@
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\customActionData.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\concatFilesDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\ErrorHandling.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
@@ -165,6 +171,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="command.proto" />
+    <None Include="concatFilesDetails.proto" />
     <None Include="customActionData.proto" />
     <None Include="errorHandling.proto" />
     <None Include="execOnDetails.proto" />

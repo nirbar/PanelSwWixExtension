@@ -13,6 +13,7 @@
 #include "SqlScript.h"
 #include "XslTransform.h"
 #include "RestartLocalResources.h"
+#include "ConcatFiles.h"
 
 // ReceiverToExecutorFunc implementation.
 HRESULT ReceiverToExecutor(LPCSTR szReceiver, CDeferredActionBase** ppExecutor)
@@ -79,6 +80,11 @@ HRESULT ReceiverToExecutor(LPCSTR szReceiver, CDeferredActionBase** ppExecutor)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating RestartLocalResources handler");
 		(*ppExecutor) = new CRestartLocalResources();
+	}
+	else if (0 == ::strcmp(szReceiver, "CConcatFiles"))
+	{
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating ConcatFiles handler");
+		(*ppExecutor) = new CConcatFiles();
 	}
 	else
 	{

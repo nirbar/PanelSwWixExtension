@@ -192,6 +192,26 @@
     </xs:complexType>
   </xs:element>
 
+  <xs:element name="SplitFile">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="File" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Split a file to parts during build, and reconstruct it during install. Used to workaround MSI limitation of 2GB file size.
+Note that build-time resolution may be harmed by this process. For example, MsiAssembly might not work correctly during build.]]>
+      </xs:documentation>
+    </xs:annotation>
+
+    <xs:complexType>
+      <xs:attribute name="Size" use="optional" type="xs:int">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Split size. Defaults to 2147483647 (2GB)]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="JsonJPath">
     <xs:annotation>
       <xs:appinfo>

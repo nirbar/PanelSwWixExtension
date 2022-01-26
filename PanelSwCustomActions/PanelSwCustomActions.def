@@ -49,3 +49,4 @@ EXPORTS
 	WmiSearch
 	RestartLocalResources
 	Md5Hash
+	ConcatFiles

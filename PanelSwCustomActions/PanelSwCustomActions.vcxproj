@@ -69,6 +69,7 @@
   <ItemGroup>
     <ClCompile Include="AccountNames.cpp" />
     <ClCompile Include="CheckRebootRequired.cpp" />
+    <ClCompile Include="ConcatFiles.cpp" />
     <ClCompile Include="ForceVersion.cpp" />
     <ClCompile Include="AccountSidSearch.cpp" />
     <ClCompile Include="BackupAndRestore.cpp" />
@@ -113,6 +114,7 @@
     <ClCompile Include="XslTransform.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ConcatFiles.h" />
     <ClInclude Include="ExecOnComponent.h" />
     <ClInclude Include="FileOperations.h" />
     <ClInclude Include="FileRegex.h" />
@@ -127,6 +129,9 @@
     <ClInclude Include="targetver.h" />
     <ClInclude Include="TaskScheduler.h" />
     <ClInclude Include="Telemetry.h" />
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\concatFilesDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\execOnDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>

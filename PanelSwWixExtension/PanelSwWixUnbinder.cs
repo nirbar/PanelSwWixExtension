@@ -61,6 +61,9 @@ namespace PanelSw.Wix.Extensions
             tableForeignKeys["PSW_InstallUtil"].Add(new ForeignRelation(0, fileTable, 0));
             tableForeignKeys["PSW_InstallUtil_Arg"].Add(new ForeignRelation(0, fileTable, 0));
             tableForeignKeys["PSW_SqlSearch"].Add(new ForeignRelation(1, propertyTable, 1));
+            tableForeignKeys["PSW_ConcatFiles"].Add(new ForeignRelation(0, componentTable, 0));
+            tableForeignKeys["PSW_ConcatFiles"].Add(new ForeignRelation(1, fileTable, 0));
+            tableForeignKeys["PSW_ConcatFiles"].Add(new ForeignRelation(2, fileTable, 0));
 
             AssignSectionIdToTables(output, tableForeignKeys);
 

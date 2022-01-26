@@ -1,10 +1,8 @@
+using Microsoft.Tools.WindowsInstallerXml;
+using System.Reflection;
+
 namespace PanelSw.Wix.Extensions
 {
-    using System;
-    using System.Reflection;
-
-    using Microsoft.Tools.WindowsInstallerXml;
-
     /// <summary>
     /// A wix extension for PanelSwWixExtension custom action library.
     /// </summary>

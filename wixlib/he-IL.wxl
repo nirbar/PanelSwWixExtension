@@ -55,4 +55,5 @@
   <String Overridable="yes" Id="WmiSearch"><![CDATA[מבצע שאילתות WMI]]></String>
   <String Overridable="yes" Id="RestartLocalResources"><![CDATA[מאתחל תהליכים רצים]]></String>
   <String Overridable="yes" Id="Md5Hash"><![CDATA[מחשב פונקציית MD5]]></String>
+  <String Overridable="yes" Id="ConcatFiles"><![CDATA[מאחד קבצים]]></String>
 </WixLocalization>

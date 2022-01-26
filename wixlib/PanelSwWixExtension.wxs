@@ -800,4 +800,17 @@
     </UI>
   </Fragment>
 
+  <!-- ConcatFiles -->
+  <Fragment>
+    <CustomAction Id="ConcatFiles" BinaryKey="PanelSwCustomActions.dll" DllEntry="ConcatFiles" Execute="immediate" SuppressModularization="yes"/>
+    <CustomAction Id="ConcatFilesExec" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" SuppressModularization="yes" HideTarget="yes" />
+    <InstallExecuteSequence>
+      <Custom Action="ConcatFiles" After="InstallFiles"/>
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="ConcatFiles">!(loc.ConcatFiles)</ProgressText>
+      <ProgressText Action="ConcatFilesExec">!(loc.ConcatFiles)</ProgressText>
+    </UI>
+  </Fragment>
+
 </Wix>

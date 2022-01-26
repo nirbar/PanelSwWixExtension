@@ -1,0 +1,8 @@
+syntax = "proto3";
+package com.panelsw.ca;
+option optimize_for = LITE_RUNTIME;
+
+message ConcatFilesDetails{
+	bytes root_file = 1;
+	bytes split_file = 2;
+}

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
+  <Product Id="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}" Name="SplitFileUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate />
+
+    <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
+      <Component Directory="INSTALLFOLDER" Guid="{9CF0C21D-C68E-4851-99AE-44BD6B763F21}" Id="_1">
+        <File Source="$(sys.SOURCEFILEPATH)">
+          <PanelSW:SplitFile Size="100"/> 
+        </File>
+      </Component>
+      <Component Directory="INSTALLFOLDER" Guid="{3D7F995E-6B3E-4A58-854C-0E92E187AA6A}" Id="_2">
+        <File Source="$(sys.SOURCEFILEPATH)" Name="SplitFile2.wxs">
+          <PanelSW:SplitFile Size="150"/>
+        </File>
+      </Component>
+    </Feature>
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+      </Directory>
+    </Directory>
+
+    <Property Id="MSIFASTINSTALL" Value="1"></Property>
+  </Product>
+</Wix>

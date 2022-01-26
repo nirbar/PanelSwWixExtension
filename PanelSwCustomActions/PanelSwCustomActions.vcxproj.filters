@@ -151,6 +151,9 @@
     <ClCompile Include="Md5Hash.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ConcatFiles.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\*.pb.*">
@@ -209,6 +212,9 @@
     <ClInclude Include="RestartLocalResources.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\concatFilesDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\execOnDetails.pb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -240,6 +246,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\registryValueDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ConcatFiles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

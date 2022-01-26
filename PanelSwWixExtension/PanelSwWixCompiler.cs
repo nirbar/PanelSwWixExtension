@@ -1,6 +1,7 @@
 using Microsoft.Tools.WindowsInstallerXml;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reflection;
 using System.Xml;
 using System.Xml.Schema;
@@ -278,6 +279,11 @@ namespace PanelSw.Wix.Extensions
                             case "XslTransform":
                                 ParseXslTransform(element, componentId, fileId);
                                 break;
+
+                            case "SplitFile":
+                                ParseSplitFileElement(parentElement, element, componentId, fileId);
+                                break;
+
                             default:
                                 Core.UnexpectedElement(parentElement, element);
                                 break;
@@ -300,6 +306,84 @@ namespace PanelSw.Wix.Extensions
                 default:
                     Core.UnexpectedElement(parentElement, element);
                     break;
+            }
+        }
+
+        private void ParseSplitFileElement(XmlElement fileElement, XmlElement element, string componentId, string fileId)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
+            int splitSize = Int32.MaxValue; //2GB
+
+            foreach (XmlAttribute attrib in element.Attributes)
+            {
+                if ((0 != attrib.NamespaceURI.Length) && (attrib.NamespaceURI != schema.TargetNamespace))
+                {
+                    continue;
+                }
+
+                switch (attrib.LocalName)
+                {
+                    case "Size":
+                        splitSize = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 1, Int32.MaxValue);
+                        break;
+                    default:
+                        Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                        break;
+                }
+            }
+
+            XmlAttribute sourceAttrib = fileElement.GetAttributeNode("Source");
+            if (sourceAttrib == null)
+            {
+                sourceAttrib = fileElement.GetAttributeNode("src");
+            }
+            string sourcePath = Core.GetAttributeValue(sourceLineNumbers, sourceAttrib);
+            if (!File.Exists(sourcePath))
+            {
+                Core.OnMessage(WixErrors.FileNotFound(sourceLineNumbers, sourcePath));
+                return;
+            }
+            FileInfo fileInfo = new FileInfo(sourcePath);
+            if (fileInfo.Length <= splitSize)
+            {
+                return;
+            }
+
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "ConcatFiles");
+
+            string tmpPath = Path.GetTempPath();
+            int splitCnt = (int)Math.Ceiling(1m * fileInfo.Length / splitSize);
+            for (int i = 1; i < splitCnt; ++i)
+            {
+                XmlElement splitFileElement = fileElement.CloneNode(false) as XmlElement;
+                string splId = "spl" + Guid.NewGuid().ToString("N");
+                string splFile = Path.Combine(tmpPath, splId);
+                File.Create(splFile).Dispose();
+
+                string nmspc = fileElement.OwnerDocument.GetPrefixOfNamespace(fileElement.NamespaceURI);
+                if (!string.IsNullOrEmpty(nmspc))
+                {
+                    nmspc = fileElement.NamespaceURI;
+                }
+
+                splitFileElement.SetAttribute("KeyPath", nmspc, "no");
+                splitFileElement.SetAttribute("CompanionFile", nmspc, fileId);
+                splitFileElement.SetAttribute("Name", nmspc, splId);
+                splitFileElement.SetAttribute("Id", nmspc, splId);
+                splitFileElement.SetAttribute("Source", nmspc, splFile);
+                splitFileElement.RemoveAttribute("src", nmspc);
+
+                fileElement.ParentNode.InsertAfter(splitFileElement, fileElement);
+
+                if (!Core.EncounteredError)
+                {
+                    Row row = Core.CreateRow(sourceLineNumbers, "PSW_ConcatFiles");
+                    row[0] = componentId;
+                    row[1] = fileId;
+                    row[2] = splId;
+                    row[3] = i;
+                    row[4] = splitSize;
+                }
             }
         }
 
@@ -527,6 +611,10 @@ namespace PanelSw.Wix.Extensions
                     customActions.Add("RestartLocalResourcesExec"); break;
                 case "PSW_Md5Hash":
                     customActions.Add("Md5Hash");
+                    break;
+                case "PSW_ConcatFiles":
+                    customActions.Add("ConcatFiles");
+                    customActions.Add("ConcatFilesExec");
                     break;
             }
 
