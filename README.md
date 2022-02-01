@@ -47,6 +47,8 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
   - *BackupAndRestore*: Backup a file before install or upgarde and restore it after.
   - *SqlScript*: Execute SQL scripts, optionally with text replacements.
   - *SplitFile*: Splits a file to parts during build, and reconstruct it during install. Used to workaround MSI limitation of 2GB file size.
+- Bundle Actions:
+  - *ExePackage/UninstallCommand*: Execute a custom command to uninstall an ExePackage. Used for packages which the uninstall is launched via a different executable than the install.
 
 ## Custom Actions
 
@@ -139,5 +141,5 @@ After building a unit test project, you'll need to shutdown Visual Studio before
 This is due to the unfortunate habit of Visual Studio to hold the extension file in use.
 You may find it convenient to build unit test projects from a command prompt to workaround this limitation
 ~~~~~~~~~~~~
-MSBuild UnitTests\SplitFileUT\SplitFileUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
+MSBuild UnitTests\UninstallCommandUT\UninstallCommandUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
 ~~~~~~~~~~~~

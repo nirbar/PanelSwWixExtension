@@ -303,12 +303,107 @@ namespace PanelSw.Wix.Extensions
                     }
                     break;
 
+                case "ExePackage":
+                    string pkgId = contextValues[0];
+                    switch (element.LocalName)
+                    {
+                        case "UninstallCommand":
+                            ParseUninstallCommandElement(parentElement, element, pkgId);
+                            break;
+                        default:
+                            Core.UnexpectedElement(parentElement, element);
+                            break;
+                    }
+                    break;
+
                 default:
                     Core.UnexpectedElement(parentElement, element);
                     break;
             }
         }
 
+        private void ParseUninstallCommandElement(XmlElement parentElement, XmlElement element, string pkgId)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
+            string id = $"{pkgId}_uninstall";
+            string detectCondition = null;
+            string commandLine = null;
+
+            string nmspc = parentElement.OwnerDocument.GetPrefixOfNamespace(parentElement.NamespaceURI);
+            if (!string.IsNullOrEmpty(nmspc))
+            {
+                nmspc = parentElement.NamespaceURI;
+            }
+
+            if (parentElement.HasAttribute("DetectCondition", nmspc))
+            {
+                detectCondition = parentElement.GetAttribute("DetectCondition", nmspc);
+            }
+
+            foreach (XmlAttribute attrib in element.Attributes)
+            {
+                if ((0 != attrib.NamespaceURI.Length) && (attrib.NamespaceURI != schema.TargetNamespace))
+                {
+                    continue;
+                }
+
+                switch (attrib.LocalName)
+                {
+                    case "Id":
+                        id = Core.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "DetectCondition":
+                        detectCondition = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "CommandLine":
+                        commandLine = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    default:
+                        Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                        break;
+                }
+            }
+
+            if (string.IsNullOrEmpty(commandLine))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "CommandLine"));
+            }
+            if (string.IsNullOrEmpty(detectCondition))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttributeInElementOrParent(sourceLineNumbers, element.LocalName, "DetectCondition", parentElement.LocalName));
+            }
+
+            if (!Core.EncounteredError)
+            {
+                XmlProcessingInstruction sourceLineElement = element.OwnerDocument.CreateProcessingInstruction(Preprocessor.LineNumberElementName, sourceLineNumbers.EncodedSourceLineNumbers);
+                parentElement.ParentNode.InsertAfter(sourceLineElement, parentElement);
+
+                XmlElement uninstallElement = element.OwnerDocument.CreateElement("ExePackage", parentElement.NamespaceURI);
+                uninstallElement.SetAttribute("Id", nmspc, id);
+                uninstallElement.SetAttribute("SourceFile", nmspc, "!(bindpath.PanelSwWixExtension)\\DeferredExePackage.exe");
+                uninstallElement.SetAttribute("After", nmspc, pkgId);
+                uninstallElement.SetAttribute("DetectCondition", nmspc, detectCondition);
+                uninstallElement.SetAttribute("InstallCommand", nmspc, "--ignore-me");
+                uninstallElement.SetAttribute("RepairCommand", nmspc, "--ignore-me");
+                uninstallElement.SetAttribute("UninstallCommand", nmspc, $"--skip-until-here {commandLine}");
+                uninstallElement.SetAttribute("Cache", nmspc, "always");
+                uninstallElement.SetAttribute("Compressed", nmspc, "yes");
+                string[] copyAttributes = new string[] { "InstallCondition", "DisplayName", "Vital", "Description", "PerMachine" };
+                foreach (string att in copyAttributes)
+                {
+                    if (parentElement.HasAttribute(att, nmspc))
+                    {
+                        uninstallElement.SetAttribute(att, nmspc, parentElement.GetAttribute(att, nmspc));
+                    }
+                }
+
+                parentElement.ParentNode.InsertAfter(uninstallElement, sourceLineElement);
+            }
+        }
+        
         private void ParseSplitFileElement(XmlElement fileElement, XmlElement element, string componentId, string fileId)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);

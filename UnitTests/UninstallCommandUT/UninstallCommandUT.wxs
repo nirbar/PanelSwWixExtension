@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
+  
+	<Bundle Name="UninstallCommandUT" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7">
+    <BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLicense"/>
+    
+		<Chain ParallelCache="yes" DisableSystemRestore="yes">
+
+      <ExePackage SourceFile="$(var.DeferredExePackage.TargetPath)">
+        <PanelSW:UninstallCommand DetectCondition="WixBundleInstalled" CommandLine='"[MyExe]" /uninstall /silent /norestart /log "[WixBundleLog_DeferredExePackage.exe_uninstall]"'/>
+      </ExePackage>
+    </Chain>
+	</Bundle>
+</Wix>

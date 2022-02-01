@@ -28,6 +28,14 @@
     <EmbeddedResource Include="en-US.wxl" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\DeferredExePackage\DeferredExePackage.vcxproj">
+      <Name>DeferredExePackage</Name>
+      <Project>{b729fb3c-25cf-4216-940d-69ea78779cd7}</Project>
+      <Private>True</Private>
+      <DoNotHarvest>True</DoNotHarvest>
+      <RefProjectOutputGroups>Binaries;Content;Satellites</RefProjectOutputGroups>
+      <RefTargetDir>INSTALLFOLDER</RefTargetDir>
+    </ProjectReference>
     <ProjectReference Include="..\PanelSwCustomActions\PanelSwCustomActions.vcxproj">
       <Name>PanelSwCustomActions</Name>
       <Project>{0c3a56aa-8073-44e1-8de4-c257d581bff0}</Project>
@@ -75,7 +83,6 @@
       <WixProps>WixExtDir=$(WixExtDir);$(WixProps)</WixProps>
       <WixProps>LuxTargetsPath=$(LuxTargetsPath);$(WixProps)</WixProps>
     </PropertyGroup>
-    
     <MSBuild Projects="$(SolutionDir)\Dism\Dism.vcxproj" Targets="Rebuild" Properties="Configuration=$(Configuration);Platform=Win32;$(WixProps)" />
     <MSBuild Projects="$(SolutionDir)\Dism\Dism.vcxproj" Targets="Rebuild" Properties="Configuration=$(Configuration);Platform=x64;$(WixProps)" />
     <MSBuild Projects="$(SolutionDir)\PswManagedCA\PswManagedCA.csproj" Targets="Rebuild" Properties="Configuration=$(Configuration);Platform=x86;$(WixProps)" />

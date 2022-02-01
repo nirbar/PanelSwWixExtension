@@ -192,6 +192,34 @@
     </xs:complexType>
   </xs:element>
 
+  <xs:element name="UninstallCommand">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="ExePackage" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Executes a custom command to uninstall an ExePackage. Used for which the uninstall is launched via a different executable than the install.]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:attribute name="Id" use="optional" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Package Id. Defaults to the parent id with a '_uninstall' postfix]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="DetectCondition" use="optional" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Detection rule for the parent ExePackage. DetectCondition must be specified in this element or in the parent ExePackage. It is recommended to dupliace the parent DetectCondition and amend with the uninstaller executable path if it is resolved with a variable.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="CommandLine" use="required" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Uninstall command line. May contain formatted values. Note that, the first argument should be the full path to the uninstaller executable and that it should be enclosed in double quotes]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="SplitFile">
     <xs:annotation>
       <xs:appinfo>
