@@ -48,7 +48,7 @@ extern "C" UINT __stdcall ConcatFiles(MSIHANDLE hInstall)
 		compAction = WcaGetComponentToDo(szComponent);
 		if ((compAction != WCA_TODO::WCA_TODO_INSTALL) && (compAction != WCA_TODO::WCA_TODO_REINSTALL))
 		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping file concat '%ls' since component '%ls' is not installed", (LPCWSTR)szRootFileId, (LPCWSTR)szComponent);
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping file concat '%ls' since component '%ls' is not scheduled for re/install", (LPCWSTR)szRootFileId, (LPCWSTR)szComponent);
 			continue;
 		}
 		if (szRootFileId.Equals(szSplitFileId))
@@ -145,16 +145,22 @@ HRESULT CConcatFiles::ExecuteOne(LPCWSTR szRootFile, LPCWSTR szSplitFile)
 	BYTE* pBuff = nullptr;
 	DWORD bRes = TRUE;
 
+	if (!FileExistsEx(szSplitFile, nullptr))
+	{
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping concatention of file '%ls' to '%ls' because it does not exist. Assuming the file was not reinstalled", szSplitFile, szRootFile);
+		hr = S_FALSE;
+		ExitFunction();
+	}
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Concatenting file '%ls' to '%ls'", szSplitFile, szRootFile);
 
 	pBuff = (BYTE*)MemAlloc(dwBuffSize, FALSE);
 	ExitOnNull(pBuff, hr, E_FAIL, "Failed to allocate memory");
 
 	hRootFile = ::CreateFile(szRootFile, FILE_APPEND_DATA, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-	ExitOnNullWithLastError((hRootFile != INVALID_HANDLE_VALUE), hr, "Failed opening file '%ls'", szRootFile);
+	ExitOnNullWithLastError((hRootFile != INVALID_HANDLE_VALUE), hr, "Failed opening root file '%ls'", szRootFile);
 
 	hSplitFile = ::CreateFile(szSplitFile, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
-	ExitOnNullWithLastError((hRootFile != INVALID_HANDLE_VALUE), hr, "Failed opening file '%ls'", szRootFile);
+	ExitOnNullWithLastError((hSplitFile != INVALID_HANDLE_VALUE), hr, "Failed opening split file '%ls'", szSplitFile);
 
 	while ((bRes = ::ReadFile(hSplitFile, pBuff, dwBuffSize, &dwBytesRead, nullptr)) && (dwBytesRead > 0))
 	{
