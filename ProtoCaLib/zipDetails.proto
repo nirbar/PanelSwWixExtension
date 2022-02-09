@@ -1,0 +1,11 @@
+syntax = "proto3";
+package com.panelsw.ca;
+option optimize_for = LITE_RUNTIME;
+
+message ZipDetails{
+
+    bytes zipFile = 1;
+    bytes srcFolder = 2;
+    bytes pattern = 3;
+	bool recursive = 4;	
+}

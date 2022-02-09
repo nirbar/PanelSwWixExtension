@@ -12,6 +12,7 @@ message UnzipDetails{
 		delete = 16;
 
 		createRoot = 32;
+		onRollback = 64; // Used by the scheduler
 	}
 
     bytes zipFile = 1;

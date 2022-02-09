@@ -2,6 +2,7 @@
 #include "../CaCommon/DeferredActionBase.h"
 #include "..\poco\Zip\include\Poco\Zip\ZipLocalFileHeader.h"
 #include "unzipDetails.pb.h"
+#include "zipDetails.pb.h"
 #include <string>
 
 class CUnzip :
@@ -9,14 +10,21 @@ class CUnzip :
 {
 public:
 
-	CUnzip() : CDeferredActionBase("Unzip") { }
+	CUnzip(bool bZip) : CDeferredActionBase(bZip ? "Zip" : "Unzip"), isZip_(bZip) { }
 
 	HRESULT AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, ::com::panelsw::ca::UnzipDetails_UnzipFlags flags);
+
+	HRESULT AddZip(LPCWSTR zipFile, LPCWSTR sourceFolder, LPCWSTR szPattern, bool bRecursive);
 
 protected:
 	HRESULT DeferredExecute(const ::std::string& command) override;
 
 private:
+	bool isZip_ = true;
+
+	HRESULT ExecuteOneUnzip(::com::panelsw::ca::UnzipDetails *pDetails);
+	HRESULT ExecuteOneZip(::com::panelsw::ca::ZipDetails *pDetails);
+
 	HRESULT ShouldOverwriteFile(LPCWSTR szFile, ::com::panelsw::ca::UnzipDetails_UnzipFlags flags);
 
 	HRESULT SetFileTimes(LPCSTR szFilePath, const std::string& extradField);

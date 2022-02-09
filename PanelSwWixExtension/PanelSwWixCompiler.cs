@@ -4893,6 +4893,8 @@ namespace PanelSw.Wix.Extensions
 
             // 
             CreateRoot = 0x20,
+
+            OnRollback = 0x40,
         };
 
         private void ParseUnzip(XmlNode node)
@@ -4934,6 +4936,15 @@ namespace PanelSw.Wix.Extensions
                                 if (aye == YesNoType.Yes)
                                 {
                                     flags |= UnzipFlags.Delete;
+                                }
+                            }
+                            break;
+                        case "OnRollback":
+                            {
+                                YesNoType aye = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                                if (aye == YesNoType.Yes)
+                                {
+                                    flags |= UnzipFlags.OnRollback;
                                 }
                             }
                             break;

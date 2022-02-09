@@ -50,3 +50,4 @@ EXPORTS
 	RestartLocalResources
 	Md5Hash
 	ConcatFiles
+	ZipFileSched

@@ -63,8 +63,13 @@ HRESULT ReceiverToExecutor(LPCSTR szReceiver, CDeferredActionBase** ppExecutor)
 	}
 	else if (0 == ::strcmp(szReceiver, "CUnzip"))
 	{
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating TopShelfService handler");
-		(*ppExecutor) = new CUnzip();
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating Unzip handler");
+		(*ppExecutor) = new CUnzip(false);
+	}
+	else if (0 == ::strcmp(szReceiver, "CZip"))
+	{
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating Zip handler");
+		(*ppExecutor) = new CUnzip(true);
 	}
 	else if (0 == ::strcmp(szReceiver, "CSqlScript"))
 	{

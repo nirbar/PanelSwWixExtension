@@ -960,6 +960,11 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
               <xs:documentation><![CDATA[Whether or not to create the root folder. When set to 'no', the root folder in the ZIP archive will not be created on the target machine. Defaults to yes.]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="OnRollback" type="wix:YesNoType" use="optional" default="no">
+            <xs:annotation>
+              <xs:documentation><![CDATA[The ZIP file will be extracted on rollback only. Defaults to no.]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
           <xs:attribute name="DeleteZip" type="wix:YesNoType" use="optional" default="no">
             <xs:annotation>
               <xs:documentation><![CDATA[Whether or not to delete the ZIP archive when extraction has ended successfully. Defaults to no.]]></xs:documentation>

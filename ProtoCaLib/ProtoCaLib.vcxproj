@@ -109,6 +109,9 @@
     <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\unzipDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\zipDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
     <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\xslTransformDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
@@ -162,6 +165,9 @@
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\unzipDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\zipDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\xslTransformDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
@@ -187,6 +193,7 @@
     <None Include="telemetryDetails.proto" />
     <None Include="topShelfServiceDetails.proto" />
     <None Include="unzipDetails.proto" />
+    <None Include="zipDetails.proto" />
     <None Include="xslTransformDetails.proto" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

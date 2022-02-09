@@ -23,6 +23,7 @@ public:
 
 	static ::com::panelsw::ca::FileRegexDetails::FileEncoding DetectEncoding(const void* pFileContent, DWORD dwSize);
 	static HRESULT PathToDevicePath(LPCWSTR szPath, LPWSTR* pszDevicePath);
+	static HRESULT ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRecursive, LPWSTR** pszFiles, UINT* pcFiles);
 
 protected:
 	

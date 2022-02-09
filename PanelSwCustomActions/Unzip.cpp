@@ -1,11 +1,14 @@
 #include "Unzip.h"
+#include "FileOperations.h"
 #include "..\CaCommon\WixString.h"
 #include "..\poco\Zip\include\Poco\Zip\ZipArchive.h"
 #include "..\poco\Zip\include\Poco\Zip\ZipStream.h"
+#include "..\poco\Zip\include\Poco\Zip\Compress.h"
 #include "..\poco\Foundation\include\Poco\UnicodeConverter.h"
 #include "..\poco\Foundation\include\Poco\Delegate.h"
 #include "..\poco\Foundation\include\Poco\StreamCopier.h"
 #include "unzipDetails.pb.h"
+#include "zipDetails.pb.h"
 #include <memutil.h>
 #include <pathutil.h>
 #include <fileutil.h>
@@ -20,7 +23,6 @@ using namespace google::protobuf;
 using namespace Poco::Zip;
 
 /*TODO
-- Migrate Zip to native code
 - Support rollback (copy current target-folder to temp before decompressing over it).
 */
 
@@ -30,7 +32,8 @@ extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall)
 	UINT er = ERROR_SUCCESS;
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
-	CUnzip cad;
+	CUnzip rlbkCad(false);
+	CUnzip cad(false);
 	DWORD dwRes = 0;
 	LPWSTR szCustomActionData = nullptr;
 
@@ -84,13 +87,117 @@ extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall)
 		ExitOnNull(!zip.IsNullOrEmpty(), hr, E_INVALIDARG, "ZIP file path is empty");
 		ExitOnNull(!folder.IsNullOrEmpty(), hr, E_INVALIDARG, "ZIP target path is empty");
 
-		hr = cad.AddUnzip(zip, folder, (UnzipDetails_UnzipFlags)flags);
-		ExitOnFailure(hr, "Failed scheduling zip file extraction");
+		if ((flags & UnzipDetails_UnzipFlags::UnzipDetails_UnzipFlags_onRollback) == UnzipDetails_UnzipFlags::UnzipDetails_UnzipFlags_onRollback)
+		{
+			hr = rlbkCad.AddUnzip(zip, folder, (UnzipDetails_UnzipFlags)flags);
+			ExitOnFailure(hr, "Failed scheduling zip file extraction");
+		}
+		else
+		{
+			hr = cad.AddUnzip(zip, folder, (UnzipDetails_UnzipFlags)flags);
+			ExitOnFailure(hr, "Failed scheduling zip file extraction");
+		}
+	}
+	hr = S_OK;
+
+	if (rlbkCad.HasActions())
+	{
+		hr = rlbkCad.GetCustomActionData(&szCustomActionData);
+		ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
+		hr = WcaDoDeferredAction(L"UnzipRollback", szCustomActionData, 0);
+		ExitOnFailure(hr, "Failed setting property");
+		ReleaseNullStr(szCustomActionData);
+	}
+
+	if (cad.HasActions())
+	{
+		hr = cad.GetCustomActionData(&szCustomActionData);
+		ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
+		hr = WcaDoDeferredAction(L"UnzipExec", szCustomActionData, 0);
+		ExitOnFailure(hr, "Failed setting property");
+	}
+
+LExit:
+	ReleaseStr(szCustomActionData);
+	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
+	return WcaFinalize(er);
+}
+
+extern "C" UINT __stdcall ZipFileSched(MSIHANDLE hInstall)
+{
+	HRESULT hr = S_OK;
+	UINT er = ERROR_SUCCESS;
+	PMSIHANDLE hView;
+	PMSIHANDLE hRecord;
+	CUnzip cad(true);
+	DWORD dwRes = 0;
+	LPWSTR szCustomActionData = nullptr;
+
+	hr = WcaInitialize(hInstall, __FUNCTION__);
+	ExitOnFailure(hr, "Failed to initialize");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
+
+	// Ensure table PSW_DeletePath exists.
+	hr = WcaTableExists(L"PSW_Unzip");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_ZipFile'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ZipFile'. Have you authored 'PanelSw:ZipFile' entries in WiX code?");
+
+	// Execute view
+	hr = WcaOpenExecuteView(L"SELECT `ZipFile`, `CompressFolder`, `FilePattern`, `Recursive`, `Condition` FROM `PSW_ZipFile`", &hView);
+	ExitOnFailure(hr, "Failed to execute SQL query");
+
+	// Iterate records
+	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
+	{
+		ExitOnFailure(hr, "Failed to fetch record.");
+
+		// Get fields
+		CWixString zip, folder, pattern, condition;
+		int recursive = 0;
+
+		hr = WcaGetRecordFormattedString(hRecord, 1, (LPWSTR*)zip);
+		ExitOnFailure(hr, "Failed to get ZipFile.");
+		hr = WcaGetRecordFormattedString(hRecord, 2, (LPWSTR*)folder);
+		ExitOnFailure(hr, "Failed to get CompressFolder.");
+		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)pattern);
+		ExitOnFailure(hr, "Failed to get FilePattern.");
+		hr = WcaGetRecordInteger(hRecord, 4, &recursive);
+		ExitOnFailure(hr, "Failed to get Recursive.");
+		hr = WcaGetRecordString(hRecord, 5, (LPWSTR*)condition);
+		ExitOnFailure(hr, "Failed to get Condition.");
+
+		MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, (LPCWSTR)condition);
+		switch (condRes)
+		{
+		case MSICONDITION::MSICONDITION_NONE:
+		case MSICONDITION::MSICONDITION_TRUE:
+			break;
+
+		case MSICONDITION::MSICONDITION_FALSE:
+			WcaLog(LOGMSG_STANDARD, "Skipping. Condition evaluated to false");
+			continue;
+
+		case MSICONDITION::MSICONDITION_ERROR:
+			hr = E_FAIL;
+			ExitOnFailure(hr, "Bad Condition field");
+		}
+
+		ExitOnNull(!zip.IsNullOrEmpty(), hr, E_INVALIDARG, "ZIP file path is empty");
+		ExitOnNull(!folder.IsNullOrEmpty(), hr, E_INVALIDARG, "ZIP source folder is empty");
+
+		if (folder.RFind(L'\\') != (folder.StrLen() - 1))
+		{
+			hr = folder.AppnedFormat(L"\\");
+			ExitOnFailure(hr, "Failed appending backslash");
+		}
+
+		hr = cad.AddZip(zip, folder, pattern, recursive);
+		ExitOnFailure(hr, "Failed scheduling zip file compression");
 	}
 
 	hr = cad.GetCustomActionData(&szCustomActionData);
 	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
-	hr = WcaDoDeferredAction(L"UnzipExec", szCustomActionData, 0);
+	hr = WcaDoDeferredAction(L"ZipFileExec", szCustomActionData, 0);
 	ExitOnFailure(hr, "Failed setting property");
 
 LExit:
@@ -106,6 +213,8 @@ HRESULT CUnzip::AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, UnzipDetails_Unz
 	UnzipDetails* pDetails = nullptr;
 	::std::string* pAny = nullptr;
 	bool bRes = true;
+
+	ExitOnNull(!isZip_, hr, E_INVALIDSTATE, "Using Zip to unzip");
 
 	hr = AddCommand("CUnzip", &pCmd);
 	ExitOnFailure(hr, "Failed to add command");
@@ -127,11 +236,170 @@ LExit:
 	return hr;
 }
 
+HRESULT CUnzip::AddZip(LPCWSTR zipFile, LPCWSTR sourceFolder, LPCWSTR szPattern, bool bRecursive)
+{
+	HRESULT hr = S_OK;
+	Command* pCmd = nullptr;
+	ZipDetails* pDetails = nullptr;
+	::std::string* pAny = nullptr;
+	bool bRes = true;
+
+	ExitOnNull(isZip_, hr, E_INVALIDSTATE, "Using Unzip to zip");
+
+	hr = AddCommand("CZip", &pCmd);
+	ExitOnFailure(hr, "Failed to add command");
+
+	pDetails = new ZipDetails();
+	ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
+
+	pDetails->set_zipfile(zipFile, WSTR_BYTE_SIZE(zipFile));
+	pDetails->set_srcfolder(sourceFolder, WSTR_BYTE_SIZE(sourceFolder));
+	pDetails->set_pattern(szPattern, WSTR_BYTE_SIZE(szPattern));
+	pDetails->set_recursive(bRecursive);
+
+	pAny = pCmd->mutable_details();
+	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+
+	bRes = pDetails->SerializeToString(pAny);
+	ExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
+
+LExit:
+	return hr;
+}
+
+
 HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 {
 	HRESULT hr = S_OK;
+	UnzipDetails unzipDetails;
+	ZipDetails zipDetails;
+
+	if (!isZip_ && unzipDetails.ParseFromString(command))
+	{
+		hr = ExecuteOneUnzip(&unzipDetails);
+		ExitOnFailure(hr, "Failed executing UnzipDetails");
+	}
+	else if (isZip_ && zipDetails.ParseFromString(command))
+	{
+		hr = ExecuteOneZip(&zipDetails);
+		ExitOnFailure(hr, "Failed executing ZipDetails");
+	}
+	else
+	{
+		hr = E_INVALIDARG;
+		ExitOnFailure(hr, "Failed unpacking command");
+	}
+
+LExit:
+	return hr;
+}
+
+HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
+{
+	HRESULT hr = S_OK;
 	bool bRes = true;
-	UnzipDetails details;
+	LPCWSTR zipFileW = nullptr;
+	LPCWSTR srcFolderW = nullptr;
+	LPCWSTR szPattern = nullptr;
+	LPWSTR* pszFiles = nullptr;
+	LPSTR szEntryName = nullptr;
+	UINT cFiles = 0;
+	std::string zipFileA;
+	std::ostream* zipFileStream = nullptr;
+	Compress* pZip = nullptr;
+	Poco::Path file, fileName;
+
+	zipFileW = (LPCWSTR)pDetails->zipfile().c_str();
+	srcFolderW = (LPCWSTR)pDetails->srcfolder().c_str();
+	szPattern = (LPCWSTR)pDetails->pattern().c_str();
+
+	try
+	{
+		hr = CFileOperations::ListFiles(srcFolderW, szPattern, pDetails->recursive(), &pszFiles, &cFiles);
+		ExitOnFailure(hr, "Failed listing files in '%ls'", srcFolderW);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Compressing %u files matching '%ls%ls' to zip file '%ls'", cFiles, srcFolderW, szPattern, zipFileW);
+
+		if (cFiles > 0)
+		{
+			Poco::UnicodeConverter::toUTF8(zipFileW, zipFileA);
+
+			zipFileStream = new std::ofstream(zipFileA, std::ios::binary);
+			ExitOnNull(zipFileStream, hr, E_OUTOFMEMORY, "Failed creating zip file '%ls'", zipFileW);
+
+			pZip = new Compress(*zipFileStream, true);
+			ExitOnNull(zipFileStream, hr, E_OUTOFMEMORY, "Failed creating zip archive for '%ls'", zipFileW);
+
+			for (UINT i = 0; i < cFiles; ++i)
+			{
+				hr = StrAnsiAllocString(&szEntryName, pszFiles[i] + ::wcslen(srcFolderW), 0, CP_UTF8);
+				ExitOnFailure(hr, "Failed allocating string");
+
+				while (LPSTR szBackslah = ::strchr(szEntryName, '\\'))
+				{
+					*szBackslah = '/';
+				}
+
+				fileName.setFileName(szEntryName);
+				ReleaseNullMem(szEntryName);
+
+				hr = StrAnsiAllocString(&szEntryName, pszFiles[i], 0, CP_UTF8);
+				ExitOnFailure(hr, "Failed allocating string");
+
+				file.setFileName(szEntryName);
+				ReleaseNullMem(szEntryName);
+
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Adding '%s' as '%s' to zip file '%s'", file.getFileName().c_str(), fileName.getFileName().c_str(), zipFileA.c_str());
+				pZip->addFile(file, fileName);
+
+				//TODO Set extra time fields, once POCO support getting the entry of the added file.
+			}
+
+			pZip->close();
+			zipFileStream->flush();
+		}
+	}
+	catch (Poco::Exception ex)
+	{
+		hr = HRESULT_FROM_WIN32(ex.code());
+		if (SUCCEEDED(hr))
+		{
+			hr = E_FAIL;
+		}
+		ExitOnFailure(hr, "Failed zipping file. %s", ex.displayText().c_str());
+	}
+	catch (std::exception ex)
+	{
+		hr = E_FAIL;
+		ExitOnFailure(hr, "Failed zipping file. %s", ex.what());
+	}
+	catch (...)
+	{
+		hr = E_FAIL;
+		ExitOnFailure(hr, "Failed zipping file");
+	}
+
+LExit:
+	ReleaseNullMem(szEntryName);
+	if (cFiles && pszFiles)
+	{
+		StrArrayFree(pszFiles, cFiles);
+	}
+	if (pZip)
+	{
+		delete pZip;
+	}
+	if (zipFileStream)
+	{
+		delete zipFileStream;
+	}
+
+	return hr;
+}
+
+HRESULT CUnzip::ExecuteOneUnzip(::com::panelsw::ca::UnzipDetails* pDetails)
+{
+	HRESULT hr = S_OK;
+	bool bRes = true;
 	ZipArchive* archive = nullptr;
 	LPCWSTR zipFileW = nullptr;
 	LPCWSTR targetFolderW = nullptr;
@@ -142,11 +410,8 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 	LPWSTR szSrcFile = nullptr;
 	LPWSTR szDstFile = nullptr;
 
-	bRes = details.ParseFromString(command);
-	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking UnzipDetails");
-
-	zipFileW = (LPCWSTR)details.zipfile().c_str();
-	targetFolderW = (LPCWSTR)details.targetfolder().c_str();
+	zipFileW = (LPCWSTR)pDetails->zipfile().c_str();
+	targetFolderW = (LPCWSTR)pDetails->targetfolder().c_str();
 
 	try
 	{
@@ -163,7 +428,7 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 		for (ZipArchive::FileHeaders::const_iterator it = archive->headerBegin(), endIt = archive->headerEnd(); it != endIt; ++it)
 		{
 			std::string file = it->second.getFileName();
-			if ((details.flags() & UnzipDetails::UnzipFlags::UnzipDetails_UnzipFlags_createRoot) == 0)
+			if ((pDetails->flags() & UnzipDetails::UnzipFlags::UnzipDetails_UnzipFlags_createRoot) == 0)
 			{
 				size_t i1 = file.find_first_of('/');
 				size_t i2 = file.find_first_of('\\');
@@ -213,7 +478,7 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 
 			if (FileExistsEx(szDstFile, nullptr))
 			{
-				hr = ShouldOverwriteFile(szDstFile, details.flags());
+				hr = ShouldOverwriteFile(szDstFile, pDetails->flags());
 				ExitOnFailure(hr, "Failed determining whether or not to overwrite file '%s'", pathA.c_str());
 
 				if (hr == S_FALSE)
@@ -274,7 +539,7 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 		delete zipFileStream;
 		zipFileStream = nullptr;
 
-		if ((details.flags() & UnzipDetails_UnzipFlags::UnzipDetails_UnzipFlags_delete_) == UnzipDetails_UnzipFlags::UnzipDetails_UnzipFlags_delete_)
+		if ((pDetails->flags() & UnzipDetails_UnzipFlags::UnzipDetails_UnzipFlags_delete_) == UnzipDetails_UnzipFlags::UnzipDetails_UnzipFlags_delete_)
 		{
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Deleting ZIP archive '%ls'", zipFileW);
 			FileEnsureDelete(zipFileW);// Ignoring result

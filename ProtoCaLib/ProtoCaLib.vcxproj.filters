@@ -61,6 +61,9 @@
     <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\unzipDetails.pb.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\zipDetails.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\xslTransformDetails.pb.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -109,6 +112,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\unzipDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\zipDetails.pb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\xslTransformDetails.pb.h">
@@ -160,6 +166,9 @@
       <Filter>Protobuf</Filter>
     </None>
     <None Include="unzipDetails.proto">
+      <Filter>Protobuf</Filter>
+    </None>
+    <None Include="zipDetails.proto">
       <Filter>Protobuf</Filter>
     </None>
     <None Include="xslTransformDetails.proto">

@@ -1,5 +1,6 @@
 #include "FileOperations.h"
 #include "../CaCommon/WixString.h"
+#include <fileutil.h>
 #include <pathutil.h>
 #include <Shellapi.h>
 #include <Shlwapi.h>
@@ -429,6 +430,7 @@ LExit:
 	return eEncoding;
 }
 
+// static 
 HRESULT CFileOperations::PathToDevicePath(LPCWSTR szPath, LPWSTR* pszDevicePath)
 {
 	HRESULT hr = S_OK;
@@ -460,5 +462,113 @@ HRESULT CFileOperations::PathToDevicePath(LPCWSTR szPath, LPWSTR* pszDevicePath)
 	*pszDevicePath = szDevicePath.Detach();
 
 LExit:
+	return hr;
+}
+
+// static 
+HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRecursive, LPWSTR** pszFiles, UINT* pcFiles)
+{
+	HRESULT hr = S_OK;
+	LPWSTR szFullPattern = nullptr;
+	LPWSTR szFullFolder = nullptr;
+	LPWSTR szCurrFile = nullptr;
+	WIN32_FIND_DATA FindFileData;
+	HANDLE hFind = INVALID_HANDLE_VALUE;
+
+	hr = StrAllocString(&szFullFolder, szFolder, 0);
+	ExitOnFailure(hr, "Failed allocating string");
+
+	hr = PathBackslashTerminate(&szFullFolder);
+	ExitOnFailure(hr, "Failed allocating string");
+
+	// Start with subfolders, no pattern foltering
+	if (bRecursive)
+	{
+		hr = StrAllocFormatted(&szFullPattern, L"%s*", szFullFolder);
+		ExitOnFailure(hr, "Failed allocating string");
+
+		hFind = ::FindFirstFile(szFullPattern, &FindFileData);
+		if ((hFind == INVALID_HANDLE_VALUE) && (::GetLastError() == ERROR_FILE_NOT_FOUND))
+		{
+			ExitFunction();
+		}		
+		ExitOnNullWithLastError((hFind != INVALID_HANDLE_VALUE), hr, "Failed searching files in '%ls'", szFullFolder);
+
+		do
+		{
+			if ((::wcscmp(L".", FindFileData.cFileName) == 0) || (::wcscmp(L"..", FindFileData.cFileName) == 0))
+			{
+				continue;
+			}
+
+			if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
+			{
+				ReleaseNullStr(szCurrFile);
+
+				hr = StrAllocFormatted(&szCurrFile, L"%s%s", szFullFolder, FindFileData.cFileName);
+				ExitOnFailure(hr, "Failed allocating string");
+
+				hr = ListFiles(szCurrFile, szPattern, bRecursive, pszFiles, pcFiles);
+				ExitOnFailure(hr, "Failed finding files");
+			}
+
+		} while (::FindNextFile(hFind, &FindFileData));
+		ExitOnNullWithLastError((::GetLastError() == ERROR_NO_MORE_FILES), hr, "Failed searching files in '%ls'", szFullFolder)
+
+		::FindClose(hFind);
+		hFind = INVALID_HANDLE_VALUE;
+	}
+
+	// Now look for files
+	ReleaseNullStr(szFullPattern);
+	if (szPattern && *szPattern)
+	{
+		hr = StrAllocFormatted(&szFullPattern, L"%s%s", szFullFolder, szPattern);
+		ExitOnFailure(hr, "Failed allocating string");
+	}
+	else
+	{
+		hr = StrAllocFormatted(&szFullPattern, L"%s*", szFullFolder);
+		ExitOnFailure(hr, "Failed allocating string");
+	}
+
+	hFind = ::FindFirstFile(szFullPattern, &FindFileData);
+	if ((hFind == INVALID_HANDLE_VALUE) && (::GetLastError() == ERROR_FILE_NOT_FOUND))
+	{
+		ExitFunction();
+	}		
+	ExitOnNullWithLastError((hFind != INVALID_HANDLE_VALUE), hr, "Failed searching files in '%ls'", szFullPattern);
+
+	do
+	{
+		if ((::wcscmp(L".", FindFileData.cFileName) == 0) || (::wcscmp(L"..", FindFileData.cFileName) == 0))
+		{
+			continue;
+		}
+		if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
+		{
+			continue;
+		}
+
+		ReleaseNullStr(szCurrFile);
+
+		hr = StrAllocFormatted(&szCurrFile, L"%s%s", szFullFolder, FindFileData.cFileName);
+		ExitOnFailure(hr, "Failed allocating string");
+
+		hr = StrArrayAllocString(pszFiles, pcFiles, szCurrFile, 0);
+		ExitOnFailure(hr, "Failed allocating string");
+
+	} while (::FindNextFile(hFind, &FindFileData));
+	ExitOnNullWithLastError((::GetLastError() == ERROR_NO_MORE_FILES), hr, "Failed searching files in '%ls'", szFullPattern)
+
+LExit:
+
+	ReleaseStr(szFullPattern);
+	ReleaseStr(szCurrFile);
+	if (hFind && (hFind != INVALID_HANDLE_VALUE))
+	{
+		::FindClose(hFind);
+	}
+
 	return hr;
 }

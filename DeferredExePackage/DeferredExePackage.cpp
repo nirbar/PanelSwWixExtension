@@ -31,7 +31,7 @@ int _tmain()
     szIgnoreArg = _tcsstr(szCmdLine, IGNORE_ME);
     if (szIgnoreArg && (!szSkipArg || (szIgnoreArg < szSkipArg)))
     {
-        _tprintf(TEXT("Empty run requested\n"), ::GetCommandLine());
+        _tprintf(TEXT("Empty run requested: %s\n"), ::GetCommandLine());
         goto LExit;
     }
     if (!szSkipArg)
