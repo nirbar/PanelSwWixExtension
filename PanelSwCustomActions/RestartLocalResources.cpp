@@ -13,7 +13,6 @@
 #include <algorithm>
 #include <Psapi.h>
 #include "../CaCommon/WixString.h"
-#pragma comment (lib, "Psapi.lib")
 using namespace std;
 using namespace ::com::panelsw::ca;
 using namespace google::protobuf;
@@ -43,10 +42,28 @@ extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall)
     HANDLE hProc = nullptr;
     std::list<CWixString> lstFolders;
     CRestartLocalResources cad;
+    HMODULE hDll = NULL;
+    decltype(::GetProcessImageFileNameW) *pGetProcessImageFileNameW = nullptr;
 
     hr = WcaInitialize(hInstall, __FUNCTION__);
     ExitOnFailure(hr, "Failed to initialize");
     WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
+
+    hDll = ::LoadLibrary(L"Kernel32.dll");
+    ExitOnNullWithLastError(hDll, hr, "Failed loading Kernel32.dll");
+
+    pGetProcessImageFileNameW = (decltype(::GetProcessImageFileNameW)*)::GetProcAddress(hDll, "GetProcessImageFileNameW");
+    if (pGetProcessImageFileNameW == nullptr)
+    {
+        ::FreeLibrary(hDll);
+
+        hDll = ::LoadLibrary(L"Psapi.dll");
+        ExitOnNullWithLastError(hDll, hr, "Failed loading Psapi.dll");
+
+        pGetProcessImageFileNameW = (decltype(::GetProcessImageFileNameW)*)::GetProcAddress(hDll, "GetProcessImageFileNameW");
+    }
+    ExitOnNullWithLastError(pGetProcessImageFileNameW, hr, "Failed loading function GetProcessImageFileNameW from Kernel32.dll / Psapi.dll");
+
 
     hr = WcaTableExists(L"PSW_RestartLocalResources");
     ExitOnFailure(hr, "Failed to check if table exists 'PSW_RestartLocalResources'");
@@ -131,25 +148,31 @@ extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall)
         visInFolder.szFullExePath[0] = NULL;
 
         hProc = ::OpenProcess(PROCESS_QUERY_LIMITED_INFORMATION, FALSE, peData.th32ProcessID);
-        if (hProc)
+        if (!hProc)
         {
-            if (::GetProcessImageFileNameW(hProc, visInFolder.szFullExePath, ARRAYSIZE(visInFolder.szFullExePath)))
+            WcaLogError(HRESULT_FROM_WIN32(::GetLastError()), "Failed to open process '%ls' (process ID %u). Ignoring error", peData.szExeFile, peData.th32ProcessID);
+            continue;
+        }
+
+        if (!pGetProcessImageFileNameW(hProc, visInFolder.szFullExePath, ARRAYSIZE(visInFolder.szFullExePath)))
+        {
+            WcaLogError(HRESULT_FROM_WIN32(::GetLastError()), "Failed to get process full path for '%ls' (process ID %u). Ignoring error", peData.szExeFile, peData.th32ProcessID);
+            continue;
+        }
+
+        // Executable is within the folder?
+        if (std::any_of(lstFolders.begin(), lstFolders.end(), visInFolder))
+        {
+            if (pSession)
             {
-                // Executable is within the folder?
-                if (std::any_of(lstFolders.begin(), lstFolders.end(), visInFolder))
-                {
-                    if (pSession)
-                    {
-                        WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Registering process '%ls' (%u) with RestartManager", visInFolder.szFullExePath, peData.th32ProcessID);
+                WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Registering process '%ls' (%u) with RestartManager", visInFolder.szFullExePath, peData.th32ProcessID);
 
-                        hr = RmuAddProcessById(pSession, peData.th32ProcessID);
-                        ExitOnFailure(hr, "Failed adding process to RestartManager");
-                    }
-
-                    hr = cad.AddRestartLocalResources(visInFolder.szFullExePath, peData.th32ProcessID);
-                    ExitOnFailure(hr, "Failed to enlist process '%ls' for termination", visInFolder.szFullExePath)
-                }
+                hr = RmuAddProcessById(pSession, peData.th32ProcessID);
+                ExitOnFailure(hr, "Failed adding process to RestartManager");
             }
+
+            hr = cad.AddRestartLocalResources(visInFolder.szFullExePath, peData.th32ProcessID);
+            ExitOnFailure(hr, "Failed to enlist process '%ls' for termination", visInFolder.szFullExePath)
         }
     }
 
@@ -171,6 +194,11 @@ extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall)
     }
 
 LExit:
+    if (hDll)
+    {
+        ::FreeLibrary(hDll);
+        hDll = NULL;
+    }
     ReleaseFile(hSnap);
     ReleaseHandle(hProc);
     ReleaseMem(pSession);
@@ -252,7 +280,7 @@ HRESULT CRestartLocalResources::Execute(LPCWSTR szFilePath, DWORD dwProcId)
     ExitOnWin32Error(er, hr, "Failed to wait for process to terminate");
 
 LExit:
-    ReleaseFile(hProcess);
+    ReleaseHandle(hProcess);
 
     return hr;
 }
