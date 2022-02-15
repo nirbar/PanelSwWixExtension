@@ -12,7 +12,6 @@
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{b729fb3c-25cf-4216-940d-69ea78779cd7}</ProjectGuid>
     <RootNamespace>DeferredExePackage</RootNamespace>
-    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
