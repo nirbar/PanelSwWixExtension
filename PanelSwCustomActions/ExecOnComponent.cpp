@@ -603,12 +603,12 @@ HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command)
 	bRes = details.ParseFromString(command);
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ExecOnDetails");
 
-	szCommand = (LPCWSTR)details.command().c_str();
-	szObfuscatedCommand = (LPCWSTR)details.obfuscatedcommand().c_str();
-	szWorkingDirectory = (LPCWSTR)details.workingdirectory().c_str();
-	szDomain = (LPCWSTR)details.domain().c_str();
-	szUser = (LPCWSTR)details.user().c_str();
-	szPassword = (LPCWSTR)details.password().c_str();
+	szCommand = (LPCWSTR)details.command().data();
+	szObfuscatedCommand = (LPCWSTR)details.obfuscatedcommand().data();
+	szWorkingDirectory = (LPCWSTR)details.workingdirectory().data();
+	szDomain = (LPCWSTR)details.domain().data();
+	szUser = (LPCWSTR)details.user().data();
+	szPassword = (LPCWSTR)details.password().data();
 
 	hr = SetEnvironment(details.environment());
 	if (FAILED(hr))
@@ -1060,8 +1060,8 @@ HRESULT CExecOnComponent::SetEnvironment(const ::google::protobuf::Map<std::stri
 
 	for (::google::protobuf::Map<std::string, std::string>::const_iterator itCurr = customEnv.begin(), itEnd = customEnv.end(); itCurr != itEnd; ++itCurr)
 	{
-		LPCWSTR szName = (LPCWSTR)itCurr->first.c_str();
-		LPCWSTR szValue = (LPCWSTR)itCurr->second.c_str();
+		LPCWSTR szName = (LPCWSTR)itCurr->first.data();
+		LPCWSTR szValue = (LPCWSTR)itCurr->second.data();
 
 		if (szName && *szName && szValue && *szValue)
 		{

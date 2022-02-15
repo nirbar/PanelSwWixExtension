@@ -250,8 +250,8 @@ HRESULT CXslTransform::DeferredExecute(const ::std::string& command)
 	bRes = details.ParseFromString(command);
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking XslTransformDetails");
 
-	szXmlPath = (LPCWSTR)details.xml_path().c_str();
-	szXslPath = (LPCWSTR)details.xsl_path().c_str();
+	szXmlPath = (LPCWSTR)details.xml_path().data();
+	szXslPath = (LPCWSTR)details.xsl_path().data();
 
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing XSL transform on file '%ls'", szXmlPath);
 

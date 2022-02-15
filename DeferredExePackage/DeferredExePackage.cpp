@@ -41,22 +41,30 @@ int _tmain()
         goto LExit;
     }
 
-    szCmdLine = szSkipArg + ARRAYSIZE(SKIP_UNTIL_HERE);
-    while (::_istspace(szCmdLine[0]))
+    szCmdLine = szSkipArg + ::_tcsclen(SKIP_UNTIL_HERE);
+    while ((szCmdLine[0] != NULL) && ::_istspace(szCmdLine[0]))
     {
         ++szCmdLine;
+    }
+    if (szCmdLine[0] == NULL)
+    {
+        _tprintf(TEXT("Command line after skip is empty: %s\n"), ::GetCommandLine());
+        dwExitCode = ERROR_BAD_ARGUMENTS;
+        goto LExit;
     }
 
     bRes = ::CreateProcess(nullptr, szCmdLine, nullptr, nullptr, FALSE, CREATE_NEW_PROCESS_GROUP, nullptr, nullptr, &startupInfo, &processInfo);
     if (!bRes)
     {
         dwExitCode = ::GetLastError();
+        _tprintf(TEXT("Failed to launch process with command line '%s'. Exit code is %u\n"), szCmdLine, dwExitCode);
         goto LExit;
     }
 
     dwExitCode = ::WaitForSingleObject(processInfo.hProcess, INFINITE);
     if (dwExitCode != WAIT_OBJECT_0)
     {
+        _tprintf(TEXT("Failed to wait on process with command line '%s'. Wait error code is %u\n"), szCmdLine, dwExitCode);
         goto LExit;
     }
 
@@ -64,8 +72,11 @@ int _tmain()
     if (!bRes)
     {
         dwExitCode = ::GetLastError();
+        _tprintf(TEXT("Failed to get exit code of process with command line '%s'. Error code is %u\n"), szCmdLine, dwExitCode);
         goto LExit;
     }
+
+    _tprintf(TEXT("Process exit code is %u\n"), dwExitCode);
 
 LExit:
     if (processInfo.hThread != NULL)

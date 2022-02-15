@@ -64,7 +64,6 @@ extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall)
     }
     ExitOnNullWithLastError(pGetProcessImageFileNameW, hr, "Failed loading function GetProcessImageFileNameW from Kernel32.dll / Psapi.dll");
 
-
     hr = WcaTableExists(L"PSW_RestartLocalResources");
     ExitOnFailure(hr, "Failed to check if table exists 'PSW_RestartLocalResources'");
     ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_RestartLocalResources'. Have you authored 'PanelSw:RestartLocalResources' entries in WiX code?");

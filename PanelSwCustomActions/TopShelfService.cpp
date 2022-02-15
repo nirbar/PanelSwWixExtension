@@ -330,7 +330,7 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 	LPCWSTR description = nullptr;
 	CWixString logCommand;
 
-	hr = StrAllocString(&file, (LPCWSTR)(pDetails->file().c_str()), 0);
+	hr = StrAllocString(&file, (LPCWSTR)(pDetails->file().data()), 0);
 	ExitOnFailure(hr, "Failed allocating string");
 
 	hr = PathEnsureQuoted(&file, FALSE);

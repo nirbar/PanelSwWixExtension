@@ -556,19 +556,19 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 		// Failure and error handling on either connection or query failure
 		if (!sqlConn.IsConnected())
 		{
-			LPCWSTR szConnStr = (LPCWSTR)details.connectionstring().c_str();
+			LPCWSTR szConnStr = (LPCWSTR)details.connectionstring().data();
 			if (szConnStr && *szConnStr)
 			{
 				hr = sqlConn.Connect(szConnStr, &szError);
 			}
 			else
 			{
-				hr = sqlConn.Connect((LPCWSTR)details.server().c_str(), (LPCWSTR)details.instance().c_str(), details.port(), (LPCWSTR)details.database().c_str(), (LPCWSTR)details.username().c_str(), (LPCWSTR)details.password().c_str(), details.encrypted(), &szError);
+				hr = sqlConn.Connect((LPCWSTR)details.server().data(), (LPCWSTR)details.instance().data(), details.port(), (LPCWSTR)details.database().data(), (LPCWSTR)details.username().data(), (LPCWSTR)details.password().data(), details.encrypted(), &szError);
 			}
 		}
 		if (sqlConn.IsConnected())
 		{
-			hr = ExecuteOne(sqlConn, (LPCWSTR)details.scripts(i).c_str(), &szError);
+			hr = ExecuteOne(sqlConn, (LPCWSTR)details.scripts(i).data(), &szError);
 		}
 
 		if (FAILED(hr))
