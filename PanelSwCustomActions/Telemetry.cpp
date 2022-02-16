@@ -185,10 +185,10 @@ HRESULT CTelemetry::DeferredExecute(const ::std::string& command)
 	bRes = details.ParseFromString(command);
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking TelemetryDetails");
 
-	szUrl = (LPCWSTR)details.url().data();
-	szPage = (LPCWSTR)details.page().data();
-	szData = (LPCWSTR)details.data().data();
-	szMethod = (LPCWSTR)details.method().data();
+	szUrl = (LPCWSTR)(LPVOID)details.url().data();
+	szPage = (LPCWSTR)(LPVOID)details.page().data();
+	szData = (LPCWSTR)(LPVOID)details.data().data();
+	szMethod = (LPCWSTR)(LPVOID)details.method().data();
 
 	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Posting telemetry: Url=%ls Page=%ls Method=%ls Data=%ls Secure=%i"
 		, szUrl

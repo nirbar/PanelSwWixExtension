@@ -309,9 +309,9 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 	Compress* pZip = nullptr;
 	Poco::Path file, fileName;
 
-	zipFileW = (LPCWSTR)pDetails->zipfile().data();
-	srcFolderW = (LPCWSTR)pDetails->srcfolder().data();
-	szPattern = (LPCWSTR)pDetails->pattern().data();
+	zipFileW = (LPCWSTR)(LPVOID)pDetails->zipfile().data();
+	srcFolderW = (LPCWSTR)(LPVOID)pDetails->srcfolder().data();
+	szPattern = (LPCWSTR)(LPVOID)pDetails->pattern().data();
 
 	try
 	{
@@ -410,8 +410,8 @@ HRESULT CUnzip::ExecuteOneUnzip(::com::panelsw::ca::UnzipDetails* pDetails)
 	LPWSTR szSrcFile = nullptr;
 	LPWSTR szDstFile = nullptr;
 
-	zipFileW = (LPCWSTR)pDetails->zipfile().data();
-	targetFolderW = (LPCWSTR)pDetails->targetfolder().data();
+	zipFileW = (LPCWSTR)(LPVOID)pDetails->zipfile().data();
+	targetFolderW = (LPCWSTR)(LPVOID)pDetails->targetfolder().data();
 
 	try
 	{

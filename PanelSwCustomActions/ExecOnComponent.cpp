@@ -604,12 +604,12 @@ HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command)
 	bRes = details.ParseFromString(command);
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ExecOnDetails");
 
-	szCommand = (LPCWSTR)details.command().data();
-	szObfuscatedCommand = (LPCWSTR)details.obfuscatedcommand().data();
-	szWorkingDirectory = (LPCWSTR)details.workingdirectory().data();
-	szDomain = (LPCWSTR)details.domain().data();
-	szUser = (LPCWSTR)details.user().data();
-	szPassword = (LPCWSTR)details.password().data();
+	szCommand = (LPCWSTR)(LPVOID)details.command().data();
+	szObfuscatedCommand = (LPCWSTR)(LPVOID)details.obfuscatedcommand().data();
+	szWorkingDirectory = (LPCWSTR)(LPVOID)details.workingdirectory().data();
+	szDomain = (LPCWSTR)(LPVOID)details.domain().data();
+	szUser = (LPCWSTR)(LPVOID)details.user().data();
+	szPassword = (LPCWSTR)(LPVOID)details.password().data();
 
 	hr = SetEnvironment(details.environment());
 	if (FAILED(hr))
@@ -959,11 +959,11 @@ HRESULT CExecOnComponent::SearchStdOut(LPCWSTR szStdOut, const ExecOnDetails& de
 		try
 		{
 			bool bRes = true;
-			std::wregex rx((LPCWSTR)console.regex().data());
+			std::wregex rx((LPCWSTR)(LPVOID)console.regex().data());
 			match_results<LPCWSTR> results;
 
 			bRes = regex_search(szStdOut, results, rx);
-			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Regex '%ls' search yielded %i matches", (LPCWSTR)console.obfuscatedregex().data(), results.size());
+			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Regex '%ls' search yielded %i matches", (LPCWSTR)(LPVOID)console.obfuscatedregex().data(), results.size());
 			if ((bRes && results.size()) != console.onmatch())
 			{
 				continue;
@@ -1002,10 +1002,10 @@ HRESULT CExecOnComponent::SearchStdOut(LPCWSTR szStdOut, const ExecOnDetails& de
 			localHr = WcaSetRecordInteger(hRec, 1, 27006);
 			ExitOnFailure(localHr, "Failed setting record integer");
 
-			localHr = WcaSetRecordString(hRec, 2, (LPCWSTR)details.obfuscatedcommand().data());
+			localHr = WcaSetRecordString(hRec, 2, (LPCWSTR)(LPVOID)details.obfuscatedcommand().data());
 			ExitOnFailure(localHr, "Failed setting record string");
 
-			localHr = WcaSetRecordString(hRec, 3, (LPCWSTR)console.prompttext().data());
+			localHr = WcaSetRecordString(hRec, 3, (LPCWSTR)(LPVOID)console.prompttext().data());
 			ExitOnFailure(localHr, "Failed setting record string");
 
 			promptResult = WcaProcessMessage((INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_ERROR | MB_ABORTRETRYIGNORE | MB_DEFBUTTON1 | MB_ICONERROR), hRec);
@@ -1068,8 +1068,8 @@ HRESULT CExecOnComponent::SetEnvironment(const ::google::protobuf::Map<std::stri
 
 	for (::google::protobuf::Map<std::string, std::string>::const_iterator itCurr = customEnv.begin(), itEnd = customEnv.end(); itCurr != itEnd; ++itCurr)
 	{
-		LPCWSTR szName = (LPCWSTR)itCurr->first.data();
-		LPCWSTR szValue = (LPCWSTR)itCurr->second.data();
+		LPCWSTR szName = (LPCWSTR)(LPVOID)itCurr->first.data();
+		LPCWSTR szValue = (LPCWSTR)(LPVOID)itCurr->second.data();
 
 		if (szName && *szName && szValue && *szValue)
 		{

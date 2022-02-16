@@ -179,9 +179,9 @@ HRESULT CShellExecute::DeferredExecute(const ::std::string& command)
 	bRes = details.ParseFromString(command);
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ShellExecDetails");
 
-	szTarget = (LPCWSTR)details.target().data();
-	szArgs = (LPCWSTR)details.args().data();
-	szVerb = (LPCWSTR)details.verb().data();
+	szTarget = (LPCWSTR)(LPVOID)details.target().data();
+	szArgs = (LPCWSTR)(LPVOID)details.args().data();
+	szVerb = (LPCWSTR)(LPVOID)details.verb().data();
 	nShow = details.show();
 	bWait = details.wait();
 

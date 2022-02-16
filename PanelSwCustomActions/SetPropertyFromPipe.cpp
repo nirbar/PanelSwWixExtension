@@ -143,8 +143,8 @@ static HRESULT ReadPropertiesFromPipe(LPCWSTR szPipeName, UINT nTimeout)
 
 	for (int i = 0; i < details.properties_size(); ++i)
 	{
-		LPCWSTR szName = (LPCWSTR)details.properties(i).name().data();
-		LPCWSTR szValue = (LPCWSTR)details.properties(i).value().data();
+		LPCWSTR szName = (LPCWSTR)(LPVOID)details.properties(i).name().data();
+		LPCWSTR szValue = (LPCWSTR)(LPVOID)details.properties(i).value().data();
 
 		if (szName && *szName)
 		{

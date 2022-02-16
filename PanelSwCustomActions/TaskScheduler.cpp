@@ -261,10 +261,10 @@ HRESULT CTaskScheduler::DeferredExecute(const ::std::string& command)
 		LPCWSTR szUser = nullptr;
 		LPCWSTR szPassword = nullptr;
 
-		szName = (LPCWSTR)details.name().data();
-		szXml = (LPCWSTR)details.taskxml().data();
-		szUser = (LPCWSTR)details.user().data();
-		szPassword = (LPCWSTR)details.password().data();
+		szName = (LPCWSTR)(LPVOID)details.name().data();
+		szXml = (LPCWSTR)(LPVOID)details.taskxml().data();
+		szUser = (LPCWSTR)(LPVOID)details.user().data();
+		szPassword = (LPCWSTR)(LPVOID)details.password().data();
 
 		hr = CreateTask(szName, szXml, szUser, szPassword);
 		ExitOnFailure(hr, "Failed to create task '%ls'", szName);
@@ -275,7 +275,7 @@ HRESULT CTaskScheduler::DeferredExecute(const ::std::string& command)
 	{
 		LPCWSTR szName = nullptr;
 
-		szName = (LPCWSTR)details.name().data();
+		szName = (LPCWSTR)(LPVOID)details.name().data();
 
 		hr = RemoveTask(szName);
 		ExitOnFailure(hr, "Failed to create task '%ls'", szName);
@@ -287,8 +287,8 @@ HRESULT CTaskScheduler::DeferredExecute(const ::std::string& command)
 		LPCWSTR szName = nullptr;
 		LPCWSTR szBackupFile = nullptr;
 
-		szName = (LPCWSTR)details.name().data();
-		szBackupFile = (LPCWSTR)details.backupfile().data();
+		szName = (LPCWSTR)(LPVOID)details.name().data();
+		szBackupFile = (LPCWSTR)(LPVOID)details.backupfile().data();
 
 		hr = BackupTask(szName, szBackupFile);
 		ExitOnFailure(hr, "Failed to backup task '%ls'", szName);
@@ -297,7 +297,7 @@ HRESULT CTaskScheduler::DeferredExecute(const ::std::string& command)
 
 	default:
 		LPCWSTR szName = nullptr;
-		szName = (LPCWSTR)details.name().data();
+		szName = (LPCWSTR)(LPVOID)details.name().data();
 		hr = E_INVALIDARG;
 		ExitOnFailure(hr, "Bad action for task '%ls'", szName);
 	}

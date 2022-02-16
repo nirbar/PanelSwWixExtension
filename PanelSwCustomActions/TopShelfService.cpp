@@ -269,7 +269,7 @@ LRetry:
 
 			if (!fileName)
 			{
-				fileName = (LPCWSTR)details.file().data();
+				fileName = (LPCWSTR)(LPVOID)details.file().data();
 				fileName = ::PathFindFileName(fileName);
 			}
 
@@ -330,7 +330,7 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 	LPCWSTR description = nullptr;
 	CWixString logCommand;
 
-	hr = StrAllocString(&file, (LPCWSTR)(pDetails->file().data()), 0);
+	hr = StrAllocString(&file, (LPCWSTR)(LPVOID)pDetails->file().data(), 0);
 	ExitOnFailure(hr, "Failed allocating string");
 
 	hr = PathEnsureQuoted(&file, FALSE);
@@ -342,7 +342,7 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 	);
 	ExitOnFailure(hr, "Failed formatting string");
 
-	instance = (LPCWSTR)pDetails->instance().data();
+	instance = (LPCWSTR)(LPVOID)pDetails->instance().data();
 	if (instance && *instance)
 	{
 		hr = pCommandLine->AppnedFormat(L" -instance \"%s\"", instance);
@@ -355,19 +355,19 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 		goto LCommandForLog;
 	}
 
-	serviceName = (LPCWSTR)pDetails->servicename().data();
+	serviceName = (LPCWSTR)(LPVOID)pDetails->servicename().data();
 	if (serviceName && *serviceName)
 	{
 		hr = pCommandLine->AppnedFormat(L" -servicename \"%s\"", serviceName);
 		ExitOnFailure(hr, "Failed formatting string");
 	}
-	displayName = (LPCWSTR)pDetails->displayname().data();
+	displayName = (LPCWSTR)(LPVOID)pDetails->displayname().data();
 	if (displayName && *displayName)
 	{
 		hr = pCommandLine->AppnedFormat(L" -displayname \"%s\"", displayName);
 		ExitOnFailure(hr, "Failed formatting string");
 	}
-	description = (LPCWSTR)pDetails->description().data();
+	description = (LPCWSTR)(LPVOID)pDetails->description().data();
 	if (description && *description)
 	{
 		hr = pCommandLine->AppnedFormat(L" -description \"%s\"", description);
@@ -377,7 +377,7 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 	switch (pDetails->account())
 	{
 	case TopShelfServiceDetails_ServiceAccount::TopShelfServiceDetails_ServiceAccount_custom:
-		userName = (LPCWSTR)pDetails->username().data();
+		userName = (LPCWSTR)(LPVOID)pDetails->username().data();
 
 		hr = pCommandLine->AppnedFormat(L" -username \"%s\"", userName);
 		ExitOnFailure(hr, "Failed formatting string");
@@ -445,7 +445,7 @@ LCommandForLog: // Dump command line to log without password.
 
 	if (!pDetails->install() && (pDetails->account() == TopShelfServiceDetails_ServiceAccount::TopShelfServiceDetails_ServiceAccount_custom))
 	{
-		password = (LPCWSTR)pDetails->password().data();
+		password = (LPCWSTR)(LPVOID)pDetails->password().data();
 		if (password && *password)
 		{
 			hr = logCommand.AppnedFormat(L" -password \"*********\"");

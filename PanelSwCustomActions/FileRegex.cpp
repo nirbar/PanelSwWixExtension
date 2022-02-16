@@ -246,11 +246,11 @@ HRESULT CFileRegex::DeferredExecute(const ::std::string& command)
 	bRes = details.ParseFromString(command);
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking FileOperationsDetails");
 
-	szFile = (LPCWSTR)details.file().data();
-	szExpression = (LPCWSTR)details.expression().data();
-	szReplacement = (LPCWSTR)details.replacement().data();
-	szRegexObfuscated = (LPCWSTR)details.expressionobfuscated().data();
-	szReplacementObfuscated = (LPCWSTR)details.replacementobfuscated().data();
+	szFile = (LPCWSTR)(LPVOID)details.file().data();
+	szExpression = (LPCWSTR)(LPVOID)details.expression().data();
+	szReplacement = (LPCWSTR)(LPVOID)details.replacement().data();
+	szRegexObfuscated = (LPCWSTR)(LPVOID)details.expressionobfuscated().data();
+	szReplacementObfuscated = (LPCWSTR)(LPVOID)details.replacementobfuscated().data();
 
 	hr = Execute(szFile, szExpression, szReplacement, szRegexObfuscated, szReplacementObfuscated, details.encoding(), details.ignorecase());
 	ExitOnFailure(hr, "Failed to execute file regular expression");

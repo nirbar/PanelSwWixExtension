@@ -220,13 +220,13 @@ HRESULT CFileOperations::DeferredExecute(const ::std::string& command)
 
 	if (details.from().size())
 	{
-		szFrom = (LPCWSTR)details.from().data();
+		szFrom = (LPCWSTR)(LPVOID)details.from().data();
 	}
 	ExitOnNull(szFrom && *szFrom, hr, E_FAIL, "'From' field is empty");
 
 	if (details.to().size())
 	{
-		szTo = (LPCWSTR)details.to().data();
+		szTo = (LPCWSTR)(LPVOID)details.to().data();
 	}
 
 	if (szFrom && szTo)

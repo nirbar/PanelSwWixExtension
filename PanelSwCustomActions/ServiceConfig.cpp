@@ -356,26 +356,26 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 	bRes = details.ParseFromString(command);
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ExecOnDetails");
 
-	szServiceName = (LPCWSTR)details.name().data();
+	szServiceName = (LPCWSTR)(LPVOID)details.name().data();
 	if (details.account().size() > sizeof(WCHAR)) // Larger than NULL
 	{
-		szAccount = (LPCWSTR)details.account().data();
+		szAccount = (LPCWSTR)(LPVOID)details.account().data();
 		if (details.password().size() > sizeof(WCHAR))// Larger than NULL
 		{
-			szPassword = (LPCWSTR)details.password().data();
+			szPassword = (LPCWSTR)(LPVOID)details.password().data();
 		}
 	}
 	if (details.commandline().size() > sizeof(WCHAR))
 	{
-		szCommandLine = (LPCWSTR)details.commandline().data();
+		szCommandLine = (LPCWSTR)(LPVOID)details.commandline().data();
 	}
 	if (details.loadordergroup().size() > 0) // May be empty
 	{
-		szLoadOrderGroup = (LPCWSTR)details.loadordergroup().data();
+		szLoadOrderGroup = (LPCWSTR)(LPVOID)details.loadordergroup().data();
 	}
 	if (details.dependencies().size() > 0) // May be empty
 	{
-		szDependencies = (LPCWSTR)details.dependencies().data();
+		szDependencies = (LPCWSTR)(LPVOID)details.dependencies().data();
 	}
 
 LRetry:

@@ -245,8 +245,8 @@ HRESULT CRestartLocalResources::DeferredExecute(const ::std::string& command)
     bRes = details.ParseFromString(command);
     ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking RestartLocalResourcesDetails");
 
-    szFile = (LPCWSTR)details.file().data();
-    szProcessName = (LPCWSTR)details.processname().data();
+    szFile = (LPCWSTR)(LPVOID)details.file().data();
+    szProcessName = (LPCWSTR)(LPVOID)details.processname().data();
 
     hr = Execute(szFile, szProcessName, details.process_id());
     ExitOnFailure(hr, "Failed to terminate process");

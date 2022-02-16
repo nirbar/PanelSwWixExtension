@@ -123,8 +123,8 @@ HRESULT CConcatFiles::DeferredExecute(const ::std::string& command)
 	bRes = details.ParseFromString(command);
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ConcatFilesDetails");
 
-	szRootFile = (LPCWSTR)details.root_file().data();
-	szSplitFile = (LPCWSTR)details.split_file().data();
+	szRootFile = (LPCWSTR)(LPVOID)details.root_file().data();
+	szSplitFile = (LPCWSTR)(LPVOID)details.split_file().data();
 
 	hr = ExecuteOne(szRootFile, szSplitFile);
 	ExitOnFailure(hr, "Failed to concat file");
