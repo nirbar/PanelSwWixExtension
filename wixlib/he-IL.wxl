@@ -6,6 +6,7 @@
   <String Overridable="yes" Id="ShellExecute">הרצת פקודה "[1]" [2] ב- "[3]" בפעולת [4]</String>
   <String Overridable="yes" Id="TaskScheduler">Configuring Scheduled Tasks</String>
   <String Overridable="yes" Id="ExecOnComponent"><![CDATA[הרצת פקודות]]></String>
+  <String Overridable="yes" Id="ExecOnComponentTemplate"><![CDATA[מריץ [1]]]></String>
   <String Overridable="yes" Id="ExecOnFailure"><![CDATA[כשלון בהרצת פקודה [2]]]></String>
   <String Overridable="yes" Id="ExecOnConsoleFailure"><![CDATA[פקודה [2] החזירה שגיאה
 [3]]]></String>  
@@ -22,6 +23,7 @@
   <String Overridable="yes" Id="CreateSelfSignCertificate"><![CDATA[מייצר תעודות בחתימה אישית]]></String>
   <String Overridable="yes" Id="FileRegex"><![CDATA[חיפוש והחלפה בקבצים]]></String>
   <String Overridable="yes" Id="ForceVersion"><![CDATA[החלפת גירסאות קבצים]]></String>
+  <String Overridable="yes" Id="FileRegexTemplate"><![CDATA[מחליף '[1]' ב- '[2]' בקובץ [3]]]></String>
   <String Overridable="yes" Id="SetPropertyFromPipe"><![CDATA[קריאת פרמטרים חיצוניים]]></String>
   <String Overridable="yes" Id="EvaluateExpression"><![CDATA[חישוב נוסחאות]]></String>
   <String Overridable="yes" Id="CertificateHashSearch"><![CDATA[איתור תעודות]]></String>
@@ -29,6 +31,7 @@
   <String Overridable="yes" Id="Unzip"><![CDATA[פריסת ארכיון קבצים]]></String>
   <String Overridable="yes" Id="DiskSpace"><![CDATA[חישוב מקום פנוי בכונן]]></String>
   <String Overridable="yes" Id="Dism"><![CDATA[הפעלת מאפייני מערכת]]></String>
+  <String Overridable="yes" Id="DismTemplate"><![CDATA[מפעיל את [1]]]></String>
   <String Overridable="yes" Id="DismPackageFailure"><![CDATA[כשלון בהוספת חבילת מאפייני מערכת [2]:
 [3]]]></String>
   <String Overridable="yes" Id="DismFeatureFailure"><![CDATA[כשלון בהתקנת מאפייני מערכת [2]:
@@ -54,6 +57,7 @@
   </String>
   <String Overridable="yes" Id="WmiSearch"><![CDATA[מבצע שאילתות WMI]]></String>
   <String Overridable="yes" Id="RestartLocalResources"><![CDATA[מאתחל תהליכים רצים]]></String>
+  <String Overridable="yes" Id="RestartLocalResourcesTemplate"><![CDATA[סוגר את [1]]]></String>
   <String Overridable="yes" Id="Md5Hash"><![CDATA[מחשב פונקציית MD5]]></String>
   <String Overridable="yes" Id="ConcatFiles"><![CDATA[מאחד קבצים]]></String>
 </WixLocalization>

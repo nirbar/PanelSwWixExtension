@@ -599,6 +599,7 @@ HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command)
 	CWixString szLog;
 	HANDLE hStdOut = NULL;
 	HANDLE hProc = NULL;
+	PMSIHANDLE hActionData;
 
 	bRes = details.ParseFromString(command);
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ExecOnDetails");
@@ -624,6 +625,13 @@ HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command)
 	}
 
 	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Executing '%ls'", szObfuscatedCommand);
+
+	hActionData = ::MsiCreateRecord(1);
+	if (hActionData && SUCCEEDED(WcaSetRecordString(hActionData, 1, szObfuscatedCommand)))
+	{
+		WcaProcessMessage(INSTALLMESSAGE::INSTALLMESSAGE_ACTIONDATA, hActionData);
+	}
+
 	if (details.async())
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Not logging output on async command");

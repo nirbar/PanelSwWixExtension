@@ -162,7 +162,7 @@
     <UI>
       <ProgressText Action="FileRegex_Immediate">!(loc.FileRegex)</ProgressText>
       <ProgressText Action="FileRegex_rollback">!(loc.FileRegex)</ProgressText>
-      <ProgressText Action="FileRegex_deferred">!(loc.FileRegex)</ProgressText>
+      <ProgressText Action="FileRegex_deferred" Template="!(loc.FileRegexTemplate)">!(loc.FileRegex)</ProgressText>
       <ProgressText Action="FileRegex_commit">!(loc.FileRegex)</ProgressText>
     </UI>
   </Fragment>
@@ -325,22 +325,22 @@
     <UI>
       <Error Id="27001">!(loc.ExecOnFailure)</Error>
       <Error Id="27006">!(loc.ExecOnConsoleFailure)</Error>
-      <ProgressText Action="ExecOnComponent_BeforeStop_rollback">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_BeforeStop_deferred">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_Imp_BeforeStop_rollback">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_Imp_BeforeStop_deferred">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_AfterStop_rollback">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_AfterStop_deferred">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_Imp_AfterStop_rollback">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_Imp_AfterStop_deferred">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_BeforeStart_rollback">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_BeforeStart_deferred">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_Imp_BeforeStart_rollback">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_Imp_BeforeStart_deferred">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_AfterStart_rollback">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_AfterStart_deferred">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_Imp_AfterStart_rollback">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_Imp_AfterStart_deferred">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_BeforeStop_rollback" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_BeforeStop_deferred" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_Imp_BeforeStop_rollback" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_Imp_BeforeStop_deferred" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_AfterStop_rollback" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_AfterStop_deferred" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_Imp_AfterStop_rollback" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_Imp_AfterStop_deferred" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_BeforeStart_rollback" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_BeforeStart_deferred" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_Imp_BeforeStart_rollback" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_Imp_BeforeStart_deferred" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_AfterStart_rollback" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_AfterStart_deferred" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_Imp_AfterStart_rollback" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponent_Imp_AfterStart_deferred" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
     </UI>
   </Fragment>
 
@@ -360,8 +360,8 @@
       <Error Id="27003">!(loc.DismPackageFailure)</Error>
       <Error Id="27004">!(loc.DismFeatureFailure)</Error>
       <ProgressText Action="DismSched">!(loc.Dism)</ProgressText>
-      <ProgressText Action="DismX86">!(loc.Dism)</ProgressText>
-      <ProgressText Action="DismX64">!(loc.Dism)</ProgressText>
+      <ProgressText Action="DismX86" Template="!(loc.DismTemplate)">!(loc.Dism)</ProgressText>
+      <ProgressText Action="DismX64" Template="!(loc.DismTemplate)">!(loc.Dism)</ProgressText>
     </UI>
   </Fragment>
 
@@ -797,7 +797,7 @@
     </InstallExecuteSequence>
     <UI>
       <ProgressText Action="RestartLocalResources">!(loc.RestartLocalResources)</ProgressText>
-      <ProgressText Action="RestartLocalResourcesExec">!(loc.RestartLocalResources)</ProgressText>
+      <ProgressText Action="RestartLocalResourcesExec" Template="!(loc.RestartLocalResourcesTemplate)">!(loc.RestartLocalResources)</ProgressText>
     </UI>
   </Fragment>
 

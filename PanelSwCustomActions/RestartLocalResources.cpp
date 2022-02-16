@@ -170,7 +170,7 @@ extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall)
                 ExitOnFailure(hr, "Failed adding process to RestartManager");
             }
 
-            hr = cad.AddRestartLocalResources(visInFolder.szFullExePath, peData.th32ProcessID);
+            hr = cad.AddRestartLocalResources(visInFolder.szFullExePath, peData.szExeFile, peData.th32ProcessID);
             ExitOnFailure(hr, "Failed to enlist process '%ls' for termination", visInFolder.szFullExePath)
         }
     }
@@ -206,7 +206,7 @@ LExit:
     return WcaFinalize(er);
 }
 
-HRESULT CRestartLocalResources::AddRestartLocalResources(LPCWSTR szFilePath, DWORD dwProcId)
+HRESULT CRestartLocalResources::AddRestartLocalResources(LPCWSTR szFilePath, LPCWSTR szProcessName, DWORD dwProcId)
 {
     HRESULT hr = S_OK;
     ::com::panelsw::ca::Command* pCmd = nullptr;
@@ -221,6 +221,7 @@ HRESULT CRestartLocalResources::AddRestartLocalResources(LPCWSTR szFilePath, DWO
     ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
     pDetails->set_file(szFilePath, WSTR_BYTE_SIZE(szFilePath));
+    pDetails->set_processname(szProcessName, WSTR_BYTE_SIZE(szProcessName));
     pDetails->set_process_id(dwProcId);
 
     pAny = pCmd->mutable_details();
@@ -239,25 +240,34 @@ HRESULT CRestartLocalResources::DeferredExecute(const ::std::string& command)
     BOOL bRes = TRUE;
     RestartLocalResourcesDetails details;
     LPCWSTR szFile = nullptr;
+    LPCWSTR szProcessName = nullptr;
 
     bRes = details.ParseFromString(command);
     ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking RestartLocalResourcesDetails");
 
     szFile = (LPCWSTR)details.file().data();
+    szProcessName = (LPCWSTR)details.processname().data();
 
-    hr = Execute(szFile, details.process_id());
+    hr = Execute(szFile, szProcessName, details.process_id());
     ExitOnFailure(hr, "Failed to terminate process");
 
 LExit:
     return hr;
 }
 
-HRESULT CRestartLocalResources::Execute(LPCWSTR szFilePath, DWORD dwProcId)
+HRESULT CRestartLocalResources::Execute(LPCWSTR szFilePath, LPCWSTR szProcessName, DWORD dwProcId)
 {
     HRESULT hr = S_OK;
     HANDLE hProcess = NULL;
     DWORD er = ERROR_SUCCESS;
     BOOL bRes = TRUE;
+    PMSIHANDLE hActionData;
+
+    hActionData = ::MsiCreateRecord(1);
+    if (hActionData && SUCCEEDED(WcaSetRecordString(hActionData, 1, szProcessName)))
+    {
+        WcaProcessMessage(INSTALLMESSAGE::INSTALLMESSAGE_ACTIONDATA, hActionData);
+    }
 
     // Get windows for all processes, kill only those in the list
     ::EnumWindows(KillWindowsProc, static_cast<LPARAM>(dwProcId));

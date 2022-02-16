@@ -269,8 +269,19 @@ HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szRepla
 	HANDLE hFile = INVALID_HANDLE_VALUE;
 	void* pFileContents = nullptr;
 	FileRegexDetails::FileEncoding eDetectedEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_None;
+	PMSIHANDLE hActionData;
 
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Replacing regex '%ls' matches with '%ls' in file '%ls'", szRegexObfuscated, szReplacementObfuscated, szFilePath);
+
+	hActionData = ::MsiCreateRecord(3);
+	if (hActionData 
+		&& SUCCEEDED(WcaSetRecordString(hActionData, 1, szRegexObfuscated))
+		&& SUCCEEDED(WcaSetRecordString(hActionData, 2, szReplacementObfuscated))
+		&& SUCCEEDED(WcaSetRecordString(hActionData, 3, szFilePath))
+		)
+	{
+		WcaProcessMessage(INSTALLMESSAGE::INSTALLMESSAGE_ACTIONDATA, hActionData);
+	}
 
 	hFile = ::CreateFile(szFilePath, GENERIC_READ, FILE_SHARE_READ, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, nullptr);
 	ExitOnNullWithLastError((hFile != INVALID_HANDLE_VALUE), hr, "Failed opening file");

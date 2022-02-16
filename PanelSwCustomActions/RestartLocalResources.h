@@ -9,7 +9,7 @@ public:
 
 	CRestartLocalResources() : CDeferredActionBase("RestartLocalResources") { }
 
-	HRESULT AddRestartLocalResources(LPCWSTR szFilePath, DWORD dwProcId);
+	HRESULT AddRestartLocalResources(LPCWSTR szFilePath, LPCWSTR szProcessName, DWORD dwProcId);
 
 protected:
 	
@@ -17,7 +17,7 @@ protected:
 
 private:
 
-	HRESULT Execute(LPCWSTR szFilePath, DWORD dwProcId);
+	HRESULT Execute(LPCWSTR szFilePath, LPCWSTR szProcessName, DWORD dwProcId);
 
 	static BOOL CALLBACK KillWindowsProc(HWND hwnd, LPARAM lParam);
 };

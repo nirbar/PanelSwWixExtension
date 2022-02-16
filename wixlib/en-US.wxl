@@ -6,6 +6,7 @@
   <String Overridable="yes" Id="ShellExecute">Executing command "[1]" [2] in "[3]" with verb [4]</String>
   <String Overridable="yes" Id="TaskScheduler">Configuring Scheduled Tasks</String>
   <String Overridable="yes" Id="ExecOnComponent"><![CDATA[Executing custom actions]]></String>
+  <String Overridable="yes" Id="ExecOnComponentTemplate"><![CDATA[Executing [1]]]></String>
   <String Overridable="yes" Id="ExecOnFailure"><![CDATA[Failed executing command [2]]]></String>
   <String Overridable="yes" Id="ExecOnConsoleFailure"><![CDATA[Command [2] yielded error
 [3]]]></String>  
@@ -21,6 +22,7 @@
   <String Overridable="yes" Id="TopShelfFailure"><![CDATA[Failed configuring service [2]]]></String>
   <String Overridable="yes" Id="CreateSelfSignCertificate"><![CDATA[Creating self-signed certificates]]></String>
   <String Overridable="yes" Id="FileRegex"><![CDATA[Find & replace in file]]></String>
+  <String Overridable="yes" Id="FileRegexTemplate"><![CDATA[Replacing '[1]' with '[2]' in [3]]]></String>
   <String Overridable="yes" Id="ForceVersion"><![CDATA[Rewriting file version]]></String>
   <String Overridable="yes" Id="SetPropertyFromPipe"><![CDATA[Reading properties from pipe]]></String>
   <String Overridable="yes" Id="EvaluateExpression"><![CDATA[Evaluating expressions]]></String>
@@ -29,6 +31,7 @@
   <String Overridable="yes" Id="Unzip"><![CDATA[Extracting ZIP archive]]></String>
   <String Overridable="yes" Id="DiskSpace"><![CDATA[Calculating available disk space]]></String>
   <String Overridable="yes" Id="Dism"><![CDATA[Enable Windows roles and features]]></String>
+  <String Overridable="yes" Id="DismTemplate"><![CDATA[Enabling [1]]]></String>
   <String Overridable="yes" Id="DismPackageFailure"><![CDATA[Failed adding a Windows Feature package [2]:
 [3]]]></String>
   <String Overridable="yes" Id="DismFeatureFailure"><![CDATA[Failed enabling Windows Feature [2]:
@@ -52,6 +55,7 @@
 [5]]]></String>
   <String Overridable="yes" Id="WmiSearch"><![CDATA[Executing WMI queries]]></String>
   <String Overridable="yes" Id="RestartLocalResources"><![CDATA[Restarting resources]]></String>
+  <String Overridable="yes" Id="RestartLocalResourcesTemplate"><![CDATA[Closing [1]]]></String>
   <String Overridable="yes" Id="Md5Hash"><![CDATA[Computing MD5 hash]]></String>
   <String Overridable="yes" Id="ConcatFiles"><![CDATA[Concatenating files]]></String>
 </WixLocalization>

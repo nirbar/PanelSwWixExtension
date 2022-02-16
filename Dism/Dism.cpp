@@ -273,7 +273,15 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 		for (DWORD j = 0; j < pStates[i].dwFeatureNum; ++j)
 		{
 		LRetryFtr:
+			PMSIHANDLE hActionData;
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Enabling feature '%ls'", pStates[i].pFeatures[j]->FeatureName);
+
+			hActionData = ::MsiCreateRecord(1);
+			if (hActionData && SUCCEEDED(WcaSetRecordString(hActionData, 1, pStates[i].pFeatures[j]->FeatureName)))
+			{
+				WcaProcessMessage(INSTALLMESSAGE::INSTALLMESSAGE_ACTIONDATA, hActionData);
+			}
+
 			hr = ::DismEnableFeature(hSession, pStates[i].pFeatures[j]->FeatureName, nullptr, DismPackageNone, FALSE, nullptr, 0, TRUE, hCancel_, _pfProgressCallback, &pStates[i]);
 			if (HRESULT_CODE(hr) == ERROR_SUCCESS_REBOOT_REQUIRED)
 			{

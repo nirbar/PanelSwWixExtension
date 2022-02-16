@@ -6,4 +6,5 @@ message RestartLocalResourcesDetails{
 
 	uint32 process_id = 1;
 	bytes file = 2;
+	bytes processName = 3;
 }
