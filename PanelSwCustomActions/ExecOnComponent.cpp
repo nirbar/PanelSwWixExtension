@@ -873,7 +873,7 @@ HRESULT CExecOnComponent::LogProcessOutput(HANDLE hStdErrOut, LPWSTR* pszText /*
 
 		case FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_ReverseUnicode:
 		case FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_Unicode:
-			hr = StrAllocConcat(&szLog, (LPCWSTR)pBuffer, 0);
+			hr = StrAllocConcat(&szLog, (LPCWSTR)(LPVOID)pBuffer, 0);
 			ExitOnFailure(hr, "Failed to concatenate output strings");
 			break;
 		}

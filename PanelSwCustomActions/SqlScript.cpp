@@ -248,7 +248,7 @@ static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, CWixString* ps
 	}
 	else
 	{
-		hr = pszQuery->Copy((LPCWSTR)pbData);
+		hr = pszQuery->Copy((LPCWSTR)(LPVOID)pbData);
 		ExitOnFailure(hr, "Failed to copy SQL script to string. Is binary file '%ls' unicode-encoded?", szBinaryKey);
 	}
 
