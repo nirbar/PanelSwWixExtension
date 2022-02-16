@@ -28,7 +28,9 @@
   <String Overridable="yes" Id="EvaluateExpression"><![CDATA[Evaluating expressions]]></String>
   <String Overridable="yes" Id="CertificateHashSearch"><![CDATA[Find certificate hash]]></String>
   <String Overridable="yes" Id="ZipFile"><![CDATA[Creating ZIP archive]]></String>
+  <String Overridable="yes" Id="ZipFileTemplate"><![CDATA[Compressing from [1] to [2]]]></String>
   <String Overridable="yes" Id="Unzip"><![CDATA[Extracting ZIP archive]]></String>
+  <String Overridable="yes" Id="UnzipTemplate"><![CDATA[Extracting from [1] to [2]]]></String>
   <String Overridable="yes" Id="DiskSpace"><![CDATA[Calculating available disk space]]></String>
   <String Overridable="yes" Id="Dism"><![CDATA[Enable Windows roles and features]]></String>
   <String Overridable="yes" Id="DismTemplate"><![CDATA[Enabling [1]]]></String>
@@ -40,6 +42,7 @@
   <String Overridable="yes" Id="JsonJpathSearch"><![CDATA[Searching in Json files]]></String>
   <String Overridable="yes" Id="AccountSidSearch"><![CDATA[Detecting account security identifier]]></String>
   <String Overridable="yes" Id="PSW_SqlScript"><![CDATA[Executing SQL scripts]]></String>
+  <String Overridable="yes" Id="PSW_SqlScriptTemplate"><![CDATA[Executing SQL scripts on Server '[1]' Instance '[2]' Database '[3]']]></String>
   <String Overridable="yes" Id="PSW_SqlScriptFailure"><![CDATA[Failed executing SQL script
 [2]]]>
   </String>

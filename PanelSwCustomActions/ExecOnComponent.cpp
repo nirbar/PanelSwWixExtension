@@ -626,6 +626,7 @@ HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command)
 
 	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Executing '%ls'", szObfuscatedCommand);
 
+	// ActionData: "Executing [1]"
 	hActionData = ::MsiCreateRecord(1);
 	if (hActionData && SUCCEEDED(WcaSetRecordString(hActionData, 1, szObfuscatedCommand)))
 	{

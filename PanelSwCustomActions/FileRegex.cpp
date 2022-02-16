@@ -273,6 +273,7 @@ HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szRepla
 
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Replacing regex '%ls' matches with '%ls' in file '%ls'", szRegexObfuscated, szReplacementObfuscated, szFilePath);
 
+	// ActionData: "Replacing '[1]' with '[2]' in [3]"
 	hActionData = ::MsiCreateRecord(3);
 	if (hActionData 
 		&& SUCCEEDED(WcaSetRecordString(hActionData, 1, szRegexObfuscated))

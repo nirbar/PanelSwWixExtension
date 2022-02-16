@@ -263,6 +263,7 @@ HRESULT CRestartLocalResources::Execute(LPCWSTR szFilePath, LPCWSTR szProcessNam
     BOOL bRes = TRUE;
     PMSIHANDLE hActionData;
 
+    // ActionData: "Closing [1]"
     hActionData = ::MsiCreateRecord(1);
     if (hActionData && SUCCEEDED(WcaSetRecordString(hActionData, 1, szProcessName)))
     {

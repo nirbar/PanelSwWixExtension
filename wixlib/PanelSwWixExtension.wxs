@@ -390,7 +390,7 @@
     </InstallExecuteSequence>
     <UI>
       <ProgressText Action="ZipFileSched">!(loc.ZipFile)</ProgressText>
-      <ProgressText Action="ZipFileExec">!(loc.ZipFile)</ProgressText>
+      <ProgressText Action="ZipFileExec" Template="!(loc.ZipFileTemplate)">!(loc.ZipFile)</ProgressText>
     </UI>
   </Fragment>
 
@@ -406,7 +406,7 @@
     </InstallExecuteSequence>
     <UI>
       <ProgressText Action="UnzipSched">!(loc.Unzip)</ProgressText>
-      <ProgressText Action="UnzipExec">!(loc.Unzip)</ProgressText>
+      <ProgressText Action="UnzipExec" Template="!(loc.UnzipTemplate)">!(loc.Unzip)</ProgressText>
     </UI>
   </Fragment>
 
@@ -517,8 +517,8 @@
     <UI>
       <Error Id="27005">!(loc.PSW_SqlScriptFailure)</Error>
       <ProgressText Action="PSW_SqlScript">!(loc.PSW_SqlScript)</ProgressText>
-      <ProgressText Action="PSW_SqlScriptRollback">!(loc.PSW_SqlScript)</ProgressText>
-      <ProgressText Action="PSW_SqlScriptExec">!(loc.PSW_SqlScript)</ProgressText>
+      <ProgressText Action="PSW_SqlScriptRollback" Template="!(loc.PSW_SqlScriptTemplate)">!(loc.PSW_SqlScript)</ProgressText>
+      <ProgressText Action="PSW_SqlScriptExec" Template="!(loc.PSW_SqlScriptTemplate)">!(loc.PSW_SqlScript)</ProgressText>
     </UI>
   </Fragment>
 

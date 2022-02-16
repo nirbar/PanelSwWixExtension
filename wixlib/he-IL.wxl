@@ -28,7 +28,9 @@
   <String Overridable="yes" Id="EvaluateExpression"><![CDATA[חישוב נוסחאות]]></String>
   <String Overridable="yes" Id="CertificateHashSearch"><![CDATA[איתור תעודות]]></String>
   <String Overridable="yes" Id="ZipFile"><![CDATA[יצירת ארכיון קבצים]]></String>
+  <String Overridable="yes" Id="ZipFileTemplate"><![CDATA[מכווץ קבצים מ- [1] ל- [2]]]></String>
   <String Overridable="yes" Id="Unzip"><![CDATA[פריסת ארכיון קבצים]]></String>
+  <String Overridable="yes" Id="UnzipTemplate"><![CDATA[פורס קבצים מ- [1] ל- [2]]]></String>
   <String Overridable="yes" Id="DiskSpace"><![CDATA[חישוב מקום פנוי בכונן]]></String>
   <String Overridable="yes" Id="Dism"><![CDATA[הפעלת מאפייני מערכת]]></String>
   <String Overridable="yes" Id="DismTemplate"><![CDATA[מפעיל את [1]]]></String>
@@ -40,6 +42,7 @@
   <String Overridable="yes" Id="JsonJpathSearch"><![CDATA[חיפוש בקבצי JSON]]></String>
   <String Overridable="yes" Id="AccountSidSearch"><![CDATA[איתור מזהי אבטחה]]></String>
   <String Overridable="yes" Id="PSW_SqlScript"><![CDATA[הרצת סקריפטים SQL]]></String>
+  <String Overridable="yes" Id="PSW_SqlScriptTemplate"><![CDATA[מריץ סקריפט SQL על שרת '[1]'/'[2]' בסיס נתונים '[3]']]></String>
   <String Overridable="yes" Id="PSW_SqlScriptFailure"><![CDATA[כשלון בהרצת סקריפטי SQL
 [2]]]>
   </String>

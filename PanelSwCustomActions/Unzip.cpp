@@ -308,6 +308,7 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 	std::ostream* zipFileStream = nullptr;
 	Compress* pZip = nullptr;
 	Poco::Path file, fileName;
+	PMSIHANDLE hActionData;
 
 	zipFileW = (LPCWSTR)(LPVOID)pDetails->zipfile().data();
 	srcFolderW = (LPCWSTR)(LPVOID)pDetails->srcfolder().data();
@@ -318,6 +319,15 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 		hr = CFileOperations::ListFiles(srcFolderW, szPattern, pDetails->recursive(), &pszFiles, &cFiles);
 		ExitOnFailure(hr, "Failed listing files in '%ls'", srcFolderW);
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Compressing %u files matching '%ls%ls' to zip file '%ls'", cFiles, srcFolderW, szPattern, zipFileW);
+		
+		// ActionData: "Compressing from [1] to [2]"
+		hActionData = ::MsiCreateRecord(2);
+		if (hActionData 
+			&& SUCCEEDED(WcaSetRecordString(hActionData, 1, srcFolderW))
+			&& SUCCEEDED(WcaSetRecordString(hActionData, 2, zipFileW)))
+		{
+			WcaProcessMessage(INSTALLMESSAGE::INSTALLMESSAGE_ACTIONDATA, hActionData);
+		}
 
 		if (cFiles > 0)
 		{
@@ -409,9 +419,19 @@ HRESULT CUnzip::ExecuteOneUnzip(::com::panelsw::ca::UnzipDetails* pDetails)
 	LPSTR szSrcFileA = nullptr;
 	LPWSTR szSrcFile = nullptr;
 	LPWSTR szDstFile = nullptr;
+	PMSIHANDLE hActionData;
 
 	zipFileW = (LPCWSTR)(LPVOID)pDetails->zipfile().data();
 	targetFolderW = (LPCWSTR)(LPVOID)pDetails->targetfolder().data();
+
+	// ActionData: "Extracting from [1] to [2]"
+	hActionData = ::MsiCreateRecord(2);
+	if (hActionData
+		&& SUCCEEDED(WcaSetRecordString(hActionData, 1, zipFileW))
+		&& SUCCEEDED(WcaSetRecordString(hActionData, 2, targetFolderW)))
+	{
+		WcaProcessMessage(INSTALLMESSAGE::INSTALLMESSAGE_ACTIONDATA, hActionData);
+	}
 
 	try
 	{

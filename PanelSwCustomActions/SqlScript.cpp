@@ -543,11 +543,30 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 	SqlScriptDetails details;
 	LPWSTR szError = nullptr;
 	CSqlConnection sqlConn;
+	PMSIHANDLE hActionData;
+	LPCWSTR szServer = nullptr;
+	LPCWSTR szInstance = nullptr;
+	LPCWSTR szDatabase = nullptr;
 
 	bRes = details.ParseFromString(command);
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking SqlScriptDetails");
 
+	szServer = (LPCWSTR)(LPVOID)details.server().data();
+	szInstance = (LPCWSTR)(LPVOID)details.instance().data();
+	szDatabase = (LPCWSTR)(LPVOID)details.database().data();
+
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing %i SQL scripts", details.scripts_size());
+
+	// ActionData: "Executing SQL scripts on Server '[1]' Instance '[2]' Database '[3]'"
+	hActionData = ::MsiCreateRecord(3);
+	if (hActionData
+		&& SUCCEEDED(WcaSetRecordString(hActionData, 1, szServer))
+		&& SUCCEEDED(WcaSetRecordString(hActionData, 2, szInstance))
+		&& SUCCEEDED(WcaSetRecordString(hActionData, 3, szDatabase)))
+	{
+		WcaProcessMessage(INSTALLMESSAGE::INSTALLMESSAGE_ACTIONDATA, hActionData);
+	}
+
 	for (int i = 0; i < details.scripts_size(); ++i)
 	{
 	LRetry:
@@ -563,7 +582,7 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 			}
 			else
 			{
-				hr = sqlConn.Connect((LPCWSTR)(LPVOID)details.server().data(), (LPCWSTR)(LPVOID)details.instance().data(), details.port(), (LPCWSTR)(LPVOID)details.database().data(), (LPCWSTR)(LPVOID)details.username().data(), (LPCWSTR)(LPVOID)details.password().data(), details.encrypted(), &szError);
+				hr = sqlConn.Connect(szServer, szInstance, details.port(), szDatabase, (LPCWSTR)(LPVOID)details.username().data(), (LPCWSTR)(LPVOID)details.password().data(), details.encrypted(), &szError);
 			}
 		}
 		if (sqlConn.IsConnected())
