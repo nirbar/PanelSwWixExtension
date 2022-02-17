@@ -22,7 +22,7 @@
   <String Overridable="yes" Id="TopShelfFailure"><![CDATA[Failed configuring service [2]]]></String>
   <String Overridable="yes" Id="CreateSelfSignCertificate"><![CDATA[Creating self-signed certificates]]></String>
   <String Overridable="yes" Id="FileRegex"><![CDATA[Find & replace in file]]></String>
-  <String Overridable="yes" Id="FileRegexTemplate"><![CDATA[Replacing '[1]' with '[2]' in [3]]]></String>
+  <String Overridable="yes" Id="FileRegexTemplate"><![CDATA[Editing [1]]]></String>
   <String Overridable="yes" Id="ForceVersion"><![CDATA[Rewriting file version]]></String>
   <String Overridable="yes" Id="SetPropertyFromPipe"><![CDATA[Reading properties from pipe]]></String>
   <String Overridable="yes" Id="EvaluateExpression"><![CDATA[Evaluating expressions]]></String>
@@ -39,6 +39,7 @@
   <String Overridable="yes" Id="DismFeatureFailure"><![CDATA[Failed enabling Windows Feature [2]:
 [3]]]></String>
   <String Overridable="yes" Id="JsonJpath"><![CDATA[Editing Json files]]></String>
+  <String Overridable="yes" Id="JsonJpathTemplate"><![CDATA[Editing [1]]]></String>
   <String Overridable="yes" Id="JsonJpathSearch"><![CDATA[Searching in Json files]]></String>
   <String Overridable="yes" Id="AccountSidSearch"><![CDATA[Detecting account security identifier]]></String>
   <String Overridable="yes" Id="PSW_SqlScript"><![CDATA[Executing SQL scripts]]></String>

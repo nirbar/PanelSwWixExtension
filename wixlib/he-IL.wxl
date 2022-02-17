@@ -23,7 +23,7 @@
   <String Overridable="yes" Id="CreateSelfSignCertificate"><![CDATA[מייצר תעודות בחתימה אישית]]></String>
   <String Overridable="yes" Id="FileRegex"><![CDATA[חיפוש והחלפה בקבצים]]></String>
   <String Overridable="yes" Id="ForceVersion"><![CDATA[החלפת גירסאות קבצים]]></String>
-  <String Overridable="yes" Id="FileRegexTemplate"><![CDATA[מחליף '[1]' ב- '[2]' בקובץ [3]]]></String>
+  <String Overridable="yes" Id="FileRegexTemplate"><![CDATA[עורך את [1]]]></String>
   <String Overridable="yes" Id="SetPropertyFromPipe"><![CDATA[קריאת פרמטרים חיצוניים]]></String>
   <String Overridable="yes" Id="EvaluateExpression"><![CDATA[חישוב נוסחאות]]></String>
   <String Overridable="yes" Id="CertificateHashSearch"><![CDATA[איתור תעודות]]></String>
@@ -39,6 +39,7 @@
   <String Overridable="yes" Id="DismFeatureFailure"><![CDATA[כשלון בהתקנת מאפייני מערכת [2]:
 [3]]]></String>
   <String Overridable="yes" Id="JsonJpath"><![CDATA[עריכת קבצי JSON]]></String>
+  <String Overridable="yes" Id="JsonJpathTemplate"><![CDATA[עורך את [1]]]></String>
   <String Overridable="yes" Id="JsonJpathSearch"><![CDATA[חיפוש בקבצי JSON]]></String>
   <String Overridable="yes" Id="AccountSidSearch"><![CDATA[איתור מזהי אבטחה]]></String>
   <String Overridable="yes" Id="PSW_SqlScript"><![CDATA[הרצת סקריפטים SQL]]></String>

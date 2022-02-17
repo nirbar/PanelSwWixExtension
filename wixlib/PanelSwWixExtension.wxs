@@ -674,11 +674,11 @@
     <UI>
       <Error Id="27009">!(loc.JsonJpathFailure)</Error>
       <ProgressText Action="JsonJpathSched">!(loc.JsonJpath)</ProgressText>
-      <ProgressText Action="JsonJpathExec">!(loc.JsonJpath)</ProgressText>
+      <ProgressText Action="JsonJpathExec" Template="!(loc.JsonJpathTemplate)">!(loc.JsonJpath)</ProgressText>
     </UI>
   </Fragment>
 
-  <!-- JsonJpath -->
+  <!-- JsonJpathSearch -->
   <Fragment>
     <CustomAction Id="JsonJpathSearch" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="JsonJpathSearch" Execute="firstSequence"/>
     <InstallExecuteSequence>

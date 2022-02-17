@@ -232,7 +232,17 @@ namespace PswManagedCA
         {
             foreach (JsonJPathCatalog ctlg in catalogs_)
             {
-                LRetry:
+            LRetry:
+                session.LogUnformatted($"Replacing JSON token matching JPath '{ctlg.JPathObfuscated}' with '{ctlg.ValueObfuscated}' in file '{ctlg.FilePath}'");
+                try
+                {
+                    using (Record actionData = new Record(ctlg.FilePath))
+                    {
+                        session.Message(InstallMessage.ActionData, actionData);
+                    }
+                }
+                catch { }
+
                 try
                 {
                     JObject jo = JObject.Parse(File.ReadAllText(ctlg.FilePath));
