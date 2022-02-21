@@ -252,7 +252,7 @@ HRESULT CRestartLocalResources::DeferredExecute(const ::std::string& command)
     ExitOnFailure(hr, "Failed to terminate process");
 
 LExit:
-    return hr;
+    return SUCCEEDED(hr) ? hr : S_FALSE; // Not failing install on this
 }
 
 HRESULT CRestartLocalResources::Execute(LPCWSTR szFilePath, LPCWSTR szProcessName, DWORD dwProcId)

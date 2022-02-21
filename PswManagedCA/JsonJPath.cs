@@ -234,14 +234,11 @@ namespace PswManagedCA
             {
             LRetry:
                 session.LogUnformatted($"Replacing JSON token matching JPath '{ctlg.JPathObfuscated}' with '{ctlg.ValueObfuscated}' in file '{ctlg.FilePath}'");
-                try
+                // ActionData: "Editing [1]"
+                using (Record actionData = new Record(ctlg.FilePath))
                 {
-                    using (Record actionData = new Record(ctlg.FilePath))
-                    {
-                        session.Message(InstallMessage.ActionData, actionData);
-                    }
+                    session.Message(InstallMessage.ActionData, actionData);
                 }
-                catch { }
 
                 try
                 {

@@ -325,6 +325,9 @@
     <UI>
       <Error Id="27001">!(loc.ExecOnFailure)</Error>
       <Error Id="27006">!(loc.ExecOnConsoleFailure)</Error>
+      <ProgressText Action="ExecOnComponent">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponentRollback">!(loc.ExecOnComponent)</ProgressText>
+      <ProgressText Action="ExecOnComponentCommit">!(loc.ExecOnComponent)</ProgressText>
       <ProgressText Action="ExecOnComponent_BeforeStop_rollback" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
       <ProgressText Action="ExecOnComponent_BeforeStop_deferred" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
       <ProgressText Action="ExecOnComponent_Imp_BeforeStop_rollback" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>

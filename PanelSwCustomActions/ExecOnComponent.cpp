@@ -148,6 +148,9 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 			szExtension = ::PathFindExtension((LPCWSTR)szBinary);
 			if (szExtension && *szExtension)
 			{
+				::DeleteFile((LPCWSTR)szTempFile);
+				::DeleteFile((LPCWSTR)szTempFile);
+			
 				dwRes = ::PathRenameExtension(szTempFile, szExtension);
 				ExitOnNullWithLastError(dwRes, hr, "Failed renaming file extension '%ls' to '%ls'", szTempFile, szExtension);
 			}
