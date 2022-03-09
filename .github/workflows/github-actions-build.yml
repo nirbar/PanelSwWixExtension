@@ -5,10 +5,10 @@ on:
       - v*
   workflow_dispatch:
 env:
-  CUSTOM_WIX_VERSION: '3.12.0-c110'
+  CUSTOM_WIX_VERSION: '3.12.0-c111'
 jobs:
   PanelSwWixExtension-Build:
-    runs-on: windows-latest
+    runs-on: windows-2019
     steps:
       - uses: actions/checkout@v2
         with:

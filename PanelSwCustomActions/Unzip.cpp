@@ -138,7 +138,7 @@ extern "C" UINT __stdcall ZipFileSched(MSIHANDLE hInstall)
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
 	// Ensure table PSW_DeletePath exists.
-	hr = WcaTableExists(L"PSW_Unzip");
+	hr = WcaTableExists(L"PSW_ZipFile");
 	ExitOnFailure(hr, "Failed to check if table exists 'PSW_ZipFile'");
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ZipFile'. Have you authored 'PanelSw:ZipFile' entries in WiX code?");
 
