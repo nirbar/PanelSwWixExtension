@@ -54,5 +54,26 @@
     <?ifndef NO_ERROR?>
     <?error Expected no error?>
     <?endif?>
+
+    <?define GUID1 = $(psw.AutoGuid($(var.VAR_WITH_VALUE)))?>
+    <?define GUID2 = $(psw.AutoGuid(    1     ))?>
+    <?if $(var.GUID1) != $(var.GUID2)?>
+    <?error Expected AutoGuid to produce the same UUID for the same inputs?>
+    <?endif?>
+
+    <?define GUID3 = $(psw.AutoGuid(2))?>
+    <?if $(var.GUID1) = $(var.GUID3)?>
+    <?error Expected AutoGuid to produce different UUID for different inputs?>
+    <?endif?>
+
+    <?define GUID4 = $(psw.AutoGuid(1,2))?>
+    <?if $(var.GUID4) = $(var.GUID3)?>
+    <?error Expected AutoGuid to produce different UUID compared to another with appended inputs?>
+    <?endif?>
+
+    <?define GUID5 = $(psw.AutoGuid(2,1))?>
+    <?if $(var.GUID5) = $(var.GUID3) or $(var.GUID5) = $(var.GUID4)?>
+    <?error Expected AutoGuid to produce different UUID compared to another with prefixed inputs?>
+    <?endif?>
   </Product>
 </Wix>

@@ -52,6 +52,7 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
 
 ## Preprocessor
 - *$(psw.VarNullOrEmpty(VAR_NAME))*: Return 1 if the variable is not defined, or if it defined as empty. Return 0 otherwise
+- *$(psw.AutoGuid(x,y,z,...))*: Return a pseudo-random UUID per arguments
 
 ## Custom Actions
 
