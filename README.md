@@ -50,6 +50,9 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
 - Bundle Actions:
   - *ExePackage/UninstallCommand*: Execute a custom command to uninstall an ExePackage. Used for packages which the uninstall is launched via a different executable than the install.
 
+## Preprocessor
+- *$(psw.VarNullOrEmpty(VAR_NAME))*: Return 1 if the variable is not defined, or if it defined as empty. Return 0 otherwise
+
 ## Custom Actions
 
 - *TerminateSuccessfully_Immediate*: Terminates the installation with a successful indication. Executed in-script.
@@ -141,5 +144,5 @@ After building a unit test project, you'll need to shutdown Visual Studio before
 This is due to the unfortunate habit of Visual Studio to hold the extension file in use.
 You may find it convenient to build unit test projects from a command prompt to workaround this limitation
 ~~~~~~~~~~~~
-MSBuild UnitTests\RestartLocalResourcesUT\RestartLocalResourcesUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
+MSBuild UnitTests\PreprocessorUT\PreprocessorUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
 ~~~~~~~~~~~~

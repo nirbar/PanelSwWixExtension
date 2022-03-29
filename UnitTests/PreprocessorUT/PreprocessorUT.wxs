@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
+     xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
+     >
+  <Product Id="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}" Name="PreprocessorUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}">
+    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    <MediaTemplate />
+
+    <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+
+    <Directory Id="TARGETDIR" Name="SourceDir">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+      </Directory>
+    </Directory>
+
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component>
+        <File Source="$(sys.SOURCEFILEPATH)"/>
+      </Component>
+    </ComponentGroup>
+
+    <?define VAR_DEFINED?>
+    <?define VAR_WITH_VALUE=1?>
+
+    <?if $(psw.VarNullOrEmpty(VAR_DEFINED)) = 0?>
+    <?error Expected VAR_DEFINED to be empty?>
+    <?endif?>
+
+    <?if $(psw.VarNullOrEmpty(VAR_WITH_VALUE)) = 1?>
+    <?error Expected VAR_WITH_VALUE to have a value?>
+    <?endif?>
+
+    <?if $(psw.VarNullOrEmpty(VAR_UNDEFINED)) = 0?>
+    <?error Expected VAR_UNDEFINED to have a value?>
+    <?endif?>
+
+    <?if $(psw.VarNullOrEmpty(VAR_UNDEFINED)) != 0 and $(psw.VarNullOrEmpty(VAR_UNDEFINED)) != 1?>
+    <?error Expected psw.VarNullOrEmpty to return either 1 or 0?>
+    <?endif?>
+
+    <?if $(psw.VarNullOrEmpty(VAR_UNDEFINED)) != 1 and $(psw.VarNullOrEmpty(VAR_UNDEFINED)) != 0?>
+    <?error Expected psw.VarNullOrEmpty to return either 1 or 0?>
+    <?endif?>
+
+    <?if $(psw.VarNullOrEmpty(VAR_UNDEFINED)) != 1 or $(psw.VarNullOrEmpty(VAR_UNDEFINED)) != 0?>
+    <?define NO_ERROR?>
+    <?endif?>
+
+    <?ifndef NO_ERROR?>
+    <?error Expected no error?>
+    <?endif?>
+  </Product>
+</Wix>

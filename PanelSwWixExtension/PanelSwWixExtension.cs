@@ -12,10 +12,12 @@ namespace PanelSw.Wix.Extensions
         private PanelSwWixCompiler compilerExtension;
         private PanelSwWixBinder binder_;
         private PanelSwWixUnbinder unbinder_;
+        private PanelSwWixPreprocessor preprocessor_;
         private TableDefinitionCollection tableDefinitions;
 
         public override BinderExtension BinderExtension => binder_ ?? (binder_ = new PanelSwWixBinder());
         public override UnbinderExtension UnbinderExtension => unbinder_ ?? (unbinder_ = new PanelSwWixUnbinder(TableDefinitions));
+        public override PreprocessorExtension PreprocessorExtension => preprocessor_ ?? (preprocessor_ = new PanelSwWixPreprocessor());
 
         /// <summary>
         /// Gets the optional compiler extension.
