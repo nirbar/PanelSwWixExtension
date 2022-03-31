@@ -45,7 +45,7 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_SqlScript_Replacements'. Have you authored 'PanelSw:SqlScript' entries in WiX code?");
 
 	// Execute view
-	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `Server`, `Instance`, `Database`, `Username`, `Password`, `Binary_`, `On`, `ErrorHandling`, `Port`, `Encrypted`, `ConnectionString` FROM `PSW_SqlScript` ORDER BY `Order`", &hView);
+	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `Driver`, `Server`, `Instance`, `Database`, `Username`, `Password`, `Binary_`, `On`, `ErrorHandling`, `Port`, `Encrypted`, `ConnectionString` FROM `PSW_SqlScript` ORDER BY `Order`", &hView);
 	ExitOnFailure(hr, "Failed to execute SQL query.");
 
 	// Iterate records
@@ -55,7 +55,7 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 
 		// Get fields
 		CWixString szConnectionString;
-		CWixString szId, szComponent, szServer, szInstance, szDatabase, szUsername, szPassword, szBinary, szEncrypted;
+		CWixString szId, szComponent, szDriver, szServer, szInstance, szDatabase, szUsername, szPassword, szBinary, szEncrypted;
 		CWixString szQuery;
 		int nOn = 0;
 		int errorHandling = ErrorHandling::fail;
@@ -67,28 +67,30 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to get Id.");
 		hr = WcaGetRecordString(hRecord, 2, (LPWSTR*)szComponent);
 		ExitOnFailure(hr, "Failed to get Component_.");
-		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)szServer);
+		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)szDriver);
+		ExitOnFailure(hr, "Failed to get Driver.");
+		hr = WcaGetRecordFormattedString(hRecord, 4, (LPWSTR*)szServer);
 		ExitOnFailure(hr, "Failed to get Server.");
-		hr = WcaGetRecordFormattedString(hRecord, 4, (LPWSTR*)szInstance);
+		hr = WcaGetRecordFormattedString(hRecord, 5, (LPWSTR*)szInstance);
 		ExitOnFailure(hr, "Failed to get Instance.");
-		hr = WcaGetRecordFormattedString(hRecord, 5, (LPWSTR*)szDatabase);
+		hr = WcaGetRecordFormattedString(hRecord, 6, (LPWSTR*)szDatabase);
 		ExitOnFailure(hr, "Failed to get Database.");
-		hr = WcaGetRecordFormattedString(hRecord, 6, (LPWSTR*)szUsername);
+		hr = WcaGetRecordFormattedString(hRecord, 7, (LPWSTR*)szUsername);
 		ExitOnFailure(hr, "Failed to get Username.");
-		hr = WcaGetRecordFormattedString(hRecord, 7, (LPWSTR*)szPassword);
+		hr = WcaGetRecordFormattedString(hRecord, 8, (LPWSTR*)szPassword);
 		ExitOnFailure(hr, "Failed to get Password.");
-		hr = WcaGetRecordString(hRecord, 8, (LPWSTR*)szBinary);
+		hr = WcaGetRecordString(hRecord, 9, (LPWSTR*)szBinary);
 		ExitOnFailure(hr, "Failed to get Binary_.");
-		hr = WcaGetRecordInteger(hRecord, 9, &nOn);
+		hr = WcaGetRecordInteger(hRecord, 10, &nOn);
 		ExitOnFailure(hr, "Failed to get On.");
-		hr = WcaGetRecordInteger(hRecord, 10, &errorHandling);
+		hr = WcaGetRecordInteger(hRecord, 11, &errorHandling);
 		ExitOnFailure(hr, "Failed to get ErrorHandling.");
-		hr = WcaGetRecordFormattedInteger(hRecord, 11, &nPort);
+		hr = WcaGetRecordFormattedInteger(hRecord, 12, &nPort);
 		ExitOnFailure(hr, "Failed to get Port.");
-		hr = WcaGetRecordFormattedString(hRecord, 12, (LPWSTR*)szEncrypted);
+		hr = WcaGetRecordFormattedString(hRecord, 13, (LPWSTR*)szEncrypted);
 		ExitOnFailure(hr, "Failed to get Encrypted.");
 		bEncrypted = (szEncrypted.EqualsIgnoreCase(L"true") || szEncrypted.EqualsIgnoreCase(L"yes") || szEncrypted.Equals(L"1"));
-		hr = WcaGetRecordFormattedString(hRecord, 13, (LPWSTR*)szConnectionString);
+		hr = WcaGetRecordFormattedString(hRecord, 14, (LPWSTR*)szConnectionString);
 		ExitOnFailure(hr, "Failed to get ConnectionString.");
 
 		ExitOnNull(!szBinary.IsNullOrEmpty(), hr, E_INVALIDARG, "Binary key is empty");
@@ -132,13 +134,13 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 			if (nOn & SqlExecOn::Install)
 			{
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute SQL script '%ls'", (LPCWSTR)szBinary);
-				hr = deferredCA.AddExec(szConnectionString, szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
+				hr = deferredCA.AddExec(szConnectionString, szDriver, szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
 				ExitOnFailure(hr, "Failed scheduling '%ls' SQL script", (LPCWSTR)szBinary);
 			}
 			if (nOn & SqlExecOn::InstallRollback)
 			{
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute SQL script '%ls' on rollback", (LPCWSTR)szBinary);
-				hr = rollbackCA.AddExec(szConnectionString, szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
+				hr = rollbackCA.AddExec(szConnectionString, szDriver, szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
 				ExitOnFailure(hr, "Failed scheduling '%ls' SQL script", (LPCWSTR)szBinary);
 			}
 			break;
@@ -147,13 +149,13 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 			if (nOn & SqlExecOn::Reinstall)
 			{
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute SQL script '%ls'", (LPCWSTR)szBinary);
-				hr = deferredCA.AddExec(szConnectionString, szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
+				hr = deferredCA.AddExec(szConnectionString, szDriver, szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
 				ExitOnFailure(hr, "Failed scheduling '%ls' SQL script", (LPCWSTR)szBinary);
 			}
 			if (nOn & SqlExecOn::ReinstallRollback)
 			{
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute SQL script '%ls' on rollback", (LPCWSTR)szBinary);
-				hr = rollbackCA.AddExec(szConnectionString, szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
+				hr = rollbackCA.AddExec(szConnectionString, szDriver, szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
 				ExitOnFailure(hr, "Failed scheduling '%ls' SQL script", (LPCWSTR)szBinary);
 			}
 			break;
@@ -162,13 +164,13 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 			if (nOn & SqlExecOn::Uninstall)
 			{
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute SQL script '%ls'", (LPCWSTR)szBinary);
-				hr = deferredCA.AddExec(szConnectionString, szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
+				hr = deferredCA.AddExec(szConnectionString, szDriver, szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
 				ExitOnFailure(hr, "Failed scheduling '%ls' SQL script", (LPCWSTR)szBinary);
 			}
 			if (nOn & SqlExecOn::UninstallRollback)
 			{
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will execute SQL script '%ls' on rollback", (LPCWSTR)szBinary);
-				hr = rollbackCA.AddExec(szConnectionString, szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
+				hr = rollbackCA.AddExec(szConnectionString, szDriver, szServer, szInstance, nPort, bEncrypted, szDatabase, szUsername, szPassword, szQuery, (::com::panelsw::ca::ErrorHandling)errorHandling);
 				ExitOnFailure(hr, "Failed scheduling '%ls' SQL script", (LPCWSTR)szBinary);
 			}
 			break;
@@ -498,7 +500,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CSqlScript::AddExec(LPCWSTR szConnectionString, LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, bool bEncrypted, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, com::panelsw::ca::ErrorHandling errorHandling)
+HRESULT CSqlScript::AddExec(LPCWSTR szConnectionString, LPCWSTR szDriver, LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, bool bEncrypted, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, com::panelsw::ca::ErrorHandling errorHandling)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command* pCmd = nullptr;
@@ -516,6 +518,7 @@ HRESULT CSqlScript::AddExec(LPCWSTR szConnectionString, LPCWSTR szServer, LPCWST
 	ExitOnFailure(hr, "Failed splitting script");
 
 	pDetails->set_connectionstring(szConnectionString, WSTR_BYTE_SIZE(szConnectionString));
+	pDetails->set_driver(szDriver, WSTR_BYTE_SIZE(szDriver));
 	pDetails->set_server(szServer, WSTR_BYTE_SIZE(szServer));
 	pDetails->set_instance(szInstance, WSTR_BYTE_SIZE(szInstance));
 	pDetails->set_port(nPort);
@@ -544,6 +547,7 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 	LPWSTR szError = nullptr;
 	CSqlConnection sqlConn;
 	PMSIHANDLE hActionData;
+	LPCWSTR szDriver = nullptr;
 	LPCWSTR szServer = nullptr;
 	LPCWSTR szInstance = nullptr;
 	LPCWSTR szDatabase = nullptr;
@@ -551,6 +555,7 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 	bRes = details.ParseFromString(command);
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking SqlScriptDetails");
 
+	szDriver = (LPCWSTR)(LPVOID)details.driver().data();
 	szServer = (LPCWSTR)(LPVOID)details.server().data();
 	szInstance = (LPCWSTR)(LPVOID)details.instance().data();
 	szDatabase = (LPCWSTR)(LPVOID)details.database().data();
@@ -582,7 +587,7 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 			}
 			else
 			{
-				hr = sqlConn.Connect(szServer, szInstance, details.port(), szDatabase, (LPCWSTR)(LPVOID)details.username().data(), (LPCWSTR)(LPVOID)details.password().data(), details.encrypted(), &szError);
+				hr = sqlConn.Connect(szDriver, szServer, szInstance, details.port(), szDatabase, (LPCWSTR)(LPVOID)details.username().data(), (LPCWSTR)(LPVOID)details.password().data(), details.encrypted(), &szError);
 			}
 		}
 		if (sqlConn.IsConnected())

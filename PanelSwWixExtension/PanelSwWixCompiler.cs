@@ -1838,6 +1838,7 @@ namespace PanelSw.Wix.Extensions
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
             string id = "sql" + Guid.NewGuid().ToString("N");
             string binary = null;
+            string driver = null;
             string server = null;
             string connectionString = null;
             string instance = null;
@@ -1870,6 +1871,10 @@ namespace PanelSw.Wix.Extensions
 
                     case "ConnectionString":
                         connectionString = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "Driver":
+                        driver = Core.GetAttributeValue(sourceLineNumbers, attrib);
                         break;
 
                     case "Server":
@@ -2065,6 +2070,7 @@ namespace PanelSw.Wix.Extensions
                 row[11] = (int)(errorHandling ?? ErrorHandling.fail);
                 row[12] = order;
                 row[13] = connectionString;
+                row[14] = driver;
             }
         }
 

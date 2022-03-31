@@ -15,4 +15,5 @@ message SqlScriptDetails{
 	uint32 port = 8;
 	bool encrypted = 9;	
 	bytes connectionstring = 10;
+	bytes driver = 11;
 }

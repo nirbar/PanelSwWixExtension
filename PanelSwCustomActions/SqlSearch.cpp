@@ -116,7 +116,7 @@ LRetry:
 	}
 	else
 	{
-		hr = sqlConn.Connect(szServer, szInstance, nPort, szDatabase, szUsername, szPassword, bEncrypted, (LPWSTR*)szError);
+		hr = sqlConn.Connect(nullptr, szServer, szInstance, nPort, szDatabase, szUsername, szPassword, bEncrypted, (LPWSTR*)szError);
 	}
 	if (SUCCEEDED(hr))
 	{

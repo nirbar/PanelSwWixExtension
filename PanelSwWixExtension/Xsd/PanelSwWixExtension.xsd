@@ -2072,6 +2072,11 @@ Remove registry values.
           <xs:documentation>SQL full connection string, including driver. Use either this attribute or the other connection parameters attributes, but not both</xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="Driver" type="xs:string" use="optional" default="SQL Server">
+        <xs:annotation>
+          <xs:documentation>Driver name. Note that, the connection string parameters are configured for the default driver 'SQL Server'. When using a custom driver make sure that it supports the same connection string parameters, or use the ConnectionString attribute to specify the full string.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
       <xs:attribute name="Server" type="xs:string" use="optional">
         <xs:annotation>
           <xs:documentation>SQL server name</xs:documentation>

@@ -36,14 +36,25 @@ CSqlConnection::~CSqlConnection()
 }
 
 // https://docs.microsoft.com/en-us/sql/relational-databases/native-client/applications/using-connection-string-keywords-with-sql-server-native-client
-HRESULT CSqlConnection::Connect(LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, bool bEncrypted, LPWSTR* pszError)
+HRESULT CSqlConnection::Connect(LPCWSTR szDriver, LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, bool bEncrypted, LPWSTR* pszError)
 {
     CWixString szConnString;
     CWixString szServerTmp;
     HRESULT hr = S_OK;
 
     ExitOnNull((szServer && *szServer), hr, E_FAIL, "Server cannot be null");
-    
+
+    if (szDriver && *szDriver)
+    {
+        hr = szConnString.Format(L"Driver={%s};", szDriver);
+        ExitOnFailure(hr, "Failed appending string");
+    }
+    else
+    {
+        hr = szConnString.Copy(L"Driver={SQL Server};");
+        ExitOnFailure(hr, "Failed appending string");
+    }
+
     hr = szServerTmp.Copy(szServer);
     ExitOnFailure(hr, "Failed alloacting string");
 
@@ -59,7 +70,7 @@ HRESULT CSqlConnection::Connect(LPCWSTR szServer, LPCWSTR szInstance, USHORT nPo
         ExitOnFailure(hr, "Failed appending string");
     }
 
-    hr = szConnString.Format(L"Driver={SQL Server}; Server={%s};", (LPCWSTR)szServerTmp);
+    hr = szConnString.AppnedFormat(L" Server={%s};", (LPCWSTR)szServerTmp);
     ExitOnFailure(hr, "Failed alloacting string");
 
     if (szDatabase && *szDatabase)

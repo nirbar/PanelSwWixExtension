@@ -335,6 +335,7 @@
     <columnDefinition name="ErrorHandling" type="number" minValue="0" maxValue="2" length="2" />
     <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
     <columnDefinition name="ConnectionString" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
+    <columnDefinition name="Driver" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
   </tableDefinition>
 
   <tableDefinition name="PSW_SqlScript_Replacements">

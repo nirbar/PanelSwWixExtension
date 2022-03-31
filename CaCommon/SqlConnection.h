@@ -12,7 +12,7 @@ public:
     CSqlConnection();
     virtual ~CSqlConnection();
 
-    HRESULT Connect(LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, bool bEncrypted, LPWSTR* pszError = nullptr);
+    HRESULT Connect(LPCWSTR szDriver, LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, bool bEncrypted, LPWSTR* pszError = nullptr);
 
     HRESULT Connect(LPCWSTR szConnectionString, LPWSTR *pszError = nullptr);
 
