@@ -336,7 +336,6 @@ Global
 		{9D192FCB-1D43-4DA7-902E-8076E757A045}.Debug|x86.Build.0 = Debug|x86
 		{9D192FCB-1D43-4DA7-902E-8076E757A045}.Release|x64.ActiveCfg = Release|x86
 		{9D192FCB-1D43-4DA7-902E-8076E757A045}.Release|x86.ActiveCfg = Release|x86
-		{9D192FCB-1D43-4DA7-902E-8076E757A045}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

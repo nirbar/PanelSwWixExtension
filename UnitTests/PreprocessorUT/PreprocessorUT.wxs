@@ -24,6 +24,7 @@
       </Component>
     </ComponentGroup>
 
+    <!-- VarNullOrEmpty -->
     <?define VAR_DEFINED?>
     <?define VAR_WITH_VALUE=1?>
 
@@ -55,6 +56,7 @@
     <?error Expected no error?>
     <?endif?>
 
+    <!-- AutoGuid -->
     <?define GUID1 = $(psw.AutoGuid($(var.VAR_WITH_VALUE)))?>
     <?define GUID2 = $(psw.AutoGuid(    1     ))?>
     <?if $(var.GUID1) != $(var.GUID2)?>
@@ -74,6 +76,49 @@
     <?define GUID5 = $(psw.AutoGuid(2,1))?>
     <?if $(var.GUID5) = $(var.GUID3) or $(var.GUID5) = $(var.GUID4)?>
     <?error Expected AutoGuid to produce different UUID compared to another with prefixed inputs?>
+    <?endif?>
+
+    <!-- FileExists -->
+    <?if $(psw.FileExists($(sys.SOURCEFILEPATH))) != 1?>
+    <?error Expected this code file to exist?>
+    <?endif?>
+
+    <?if $(psw.FileExists($(sys.SOURCEFILEPATH)1)) != 0?>
+    <?error Expected code file '$(sys.SOURCEFILEPATH)1' not to exist?>
+    <?endif?>
+
+    <?if $(psw.FileExists($(sys.SOURCEFILEDIR))) != 0?>
+    <?error Expected this code file's folder not to exists as file?>
+    <?endif?>
+
+    <!-- DirExists -->
+    <?if $(psw.DirExists($(sys.SOURCEFILEDIR))) != 1?>
+    <?error Expected this code file's folder to exist?>
+    <?endif?>
+
+    <?if $(psw.DirExists($(sys.SOURCEFILEDIR)1)) != 0?>
+    <?error Expected folder '$(sys.SOURCEFILEDIR)1' not to exist?>
+    <?endif?>
+
+    <?if $(psw.DirExists($(sys.SOURCEFILEDIR)empty)) != 1?>
+    <?error Expected folder '$(sys.SOURCEFILEDIR)empty' to exist?>
+    <?endif?>
+
+    <?if $(psw.DirExists($(sys.SOURCEFILEPATH))) != 0?>
+    <?error Expected file '$(sys.SOURCEFILEPATH)' not to exist as folder?>
+    <?endif?>
+
+    <!-- DirEmpty -->
+    <?if $(psw.DirEmpty($(sys.SOURCEFILEDIR))) != 0?>
+    <?error Expected this code file's folder not to be empty?>
+    <?endif?>
+
+    <?if $(psw.DirEmpty($(sys.SOURCEFILEDIR)1)) != 1?>
+    <?error Expected folder '$(sys.SOURCEFILEDIR)1)' to be non-existent?>
+    <?endif?>
+
+    <?if $(psw.DirEmpty($(sys.SOURCEFILEDIR)empty)) != 1?>
+    <?error Expected folder '$(sys.SOURCEFILEDIR)empty)' to be empty?>
     <?endif?>
   </Product>
 </Wix>

@@ -53,6 +53,9 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
 ## Preprocessor
 - *$(psw.VarNullOrEmpty(VAR_NAME))*: Return 1 if the variable is not defined, or if it defined as empty. Return 0 otherwise
 - *$(psw.AutoGuid(x,y,z,...))*: Return a pseudo-random UUID per arguments
+- *$(psw.FileExists(path))*: Return 1 if the file exists, 0 otherwise
+- *$(psw.DirExists(path))*: Return 1 if the folder exists, 0 otherwise
+- *$(psw.DirEmpty(path))*: Return 1 if the folder doesn't exist or if it has no files (including in subfolders). Return 0 otherwise
 
 ## Custom Actions
 

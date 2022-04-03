@@ -1,5 +1,6 @@
 ﻿using Microsoft.Tools.WindowsInstallerXml;
 using System;
+using System.IO;
 using System.Linq;
 
 namespace PanelSw.Wix.Extensions
@@ -30,6 +31,30 @@ namespace PanelSw.Wix.Extensions
                     string key = args.Aggregate((a, c) => $"{a}\\{c}");
                     string guid = CompilerCore.NewGuid(new Guid("{F026BBCE-4776-402C-BF36-352781805165}"), key);
                     return guid;
+
+                case "FileExists":
+                    if (args.Length != 1 || string.IsNullOrEmpty(args[0]))
+                    {
+                        throw new WixException(WixErrors.InvalidPreprocessorFunction(null, function));
+                    }
+
+                    return File.Exists(args[0]) ? "1" : "0";
+
+                case "DirExists":
+                    if (args.Length != 1 || string.IsNullOrEmpty(args[0]))
+                    {
+                        throw new WixException(WixErrors.InvalidPreprocessorFunction(null, function));
+                    }
+
+                    return Directory.Exists(args[0]) ? "1" : "0";
+
+                case "DirEmpty":
+                    if (args.Length != 1 || string.IsNullOrEmpty(args[0]))
+                    {
+                        throw new WixException(WixErrors.InvalidPreprocessorFunction(null, function));
+                    }
+
+                    return (Directory.Exists(args[0]) && (Directory.GetFiles(args[0], "*", SearchOption.AllDirectories).Length > 0)) ? "0" : "1";
 
                 default:
                     return null;
