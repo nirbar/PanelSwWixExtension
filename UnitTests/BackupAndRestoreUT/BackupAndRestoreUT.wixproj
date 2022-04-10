@@ -19,7 +19,7 @@
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Product.wxs" />
+    <Compile Include="BackupAndRestoreUT.wxs" />
   </ItemGroup>
   <ItemGroup>
     <WixExtension Include="PanelSwWixExtension">

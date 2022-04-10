@@ -67,15 +67,17 @@ extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall)
 			continue;
 		}
 
-		// Generate temp file name.
-		hr = PathCreateTempFile(nullptr, L"BNR%05i.tmp", INFINITE, FILE_ATTRIBUTE_NORMAL, (LPWSTR*)szTempFile, nullptr);
-		ExitOnFailure(hr, "Failed getting temporary file name");
-
+		// Generate temp file or folder name.
 		bIsFolder = ::PathIsDirectory(szPath);
-		if (bIsFolder) // For folders, we'll delete the file that holds the same name. For files, we'll simply overwrite.
+		if (bIsFolder) 
 		{
-			hr = deferredCAD.DeletePath(szTempFile, true, true); // Delete the temporay file we created now as we're not going to need it.
-			ExitOnFailure(hr, "Failed deleting file");
+			hr = PathCreateTempDirectory(nullptr, L"BNRD%04i.tmp", INFINITE, (LPWSTR*)szTempFile);
+			ExitOnFailure(hr, "Failed getting temporary folder name");
+		}
+		else
+		{
+			hr = PathCreateTempFile(nullptr, L"BNR%05i.tmp", INFINITE, FILE_ATTRIBUTE_NORMAL, (LPWSTR*)szTempFile, nullptr);
+			ExitOnFailure(hr, "Failed getting temporary file name");
 		}
 
 		hr = deferredCAD.CopyPath(szPath, szTempFile, false, bIgnoreMissing, flags & CFileOperations::FileOperationsAttributes::IgnoreErrors);
