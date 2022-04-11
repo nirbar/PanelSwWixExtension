@@ -252,8 +252,16 @@ HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool
 	LPWSTR szFromNull = nullptr;
 	LPWSTR szToNull = nullptr;
 
-	hr = StrAllocFormatted(&szFromNull, L"%s%c%c", szFrom, L'\0', L'\0');
-	ExitOnFailure(hr, "Failed formatting string");
+	if (::PathIsDirectory(szFrom))
+	{
+		hr = StrAllocFormatted(&szFromNull, L"%s\\*%c%c", szFrom, L'\0', L'\0');
+		ExitOnFailure(hr, "Failed formatting string");
+	}
+	else
+	{
+		hr = StrAllocFormatted(&szFromNull, L"%s%c%c", szFrom, L'\0', L'\0');
+		ExitOnFailure(hr, "Failed formatting string");
+	}
 
 	hr = StrAllocFormatted(&szToNull, L"%s%c%c", szTo, L'\0', L'\0');
 	ExitOnFailure(hr, "Failed formatting string");
