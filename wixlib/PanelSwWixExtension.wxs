@@ -528,9 +528,9 @@
   <!-- BackupAndRestore -->
   <Fragment>
     <CustomAction Id="BackupAndRestore" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="BackupAndRestore" Execute="immediate" Return="check" />
-    <CustomAction Id="BackupAndRestore_rollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" />
-    <CustomAction Id="BackupAndRestore_deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" />
-    <CustomAction Id="BackupAndRestore_commit" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="commit" Return="ignore" Impersonate="no" />
+    <CustomAction Id="BackupAndRestore_rollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" HideTarget="yes" />
+    <CustomAction Id="BackupAndRestore_deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" />
+    <CustomAction Id="BackupAndRestore_commit" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="commit" Return="ignore" Impersonate="no" HideTarget="yes" />
 
     <InstallExecuteSequence>
       <Custom Action="BackupAndRestore" Before="RemoveExistingProducts" Overridable="yes"/>
