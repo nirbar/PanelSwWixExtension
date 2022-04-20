@@ -1,0 +1,99 @@
+Starting Chef Client, version 14.14.29[0m
+resolving cookbooks for run list: ["aerobase"][0m
+Synchronizing Cookbooks:[0m
+  - aerobase (2.9.0)[0m
+  - package (0.0.0)[0m
+  - enterprise (0.15.1)[0m
+  - runit (5.1.1)[0m
+  - apt (7.3.0)[0m
+  - packagecloud (1.0.1)[0m
+  - yum-epel (3.3.0)[0m
+Installing Cookbook Gems:[0m
+Compiling Cookbooks...[0m
+[2022-04-19T18:13:30+03:00] WARN: Provider apt_preference from the client is overriding the provider from a cookbook. Please upgrade your cookbook or remove the cookbook from your run_list.
+[2022-04-19T18:13:30+03:00] WARN: Provider apt_repository from the client is overriding the provider from a cookbook. Please upgrade your cookbook or remove the cookbook from your run_list.
+[2022-04-19T18:13:30+03:00] WARN: Resource apt_preference from the client is overriding the resource from a cookbook. Please upgrade your cookbook or remove the cookbook from your run_list.
+[2022-04-19T18:13:30+03:00] WARN: Resource apt_repository from the client is overriding the resource from a cookbook. Please upgrade your cookbook or remove the cookbook from your run_list.
+Converging 113 resources[0m
+Recipe: aerobase::users[0m
+  * directory[C:/company/IDP/Aerobase/Data] action create (up to date)
+  * group[aerobase-group] action create
+    [32m- create group aerobase-group[0m
+[0m  * windows_user[aerobase] action create[2022-04-19T18:13:30+03:00] WARN: The 'gid' (or 'group') property is not implemented on the Windows platform. Please use the `members` property of the  'group' resource to assign a user to a group.
+    [32m- create user aerobase[0m
+[0mRecipe: aerobase::default[0m
+  * directory[C:/company/IDP/Aerobase/Configuration] action create
+    [32m- change dacl[0m
+    [32m- change owner[0m
+    [32m- change group[0m
+[0m  * directory[C:/company/IDP/Aerobase/Data] action create
+    [32m- change dacl[0m
+    [32m- change owner[0m
+    [32m- change group[0m
+[0m  * directory[C:/company/IDP/Aerobase/Aerobase/embedded/etc] action create
+    [32m- create new directory C:/company/IDP/Aerobase/Aerobase/embedded/etc[0m
+    [32m- change dacl[0m
+    [32m- change owner[0m
+    [32m- change group[0m
+[0mRecipe: aerobase::postgresql_os_user[0m
+  * group[aerobase-group] action create (up to date)
+  * windows_user[aerobase-sql] action create[2022-04-19T18:13:30+03:00] WARN: The 'gid' (or 'group') property is not implemented on the Windows platform. Please use the `members` property of the  'group' resource to assign a user to a group.
+    [32m- create user aerobase-sql[0m
+[0mRecipe: aerobase::postgresql[0m
+  * directory[C:/company/IDP/Aerobase/Data/postgresql] action create
+    [32m- create new directory C:/company/IDP/Aerobase/Data/postgresql[0m[2022-04-19T18:13:30+03:00] WARN: Mode 755 includes bits for the group, but group is not specified
+[2022-04-19T18:13:30+03:00] WARN: Mode 755 includes bits for the group, but group is not specified
+[2022-04-19T18:13:30+03:00] WARN: Mode 755 includes bits for the group, but group is not specified
+    [32m- change dacl[0m
+    [32m- change owner[0m
+[0m  * directory[C:/company/IDP/Aerobase/Data/postgresql/data] action create
+    [32m- create new directory C:/company/IDP/Aerobase/Data/postgresql/data[0m
+    [32m- change dacl[0m
+    [32m- change owner[0m
+[0m  * directory[C:/company/IDP/Aerobase/Logs/postgresql] action create
+    [32m- create new directory C:/company/IDP/Aerobase/Logs/postgresql[0m
+    [32m- change dacl[0m
+    [32m- change owner[0m
+[0m  * link[C:/company/IDP/Aerobase/Data/postgresql/data] action create (skipped due to not_if)
+  * file[C:/company/IDP/Aerobase/Data/postgresql/.profile] action create
+    [32m- create new file C:/company/IDP/Aerobase/Data/postgresql/.profile[0m
+    [32m- update content in file C:/company/IDP/Aerobase/Data/postgresql/.profile from none to 5f60ce[0m
+    [37m--- C:/company/IDP/Aerobase/Data/postgresql/.profile	2022-04-19 18:13:30.594675200 +0300[0m
+    [37m+++ C:/company/IDP/Aerobase/Data/postgresql/chef-.profile20220419-4796-1w7dkdj.profile	2022-04-19 18:13:30.594675200 +0300[0m
+    [37m@@ -1 +1,2 @@[0m
+    [37m+PATH=C:/company/IDP/Aerobase/Aerobase/embedded/bin:C:/company/IDP/Aerobase/Aerobase/bin:$PATH[0m
+    [32m- change dacl[0m
+    [32m- change owner[0m
+[0m  * execute[C:/company/IDP/Aerobase/Aerobase/embedded/bin/initdb -D C:/company/IDP/Aerobase/Data/postgresql/data -E UTF8] action run
+    [0m
+    ================================================================================[0m
+    [31mError executing action `run` on resource 'execute[C:/company/IDP/Aerobase/Aerobase/embedded/bin/initdb -D C:/company/IDP/Aerobase/Data/postgresql/data -E UTF8]'[0m
+    ================================================================================[0m
+    
+[0m    Mixlib::ShellOut::ShellCommandFailed[0m
+    ------------------------------------[0m
+    Command execution failed. STDOUT/STDERR suppressed for sensitive resource[0m
+    
+[0m    Resource Declaration:[0m
+    ---------------------[0m
+    suppressed sensitive resource output[0m
+    
+[0m    Compiled Resource:[0m
+    ------------------[0m
+    suppressed sensitive resource output[0m
+    
+[0m    System Info:[0m
+    ------------[0m
+    chef_version=14.14.29
+[0m    platform=windows
+[0m    platform_version=10.0.17763
+[0m    ruby=ruby 2.5.3p105 (2018-10-18 revision 65156) [x64-mingw32]
+[0m    program_name=C:/company/IDP/Aerobase/Aerobase/embedded/bin/chef-client
+[0m    executable=C:/company/IDP/Aerobase/Aerobase/embedded/bin/chef-client[0m
+    
+[0m[0m
+Running handlers:[0m
+[2022-04-19T18:24:17+03:00] ERROR: Running exception handlers
+Running handlers complete
+[0m[2022-04-19T18:24:17+03:00] ERROR: Exception handlers complete
+Chef Client failed. 10 resources updated in 11 minutes 02 seconds[0m

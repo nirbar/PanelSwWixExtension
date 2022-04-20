@@ -29,7 +29,7 @@
 
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component>
-        <File Source="$(var.ProjectDir)Product.wxs" />
+        <File Source="$(sys.SOURCEFILEPATH)" />
         <PanelSW:ExecOn Command='"ping.exe" "[GOOGLE]"' OnInstall='yes' OnInstallRollback='yes' OnReinstall='yes' OnReinstallRollback='yes' OnUninstall='yes' OnUninstallRollback='yes'
                         BeforeStopServices='yes' AfterStopServices='yes' BeforeStartServices='yes' AfterStartServices='yes' WorkingDirectory='[INSTALLFOLDER]'>
           <PanelSW:ConsoleOutput Expression='\b[PACKETS]\b' Behavior='prompt' BehaviorOnMatch='yes' PromptText='Packets detected'/>
@@ -43,9 +43,13 @@
 
         <PanelSW:ExecOn Command='CMD /C "EXIT /b 1"' BeforeStopServices='yes' OnInstall='yes' ErrorHandling='prompt'/>
 
+        <PanelSW:ExecOn Command='CMD /C "TYPE "{*non_printable.txt}""' BinaryKey='non_printable.txt' BeforeStopServices='yes' OnInstall='yes' ErrorHandling='prompt'/>
+
         <PanelSW:ExecOn BinaryKey='TestBinary' Command='--version' BeforeStartServices='yes' OnInstall='yes'/>
         <PanelSW:ExecOn Impersonate='no' User='me' BeforeStartServices='yes' OnInstall='yes' Command='"notepad.exe"' ErrorHandling='prompt'/>
       </Component>
     </ComponentGroup>
+
+    <Binary SourceFile='$(sys.SOURCEFILEDIR)non-printable.txt' Id='non_printable.txt'/>
   </Product>
 </Wix>

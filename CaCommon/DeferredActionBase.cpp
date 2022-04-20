@@ -284,6 +284,16 @@ void CDeferredActionBase::LogUnformatted(LOGLEVEL level, PCSTR szFormat, ...)
 		ExitFunction();
 	}
 
+	// Replace non-printable characters with spaces
+	for (LPSTR szCurr = szMessage; szCurr && *szCurr; ++szCurr)
+	{
+		int chr = ((int)szCurr[0]) & 0x7F;
+		if (::iscntrl(chr) || ::isspace(chr) || !::isprint(chr))
+		{
+			*szCurr = L' ';
+		}
+	}
+
 	hRec = MsiCreateRecord(3);
 	if (static_cast<MSIHANDLE>(hRec) == NULL)
 	{
