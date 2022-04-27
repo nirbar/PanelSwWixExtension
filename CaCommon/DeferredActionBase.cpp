@@ -11,7 +11,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToEx
 	HRESULT hr = S_OK;
 	HRESULT hrErr = S_OK;
 	LPWSTR szCustomActionData = nullptr;
-	BYTE *pData = nullptr;
+	BYTE* pData = nullptr;
 	DWORD dwDataSize = 0;
 	BOOL bRes = TRUE;
 	CDeferredActionBase* pExecutor = nullptr;
@@ -24,7 +24,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToEx
 	UINT er = ERROR_SUCCESS;
 	DWORD_PTR cch = 0;
 	WCHAR szEmpty[1] = L"";
-	er = ::MsiGetPropertyW(hInstall, L"CustomActionData", szEmpty, (DWORD *)&cch);
+	er = ::MsiGetPropertyW(hInstall, L"CustomActionData", szEmpty, (DWORD*)&cch);
 	if ((er != ERROR_MORE_DATA) && (er != ERROR_SUCCESS))
 	{
 		hr = E_FAIL;
@@ -39,7 +39,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToEx
 		ExitFunction();
 	}
 
-	er = ::MsiGetPropertyW(hInstall, L"CustomActionData", szCustomActionData, (DWORD *)&cch);
+	er = ::MsiGetPropertyW(hInstall, L"CustomActionData", szCustomActionData, (DWORD*)&cch);
 	if (er != ERROR_SUCCESS)
 	{
 		hr = E_FAIL;
@@ -88,13 +88,13 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToEx
 	bIsRollback = ::MsiGetMode(WcaGetInstallHandle(), MSIRUNMODE::MSIRUNMODE_ROLLBACK);
 
 	// Iterate elements
-	for (const Command &cmd : cad.commands())
+	for (const Command& cmd : cad.commands())
 	{
 		if (cmd.handler().empty())
 		{
 			continue;
 		}
-		
+
 		// Get receiver
 		hr = mapFunc(cmd.handler().c_str(), &pExecutor);
 		if (bIsRollback && FAILED(hr))
@@ -177,10 +177,10 @@ UINT CDeferredActionBase::GetCost() const
 	return cost;
 }
 
-HRESULT CDeferredActionBase::AddCommand(LPCSTR szHandler, Command **ppCommand)
+HRESULT CDeferredActionBase::AddCommand(LPCSTR szHandler, Command** ppCommand)
 {
 	HRESULT hr = S_OK;
-	Command *pCmd = nullptr;
+	Command* pCmd = nullptr;
 
 	pCmd = _cad.add_commands();
 
@@ -202,7 +202,7 @@ bool CDeferredActionBase::HasActions() const
 	return (_cad.commands_size() > 0);
 }
 
-HRESULT CDeferredActionBase::GetCustomActionData(LPWSTR *pszCustomActionData)
+HRESULT CDeferredActionBase::GetCustomActionData(LPWSTR* pszCustomActionData)
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -230,17 +230,17 @@ HRESULT CDeferredActionBase::Prepend(CDeferredActionBase* pOther)
 	CustomActionData mergedCad;
 	mergedCad.set_id(_cad.id());
 
-	for (const Command &cmd : pOther->_cad.commands())
+	for (const Command& cmd : pOther->_cad.commands())
 	{
-		Command *pNewCmd = mergedCad.add_commands();
+		Command* pNewCmd = mergedCad.add_commands();
 		ExitOnNull(pNewCmd, hr, E_FAIL, "Failed to allocate command");
 
 		pNewCmd->CopyFrom(cmd);
 	}
 
-	for (const Command &cmd : _cad.commands())
+	for (const Command& cmd : _cad.commands())
 	{
-		Command *pNewCmd = mergedCad.add_commands();
+		Command* pNewCmd = mergedCad.add_commands();
 		ExitOnNull(pNewCmd, hr, E_FAIL, "Failed to allocate command");
 
 		pNewCmd->CopyFrom(cmd);
@@ -257,7 +257,8 @@ void CDeferredActionBase::LogUnformatted(LOGLEVEL level, PCSTR szFormat, ...)
 {
 	HRESULT hr = S_OK;
 	int nRes = 0;
-	LPSTR szMessage = nullptr;
+	LPWSTR szMessage = nullptr;
+	LPSTR szAnsiMessage = nullptr;
 	LPCSTR szLogName = nullptr;
 	va_list va;
 	size_t nSize = 0;
@@ -272,51 +273,58 @@ void CDeferredActionBase::LogUnformatted(LOGLEVEL level, PCSTR szFormat, ...)
 	}
 	++nSize;
 
-	szMessage = reinterpret_cast<char*>(MemAlloc(nSize, TRUE));
-	if (szMessage == nullptr)
-	{
-		ExitFunction();
-	}
+	szAnsiMessage = reinterpret_cast<char*>(MemAlloc(nSize, TRUE));
+	ExitOnNullWithLastError(szAnsiMessage, hr, "Failed to allocate memory");
 
-	nRes = ::vsprintf_s(szMessage, nSize, szFormat, va);
+	nRes = ::vsprintf_s(szAnsiMessage, nSize, szFormat, va);
 	if (nRes < 0)
 	{
 		ExitFunction();
 	}
 
+	hr = StrAllocStringAnsi(&szMessage, szAnsiMessage, 0, CP_UTF8);
+	ExitOnFailure(hr, "Failed to format string");
+
 	// Replace non-printable characters with spaces
-	for (LPSTR szCurr = szMessage; szCurr && *szCurr; ++szCurr)
+	for (LPWSTR szCurr = szMessage; szCurr && *szCurr; ++szCurr)
 	{
-		int chr = ((int)szCurr[0]) & 0x7F;
-		if (::iscntrl(chr) || ::isspace(chr) || !::isprint(chr))
+		int chr = ((int)szCurr[0]) & 0xFFFF;
+		if (::iswcntrl(chr) || ::iswspace(chr) || !::iswprint(chr))
 		{
-			*szCurr = L' ';
+			szCurr[0] = L' ';
 		}
 	}
 
-	hRec = MsiCreateRecord(3);
-	if (static_cast<MSIHANDLE>(hRec) == NULL)
-	{
-		ExitFunction();
-	}
+	hRec = ::MsiCreateRecord(3);
+	ExitOnNullWithLastError(hRec, hr, "Failed to create record");
 
 	szLogName = WcaGetLogName();
 	if (szLogName && *szLogName)
 	{
-		::MsiRecordSetStringA(hRec, 0, "[1]:  [2]");
-		::MsiRecordSetStringA(hRec, 1, szLogName);
-		::MsiRecordSetStringA(hRec, 2, szMessage);
+		hr = WcaSetRecordString(hRec, 0, L"[1]:  [2]");
+		ExitOnFailure(hr, "Failed to set log record");
+		
+		nRes = ::MsiRecordSetStringA(hRec, 1, szLogName);
+		ExitOnWin32Error(nRes, hr, "Failed to set log record");
+		
+		hr = WcaSetRecordString(hRec, 2, szMessage);
+		ExitOnFailure(hr, "Failed to set log record");
 	}
 	else
 	{
-		::MsiRecordSetStringA(hRec, 0, "[1]");
-		::MsiRecordSetStringA(hRec, 1, szMessage);
+		hr = WcaSetRecordString(hRec, 0, L"[1]");
+		ExitOnFailure(hr, "Failed to set log record");
+		
+		hr = WcaSetRecordString(hRec, 1, szMessage);
+		ExitOnFailure(hr, "Failed to set log record");
 	}
+
 	WcaProcessMessage(INSTALLMESSAGE_INFO, hRec);
 
 LExit:
 
-	ReleaseMem(szMessage);
+	ReleaseStr(szMessage);
+	ReleaseMem(szAnsiMessage);
 	va_end(va);
 	return;
 }
