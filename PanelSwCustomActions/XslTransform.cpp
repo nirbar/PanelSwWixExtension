@@ -17,6 +17,15 @@ using namespace google::protobuf;
 static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, LPWSTR *pszXslPath);
 static HRESULT ReplaceStrings(LPCWSTR szXslPath, LPCWSTR szXslId);
 
+enum InstallUninstallType : int
+{
+	NotSet = -1,
+	install = 0,
+	uninstall = 1,
+	both = 2,
+	IllegalValue = INT_MAX
+};
+
 extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
@@ -40,7 +49,7 @@ extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall)
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_XslTransform_Replacements'. Have you authored 'PanelSw:XslTransform' entries in WiX code?");
 
 	// Execute view
-	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `File_`, `FilePath`, `XslBinary_` FROM `PSW_XslTransform` ORDER BY `Order`", &hView);
+	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `File_`, `FilePath`, `XslBinary_`, `On` FROM `PSW_XslTransform` ORDER BY `Order`", &hView);
 	ExitOnFailure(hr, "Failed to execute SQL query.");
 
 	// Iterate records
@@ -52,6 +61,7 @@ extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall)
 		CWixString szId, szComponent, szFileId, szXslBinaryId;
 		CWixString szXslPath, szFileFmt, szFilePath;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
+		InstallUninstallType eOn;
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szId);
 		ExitOnFailure(hr, "Failed to get Id.");
@@ -63,6 +73,8 @@ extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to get File_.");
 		hr = WcaGetRecordString(hRecord, 5, (LPWSTR*)szXslBinaryId);
 		ExitOnFailure(hr, "Failed to get XslBinary_.");
+		hr = WcaGetRecordInteger(hRecord, 6, (int*)&eOn);
+		ExitOnFailure(hr, "Failed to get On.");
 
 		ExitOnNull(!szXslBinaryId.IsNullOrEmpty(), hr, E_INVALIDARG, "Binary key is empty");
 		ExitOnNull(!szComponent.IsNullOrEmpty(), hr, E_INVALIDARG, "Component is empty");
@@ -74,10 +86,23 @@ extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall)
 		{
 		case WCA_TODO::WCA_TODO_INSTALL:
 		case WCA_TODO::WCA_TODO_REINSTALL:
-			break;
+			if ((eOn == InstallUninstallType::install) || (eOn == InstallUninstallType::both))
+			{
+				break;
+			}
+			WcaLog(LOGMSG_STANDARD, "Skipping execution of XSLT '%ls' since component '%ls' is being installed or reinstalled", (LPCWSTR)szXslBinaryId, (LPCWSTR)szComponent);
+			continue;
+
+		case WCA_TODO::WCA_TODO_UNINSTALL:
+			if ((eOn == InstallUninstallType::uninstall) || (eOn == InstallUninstallType::both))
+			{
+				break;
+			}
+			WcaLog(LOGMSG_STANDARD, "Skipping execution of XSLT '%ls' since component '%ls' is being uninstalled", (LPCWSTR)szXslBinaryId, (LPCWSTR)szComponent);
+			continue;
 
 		default:
-			WcaLog(LOGMSG_STANDARD, "Skipping execution of XSLT '%ls' since component '%ls' is not being installed or reinstalled", (LPCWSTR)szXslBinaryId, (LPCWSTR)szComponent);
+			WcaLog(LOGMSG_STANDARD, "Skipping execution of XSLT '%ls'", (LPCWSTR)szXslBinaryId);
 			continue;
 		}
 

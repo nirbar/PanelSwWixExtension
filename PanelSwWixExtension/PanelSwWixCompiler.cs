@@ -2081,6 +2081,7 @@ namespace PanelSw.Wix.Extensions
             string filePath = null;
             string binary = null;
             int order = 1000000000 + GetLineNumber(sourceLineNumbers);
+            Microsoft.Tools.WindowsInstallerXml.Serialize.InstallUninstallType on = Microsoft.Tools.WindowsInstallerXml.Serialize.InstallUninstallType.install;
 
             foreach (XmlAttribute attrib in element.Attributes)
             {
@@ -2101,6 +2102,10 @@ namespace PanelSw.Wix.Extensions
 
                     case "FilePath":
                         filePath = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "On":
+                        on = Core.GetAttributeInstallUninstallValue(sourceLineNumbers, attrib);
                         break;
 
                     case "Order":
@@ -2124,6 +2129,10 @@ namespace PanelSw.Wix.Extensions
             if (string.IsNullOrEmpty(binary))
             {
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "BinaryKey"));
+            }
+            if (on == Microsoft.Tools.WindowsInstallerXml.Serialize.InstallUninstallType.NotSet)
+            {
+                on = Microsoft.Tools.WindowsInstallerXml.Serialize.InstallUninstallType.install;
             }
 
             // Text replacements in XSL
@@ -2191,6 +2200,7 @@ namespace PanelSw.Wix.Extensions
                 row[i++] = filePath;
                 row[i++] = binary;
                 row[i++] = order;
+                row[i++] = (int)on;
             }
         }
 

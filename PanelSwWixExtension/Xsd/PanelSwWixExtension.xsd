@@ -2022,6 +2022,11 @@ Remove registry values.
           <xs:documentation><![CDATA[Order of XSL execution, defaults to line number. XSL with explicit order field will be executed before XSL with implicit order]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="On" type="wix:InstallUninstallType">
+        <xs:annotation>
+          <xs:documentation><![CDATA[When to apply the xsl transform. Defaults to install]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
 

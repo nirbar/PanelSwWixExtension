@@ -86,6 +86,11 @@
         <PanelSW:XslTransform BinaryKey="XslTransform" FilePath="[#XmlSearch.wxs]">
           <PanelSW:Replace Text="\[\[]FILE_NAME\[\]]" Replacement="[SOME_TEXT]"/>
         </PanelSW:XslTransform>
+
+        <!--Expecting to do nothing since [FILE_NAME] was already replaced -->
+        <PanelSW:XslTransform BinaryKey="XslTransform" FilePath="$(sys.SOURCEFILEPATH)" On="uninstall">
+          <PanelSW:Replace Text="\[\[]FILE_NAME\[\]]" Replacement="no-file"/>
+        </PanelSW:XslTransform>
       </Component>
     </ComponentGroup>
   </Fragment>

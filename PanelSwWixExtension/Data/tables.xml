@@ -311,6 +311,7 @@
     <columnDefinition name="FilePath" type="string" length="0" modularize="column" category="formatted" nullable="yes"/>
     <columnDefinition name="XslBinary_" type="string" length="72" modularize="column" keyTable="Binary" keyColumn="1" category="identifier" nullable="yes"/>
     <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
+    <columnDefinition name="On" type="number" minValue="0" maxValue="127" length="2" />
   </tableDefinition>
 
   <tableDefinition name="PSW_XslTransform_Replacements">
