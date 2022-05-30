@@ -83,6 +83,7 @@
     <ClCompile Include="FileOperations.cpp" />
     <ClCompile Include="FileRegex.cpp" />
     <ClCompile Include="Md5Hash.cpp" />
+    <ClCompile Include="ExtractPayload.cpp" />
     <ClCompile Include="RestartLocalResources.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="MsiSqlQuery.cpp" />

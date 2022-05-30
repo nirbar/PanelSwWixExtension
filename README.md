@@ -26,6 +26,7 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
   - *CreateSelfSignCertificate*: Create a self-sign certificate that can then be installed by WixIisExtension.
   - *ToLowerCase*: Convert property value to lowercase.
   - *CustomPatchRef* Support referencing custom table rows in a patch
+  - *Payload* Support extracting files from Binary table temporarilty during MSI execution
 - Deferred Actions:
   - *RestartLocalResources*: Register processes with the Restart Manager if they reside in the specified folder
   - *XslTransform*: Apply a XSL transform on an installed XML file
@@ -148,5 +149,5 @@ After building a unit test project, you'll need to shutdown Visual Studio before
 This is due to the unfortunate habit of Visual Studio to hold the extension file in use.
 You may find it convenient to build unit test projects from a command prompt to workaround this limitation
 ~~~~~~~~~~~~
-MSBuild UnitTests\XmlSearchUT\XmlSearchUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
+MSBuild UnitTests\PayloadUT\PayloadUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
 ~~~~~~~~~~~~

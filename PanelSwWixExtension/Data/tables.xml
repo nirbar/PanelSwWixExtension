@@ -395,6 +395,11 @@
     <columnDefinition name="Plain" type="string" length="0" modularize="property" category="formatted" />
   </tableDefinition>
 
+  <tableDefinition name="PSW_Payload">
+    <columnDefinition name="BinaryKey_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" keyTable="Binary" keyColumn="1" />
+    <columnDefinition name="Name" type="string" length="0" modularize="none" category="anyPath" />
+  </tableDefinition>
+
   <tableDefinition name="PSW_ConcatFiles">
     <columnDefinition name="Component_" type="string" length="72" modularize="column" category="identifier" keyTable="Component" keyColumn="1" primaryKey="yes" />
     <columnDefinition name="RootFile_" type="string" length="72" modularize="column" category="identifier" keyTable="File" keyColumn="1" primaryKey="yes"/>

@@ -52,6 +52,10 @@ namespace PanelSw.Wix.Extensions
                             ParseCustomUninstallKeyElement(element);
                             break;
 
+                        case "Payload":
+                            ParsePayload(element, null, null);
+                            break;
+
                         case "FileRegex":
                             ParseFileRegex(element, null, null);
                             break;
@@ -320,6 +324,57 @@ namespace PanelSw.Wix.Extensions
                     Core.UnexpectedElement(parentElement, element);
                     break;
             }
+        }
+
+        private void ParsePayload(XmlElement element, object p1, object p2)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
+            string source = null;
+            string name = null;
+
+            foreach (XmlAttribute attrib in element.Attributes)
+            {
+                if ((0 != attrib.NamespaceURI.Length) && (attrib.NamespaceURI != schema.TargetNamespace))
+                {
+                    continue;
+                }
+
+                switch (attrib.LocalName)
+                {
+                    case "Source":
+                        source = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "Name":
+                        name = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    default:
+                        Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                        break;
+                }
+            }
+
+            if (string.IsNullOrEmpty(source))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "Source"));
+                return;
+            }
+            if (string.IsNullOrEmpty(name))
+            {
+                name = Path.GetFileName(source);
+            }
+
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "ExtractPayload");
+
+            string binaryKey = $"pld{Guid.NewGuid().ToString("N")}";
+            Row binaryRow = Core.CreateRow(sourceLineNumbers, "Binary");
+            binaryRow[0] = binaryKey;
+            binaryRow[1] = source;
+
+            Row pldRow = Core.CreateRow(sourceLineNumbers, "PSW_Payload");
+            pldRow[0] = binaryKey;
+            pldRow[1] = name;
         }
 
         private void ParseUninstallCommandElement(XmlElement parentElement, XmlElement element, string pkgId)

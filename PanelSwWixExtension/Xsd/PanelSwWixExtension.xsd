@@ -32,6 +32,35 @@
     </xs:annotation>
   </xs:attribute>
 
+  <xs:element name="Payload">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Defines a payload to be extracted temporarily during MSI execution. The payload is extracted to "PayloadFolder" after InstallInitialize, and deleted on rollback or commit]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Source" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Table to reference</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Name" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Folder and file name to nest in PayloadFolder. Defaults to the file name</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="CustomPatchRef">
     <xs:annotation>
       <xs:appinfo>
