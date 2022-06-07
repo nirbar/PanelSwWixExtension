@@ -1928,6 +1928,11 @@ Read values from a XML file
               <xs:documentation>Namespaces to set for the node selection.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="Condition" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Condition on executing the query.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
           <xs:attribute name="Match" use="optional" default="first">
             <xs:annotation>
               <xs:documentation>Configures how to handle multiple XPath matches. Defaults to 'first'.</xs:documentation>

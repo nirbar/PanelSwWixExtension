@@ -766,6 +766,11 @@ namespace PanelSw.Wix.Extensions
                     customActions.Add("ConcatFiles");
                     customActions.Add("ConcatFilesExec");
                     break;
+                case "PSW_Payload":
+                    customActions.Add("ExtractPayload");
+                    customActions.Add("ExtractPayloadRollback");
+                    customActions.Add("ExtractPayloadCommit");
+                    break;
             }
 
             if (!Core.EncounteredError)
@@ -3764,7 +3769,7 @@ namespace PanelSw.Wix.Extensions
             string id = null;
             string filePath = null;
             string xpath = null;
-            string property = null;
+            string property;
             string lang = null;
             string namespaces = null;
             XmlSearchMatch match = XmlSearchMatch.first;

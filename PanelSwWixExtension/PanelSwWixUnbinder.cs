@@ -27,6 +27,7 @@ namespace PanelSw.Wix.Extensions
             Table componentTable = output.Tables["Component"];
             Table fileTable = output.Tables["File"];
             Table propertyTable = output.Tables["Property"];
+            Table binaryTable = output.Tables["Binary"];
 
             Dictionary<string, List<ForeignRelation>> tableForeignKeys = new Dictionary<string, List<ForeignRelation>>();
             List<string> delayedTables = new List<string>();
@@ -64,6 +65,7 @@ namespace PanelSw.Wix.Extensions
             tableForeignKeys["PSW_ConcatFiles"].Add(new ForeignRelation(0, componentTable, 0));
             tableForeignKeys["PSW_ConcatFiles"].Add(new ForeignRelation(1, fileTable, 0));
             tableForeignKeys["PSW_ConcatFiles"].Add(new ForeignRelation(2, fileTable, 0));
+            tableForeignKeys["PSW_Payload"].Add(new ForeignRelation(0, binaryTable, 0));
 
             AssignSectionIdToTables(output, tableForeignKeys);
 

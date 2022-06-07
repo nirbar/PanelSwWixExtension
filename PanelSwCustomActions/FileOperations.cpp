@@ -489,7 +489,7 @@ HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRe
 	hr = PathBackslashTerminate(&szFullFolder);
 	ExitOnFailure(hr, "Failed allocating string");
 
-	// Start with subfolders, no pattern foltering
+	// Start with subfolders, no pattern filtering
 	if (bRecursive)
 	{
 		hr = StrAllocFormatted(&szFullPattern, L"%s*", szFullFolder);
