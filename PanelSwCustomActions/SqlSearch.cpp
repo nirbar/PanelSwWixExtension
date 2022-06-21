@@ -61,7 +61,7 @@ extern "C" UINT __stdcall SqlSearch(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to get Password.");
 		hr = WcaGetRecordFormattedString(hRecord, 7, (LPWSTR*)szQuery);
 		ExitOnFailure(hr, "Failed to get Query.");
-		hr = WcaGetRecordFormattedString(hRecord, 8, (LPWSTR*)szCondition);
+		hr = WcaGetRecordString(hRecord, 8, (LPWSTR*)szCondition);
 		ExitOnFailure(hr, "Failed to get Condition.");
 		hr = WcaGetRecordFormattedInteger(hRecord, 9, &nPort);
 		ExitOnFailure(hr, "Failed to get Port.");

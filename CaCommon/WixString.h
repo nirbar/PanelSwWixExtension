@@ -2,6 +2,8 @@
 
 #include "stdafx.h"
 #include <strutil.h>
+#include <Shlwapi.h>
+#pragma comment (lib, "Shlwapi.lib")
 
 class CWixString
 {
@@ -481,41 +483,13 @@ public:
 
 	DWORD FindIgnoreCase(LPCWSTR szOther) const
 	{
-		LPCWSTR pOther = nullptr;
-
-		if (IsNullOrEmpty())
+		if (IsNullOrEmpty() || !szOther || !*szOther)
 		{
 			return INFINITE;
 		}
 
-		LPCWSTR wzSource = _pS;
-		LPCWSTR wzSearch = nullptr;
-		DWORD_PTR cchSourceIndex = 0;
-
-		// Walk through wzString (the source string) one character at a time
-		while (*wzSource)
-		{
-			cchSourceIndex = 0;
-			wzSearch = szOther;
-
-			// Look ahead in the source string until we get a full match or we hit the end of the source
-			while ((NULL != wzSource[cchSourceIndex]) && (NULL != *wzSearch) && (::towlower(wzSource[cchSourceIndex]) == towlower(*wzSearch)))
-			{
-				++cchSourceIndex;
-				++wzSearch;
-			}
-
-			// If we found it, return the point that we found it at
-			if (NULL == *wzSearch)
-			{
-				return (wzSource - _pS);
-			}
-
-			// Walk ahead one character
-			++wzSource;
-		}
-
-		return (pOther - _pS);
+		LPCWSTR szOtherFound = ::StrStrIW(_pS, szOther);
+		return szOtherFound ? (szOtherFound - szOther) : INFINITE;
 	}
 
 private:

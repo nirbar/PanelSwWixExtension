@@ -48,7 +48,7 @@ extern "C" UINT __stdcall WmiSearch(MSIHANDLE hInstall)
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szProperty);
 		ExitOnFailure(hr, "Failed to get Property_.");
-		hr = WcaGetRecordFormattedString(hRecord, 2, (LPWSTR*)szCondition);
+		hr = WcaGetRecordString(hRecord, 2, (LPWSTR*)szCondition);
 		ExitOnFailure(hr, "Failed to get Condition.");
 		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)szNamespace);
 		ExitOnFailure(hr, "Failed to get Namespace.");
