@@ -73,6 +73,7 @@
   <Import Project="$(WixTargetsPath)" />
   <Target Name="BeforeBuild">
     <PropertyGroup>
+      <WixSdkPath Condition="'$(WixSdkPath)'==''">$(WIX)\SDK\</WixSdkPath>
       <WixProps>WixToolPath=$(WixToolPath)</WixProps>
       <WixProps>WixSdkPath=$(WixSdkPath);$(WixProps)</WixProps>
       <WixProps>WixTargetsPath=$(WixTargetsPath);$(WixProps)</WixProps>
