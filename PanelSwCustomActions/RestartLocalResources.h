@@ -1,6 +1,10 @@
 #pragma once
 #include "../CaCommon/DeferredActionBase.h"
 #include "restartLocalResourcesDetails.pb.h"
+#include <pathutil.h>
+#include <list>
+#include <map>
+#include <Psapi.h>
 
 class CRestartLocalResources :
 	public CDeferredActionBase
@@ -8,8 +12,11 @@ class CRestartLocalResources :
 public:
 
 	CRestartLocalResources() : CDeferredActionBase("RestartLocalResources") { }
+	~CRestartLocalResources();
 
-	HRESULT AddRestartLocalResources(LPCWSTR szFilePath, LPCWSTR szProcessName, DWORD dwProcId);
+	HRESULT AddRestartLocalResources(const std::list<LPWSTR>& lstFolders);
+
+	HRESULT EnumerateLocalProcesses(const std::list<LPWSTR>& lstFolders, std::map<DWORD, LPWSTR>& mapProcId);
 
 protected:
 	
@@ -17,7 +24,27 @@ protected:
 
 private:
 
-	HRESULT Execute(LPCWSTR szFilePath, LPCWSTR szProcessName, DWORD dwProcId);
+	HRESULT Execute(const std::list<LPWSTR>& lstFolders);
+
+	INT PromptFilesInUse(const std::map<DWORD, LPWSTR> mapProcId);
 
 	static BOOL CALLBACK KillWindowsProc(HWND hwnd, LPARAM lParam);
+
+	HRESULT Initialize();
+	void Uninitialize();
+
+	decltype(::GetProcessImageFileNameW)* pGetProcessImageFileNameW_ = nullptr;
+	HMODULE hGetProcessImageFileNameDll_ = NULL;
+
+	// Helper struct to find a folder that contains the exe by path
+	struct
+	{
+		WCHAR szFullExePath[MAX_PATH + 1];
+
+		bool operator()(const LPCWSTR& szFolder) const
+		{
+			HRESULT hr = PathDirectoryContainsPath(szFolder, szFullExePath);
+			return (hr == S_OK);
+		}
+	} visInFolder_;
 };

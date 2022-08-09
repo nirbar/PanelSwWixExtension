@@ -4,7 +4,5 @@ option optimize_for = LITE_RUNTIME;
 
 message RestartLocalResourcesDetails{
 
-	uint32 process_id = 1;
-	bytes file = 2;
-	bytes processName = 3;
+	repeated bytes folders = 1;
 }

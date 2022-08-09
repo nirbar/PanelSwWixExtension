@@ -7,6 +7,8 @@
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
     <MediaTemplate />
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
+    <Property Id="MSIRMSHUTDOWN" Value="1"/>
+    <Property Id="MSIDISABLERMRESTART" Value="1"/>
 
     <Feature Id="ProductFeature" Title="RestartLocalResourcesUT" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
@@ -24,6 +26,6 @@
       </Component>
     </ComponentGroup>
 
-    <PanelSW:RestartLocalResources Path="C:\USERS\NIR.BAR\DESKTOP\NPP.7.7.1.BIN\"/>
+    <PanelSW:RestartLocalResources Path="C:\Users\Administrator\Desktop\Notepad++\"/>
   </Product>
 </Wix>
