@@ -92,7 +92,7 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 
 		if (szFilePath.IsNullOrEmpty())
 		{
-			CFileRegex::LogUnformatted(LOGMSG_STANDARD, "Will skip regex for file '%ls'.", (LPCWSTR)szFileFormat);
+			CFileRegex::LogUnformatted(LOGMSG_STANDARD, false, "Will skip regex for file '%ls'.", (LPCWSTR)szFileFormat);
 			continue;
 		}
 
@@ -102,7 +102,7 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 		hr = szReplacement.MsiFormat((LPCWSTR)szReplacementUnformatted, (LPWSTR*)szReplacementObfuscated);
 		ExitOnFailure(hr, "Failed formatting string");
 
-		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Will replace matches of regex '%ls' with '%ls' on file '%ls'", (LPCWSTR)szRegexObfuscated, (LPCWSTR)szReplacementObfuscated, (LPCWSTR)szFilePath);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, "Will replace matches of regex '%ls' with '%ls' on file '%ls'", (LPCWSTR)szRegexObfuscated, (LPCWSTR)szReplacementObfuscated, (LPCWSTR)szFilePath);
 
 		hr = oDeferredFileRegex.AddFileRegex(szFilePath, szRegex, szReplacement, szRegexObfuscated, szReplacementObfuscated, (FileRegexDetails::FileEncoding)nEncoding, nIgnoreCase != 0);
 		ExitOnFailure(hr, "Failed creating custom action data for deferred action.");

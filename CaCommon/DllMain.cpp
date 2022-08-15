@@ -15,18 +15,18 @@ extern "C" BOOL WINAPI DllMain(HINSTANCE hInst, ULONG ulReason, LPVOID)
 	case DLL_PROCESS_ATTACH:
 		WcaGlobalInitialize(hInst);
 
-		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Checking if file system redirection can be disabled");
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, "Checking if file system redirection can be disabled");
 		_gFsRedirect.fDisabled = FALSE;
 		hProc = ::GetCurrentProcess();
 		hr = ProcWow64(hProc, &bWow64);
 		if (SUCCEEDED(hr) && bWow64)
 		{
-			CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Disabling file system redirection");
+			CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, "Disabling file system redirection");
 			hr = ProcDisableWowFileSystemRedirection(&_gFsRedirect);
 			if (FAILED(hr))
 			{
 				_gFsRedirect.fDisabled = FALSE;
-				CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "ProcDisableWowFileSystemRedirection failed with code %u", hr);
+				CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, "ProcDisableWowFileSystemRedirection failed with code %u", hr);
 			}
 		}
 
@@ -40,7 +40,7 @@ extern "C" BOOL WINAPI DllMain(HINSTANCE hInst, ULONG ulReason, LPVOID)
 			hr = ProcRevertWowFileSystemRedirection(&_gFsRedirect);
 			if (FAILED(hr))
 			{
-				CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Wow64RevertWow64FsRedirection failed");
+				CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, "Wow64RevertWow64FsRedirection failed");
 			}
 		}
 

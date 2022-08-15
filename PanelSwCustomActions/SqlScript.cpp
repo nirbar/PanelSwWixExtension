@@ -560,7 +560,7 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 	szInstance = (LPCWSTR)(LPVOID)details.instance().data();
 	szDatabase = (LPCWSTR)(LPVOID)details.database().data();
 
-	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Executing %i SQL scripts", details.scripts_size());
+	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Executing %i SQL scripts", details.scripts_size());
 
 	// ActionData: "Executing SQL scripts on Server '[1]' Instance '[2]' Database '[3]'"
 	hActionData = ::MsiCreateRecord(3);
@@ -605,7 +605,7 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 				break;
 
 			case ErrorHandling::ignore:
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Ignoring SQL script failure 0x%08X", hr);
+				LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Ignoring SQL script failure 0x%08X", hr);
 				hr = S_FALSE;
 				break;
 
@@ -633,17 +633,17 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 				case IDABORT:
 				case IDCANCEL:
 				default: // Probably silent (result 0)
-					WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User aborted on SQL failure (error code 0x%08X)", hrOp);
+					LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "User aborted on SQL failure (error code 0x%08X)", hrOp);
 					hr = hrOp;
 					break;
 
 				case IDRETRY:
-					WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose to retry on SQL failure (error code 0x%08X)", hrOp);
+					LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "User chose to retry on SQL failure (error code 0x%08X)", hrOp);
 					hr = S_OK;
 					goto LRetry;
 
 				case IDIGNORE:
-					WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User ignored SQL failure (error code 0x%08X)", hrOp);
+					LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "User ignored SQL failure (error code 0x%08X)", hrOp);
 					hr = S_FALSE;
 					break;
 				}

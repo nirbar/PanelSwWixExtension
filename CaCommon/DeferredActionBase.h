@@ -26,7 +26,7 @@ public:
 
 	bool HasActions() const;
 
-	static void LogUnformatted(LOGLEVEL level, PCSTR szFormat, ...);
+	static void LogUnformatted(LOGLEVEL level, bool bShowTime, PCSTR szFormat, ...);
 
 protected:
 

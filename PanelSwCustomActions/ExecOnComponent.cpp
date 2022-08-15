@@ -471,7 +471,7 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedC
 
 	if (nFlags & Flags::BeforeStopServices)
 	{
-		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' before StopServices", szObfuscatedCommand);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, "Will execute command '%ls' before StopServices", szObfuscatedCommand);
 		if (nFlags & Flags::Impersonate)
 		{
 			hr = pBeforeStopImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
@@ -484,7 +484,7 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedC
 	}
 	if (nFlags & Flags::AfterStopServices)
 	{
-		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' after StopServices", szObfuscatedCommand);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, "Will execute command '%ls' after StopServices", szObfuscatedCommand);
 		if (nFlags & Flags::Impersonate)
 		{
 			hr = pAfterStopImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
@@ -497,7 +497,7 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedC
 	}
 	if (nFlags & Flags::BeforeStartServices)
 	{
-		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' before StartServices", szObfuscatedCommand, (ErrorHandling)errorHandling);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, "Will execute command '%ls' before StartServices", szObfuscatedCommand, (ErrorHandling)errorHandling);
 		if (nFlags & Flags::Impersonate)
 		{
 			hr = pBeforeStartImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
@@ -510,7 +510,7 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedC
 	}
 	if (nFlags & Flags::AfterStartServices)
 	{
-		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Will execute command '%ls' after StartServices", szObfuscatedCommand, (ErrorHandling)errorHandling);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, "Will execute command '%ls' after StartServices", szObfuscatedCommand, (ErrorHandling)errorHandling);
 		if (nFlags & Flags::Impersonate)
 		{
 			hr = pAfterStartImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
@@ -626,7 +626,7 @@ HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command)
 		::SetCurrentDirectory(szWorkingDirectory);
 	}
 
-	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Executing '%ls'", szObfuscatedCommand);
+	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Executing '%ls'", szObfuscatedCommand);
 
 	// ActionData: "Executing [1]"
 	hActionData = ::MsiCreateRecord(1);
@@ -705,7 +705,7 @@ LRetry:
 		hr = ProcWaitForCompletion(hProc, INFINITE, &exitCode);
 		if (SUCCEEDED(hr))
 		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Process exited with code %u", exitCode);
+			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Process exited with code %u", exitCode);
 		}
 	}
 	if (FAILED(hr))
@@ -891,7 +891,7 @@ HRESULT CExecOnComponent::LogProcessOutput(HANDLE hStdErrOut, LPWSTR* pszText /*
 			char szFormat[20];
 
 			::sprintf_s<sizeof(szFormat)>(szFormat, "%%.%dls", (szLogEnd - (szLog + dwLogStart)));
-			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, szFormat, szLog + dwLogStart);
+			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, szFormat, szLog + dwLogStart);
 
 			// Go past \n or \r\n
 			if ((*szLogEnd == L'\r') && (*(szLogEnd + 1) == L'\n'))
@@ -931,7 +931,7 @@ HRESULT CExecOnComponent::LogProcessOutput(HANDLE hStdErrOut, LPWSTR* pszText /*
 	// Print any text that didn't end with a new line
 	if (szLog && (szLog[dwLogStart] != NULL))
 	{
-		LogUnformatted(LOGMSG_STANDARD, "%ls", szLog + dwLogStart);
+		LogUnformatted(LOGMSG_STANDARD, true, "%ls", szLog + dwLogStart);
 	}
 
 	// Return full log to the caller
@@ -966,7 +966,7 @@ HRESULT CExecOnComponent::SearchStdOut(LPCWSTR szStdOut, const ExecOnDetails& de
 			match_results<LPCWSTR> results;
 
 			bRes = regex_search(szStdOut, results, rx);
-			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Regex '%ls' search yielded %i matches", (LPCWSTR)(LPVOID)console.obfuscatedregex().data(), results.size());
+			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, "Regex '%ls' search yielded %i matches", (LPCWSTR)(LPVOID)console.obfuscatedregex().data(), results.size());
 			if ((bRes && results.size()) != console.onmatch())
 			{
 				continue;
@@ -1076,7 +1076,7 @@ HRESULT CExecOnComponent::SetEnvironment(const ::google::protobuf::Map<std::stri
 
 		if (szName && *szName && szValue && *szValue)
 		{
-			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Setting custom environment variable '%ls' to '%ls'", szName, szValue);
+			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, "Setting custom environment variable '%ls' to '%ls'", szName, szValue);
 
 			bRes = ::SetEnvironmentVariable(szName, szValue);
 			ExitOnNullWithLastError(bRes, hr, "Failed setting environment variable '%ls'", (LPCWSTR)szName);

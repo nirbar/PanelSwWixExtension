@@ -151,7 +151,7 @@ HRESULT CConcatFiles::ExecuteOne(LPCWSTR szRootFile, LPCWSTR szSplitFile)
 		hr = S_FALSE;
 		ExitFunction();
 	}
-	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Concatenting file '%ls' to '%ls'", szSplitFile, szRootFile);
+	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Concatenting file '%ls' to '%ls'", szSplitFile, szRootFile);
 
 	pBuff = (BYTE*)MemAlloc(dwBuffSize, FALSE);
 	ExitOnNull(pBuff, hr, E_FAIL, "Failed to allocate memory");

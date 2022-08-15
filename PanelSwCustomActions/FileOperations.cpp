@@ -254,7 +254,12 @@ HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool
 
 	if (::PathIsDirectory(szFrom))
 	{
-		hr = StrAllocFormatted(&szFromNull, L"%s\\*%c%c", szFrom, L'\0', L'\0');
+		hr = StrAllocString(&szFromNull, szFrom, 0);
+		ExitOnFailure(hr, "Failed allocating string");
+
+		::PathRemoveBackslash(szFromNull);
+
+		hr = StrAllocConcatFormatted(&szFromNull, L"\\*%c%c", L'\0', L'\0');
 		ExitOnFailure(hr, "Failed formatting string");
 	}
 	else
@@ -267,7 +272,6 @@ HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool
 	ExitOnFailure(hr, "Failed formatting string");
 
 	// Remove trailing backslashes (fails on Windows XP)
-	::PathRemoveBackslash(szFromNull);
 	::PathRemoveBackslash(szToNull);
 
 	// Prepare 
@@ -277,20 +281,20 @@ HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool
 	opInfo.pTo = szToNull;
 	opInfo.fFlags = FOF_NO_UI;
 
+	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Copying '%ls' to '%ls'", szFromNull, szToNull);
 	nRes = ::SHFileOperation(&opInfo);
 	if (bIgnoreMissing && (nRes == ERROR_FILE_NOT_FOUND) || (nRes == ERROR_PATH_NOT_FOUND))
 	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping copy '%ls' as it doesn't exist and marked to ignore missing", szFrom);
+		LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Skipping copy '%ls' as it doesn't exist and marked to ignore missing", szFrom);
 		ExitFunction1(hr = S_FALSE);
 	}
 	if (bIgnoreErrors && ((nRes != 0) || opInfo.fAnyOperationsAborted))
 	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed Copying '%ls' to '%ls'; Ignoring error (%i)", szFromNull, szToNull, nRes);
+		LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Failed Copying '%ls' to '%ls'; Ignoring error (%i)", szFromNull, szToNull, nRes);
 		ExitFunction1(hr = S_FALSE);
 	}
 	ExitOnWin32Error(nRes, hr, "Failed copying file '%ls' to '%ls'", szFromNull, szToNull);
 	ExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed copying file (operation aborted)");
-	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Copied '%ls' to '%ls'", szFromNull, szToNull);
 
 LExit:
 	ReleaseStr(szFromNull);
@@ -317,20 +321,20 @@ HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bI
 	opInfo.pFrom = szFromNull;
 	opInfo.fFlags = FOF_NO_UI;
 
+	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Deleting '%ls'", szFrom);
 	nRes = ::SHFileOperation(&opInfo);
 	if (bIgnoreMissing && (nRes == ERROR_FILE_NOT_FOUND) || (nRes == ERROR_PATH_NOT_FOUND))
 	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping deletion of '%ls' as it doesn't exist and marked to ignore missing", szFrom);
+		LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Skipping deletion of '%ls' as it doesn't exist and marked to ignore missing", szFrom);
 		ExitFunction1(hr = S_FALSE);
 	}
 	if (bIgnoreErrors && ((nRes != 0) || opInfo.fAnyOperationsAborted))
 	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed deleting '%ls'; Ignoring error (%i)", szFromNull, nRes);
+		LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Failed deleting '%ls'; Ignoring error (%i)", szFromNull, nRes);
 		ExitFunction1(hr = S_FALSE);
 	}
 	ExitOnNull((nRes == 0), hr, E_FAIL, "Failed deleting '%ls' (Error %i)", szFromNull, nRes);
 	ExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed deleting file (operation aborted)");
-	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Deleted '%ls'", szFrom);
 
 LExit:
 	ReleaseStr(szFromNull);

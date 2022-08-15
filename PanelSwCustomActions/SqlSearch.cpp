@@ -161,26 +161,26 @@ LRetry:
 			switch (promptResult)
 			{
 			case IDABORT:
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User aborted on failure to execute SQL query");
+				CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "User aborted on failure to execute SQL query");
 				hr = hrOp;
 				break;
 
 			case IDRETRY:
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose to retry on failure to execute SQL query");
+				CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "User chose to retry on failure to execute SQL query");
 				goto LRetry;
 
 			case IDIGNORE:
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User ignored failure to execute SQL query");
+				CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "User ignored failure to execute SQL query");
 				hr = S_FALSE;
 				ExitFunction();
 
 			case IDCANCEL:
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User canceled on failure to execute SQL query");
+				CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "User canceled on failure to execute SQL query");
 				ExitOnWin32Error(ERROR_INSTALL_USEREXIT, hr, "Cancelling");
 				break;
 
 			default: // Probably silent (result 0)
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failure to execute SQL query. Prompt result is 0x%08X", promptResult);
+				CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Failure to execute SQL query. Prompt result is 0x%08X", promptResult);
 				hr = hrOp;
 				break;
 			}

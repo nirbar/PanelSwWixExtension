@@ -120,7 +120,7 @@ extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 				ExitOnFailure(hr, "Bad Condition field");
 			}
 		}
-		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, "Executing regular expression query '%ls'", (LPCWSTR)szObfuscatedExpression);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, "Executing regular expression query '%ls'", (LPCWSTR)szObfuscatedExpression);
 
 		// Syntax flags
 		if (flags.s.match & MatchFlags::IgnoreCare)

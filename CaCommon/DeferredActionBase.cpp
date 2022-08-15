@@ -253,10 +253,12 @@ LExit:
 	return hr;
 }
 
-void CDeferredActionBase::LogUnformatted(LOGLEVEL level, PCSTR szFormat, ...)
+void CDeferredActionBase::LogUnformatted(LOGLEVEL level, bool bShowTime, PCSTR szFormat, ...)
 {
 	HRESULT hr = S_OK;
 	int nRes = 0;
+	LPWSTR szTime = nullptr;
+	LPWSTR szFormattedTime = nullptr;
 	LPWSTR szMessage = nullptr;
 	LPSTR szAnsiMessage = nullptr;
 	LPCSTR szLogName = nullptr;
@@ -295,27 +297,53 @@ void CDeferredActionBase::LogUnformatted(LOGLEVEL level, PCSTR szFormat, ...)
 		}
 	}
 
-	hRec = ::MsiCreateRecord(3);
+	if (bShowTime)
+	{
+		SYSTEMTIME sysTime;
+
+		::GetLocalTime(&sysTime); // Grab the time once to ensure both calls to GetTimeFormatW() require the same buffer size
+
+		nRes = ::GetTimeFormatW(LOCALE_INVARIANT, TIME_FORCE24HOURFORMAT, &sysTime, nullptr, nullptr, 0);
+		if (nRes)
+		{
+			if (SUCCEEDED(StrAlloc(&szTime, nRes)))
+			{
+				nRes = ::GetTimeFormatW(LOCALE_INVARIANT, TIME_FORCE24HOURFORMAT, &sysTime, nullptr, szTime, nRes);
+				if (nRes)
+				{
+					StrAllocFormatted(&szFormattedTime, L" (%ls)", szTime);
+				}
+			}
+		}
+	}
+
+	hRec = ::MsiCreateRecord(4);
 	ExitOnNullWithLastError(hRec, hr, "Failed to create record");
 
 	szLogName = WcaGetLogName();
 	if (szLogName && *szLogName)
 	{
-		hr = WcaSetRecordString(hRec, 0, L"[1]:  [2]");
+		hr = WcaSetRecordString(hRec, 0, L"[1][2]:  [3]");
 		ExitOnFailure(hr, "Failed to set log record");
-		
+
 		nRes = ::MsiRecordSetStringA(hRec, 1, szLogName);
 		ExitOnWin32Error(nRes, hr, "Failed to set log record");
-		
-		hr = WcaSetRecordString(hRec, 2, szMessage);
+
+		hr = WcaSetRecordString(hRec, 2, szFormattedTime ? szFormattedTime : L"");
+		ExitOnFailure(hr, "Failed to set log record");
+
+		hr = WcaSetRecordString(hRec, 3, szMessage);
 		ExitOnFailure(hr, "Failed to set log record");
 	}
 	else
 	{
-		hr = WcaSetRecordString(hRec, 0, L"[1]");
+		hr = WcaSetRecordString(hRec, 0, L"[1][2]");
 		ExitOnFailure(hr, "Failed to set log record");
-		
-		hr = WcaSetRecordString(hRec, 1, szMessage);
+
+		hr = WcaSetRecordString(hRec, 1, szFormattedTime ? szFormattedTime : L"");
+		ExitOnFailure(hr, "Failed to set log record");
+
+		hr = WcaSetRecordString(hRec, 2, szMessage);
 		ExitOnFailure(hr, "Failed to set log record");
 	}
 
@@ -323,6 +351,8 @@ void CDeferredActionBase::LogUnformatted(LOGLEVEL level, PCSTR szFormat, ...)
 
 LExit:
 
+	ReleaseStr(szTime);
+	ReleaseStr(szFormattedTime);
 	ReleaseStr(szMessage);
 	ReleaseMem(szAnsiMessage);
 	va_end(va);
