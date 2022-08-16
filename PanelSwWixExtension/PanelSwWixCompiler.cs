@@ -2472,14 +2472,6 @@ namespace PanelSw.Wix.Extensions
             {
                 Core.OnMessage(WixErrors.IllegalAttributeValueWithOtherAttribute(sourceLineNumbers, element.LocalName, "Wait", "no", "ErrorHandling"));
             }
-            if (((flags & ExecOnComponentFlags.Impersonate) == ExecOnComponentFlags.Impersonate) && string.IsNullOrEmpty(user))
-            {
-                Core.OnMessage(WixErrors.IllegalAttributeValueWithOtherAttribute(sourceLineNumbers, element.LocalName, "Impersonate", "yes", "User"));
-            }
-            if (((flags & ExecOnComponentFlags.Impersonate) != ExecOnComponentFlags.Impersonate) && !string.IsNullOrEmpty(user))
-            {
-                Core.OnMessage(WixErrors.IllegalAttributeValueWithOtherAttribute(sourceLineNumbers, element.LocalName, "Impersonate", "no", "User"));
-            }
 
             // ExitCode mapping
             foreach (XmlNode child in element.ChildNodes)
