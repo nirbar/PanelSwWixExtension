@@ -186,7 +186,7 @@ HRESULT CRestartLocalResources::DeferredExecute(const ::std::string& command)
 
     for (const std::string& fldr : details.folders())
     {
-        lstFolders.push_back(const_cast<LPWSTR>(reinterpret_cast<LPCWSTR>(fldr.c_str())));
+        lstFolders.push_back(const_cast<LPWSTR>((LPCWSTR)(LPVOID)fldr.data()));
         WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will Enumerate processes in '%ls'", lstFolders.back());
     }
 
