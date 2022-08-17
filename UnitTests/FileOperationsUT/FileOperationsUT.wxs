@@ -26,7 +26,7 @@
 
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component Id="Test" Guid="*">
-        <File Id="Test" Source="$(var.ProjectDir)Product.wxs" KeyPath="yes">
+        <File Id="Test" Source="$(sys.SOURCEFILEPATH)" KeyPath="yes">
           <CopyFile Id="DeleteMeDir" DestinationDirectory="DeleteMeDir"/>
         </File>
       </Component>

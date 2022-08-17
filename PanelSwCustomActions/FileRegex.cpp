@@ -117,8 +117,8 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 		{
 			CWixString tempFile;
 
-			hr = PathCreateTempFile(nullptr, L"RGX%05i.tmp", INFINITE, FILE_ATTRIBUTE_NORMAL, (LPWSTR*)tempFile, nullptr);
-			ExitOnFailure(hr, "Failed getting temporary file name");
+			hr = CFileOperations::MakeTemporaryName(szFilePath, L"RGX%05i.tmp", false, (LPWSTR*)tempFile);
+			ExitOnFailure(hr, "Failed getting temporary path for '%ls'", (LPCWSTR)szFilePath);
 
 			hr = rollbackCAD.AddMoveFile((LPCWSTR)tempFile, szFilePath);
 			ExitOnFailure(hr, "Failed creating custom action data for rollback action.");

@@ -73,9 +73,9 @@ extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
 			ExitOnFailure(hr, "Bad Condition field");
 		}
 
-		// Generate temp file name.
-		hr = PathCreateTempFile(nullptr, L"DLT%05i.tmp", INFINITE, FILE_ATTRIBUTE_NORMAL, (LPWSTR*)tempFile, nullptr);
-		ExitOnFailure(hr, "Failed getting temporary file name");
+		hr = CFileOperations::MakeTemporaryName(szFilePath, L"DLT%05i.tmp", false, (LPWSTR*)tempFile);
+		ExitOnFailure(hr, "Failed getting temporary path for '%ls'", (LPCWSTR)szFilePath);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will delete '%ls', using temporary backup in '%ls'", (LPCWSTR)szFilePath, (LPCWSTR)tempFile);
 
 		hr = rollbackCAD.AddDeleteFile((LPCWSTR)szFilePath, flags | CFileOperations::FileOperationsAttributes::IgnoreMissingPath); // Delete the target path. Done for case where the source is folder rather than file.
 		ExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
@@ -281,7 +281,7 @@ HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool
 	opInfo.pTo = szToNull;
 	opInfo.fFlags = FOF_NO_UI;
 
-	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Copying '%ls' to '%ls'", szFromNull, szToNull);
+	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Copying or moving '%ls' to '%ls'", szFromNull, szToNull);
 	nRes = ::SHFileOperation(&opInfo);
 	if (bIgnoreMissing && (nRes == ERROR_FILE_NOT_FOUND) || (nRes == ERROR_PATH_NOT_FOUND))
 	{
@@ -582,5 +582,49 @@ LExit:
 		::FindClose(hFind);
 	}
 
+	return hr;
+}
+
+//static 
+HRESULT CFileOperations::MakeTemporaryName(LPCWSTR szBackupOf, LPCWSTR szPrefix, bool bIsFolder, LPWSTR* pszTempName)
+{
+	HRESULT hr = S_OK;
+	CWixString szParentFolder;
+
+	if (szBackupOf && *szBackupOf)
+	{
+		hr = szParentFolder.Copy(szBackupOf);
+		ExitOnFailure(hr, "Failed copying string");
+
+		::PathRemoveBackslashW((LPWSTR)szParentFolder);
+		::PathRemoveFileSpecW((LPWSTR)szParentFolder);
+		if (szParentFolder.StrLen() < 3)
+		{
+			szParentFolder.Release();
+		}
+	}
+
+LRetry:
+	if (bIsFolder)
+	{
+		hr = PathCreateTempDirectory((LPCWSTR)szParentFolder, szPrefix, INFINITE, pszTempName);
+	}
+	else
+	{
+		hr = PathCreateTempFile((LPCWSTR)szParentFolder, szPrefix, INFINITE, FILE_ATTRIBUTE_NORMAL, pszTempName, nullptr);
+	}
+	if ((hr == E_PATHNOTFOUND) && szParentFolder.StrLen())
+	{
+		::PathRemoveBackslashW((LPWSTR)szParentFolder);
+		::PathRemoveFileSpecW((LPWSTR)szParentFolder);
+		if (szParentFolder.StrLen() < 3)
+		{
+			szParentFolder.Release();
+		}
+		goto LRetry;
+	}
+	ExitOnFailure(hr, "Failed getting temporary path in '%ls'", (LPCWSTR)szParentFolder);
+
+LExit:
 	return hr;
 }

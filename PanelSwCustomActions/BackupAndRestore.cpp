@@ -69,16 +69,9 @@ extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall)
 
 		// Generate temp file or folder name.
 		bIsFolder = ::PathIsDirectory(szPath);
-		if (bIsFolder) 
-		{
-			hr = PathCreateTempDirectory(nullptr, L"BNRD%04i.tmp", INFINITE, (LPWSTR*)szTempFile);
-			ExitOnFailure(hr, "Failed getting temporary folder name");
-		}
-		else
-		{
-			hr = PathCreateTempFile(nullptr, L"BNR%05i.tmp", INFINITE, FILE_ATTRIBUTE_NORMAL, (LPWSTR*)szTempFile, nullptr);
-			ExitOnFailure(hr, "Failed getting temporary file name");
-		}
+		hr = CFileOperations::MakeTemporaryName(szPath, L"BNR%05i.tmp", bIsFolder, (LPWSTR*)szTempFile);
+		ExitOnFailure(hr, "Failed getting temporary path for '%ls'", (LPCWSTR)szPath);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Backing up and '%ls' and will restore it later, using temporary path '%ls'", (LPCWSTR)szPath, (LPCWSTR)szTempFile);
 
 		hr = deferredCAD.CopyPath(szPath, szTempFile, false, bIgnoreMissing, flags & CFileOperations::FileOperationsAttributes::IgnoreErrors);
 		ExitOnFailure(hr, "Failed backing up '%ls'", (LPCWSTR)szPath);

@@ -514,9 +514,9 @@ HRESULT CUnzip::ExecuteOneUnzip(::com::panelsw::ca::UnzipDetails* pDetails)
 				{
 					WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Extraction of '%s' requires reboot", pathA.c_str());
 					bRes = true;
-
-					hr = PathCreateTempFile(nullptr, L"UZP%05i.tmp", INFINITE, FILE_ATTRIBUTE_NORMAL, &szSrcFile, nullptr);
-					ExitOnFailure(hr, "Failed creating temporary file");
+					
+					hr = CFileOperations::MakeTemporaryName(szDstFile, L"UZP%05i.tmp", false, &szSrcFile);
+					ExitOnFailure(hr, "Failed getting temporary path for '%hs'", pathA.c_str());
 
 					hr = StrAnsiAllocString(&szSrcFileA, szSrcFile, 0, CP_UTF8);
 					ExitOnFailure(hr, "Failed copying UTF-8 string");
