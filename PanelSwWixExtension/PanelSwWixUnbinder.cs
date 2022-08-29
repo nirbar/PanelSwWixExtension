@@ -35,7 +35,7 @@ namespace PanelSw.Wix.Extensions
             delayedTables.Add("PSW_ExecOn_ConsoleOutput");
             delayedTables.Add("PSW_ExecOnComponent_Environment");
             delayedTables.Add("PSW_ServiceConfig_Dependency");
-            
+
             IncludeWixTables(output, tableForeignKeys);
 
             // Include internal tables except those that will be resolved later
@@ -91,9 +91,68 @@ namespace PanelSw.Wix.Extensions
         private void IncludeWixTables(Output output, Dictionary<string, List<ForeignRelation>> tableForeignKeys)
         {
             Table propertyTable = output.Tables["Property"];
-          
+            Table componentTable = output.Tables["Component"];
+            Table directoryTable = output.Tables["Directory"];
+            Table userTable = output.Tables["User"];
+            Table fileShareTable = output.Tables["FileShare"];
+            Table groupTable = output.Tables["Group"];
+
             tableForeignKeys["AppSearch"] = new List<ForeignRelation>();
             tableForeignKeys["AppSearch"].Add(new ForeignRelation(0, propertyTable, 0));
+
+            // WixUtilExtension
+            tableForeignKeys["WixCloseApplication"] = new List<ForeignRelation>();
+            tableForeignKeys["WixRemoveFolderEx"] = new List<ForeignRelation>();
+            tableForeignKeys["WixRemoveFolderEx"].Add(new ForeignRelation(1, componentTable, 0));
+
+            tableForeignKeys["WixRestartResource"] = new List<ForeignRelation>();
+            tableForeignKeys["WixRestartResource"].Add(new ForeignRelation(1, componentTable, 0));
+
+            tableForeignKeys["FileShare"] = new List<ForeignRelation>();
+            tableForeignKeys["FileShare"].Add(new ForeignRelation(2, componentTable, 0));
+            tableForeignKeys["FileShare"].Add(new ForeignRelation(4, directoryTable, 0));
+            tableForeignKeys["FileShare"].Add(new ForeignRelation(5, userTable, 0));
+
+            tableForeignKeys["FileSharePermissions"] = new List<ForeignRelation>();
+            tableForeignKeys["FileSharePermissions"].Add(new ForeignRelation(0, fileShareTable, 0));
+
+            tableForeignKeys["Group"] = new List<ForeignRelation>();
+            tableForeignKeys["Group"].Add(new ForeignRelation(1, componentTable, 0));
+
+            tableForeignKeys["WixInternetShortcut"] = new List<ForeignRelation>();
+            tableForeignKeys["WixInternetShortcut"].Add(new ForeignRelation(1, componentTable, 0));
+            tableForeignKeys["WixInternetShortcut"].Add(new ForeignRelation(2, directoryTable, 0));
+
+            tableForeignKeys["PerformanceCategory"] = new List<ForeignRelation>();
+            tableForeignKeys["PerformanceCategory"].Add(new ForeignRelation(1, componentTable, 0));
+
+            tableForeignKeys["Perfmon"] = new List<ForeignRelation>();
+            tableForeignKeys["Perfmon"].Add(new ForeignRelation(0, componentTable, 0));
+
+            tableForeignKeys["PerfmonManifest"] = new List<ForeignRelation>();
+            tableForeignKeys["PerfmonManifest"].Add(new ForeignRelation(0, componentTable, 0));
+
+            tableForeignKeys["EventManifest"] = new List<ForeignRelation>();
+            tableForeignKeys["EventManifest"].Add(new ForeignRelation(0, componentTable, 0));
+
+            tableForeignKeys["SecureObjects"] = new List<ForeignRelation>();
+            tableForeignKeys["SecureObjects"].Add(new ForeignRelation(5, componentTable, 0));
+
+            tableForeignKeys["ServiceConfig"] = new List<ForeignRelation>();
+            tableForeignKeys["ServiceConfig"].Add(new ForeignRelation(1, componentTable, 0));
+
+            tableForeignKeys["User"] = new List<ForeignRelation>();
+            tableForeignKeys["User"].Add(new ForeignRelation(1, componentTable, 0));
+
+            tableForeignKeys["UserGroup"] = new List<ForeignRelation>();
+            tableForeignKeys["UserGroup"].Add(new ForeignRelation(0, userTable, 0));
+            tableForeignKeys["UserGroup"].Add(new ForeignRelation(1, groupTable, 0));
+
+            tableForeignKeys["XmlFile"] = new List<ForeignRelation>();
+            tableForeignKeys["XmlFile"].Add(new ForeignRelation(6, componentTable, 0));
+
+            tableForeignKeys["XmlConfig"] = new List<ForeignRelation>();
+            tableForeignKeys["XmlConfig"].Add(new ForeignRelation(7, componentTable, 0));
         }
 
         private void ResolveAppSearch(Output output)
@@ -232,7 +291,7 @@ namespace PanelSw.Wix.Extensions
         private void ResolveDrLocatorTree(Output output, Row drRow)
         {
             string key = drRow.Fields[0].Data as string;
-         
+
             // File?
             Table signatureTable = output.Tables["Signature"];
             if (signatureTable != null)
