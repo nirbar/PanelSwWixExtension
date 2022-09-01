@@ -41,7 +41,7 @@ namespace PanelSw.Wix.Extensions
             // Include internal tables except those that will be resolved later
             foreach (TableDefinition td in tableDefinitions_)
             {
-                if (!td.IsUnreal && !td.IsBootstrapperApplicationData && !delayedTables.Contains(td.Name))
+                if (!tableForeignKeys.ContainsKey(td.Name) && !delayedTables.Contains(td.Name) && !td.IsUnreal && !td.IsBootstrapperApplicationData)
                 {
                     tableForeignKeys[td.Name] = new List<ForeignRelation>();
                 }
@@ -97,11 +97,16 @@ namespace PanelSw.Wix.Extensions
             Table fileShareTable = output.Tables["FileShare"];
             Table groupTable = output.Tables["Group"];
 
+            // Windows Installer tables
             tableForeignKeys["AppSearch"] = new List<ForeignRelation>();
             tableForeignKeys["AppSearch"].Add(new ForeignRelation(0, propertyTable, 0));
 
+            tableForeignKeys["ServiceConfig"] = new List<ForeignRelation>();
+            tableForeignKeys["ServiceConfig"].Add(new ForeignRelation(1, componentTable, 0));
+
             // WixUtilExtension
             tableForeignKeys["WixCloseApplication"] = new List<ForeignRelation>();
+
             tableForeignKeys["WixRemoveFolderEx"] = new List<ForeignRelation>();
             tableForeignKeys["WixRemoveFolderEx"].Add(new ForeignRelation(1, componentTable, 0));
 
@@ -137,9 +142,6 @@ namespace PanelSw.Wix.Extensions
 
             tableForeignKeys["SecureObjects"] = new List<ForeignRelation>();
             tableForeignKeys["SecureObjects"].Add(new ForeignRelation(5, componentTable, 0));
-
-            tableForeignKeys["ServiceConfig"] = new List<ForeignRelation>();
-            tableForeignKeys["ServiceConfig"].Add(new ForeignRelation(1, componentTable, 0));
 
             tableForeignKeys["User"] = new List<ForeignRelation>();
             tableForeignKeys["User"].Add(new ForeignRelation(1, componentTable, 0));
