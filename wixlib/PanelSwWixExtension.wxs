@@ -257,6 +257,12 @@
     <CustomAction Id="Rollback_Deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="Rollback" Execute="deferred" Return="check" HideTarget="yes" />
   </Fragment>
 
+  <!-- PromptCancel -->
+  <Fragment>
+    <CustomAction Id="PromptCancel_Immediate" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="PromptCancel" Execute="immediate" Return="check" />
+    <CustomAction Id="PromptCancel_Deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="PromptCancel" Execute="deferred" Return="check" HideTarget="yes" />
+  </Fragment>
+
   <!-- TaskScheduler -->
   <Fragment>
     <CustomAction Id="TaskScheduler" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="TaskScheduler" Execute="immediate" Return="check" />

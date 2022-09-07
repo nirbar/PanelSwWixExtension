@@ -62,6 +62,17 @@ public:
 		return *this;
 	}
 
+	WCHAR& operator[](size_t i)
+	{
+		static WCHAR errChr;
+		if ((i < 0) || (i >= Capacity()))
+		{
+			return errChr;
+		}
+
+		return _pS[i];
+	}
+
 #pragma endregion
 
 	HRESULT Allocate(DWORD dwSize)
@@ -352,7 +363,7 @@ public:
 		return 0;
 	}
 
-	DWORD StrLen() const
+	size_t StrLen() const
 	{
 		if (_pS != nullptr)
 		{

@@ -73,27 +73,30 @@ extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
 			ExitOnFailure(hr, "Bad Condition field");
 		}
 
+		// Trim slashes
+		for (size_t i = szFilePath.StrLen() - 1; ((i > 1) && ((szFilePath[i] == L'\\') || (szFilePath[i] == L'/'))); --i)
+		{
+			szFilePath[i] = NULL;
+		}
+
 		hr = CFileOperations::MakeTemporaryName(szFilePath, L"DLT%05i.tmp", false, (LPWSTR*)tempFile);
 		ExitOnFailure(hr, "Failed getting temporary path for '%ls'", (LPCWSTR)szFilePath);
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will delete '%ls', using temporary backup in '%ls'", (LPCWSTR)szFilePath, (LPCWSTR)tempFile);
 
-		hr = rollbackCAD.AddDeleteFile((LPCWSTR)szFilePath, flags | CFileOperations::FileOperationsAttributes::IgnoreMissingPath); // Delete the target path. Done for case where the source is folder rather than file.
+		hr = rollbackCAD.AddDeleteFile((LPCWSTR)szFilePath, CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath); // Delete the target path. Done for case where the source is folder rather than file.
 		ExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
 
 		hr = rollbackCAD.AddMoveFile((LPCWSTR)tempFile, (LPCWSTR)szFilePath, flags);
 		ExitOnFailure(hr, "Failed creating custom action data for rollback action.");
 
 		// Add deferred data to move file szFilePath -> tempFile.
-		hr = deferredFileCAD.AddDeleteFile((LPCWSTR)tempFile, flags); // Delete the temporary file. Done for case where the source is folder rather than file.
+		hr = deferredFileCAD.AddDeleteFile((LPCWSTR)tempFile, CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath); // Delete the temporary file. Done for case where the source is folder rather than file.
 		ExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
 
 		hr = deferredFileCAD.AddMoveFile((LPCWSTR)szFilePath, (LPCWSTR)tempFile, flags);
 		ExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
 
-		hr = deferredFileCAD.AddDeleteFile((LPCWSTR)szFilePath, CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath); // Workaround- if the "file" is actually a folder, then MoveFile only moves the contents without the folder itself
-		ExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
-
-		hr = commitCAD.AddDeleteFile((LPCWSTR)tempFile, flags);
+		hr = commitCAD.AddDeleteFile((LPCWSTR)tempFile, CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath);
 		ExitOnFailure(hr, "Failed creating custom action data for commit action.");
 	}
 
@@ -255,27 +258,21 @@ HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool
 	LPWSTR szFromNull = nullptr;
 	LPWSTR szToNull = nullptr;
 
-	if (::PathIsDirectory(szFrom))
-	{
-		hr = StrAllocString(&szFromNull, szFrom, 0);
-		ExitOnFailure(hr, "Failed allocating string");
-
-		::PathRemoveBackslash(szFromNull);
-
-		hr = StrAllocConcatFormatted(&szFromNull, L"\\*%c%c", L'\0', L'\0');
-		ExitOnFailure(hr, "Failed formatting string");
-	}
-	else
-	{
-		hr = StrAllocFormatted(&szFromNull, L"%s%c%c", szFrom, L'\0', L'\0');
-		ExitOnFailure(hr, "Failed formatting string");
-	}
+	hr = StrAllocFormatted(&szFromNull, L"%s%c%c", szFrom, L'\0', L'\0');
+	ExitOnFailure(hr, "Failed formatting string");
 
 	hr = StrAllocFormatted(&szToNull, L"%s%c%c", szTo, L'\0', L'\0');
 	ExitOnFailure(hr, "Failed formatting string");
 
-	// Remove trailing backslashes (fails on Windows XP)
-	::PathRemoveBackslash(szToNull);
+	// Remove trailing slashes
+	for (size_t i = ::wcslen(szFromNull) - 1; ((i > 1) && ((szFromNull[i] == L'\\') || (szFromNull[i] == L'/'))); --i)
+	{
+		szFromNull[i] = NULL;
+	}
+	for (size_t i = ::wcslen(szToNull) - 1; ((i > 1) && ((szToNull[i] == L'\\') || (szToNull[i] == L'/'))); --i)
+	{
+		szToNull[i] = NULL;
+	}
 
 	// Prepare 
 	::memset(&opInfo, 0, sizeof(opInfo));
@@ -286,7 +283,8 @@ HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool
 
 	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "%s '%ls' to '%ls'", bMove ? "Moving" : "Copying", szFromNull, szToNull);
 	nRes = ::SHFileOperation(&opInfo);
-	if (bIgnoreMissing && (nRes == ERROR_FILE_NOT_FOUND) || (nRes == ERROR_PATH_NOT_FOUND))
+	//TODO On Windows XP the error code is generic (0x402) when the source file is absent
+	if (bIgnoreMissing && ((nRes == ERROR_FILE_NOT_FOUND) || (nRes == ERROR_PATH_NOT_FOUND)))
 	{
 		LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Skipping copy '%ls' as it doesn't exist and marked to ignore missing", szFrom);
 		ExitFunction1(hr = S_FALSE);
