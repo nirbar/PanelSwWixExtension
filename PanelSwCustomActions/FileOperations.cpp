@@ -90,6 +90,9 @@ extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
 		hr = deferredFileCAD.AddMoveFile((LPCWSTR)szFilePath, (LPCWSTR)tempFile, flags);
 		ExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
 
+		hr = deferredFileCAD.AddDeleteFile((LPCWSTR)szFilePath, CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath); // Workaround- if the "file" is actually a folder, then MoveFile only moves the contents without the folder itself
+		ExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
+
 		hr = commitCAD.AddDeleteFile((LPCWSTR)tempFile, flags);
 		ExitOnFailure(hr, "Failed creating custom action data for commit action.");
 	}
@@ -281,7 +284,7 @@ HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool
 	opInfo.pTo = szToNull;
 	opInfo.fFlags = FOF_NO_UI;
 
-	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Copying or moving '%ls' to '%ls'", szFromNull, szToNull);
+	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "%s '%ls' to '%ls'", bMove ? "Moving" : "Copying", szFromNull, szToNull);
 	nRes = ::SHFileOperation(&opInfo);
 	if (bIgnoreMissing && (nRes == ERROR_FILE_NOT_FOUND) || (nRes == ERROR_PATH_NOT_FOUND))
 	{
