@@ -8,9 +8,6 @@
 using namespace ::com::panelsw::ca;
 using namespace google::protobuf;
 
-#define DeletePath_QUERY L"SELECT `Id`, `Path`, `Flags`, `Condition` FROM `PSW_DeletePath`"
-enum DeletePathQuery { Id = 1, Path, Flags, Condition };
-
 extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
@@ -33,8 +30,8 @@ extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_DeletePath'. Have you authored 'PanelSw:DeletePath' entries in WiX code?");
 
 	// Execute view
-	hr = WcaOpenExecuteView(DeletePath_QUERY, &hView);
-	ExitOnFailure(hr, "Failed to execute SQL query '%ls'.", DeletePath_QUERY);
+	hr = WcaOpenExecuteView(L"SELECT `Path`, `Flags`, `Condition` FROM `PSW_DeletePath` ORDER BY `Order`", &hView);
+	ExitOnFailure(hr, "Failed to execute SQL query");
 
 	// Iterate records
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
@@ -42,17 +39,15 @@ extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		CWixString szId, szFilePath, szCondition;
+		CWixString szFilePath, szCondition;
 		CWixString tempFile;
 		int flags = 0;
 
-		hr = WcaGetRecordString(hRecord, DeletePathQuery::Id, (LPWSTR*)szId);
-		ExitOnFailure(hr, "Failed to get Id.");
-		hr = WcaGetRecordFormattedString(hRecord, DeletePathQuery::Path, (LPWSTR*)szFilePath);
+		hr = WcaGetRecordFormattedString(hRecord, 1, (LPWSTR*)szFilePath);
 		ExitOnFailure(hr, "Failed to get Path.");
-		hr = WcaGetRecordInteger(hRecord, DeletePathQuery::Flags, &flags);
+		hr = WcaGetRecordInteger(hRecord, 2, &flags);
 		ExitOnFailure(hr, "Failed to get Flags.");
-		hr = WcaGetRecordString(hRecord, DeletePathQuery::Condition, (LPWSTR*)szCondition);
+		hr = WcaGetRecordString(hRecord, 3, (LPWSTR*)szCondition);
 		ExitOnFailure(hr, "Failed to get Condition.");
 
 		// Test condition
@@ -143,6 +138,7 @@ HRESULT CFileOperations::AddCopyFile(LPCWSTR szFrom, LPCWSTR szTo, int flags)
 
 	pDetails->set_ignoreerrors(flags & FileOperationsAttributes::IgnoreErrors);
 	pDetails->set_ignoremissing(flags & FileOperationsAttributes::IgnoreMissingPath);
+	pDetails->set_onlyifempty(flags & FileOperationsAttributes::OnlyIfEmpty);
 
 	pAny = pCmd->mutable_details();
 	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
@@ -174,6 +170,7 @@ HRESULT CFileOperations::AddMoveFile(LPCWSTR szFrom, LPCWSTR szTo, int flags)
 
 	pDetails->set_ignoreerrors(flags & FileOperationsAttributes::IgnoreErrors);
 	pDetails->set_ignoremissing(flags & FileOperationsAttributes::IgnoreMissingPath);
+	pDetails->set_onlyifempty(flags & FileOperationsAttributes::OnlyIfEmpty);
 
 	pAny = pCmd->mutable_details();
 	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
@@ -202,6 +199,7 @@ HRESULT CFileOperations::AddDeleteFile(LPCWSTR szPath, int flags)
 	pDetails->set_from(szPath, WSTR_BYTE_SIZE(szPath));
 	pDetails->set_ignoreerrors(flags & FileOperationsAttributes::IgnoreErrors);
 	pDetails->set_ignoremissing(flags & FileOperationsAttributes::IgnoreMissingPath);
+	pDetails->set_onlyifempty(flags & FileOperationsAttributes::OnlyIfEmpty);
 
 	pAny = pCmd->mutable_details();
 	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
@@ -237,12 +235,12 @@ HRESULT CFileOperations::DeferredExecute(const ::std::string& command)
 
 	if (szFrom && szTo)
 	{
-		hr = CopyPath(szFrom, szTo, details.move(), details.ignoremissing(), details.ignoreerrors());
+		hr = CopyPath(szFrom, szTo, details.move(), details.ignoremissing(), details.ignoreerrors(), details.onlyifempty());
 		ExitOnFailure(hr, "Failed to copy file");
 	}
 	else 
 	{
-		hr = DeletePath(szFrom, details.ignoremissing(), details.ignoreerrors());
+		hr = DeletePath(szFrom, details.ignoremissing(), details.ignoreerrors(), details.onlyifempty());
 		ExitOnFailure(hr, "Failed to delete file");
 	}
 
@@ -250,13 +248,27 @@ LExit:
 	return hr;
 }
 
-HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool bIgnoreMissing, bool bIgnoreErrors)
+HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool bIgnoreMissing, bool bIgnoreErrors, bool bOnlyIfEmpty)
 {
 	SHFILEOPSTRUCT opInfo;
 	HRESULT hr = S_OK;
 	INT nRes = ERROR_SUCCESS;
 	LPWSTR szFromNull = nullptr;
 	LPWSTR szToNull = nullptr;
+	LPWSTR* pszFiles = nullptr;
+	UINT nFiles = 0;
+
+	if (bMove && bOnlyIfEmpty && ::PathIsDirectory(szFrom))
+	{
+		hr = ListFiles(szFrom, L"*", true, &pszFiles, &nFiles);
+		ExitOnFailure(hr, "Failed testing wether folder '%ls' is empty", szFrom);
+
+		if (nFiles > 0)
+		{
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skip moving folder '%ls' because it contains %u files", szFrom, nFiles);
+			ExitFunction();
+		}
+	}
 
 	hr = StrAllocFormatted(&szFromNull, L"%s%c%c", szFrom, L'\0', L'\0');
 	ExitOnFailure(hr, "Failed formatting string");
@@ -298,23 +310,35 @@ HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool
 	ExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed copying file (operation aborted)");
 
 LExit:
+	ReleaseStrArray(pszFiles, nFiles);
 	ReleaseStr(szFromNull);
 	ReleaseStr(szToNull);
 	return hr;
 }
 
-HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bIgnoreErrors)
+HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bIgnoreErrors, bool bOnlyIfEmpty)
 {
 	SHFILEOPSTRUCT opInfo;
 	HRESULT hr = S_OK;
 	INT nRes = ERROR_SUCCESS;
 	LPWSTR szFromNull = nullptr;
+	LPWSTR* pszFiles = nullptr;
+	UINT nFiles = 0;
+
+	if (bOnlyIfEmpty && ::PathIsDirectory(szFrom))
+	{
+		hr = ListFiles(szFrom, L"*", true, &pszFiles, &nFiles);
+		ExitOnFailure(hr, "Failed testing wether folder '%ls' is empty", szFrom);
+
+		if (nFiles > 0)
+		{
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skip deleting folder '%ls' because it contains %u files", szFrom, nFiles);
+			ExitFunction();
+		}
+	}
 
 	hr = StrAllocFormatted(&szFromNull, L"%s%c%c", szFrom, L'\0', L'\0');
 	ExitOnFailure(hr, "Failed formatting string");
-
-	// Remove trailing backslashes (fails on Windows XP)
-	::PathRemoveBackslash(szFromNull);
 
 	// Prepare 
 	::memset(&opInfo, 0, sizeof(opInfo));
@@ -338,6 +362,7 @@ HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bI
 	ExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed deleting file (operation aborted)");
 
 LExit:
+	ReleaseStrArray(pszFiles, nFiles);
 	ReleaseStr(szFromNull);
 
 	return hr;

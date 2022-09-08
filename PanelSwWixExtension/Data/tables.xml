@@ -100,6 +100,7 @@
     <columnDefinition name="Path" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="Flags" type="number" length="2" minValue="0" maxValue="127" />
     <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
+    <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
   </tableDefinition>
 
   <tableDefinition name="PSW_TaskScheduler">

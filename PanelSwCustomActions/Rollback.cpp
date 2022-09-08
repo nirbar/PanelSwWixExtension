@@ -19,7 +19,7 @@ extern "C" UINT __stdcall PromptCancel(MSIHANDLE hInstall)
 	hRec = ::MsiCreateRecord(1);
 	ExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
 
-	hr = WcaSetRecordString(hRec, 0, L"Cancel?");
+	hr = WcaSetRecordInteger(hRec, 1, 1602);
 	ExitOnFailure(hr, "Failed setting record string");
 
 	dwRes = WcaProcessMessage((INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_ERROR | MB_YESNO | MB_DEFBUTTON1 | MB_ICONERROR), hRec);

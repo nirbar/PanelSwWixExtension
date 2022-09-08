@@ -1362,7 +1362,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[
-Delete folder or file specified by a path.
+Delete folder or file specified by a path. DeletePath entries are processed in order of source line number.
 
 \par Example:
 \code
@@ -1396,6 +1396,11 @@ Delete folder or file specified by a path.
           <xs:attribute name="IgnoreErrors" type="wix:YesNoType" use="optional">
             <xs:annotation>
               <xs:documentation>Do not fail the installation if the file operation fails. Default is no.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="OnlyIfEmpty" type="wix:YesNoType" use="optional">
+            <xs:annotation>
+              <xs:documentation>If the Path is a folder and that folder contains no files recursively, then delete it. Default is no.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>

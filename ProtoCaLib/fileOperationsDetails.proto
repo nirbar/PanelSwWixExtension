@@ -10,4 +10,5 @@ message FileOperationsDetails{
 	bool move = 3;
 	bool ignoreMissing = 4;
 	bool ignoreErrors = 5;
+	bool onlyIfEmpty = 6;
 }

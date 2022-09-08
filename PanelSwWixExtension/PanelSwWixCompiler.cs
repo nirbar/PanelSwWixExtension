@@ -4773,8 +4773,9 @@ namespace PanelSw.Wix.Extensions
         [Flags]
         private enum DeletePathFlags
         {
-            IgnoreMissing = 1
-            , IgnoreErrors = 2 * IgnoreMissing
+            IgnoreMissing = 1,
+            IgnoreErrors = 2 * IgnoreMissing,
+            OnlyIfEmpty = 2 * IgnoreErrors,
         }
 
         private void ParseDeletePath(XmlNode node)
@@ -4784,32 +4785,39 @@ namespace PanelSw.Wix.Extensions
             string filepath = null;
             string condition = null;
             DeletePathFlags flags = 0;
+            int order = 1000000000 + GetLineNumber(sourceLineNumbers);
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
                 if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
                 {
-                    switch (attrib.LocalName.ToLower())
+                    switch (attrib.LocalName)
                     {
-                        case "id":
+                        case "Id":
                             id = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "path":
+                        case "Path":
                             filepath = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "ignoremissing":
+                        case "IgnoreMissing":
                             if (Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("yes", StringComparison.OrdinalIgnoreCase))
                             {
                                 flags |= DeletePathFlags.IgnoreMissing;
                             }
                             break;
-                        case "ignoreerrors":
+                        case "IgnoreErrors":
                             if (Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("yes", StringComparison.OrdinalIgnoreCase))
                             {
                                 flags |= DeletePathFlags.IgnoreErrors;
                             }
                             break;
-                        case "condition":
+                        case "OnlyIfEmpty":
+                            if (Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            {
+                                flags |= DeletePathFlags.OnlyIfEmpty;
+                            }
+                            break;
+                        case "Condition":
                             condition = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
 
@@ -4862,6 +4870,7 @@ namespace PanelSw.Wix.Extensions
                 row[1] = filepath;
                 row[2] = (int)flags;
                 row[3] = condition;
+                row[4] = order;
             }
         }
 

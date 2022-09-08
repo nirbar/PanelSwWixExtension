@@ -10,6 +10,7 @@ public:
 	{
 		IgnoreMissingPath = 1
 		, IgnoreErrors = 2 * IgnoreMissingPath
+		, OnlyIfEmpty = 2 * IgnoreErrors
 	};
 
 	CFileOperations() : CDeferredActionBase("FileOperations") { }
@@ -18,8 +19,8 @@ public:
 	HRESULT AddMoveFile(LPCWSTR szFrom, LPCWSTR szTo, int flags = 0);
 	HRESULT AddDeleteFile(LPCWSTR szFile, int flags = 0);
 
-	HRESULT CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool bIgnoreMissing, bool bIgnoreErrors);
-	HRESULT DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bIgnoreErrors);
+	HRESULT CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool bIgnoreMissing, bool bIgnoreErrors, bool bOnlyIfEmpty);
+	HRESULT DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bIgnoreErrors, bool bOnlyIfEmpty);
 
 	static ::com::panelsw::ca::FileRegexDetails::FileEncoding DetectEncoding(const void* pFileContent, DWORD dwSize);
 	static HRESULT PathToDevicePath(LPCWSTR szPath, LPWSTR* pszDevicePath);
