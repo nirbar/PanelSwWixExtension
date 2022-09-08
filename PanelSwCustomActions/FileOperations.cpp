@@ -78,7 +78,7 @@ extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed getting temporary path for '%ls'", (LPCWSTR)szFilePath);
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will delete '%ls', using temporary backup in '%ls'", (LPCWSTR)szFilePath, (LPCWSTR)tempFile);
 
-		hr = rollbackCAD.AddDeleteFile((LPCWSTR)szFilePath, CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath); // Delete the target path. Done for case where the source is folder rather than file.
+		hr = rollbackCAD.AddDeleteFile((LPCWSTR)szFilePath, flags | CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath); // Delete the target path. Done for case where the source is folder rather than file.
 		ExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
 
 		hr = rollbackCAD.AddMoveFile((LPCWSTR)tempFile, (LPCWSTR)szFilePath, flags);

@@ -20,7 +20,7 @@
     <file src="..\build\bin\Release\DeferredExePackage\DeferredExePackage.exe" target="tools\lib"/>
     <file src=".\Xsd\PanelSwWixExtension.xsd" target="content"/>
     <file src="..\LICENSE" target="LICENSE" />
-    <file src="..\README.md" target="README.md" />
+    <file src="..\README.md" target="README" />
 
     <!-- lib -->
     <file src="..\build\bin\Release\CaCommon\CaCommon.lib" target="tools\lib\v141_xp"/>
