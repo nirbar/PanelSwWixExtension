@@ -56,13 +56,13 @@ extern "C" UINT __stdcall ConcatFiles(MSIHANDLE hInstall)
 			continue;
 		}
 
-		hr = szFilePathFormat.Format(L"[#%s]", (LPCWSTR)szRootFileId);
+		hr = szFilePathFormat.Format(L"[#%ls]", (LPCWSTR)szRootFileId);
 		ExitOnFailure(hr, "Failed to format string.");
 
 		hr = szRootFilePath.MsiFormat((LPCWSTR)szFilePathFormat);
 		ExitOnFailure(hr, "Failed to format string.");
 
-		hr = szFilePathFormat.Format(L"[#%s]", (LPCWSTR)szSplitFileId);
+		hr = szFilePathFormat.Format(L"[#%ls]", (LPCWSTR)szSplitFileId);
 		ExitOnFailure(hr, "Failed to format string.");
 
 		hr = szSplitFilePath.MsiFormat((LPCWSTR)szFilePathFormat);
@@ -151,7 +151,7 @@ HRESULT CConcatFiles::ExecuteOne(LPCWSTR szRootFile, LPCWSTR szSplitFile)
 		hr = S_FALSE;
 		ExitFunction();
 	}
-	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Concatenting file '%ls' to '%ls'", szSplitFile, szRootFile);
+	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Concatenting file '%ls' to '%ls'", szSplitFile, szRootFile);
 
 	pBuff = (BYTE*)MemAlloc(dwBuffSize, FALSE);
 	ExitOnNull(pBuff, hr, E_FAIL, "Failed to allocate memory");

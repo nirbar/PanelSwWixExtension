@@ -270,10 +270,10 @@ HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool
 		}
 	}
 
-	hr = StrAllocFormatted(&szFromNull, L"%s%c%c", szFrom, L'\0', L'\0');
+	hr = StrAllocFormatted(&szFromNull, L"%ls%lc%lc", szFrom, L'\0', L'\0');
 	ExitOnFailure(hr, "Failed formatting string");
 
-	hr = StrAllocFormatted(&szToNull, L"%s%c%c", szTo, L'\0', L'\0');
+	hr = StrAllocFormatted(&szToNull, L"%ls%lc%lc", szTo, L'\0', L'\0');
 	ExitOnFailure(hr, "Failed formatting string");
 
 	// Remove trailing slashes
@@ -293,17 +293,17 @@ HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool
 	opInfo.pTo = szToNull;
 	opInfo.fFlags = FOF_NO_UI;
 
-	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "%s '%ls' to '%ls'", bMove ? "Moving" : "Copying", szFromNull, szToNull);
+	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"%ls '%ls' to '%ls'", bMove ? L"Moving" : L"Copying", szFromNull, szToNull);
 	nRes = ::SHFileOperation(&opInfo);
 	//TODO On Windows XP the error code is generic (0x402) when the source file is absent
 	if (bIgnoreMissing && ((nRes == ERROR_FILE_NOT_FOUND) || (nRes == ERROR_PATH_NOT_FOUND)))
 	{
-		LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Skipping copy '%ls' as it doesn't exist and marked to ignore missing", szFrom);
+		LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Skipping copy '%ls' as it doesn't exist and marked to ignore missing", szFrom);
 		ExitFunction1(hr = S_FALSE);
 	}
 	if (bIgnoreErrors && ((nRes != 0) || opInfo.fAnyOperationsAborted))
 	{
-		LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Failed Copying '%ls' to '%ls'; Ignoring error (%i)", szFromNull, szToNull, nRes);
+		LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Failed Copying '%ls' to '%ls'; Ignoring error (%i)", szFromNull, szToNull, nRes);
 		ExitFunction1(hr = S_FALSE);
 	}
 	ExitOnWin32Error(nRes, hr, "Failed copying file '%ls' to '%ls'", szFromNull, szToNull);
@@ -337,7 +337,7 @@ HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bI
 		}
 	}
 
-	hr = StrAllocFormatted(&szFromNull, L"%s%c%c", szFrom, L'\0', L'\0');
+	hr = StrAllocFormatted(&szFromNull, L"%ls%lc%lc", szFrom, L'\0', L'\0');
 	ExitOnFailure(hr, "Failed formatting string");
 
 	// Prepare 
@@ -346,16 +346,16 @@ HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bI
 	opInfo.pFrom = szFromNull;
 	opInfo.fFlags = FOF_NO_UI;
 
-	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Deleting '%ls'", szFrom);
+	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Deleting '%ls'", szFrom);
 	nRes = ::SHFileOperation(&opInfo);
 	if (bIgnoreMissing && (nRes == ERROR_FILE_NOT_FOUND) || (nRes == ERROR_PATH_NOT_FOUND))
 	{
-		LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Skipping deletion of '%ls' as it doesn't exist and marked to ignore missing", szFrom);
+		LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Skipping deletion of '%ls' as it doesn't exist and marked to ignore missing", szFrom);
 		ExitFunction1(hr = S_FALSE);
 	}
 	if (bIgnoreErrors && ((nRes != 0) || opInfo.fAnyOperationsAborted))
 	{
-		LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Failed deleting '%ls'; Ignoring error (%i)", szFromNull, nRes);
+		LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Failed deleting '%ls'; Ignoring error (%i)", szFromNull, nRes);
 		ExitFunction1(hr = S_FALSE);
 	}
 	ExitOnNull((nRes == 0), hr, E_FAIL, "Failed deleting '%ls' (Error %i)", szFromNull, nRes);
@@ -494,7 +494,7 @@ HRESULT CFileOperations::PathToDevicePath(LPCWSTR szPath, LPWSTR* pszDevicePath)
 	dwRes = ::QueryDosDevice((LPCWSTR)szDrive, szDosName, ARRAYSIZE(szDosName));
 	ExitOnNullWithLastError(dwRes, hr, "Failed getting device path for drive '%ls'", (LPCWSTR)szDrive);
 
-	hr = szDevicePath.Format(L"%s%s", szDosName, szVolumeEnd + 1);
+	hr = szDevicePath.Format(L"%ls%ls", szDosName, szVolumeEnd + 1);
 	ExitOnFailure(hr, "Failed formatting device path");
 
 	*pszDevicePath = szDevicePath.Detach();
@@ -522,7 +522,7 @@ HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRe
 	// Start with subfolders, no pattern filtering
 	if (bRecursive)
 	{
-		hr = StrAllocFormatted(&szFullPattern, L"%s*", szFullFolder);
+		hr = StrAllocFormatted(&szFullPattern, L"%ls*", szFullFolder);
 		ExitOnFailure(hr, "Failed allocating string");
 
 		hFind = ::FindFirstFile(szFullPattern, &FindFileData);
@@ -543,7 +543,7 @@ HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRe
 			{
 				ReleaseNullStr(szCurrFile);
 
-				hr = StrAllocFormatted(&szCurrFile, L"%s%s", szFullFolder, FindFileData.cFileName);
+				hr = StrAllocFormatted(&szCurrFile, L"%ls%ls", szFullFolder, FindFileData.cFileName);
 				ExitOnFailure(hr, "Failed allocating string");
 
 				hr = ListFiles(szCurrFile, szPattern, bRecursive, pszFiles, pcFiles);
@@ -561,12 +561,12 @@ HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRe
 	ReleaseNullStr(szFullPattern);
 	if (szPattern && *szPattern)
 	{
-		hr = StrAllocFormatted(&szFullPattern, L"%s%s", szFullFolder, szPattern);
+		hr = StrAllocFormatted(&szFullPattern, L"%ls%ls", szFullFolder, szPattern);
 		ExitOnFailure(hr, "Failed allocating string");
 	}
 	else
 	{
-		hr = StrAllocFormatted(&szFullPattern, L"%s*", szFullFolder);
+		hr = StrAllocFormatted(&szFullPattern, L"%ls*", szFullFolder);
 		ExitOnFailure(hr, "Failed allocating string");
 	}
 
@@ -590,7 +590,7 @@ HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRe
 
 		ReleaseNullStr(szCurrFile);
 
-		hr = StrAllocFormatted(&szCurrFile, L"%s%s", szFullFolder, FindFileData.cFileName);
+		hr = StrAllocFormatted(&szCurrFile, L"%ls%ls", szFullFolder, FindFileData.cFileName);
 		ExitOnFailure(hr, "Failed allocating string");
 
 		hr = StrArrayAllocString(pszFiles, pcFiles, szCurrFile, 0);

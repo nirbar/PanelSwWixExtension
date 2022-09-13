@@ -88,7 +88,7 @@ extern "C" UINT __stdcall TopShelf(MSIHANDLE hInstall)
 			continue;
 		}
 
-		hr = fileFormat.Format(L"[#%s]", (LPCWSTR)fileId);
+		hr = fileFormat.Format(L"[#%ls]", (LPCWSTR)fileId);
 		ExitOnFailure(hr, "Failed formatting string");
 
 		hr = file.MsiFormat(fileFormat);
@@ -336,16 +336,13 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 	hr = PathEnsureQuoted(&file, FALSE);
 	ExitOnFailure(hr, "Failed ensuring file path '%ls' is quoted", file);
 
-	hr = pCommandLine->Format(L"%s %s"
-		, file
-		, pDetails->install() ? L"install" : L"uninstall"
-	);
+	hr = pCommandLine->Format(L"%ls %ls", file, pDetails->install() ? L"install" : L"uninstall");
 	ExitOnFailure(hr, "Failed formatting string");
 
 	instance = (LPCWSTR)(LPVOID)pDetails->instance().data();
 	if (instance && *instance)
 	{
-		hr = pCommandLine->AppnedFormat(L" -instance \"%s\"", instance);
+		hr = pCommandLine->AppnedFormat(L" -instance \"%ls\"", instance);
 		ExitOnFailure(hr, "Failed formatting string");
 	}
 
@@ -358,19 +355,19 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 	serviceName = (LPCWSTR)(LPVOID)pDetails->servicename().data();
 	if (serviceName && *serviceName)
 	{
-		hr = pCommandLine->AppnedFormat(L" -servicename \"%s\"", serviceName);
+		hr = pCommandLine->AppnedFormat(L" -servicename \"%ls\"", serviceName);
 		ExitOnFailure(hr, "Failed formatting string");
 	}
 	displayName = (LPCWSTR)(LPVOID)pDetails->displayname().data();
 	if (displayName && *displayName)
 	{
-		hr = pCommandLine->AppnedFormat(L" -displayname \"%s\"", displayName);
+		hr = pCommandLine->AppnedFormat(L" -displayname \"%ls\"", displayName);
 		ExitOnFailure(hr, "Failed formatting string");
 	}
 	description = (LPCWSTR)(LPVOID)pDetails->description().data();
 	if (description && *description)
 	{
-		hr = pCommandLine->AppnedFormat(L" -description \"%s\"", description);
+		hr = pCommandLine->AppnedFormat(L" -description \"%ls\"", description);
 		ExitOnFailure(hr, "Failed formatting string");
 	}
 
@@ -379,7 +376,7 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 	case TopShelfServiceDetails_ServiceAccount::TopShelfServiceDetails_ServiceAccount_custom:
 		userName = (LPCWSTR)(LPVOID)pDetails->username().data();
 
-		hr = pCommandLine->AppnedFormat(L" -username \"%s\"", userName);
+		hr = pCommandLine->AppnedFormat(L" -username \"%ls\"", userName);
 		ExitOnFailure(hr, "Failed formatting string");
 
 		// Password will be added later, when formatting command line for log so it will be hidden.
@@ -451,7 +448,7 @@ LCommandForLog: // Dump command line to log without password.
 			hr = logCommand.AppnedFormat(L" -password \"*********\"");
 			ExitOnFailure(hr, "Failed formatting string");
 
-			hr = pCommandLine->AppnedFormat(L" -password \"%s\"", password);
+			hr = pCommandLine->AppnedFormat(L" -password \"%ls\"", password);
 			ExitOnFailure(hr, "Failed formatting string");
 		}
 	}

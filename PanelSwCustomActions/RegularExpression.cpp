@@ -120,7 +120,7 @@ extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 				ExitOnFailure(hr, "Bad Condition field");
 			}
 		}
-		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, "Executing regular expression query '%ls'", (LPCWSTR)szObfuscatedExpression);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Executing regular expression query '%ls'", (LPCWSTR)szObfuscatedExpression);
 
 		// Syntax flags
 		if (flags.s.match & MatchFlags::IgnoreCare)
@@ -164,7 +164,7 @@ extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 				{
 					hr = E_FAIL;
 				}
-				ExitOnFailure(hr, "Failed evaluating regular expression. %s", ex.what());
+				ExitOnFailure(hr, "Failed evaluating regular expression. %hs", ex.what());
 			}
 		}
 	}
@@ -197,7 +197,7 @@ static HRESULT SearchUnicode(LPCWSTR szProperty, LPCWSTR szExpression, LPCWSTR s
 		{
 			hr = E_FAIL;
 		}
-		ExitOnFailure(hr, "Failed evaluating regular expression. %s", ex.what());
+		ExitOnFailure(hr, "Failed evaluating regular expression. %hs", ex.what());
 	}
 
 	if (!bRes)
@@ -206,7 +206,7 @@ static HRESULT SearchUnicode(LPCWSTR szProperty, LPCWSTR szExpression, LPCWSTR s
 		ExitFunction1(hr = S_FALSE);
 	}
 
-	hr = sPropName.Format(L"%s_COUNT", szProperty);
+	hr = sPropName.Format(L"%ls_COUNT", szProperty);
 	ExitOnFailure(hr, "Failed formatting string");
 
 	hr = WcaSetIntProperty(szProperty, results.size());
@@ -220,7 +220,7 @@ static HRESULT SearchUnicode(LPCWSTR szProperty, LPCWSTR szExpression, LPCWSTR s
 	{
 		const std::sub_match<LPCWSTR>& match = results[i];
 
-		hr = sPropName.Format(L"%s_%Iu", szProperty, i);
+		hr = sPropName.Format(L"%ls_%Iu", szProperty, i);
 		ExitOnFailure(hr, "Failed formatting string");
 
 		hr = WcaSetProperty((LPCWSTR)sPropName, match.str().c_str());
@@ -258,7 +258,7 @@ static HRESULT SearchMultibyte(LPCWSTR szProperty, LPCWSTR szExpression, LPCSTR 
 		{
 			hr = E_FAIL;
 		}
-		ExitOnFailure(hr, "Failed evaluating regular expression. %s", ex.what());
+		ExitOnFailure(hr, "Failed evaluating regular expression. %hs", ex.what());
 	}
 
 	if (!bRes)
@@ -267,7 +267,7 @@ static HRESULT SearchMultibyte(LPCWSTR szProperty, LPCWSTR szExpression, LPCSTR 
 		ExitFunction1(hr = S_FALSE);
 	}
 
-	hr = szCntProp.Format(L"%s_COUNT", szProperty);
+	hr = szCntProp.Format(L"%ls_COUNT", szProperty);
 	ExitOnFailure(hr, "Failed formatting string");
 
 	hr = WcaSetIntProperty(szProperty, results.size());
@@ -285,7 +285,7 @@ static HRESULT SearchMultibyte(LPCWSTR szProperty, LPCWSTR szExpression, LPCSTR 
 		ExitOnFailure(hr, "Failed formatting ansi string");
 
 		hr = ::MsiSetPropertyA(WcaGetInstallHandle(), szPropertyA, match.str().c_str());
-		ExitOnFailure(hr, "Failed setting property '%s'", szPropertyA);
+		ExitOnFailure(hr, "Failed setting property '%hs'", szPropertyA);
 
 		ReleaseNullMem(szPropertyA);
 	}

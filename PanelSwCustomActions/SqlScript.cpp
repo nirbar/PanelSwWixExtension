@@ -222,7 +222,7 @@ static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, CWixString* ps
 	DWORD cbData = 0;
 	FileRegexDetails::FileEncoding encoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_None;
 
-	hr = szMsiQuery.Format(L"SELECT `Data` FROM `Binary` WHERE `Name`='%s'", szBinaryKey);
+	hr = szMsiQuery.Format(L"SELECT `Data` FROM `Binary` WHERE `Name`='%ls'", szBinaryKey);
 	ExitOnFailure(hr, "Failed to format string");
 
 	hr = WcaOpenExecuteView((LPCWSTR)szMsiQuery, &hView);
@@ -271,7 +271,7 @@ static HRESULT ReplaceStrings(CWixString* pszQuery, LPCWSTR szQueryId)
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
 
-	hr = szMsiQuery.Format(L"SELECT `Text`, `Replacement` FROM `PSW_SqlScript_Replacements` WHERE `SqlScript_`='%s' ORDER BY `Order`", szQueryId);
+	hr = szMsiQuery.Format(L"SELECT `Text`, `Replacement` FROM `PSW_SqlScript_Replacements` WHERE `SqlScript_`='%ls' ORDER BY `Order`", szQueryId);
 	ExitOnFailure(hr, "Failed to format string");
 
 	hr = WcaOpenExecuteView((LPCWSTR)szMsiQuery, &hView);
@@ -560,7 +560,7 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 	szInstance = (LPCWSTR)(LPVOID)details.instance().data();
 	szDatabase = (LPCWSTR)(LPVOID)details.database().data();
 
-	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Executing %i SQL scripts", details.scripts_size());
+	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Executing %i SQL scripts", details.scripts_size());
 
 	// ActionData: "Executing SQL scripts on Server '[1]' Instance '[2]' Database '[3]'"
 	hActionData = ::MsiCreateRecord(3);
@@ -605,7 +605,7 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 				break;
 
 			case ErrorHandling::ignore:
-				LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Ignoring SQL script failure 0x%08X", hr);
+				LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Ignoring SQL script failure 0x%08X", hr);
 				hr = S_FALSE;
 				break;
 
@@ -633,17 +633,17 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 				case IDABORT:
 				case IDCANCEL:
 				default: // Probably silent (result 0)
-					LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "User aborted on SQL failure (error code 0x%08X)", hrOp);
+					LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"User aborted on SQL failure (error code 0x%08X)", hrOp);
 					hr = hrOp;
 					break;
 
 				case IDRETRY:
-					LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "User chose to retry on SQL failure (error code 0x%08X)", hrOp);
+					LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"User chose to retry on SQL failure (error code 0x%08X)", hrOp);
 					hr = S_OK;
 					goto LRetry;
 
 				case IDIGNORE:
-					LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "User ignored SQL failure (error code 0x%08X)", hrOp);
+					LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"User ignored SQL failure (error code 0x%08X)", hrOp);
 					hr = S_FALSE;
 					break;
 				}

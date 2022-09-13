@@ -68,14 +68,7 @@ extern "C" UINT __stdcall Telemetry(MSIHANDLE hInstall)
 		hr = WcaGetRecordString(hRecord, TelemetryQuery::Condition, (LPWSTR*)szCondition);
 		ExitOnFailure(hr, "Failed to get Condition.");
 
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Will post telemetry: Id=%ls\nUrl=%ls\nPage=%ls\nData=%ls\nFlags=%i\nCondition=%ls"
-			, (LPCWSTR)szId
-			, (LPCWSTR)szUrl
-			, (LPCWSTR)szPage
-			, (LPCWSTR)szData
-			, (LPCWSTR)nFlags
-			, (LPCWSTR)szCondition
-		);
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Will post telemetry: Id=%ls\nUrl=%ls\nPage=%ls\nData=%ls\nFlags=%i\nCondition=%ls", (LPCWSTR)szId, (LPCWSTR)szUrl, (LPCWSTR)szPage, (LPCWSTR)szData, nFlags, (LPCWSTR)szCondition);
 
 		// Test condition
 		MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, szCondition);
@@ -190,12 +183,7 @@ HRESULT CTelemetry::DeferredExecute(const ::std::string& command)
 	szData = (LPCWSTR)(LPVOID)details.data().data();
 	szMethod = (LPCWSTR)(LPVOID)details.method().data();
 
-	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Posting telemetry: Url=%ls Page=%ls Method=%ls Data=%ls Secure=%i"
-		, szUrl
-		, szPage
-		, szMethod
-		, szData
-		, details.secure());
+	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Posting telemetry: Url=%ls Page=%ls Method=%ls Data=%ls Secure=%i", szUrl, szPage, szMethod, szData, details.secure());
 
 	hr = Post(szUrl, szPage, szMethod, szData, details.secure());
 	ExitOnFailure(hr, "Failed to post Data '%ls' to URL '%ls%ls'", szData, szUrl, szPage);
@@ -282,7 +270,7 @@ HRESULT CTelemetry::Post(LPCWSTR szUrl, LPCWSTR szPage, LPCWSTR szMethod, LPCWST
 		bResults = ::WinHttpReadData(hRequest, (LPVOID)pszOutBuffer, dwSize, &dwDownloaded);
 		ExitOnNullWithLastError(bResults, hr, "Failed reading data");
 		ExitOnNull(dwDownloaded, hr, E_FAIL, "Failed reading data (dwDownloaded=0)");
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "%s", pszOutBuffer);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "%hs", pszOutBuffer);
 
 	} while (dwSize > 0);
 

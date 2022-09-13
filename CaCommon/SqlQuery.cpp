@@ -45,7 +45,7 @@ HRESULT CSqlQuery::ExecuteQuery(const CSqlConnection &sqlConn, LPCWSTR szQuery, 
 
     if (SQL_SUCCEEDED(SQLRowCount(hStmt_, &nRows)) && (nRows >= 0))
     {
-        WcaLog(LOGLEVEL::LOGMSG_STANDARD, "%i rows were affected by query", nRows);
+        WcaLog(LOGLEVEL::LOGMSG_STANDARD, "%l rows were affected by query", nRows);
     }
 
     sr = SQLNumResultCols(hStmt_, &nColumns);
@@ -58,7 +58,7 @@ HRESULT CSqlQuery::ExecuteQuery(const CSqlConnection &sqlConn, LPCWSTR szQuery, 
     }
     if (nColumns > 1)
     {
-        WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Query yielded %i columns. Returning first result only", nColumns);
+        WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Query yielded %h columns. Returning first result only", nColumns);
     }
 
     sr = SQLFetch(hStmt_);
@@ -83,7 +83,7 @@ HRESULT CSqlQuery::ExecuteQuery(const CSqlConnection &sqlConn, LPCWSTR szQuery, 
             break;
         }
 
-        hr = szResult.AppnedFormat(L"%s", szChunk); // Wary of results containing '%' specifiers
+        hr = szResult.AppnedFormat(L"%ls", (LPCWSTR)szChunk); // Wary of results containing '%' specifiers
         ExitOnFailure(hr, "Failed allocting memory");
 
         if ((nDataSize != SQL_NO_TOTAL) && (nDataSize <= DATA_CHUNK_SIZE))

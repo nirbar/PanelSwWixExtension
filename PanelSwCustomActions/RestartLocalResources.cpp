@@ -235,7 +235,7 @@ HRESULT CRestartLocalResources::Execute(const std::list<LPWSTR>& lstFolders)
         ExitFunction();
 
     default:
-        LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Aborting processes");
+        LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Aborting processes");
         break;
     }
 
@@ -260,7 +260,7 @@ HRESULT CRestartLocalResources::Execute(const std::list<LPWSTR>& lstFolders)
         if (er == WAIT_TIMEOUT)
         {
             er = ERROR_SUCCESS;
-            LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Terminating process '%ls' (%u)", prcId.second, prcId.first);
+            LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Terminating process '%ls' (%u)", prcId.second, prcId.first);
 
             ::TerminateProcess(hProcess, 0);
             er = ::WaitForSingleObject(hProcess, 1000);
@@ -328,7 +328,7 @@ BOOL CALLBACK CRestartLocalResources::KillWindowsProc(HWND hwnd, LPARAM lParam)
         DWORD dwRes = 0;
         HRESULT hr = S_OK;
 
-        LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Closing window belonging to process %u", dwMyProcId);
+        LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Closing window belonging to process %u", dwMyProcId);
 
         bRes = ::SendMessageTimeoutW(hwnd, WM_QUERYENDSESSION, 0, ENDSESSION_CLOSEAPP | ENDSESSION_CRITICAL, SMTO_BLOCK | SMTO_ABORTIFHUNG, 10000, &dwRes);
         ExitOnNullWithLastError(bRes, hr, "Process did not respond timely to query-end-session message");

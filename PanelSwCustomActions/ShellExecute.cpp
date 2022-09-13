@@ -185,8 +185,7 @@ HRESULT CShellExecute::DeferredExecute(const ::std::string& command)
 	nShow = details.show();
 	bWait = details.wait();
 
-	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "ShellExecute: Target='%ls' Args='%ls' Verb='%ls' WorkingDir='%ls' Show=%i Wait=%i"
-		, szTarget, szArgs, szVerb, szWorkingDir, nShow, bWait);
+	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "ShellExecute: Target='%ls' Args='%ls' Verb='%ls' WorkingDir='%ls' Show=%i Wait=%i", szTarget, szArgs, szVerb, szWorkingDir, nShow, bWait);
 
 	hr = Execute(szTarget, szArgs, szVerb, szWorkingDir, nShow, bWait);
 	ExitOnFailure(hr, "Failed to execute \"%ls\" %ls", szTarget, szArgs);

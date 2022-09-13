@@ -1,5 +1,6 @@
 #include "DeferredActionBase.h"
 #include "WixString.h"
+#include <strsafe.h>
 #include <memutil.h>
 #include <wcawow64.h>
 using namespace ::com::panelsw::ca;
@@ -99,12 +100,12 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToEx
 		hr = mapFunc(cmd.handler().c_str(), &pExecutor);
 		if (bIsRollback && FAILED(hr))
 		{
-			WcaLogError(hr, "Failed to get CDeferredActionBase for '%s'", cmd.handler().c_str());
+			WcaLogError(hr, "Failed to get CDeferredActionBase for '%hs'", cmd.handler().c_str());
 			hrErr = hr;
 			hr = S_OK;
 			goto LContinue;
 		}
-		ExitOnFailure(hr, "Failed to get CDeferredActionBase for '%s'", cmd.handler().c_str());
+		ExitOnFailure(hr, "Failed to get CDeferredActionBase for '%hs'", cmd.handler().c_str());
 
 		// Execute
 		hr = pExecutor->DeferredExecute(cmd.details());
@@ -253,39 +254,42 @@ LExit:
 	return hr;
 }
 
-void CDeferredActionBase::LogUnformatted(LOGLEVEL level, bool bShowTime, PCSTR szFormat, ...)
+void CDeferredActionBase::LogUnformatted(LOGLEVEL level, bool bShowTime, LPCWSTR szFormat, ...)
 {
 	HRESULT hr = S_OK;
 	int nRes = 0;
 	LPWSTR szTime = nullptr;
 	LPWSTR szFormattedTime = nullptr;
 	LPWSTR szMessage = nullptr;
-	LPSTR szAnsiMessage = nullptr;
 	LPCSTR szLogName = nullptr;
-	va_list va;
+	va_list va = nullptr;
 	size_t nSize = 0;
 	PMSIHANDLE hRec;
 
-	va_start(va, szFormat);
-
-	nSize = ::_vscprintf(szFormat, va);
-	if (nSize == 0)
+	nSize = 256;
+	do
 	{
-		ExitFunction();
-	}
-	++nSize;
+		nSize *= 2;
+		if (nSize > STRSAFE_MAX_CCH) // Print a truncated message
+		{
+			hr = S_OK;
+			break;
+		}
 
-	szAnsiMessage = reinterpret_cast<char*>(MemAlloc(nSize, TRUE));
-	ExitOnNullWithLastError(szAnsiMessage, hr, "Failed to allocate memory");
+		if (va)
+		{
+			va_end(va);
+		}
 
-	nRes = ::vsprintf_s(szAnsiMessage, nSize, szFormat, va);
-	if (nRes < 0)
-	{
-		ExitFunction();
-	}
+		va_start(va, szFormat);
+		ReleaseNullStr(szMessage);
 
-	hr = StrAllocStringAnsi(&szMessage, szAnsiMessage, 0, CP_UTF8);
-	ExitOnFailure(hr, "Failed to format string");
+		hr = StrAlloc(&szMessage, nSize);
+		ExitOnFailure(hr, "Failed to allocate memory");
+
+		hr = ::StringCchVPrintfW(szMessage, nSize, szFormat, va);
+	} while (hr == STRSAFE_E_INSUFFICIENT_BUFFER);
+	ExitOnFailure(hr, "Failed to format log message");
 
 	// Replace non-printable characters with spaces
 	for (LPWSTR szCurr = szMessage; szCurr && *szCurr; ++szCurr)
@@ -354,8 +358,10 @@ LExit:
 	ReleaseStr(szTime);
 	ReleaseStr(szFormattedTime);
 	ReleaseStr(szMessage);
-	ReleaseMem(szAnsiMessage);
-	va_end(va);
+	if (va)
+	{
+		va_end(va);
+	}
 	return;
 }
 

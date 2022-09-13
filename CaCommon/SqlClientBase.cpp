@@ -44,7 +44,7 @@ HRESULT CSqlClientBase::LogDiagnosticRecord(SQLHANDLE hHandle, SQLSMALLINT hType
         {
             if (*pszText)
             {
-                StrAllocConcatFormatted(pszText, L"\n%s", wzMessage);
+                StrAllocConcatFormatted(pszText, L"\n%ls", wzMessage);
             }
             else
             {

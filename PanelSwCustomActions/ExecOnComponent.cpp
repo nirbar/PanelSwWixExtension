@@ -127,7 +127,7 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 			CWixString szReplaceMe;
 			LPCWSTR szExtension = nullptr;
 
-			hr = szSubQuery.Format(L"SELECT `Data` FROM `Binary` WHERE `Name`='%s'", (LPCWSTR)szBinary);
+			hr = szSubQuery.Format(L"SELECT `Data` FROM `Binary` WHERE `Name`='%ls'", (LPCWSTR)szBinary);
 			ExitOnFailure(hr, "Failed to format string");
 
 			hr = WcaOpenExecuteView((LPCWSTR)szSubQuery, &hSubView);
@@ -154,7 +154,7 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 				ExitOnNullWithLastError(dwRes, hr, "Failed renaming file extension '%ls' to '%ls'", szTempFile, szExtension);
 			}
 
-			hr = szReplaceMe.Format(L"{*%s}", (LPCWSTR)szBinary);
+			hr = szReplaceMe.Format(L"{*%ls}", (LPCWSTR)szBinary);
 			ExitOnFailure(hr, "Failed to format string");
 
 			hr = szCommandFormat.ReplaceAll((LPCWSTR)szReplaceMe, szTempFile);
@@ -183,7 +183,7 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		// Impersonate a user?
 		if (!userId.IsNullOrEmpty())
 		{
-			hr = szSubQuery.Format(L"SELECT `Domain`, `Name`, `Password` FROM `User` WHERE `User`='%s'", (LPCWSTR)userId);
+			hr = szSubQuery.Format(L"SELECT `Domain`, `Name`, `Password` FROM `User` WHERE `User`='%ls'", (LPCWSTR)userId);
 			ExitOnFailure(hr, "Failed to format string");
 
 			hr = WcaOpenExecuteView((LPCWSTR)szSubQuery, &hSubView);
@@ -207,7 +207,7 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed expanding command");
 
 		// Get exit code map (i.e. map exit code 1 to success)
-		hr = szSubQuery.Format(L"SELECT `From`, `To` FROM `PSW_ExecOnComponent_ExitCode` WHERE `ExecOnId_`='%s'", (LPCWSTR)szId);
+		hr = szSubQuery.Format(L"SELECT `From`, `To` FROM `PSW_ExecOnComponent_ExitCode` WHERE `ExecOnId_`='%ls'", (LPCWSTR)szId);
 		ExitOnFailure(hr, "Failed to format string");
 
 		hr = WcaOpenExecuteView((LPCWSTR)szSubQuery, &hSubView);
@@ -228,7 +228,7 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		}
 
 		// Custom environment variables
-		hr = szSubQuery.Format(L"SELECT `Name`, `Value` FROM `PSW_ExecOnComponent_Environment` WHERE `ExecOnId_`='%s'", (LPCWSTR)szId);
+		hr = szSubQuery.Format(L"SELECT `Name`, `Value` FROM `PSW_ExecOnComponent_Environment` WHERE `ExecOnId_`='%ls'", (LPCWSTR)szId);
 		ExitOnFailure(hr, "Failed to format string");
 
 		hr = WcaOpenExecuteView((LPCWSTR)szSubQuery, &hSubView);
@@ -252,7 +252,7 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		}
 
 		// Get exit code map (i.e. map exit code 1 to success)
-		hr = szSubQuery.Format(L"SELECT `Expression`, `Flags`, `ErrorHandling`, `PromptText` FROM `PSW_ExecOn_ConsoleOutput` WHERE `ExecOnId_`='%s'", (LPCWSTR)szId);
+		hr = szSubQuery.Format(L"SELECT `Expression`, `Flags`, `ErrorHandling`, `PromptText` FROM `PSW_ExecOn_ConsoleOutput` WHERE `ExecOnId_`='%ls'", (LPCWSTR)szId);
 		ExitOnFailure(hr, "Failed to format string");
 
 		hr = WcaOpenExecuteView((LPCWSTR)szSubQuery, &hSubView);
@@ -471,7 +471,7 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedC
 
 	if (nFlags & Flags::BeforeStopServices)
 	{
-		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, "Will execute command '%ls' before StopServices", szObfuscatedCommand);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Will execute command '%ls' before StopServices", szObfuscatedCommand);
 		if (nFlags & Flags::Impersonate)
 		{
 			hr = pBeforeStopImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
@@ -484,7 +484,7 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedC
 	}
 	if (nFlags & Flags::AfterStopServices)
 	{
-		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, "Will execute command '%ls' after StopServices", szObfuscatedCommand);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Will execute command '%ls' after StopServices", szObfuscatedCommand);
 		if (nFlags & Flags::Impersonate)
 		{
 			hr = pAfterStopImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
@@ -497,7 +497,7 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedC
 	}
 	if (nFlags & Flags::BeforeStartServices)
 	{
-		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, "Will execute command '%ls' before StartServices", szObfuscatedCommand, (ErrorHandling)errorHandling);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Will execute command '%ls' before StartServices", szObfuscatedCommand);
 		if (nFlags & Flags::Impersonate)
 		{
 			hr = pBeforeStartImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
@@ -510,7 +510,7 @@ HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedC
 	}
 	if (nFlags & Flags::AfterStartServices)
 	{
-		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, "Will execute command '%ls' after StartServices", szObfuscatedCommand, (ErrorHandling)errorHandling);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Will execute command '%ls' after StartServices", szObfuscatedCommand);
 		if (nFlags & Flags::Impersonate)
 		{
 			hr = pAfterStartImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
@@ -626,7 +626,7 @@ HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command)
 		::SetCurrentDirectory(szWorkingDirectory);
 	}
 
-	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Executing '%ls'", szObfuscatedCommand);
+	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Executing '%ls'", szObfuscatedCommand);
 
 	// ActionData: "Executing [1]"
 	hActionData = ::MsiCreateRecord(1);
@@ -705,7 +705,7 @@ LRetry:
 		hr = ProcWaitForCompletion(hProc, INFINITE, &exitCode);
 		if (SUCCEEDED(hr))
 		{
-			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, "Process exited with code %u", exitCode);
+			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Process exited with code %u", exitCode);
 		}
 	}
 	if (FAILED(hr))
@@ -888,9 +888,9 @@ HRESULT CExecOnComponent::LogProcessOutput(HANDLE hStdErrOut, LPWSTR* pszText /*
 		}
 		while (szLogEnd && *szLogEnd)
 		{
-			char szFormat[20];
+			WCHAR szFormat[20];
 
-			::sprintf_s<sizeof(szFormat)>(szFormat, "%%.%dls", (szLogEnd - (szLog + dwLogStart)));
+			::wprintf_s(szFormat, L"%%.%dls", (szLogEnd - (szLog + dwLogStart)));
 			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, szFormat, szLog + dwLogStart);
 
 			// Go past \n or \r\n
@@ -931,7 +931,7 @@ HRESULT CExecOnComponent::LogProcessOutput(HANDLE hStdErrOut, LPWSTR* pszText /*
 	// Print any text that didn't end with a new line
 	if (szLog && (szLog[dwLogStart] != NULL))
 	{
-		LogUnformatted(LOGMSG_STANDARD, true, "%ls", szLog + dwLogStart);
+		LogUnformatted(LOGMSG_STANDARD, true, L"%ls", szLog + dwLogStart);
 	}
 
 	// Return full log to the caller
@@ -966,7 +966,7 @@ HRESULT CExecOnComponent::SearchStdOut(LPCWSTR szStdOut, const ExecOnDetails& de
 			match_results<LPCWSTR> results;
 
 			bRes = regex_search(szStdOut, results, rx);
-			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, "Regex '%ls' search yielded %i matches", (LPCWSTR)(LPVOID)console.obfuscatedregex().data(), results.size());
+			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Regex '%ls' search yielded %u matches", (LPCWSTR)(LPVOID)console.obfuscatedregex().data(), results.size());
 			if ((bRes && results.size()) != console.onmatch())
 			{
 				continue;
@@ -979,7 +979,7 @@ HRESULT CExecOnComponent::SearchStdOut(LPCWSTR szStdOut, const ExecOnDetails& de
 			{
 				hr = E_FAIL;
 			}
-			ExitOnFailure(hr, "Failed evaluating regular expression. %s", ex.what());
+			ExitOnFailure(hr, "Failed evaluating regular expression. %hs", ex.what());
 		}
 
 		switch (console.errorhandling())
@@ -1076,7 +1076,7 @@ HRESULT CExecOnComponent::SetEnvironment(const ::google::protobuf::Map<std::stri
 
 		if (szName && *szName && szValue && *szValue)
 		{
-			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, "Setting custom environment variable '%ls' to '%ls'", szName, szValue);
+			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Setting custom environment variable '%ls' to '%ls'", szName, szValue);
 
 			bRes = ::SetEnvironmentVariable(szName, szValue);
 			ExitOnNullWithLastError(bRes, hr, "Failed setting environment variable '%ls'", (LPCWSTR)szName);

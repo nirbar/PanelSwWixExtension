@@ -101,10 +101,10 @@ extern "C" UINT __stdcall AccountNames(MSIHANDLE hInstall)
 
 		if (domainName.StrLen() > 0)
 		{
-			hr = fullName.Format(L"%s\\%s", (LPCWSTR)domainName, (LPCWSTR)accountName);
+			hr = fullName.Format(L"%ls\\%ls", (LPCWSTR)domainName, (LPCWSTR)accountName);
 			ExitOnFailure(hr, "Failed formatting string");
 
-			hr = property.Format(L"%s_DOMAIN", sidPair.second);
+			hr = property.Format(L"%ls_DOMAIN", sidPair.second);
 			ExitOnFailure(hr, "Failed formatting string");
 
 			hr = WcaSetProperty(property, (LPCWSTR)domainName);
@@ -116,7 +116,7 @@ extern "C" UINT __stdcall AccountNames(MSIHANDLE hInstall)
 			ExitOnFailure(hr, "Failed copying string");
 		}
 
-		hr = property.Format(L"%s_NAME", sidPair.second);
+		hr = property.Format(L"%ls_NAME", sidPair.second);
 		ExitOnFailure(hr, "Failed formatting string");
 
 		hr = WcaSetProperty(property, (LPCWSTR)accountName);

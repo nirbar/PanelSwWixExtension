@@ -358,7 +358,7 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 				file.setFileName(szEntryName);
 				ReleaseNullMem(szEntryName);
 
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Adding '%s' as '%s' to zip file '%s'", file.getFileName().c_str(), fileName.getFileName().c_str(), zipFileA.c_str());
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Adding '%hs' as '%hs' to zip file '%hs'", file.getFileName().c_str(), fileName.getFileName().c_str(), zipFileA.c_str());
 				pZip->addFile(file, fileName);
 
 				//TODO Set extra time fields, once POCO support getting the entry of the added file.
@@ -375,12 +375,12 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 		{
 			hr = E_FAIL;
 		}
-		ExitOnFailure(hr, "Failed zipping file. %s", ex.displayText().c_str());
+		ExitOnFailure(hr, "Failed zipping file. %hs", ex.displayText().c_str());
 	}
 	catch (std::exception ex)
 	{
 		hr = E_FAIL;
-		ExitOnFailure(hr, "Failed zipping file. %s", ex.what());
+		ExitOnFailure(hr, "Failed zipping file. %hs", ex.what());
 	}
 	catch (...)
 	{
@@ -437,7 +437,7 @@ HRESULT CUnzip::ExecuteOneUnzip(::com::panelsw::ca::UnzipDetails* pDetails)
 	{
 		Poco::UnicodeConverter::toUTF8(targetFolderW, targetFolderA);
 		Poco::UnicodeConverter::toUTF8(zipFileW, zipFileA);
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Extracting zip file '%s' to '%s'", zipFileA.c_str(), targetFolderA.c_str());
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Extracting zip file '%hs' to '%hs'", zipFileA.c_str(), targetFolderA.c_str());
 
 		zipFileStream = new std::ifstream(zipFileA, std::ios::binary);
 		ExitOnNull(zipFileStream, hr, E_FAIL, "Failed allocating file stream");
@@ -462,7 +462,7 @@ HRESULT CUnzip::ExecuteOneUnzip(::com::panelsw::ca::UnzipDetails* pDetails)
 				}
 				else
 				{
-					WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File '%s' is directly in ZIP root so 'SkipRoot' does not apply to it", file.c_str());
+					WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File '%hs' is directly in ZIP root so 'SkipRoot' does not apply to it", file.c_str());
 				}
 			}
 
@@ -484,14 +484,14 @@ HRESULT CUnzip::ExecuteOneUnzip(::com::panelsw::ca::UnzipDetails* pDetails)
 				}
 
 				std::string dirA = dir.toString(Poco::Path::Style::PATH_WINDOWS);
-				WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating sub-folder '%s'", dirA.c_str());
+				WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating sub-folder '%hs'", dirA.c_str());
 				bRes = ::CreateDirectoryA(dirA.c_str(), nullptr);
-				ExitOnNullWithLastError((bRes || (::GetLastError() == ERROR_ALREADY_EXISTS)), hr, "Failed creating folder '%s'", dirA.c_str());
+				ExitOnNullWithLastError((bRes || (::GetLastError() == ERROR_ALREADY_EXISTS)), hr, "Failed creating folder '%hs'", dirA.c_str());
 			}
 
 			if (it->second.isDirectory())
 			{
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Creating folder '%s'", pathA.c_str());
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Creating folder '%hs'", pathA.c_str());
 				::CreateDirectoryA(pathA.c_str(), nullptr); // Ignore failure to create empty folders. Folders with files will fail when extracting the files.
 				continue;
 			}
@@ -499,7 +499,7 @@ HRESULT CUnzip::ExecuteOneUnzip(::com::panelsw::ca::UnzipDetails* pDetails)
 			if (FileExistsEx(szDstFile, nullptr))
 			{
 				hr = ShouldOverwriteFile(szDstFile, pDetails->flags());
-				ExitOnFailure(hr, "Failed determining whether or not to overwrite file '%s'", pathA.c_str());
+				ExitOnFailure(hr, "Failed determining whether or not to overwrite file '%hs'", pathA.c_str());
 
 				if (hr == S_FALSE)
 				{
@@ -507,12 +507,12 @@ HRESULT CUnzip::ExecuteOneUnzip(::com::panelsw::ca::UnzipDetails* pDetails)
 				}
 
 				bRes = ::SetFileAttributesA(pathA.c_str(), FILE_ATTRIBUTE_NORMAL);
-				ExitOnNullWithLastError(bRes, hr, "Failed clearing attributes of '%s'", pathA.c_str());
+				ExitOnNullWithLastError(bRes, hr, "Failed clearing attributes of '%hs'", pathA.c_str());
 
 				bRes = ::DeleteFileA(pathA.c_str());
 				if (!bRes && ((::GetLastError() == ERROR_ACCESS_DENIED) || (::GetLastError() == ERROR_SHARING_VIOLATION) || (::GetLastError() == ERROR_LOCK_VIOLATION)))
 				{
-					WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Extraction of '%s' requires reboot", pathA.c_str());
+					WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Extraction of '%hs' requires reboot", pathA.c_str());
 					bRes = true;
 					
 					hr = CFileOperations::MakeTemporaryName(szDstFile, L"UZP%05i.tmp", false, &szSrcFile);
@@ -529,17 +529,17 @@ HRESULT CUnzip::ExecuteOneUnzip(::com::panelsw::ca::UnzipDetails* pDetails)
 					hr = WcaDeferredActionRequiresReboot();
 					ExitOnFailure(hr, "Failed requiring reboot");
 				}
-				ExitOnNullWithLastError(bRes, hr, "Failed deleting '%s'", pathA.c_str());
+				ExitOnNullWithLastError(bRes, hr, "Failed deleting '%hs'", pathA.c_str());
 			}
 
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Extracting '%s'", pathA.c_str());
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Extracting '%hs'", pathA.c_str());
 
 			{ // Scope ZipInputStream to release the file
 				ZipInputStream zipin(*zipFileStream, it->second);
 				std::ofstream out(pathA.c_str(), std::ios::binary);
 
 				std::streamsize bytes = Poco::StreamCopier::copyStream(zipin, out);
-				ExitOnNull((bytes == it->second.getUncompressedSize()), hr, E_FAIL, "Error extracting file '%s' from zip '%ls': %i / %i bytes written", file.c_str(), zipFileW, bytes, it->second.getUncompressedSize());
+				ExitOnNull((bytes == it->second.getUncompressedSize()), hr, E_FAIL, "Error extracting file '%hs' from zip '%ls': %i / %i bytes written", file.c_str(), zipFileW, bytes, it->second.getUncompressedSize());
 			}
 
 			// Set file times, ignore failures.
@@ -572,12 +572,12 @@ HRESULT CUnzip::ExecuteOneUnzip(::com::panelsw::ca::UnzipDetails* pDetails)
 		{
 			hr = E_FAIL;
 		}
-		ExitOnFailure(hr, "Failed unzipping file. %s", ex.displayText().c_str());
+		ExitOnFailure(hr, "Failed unzipping file. %hs", ex.displayText().c_str());
 	}
 	catch (std::exception ex)
 	{
 		hr = E_FAIL;
-		ExitOnFailure(hr, "Failed unzipping file. %s", ex.what());
+		ExitOnFailure(hr, "Failed unzipping file. %hs", ex.what());
 	}
 	catch (...)
 	{
@@ -614,7 +614,7 @@ HRESULT CUnzip::SetFileTimes(LPCSTR szFilePath, const std::string& extradField)
 	FILETIME* pModifyTime = nullptr;
 
 	hr = FindTimeInEntry(extradField, &createTime, &accessTime, &modifyTime);
-	ExitOnFailure(hr, "Failed finding time in entry for %s", szFilePath);
+	ExitOnFailure(hr, "Failed finding time in entry for %hs", szFilePath);
 
 	if ((createTime.dwHighDateTime != 0) || (createTime.dwLowDateTime != 0))
 	{
@@ -631,15 +631,15 @@ HRESULT CUnzip::SetFileTimes(LPCSTR szFilePath, const std::string& extradField)
 
 	if (!pCreateTime && !pAccessTime && !pModifyTime)
 	{
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "No time fields found in entry for file '%s'", szFilePath);
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "No time fields found in entry for file '%hs'", szFilePath);
 		ExitFunction();
 	}
 
 	hFile = ::CreateFileA(szFilePath, GENERIC_READ | GENERIC_WRITE, FILE_SHARE_WRITE | FILE_SHARE_READ | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	ExitOnNullWithLastError((hFile && (hFile != INVALID_HANDLE_VALUE)), hr, "Failed openning file '%s' to set create/access/modify times", szFilePath);
+	ExitOnNullWithLastError((hFile && (hFile != INVALID_HANDLE_VALUE)), hr, "Failed openning file '%hs' to set create/access/modify times", szFilePath);
 
 	bRes = ::SetFileTime(hFile, pCreateTime, pAccessTime, pModifyTime);
-	ExitOnNullWithLastError(bRes, hr, "Failed to set create/access/modify times on '%s'", szFilePath);
+	ExitOnNullWithLastError(bRes, hr, "Failed to set create/access/modify times on '%hs'", szFilePath);
 
 LExit:
 	if (hFile && (hFile != INVALID_HANDLE_VALUE))

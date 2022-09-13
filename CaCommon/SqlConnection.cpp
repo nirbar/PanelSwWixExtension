@@ -46,7 +46,7 @@ HRESULT CSqlConnection::Connect(LPCWSTR szDriver, LPCWSTR szServer, LPCWSTR szIn
 
     if (szDriver && *szDriver)
     {
-        hr = szConnString.Format(L"Driver={%s};", szDriver);
+        hr = szConnString.Format(L"Driver={%ls};", szDriver);
         ExitOnFailure(hr, "Failed appending string");
     }
     else
@@ -61,7 +61,7 @@ HRESULT CSqlConnection::Connect(LPCWSTR szDriver, LPCWSTR szServer, LPCWSTR szIn
     // Server[\Instance|,port]
     if (szInstance && *szInstance)
     {
-        hr = szServerTmp.AppnedFormat(L"\\%s", szInstance);
+        hr = szServerTmp.AppnedFormat(L"\\%ls", szInstance);
         ExitOnFailure(hr, "Failed appending string");
     }
     else if (nPort > 0)
@@ -70,12 +70,12 @@ HRESULT CSqlConnection::Connect(LPCWSTR szDriver, LPCWSTR szServer, LPCWSTR szIn
         ExitOnFailure(hr, "Failed appending string");
     }
 
-    hr = szConnString.AppnedFormat(L" Server={%s};", (LPCWSTR)szServerTmp);
+    hr = szConnString.AppnedFormat(L" Server={%ls};", (LPCWSTR)szServerTmp);
     ExitOnFailure(hr, "Failed alloacting string");
 
     if (szDatabase && *szDatabase)
     {
-        hr = szConnString.AppnedFormat(L" Database={%s};", szDatabase);
+        hr = szConnString.AppnedFormat(L" Database={%ls};", szDatabase);
         ExitOnFailure(hr, "Failed appending string");
     }
 
@@ -93,13 +93,13 @@ HRESULT CSqlConnection::Connect(LPCWSTR szDriver, LPCWSTR szServer, LPCWSTR szIn
     // User/password last to log obfuscated connection string
     if (szUser && *szUser)
     {
-        hr = szConnString.AppnedFormat(L" Trusted_Connection=no; UID={%s};", szUser);
+        hr = szConnString.AppnedFormat(L" Trusted_Connection=no; UID={%ls};", szUser);
         ExitOnFailure(hr, "Failed appending string");
 
         WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Connection string '%ls PWD={******};'", (LPCWSTR)szConnString);
         if (szPassword && *szPassword)
         {
-            hr = szConnString.AppnedFormat(L" PWD={%s};", szPassword);
+            hr = szConnString.AppnedFormat(L" PWD={%ls};", szPassword);
             ExitOnFailure(hr, "Failed appending string");
         }
     }

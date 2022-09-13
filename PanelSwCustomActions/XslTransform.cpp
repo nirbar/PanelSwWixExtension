@@ -108,7 +108,7 @@ extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall)
 
 		if (!szFileId.IsNullOrEmpty())
 		{
-			hr = szFileFmt.Format(L"[#%s]", (LPCWSTR)szFileId);
+			hr = szFileFmt.Format(L"[#%ls]", (LPCWSTR)szFileId);
 			ExitOnFailure(hr, "Failed formatting string");
 		}
 
@@ -162,7 +162,7 @@ static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, LPWSTR* pszXsl
 	DWORD cbData = 0;
 	HANDLE hFile = INVALID_HANDLE_VALUE;
 
-	hr = szMsiQuery.Format(L"SELECT `Data` FROM `Binary` WHERE `Name`='%s'", szBinaryKey);
+	hr = szMsiQuery.Format(L"SELECT `Data` FROM `Binary` WHERE `Name`='%ls'", szBinaryKey);
 	ExitOnFailure(hr, "Failed to format string");
 
 	hr = WcaOpenExecuteView((LPCWSTR)szMsiQuery, &hView);
@@ -198,7 +198,7 @@ static HRESULT ReplaceStrings(LPCWSTR szXslPath, LPCWSTR szXslId)
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
 
-	hr = szMsiQuery.Format(L"SELECT `Text`, `Replacement` FROM `PSW_XslTransform_Replacements` WHERE `XslTransform_`='%s' ORDER BY `Order`", szXslId);
+	hr = szMsiQuery.Format(L"SELECT `Text`, `Replacement` FROM `PSW_XslTransform_Replacements` WHERE `XslTransform_`='%ls' ORDER BY `Order`", szXslId);
 	ExitOnFailure(hr, "Failed to format string");
 
 	hr = WcaOpenExecuteView((LPCWSTR)szMsiQuery, &hView);

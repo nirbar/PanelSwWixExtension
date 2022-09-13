@@ -57,7 +57,7 @@ extern "C" UINT __stdcall SplitString(MSIHANDLE hInstall)
 		(SUCCEEDED(hr) && szCurrValue);
 		++i, hr = szFullString.NextToken((LPCWSTR)szToken, &szCurrValue))
 	{
-		hr = szDstPropName.Format(L"%s_%Iu", (LPCWSTR)szPropName, i);
+		hr = szDstPropName.Format(L"%ls_%Iu", (LPCWSTR)szPropName, i);
 		ExitOnFailure(hr, "Failed formatting string");
 
 		hr = WcaSetProperty((LPCWSTR)szDstPropName, szCurrValue);

@@ -83,7 +83,7 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 		// Parse file path
 		if (!szFileId.IsNullOrEmpty())
 		{
-			hr = szFileFormat.Format(L"[#%s]", (LPCWSTR)szFileId);
+			hr = szFileFormat.Format(L"[#%ls]", (LPCWSTR)szFileId);
 			ExitOnFailure(hr, "Failed formatting string");
 		}
 
@@ -92,7 +92,7 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 
 		if (szFilePath.IsNullOrEmpty())
 		{
-			CFileRegex::LogUnformatted(LOGMSG_STANDARD, false, "Will skip regex for file '%ls'.", (LPCWSTR)szFileFormat);
+			WcaLog(LOGMSG_STANDARD, "Will skip regex for file '%ls'.", (LPCWSTR)szFileFormat);
 			continue;
 		}
 
@@ -102,7 +102,7 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 		hr = szReplacement.MsiFormat((LPCWSTR)szReplacementUnformatted, (LPWSTR*)szReplacementObfuscated);
 		ExitOnFailure(hr, "Failed formatting string");
 
-		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, "Will replace matches of regex '%ls' with '%ls' on file '%ls'", (LPCWSTR)szRegexObfuscated, (LPCWSTR)szReplacementObfuscated, (LPCWSTR)szFilePath);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Will replace matches of regex '%ls' with '%ls' in file '%ls'", (LPCWSTR)szRegexObfuscated, (LPCWSTR)szReplacementObfuscated, (LPCWSTR)szFilePath);
 
 		hr = oDeferredFileRegex.AddFileRegex(szFilePath, szRegex, szReplacement, szRegexObfuscated, szReplacementObfuscated, (FileRegexDetails::FileEncoding)nEncoding, nIgnoreCase != 0);
 		ExitOnFailure(hr, "Failed creating custom action data for deferred action.");
@@ -382,7 +382,7 @@ HRESULT CFileRegex::ExecuteMultibyte(LPCWSTR szFilePath, LPCSTR szFileContent, L
 		{
 			hr = E_FAIL;
 		}
-		ExitOnFailure(hr, "Failed evaluating regular expression. %s", ex.what());
+		ExitOnFailure(hr, "Failed evaluating regular expression. %hs", ex.what());
 	}
 
 	dwSize = szContent.length();
@@ -441,7 +441,7 @@ HRESULT CFileRegex::ExecuteUnicode(LPCWSTR szFilePath, LPCWSTR szFileContent, LP
 		{
 			hr = E_FAIL;
 		}
-		ExitOnFailure(hr, "Failed evaluating regular expression. %s", ex.what());
+		ExitOnFailure(hr, "Failed evaluating regular expression. %hs", ex.what());
 	}
 
 	dwFileSize = szContent.length();

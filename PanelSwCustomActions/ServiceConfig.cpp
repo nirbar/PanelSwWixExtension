@@ -111,7 +111,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 				hr = szName.Copy((LPCWSTR)szAccount, i);
 				ExitOnFailure(hr, "Failed copying string");
 
-				szAccount.Format(L"%s\\%s", (LPCWSTR)szDomain, (LPCWSTR)szName);
+				szAccount.Format(L"%ls\\%ls", (LPCWSTR)szDomain, (LPCWSTR)szName);
 				ExitOnFailure(hr, "Failed formatting string");
 			}
 			else
@@ -128,7 +128,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 					hr = szName.Copy((LPCWSTR)szAccount);
 					ExitOnFailure(hr, "Failed copying string");
 
-					szAccount.Format(L"%s\\%s", (LPCWSTR)szDomain, (LPCWSTR)szName);
+					szAccount.Format(L"%ls\\%ls", (LPCWSTR)szDomain, (LPCWSTR)szName);
 					ExitOnFailure(hr, "Failed formatting string");
 				}
 			}
@@ -155,7 +155,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 		}
 
 		// Dependencies
-		hr = szSubQuery.Format(L"SELECT `Service`, `Group` FROM `PSW_ServiceConfig_Dependency` WHERE `ServiceConfig_`='%s'", (LPCWSTR)szId);
+		hr = szSubQuery.Format(L"SELECT `Service`, `Group` FROM `PSW_ServiceConfig_Dependency` WHERE `ServiceConfig_`='%ls'", (LPCWSTR)szId);
 		ExitOnFailure(hr, "Failed to format string");
 
 		hr = WcaOpenExecuteView((LPCWSTR)szSubQuery, &hSubView);
@@ -177,14 +177,14 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will add to service '%ls' dependency on group '%ls'", (LPCWSTR)szServiceName, (LPCWSTR)szGroup);
 				if (szDependencies == nullptr)
 				{
-					hr = StrAllocFormatted(&szDependencies, L"%c%s%c", SC_GROUP_IDENTIFIER, (LPCWSTR)szGroup, NULL);
+					hr = StrAllocFormatted(&szDependencies, L"%lc%ls%lc", SC_GROUP_IDENTIFIER, (LPCWSTR)szGroup, L'\0');
 					ExitOnFailure(hr, "Failed creating multstring.");
 				}
 				else
 				{
 					CWixString szTmp;
 
-					hr = szTmp.Format(L"%c%s", SC_GROUP_IDENTIFIER, (LPCWSTR)szGroup);
+					hr = szTmp.Format(L"%lc%ls", SC_GROUP_IDENTIFIER, (LPCWSTR)szGroup);
 					ExitOnFailure(hr, "Failed formatting string");
 
 					hr = MultiSzInsertString(&szDependencies, nullptr, 0, (LPCWSTR)szTmp);
@@ -202,7 +202,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will add to service '%ls' dependency on service '%ls'", (LPCWSTR)szServiceName, (LPCWSTR)szService);
 				if (szDependencies == nullptr)
 				{
-					hr = StrAllocFormatted(&szDependencies, L"%s%c", (LPCWSTR)szService, NULL);
+					hr = StrAllocFormatted(&szDependencies, L"%ls%lc", (LPCWSTR)szService, L'\0');
 					ExitOnFailure(hr, "Failed creating multstring.");
 				}
 				else

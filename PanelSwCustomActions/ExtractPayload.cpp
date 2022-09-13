@@ -73,7 +73,7 @@ extern "C" UINT __stdcall ExtractPayload(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to concat payload path");
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Extracting '%ls'", (LPCWSTR)szPayloadPath);
 
-		hr = szSubQuery.Format(L"SELECT `Data` FROM `Binary` WHERE `Name`='%s'", (LPCWSTR)szBinaryKey);
+		hr = szSubQuery.Format(L"SELECT `Data` FROM `Binary` WHERE `Name`='%ls'", (LPCWSTR)szBinaryKey);
 		ExitOnFailure(hr, "Failed to format string");
 
 		hr = WcaOpenExecuteView((LPCWSTR)szSubQuery, &hSubView);

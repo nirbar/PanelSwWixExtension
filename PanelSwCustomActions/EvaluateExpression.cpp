@@ -54,7 +54,7 @@ extern "C" UINT __stdcall EvaluateExpression(MSIHANDLE hInstall)
 		}
 
 		bRes = parser.compile(szAnsiExpression, expr);
-		ExitOnNull(bRes, hr, E_FAIL, "Failed compiling expression '%s'. %s", szAnsiExpression, parser.error().c_str());
+		ExitOnNull(bRes, hr, E_FAIL, "Failed compiling expression '%hs'. %hs", szAnsiExpression, parser.error().c_str());
 
 		if (expr.value() == (int)expr.value())
 		{

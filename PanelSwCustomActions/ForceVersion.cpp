@@ -31,8 +31,8 @@ extern "C" UINT __stdcall ForceVersion(MSIHANDLE hInstall)
 		CWixString query;
 		PMSIHANDLE fileView;
 		PMSIHANDLE fileRecord;
-		LPCWSTR selectQueryFormat = L"SELECT `File`, `Component_`, `FileName`, `FileSize`, `Version`, `Language`, `Attributes`, `Sequence` FROM `File` WHERE `File`.`File` = '%s'";
-		LPCWSTR deleteQueryFormat = L"DELETE FROM `File` WHERE `File`.`File` = '%s'";
+		LPCWSTR selectQueryFormat = L"SELECT `File`, `Component_`, `FileName`, `FileSize`, `Version`, `Language`, `Attributes`, `Sequence` FROM `File` WHERE `File`.`File` = '%ls'";
+		LPCWSTR deleteQueryFormat = L"DELETE FROM `File` WHERE `File`.`File` = '%ls'";
 		LPCWSTR insertQuery = L"INSERT INTO `File` (`File`, `Component_`, `FileName`, `FileSize`, `Version`, `Language`, `Attributes`, `Sequence`) VALUES (?, ?, ?, ?, ?, ?, ?, ?) TEMPORARY";
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)file);

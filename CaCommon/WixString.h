@@ -224,7 +224,7 @@ public:
 					{
 						if (szProp && *szProp)
 						{
-							hr = StrAllocFormatted(&szHideMe, L"[%s]", szProp);
+							hr = StrAllocFormatted(&szHideMe, L"[%ls]", szProp);
 							if (SUCCEEDED(hr))
 							{
 								hr = StrReplaceStringAll(&szStripped, szHideMe, L"******");

@@ -112,7 +112,7 @@ extern "C" UINT __stdcall CleanPendingFileRenameOperationsSched(MSIHANDLE hInsta
 			continue;
 		}
 
-		hr = szFilePathFmt.Format(L"[#%s]", (LPCWSTR)szId);
+		hr = szFilePathFmt.Format(L"[#%ls]", (LPCWSTR)szId);
 		ExitOnFailure(hr, "Failed formatting string.");
 
 		hr = szFilePath.MsiFormat((LPCWSTR)szFilePathFmt);
@@ -122,7 +122,7 @@ extern "C" UINT __stdcall CleanPendingFileRenameOperationsSched(MSIHANDLE hInsta
 		{
 			if (::_wcsicmp(szDelete, (LPCWSTR)szFilePath) == 0)
 			{
-				hr = szCleanPendingFileRenameOperations.AppnedFormat(L"%s;", szDelete);
+				hr = szCleanPendingFileRenameOperations.AppnedFormat(L"%ls;", szDelete);
 				ExitOnFailure(hr, "Failed to append string.");
 			}
 		}
