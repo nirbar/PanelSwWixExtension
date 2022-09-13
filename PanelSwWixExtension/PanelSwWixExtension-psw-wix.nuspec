@@ -9,9 +9,11 @@
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <license type="file">LICENSE</license>
     <projectUrl>https://github.com/nirbar/PanelSwWixExtension.git</projectUrl>
-    <description>A WiX extension with various actions including- File regular expressions; XmlSearch; TaskScheduler; ExecOnComponent</description>
-    <summary>A WiX extension with various actions</summary>
-    <tags>WiX MSI Installer WixToolset XML</tags>
+    <repository type="git" url="https://github.com/nirbar/PanelSwWixExtension.git"/>
+    <description>The most widely used external WiX extension</description>
+    <summary>PanelSwWixExtension is the most widely used external WiX extension</summary>
+    <readme>README.md</readme>
+    <tags>WiX MSI Installer WixToolset CustomAction</tags>
 
     <dependencies>
       <!--Make sure to change in .github\workflows\github-actions-build.yml -->
@@ -25,7 +27,7 @@
     <file src="..\build\bin\Release\DeferredExePackage\DeferredExePackage.exe" target="tools\lib"/>
     <file src=".\Xsd\PanelSwWixExtension.xsd" target="content"/>
     <file src="..\LICENSE" target="LICENSE" />
-    <file src="..\README.md" target="README" />
+    <file src="..\README.md" target="README.md" />
     
     <!-- lib -->
     <file src="..\build\bin\Release\CaCommon\CaCommon.lib" target="tools\lib\v141_xp"/>

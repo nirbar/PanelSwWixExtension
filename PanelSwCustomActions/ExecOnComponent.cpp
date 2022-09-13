@@ -888,13 +888,10 @@ HRESULT CExecOnComponent::LogProcessOutput(HANDLE hStdErrOut, LPWSTR* pszText /*
 		}
 		while (szLogEnd && *szLogEnd)
 		{
-			WCHAR szFormat[20];
-
-			::wprintf_s(szFormat, L"%%.%dls", (szLogEnd - (szLog + dwLogStart)));
-			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, szFormat, szLog + dwLogStart);
+			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"%.*ls", (szLogEnd - (szLog + dwLogStart)), szLog + dwLogStart);
 
 			// Go past \n or \r\n
-			if ((*szLogEnd == L'\r') && (*(szLogEnd + 1) == L'\n'))
+			if ((szLogEnd[0] == L'\r') && (szLogEnd[1] == L'\n'))
 			{
 				szLogEnd += 2;
 			}
