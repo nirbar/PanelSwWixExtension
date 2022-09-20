@@ -73,11 +73,11 @@ extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed getting temporary path for '%ls'", (LPCWSTR)szPath);
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Backing up and '%ls' and will restore it later, using temporary path '%ls'", (LPCWSTR)szPath, (LPCWSTR)szTempFile);
 
-		hr = deferredCAD.CopyPath(szPath, szTempFile, false, bIgnoreMissing, flags & CFileOperations::FileOperationsAttributes::IgnoreErrors, false);
+		hr = deferredCAD.CopyPath(szPath, szTempFile, false, bIgnoreMissing, flags & CFileOperations::FileOperationsAttributes::IgnoreErrors, false, false);
 		ExitOnFailure(hr, "Failed backing up '%ls'", (LPCWSTR)szPath);
 		if (hr == S_FALSE)
 		{
-			deferredCAD.DeletePath(szTempFile, true, true, false); // Delete the temporay file we created now as we're not going to need it.
+			deferredCAD.DeletePath(szTempFile, true, true, false, false); // Delete the temporay file we created now as we're not going to need it.
 			continue;
 		}
 

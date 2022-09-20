@@ -1473,13 +1473,13 @@ namespace PanelSw.Wix.Extensions
                             filepath = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "ignoremissing":
-                            if (Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            if (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 flags |= DeletePathFlags.IgnoreMissing;
                             }
                             break;
                         case "ignoreerrors":
-                            if (Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            if (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 flags |= DeletePathFlags.IgnoreErrors;
                             }
@@ -4121,7 +4121,6 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
-                string tmp;
                 if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
                 {
                     switch (attrib.LocalName.ToLower())
@@ -4142,29 +4141,25 @@ namespace PanelSw.Wix.Extensions
                             data = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "onsuccess":
-                            tmp = Core.GetAttributeValue(sourceLineNumbers, attrib);
-                            if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            if (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 flags |= ExecutePhase.OnCommit;
                             }
                             break;
                         case "onstart":
-                            tmp = Core.GetAttributeValue(sourceLineNumbers, attrib);
-                            if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            if (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 flags |= ExecutePhase.OnExecute;
                             }
                             break;
                         case "onfailure":
-                            tmp = Core.GetAttributeValue(sourceLineNumbers, attrib);
-                            if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            if (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 flags |= ExecutePhase.OnRollback;
                             }
                             break;
                         case "secure":
-                            tmp = Core.GetAttributeValue(sourceLineNumbers, attrib);
-                            if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            if (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 flags |= ExecutePhase.Secure;
                             }
@@ -4244,7 +4239,6 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
-                string tmp;
                 if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
                 {
                     switch (attrib.LocalName.ToLower())
@@ -4265,8 +4259,7 @@ namespace PanelSw.Wix.Extensions
                             verb = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "wait":
-                            tmp = Core.GetAttributeValue(sourceLineNumbers, attrib);
-                            if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            if (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 wait = 1;
                             }
@@ -4276,22 +4269,19 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         case "oncommit":
-                            tmp = Core.GetAttributeValue(sourceLineNumbers, attrib);
-                            if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            if (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 flags |= ExecutePhase.OnCommit;
                             }
                             break;
                         case "onexecute":
-                            tmp = Core.GetAttributeValue(sourceLineNumbers, attrib);
-                            if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            if (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 flags |= ExecutePhase.OnExecute;
                             }
                             break;
                         case "onrollback":
-                            tmp = Core.GetAttributeValue(sourceLineNumbers, attrib);
-                            if (tmp.Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            if (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 flags |= ExecutePhase.OnRollback;
                             }
@@ -4776,6 +4766,7 @@ namespace PanelSw.Wix.Extensions
             IgnoreMissing = 1,
             IgnoreErrors = 2 * IgnoreMissing,
             OnlyIfEmpty = 2 * IgnoreErrors,
+            AllowReboot = 2 * OnlyIfEmpty
         }
 
         private void ParseDeletePath(XmlNode node)
@@ -4784,7 +4775,7 @@ namespace PanelSw.Wix.Extensions
             string id = null;
             string filepath = null;
             string condition = null;
-            DeletePathFlags flags = 0;
+            DeletePathFlags flags = DeletePathFlags.AllowReboot;
             int order = 1000000000 + GetLineNumber(sourceLineNumbers);
 
             foreach (XmlAttribute attrib in node.Attributes)
@@ -4800,21 +4791,27 @@ namespace PanelSw.Wix.Extensions
                             filepath = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "IgnoreMissing":
-                            if (Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            if (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 flags |= DeletePathFlags.IgnoreMissing;
                             }
                             break;
                         case "IgnoreErrors":
-                            if (Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            if (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 flags |= DeletePathFlags.IgnoreErrors;
                             }
                             break;
                         case "OnlyIfEmpty":
-                            if (Core.GetAttributeValue(sourceLineNumbers, attrib).Equals("yes", StringComparison.OrdinalIgnoreCase))
+                            if (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 flags |= DeletePathFlags.OnlyIfEmpty;
+                            }
+                            break;
+                        case "AllowReboot":
+                            if (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.No)
+                            {
+                                flags &= ~DeletePathFlags.AllowReboot;
                             }
                             break;
                         case "Condition":
@@ -4861,6 +4858,10 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
+            if (flags.HasFlag(DeletePathFlags.AllowReboot))
+            {
+                Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "PSW_CheckRebootRequired");
+            }
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "DeletePath");
 
             if (!Core.EncounteredError)

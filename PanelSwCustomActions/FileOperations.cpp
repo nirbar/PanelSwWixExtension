@@ -88,8 +88,11 @@ extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
 		hr = deferredFileCAD.AddDeleteFile((LPCWSTR)tempFile, CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath); // Delete the temporary file. Done for case where the source is folder rather than file.
 		ExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
 
-		hr = deferredFileCAD.AddMoveFile((LPCWSTR)szFilePath, (LPCWSTR)tempFile, flags);
+		hr = deferredFileCAD.AddCopyFile((LPCWSTR)szFilePath, (LPCWSTR)tempFile, flags); // Copy rather than delete, to allow locked files not to break the backup
 		ExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
+
+		hr = commitCAD.AddDeleteFile((LPCWSTR)szFilePath, flags);
+		ExitOnFailure(hr, "Failed creating custom action data for commit action.");
 
 		hr = commitCAD.AddDeleteFile((LPCWSTR)tempFile, CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath);
 		ExitOnFailure(hr, "Failed creating custom action data for commit action.");
@@ -200,6 +203,7 @@ HRESULT CFileOperations::AddDeleteFile(LPCWSTR szPath, int flags)
 	pDetails->set_ignoreerrors(flags & FileOperationsAttributes::IgnoreErrors);
 	pDetails->set_ignoremissing(flags & FileOperationsAttributes::IgnoreMissingPath);
 	pDetails->set_onlyifempty(flags & FileOperationsAttributes::OnlyIfEmpty);
+	pDetails->set_allowreboot(flags & FileOperationsAttributes::AllowReboot);
 
 	pAny = pCmd->mutable_details();
 	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
@@ -235,12 +239,12 @@ HRESULT CFileOperations::DeferredExecute(const ::std::string& command)
 
 	if (szFrom && szTo)
 	{
-		hr = CopyPath(szFrom, szTo, details.move(), details.ignoremissing(), details.ignoreerrors(), details.onlyifempty());
+		hr = CopyPath(szFrom, szTo, details.move(), details.ignoremissing(), details.ignoreerrors(), details.onlyifempty(), details.allowreboot());
 		ExitOnFailure(hr, "Failed to copy file");
 	}
 	else 
 	{
-		hr = DeletePath(szFrom, details.ignoremissing(), details.ignoreerrors(), details.onlyifempty());
+		hr = DeletePath(szFrom, details.ignoremissing(), details.ignoreerrors(), details.onlyifempty(), details.allowreboot());
 		ExitOnFailure(hr, "Failed to delete file");
 	}
 
@@ -248,7 +252,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool bIgnoreMissing, bool bIgnoreErrors, bool bOnlyIfEmpty)
+HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool bIgnoreMissing, bool bIgnoreErrors, bool bOnlyIfEmpty, bool bAllowReboot)
 {
 	SHFILEOPSTRUCT opInfo;
 	HRESULT hr = S_OK;
@@ -295,16 +299,30 @@ HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool
 
 	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"%ls '%ls' to '%ls'", bMove ? L"Moving" : L"Copying", szFromNull, szToNull);
 	nRes = ::SHFileOperation(&opInfo);
+	
 	//TODO On Windows XP the error code is generic (0x402) when the source file is absent
 	if (bIgnoreMissing && ((nRes == ERROR_FILE_NOT_FOUND) || (nRes == ERROR_PATH_NOT_FOUND)))
 	{
 		LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Skipping copy '%ls' as it doesn't exist and marked to ignore missing", szFrom);
 		ExitFunction1(hr = S_FALSE);
 	}
-	if (bIgnoreErrors && ((nRes != 0) || opInfo.fAnyOperationsAborted))
+	
+	if ((nRes != 0) || opInfo.fAnyOperationsAborted)
 	{
-		LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Failed Copying '%ls' to '%ls'; Ignoring error (%i)", szFromNull, szToNull, nRes);
-		ExitFunction1(hr = S_FALSE);
+		// If file is locked then retry the operation after reboot
+		if (bMove && bAllowReboot && ((nRes == ERROR_LOCK_VIOLATION) || (nRes == ERROR_DRIVE_LOCKED) || (nRes == ERROR_SHARING_VIOLATION)))
+		{
+			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Failed moving '%ls' to '%ls' due to a lock on the file(s), so reboot will be required", szFromNull, szToNull);
+
+			::MoveFileEx(szFromNull, szToNull, MOVEFILE_DELAY_UNTIL_REBOOT);
+			WcaDeferredActionRequiresReboot();
+			ExitFunction1(hr = S_OK);
+		}
+		if (bIgnoreErrors)
+		{
+			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Failed copying '%ls' to '%ls'; Ignoring error (%i)", szFromNull, szToNull, nRes);
+			ExitFunction1(hr = S_FALSE);
+		}
 	}
 	ExitOnWin32Error(nRes, hr, "Failed copying file '%ls' to '%ls'", szFromNull, szToNull);
 	ExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed copying file (operation aborted)");
@@ -316,7 +334,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bIgnoreErrors, bool bOnlyIfEmpty)
+HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bIgnoreErrors, bool bOnlyIfEmpty, bool bAllowReboot)
 {
 	SHFILEOPSTRUCT opInfo;
 	HRESULT hr = S_OK;
@@ -353,10 +371,32 @@ HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bI
 		LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Skipping deletion of '%ls' as it doesn't exist and marked to ignore missing", szFrom);
 		ExitFunction1(hr = S_FALSE);
 	}
-	if (bIgnoreErrors && ((nRes != 0) || opInfo.fAnyOperationsAborted))
+	if ((nRes != 0) || opInfo.fAnyOperationsAborted)
 	{
-		LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Failed deleting '%ls'; Ignoring error (%i)", szFromNull, nRes);
-		ExitFunction1(hr = S_FALSE);
+		// If file is locked then retry the operation after reboot
+		if (bAllowReboot && ((nRes == ERROR_LOCK_VIOLATION) || (nRes == ERROR_DRIVE_LOCKED) || (nRes == ERROR_SHARING_VIOLATION)))
+		{
+			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Failed deleting '%ls' due to a lock on file(s), so reboot will be required", szFromNull);
+
+			// MoveFileEx can delete empty folder only, so we must explictly delete files first
+			ReleaseStrArray(pszFiles, nFiles);
+			hr = ListFiles(szFrom, L"*", true, &pszFiles, &nFiles);
+			ExitOnFailure(hr, "Failed listing files in folder '%ls'", szFrom);
+
+			for (UINT i = 0; i < nFiles; ++i)
+			{
+				::MoveFileEx(pszFiles[i], nullptr, MOVEFILE_DELAY_UNTIL_REBOOT);
+			}
+
+			::MoveFileEx(szFromNull, nullptr, MOVEFILE_DELAY_UNTIL_REBOOT);
+			WcaDeferredActionRequiresReboot();
+			ExitFunction1(hr = S_OK);
+		}
+		if (bIgnoreErrors)
+		{
+			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Failed deleting '%ls'; Ignoring error (%i)", szFromNull, nRes);
+			ExitFunction1(hr = S_FALSE);
+		}
 	}
 	ExitOnNull((nRes == 0), hr, E_FAIL, "Failed deleting '%ls' (Error %i)", szFromNull, nRes);
 	ExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed deleting file (operation aborted)");

@@ -18,6 +18,8 @@ public:
 
 	HRESULT EnumerateLocalProcesses(const std::list<LPWSTR>& lstFolders, std::map<DWORD, LPWSTR>& mapProcId);
 
+	HRESULT RegisterWithRm(const std::list<LPWSTR>& lstFolders);
+
 protected:
 	
 	HRESULT DeferredExecute(const ::std::string& command) override;
@@ -26,7 +28,7 @@ private:
 
 	HRESULT Execute(const std::list<LPWSTR>& lstFolders);
 
-	INT PromptFilesInUse(const std::map<DWORD, LPWSTR> mapProcId);
+	INT PromptFilesInUse(const std::map<DWORD, LPWSTR> &mapProcId);
 
 	static BOOL CALLBACK KillWindowsProc(HWND hwnd, LPARAM lParam);
 

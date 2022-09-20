@@ -11,4 +11,5 @@ message FileOperationsDetails{
 	bool ignoreMissing = 4;
 	bool ignoreErrors = 5;
 	bool onlyIfEmpty = 6;
+	bool allowReboot = 7;
 }

@@ -21,10 +21,7 @@ extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall)
     UINT er = ERROR_SUCCESS;
     PMSIHANDLE hView;
     PMSIHANDLE hRecord;
-    CWixString szSessionKey;
-    PRMU_SESSION pSession = nullptr;
     std::list<LPWSTR> lstFolders;
-    std::map<DWORD, LPWSTR> mapProcId;
     CRestartLocalResources cad;
     LPWSTR szDevicePath;
     CWixString szCustomActionData;
@@ -52,7 +49,7 @@ extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall)
 
         hr = WcaGetRecordFormattedString(hRecord, 1, (LPWSTR*)szPath);
         ExitOnFailure(hr, "Failed to get Property_.");
-        hr = WcaGetRecordFormattedString(hRecord, 2, (LPWSTR*)szCondition);
+        hr = WcaGetRecordString(hRecord, 2, (LPWSTR*)szCondition);
         ExitOnFailure(hr, "Failed to get Condition.");
 
         if (!szCondition.IsNullOrEmpty())
@@ -73,7 +70,7 @@ extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall)
         hr = CFileOperations::PathToDevicePath((LPCWSTR)szPath, &szDevicePath);
         ExitOnFailure(hr, "Failed to get target folder in device path form");
         WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will Enumerate processes in '%ls'", szDevicePath);
-        
+
         lstFolders.push_back(szDevicePath);
         szDevicePath = nullptr;
     }
@@ -88,44 +85,14 @@ extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall)
     hr = cad.AddRestartLocalResources(lstFolders);
     ExitOnFailure(hr, "Failed to prepare custom action data");
 
-    // Best effort to register the processes with restart manager
-    hr = WcaGetProperty(L"MsiRestartManagerSessionKey", (LPWSTR*)szSessionKey);
-    ExitOnFailure(hr, "Failed to get the MsiRestartManagerSessionKey property.");
-
-    if (szSessionKey.IsNullOrEmpty())
-    {
-        WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Can't join RestartManager session because key is null");
-    }
-    else
-    {
-        hr = RmuJoinSession(&pSession, (LPCWSTR)szSessionKey);
-        if (FAILED(hr))
-        {
-            WcaLogError(hr, "Failed to join RestartManager session '%ls'.", (LPCWSTR)szSessionKey);
-            hr = S_OK;
-        }
-    }
-
-    hr = cad.EnumerateLocalProcesses(lstFolders, mapProcId);
-    ExitOnFailure(hr, "Failed to enumerate processes");
-
-    for (const std::pair<DWORD, LPWSTR>& prcId : mapProcId)
-    {
-        if (pSession)
-        {
-            WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Registering process '%ls' (%u) with RestartManager", prcId.second, prcId.first);
-
-            hr = RmuAddProcessById(pSession, prcId.first);
-            ExitOnFailure(hr, "Failed adding process to RestartManager");
-        }
-    }
-
-
     hr = cad.GetCustomActionData((LPWSTR*)szCustomActionData);
     ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
 
     hr = WcaSetProperty(L"RestartLocalResourcesExec", (LPCWSTR)szCustomActionData);
     ExitOnFailure(hr, "Failed to set property.");
+
+    // Best effort to register the processes with restart manager
+    cad.RegisterWithRm(lstFolders);
 
 LExit:
     // Release map, list
@@ -133,16 +100,46 @@ LExit:
     {
         ReleaseStr(f);
     }
-    for (std::pair<DWORD, LPWSTR> f : mapProcId)
-    {
-        ReleaseStr(f.second);
-    }
 
     ReleaseStr(szDevicePath);
-    ReleaseMem(pSession);
 
     er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
     return WcaFinalize(er);
+}
+
+HRESULT CRestartLocalResources::RegisterWithRm(const std::list<LPWSTR>& lstFolders)
+{
+    HRESULT hr = S_OK;
+    PRMU_SESSION pSession = nullptr;
+    CWixString szSessionKey;
+    std::map<DWORD, LPWSTR> mapProcId;
+
+    hr = WcaGetProperty(L"MsiRestartManagerSessionKey", (LPWSTR*)szSessionKey);
+    ExitOnFailure(hr, "Failed to get the MsiRestartManagerSessionKey property.");
+
+    if (szSessionKey.IsNullOrEmpty())
+    {
+        WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Can't join RestartManager session because key is null");
+        ExitFunction();
+    }
+
+    hr = RmuJoinSession(&pSession, (LPCWSTR)szSessionKey);
+    ExitOnFailure(hr, "Failed to join RestartManager session '%ls'.", (LPCWSTR)szSessionKey);
+
+    hr = EnumerateLocalProcesses(lstFolders, mapProcId);
+    ExitOnFailure(hr, "Failed to enumerate processes");
+
+    for (const std::pair<DWORD, LPWSTR>& prcId : mapProcId)
+    {
+        WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Registering process '%ls' (%u) with RestartManager", prcId.second, prcId.first);
+
+        hr = RmuAddProcessById(pSession, prcId.first);
+        ExitOnFailure(hr, "Failed adding process %u '%ls' to RestartManager", prcId.first, prcId.second);
+    }
+
+LExit:
+    ReleaseMem(pSession);
+    return hr;
 }
 
 HRESULT CRestartLocalResources::AddRestartLocalResources(const std::list<LPWSTR>& lstFolders)
@@ -268,7 +265,6 @@ HRESULT CRestartLocalResources::Execute(const std::list<LPWSTR>& lstFolders)
         ExitOnWin32Error(er, hr, "Failed to wait for process to terminate");
 
         ReleaseHandle(hProcess);
-        hProcess = NULL;
     }
 
 LExit:
@@ -283,7 +279,7 @@ LExit:
     return hr;
 }
 
-INT CRestartLocalResources::PromptFilesInUse(const std::map<DWORD, LPWSTR> mapProcId)
+INT CRestartLocalResources::PromptFilesInUse(const std::map<DWORD, LPWSTR> &mapProcId)
 {
     PMSIHANDLE hFilesInUse;
     HRESULT hr = S_OK;
@@ -382,6 +378,8 @@ HRESULT CRestartLocalResources::EnumerateLocalProcesses(const std::list<LPWSTR>&
         // Executable is within the folder?
         if (std::any_of(lstFolders.begin(), lstFolders.end(), visInFolder_))
         {
+            WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Detected process %u: '%ls'", peData.th32ProcessID, visInFolder_.szFullExePath);
+
             hr = StrAllocString(&szProcessName, peData.szExeFile, 0);
             ExitOnFailure(hr, "Failed to allocate memory");
 

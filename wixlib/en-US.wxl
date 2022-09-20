@@ -61,6 +61,6 @@
   <String Overridable="yes" Id="RestartLocalResources"><![CDATA[Restarting resources]]></String>
   <String Overridable="yes" Id="RestartLocalResourcesTemplate"><![CDATA[Closing [1]]]></String>
   <String Overridable="yes" Id="Md5Hash"><![CDATA[Computing MD5 hash]]></String>
-  <String Overridable="yes" Id="ConcatFiles"><![CDATA[Concatenating files]]></String>
+  <String Overridable="yes" Id="ConcatFiles"><![CDATA[Reconstructing files]]></String>
   <String Overridable="yes" Id="ExtractPayload"><![CDATA[Extracting temporary files]]></String>
 </WixLocalization>
