@@ -4775,7 +4775,7 @@ namespace PanelSw.Wix.Extensions
             string id = null;
             string filepath = null;
             string condition = null;
-            DeletePathFlags flags = DeletePathFlags.AllowReboot;
+            DeletePathFlags flags = DeletePathFlags.AllowReboot | DeletePathFlags.IgnoreErrors | DeletePathFlags.IgnoreMissing;
             int order = 1000000000 + GetLineNumber(sourceLineNumbers);
 
             foreach (XmlAttribute attrib in node.Attributes)
@@ -4791,16 +4791,8 @@ namespace PanelSw.Wix.Extensions
                             filepath = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "IgnoreMissing":
-                            if (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
-                            {
-                                flags |= DeletePathFlags.IgnoreMissing;
-                            }
-                            break;
                         case "IgnoreErrors":
-                            if (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
-                            {
-                                flags |= DeletePathFlags.IgnoreErrors;
-                            }
+                            Core.OnMessage(WixWarnings.DeprecatedAttribute(sourceLineNumbers, node.LocalName, attrib.LocalName));
                             break;
                         case "OnlyIfEmpty":
                             if (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)

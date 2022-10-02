@@ -14,8 +14,6 @@ extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
 	UINT er = ERROR_SUCCESS;
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
-	CFileOperations rollbackCAD;
-	CFileOperations deferredFileCAD;
 	CFileOperations commitCAD;
 	DWORD dwRes = 0;
 	LPWSTR szCustomActionData = nullptr;
@@ -40,7 +38,6 @@ extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
 
 		// Get fields
 		CWixString szFilePath, szCondition;
-		CWixString tempFile;
 		int flags = 0;
 
 		hr = WcaGetRecordFormattedString(hRecord, 1, (LPWSTR*)szFilePath);
@@ -74,44 +71,12 @@ extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
 			szFilePath[i] = NULL;
 		}
 
-		hr = CFileOperations::MakeTemporaryName(szFilePath, L"DLT%05i.tmp", false, (LPWSTR*)tempFile);
-		ExitOnFailure(hr, "Failed getting temporary path for '%ls'", (LPCWSTR)szFilePath);
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will delete '%ls', using temporary backup in '%ls'", (LPCWSTR)szFilePath, (LPCWSTR)tempFile);
-
-		hr = rollbackCAD.AddDeleteFile((LPCWSTR)szFilePath, flags | CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath); // Delete the target path. Done for case where the source is folder rather than file.
-		ExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
-
-		hr = rollbackCAD.AddMoveFile((LPCWSTR)tempFile, (LPCWSTR)szFilePath, flags);
-		ExitOnFailure(hr, "Failed creating custom action data for rollback action.");
-
-		// Add deferred data to move file szFilePath -> tempFile.
-		hr = deferredFileCAD.AddDeleteFile((LPCWSTR)tempFile, CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath); // Delete the temporary file. Done for case where the source is folder rather than file.
-		ExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
-
-		hr = deferredFileCAD.AddCopyFile((LPCWSTR)szFilePath, (LPCWSTR)tempFile, flags); // Copy rather than delete, to allow locked files not to break the backup
-		ExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
-
 		hr = commitCAD.AddDeleteFile((LPCWSTR)szFilePath, flags);
-		ExitOnFailure(hr, "Failed creating custom action data for commit action.");
-
-		hr = commitCAD.AddDeleteFile((LPCWSTR)tempFile, CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath);
 		ExitOnFailure(hr, "Failed creating custom action data for commit action.");
 	}
 
-	hr = rollbackCAD.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
-	hr = WcaDoDeferredAction(L"DeletePath_rollback", szCustomActionData, rollbackCAD.GetCost());
-	ExitOnFailure(hr, "Failed scheduling deferred action.");
-
-	ReleaseNullStr(szCustomActionData);
-	hr = deferredFileCAD.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
-	hr = WcaDoDeferredAction(L"DeletePath_deferred", szCustomActionData, deferredFileCAD.GetCost());
-	ExitOnFailure(hr, "Failed scheduling deferred action.");
-
-	ReleaseNullStr(szCustomActionData);
 	hr = commitCAD.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
+	ExitOnFailure(hr, "Failed getting custom action data for commit action.");
 	hr = WcaDoDeferredAction(L"DeletePath_commit", szCustomActionData, commitCAD.GetCost());
 	ExitOnFailure(hr, "Failed scheduling deferred action.");
 

@@ -1390,12 +1390,12 @@ Delete folder or file specified by a path. DeletePath entries are processed in o
           </xs:attribute>
           <xs:attribute name="IgnoreMissing" type="wix:YesNoType" use="optional">
             <xs:annotation>
-              <xs:documentation>Skip is source is missing. Default is no.</xs:documentation>
+              <xs:documentation>Deprecated and ignored. Skip is source is missing. Default is no.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="IgnoreErrors" type="wix:YesNoType" use="optional">
             <xs:annotation>
-              <xs:documentation>Do not fail the installation if the file operation fails. Default is no.</xs:documentation>
+              <xs:documentation>Deprecated and ignored. Do not fail the installation if the file operation fails. Default is no.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="OnlyIfEmpty" type="wix:YesNoType" use="optional">

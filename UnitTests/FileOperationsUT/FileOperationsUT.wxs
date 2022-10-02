@@ -23,7 +23,7 @@
 
     <PanelSW:DeletePath Path="[EmptyDir]" OnlyIfEmpty="yes"><![CDATA[Not Installed]]></PanelSW:DeletePath>
     <PanelSW:DeletePath Path="[DeleteMeDir]FileOperationsUT.wxs"><![CDATA[Not Installed]]></PanelSW:DeletePath>
-    <PanelSW:DeletePath Path="[EmptyDir]" OnlyIfEmpty="yes"><![CDATA[Not Installed]]></PanelSW:DeletePath>
+    <PanelSW:DeletePath Path="[EmptyDir]" OnlyIfEmpty="yes" AllowReboot="no"><![CDATA[Not Installed]]></PanelSW:DeletePath>
     <InstallExecuteSequence>
       <Custom Action="PromptCancel_Deferred" After="DeletePath"/>
     </InstallExecuteSequence>

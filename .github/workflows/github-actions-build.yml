@@ -5,7 +5,7 @@ on:
       - v*
   workflow_dispatch:
 env:
-  CUSTOM_WIX_VERSION: '3.12.0-c129'
+  CUSTOM_WIX_VERSION: '3.12.0-c130'
 jobs:
   PanelSwWixExtension-Build:
     runs-on: windows-2019
