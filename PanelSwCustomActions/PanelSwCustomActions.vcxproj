@@ -47,7 +47,7 @@
     <Link>
       <AdditionalDependencies>CaCommon.lib;libprotobuf-lite.lib;ProtoCaLib.lib;msi.lib;dutil.lib;wcautil.lib;Version.lib;Shell32.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(WixSdkPath)\$(WixPlatformToolset)\lib\x86;$(OutDir)\..\CaCommon\;$(OutDir)\..\ProtoCaLib;$(BuildFolder)\poco\lib\$(Configuration);$(BuildFolder)\protobuf\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-	  <SubSystem>Windows</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
@@ -71,6 +71,7 @@
     <ClCompile Include="AccountNames.cpp" />
     <ClCompile Include="CheckRebootRequired.cpp" />
     <ClCompile Include="ConcatFiles.cpp" />
+    <ClCompile Include="FolderPaths.cpp" />
     <ClCompile Include="ForceVersion.cpp" />
     <ClCompile Include="AccountSidSearch.cpp" />
     <ClCompile Include="BackupAndRestore.cpp" />

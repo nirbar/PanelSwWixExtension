@@ -53,3 +53,4 @@ EXPORTS
 	ZipFileSched
 	ExtractPayload
 	PromptCancel
+	FolderPaths

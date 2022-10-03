@@ -20,10 +20,12 @@
       </Directory>
     </Directory>
 
+    <PropertyRef Id="UserDesktopFolder"/>
     <PropertyRef Id="BUILTIN_ADMINISTRATORS"/>
     <Condition Message="Expected BUILTIN_ADMINISTRATORS=BUILTIN\Administrators"><![CDATA[BUILTIN_ADMINISTRATORS="BUILTIN\Administrators"]]></Condition>
     <Condition Message="Expected BUILTIN_ADMINISTRATORS_DOMAIN=BUILTIN"><![CDATA[BUILTIN_ADMINISTRATORS_DOMAIN="BUILTIN"]]></Condition>
     <Condition Message="Expected BUILTIN_ADMINISTRATORS_NAME=Administrators"><![CDATA[BUILTIN_ADMINISTRATORS_NAME="Administrators"]]></Condition>
+    <Condition Message="Expected UserDesktopFolder to contain 'Desktop'"><![CDATA[UserDesktopFolder ~>< "Desktop"]]></Condition>
 
     <!-- Terminate after validating result. -->
     <InstallUISequence>

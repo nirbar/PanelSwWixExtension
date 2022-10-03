@@ -135,6 +135,10 @@ The following properties hold localized built-in account names. To use them, add
 - ENTERPRISE_RO_DCs
 - CERTSVC_DCOM_ACCESS
 
+The following properties hold localized CSIDL folders. To use them, add a [PropertyRef](http://wixtoolset.org/documentation/manual/v3/xsd/wix/propertyref.html) element.
+
+- UserDesktopFolder: CSIDL_DESKTOPDIRECTORY
+
 ## Building
 
 PanelSwWixExtension require the following prerequisites to build:
@@ -149,5 +153,5 @@ After building a unit test project, you'll need to shutdown Visual Studio before
 This is due to the unfortunate habit of Visual Studio to hold the extension file in use.
 You may find it convenient to build unit test projects from a command prompt to workaround this limitation
 ~~~~~~~~~~~~
-MSBuild UnitTests\FileOperationsUT\FileOperationsUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
+MSBuild UnitTests\AccountNamesUT\AccountNamesUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
 ~~~~~~~~~~~~

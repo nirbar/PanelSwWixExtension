@@ -238,6 +238,18 @@
     </InstallExecuteSequence>
   </Fragment>
 
+  <Fragment>
+    <Property Id="UserDesktopFolder" Value="N/A"/>
+
+    <CustomAction Id="FolderPaths" BinaryKey="PanelSwCustomActions.dll" DllEntry="FolderPaths" Execute="firstSequence" />
+    <InstallUISequence>
+      <Custom Action="FolderPaths" Before="AppSearch" Overridable="yes" />
+    </InstallUISequence>
+    <InstallExecuteSequence>
+      <Custom Action="FolderPaths" Before="AppSearch" Overridable="yes" />
+    </InstallExecuteSequence>
+  </Fragment>
+
   <!-- MsiSqlQuery -->
   <Fragment>
     <CustomAction Id="MsiSqlQuery" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="MsiSqlQuery" Execute="immediate" Return="check" />
