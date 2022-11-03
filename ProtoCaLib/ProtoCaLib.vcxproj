@@ -109,6 +109,9 @@
     <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\unzipDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\obfuscatedString.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
     <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\zipDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
@@ -165,6 +168,9 @@
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\unzipDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\obfuscatedString.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\zipDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
@@ -183,6 +189,7 @@
     <None Include="execOnDetails.proto" />
     <None Include="fileOperationsDetails.proto" />
     <None Include="fileRegexDetails.proto" />
+    <None Include="obfuscatedString.proto" />
     <None Include="packages.config" />
     <None Include="restartLocalResourcesDetails.proto" />
     <None Include="servciceConfigDetails.proto" />

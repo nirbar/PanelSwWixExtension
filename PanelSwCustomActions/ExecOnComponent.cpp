@@ -41,7 +41,7 @@ enum Flags
 	Impersonate = 2 * ASync,
 };
 
-static HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, CExecOnComponent::ExitCodeMap *pExitCodeMap, std::vector<ConsoleOuputRemap> *pConsoleOuput, CExecOnComponent::EnvironmentMap *pEnv, int nFlags, int errorHandling, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart, CExecOnComponent* pBeforeStopImp, CExecOnComponent* pAfterStopImp, CExecOnComponent* pBeforeStartImp, CExecOnComponent* pAfterStartImp);
+static HRESULT ScheduleExecution(LPCWSTR szId, const CWixString& szCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, CExecOnComponent::ExitCodeMap *pExitCodeMap, std::vector<ConsoleOuputRemap> *pConsoleOuput, CExecOnComponent::EnvironmentMap *pEnv, int nFlags, int errorHandling, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart, CExecOnComponent* pBeforeStopImp, CExecOnComponent* pAfterStopImp, CExecOnComponent* pBeforeStartImp, CExecOnComponent* pAfterStartImp);
 
 extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 {
@@ -50,7 +50,6 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
 	LPWSTR szCustomActionData = nullptr;
-	LPWSTR szObfuscatedCommand = nullptr;
 	CExecOnComponent oDeferredBeforeStop, oDeferredAfterStop, oDeferredBeforeStart, oDeferredAfterStart;
 	CExecOnComponent oRollbackBeforeStop, oRollbackAfterStop, oRollbackBeforeStart, oRollbackAfterStart;
 	CExecOnComponent oDeferredBeforeStopImp, oDeferredAfterStopImp, oDeferredBeforeStartImp, oDeferredAfterStartImp;
@@ -88,7 +87,6 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
 		ExitOnFailure(hr, "Failed to fetch record.");
-		ReleaseNullStr(szObfuscatedCommand);
 
 		// Get fields
 		PMSIHANDLE hSubView;
@@ -102,7 +100,7 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
 		CExecOnComponent::ExitCodeMap exitCodeMap;
 		std::vector<ConsoleOuputRemap> consoleOutput;
-		std::map<std::string, std::string> environment;
+		std::map<std::string, com::panelsw::ca::ObfuscatedString> environment;
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szId);
 		ExitOnFailure(hr, "Failed to get Id.");
@@ -151,24 +149,24 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 				::DeleteFile((LPCWSTR)szTempFile);
 			
 				dwRes = ::PathRenameExtension(szTempFile, szExtension);
-				ExitOnNullWithLastError(dwRes, hr, "Failed renaming file extension '%ls' to '%ls'", szTempFile, szExtension);
+				ExitOnNullWithLastError(dwRes, hr, "Failed renaming file extension '%ls' to '%ls'", (LPCWSTR)szTempFile, szExtension);
 			}
 
 			hr = szReplaceMe.Format(L"{*%ls}", (LPCWSTR)szBinary);
 			ExitOnFailure(hr, "Failed to format string");
 
-			hr = szCommandFormat.ReplaceAll((LPCWSTR)szReplaceMe, szTempFile);
+			hr = szCommandFormat.ReplaceAll((LPCWSTR)szReplaceMe, (LPCWSTR)szTempFile);
 			ExitOnFailure(hr, "Failed to replace in string");
 
-			hFile = ::CreateFile(szTempFile, GENERIC_ALL, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
+			hFile = ::CreateFile((LPCWSTR)szTempFile, GENERIC_ALL, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, nullptr);
 			ExitOnNullWithLastError((hFile != INVALID_HANDLE_VALUE), hr, "Failed opening file");
 
 			dwRes = ::WriteFile(hFile, pbData, cbData, &cbData, nullptr);
 			ExitOnNullWithLastError(dwRes, hr, "Failed writing to file");
 
 			// Don't care if this is going to fail- just deleting a temporary file
-			rollbackCAD.AddDeleteFile(szTempFile, CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath);
-			commitCAD.AddDeleteFile(szTempFile, CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath);
+			rollbackCAD.AddDeleteFile((LPCWSTR)szTempFile, CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath);
+			commitCAD.AddDeleteFile((LPCWSTR)szTempFile, CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath);
 
 			ReleaseNullMem(pbData);
 			cbData = 0;
@@ -203,7 +201,7 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 			hSubView = NULL;
 		}
 
-		hr = szCommand.MsiFormat((LPCWSTR)szCommandFormat, &szObfuscatedCommand);
+		hr = szCommand.MsiFormat((LPCWSTR)szCommandFormat);
 		ExitOnFailure(hr, "Failed expanding command");
 
 		// Get exit code map (i.e. map exit code 1 to success)
@@ -238,17 +236,20 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		while ((hr = WcaFetchRecord(hSubView, &hSubRecord)) != E_NOMOREITEMS)
 		{
 			ExitOnFailure(hr, "Failed to fetch record.");
-			CWixString name, value;
-			std::string nameA, valueA;
+			CWixString name, valueFormat, value;
+			std::string nameA;
 
 			hr = WcaGetRecordFormattedString(hSubRecord, 1, (LPWSTR*)name);
-			ExitOnFailure(hr, "Failed to get From.");
-			hr = WcaGetRecordFormattedString(hSubRecord, 2, (LPWSTR*)value);
-			ExitOnFailure(hr, "Failed to get To.");
+			ExitOnFailure(hr, "Failed to get environment variable name");
+			hr = WcaGetRecordString(hSubRecord, 2, (LPWSTR*)valueFormat);
+			ExitOnFailure(hr, "Failed to get environment variable value");
+
+			hr = value.MsiFormat((LPCWSTR)valueFormat);
+			ExitOnFailure(hr, "Failed to MSI-format string");
 
 			nameA.assign((LPCSTR)(LPCWSTR)name, WSTR_BYTE_SIZE((LPCWSTR)name));
-			valueA.assign((LPCSTR)(LPCWSTR)value, WSTR_BYTE_SIZE((LPCWSTR)value));
-			environment[nameA] = valueA;
+			environment[nameA].set_plain((LPCSTR)(LPCWSTR)value, WSTR_BYTE_SIZE((LPCWSTR)value));
+			environment[nameA].set_obfuscated((LPCSTR)value.Obfuscated(), WSTR_BYTE_SIZE(value.Obfuscated()));
 		}
 
 		// Get exit code map (i.e. map exit code 1 to success)
@@ -262,7 +263,7 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		while ((hr = WcaFetchRecord(hSubView, &hSubRecord)) != E_NOMOREITEMS)
 		{
 			ExitOnFailure(hr, "Failed to fetch record.");
-			CWixString szExpressionFormat, szExpression, szObfuscatedExpression;
+			CWixString szExpressionFormat, szExpression;
 			CWixString szPrompt;
 			int onMatch = 1;
 			ErrorHandling stdoutHandling = ErrorHandling::fail;
@@ -277,11 +278,11 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 			hr = WcaGetRecordFormattedString(hSubRecord, 4, (LPWSTR*)szPrompt);
 			ExitOnFailure(hr, "Failed to get ErrorHandling.");
 
-			hr = szExpression.MsiFormat((LPCWSTR)szExpressionFormat, (LPWSTR*)szObfuscatedExpression);
+			hr = szExpression.MsiFormat((LPCWSTR)szExpressionFormat);
 			ExitOnFailure(hr, "Failed to format Expression.");
 
-			console.set_regex((LPCWSTR)szExpression, WSTR_BYTE_SIZE((LPCWSTR)szExpression));
-			console.set_obfuscatedregex((LPCWSTR)szObfuscatedExpression, WSTR_BYTE_SIZE((LPCWSTR)szObfuscatedExpression));
+			console.mutable_regex()->set_plain((LPCWSTR)szExpression, WSTR_BYTE_SIZE((LPCWSTR)szExpression));
+			console.mutable_regex()->set_obfuscated(szExpression.Obfuscated(), WSTR_BYTE_SIZE(szExpression.Obfuscated()));
 			console.set_onmatch(onMatch);
 			console.set_errorhandling(stdoutHandling);
 			console.set_prompttext((LPCWSTR)szPrompt, WSTR_BYTE_SIZE((LPCWSTR)szPrompt));
@@ -298,12 +299,12 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		case WCA_TODO::WCA_TODO_INSTALL:
 			if (nFlags & Flags::OnInstall)
 			{
-				hr = ScheduleExecution(szId, szCommand, szObfuscatedCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, &oDeferredBeforeStopImp, &oDeferredAfterStopImp, &oDeferredBeforeStartImp, &oDeferredAfterStartImp);
+				hr = ScheduleExecution(szId, szCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, &oDeferredBeforeStopImp, &oDeferredAfterStopImp, &oDeferredBeforeStartImp, &oDeferredAfterStartImp);
 				ExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			if (nFlags & Flags::OnInstallRollback)
 			{
-				hr = ScheduleExecution(szId, szCommand, szObfuscatedCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, &oRollbackBeforeStopImp, &oRollbackAfterStopImp, &oRollbackBeforeStartImp, &oRollbackAfterStartImp);
+				hr = ScheduleExecution(szId, szCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, &oRollbackBeforeStopImp, &oRollbackAfterStopImp, &oRollbackBeforeStartImp, &oRollbackAfterStartImp);
 				ExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			break;
@@ -311,12 +312,12 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		case WCA_TODO::WCA_TODO_REINSTALL:
 			if (nFlags & Flags::OnReinstall)
 			{
-				hr = ScheduleExecution(szId, szCommand, szObfuscatedCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, &oDeferredBeforeStopImp, &oDeferredAfterStopImp, &oDeferredBeforeStartImp, &oDeferredAfterStartImp);
+				hr = ScheduleExecution(szId, szCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, &oDeferredBeforeStopImp, &oDeferredAfterStopImp, &oDeferredBeforeStartImp, &oDeferredAfterStartImp);
 				ExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			if (nFlags & Flags::OnReinstallRollback)
 			{
-				hr = ScheduleExecution(szId, szCommand, szObfuscatedCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, &oRollbackBeforeStopImp, &oRollbackAfterStopImp, &oRollbackBeforeStartImp, &oRollbackAfterStartImp);
+				hr = ScheduleExecution(szId, szCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, &oRollbackBeforeStopImp, &oRollbackAfterStopImp, &oRollbackBeforeStartImp, &oRollbackAfterStartImp);
 				ExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			break;
@@ -324,12 +325,12 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		case WCA_TODO::WCA_TODO_UNINSTALL:
 			if (nFlags & Flags::OnRemove)
 			{
-				hr = ScheduleExecution(szId, szCommand, szObfuscatedCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, &oDeferredBeforeStopImp, &oDeferredAfterStopImp, &oDeferredBeforeStartImp, &oDeferredAfterStartImp);
+				hr = ScheduleExecution(szId, szCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, &oDeferredBeforeStopImp, &oDeferredAfterStopImp, &oDeferredBeforeStartImp, &oDeferredAfterStartImp);
 				ExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			if (nFlags & Flags::OnRemoveRollback)
 			{
-				hr = ScheduleExecution(szId, szCommand, szObfuscatedCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, &oRollbackBeforeStopImp, &oRollbackAfterStopImp, &oRollbackBeforeStartImp, &oRollbackAfterStartImp);
+				hr = ScheduleExecution(szId, szCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, &oRollbackBeforeStopImp, &oRollbackAfterStopImp, &oRollbackBeforeStartImp, &oRollbackAfterStartImp);
 				ExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			break;
@@ -454,7 +455,6 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 LExit:
 	ReleaseMem(pbData);
 	ReleaseStr(szCustomActionData);
-	ReleaseStr(szObfuscatedCommand);
 	if ((hFile != INVALID_HANDLE_VALUE) && (hFile != NULL))
 	{
 		::FlushFileBuffers(hFile);
@@ -465,59 +465,59 @@ LExit:
 	return WcaFinalize(er);
 }
 
-HRESULT ScheduleExecution(LPCWSTR szId, LPCWSTR szCommand, LPCWSTR szObfuscatedCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, CExecOnComponent::ExitCodeMap* pExitCodeMap, std::vector<ConsoleOuputRemap>* pConsoleOuput, CExecOnComponent::EnvironmentMap* pEnv, int nFlags, int errorHandling, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart, CExecOnComponent* pBeforeStopImp, CExecOnComponent* pAfterStopImp, CExecOnComponent* pBeforeStartImp, CExecOnComponent* pAfterStartImp)
+HRESULT ScheduleExecution(LPCWSTR szId, const CWixString &szCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, CExecOnComponent::ExitCodeMap* pExitCodeMap, std::vector<ConsoleOuputRemap>* pConsoleOuput, CExecOnComponent::EnvironmentMap* pEnv, int nFlags, int errorHandling, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart, CExecOnComponent* pBeforeStopImp, CExecOnComponent* pAfterStopImp, CExecOnComponent* pBeforeStartImp, CExecOnComponent* pAfterStartImp)
 {
 	HRESULT hr = S_OK;
 
 	if (nFlags & Flags::BeforeStopServices)
 	{
-		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Will execute command '%ls' before StopServices", szObfuscatedCommand);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Will execute command '%ls' before StopServices", szCommand.Obfuscated());
 		if (nFlags & Flags::Impersonate)
 		{
-			hr = pBeforeStopImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
+			hr = pBeforeStopImp->AddExec(szCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
 		}
 		else
 		{
-			hr = pBeforeStop->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
+			hr = pBeforeStop->AddExec(szCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
 		}
 		ExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
 	if (nFlags & Flags::AfterStopServices)
 	{
-		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Will execute command '%ls' after StopServices", szObfuscatedCommand);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Will execute command '%ls' after StopServices", szCommand.Obfuscated());
 		if (nFlags & Flags::Impersonate)
 		{
-			hr = pAfterStopImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
+			hr = pAfterStopImp->AddExec(szCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
 		}
 		else
 		{
-			hr = pAfterStop->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
+			hr = pAfterStop->AddExec(szCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
 		}
 		ExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
 	if (nFlags & Flags::BeforeStartServices)
 	{
-		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Will execute command '%ls' before StartServices", szObfuscatedCommand);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Will execute command '%ls' before StartServices", szCommand.Obfuscated());
 		if (nFlags & Flags::Impersonate)
 		{
-			hr = pBeforeStartImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
+			hr = pBeforeStartImp->AddExec(szCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
 		}
 		else
 		{
-			hr = pBeforeStart->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
+			hr = pBeforeStart->AddExec(szCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
 		}
 		ExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
 	if (nFlags & Flags::AfterStartServices)
 	{
-		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Will execute command '%ls' after StartServices", szObfuscatedCommand);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Will execute command '%ls' after StartServices", szCommand.Obfuscated());
 		if (nFlags & Flags::Impersonate)
 		{
-			hr = pAfterStartImp->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
+			hr = pAfterStartImp->AddExec(szCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
 		}
 		else
 		{
-			hr = pAfterStart->AddExec(szCommand, szObfuscatedCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
+			hr = pAfterStart->AddExec(szCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
 		}
 		ExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
@@ -526,7 +526,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CExecOnComponent::AddExec(LPCWSTR szCommand, LPCWSTR szObfuscatedCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, ExitCodeMap* pExitCodeMap, vector<ConsoleOuputRemap>* pConsoleOuput, EnvironmentMap* pEnv, int nFlags, ErrorHandling errorHandling)
+HRESULT CExecOnComponent::AddExec(const CWixString &szCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, ExitCodeMap* pExitCodeMap, vector<ConsoleOuputRemap>* pConsoleOuput, EnvironmentMap* pEnv, int nFlags, ErrorHandling errorHandling)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command* pCmd = nullptr;
@@ -540,8 +540,8 @@ HRESULT CExecOnComponent::AddExec(LPCWSTR szCommand, LPCWSTR szObfuscatedCommand
 	pDetails = new ExecOnDetails();
 	ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	pDetails->set_command(szCommand, WSTR_BYTE_SIZE(szCommand));
-	pDetails->set_obfuscatedcommand(szObfuscatedCommand, WSTR_BYTE_SIZE(szObfuscatedCommand));
+	pDetails->mutable_command()->set_plain((LPCWSTR)szCommand, WSTR_BYTE_SIZE((LPCWSTR)szCommand));
+	pDetails->mutable_command()->set_obfuscated(szCommand.Obfuscated(), WSTR_BYTE_SIZE(szCommand.Obfuscated()));
 	if (szWorkingDirectory && *szWorkingDirectory)
 	{
 		pDetails->set_workingdirectory(szWorkingDirectory, WSTR_BYTE_SIZE(szWorkingDirectory));
@@ -566,8 +566,8 @@ HRESULT CExecOnComponent::AddExec(LPCWSTR szCommand, LPCWSTR szObfuscatedCommand
 	for (size_t i = 0; i < pConsoleOuput->size(); ++i)
 	{
 		ConsoleOuputRemap* pConsole = pDetails->add_consoleouputremap();
-		pConsole->set_regex(pConsoleOuput->at(i).regex());
-		pConsole->set_obfuscatedregex(pConsoleOuput->at(i).obfuscatedregex());
+		pConsole->mutable_regex()->set_plain(pConsoleOuput->at(i).regex().plain());
+		pConsole->mutable_regex()->set_obfuscated(pConsoleOuput->at(i).regex().obfuscated());
 		pConsole->set_prompttext(pConsoleOuput->at(i).prompttext());
 		pConsole->set_onmatch(pConsoleOuput->at(i).onmatch());
 		pConsole->set_errorhandling(pConsoleOuput->at(i).errorhandling());
@@ -606,8 +606,8 @@ HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command)
 	bRes = details.ParseFromString(command);
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ExecOnDetails");
 
-	szCommand = (LPCWSTR)(LPVOID)details.command().data();
-	szObfuscatedCommand = (LPCWSTR)(LPVOID)details.obfuscatedcommand().data();
+	szCommand = (LPCWSTR)(LPVOID)details.command().plain().data();
+	szObfuscatedCommand = (LPCWSTR)(LPVOID)details.command().obfuscated().data();
 	szWorkingDirectory = (LPCWSTR)(LPVOID)details.workingdirectory().data();
 	szDomain = (LPCWSTR)(LPVOID)details.domain().data();
 	szUser = (LPCWSTR)(LPVOID)details.user().data();
@@ -959,11 +959,11 @@ HRESULT CExecOnComponent::SearchStdOut(LPCWSTR szStdOut, const ExecOnDetails& de
 		try
 		{
 			bool bRes = true;
-			std::wregex rx((LPCWSTR)(LPVOID)console.regex().data());
+			std::wregex rx((LPCWSTR)(LPVOID)console.regex().plain().data());
 			match_results<LPCWSTR> results;
 
 			bRes = regex_search(szStdOut, results, rx);
-			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Regex '%ls' search yielded %u matches", (LPCWSTR)(LPVOID)console.obfuscatedregex().data(), results.size());
+			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Regex '%ls' search yielded %u matches", (LPCWSTR)(LPVOID)console.regex().obfuscated().data(), results.size());
 			if ((bRes && results.size()) != console.onmatch())
 			{
 				continue;
@@ -1002,7 +1002,7 @@ HRESULT CExecOnComponent::SearchStdOut(LPCWSTR szStdOut, const ExecOnDetails& de
 			localHr = WcaSetRecordInteger(hRec, 1, 27006);
 			ExitOnFailure(localHr, "Failed setting record integer");
 
-			localHr = WcaSetRecordString(hRec, 2, (LPCWSTR)(LPVOID)details.obfuscatedcommand().data());
+			localHr = WcaSetRecordString(hRec, 2, (LPCWSTR)(LPVOID)details.command().obfuscated().data());
 			ExitOnFailure(localHr, "Failed setting record string");
 
 			localHr = WcaSetRecordString(hRec, 3, (LPCWSTR)(LPVOID)console.prompttext().data());
@@ -1039,7 +1039,7 @@ LExit:
 	return (SUCCEEDED(localHr) ? hr : localHr);
 }
 
-HRESULT CExecOnComponent::SetEnvironment(const ::google::protobuf::Map<std::string, std::string>& customEnv)
+HRESULT CExecOnComponent::SetEnvironment(const ::google::protobuf::Map<std::string, com::panelsw::ca::ObfuscatedString>& customEnv)
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -1066,14 +1066,15 @@ HRESULT CExecOnComponent::SetEnvironment(const ::google::protobuf::Map<std::stri
 	}
 	ExitOnFailure(hr, "Failed enumerating environment registry key");
 
-	for (::google::protobuf::Map<std::string, std::string>::const_iterator itCurr = customEnv.begin(), itEnd = customEnv.end(); itCurr != itEnd; ++itCurr)
+	for (::google::protobuf::Map<std::string, com::panelsw::ca::ObfuscatedString>::const_iterator itCurr = customEnv.begin(), itEnd = customEnv.end(); itCurr != itEnd; ++itCurr)
 	{
 		LPCWSTR szName = (LPCWSTR)(LPVOID)itCurr->first.data();
-		LPCWSTR szValue = (LPCWSTR)(LPVOID)itCurr->second.data();
+		LPCWSTR szValue = (LPCWSTR)(LPVOID)itCurr->second.plain().data();
+		LPCWSTR szObfuscatedValue = (LPCWSTR)(LPVOID)itCurr->second.obfuscated().data();
 
 		if (szName && *szName && szValue && *szValue)
 		{
-			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Setting custom environment variable '%ls' to '%ls'", szName, szValue);
+			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Setting custom environment variable '%ls' to '%ls'", szName, szObfuscatedValue);
 
 			bRes = ::SetEnvironmentVariable(szName, szValue);
 			ExitOnNullWithLastError(bRes, hr, "Failed setting environment variable '%ls'", (LPCWSTR)szName);

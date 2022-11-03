@@ -1,0 +1,8 @@
+syntax = "proto3";
+package com.panelsw.ca;
+option optimize_for = LITE_RUNTIME;
+
+message ObfuscatedString{
+	bytes plain = 1;
+	bytes obfuscated = 2;
+}

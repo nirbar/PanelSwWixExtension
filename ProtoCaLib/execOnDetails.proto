@@ -1,31 +1,30 @@
 syntax = "proto3";
 package com.panelsw.ca;
-option optimize_for = LITE_RUNTIME;
 import "errorHandling.proto";
+import "obfuscatedString.proto";
+option optimize_for = LITE_RUNTIME;
 
 message ConsoleOuputRemap { 
 
-	bytes regex = 1;
-	bytes obfuscatedRegex = 2;
+	ObfuscatedString regex = 1;
 
-	bool onMatch = 3;
-	ErrorHandling errorHandling = 4;
-	bytes promptText = 5;
+	bool onMatch = 2;
+	ErrorHandling errorHandling = 3;
+	bytes promptText = 4;
 }
 
 message ExecOnDetails{
 
-	bytes command = 1;
-	bytes obfuscatedcommand = 2;
-	bytes workingdirectory = 3;
+	ObfuscatedString command = 1;
+	bytes workingdirectory = 2;
 	
-	map<int32, int32> exitCodeRemap = 4;
-	map<string, bytes> environment = 5;
+	map<int32, int32> exitCodeRemap = 3;
+	map<string, ObfuscatedString> environment = 4;
 
-	bool async = 6;
-	ErrorHandling errorHandling = 7;
+	bool async = 5;
+	ErrorHandling errorHandling = 6;
 
-	repeated ConsoleOuputRemap consoleOuputRemap = 8;
+	repeated ConsoleOuputRemap consoleOuputRemap = 7;
 
 	// Impersonate a user
 	bytes domain = 9;

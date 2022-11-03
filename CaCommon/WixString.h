@@ -39,6 +39,7 @@ public:
 	{
 		_dwCapacity = other._dwCapacity;
 		_pTokenContext = other._pTokenContext;
+		_szObfuscated = other._szObfuscated;
 		_pS = other.Detach();
 	}
 
@@ -46,6 +47,7 @@ public:
 	{
 		_dwCapacity = other._dwCapacity;
 		_pTokenContext = other._pTokenContext;
+		_szObfuscated = other._szObfuscated;
 		_pS = other.Detach();
 		return *this;
 	}
@@ -64,7 +66,7 @@ public:
 
 	WCHAR& operator[](size_t i)
 	{
-		static WCHAR errChr;
+		static WCHAR errChr = NULL;
 		if ((i < 0) || (i >= Capacity()))
 		{
 			return errChr;
@@ -79,16 +81,12 @@ public:
 	{
 		HRESULT hr = S_OK;
 
-		if (dwSize > Capacity())
-		{
-			hr = Release();
-			ExitOnFailure(hr, "Failed to free memory");
+		Release();
 
-			hr = StrAlloc(&_pS, dwSize);
-			ExitOnFailure(hr, "Failed to allocate memory");
+		hr = StrAlloc(&_pS, dwSize);
+		ExitOnFailure(hr, "Failed to allocate memory");
 
-			_dwCapacity = dwSize;
-		}
+		_dwCapacity = dwSize;
 
 	LExit:
 		return hr;
@@ -96,29 +94,32 @@ public:
 
 	HRESULT SecureRelease()
 	{
-		HRESULT hr = S_OK;
-
 		if (_pS != nullptr)
 		{
-			SecureZeroMemory(_pS, _dwCapacity);
-			hr = Release();
+			SecureZeroMemory(_pS, Capacity());
 		}
 
-		return hr;
+		return Release();
 	}
 
 	HRESULT Release()
 	{
 		HRESULT hr = S_OK;
 
+		if (_szObfuscated)
+		{
+			StrFree(_szObfuscated);
+			_szObfuscated = nullptr;
+		}
+
 		if (_pS != nullptr)
 		{
 			hr = StrFree(_pS);
-			ExitOnFailure(hr, "Failed to free memory");
-
 			_pS = nullptr;
 			_dwCapacity = 0;
 			_pTokenContext = nullptr;
+
+			ExitOnFailure(hr, "Failed to free memory");
 		}
 
 	LExit:
@@ -131,6 +132,7 @@ public:
 		_pS = nullptr;
 		_dwCapacity = 0;
 		_pTokenContext = nullptr;
+		_szObfuscated = nullptr;
 		return pS;
 	}
 
@@ -140,10 +142,10 @@ public:
 		HRESULT hr = S_OK;
 		errno_t err = ERROR_SUCCESS;
 
+		Release();
+
 		if (pS == nullptr)
 		{
-			hr = Release();
-			ExitOnFailure(hr, "Failed to release string");
 			ExitFunction();
 		}
 
@@ -168,7 +170,13 @@ public:
 	{
 		HRESULT hr = S_OK;
 
+		ExitOnNull(_pS, hr, E_INVALIDSTATE, "Can't replace in null string");
+
 		hr = StrReplaceStringAll(&_pS, from, to);
+		if (FAILED(hr))
+		{
+			Release();
+		}
 		ExitOnFailure(hr, "Failed to replace in string");
 
 	LExit:
@@ -181,10 +189,11 @@ public:
 		va_list va;
 		va_start(va, stFormat);
 
+		Release();
+
 		size_t sSize = ::_vscwprintf(stFormat, va);
 		if (sSize == 0)
 		{
-			hr = Release();
 			ExitFunction();
 		}
 
@@ -200,10 +209,15 @@ public:
 		return hr;
 	}
 
+	LPCWSTR Obfuscated() const
+	{
+		return _szObfuscated ? _szObfuscated : _pS;
+	}
+
 	// Expand MSI-formatted string.
-	// stFormat: MSI format string
-	// szObfuscated: If not NULL, will receive the expanded string with hidden properties obfuscated.
-	HRESULT MsiFormat(LPCWSTR stFormat, LPWSTR* pszObfuscated = nullptr)
+	// szFormat: MSI format string
+	// pszObfuscated: Optional pointer to a string that will contain the obfuscated formatted string
+	HRESULT MsiFormat(LPCWSTR szFormat, LPWSTR* pszObfuscated = nullptr)
 	{
 		HRESULT hr = S_OK;
 		LPWSTR szNew = nullptr;
@@ -211,61 +225,66 @@ public:
 		LPWSTR szObfuscated = nullptr;
 		LPWSTR szMsiHiddenProperties = nullptr;
 		LPWSTR szHideMe = nullptr;
+		
+		Release();
 
-		if (pszObfuscated)
+		hr = StrAllocString(&szStripped, szFormat, 0);
+		if (SUCCEEDED(hr))
 		{
-			hr = StrAllocString(&szStripped, stFormat, 0);
-			if (SUCCEEDED(hr))
+			hr = WcaGetProperty(L"MsiHiddenProperties", &szMsiHiddenProperties);
+			if (SUCCEEDED(hr) && szMsiHiddenProperties && *szMsiHiddenProperties)
 			{
-				hr = WcaGetProperty(L"MsiHiddenProperties", &szMsiHiddenProperties);
-				if (SUCCEEDED(hr) && szMsiHiddenProperties && *szMsiHiddenProperties)
+				for (LPWSTR szContext = nullptr, szProp = ::wcstok_s(szMsiHiddenProperties, L";", &szContext); SUCCEEDED(hr) && szProp; szProp = ::wcstok_s(nullptr, L";", &szContext))
 				{
-					for (LPWSTR szContext = nullptr, szProp = ::wcstok_s(szMsiHiddenProperties, L";", &szContext); SUCCEEDED(hr) && szProp; szProp = ::wcstok_s(nullptr, L";", &szContext))
+					if (szProp && *szProp)
 					{
-						if (szProp && *szProp)
+						hr = StrAllocFormatted(&szHideMe, L"[%ls]", szProp);
+						if (SUCCEEDED(hr))
 						{
-							hr = StrAllocFormatted(&szHideMe, L"[%ls]", szProp);
-							if (SUCCEEDED(hr))
+							hr = StrReplaceStringAll(&szStripped, szHideMe, L"******");
+							if (FAILED(hr))
 							{
-								hr = StrReplaceStringAll(&szStripped, szHideMe, L"******");
-
-								StrFree(szHideMe);
-								szHideMe = nullptr;
+								break;
 							}
+
+							StrFree(szHideMe);
+							szHideMe = nullptr;
 						}
 					}
 				}
+			}
 
+			if (SUCCEEDED(hr))
+			{
+				hr = WcaGetFormattedString(szStripped, &szObfuscated);
 				if (SUCCEEDED(hr))
 				{
-					hr = WcaGetFormattedString(szStripped, &szObfuscated);
+					hr = StrReplaceStringAll(&szObfuscated, L"[", L"[\\[]"); // Since obfuscated is re-formatted on logging, we want to re-escape '['.
 					if (SUCCEEDED(hr))
 					{
-						hr = StrReplaceStringAll(&szObfuscated, L"[", L"[\\[]"); // Since obfuscated is re-formatted on logging, we want to re-escape '['.
-						if (SUCCEEDED(hr))
+						_szObfuscated = szObfuscated;
+						szObfuscated = nullptr;
+
+						if (pszObfuscated)
 						{
-							*pszObfuscated = szObfuscated;
-							szObfuscated = nullptr;
+							StrAllocString(pszObfuscated, _szObfuscated, NULL);
 						}
 					}
 				}
 			}
 		}
 
-		hr = WcaGetFormattedString(stFormat, &szNew);
+		hr = WcaGetFormattedString(szFormat, &szNew);
 		if (SUCCEEDED(hr))
 		{
-			Release();
+			if (_pS)
+			{
+				StrFree(_pS);
+			}
 			_pS = szNew;
 			_dwCapacity = 1 + ::wcslen(szNew);
 
 			szNew = nullptr;
-		}
-
-		// Nothing needed obfuscation (MsiHiddenProperties was empty)?
-		if (pszObfuscated && !*pszObfuscated)
-		{
-			StrAllocString(pszObfuscated, _pS, 0);
 		}
 
 		if (szNew)
@@ -304,12 +323,18 @@ public:
 		ExitOnFailure(hr, "Failed formatting string");
 
 		hr = StrAllocConcat(&_pS, szAppend, 0);
-		ExitOnFailure(hr, "Failed appenfing string");
+		ExitOnFailure(hr, "Failed appending string");
 
 		dwCapacity = 1 + ::wcslen(_pS);
 		if (dwCapacity > _dwCapacity)
 		{
 			_dwCapacity = dwCapacity;
+		}
+
+		if (_szObfuscated)
+		{
+			hr = StrAllocConcat(&_szObfuscated, szAppend, 0);
+			ExitOnFailure(hr, "Failed appending string");
 		}
 
 	LExit:
@@ -506,6 +531,7 @@ public:
 private:
 
 	LPWSTR _pS = nullptr;
+	LPWSTR _szObfuscated = nullptr;
 	LPWSTR _pTokenContext = nullptr;
 	DWORD _dwCapacity = 0;
 };

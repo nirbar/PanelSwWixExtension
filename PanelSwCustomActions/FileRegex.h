@@ -1,5 +1,6 @@
 #pragma once
 #include "../CaCommon/DeferredActionBase.h"
+#include "../CaCommon/WixString.h"
 #include "fileRegexDetails.pb.h"
 
 class CFileRegex :
@@ -9,9 +10,9 @@ public:
 
 	CFileRegex() : CDeferredActionBase("FileRegex") { }
 
-	HRESULT AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, LPCWSTR szRegexObfuscated, LPCWSTR szReplacementObfuscated, ::com::panelsw::ca::FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase);
+	HRESULT AddFileRegex(LPCWSTR szFilePath, const CWixString &szRegex, const CWixString& szReplacement, ::com::panelsw::ca::FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase);
 
-	HRESULT Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, LPCWSTR szRegexObfuscated, LPCWSTR szReplacementObfuscated, ::com::panelsw::ca::FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase);
+	HRESULT Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, ::com::panelsw::ca::FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase);
 
 protected:
 	

@@ -210,7 +210,6 @@ static HRESULT ReplaceStrings(LPCWSTR szXslPath, LPCWSTR szXslId)
 
 		CWixString szTextFmt, szReplacementFmt;
 		CWixString szText, szReplacement;
-		CWixString szTextObf, szReplacementObf;
 		CFileRegex fileRegex;
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szTextFmt);
@@ -218,15 +217,17 @@ static HRESULT ReplaceStrings(LPCWSTR szXslPath, LPCWSTR szXslId)
 		hr = WcaGetRecordString(hRecord, 2, (LPWSTR*)szReplacementFmt);
 		ExitOnFailure(hr, "Failed to get Replacement.");
 
-		hr = szText.MsiFormat((LPCWSTR)szTextFmt, (LPWSTR*)szTextObf);
+		hr = szText.MsiFormat((LPCWSTR)szTextFmt);
 		ExitOnFailure(hr, "Failed formatting string");
 
-		hr = szReplacement.MsiFormat((LPCWSTR)szReplacementFmt, (LPWSTR*)szReplacementObf);
+		hr = szReplacement.MsiFormat((LPCWSTR)szReplacementFmt);
 		ExitOnFailure(hr, "Failed formatting string");
 
 		if (!szText.IsNullOrEmpty())
 		{
-			hr = fileRegex.Execute(szXslPath, szText, szReplacement, szTextObf, szReplacementObf, com::panelsw::ca::FileRegexDetails_FileEncoding::FileRegexDetails_FileEncoding_None, false);
+			CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Will replace matches of regex '%ls' with '%ls' in file '%ls'", szText.Obfuscated(), szReplacement.Obfuscated(), szXslPath);
+
+			hr = fileRegex.Execute(szXslPath, szText, szReplacement, com::panelsw::ca::FileRegexDetails_FileEncoding::FileRegexDetails_FileEncoding_None, false);
 			ExitOnFailure(hr, "Failed to replace strings in SQL script.");
 		}
 	}

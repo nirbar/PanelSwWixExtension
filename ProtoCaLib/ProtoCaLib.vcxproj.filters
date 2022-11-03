@@ -186,6 +186,9 @@
     <None Include="concatFilesDetails.proto">
       <Filter>Protobuf</Filter>
     </None>
+    <None Include="obfuscatedString.proto">
+      <Filter>Protobuf</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(IntDir)\Version.rc">

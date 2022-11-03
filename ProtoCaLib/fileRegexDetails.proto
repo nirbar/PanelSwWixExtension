@@ -1,5 +1,6 @@
 syntax = "proto3";
 package com.panelsw.ca;
+import "obfuscatedString.proto";
 option optimize_for = LITE_RUNTIME;
 
 message FileRegexDetails{
@@ -12,10 +13,8 @@ message FileRegexDetails{
 	}
 	
 	bytes file = 1;
-	bytes expression = 2;
-	bytes replacement = 3;
+	ObfuscatedString expression = 2;
+	ObfuscatedString replacement = 3;
 	FileEncoding encoding = 4;
 	bool ignoreCase = 5;
-	bytes expressionObfuscated = 6;
-	bytes replacementObfuscated = 7;
 }

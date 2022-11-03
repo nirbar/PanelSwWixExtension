@@ -48,7 +48,7 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 
 		// Get fields
 		CWixString szComponent, szFileId, szFileFormat, szFilePath, szRegexUnformatted, szReplacementUnformatted, szCondition;
-		CWixString szRegex, szRegexObfuscated, szReplacement, szReplacementObfuscated;
+		CWixString szRegex, szReplacement;
 		int nIgnoreCase = 0;
 		int nEncoding = 0;
 
@@ -96,15 +96,15 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 			continue;
 		}
 
-		hr = szRegex.MsiFormat((LPCWSTR)szRegexUnformatted, (LPWSTR*)szRegexObfuscated);
+		hr = szRegex.MsiFormat((LPCWSTR)szRegexUnformatted);
 		ExitOnFailure(hr, "Failed formatting string");
 
-		hr = szReplacement.MsiFormat((LPCWSTR)szReplacementUnformatted, (LPWSTR*)szReplacementObfuscated);
+		hr = szReplacement.MsiFormat((LPCWSTR)szReplacementUnformatted);
 		ExitOnFailure(hr, "Failed formatting string");
 
-		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Will replace matches of regex '%ls' with '%ls' in file '%ls'", (LPCWSTR)szRegexObfuscated, (LPCWSTR)szReplacementObfuscated, (LPCWSTR)szFilePath);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Will replace matches of regex '%ls' with '%ls' in file '%ls'", szRegex.Obfuscated(), szReplacement.Obfuscated(), (LPCWSTR)szFilePath);
 
-		hr = oDeferredFileRegex.AddFileRegex(szFilePath, szRegex, szReplacement, szRegexObfuscated, szReplacementObfuscated, (FileRegexDetails::FileEncoding)nEncoding, nIgnoreCase != 0);
+		hr = oDeferredFileRegex.AddFileRegex(szFilePath, szRegex, szReplacement, (FileRegexDetails::FileEncoding)nEncoding, nIgnoreCase != 0);
 		ExitOnFailure(hr, "Failed creating custom action data for deferred action.");
 
 		// Once per file: Backup it up before applying replacements; Restore on failure; Delete on commit.
@@ -200,7 +200,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CFileRegex::AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, LPCWSTR szRegexObfuscated, LPCWSTR szReplacementObfuscated, FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase)
+HRESULT CFileRegex::AddFileRegex(LPCWSTR szFilePath, const CWixString &szRegex, const CWixString& szReplacement, FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command* pCmd = nullptr;
@@ -215,10 +215,10 @@ HRESULT CFileRegex::AddFileRegex(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR sz
 	ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
 	pDetails->set_file(szFilePath, WSTR_BYTE_SIZE(szFilePath));
-	pDetails->set_expression(szRegex, WSTR_BYTE_SIZE(szRegex));
-	pDetails->set_expressionobfuscated(szRegexObfuscated, WSTR_BYTE_SIZE(szRegexObfuscated));
-	pDetails->set_replacement(szReplacement, WSTR_BYTE_SIZE(szReplacement));
-	pDetails->set_replacementobfuscated(szReplacementObfuscated, WSTR_BYTE_SIZE(szReplacementObfuscated));
+	pDetails->mutable_expression()->set_plain((LPCWSTR)szRegex, WSTR_BYTE_SIZE((LPCWSTR)szRegex));
+	pDetails->mutable_expression()->set_obfuscated(szRegex.Obfuscated(), WSTR_BYTE_SIZE(szRegex.Obfuscated()));
+	pDetails->mutable_replacement()->set_plain((LPCWSTR)szReplacement, WSTR_BYTE_SIZE((LPCWSTR)szReplacement));
+	pDetails->mutable_replacement()->set_obfuscated(szReplacement.Obfuscated(), WSTR_BYTE_SIZE(szReplacement.Obfuscated()));
 	pDetails->set_encoding(eEncoding);
 	pDetails->set_ignorecase(bIgnoreCase);
 
@@ -247,19 +247,21 @@ HRESULT CFileRegex::DeferredExecute(const ::std::string& command)
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking FileOperationsDetails");
 
 	szFile = (LPCWSTR)(LPVOID)details.file().data();
-	szExpression = (LPCWSTR)(LPVOID)details.expression().data();
-	szReplacement = (LPCWSTR)(LPVOID)details.replacement().data();
-	szRegexObfuscated = (LPCWSTR)(LPVOID)details.expressionobfuscated().data();
-	szReplacementObfuscated = (LPCWSTR)(LPVOID)details.replacementobfuscated().data();
+	szExpression = (LPCWSTR)(LPVOID)details.expression().plain().data();
+	szReplacement = (LPCWSTR)(LPVOID)details.replacement().plain().data();
+	szRegexObfuscated = (LPCWSTR)(LPVOID)details.expression().obfuscated().data();
+	szReplacementObfuscated = (LPCWSTR)(LPVOID)details.replacement().obfuscated().data();
 
-	hr = Execute(szFile, szExpression, szReplacement, szRegexObfuscated, szReplacementObfuscated, details.encoding(), details.ignorecase());
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Replacing regex '%ls' matches with '%ls' in file '%ls'", szRegexObfuscated, szReplacementObfuscated, szFile);
+
+	hr = Execute(szFile, szExpression, szReplacement, details.encoding(), details.ignorecase());
 	ExitOnFailure(hr, "Failed to execute file regular expression");
 
 LExit:
 	return hr;
 }
 
-HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, LPCWSTR szRegexObfuscated, LPCWSTR szReplacementObfuscated, FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase)
+HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szReplacement, FileRegexDetails::FileEncoding eEncoding, bool bIgnoreCase)
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -270,8 +272,6 @@ HRESULT CFileRegex::Execute(LPCWSTR szFilePath, LPCWSTR szRegex, LPCWSTR szRepla
 	void* pFileContents = nullptr;
 	FileRegexDetails::FileEncoding eDetectedEncoding = FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_None;
 	PMSIHANDLE hActionData;
-
-	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Replacing regex '%ls' matches with '%ls' in file '%ls'", szRegexObfuscated, szReplacementObfuscated, szFilePath);
 
 	// ActionData: "Editing [1]"
 	hActionData = ::MsiCreateRecord(1);
