@@ -197,10 +197,8 @@ LExit:
 HRESULT CRestartLocalResources::Execute(const std::list<LPWSTR>& lstFolders)
 {
     HRESULT hr = S_OK;
-    HANDLE hProcess = NULL;
     INT er = ERROR_SUCCESS;
     BOOL bRes = TRUE;
-    PMSIHANDLE hActionData;
     std::map<DWORD, LPWSTR> mapProcId;
 
     hr = EnumerateLocalProcesses(lstFolders, mapProcId);
@@ -238,33 +236,7 @@ HRESULT CRestartLocalResources::Execute(const std::list<LPWSTR>& lstFolders)
 
     for (const std::pair<DWORD, LPWSTR>& prcId : mapProcId)
     {
-        // ActionData: "Closing [1]"
-        hActionData = ::MsiCreateRecord(1);
-        if (hActionData && SUCCEEDED(WcaSetRecordString(hActionData, 1, prcId.second)))
-        {
-            WcaProcessMessage(INSTALLMESSAGE::INSTALLMESSAGE_ACTIONDATA, hActionData);
-        }
-
-        // Get windows for all processes, kill only those in the list
-        ::EnumWindows(KillWindowsProc, static_cast<LPARAM>(prcId.first));
-
-        // Now kill the process if it is still running
-        hProcess = ::OpenProcess(PROCESS_TERMINATE | SYNCHRONIZE, FALSE, prcId.first);
-        ExitOnNullWithLastError(hProcess, hr, "Failed to open process '%ls' (%u)", prcId.second, prcId.first);
-
-        // Process still running?
-        er = ::WaitForSingleObject(hProcess, 0);
-        if (er == WAIT_TIMEOUT)
-        {
-            er = ERROR_SUCCESS;
-            LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Terminating process '%ls' (%u)", prcId.second, prcId.first);
-
-            ::TerminateProcess(hProcess, 0);
-            er = ::WaitForSingleObject(hProcess, 1000);
-        }
-        ExitOnWin32Error(er, hr, "Failed to wait for process to terminate");
-
-        ReleaseHandle(hProcess);
+		KillOneProcess(prcId.first, prcId.second);
     }
 
 LExit:
@@ -272,11 +244,47 @@ LExit:
     for (std::pair<DWORD, LPWSTR> f : mapProcId)
     {
         ReleaseStr(f.second);
-    }
-    
-    ReleaseHandle(hProcess);
+    }    
 
     return hr;
+}
+
+HRESULT CRestartLocalResources::KillOneProcess(DWORD dwProcessId, LPCWSTR szProcessName)
+{
+	HRESULT hr = S_OK;
+	PMSIHANDLE hActionData;
+	HANDLE hProcess = NULL;
+	INT er = ERROR_SUCCESS;
+
+	// ActionData: "Closing [1]"
+	hActionData = ::MsiCreateRecord(1);
+	if (hActionData && SUCCEEDED(WcaSetRecordString(hActionData, 1, szProcessName)))
+	{
+		WcaProcessMessage(INSTALLMESSAGE::INSTALLMESSAGE_ACTIONDATA, hActionData);
+	}
+
+	// Get windows for all processes, kill only those in the list
+	::EnumWindows(KillWindowsProc, static_cast<LPARAM>(dwProcessId));
+
+	// Now kill the process if it is still running
+	hProcess = ::OpenProcess(PROCESS_TERMINATE | SYNCHRONIZE, FALSE, dwProcessId);
+	ExitOnNullWithLastError(hProcess, hr, "Failed to open process '%ls' (%u)", szProcessName, dwProcessId);
+
+	// Process still running?
+	er = ::WaitForSingleObject(hProcess, 0);
+	if (er == WAIT_TIMEOUT)
+	{
+		er = ERROR_SUCCESS;
+		LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Terminating process '%ls' (%u)", szProcessName, dwProcessId);
+
+		::TerminateProcess(hProcess, 0);
+		er = ::WaitForSingleObject(hProcess, 1000);
+	}
+	ExitOnWin32Error(er, hr, "Failed to wait for process to terminate");
+
+LExit:
+	ReleaseHandle(hProcess);
+	return hr;
 }
 
 INT CRestartLocalResources::PromptFilesInUse(const std::map<DWORD, LPWSTR> &mapProcId)

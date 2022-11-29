@@ -54,7 +54,7 @@ public:
 
 	CWixString& operator=(const CWixString& other)
 	{
-		Copy((LPCWSTR)other);
+		Copy(other);
 		return *this;
 	}
 
@@ -134,6 +134,25 @@ public:
 		_pTokenContext = nullptr;
 		_szObfuscated = nullptr;
 		return pS;
+	}
+
+	HRESULT Copy(const CWixString &other)
+	{
+		HRESULT hr = S_OK;
+
+		Release();
+
+		hr = Copy(other._pS);
+		ExitOnFailure(hr, "Failed to copy string");
+
+		if (other._szObfuscated)
+		{
+			hr = StrAllocString(&_szObfuscated, other._szObfuscated, NULL);
+			ExitOnFailure(hr, "Failed to copy string");
+		}
+
+	LExit:
+		return hr;
 	}
 
 	HRESULT Copy(LPCWSTR pS, DWORD dwMax = INFINITE - 1)
@@ -283,7 +302,7 @@ public:
 			}
 			_pS = szNew;
 			_dwCapacity = 1 + ::wcslen(szNew);
-
+			_pTokenContext = nullptr;
 			szNew = nullptr;
 		}
 

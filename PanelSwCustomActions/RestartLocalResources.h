@@ -27,6 +27,7 @@ protected:
 private:
 
 	HRESULT Execute(const std::list<LPWSTR>& lstFolders);
+	HRESULT KillOneProcess(DWORD dwProcessId, LPCWSTR szProcessName);
 
 	INT PromptFilesInUse(const std::map<DWORD, LPWSTR> &mapProcId);
 

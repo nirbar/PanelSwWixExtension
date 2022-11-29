@@ -172,7 +172,6 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall)
 			extArray.rgExtension = &ext;
 		}
 
-
 		pCertContext = ::CertCreateSelfSignCertificate(hCrypt, &nameBlob, 0, &keyInfo, nullptr, nullptr, &endTime, extArray.cExtension ? &extArray : nullptr);
 		ExitOnNullWithLastError(pCertContext, hr, "Failed creating self signed certificate");
 
