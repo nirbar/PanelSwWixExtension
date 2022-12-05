@@ -73,6 +73,9 @@
     <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\concatFilesDetails.pb.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\obfuscatedString.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\customActionData.pb.h">
@@ -127,6 +130,9 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\concatFilesDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\obfuscatedString.pb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

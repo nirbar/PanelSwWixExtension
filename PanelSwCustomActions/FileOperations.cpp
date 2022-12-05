@@ -1,6 +1,7 @@
 #include "FileOperations.h"
 #include "../CaCommon/WixString.h"
 #include <fileutil.h>
+#include <dirutil.h>
 #include <pathutil.h>
 #include <Shellapi.h>
 #include <Shlwapi.h>
@@ -627,11 +628,15 @@ HRESULT CFileOperations::MakeTemporaryName(LPCWSTR szBackupOf, LPCWSTR szPrefix,
 		hr = szParentFolder.Copy(szBackupOf);
 		ExitOnFailure(hr, "Failed copying string");
 
-		::PathRemoveBackslashW((LPWSTR)szParentFolder);
-		::PathRemoveFileSpecW((LPWSTR)szParentFolder);
-		if (szParentFolder.StrLen() < 3)
+		while (!DirExists(szParentFolder, nullptr))
 		{
-			szParentFolder.Release();
+			::PathRemoveBackslashW((LPWSTR)szParentFolder);
+			::PathRemoveFileSpecW((LPWSTR)szParentFolder);
+			if (szParentFolder.StrLen() < 3)
+			{
+				szParentFolder.Release();
+				break;
+			}
 		}
 	}
 
