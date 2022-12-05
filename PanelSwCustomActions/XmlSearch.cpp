@@ -1,6 +1,7 @@
 
 #include "stdafx.h"
 #include "..\CaCommon\WixString.h"
+#include "..\CaCommon\DeferredActionBase.h"
 #include <fileutil.h>
 #include <errno.h>
 #include <objbase.h>
@@ -52,7 +53,7 @@ extern "C" UINT __stdcall XmlSearch(MSIHANDLE hInstall)
 		CWixString szId;
 		CWixString szProperty;
 		CWixString szFilePath;
-		CWixString szExpression, szUnformattedExpression, szObfuscatedExpression;
+		CWixString szExpression, szUnformattedExpression;
 		CWixString szLanguage;
 		CWixString szNamespaces;
 		CWixString szCondition;
@@ -96,10 +97,10 @@ extern "C" UINT __stdcall XmlSearch(MSIHANDLE hInstall)
 			}
 		}
 
-		hr = szExpression.MsiFormat(szUnformattedExpression, (LPWSTR*)szObfuscatedExpression);
+		hr = szExpression.MsiFormat(szUnformattedExpression);
 		ExitOnFailure(hr, "Failed formatting query.");
 
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Running Expression '%ls' on '%ls'", (LPCWSTR)szObfuscatedExpression, (LPCWSTR)szFilePath);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Running Expression '%ls' on '%ls'", szExpression.Obfuscated(), (LPCWSTR)szFilePath);
 		hr = QueryXml(szFilePath, szExpression, szLanguage, szNamespaces, eMatch, szProperty);
 		ExitOnFailure(hr, "Failed to query XML.");
 	}

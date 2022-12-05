@@ -49,7 +49,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		CWixString szId, szComponent, szServiceName, szCommand, szCommandFormat, szCommandObfuscated, szAccount, szPassword, szLoadOrderGroupFmt, szLoadOrderGroup;
+		CWixString szId, szComponent, szServiceName, szCommand, szCommandFormat, szAccount, szPassword, szLoadOrderGroupFmt, szLoadOrderGroup;
 		CWixString szSubQuery;
 		PMSIHANDLE hSubView, hSubRecord;
 		int start = -1;
@@ -92,10 +92,10 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 
 		if (!szCommandFormat.IsNullOrEmpty())
 		{
-			hr = szCommand.MsiFormat(szCommandFormat, (LPWSTR*)szCommandObfuscated);
+			hr = szCommand.MsiFormat(szCommandFormat);
 			ExitOnFailure(hr, "Failed formatting string");
 
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will configure service '%ls' to execute command line '%ls'", (LPCWSTR)szServiceName, (LPCWSTR)szCommandObfuscated);
+			CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Will configure service '%ls' to execute command line '%ls'", (LPCWSTR)szServiceName, szCommand.Obfuscated());
 		}
 		if (!szAccount.IsNullOrEmpty())
 		{

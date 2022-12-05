@@ -252,7 +252,7 @@ HRESULT CFileRegex::DeferredExecute(const ::std::string& command)
 	szRegexObfuscated = (LPCWSTR)(LPVOID)details.expression().obfuscated().data();
 	szReplacementObfuscated = (LPCWSTR)(LPVOID)details.replacement().obfuscated().data();
 
-	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Replacing regex '%ls' matches with '%ls' in file '%ls'", szRegexObfuscated, szReplacementObfuscated, szFile);
+	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Replacing regex '%ls' matches with '%ls' in file '%ls'", szRegexObfuscated, szReplacementObfuscated, szFile);
 
 	hr = Execute(szFile, szExpression, szReplacement, details.encoding(), details.ignorecase());
 	ExitOnFailure(hr, "Failed to execute file regular expression");

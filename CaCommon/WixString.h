@@ -278,16 +278,12 @@ public:
 				hr = WcaGetFormattedString(szStripped, &szObfuscated);
 				if (SUCCEEDED(hr))
 				{
-					hr = StrReplaceStringAll(&szObfuscated, L"[", L"[\\[]"); // Since obfuscated is re-formatted on logging, we want to re-escape '['.
-					if (SUCCEEDED(hr))
-					{
-						_szObfuscated = szObfuscated;
-						szObfuscated = nullptr;
+					_szObfuscated = szObfuscated;
+					szObfuscated = nullptr;
 
-						if (pszObfuscated)
-						{
-							StrAllocString(pszObfuscated, _szObfuscated, NULL);
-						}
+					if (pszObfuscated)
+					{
+						StrAllocString(pszObfuscated, _szObfuscated, NULL);
 					}
 				}
 			}

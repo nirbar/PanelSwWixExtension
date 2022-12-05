@@ -70,7 +70,7 @@ extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		CWixString szExpressionFormat, szExpression, szObfuscatedExpression;
+		CWixString szExpressionFormat, szExpression;
 		CWixString sId, sFilePath, sInput, sReplace, sDstProperty, sCondition;
 		int iFlags = 0;
 		RegexFlags flags;
@@ -94,7 +94,7 @@ extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 		hr = WcaGetRecordString(hRecord, eRegularExpressionQuery::Condition, (LPWSTR*)sCondition);
 		ExitOnFailure(hr, "Failed to get Condition.");
 
-		hr = szExpression.MsiFormat((LPCWSTR)szExpressionFormat, (LPWSTR*)szObfuscatedExpression);
+		hr = szExpression.MsiFormat((LPCWSTR)szExpressionFormat);
 		ExitOnFailure(hr, "Failed to format Expression.");
 
 		// Test condition
@@ -120,7 +120,7 @@ extern "C" UINT __stdcall RegularExpression(MSIHANDLE hInstall)
 				ExitOnFailure(hr, "Bad Condition field");
 			}
 		}
-		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Executing regular expression query '%ls'", (LPCWSTR)szObfuscatedExpression);
+		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Executing regular expression query '%ls'", szExpression.Obfuscated());
 
 		// Syntax flags
 		if (flags.s.match & MatchFlags::IgnoreCare)
