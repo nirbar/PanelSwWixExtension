@@ -149,8 +149,8 @@
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
       </xs:appinfo>
       <xs:documentation>
-        <![CDATA[Compare versions. The target property is set to 1 if Version1 is greater than Version2; -1 if Version1 is smaller than Version2; 0 if both versions are the same. 
-The property is not set if Version1 or Version2 cannot be parsed to a version number]]>
+        <![CDATA[Compare versions. The target property is set to a positive value if Version1 is greater than Version2; Negative if Version1 is smaller than Version2; 0 if both versions are the same. 
+The property is not set if Version1 or Version2 cannot be parsed to a version number. The values are in range -4 to +4, denoting the version part that was different (-+4 if Major part was different, -+3 for Minor part, etc.)]]>
       </xs:documentation>
     </xs:annotation>
     <xs:complexType>

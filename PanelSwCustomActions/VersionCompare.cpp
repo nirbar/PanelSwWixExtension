@@ -31,6 +31,8 @@ extern "C" UINT __stdcall VersionCompare(MSIHANDLE hInstall)
 		// Get fields
 		CWixString ver1, ver2, property;
 		ULARGE_INTEGER ullVer1, ullVer2;
+		USHORT  rgusVer1[4], rgusVer2[4];
+		int nCompareRes = 0;
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)property);
 		ExitOnFailure(hr, "Failed to get Property_.");
@@ -45,21 +47,34 @@ extern "C" UINT __stdcall VersionCompare(MSIHANDLE hInstall)
 			continue;
 		}
 
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Comparing version '%u.%u.%u.%u' to '%u.%u.%u.%u' and placing result in '%ls'"
-			, ((ullVer1.HighPart >> 16) & 0xFFFF)
-			, (ullVer1.HighPart & 0xFFFF)
-			, ((ullVer1.LowPart >> 16) & 0xFFFF)
-			, (ullVer1.LowPart & 0xFFFF)
-			, ((ullVer2.HighPart >> 16) & 0xFFFF)
-			, (ullVer2.HighPart & 0xFFFF)
-			, ((ullVer2.LowPart >> 16) & 0xFFFF)
-			, (ullVer2.LowPart & 0xFFFF)
-			, (LPCWSTR)property
-		);
-		hr = WcaSetIntProperty(property, (ullVer1.QuadPart > ullVer2.QuadPart) ? 1 : (ullVer1.QuadPart < ullVer2.QuadPart) ? -1 : 0);
+		rgusVer1[3] = ((ullVer1.HighPart >> 16) & 0xFFFF);
+		rgusVer1[2] = (ullVer1.HighPart & 0xFFFF);
+		rgusVer1[1] = ((ullVer1.LowPart >> 16) & 0xFFFF);
+		rgusVer1[0] = (ullVer1.LowPart & 0xFFFF);
+
+		rgusVer2[3] = ((ullVer2.HighPart >> 16) & 0xFFFF);
+		rgusVer2[2] = (ullVer2.HighPart & 0xFFFF);
+		rgusVer2[1] = ((ullVer2.LowPart >> 16) & 0xFFFF);
+		rgusVer2[0] = (ullVer2.LowPart & 0xFFFF);
+
+		for (int i = ARRAYSIZE(rgusVer1) - 1; i >= 0; --i)
+		{
+			if (rgusVer1[i] > rgusVer2[i])
+			{
+				nCompareRes = i + 1;
+				break;
+			}
+			if (rgusVer1[i] < rgusVer2[i])
+			{
+				nCompareRes = -(i + 1);
+				break;
+			}
+		}
+
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Comparing version '%u.%u.%u.%u' to '%u.%u.%u.%u' and placing result in '%ls'", rgusVer1[3], rgusVer1[2], rgusVer1[1], rgusVer1[0], rgusVer2[3], rgusVer2[2], rgusVer2[1], rgusVer2[0], (LPCWSTR)property);
+		hr = WcaSetIntProperty(property, nCompareRes);
 		ExitOnFailure(hr, "Failed setting property");
 	}
-
 	hr = ERROR_SUCCESS;
 
 LExit:

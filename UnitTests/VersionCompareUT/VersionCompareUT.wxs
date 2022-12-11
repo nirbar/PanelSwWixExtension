@@ -8,7 +8,7 @@
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <Component Directory="INSTALLFOLDER">
-        <File Source="$(var.ProjectDir)Product.wxs"/>
+        <File Source="$(sys.SOURCEFILEPATH)"/>
       </Component>
     </Feature>
 
