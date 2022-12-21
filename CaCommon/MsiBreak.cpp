@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "MsiBreak.h"
 #include <strsafe.h>
 

@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "DeferredActionBase.h"
 #include "WixString.h"
 #include <strsafe.h>

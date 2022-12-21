@@ -12,6 +12,18 @@ indent_style = space
 indent_size = 2
 charset = utf-8
 
+# Projects- 2 space indentation
+[*.*proj]
+indent_style = space
+indent_size = 2
+charset = utf-8
+
+# Props- 2 space indentation
+[*.{props,targets,config}]
+indent_style = space
+indent_size = 2
+charset = utf-8
+
 # C++- tab indentation
 [*.{cpp,h}]
 indent_style = tab

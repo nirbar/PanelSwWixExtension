@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "SqlConnection.h"
 
 CSqlConnection::CSqlConnection()

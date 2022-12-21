@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "RegistryKey.h"
 #include <strutil.h>
 #include <regutil.h>

@@ -1,6 +1,8 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" InitialTargets="EnsureWixToolsetInstalled" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\TidyBuild.1.4.1\build\TidyBuild.props" Condition="Exists('..\packages\TidyBuild.1.4.1\build\TidyBuild.props')" />
+  <Import Project="..\packages\WixToolset.WcaUtil.4.0.0-rc.1\build\WixToolset.WcaUtil.props" Condition="Exists('..\packages\WixToolset.WcaUtil.4.0.0-rc.1\build\WixToolset.WcaUtil.props')" />
+  <Import Project="..\packages\WixToolset.DUtil.4.0.0-rc.1\build\WixToolset.DUtil.props" Condition="Exists('..\packages\WixToolset.DUtil.4.0.0-rc.1\build\WixToolset.DUtil.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
@@ -30,21 +32,22 @@
     <LinkIncremental>true</LinkIncremental>
     <TargetExt>.lib</TargetExt>
   </PropertyGroup>
-  <PropertyGroup>
-    <WixSdkPath Condition="'$(WixSdkPath)'==''">$(WIX)\SDK\</WixSdkPath>
-    <WixPlatformToolset Condition="'$(WixPlatformToolset)'==''">VS2017</WixPlatformToolset>
-  </PropertyGroup>
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <Optimization>MinSpace</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;_USRDLL;CUSTOMACTIONTEST_EXPORTS;FullVersion="$(FullVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;_USRDLL;EXAMPLECADLL_EXPORTS;FullVersion="$(FullVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <WholeProgramOptimization>false</WholeProgramOptimization>
-      <AdditionalIncludeDirectories>$(WixSdkPath)\inc;$(WIX)SDK\$(WixPlatformToolset)\inc;$(IntDir)\..\Protobuf;..\protobuf\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <AdditionalIncludeDirectories>$(IntDir)\..\Protobuf;..\protobuf\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
@@ -58,7 +61,7 @@
     </Link>
     <Lib>
       <LinkTimeCodeGeneration>false</LinkTimeCodeGeneration>
-      <AdditionalLibraryDirectories>$(WixSdkPath)\$(WixPlatformToolset)\lib\x86;$(BuildFolder)\protobuf\$(Configuration);$(OutDir)\..\ProtoCaLib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(BuildFolder)\protobuf\$(Configuration);$(OutDir)\..\ProtoCaLib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -69,7 +72,7 @@
     <ClCompile Include="SqlClientBase.cpp" />
     <ClCompile Include="SqlConnection.cpp" />
     <ClCompile Include="SqlQuery.cpp" />
-    <ClCompile Include="stdafx.cpp">
+    <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="SummaryStream.cpp" />
@@ -87,9 +90,9 @@
     <ClInclude Include="SqlClientBase.h" />
     <ClInclude Include="SqlConnection.h" />
     <ClInclude Include="SqlQuery.h" />
-    <ClInclude Include="stdafx.h" />
+    <ClInclude Include="framework.h" />
+    <ClInclude Include="pch.h" />
     <ClInclude Include="SummaryStream.h" />
-    <ClInclude Include="targetver.h" />
     <ClInclude Include="WixString.h" />
   </ItemGroup>
   <ItemGroup>
@@ -98,11 +101,6 @@
     <None Include="protobuf\customActionData.proto" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <Import Project="$(WixNativeCATargetsPath)" Condition=" '$(WixNativeCATargetsPath)' != '' " />
-  <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.NativeCA.targets" Condition=" '$(WixNativeCATargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.NativeCA.targets') " />
-  <Target Name="EnsureWixToolsetInstalled" Condition=" '$(WixNativeCATargetsImported)' != 'true' ">
-    <Error Text="The WiX Toolset v3.11 (or newer) build tools must be installed to build this project. To download the WiX Toolset, see http://wixtoolset.org/releases/" />
-  </Target>
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
     <Import Project="..\packages\TidyBuild.1.4.1\build\TidyBuild.targets" Condition="Exists('..\packages\TidyBuild.1.4.1\build\TidyBuild.targets')" />
@@ -120,5 +118,7 @@
     <Error Condition="!Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets'))" />
     <Error Condition="!Exists('..\packages\TidyBuild.1.4.1\build\TidyBuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.4.1\build\TidyBuild.props'))" />
     <Error Condition="!Exists('..\packages\TidyBuild.1.4.1\build\TidyBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.4.1\build\TidyBuild.targets'))" />
+    <Error Condition="!Exists('..\packages\WixToolset.DUtil.4.0.0-rc.1\build\WixToolset.DUtil.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WixToolset.DUtil.4.0.0-rc.1\build\WixToolset.DUtil.props'))" />
+    <Error Condition="!Exists('..\packages\WixToolset.WcaUtil.4.0.0-rc.1\build\WixToolset.WcaUtil.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WixToolset.WcaUtil.4.0.0-rc.1\build\WixToolset.WcaUtil.props'))" />
   </Target>
 </Project>

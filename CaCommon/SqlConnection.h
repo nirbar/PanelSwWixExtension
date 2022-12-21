@@ -1,6 +1,6 @@
 #pragma once
 
-#include "stdafx.h"
+#include "pch.h"
 #include "SqlClientBase.h"
 #include <sql.h>
 #include "WixString.h"

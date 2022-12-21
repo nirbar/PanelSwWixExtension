@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "SqlQuery.h"
 #include <memutil.h>
 #include <strutil.h>
