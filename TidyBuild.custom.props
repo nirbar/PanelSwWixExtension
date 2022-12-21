@@ -15,7 +15,7 @@
     <!-- CMake -->
     <CMakeDir Condition="'$(CMakeDir)'==''">D:\Tools\cmake-3.21.3-windows-x86_64\</CMakeDir>
     <CMakeVsVersion Condition="'$(CMakeVsVersion)'==''">Visual Studio 16 2019</CMakeVsVersion>
-    <PlatformToolset Condition="'$(PlatformToolset)'==''">v141_xp</PlatformToolset>
+    <PlatformToolset Condition="'$(PlatformToolset)'==''">v142</PlatformToolset>
     <XPDeprecationWarning>false</XPDeprecationWarning>
 
     <WindowsKitSharedDir Condition="'$(WindowsKitSharedDir)'=='' And Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\shared\')">C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\shared\</WindowsKitSharedDir>
