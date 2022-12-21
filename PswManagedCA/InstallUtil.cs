@@ -1,4 +1,4 @@
-using Microsoft.Deployment.WindowsInstaller;
+using WixToolset.Dtf.WindowsInstaller;
 using PswManagedCA.Util;
 using System;
 using System.Collections;

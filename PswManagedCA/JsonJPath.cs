@@ -1,4 +1,4 @@
-﻿using Microsoft.Deployment.WindowsInstaller;
+using WixToolset.Dtf.WindowsInstaller;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29806.167
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32421.90
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "PanelSwWixLib", "wixlib\PanelSwWixLib.wixproj", "{B6AC15A8-5EF9-4F89-ACCC-3F5C3FC04BCE}"
 	ProjectSection(ProjectDependencies) = postProject
@@ -66,7 +66,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PswManagedCA", "PswManagedC
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "ZipFileUT", "UnitTests\ZipFileUT\ZipFileUT.wixproj", "{272D736A-5479-4915-B8FE-5A0D908AB61F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Dism", "Dism\Dism.vcxproj", "{CB9038CA-D9A1-4014-BA48-661AFA842A41}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Dism", "Dism\Dism.vcxproj", "{E08BD5F2-B8DE-4EEE-A77F-FD82678664AC}"
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "ServiceConfigUT", "UnitTests\ServiceConfigUT\ServiceConfigUT.wixproj", "{C6FC6CB8-13AD-48BE-8FB1-8A7BC5790896}"
 EndProject
@@ -209,17 +209,15 @@ Global
 		{EEC82796-3809-4D8B-9F2B-D9F1DB044E39}.Debug|x64.ActiveCfg = Release|x86
 		{EEC82796-3809-4D8B-9F2B-D9F1DB044E39}.Debug|x86.ActiveCfg = Release|x86
 		{EEC82796-3809-4D8B-9F2B-D9F1DB044E39}.Release|x64.ActiveCfg = Release|x86
-		{EEC82796-3809-4D8B-9F2B-D9F1DB044E39}.Release|x86.ActiveCfg = Release|x86
-		{EEC82796-3809-4D8B-9F2B-D9F1DB044E39}.Release|x86.Build.0 = Release|x86
+		{EEC82796-3809-4D8B-9F2B-D9F1DB044E39}.Release|x86.ActiveCfg = Release|Any CPU
+		{EEC82796-3809-4D8B-9F2B-D9F1DB044E39}.Release|x86.Build.0 = Release|Any CPU
 		{272D736A-5479-4915-B8FE-5A0D908AB61F}.Debug|x64.ActiveCfg = Release|x86
 		{272D736A-5479-4915-B8FE-5A0D908AB61F}.Debug|x86.ActiveCfg = Release|x86
 		{272D736A-5479-4915-B8FE-5A0D908AB61F}.Release|x64.ActiveCfg = Release|x86
 		{272D736A-5479-4915-B8FE-5A0D908AB61F}.Release|x86.ActiveCfg = Release|x86
-		{CB9038CA-D9A1-4014-BA48-661AFA842A41}.Debug|x64.ActiveCfg = Release|Win32
-		{CB9038CA-D9A1-4014-BA48-661AFA842A41}.Debug|x86.ActiveCfg = Release|Win32
-		{CB9038CA-D9A1-4014-BA48-661AFA842A41}.Release|x64.ActiveCfg = Release|Win32
-		{CB9038CA-D9A1-4014-BA48-661AFA842A41}.Release|x86.ActiveCfg = Release|Win32
-		{CB9038CA-D9A1-4014-BA48-661AFA842A41}.Release|x86.Build.0 = Release|Win32
+		{E08BD5F2-B8DE-4EEE-A77F-FD82678664AC}.Release|x64.ActiveCfg = Release|Win32
+		{E08BD5F2-B8DE-4EEE-A77F-FD82678664AC}.Release|x86.ActiveCfg = Release|Win32
+		{E08BD5F2-B8DE-4EEE-A77F-FD82678664AC}.Release|x86.Build.0 = Release|Win32
 		{C6FC6CB8-13AD-48BE-8FB1-8A7BC5790896}.Debug|x64.ActiveCfg = Release|x86
 		{C6FC6CB8-13AD-48BE-8FB1-8A7BC5790896}.Debug|x86.ActiveCfg = Release|x86
 		{C6FC6CB8-13AD-48BE-8FB1-8A7BC5790896}.Release|x64.ActiveCfg = Release|x86
