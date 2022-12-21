@@ -1,9 +1,7 @@
+#include "pch.h"
 #include "SqlScript.h"
 #include "FileOperations.h"
-#include "../CaCommon/WixString.h"
 #include "../CaCommon/SqlQuery.h"
-#include <wcautil.h>
-#include <memutil.h>
 #include "google\protobuf\any.h"
 using namespace com::panelsw::ca;
 using namespace google::protobuf;

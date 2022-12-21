@@ -5,8 +5,6 @@
 #include <strutil.h>
 #include <string>
 #include "setPropertyFromPipeDetails.pb.h"
-#pragma comment (lib, "balutil.lib")
-#pragma comment (lib, "dutil.lib")
 #pragma comment (lib, "Rpcrt4.lib")
 using namespace ::com::panelsw::ca;
 

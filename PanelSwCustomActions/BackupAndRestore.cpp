@@ -1,7 +1,5 @@
+#include "pch.h"
 #include "FileOperations.h"
-#include <strutil.h>
-#include <pathutil.h>
-#include "../CaCommon/WixString.h"
 #include <Shellapi.h>
 #include <Shlwapi.h>
 #include "FileOperations.h"

@@ -1,13 +1,9 @@
+#include "pch.h"
 #include "ExecOnComponent.h"
 #include "../CaCommon/RegistryKey.h"
 #include "FileOperations.h"
-#include "../CaCommon/WixString.h"
 #include <regex>
-#include <wcautil.h>
-#include <memutil.h>
-#include <pathutil.h>
 #include <shlwapi.h>
-#include <procutil.h>
 #include "google\protobuf\any.h"
 using namespace std;
 using namespace com::panelsw::ca;
@@ -140,7 +136,7 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 			hSubRecord = NULL;
 			hSubView = NULL;
 
-			hr = PathCreateTempFile(nullptr, L"EXE%05i.tmp", INFINITE, FILE_ATTRIBUTE_NORMAL, (LPWSTR*)szTempFile, nullptr);
+			hr = PathCreateTempFile(nullptr, L"EXE%05i.tmp", INFINITE, L"EXE", FILE_ATTRIBUTE_NORMAL, (LPWSTR*)szTempFile, nullptr);
 			ExitOnFailure(hr, "Failed getting temporary file name");
 
 			szExtension = ::PathFindExtension((LPCWSTR)szBinary);
@@ -651,7 +647,7 @@ HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command)
 			bImpersonated = true;
 		}
 
-		hr = ProcExecute(const_cast<LPWSTR>(szCommand), &hProc, nullptr, nullptr);
+		hr = ProcExecute(nullptr, const_cast<LPWSTR>(szCommand), &hProc, nullptr, nullptr);
 		ExitOnFailure(hr, "Failed to launch command '%ls'", szCommand);
 		hr = S_OK;
 		ExitFunction();
@@ -686,7 +682,7 @@ LRetry:
 	}
 
 	// By default, exitCode is what the process returned. If couldn't execute the process, use failure code is result.
-	hr = ProcExecute(commandLineCopy, &hProc, nullptr, &hStdOut);
+	hr = ProcExecute(nullptr, commandLineCopy, &hProc, nullptr, &hStdOut);
 
 	if (bImpersonated)
 	{

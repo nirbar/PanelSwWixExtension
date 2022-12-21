@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 
 extern "C" UINT __stdcall Rollback(MSIHANDLE hInstall)
 {

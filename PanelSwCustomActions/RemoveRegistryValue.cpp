@@ -1,8 +1,7 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "../CaCommon/RegistryKey.h"
 #include "RegistryXmlParser.h"
 #include "RegDataSerializer.h"
-#include <strutil.h>
 
 #define RemoveRegistryValueQuery L"SELECT `Id`, `Root`, `Key`, `Name`, `Area`, `Attributes`, `Condition` FROM `PSW_RemoveRegistryValue`"
 enum eRemoveRegistryValueQuery { Id = 1, Root, Key, Name, Area, Attributes, Condition };

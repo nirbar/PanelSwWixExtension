@@ -1,9 +1,7 @@
-
-#include "stdafx.h"
+#include "pch.h"
 #include "RegistryXmlParser.h"
 #include "../CaCommon/RegistryKey.h"
 #include "RegDataSerializer.h"
-#include <strutil.h>
 #pragma comment( lib, "msxml2.lib")
 
 CRegistryXmlParser::CRegistryXmlParser()

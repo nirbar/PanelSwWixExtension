@@ -1,6 +1,4 @@
-
-#include "stdafx.h"
-#include "..\CaCommon\WixString.h"
+#include "pch.h"
 #include <errno.h>
 
 extern "C" UINT __stdcall ReadIniValues(MSIHANDLE hInstall)

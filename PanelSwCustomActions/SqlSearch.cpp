@@ -1,5 +1,4 @@
-#include "stdafx.h"
-#include "../CaCommon/WixString.h"
+#include "pch.h"
 #include "../CaCommon/SqlConnection.h"
 #include "../CaCommon/SqlQuery.h"
 #include "errorHandling.pb.h"

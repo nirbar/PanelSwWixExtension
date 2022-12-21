@@ -1,6 +1,4 @@
-#include "stdafx.h"
-#include <memutil.h>
-#include "../CaCommon/WixString.h"
+#include "pch.h"
 #include "setPropertyFromPipeDetails.pb.h"
 using namespace ::com::panelsw::ca;
 

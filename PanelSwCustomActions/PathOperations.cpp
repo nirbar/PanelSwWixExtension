@@ -1,4 +1,4 @@
-#include "../CaCommon/WixString.h"
+#include "pch.h"
 #include <stdlib.h>
 #include <Shlwapi.h>
 #pragma comment (lib, "Shlwapi.lib")
@@ -29,7 +29,7 @@ extern "C" UINT __stdcall SplitPath(MSIHANDLE hInstall)
 
 	// Get property-to-encrypt name
 	hr = WcaGetProperty(PathToSplitProp, (LPWSTR*)szFullPath);
-	ExitOnFailure1(hr, "Failed getting %ls", PathToSplitProp);
+	ExitOnFailure(hr, "Failed getting %ls", PathToSplitProp);
 	if (szFullPath.IsNullOrEmpty())
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "No path to split...");
@@ -38,21 +38,21 @@ extern "C" UINT __stdcall SplitPath(MSIHANDLE hInstall)
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will split property '%ls'", (LPCWSTR)szFullPath);
 
 	er = ::_wsplitpath_s<_MAX_DRIVE + 1, _MAX_DIR + 1, _MAX_FNAME + 1, _MAX_EXT + 1>((LPCWSTR)szFullPath, szDrive, szFolder, szName, szExt);
-	ExitOnNull1( ( er==ERROR_SUCCESS), hr, E_FAIL, "Failed splitting '%ls' full-path", (LPCWSTR)szFullPath);
+	ExitOnNull( ( er==ERROR_SUCCESS), hr, E_FAIL, "Failed splitting '%ls' full-path", (LPCWSTR)szFullPath);
 	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Split full path '%ls' to '%ls' '%ls' '%ls' '%ls'", (LPCWSTR)szFullPath, szDrive, szFolder, szName, szExt);
 
 	// Store back in properties
 	hr = WcaSetProperty(SplitDriveProp, szDrive);
-	ExitOnFailure1(hr, "Failed setting the '%ls'", szDrive);
+	ExitOnFailure(hr, "Failed setting the '%ls'", szDrive);
 
 	hr = WcaSetProperty(SplitDirectoryProp, szFolder);
-	ExitOnFailure1(hr, "Failed setting the '%ls'", szFolder);
+	ExitOnFailure(hr, "Failed setting the '%ls'", szFolder);
 
 	hr = WcaSetProperty(SplitFileNameProp, szName);
-	ExitOnFailure1(hr, "Failed setting the '%ls'", szName);
+	ExitOnFailure(hr, "Failed setting the '%ls'", szName);
 
 	hr = WcaSetProperty(SplitFileExtProp, szExt);
-	ExitOnFailure1(hr, "Failed setting the '%ls'", SplitFileExtProp);
+	ExitOnFailure(hr, "Failed setting the '%ls'", SplitFileExtProp);
 
 LExit:
 
@@ -86,13 +86,13 @@ extern "C" UINT __stdcall PathExists(MSIHANDLE hInstall)
 
 	// Get full path to test
 	hr = WcaGetProperty(PathExistsProp, (LPWSTR*)szFullPath);
-	ExitOnFailure1(hr, "Failed getting %ls", PathExistsProp);
+	ExitOnFailure(hr, "Failed getting %ls", PathExistsProp);
 	if (szFullPath.IsNullOrEmpty())
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "No path to test...");
 
 		hr = WcaSetProperty(PathExistsResultProp, L"");
-		ExitOnFailure1(hr, "Failed setting %ls", PathExistsResultProp);
+		ExitOnFailure(hr, "Failed setting %ls", PathExistsResultProp);
 
 		ExitFunction();
 	}
@@ -103,7 +103,7 @@ extern "C" UINT __stdcall PathExists(MSIHANDLE hInstall)
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Path '%ls' exists", (LPCWSTR)szFullPath);
 
 		hr = WcaSetIntProperty(PathExistsResultProp, 1);
-		ExitOnFailure1(hr, "Failed setting the '%ls'", PathExistsResultProp);
+		ExitOnFailure(hr, "Failed setting the '%ls'", PathExistsResultProp);
 	}
 	// Doesn't exist.
 	else
@@ -111,7 +111,7 @@ extern "C" UINT __stdcall PathExists(MSIHANDLE hInstall)
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Path '%ls' does not exist", (LPCWSTR)szFullPath);
 
 		hr = WcaSetProperty(PathExistsResultProp, L"");
-		ExitOnFailure1(hr, "Failed setting %ls", PathExistsResultProp);
+		ExitOnFailure(hr, "Failed setting %ls", PathExistsResultProp);
 	}
 
 LExit:

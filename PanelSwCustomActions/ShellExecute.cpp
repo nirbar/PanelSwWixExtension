@@ -1,5 +1,5 @@
+#include "pch.h"
 #include "ShellExecute.h"
-#include "../CaCommon/WixString.h"
 #include <Shellapi.h>
 #include "shellExecDetails.pb.h"
 using namespace ::com::panelsw::ca;
@@ -256,7 +256,7 @@ HRESULT CShellExecute::Execute(LPCWSTR szTarget, LPCWSTR szArgs, LPCWSTR szVerb,
 		default:
 			hr = E_FAIL;
 		}
-		ExitOnFailure1(hr, "ShellExecEx failed with return code %d", reinterpret_cast<DWORD_PTR>(shExecInfo.hInstApp));
+		ExitOnFailure(hr, "ShellExecEx failed with return code %d", reinterpret_cast<DWORD_PTR>(shExecInfo.hInstApp));
 	}
 
 	if (bWait)

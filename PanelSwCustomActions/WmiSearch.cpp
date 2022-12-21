@@ -1,8 +1,7 @@
-#include "stdafx.h"
+#include "pch.h"
 #include <Objbase.h>
 #include <atlbase.h>
 #include <Wbemidl.h>
-#include "../CaCommon/WixString.h"
 #include "errorHandling.pb.h"
 
 #pragma comment(lib, "wbemuuid.lib")

@@ -1,13 +1,8 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "RestartLocalResources.h"
 #include "FileOperations.h"
-#include <memutil.h>
-#include <strutil.h>
-#include <fileutil.h>
 #include <TlHelp32.h>
 #include <RestartManager.h>
-#include <rmutil.h>
-#include <procutil.h>
 #include <list>
 #include <algorithm>
 #include "../CaCommon/WixString.h"

@@ -1,9 +1,8 @@
 
-#include "stdafx.h"
+#include "pch.h"
 #include "CustomUninstallKey.h"
 #include "../CaCommon/RegistryKey.h"
 #include "RegDataSerializer.h"
-#include <strutil.h>
 
 #define CustomUninstallKey_ExecCA L"CustomUninstallKey_deferred"
 #define CustomUninstallKey_RollbackCA L"CustomUninstallKey_rollback"

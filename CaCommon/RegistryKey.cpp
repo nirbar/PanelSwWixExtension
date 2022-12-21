@@ -3,7 +3,6 @@
 #include <strutil.h>
 #include <regutil.h>
 #include "SummaryStream.h"
-#pragma comment( lib, "dutil.lib")
 #pragma comment( lib, "Advapi32.lib")
 
 CRegistryKey::CRegistryKey(void)

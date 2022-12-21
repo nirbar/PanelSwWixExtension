@@ -1,8 +1,5 @@
+#include "pch.h"
 #include "FileOperations.h"
-#include "../CaCommon/WixString.h"
-#include <fileutil.h>
-#include <dirutil.h>
-#include <pathutil.h>
 #include <Shellapi.h>
 #include <Shlwapi.h>
 #include "fileOperationsDetails.pb.h"
@@ -647,7 +644,7 @@ LRetry:
 	}
 	else
 	{
-		hr = PathCreateTempFile((LPCWSTR)szParentFolder, szPrefix, INFINITE, FILE_ATTRIBUTE_NORMAL, pszTempName, nullptr);
+		hr = PathCreateTempFile((LPCWSTR)szParentFolder, szPrefix, INFINITE, L"TMP", FILE_ATTRIBUTE_NORMAL, pszTempName, nullptr);
 	}
 	if ((hr == E_PATHNOTFOUND) && szParentFolder.StrLen())
 	{

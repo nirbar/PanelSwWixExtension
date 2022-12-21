@@ -1,10 +1,6 @@
+#include "pch.h"
 #include "ServiceConfig.h"
 #include "../CaCommon/RegistryKey.h"
-#include "../CaCommon/WixString.h"
-#include <wcautil.h>
-#include <procutil.h>
-#include <memutil.h>
-#include <svcutil.h>
 #include "google\protobuf\any.h"
 using namespace com::panelsw::ca;
 using namespace google::protobuf;

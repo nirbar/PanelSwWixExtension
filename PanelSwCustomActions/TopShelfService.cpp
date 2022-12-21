@@ -1,7 +1,7 @@
+#include "pch.h"
 #include "TopShelfService.h"
 #include <Shellapi.h>
 #include <Shlwapi.h>
-#include <pathutil.h>
 using namespace ::com::panelsw::ca;
 using namespace google::protobuf;
 
@@ -246,7 +246,7 @@ LRetry:
 	hr = commandLineCopy.Copy(commandLine);
 	ExitOnFailure(hr, "Failed to copy string");
 
-	hr = QuietExecEx(commandLineCopy, INFINITE, FALSE, TRUE);
+	hr = QuietExec(commandLineCopy, INFINITE, FALSE, TRUE);
 	if (FAILED(hr) && isDeferred)
 	{
 		switch (details.errorhandling())
@@ -333,8 +333,13 @@ HRESULT CTopShelfService::BuildCommandLine(const ::com::panelsw::ca::TopShelfSer
 	hr = StrAllocString(&file, (LPCWSTR)(LPVOID)pDetails->file().data(), 0);
 	ExitOnFailure(hr, "Failed allocating string");
 
-	hr = PathEnsureQuoted(&file, FALSE);
-	ExitOnFailure(hr, "Failed ensuring file path '%ls' is quoted", file);
+	if (::StrChrW(file, '"') == nullptr)
+	{
+		hr = StrAllocPrefix(&file, L"\"", 0);
+		ExitOnFailure(hr, "Failed allocating string");
+		hr = StrAllocConcat(&file, L"\"", 0);
+		ExitOnFailure(hr, "Failed allocating string");
+	}
 
 	hr = pCommandLine->Format(L"%ls %ls", file, pDetails->install() ? L"install" : L"uninstall");
 	ExitOnFailure(hr, "Failed formatting string");

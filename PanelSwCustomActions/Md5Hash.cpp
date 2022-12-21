@@ -1,6 +1,4 @@
-#include "stdafx.h"
-#include <WixString.h>
-#include <memutil.h>
+#include "pch.h"
 #include <Wincrypt.h>
 #pragma comment (lib, "Crypt32.lib")
 

@@ -1,7 +1,5 @@
 
-#include "stdafx.h"
-#include <strutil.h>
-#include <regutil.h>
+#include "pch.h"
 #include <vector>
 #include <list>
 #include <Shlwapi.h>

@@ -1,5 +1,4 @@
-#include "stdafx.h"
-#include "../CaCommon/WixString.h"
+#include "pch.h"
 
 extern "C" UINT __stdcall MsiSqlQuery(MSIHANDLE hInstall)
 {

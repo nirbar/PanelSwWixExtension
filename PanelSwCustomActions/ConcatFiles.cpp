@@ -1,6 +1,5 @@
+#include "pch.h"
 #include "ConcatFiles.h"
-#include <fileutil.h>
-#include <memutil.h>
 #include "../CaCommon/WixString.h"
 #include "google\protobuf\any.h"
 using namespace com::panelsw::ca;

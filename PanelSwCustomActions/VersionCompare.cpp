@@ -1,6 +1,4 @@
-#include "stdafx.h"
-#include "../CaCommon/WixString.h"
-#include <fileutil.h>
+#include "pch.h"
 
 extern "C" UINT __stdcall VersionCompare(MSIHANDLE hInstall)
 {

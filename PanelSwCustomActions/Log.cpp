@@ -1,4 +1,4 @@
-#include "../CaCommon/WixString.h"
+#include "pch.h"
 
 #define CustomActionData L"CustomActionData"
 #define LogProperty L"LOGMESSAGE"

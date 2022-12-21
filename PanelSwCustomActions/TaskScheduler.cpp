@@ -1,6 +1,5 @@
+#include "pch.h"
 #include "TaskScheduler.h"
-#include <pathutil.h>
-#include "../CaCommon/WixString.h"
 #include "taskSchedulerDetails.pb.h"
 using namespace ::com::panelsw::ca;
 using namespace google::protobuf;
@@ -218,7 +217,7 @@ HRESULT CTaskScheduler::AddRollbackTask(LPCWSTR szTaskName, CTaskScheduler* pRol
 		DWORD dwRes = ERROR_SUCCESS;
 
 		// Get temp folder
-		hr = PathCreateTempFile(nullptr, L"TSK%05i.tmp", INFINITE, FILE_ATTRIBUTE_NORMAL, (LPWSTR*)szBackupFile, nullptr);
+		hr = PathCreateTempFile(nullptr, L"TSK%05i.tmp", INFINITE, L"TSK", FILE_ATTRIBUTE_NORMAL, (LPWSTR*)szBackupFile, nullptr);
 		ExitOnFailure(hr, "Failed getting temporary file name");
 
 		hr = AddBackupTask(szTaskName, szBackupFile);

@@ -1,8 +1,5 @@
-#include "stdafx.h"
-#include "../CaCommon/WixString.h"
+#include "pch.h"
 #include <regex>
-#include <fileutil.h>
-#include <memutil.h>
 #include "FileOperations.h"
 #include "fileRegexDetails.pb.h"
 
