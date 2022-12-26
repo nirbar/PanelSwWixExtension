@@ -24,8 +24,8 @@ namespace PanelSw.Wix.Extensions.Symbols
                     , new ColumnDefinition(nameof(Section), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property)
                     , new ColumnDefinition(nameof(Key), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property)
                     , new ColumnDefinition(nameof(DestProperty), ColumnType.String, 0, false, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Condition)
-                    , new ColumnDefinition(nameof(Attributes), ColumnType.Number, 2, false, true, ColumnCategory.Integer, 0, 127)
-                    , new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition)
+                    , new ColumnDefinition(nameof(Attributes), ColumnType.Number, 2, false, false, ColumnCategory.Integer, 0, 127)
+                    , new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, false, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition)
                 };
             }
         }

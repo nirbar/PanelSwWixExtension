@@ -4,13 +4,13 @@ using WixToolset.Data.WindowsInstaller;
 
 namespace PanelSw.Wix.Extensions.Symbols
 {
-    internal class PSW_Md5Hash : BaseSymbol
+    internal class PSW_JsonJpathSearch : BaseSymbol
     {
         public static IntermediateSymbolDefinition SymbolDefinition
         {
             get
             {
-                return new IntermediateSymbolDefinition(nameof(PSW_Md5Hash), CreateFieldDefinitions(ColumnDefinitions), typeof(PSW_Md5Hash));
+                return new IntermediateSymbolDefinition(nameof(PSW_JsonJpathSearch), CreateFieldDefinitions(ColumnDefinitions), typeof(PSW_JsonJpathSearch));
             }
         }
         public static IEnumerable<ColumnDefinition> ColumnDefinitions
@@ -21,15 +21,16 @@ namespace PanelSw.Wix.Extensions.Symbols
                 {
                     new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column)
                     , new ColumnDefinition(nameof(Property_), ColumnType.String, 72, false, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column)
-                    , new ColumnDefinition(nameof(Plain), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property)
+                    , new ColumnDefinition(nameof(JPath), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property)
+                    , new ColumnDefinition(nameof(FilePath), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property)
                 };
             }
         }
 
-        public PSW_Md5Hash() : base(SymbolDefinition)
+        public PSW_JsonJpathSearch() : base(SymbolDefinition)
         { }
 
-        public PSW_Md5Hash(SourceLineNumber lineNumber) : base(SymbolDefinition, lineNumber, "md5")
+        public PSW_JsonJpathSearch(SourceLineNumber lineNumber) : base(SymbolDefinition, lineNumber, "jpt")
         { }
 
         public string Property_
@@ -38,10 +39,16 @@ namespace PanelSw.Wix.Extensions.Symbols
             set => Fields[0].Set(value);
         }
 
-        public string Plain
+        public string JPath
         {
             get => Fields[1].AsString();
             set => Fields[1].Set(value);
+        }
+
+        public string FilePath
+        {
+            get => Fields[2].AsString();
+            set => Fields[2].Set(value);
         }
     }
 }

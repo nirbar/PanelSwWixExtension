@@ -270,12 +270,6 @@
     <columnDefinition name="ErrorHandling" type="number" minValue="0" maxValue="2" length="2" />
   </tableDefinition>
 
-  <tableDefinition name="PSW_JsonJpathSearch">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Property_" type="string" length="72" modularize="column" category="identifier" />
-    <columnDefinition name="JPath" type="string" length="0" nullable="no" modularize="column" category="formatted" />
-    <columnDefinition name="FilePath" type="string" length="0" nullable="no" modularize="column" category="formatted" />
-  </tableDefinition>
 
   <tableDefinition name="PSW_AccountSidSearch">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />

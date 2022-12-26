@@ -1,6 +1,4 @@
-using System.Collections;
 using System.Collections.Generic;
-using System.Security.Claims;
 using WixToolset.Data;
 using WixToolset.Data.WindowsInstaller;
 

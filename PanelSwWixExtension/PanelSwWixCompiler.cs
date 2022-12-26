@@ -995,7 +995,6 @@ namespace PanelSw.Wix.Extensions
         private void ParseJsonJpathSearchElement(IntermediateSection section, XElement node)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
-            string id = "_" + Guid.NewGuid().ToString("N");
             string property = null;
             string expression = null;
             string file = null;
@@ -1024,7 +1023,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(node, attrib);
                             break;
                     }
                 }
@@ -1057,10 +1056,9 @@ namespace PanelSw.Wix.Extensions
             if (!Messaging.EncounteredError)
             {
                 PSW_JsonJpathSearch row = section.AddSymbol(new PSW_JsonJpathSearch(sourceLineNumbers));
-                row[0] = id;
-                row[1] = property;
-                row[2] = expression;
-                row[3] = file;
+                row.Property_ = property;
+                row.JPath = expression;
+                row.FilePath = file;
             }
         }
 
