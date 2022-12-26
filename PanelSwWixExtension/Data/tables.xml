@@ -1,25 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <tableDefinitions xmlns="http://schemas.microsoft.com/wix/2006/tables">
-  <tableDefinition name="PSW_CustomUninstallKey">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="ProductCode" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="Name" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Data" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="DataType" type="string" length="0" modularize="property" nullable="yes" category="text" />
-    <columnDefinition name="Attributes" type="number" length="2" modularize="property" minValue="0" maxValue="127" category="integer" />
-    <columnDefinition name="Condition" type="string" length="0" modularize="property" nullable="yes" category="condition" />
-  </tableDefinition>
-
-  <tableDefinition name="PSW_ReadIniValues">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="FilePath" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Section" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Key" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="DestProperty" type="string" length="0" modularize="property" category="text" />
-    <columnDefinition name="Attributes" type="number" length="2" nullable="yes" minValue="0" maxValue="127" />
-    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
-  </tableDefinition>
-
   <tableDefinition name="PSW_RemoveRegistryValue">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
     <columnDefinition name="Root" type="string" length="0" modularize="property" category="text" />
@@ -347,16 +327,6 @@
     <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
   </tableDefinition>
 
-  <tableDefinition name="PSW_WebsiteConfig">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Component_" type="string" length="72" modularize="column" keyTable="Component" keyColumn="1" category="identifier"/>
-    <columnDefinition name="Website" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Stop" type="number" length="2" minValue="0" maxValue="1" />
-    <columnDefinition name="Start" type="number" length="2" minValue="0" maxValue="1" />
-    <columnDefinition name="AutoStart" type="number" length="2" minValue="-1" maxValue="1" />
-    <columnDefinition name="ErrorHandling" type="number" minValue="0" maxValue="2" length="2" />
-  </tableDefinition>
-
   <tableDefinition name="PSW_VersionCompare">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
     <columnDefinition name="Property_" type="string" length="0" modularize="property" category="identifier" />
@@ -394,18 +364,5 @@
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
     <columnDefinition name="Property_" type="string" length="72" modularize="column" category="identifier" />
     <columnDefinition name="Plain" type="string" length="0" modularize="property" category="formatted" />
-  </tableDefinition>
-
-  <tableDefinition name="PSW_Payload">
-    <columnDefinition name="BinaryKey_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" keyTable="Binary" keyColumn="1" />
-    <columnDefinition name="Name" type="string" length="0" modularize="none" category="anyPath" />
-  </tableDefinition>
-
-  <tableDefinition name="PSW_ConcatFiles">
-    <columnDefinition name="Component_" type="string" length="72" modularize="column" category="identifier" keyTable="Component" keyColumn="1" primaryKey="yes" />
-    <columnDefinition name="RootFile_" type="string" length="72" modularize="column" category="identifier" keyTable="File" keyColumn="1" primaryKey="yes"/>
-    <columnDefinition name="MyFile_" type="string" length="72" modularize="column" category="identifier" keyTable="File" keyColumn="1" primaryKey="yes"/>
-    <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
-    <columnDefinition name="Size" type="number" length="4" minValue="0" maxValue="2147483647" />
   </tableDefinition>
 </tableDefinitions>

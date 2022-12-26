@@ -1,116 +1,23 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="12.0">
-  <Import Project="..\packages\TidyBuild.1.4.1\build\TidyBuild.props" Condition="Exists('..\packages\TidyBuild.1.4.1\build\TidyBuild.props')" />
+<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <ProjectGuid>{69972F7F-F1CF-44AA-8F76-B4A5A4F1B309}</ProjectGuid>
-    <AssemblyName>PanelSwWixExtension</AssemblyName>
-    <OutputType>Library</OutputType>
+    <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>PanelSw.Wix.Extensions</RootNamespace>
-    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
-    <FileUPanelSwradeFlags>
-    </FileUPanelSwradeFlags>
-    <OldToolsVersion>3.5</OldToolsVersion>
-    <UPanelSwradeBackupLocation />
-    <PublishUrl>publish\</PublishUrl>
-    <Install>true</Install>
-    <InstallFrom>Disk</InstallFrom>
-    <UpdateEnabled>false</UpdateEnabled>
-    <UpdateMode>Foreground</UpdateMode>
-    <UpdateInterval>7</UpdateInterval>
-    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
-    <UpdatePeriodically>false</UpdatePeriodically>
-    <UpdateRequired>false</UpdateRequired>
-    <MapFileExtensions>true</MapFileExtensions>
-    <ApplicationRevision>0</ApplicationRevision>
-    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
-    <IsWebBootstrapper>false</IsWebBootstrapper>
-    <UseApplicationTrust>false</UseApplicationTrust>
-    <BootstrapperEnabled>true</BootstrapperEnabled>
-    <GenerateResourceNeverLockTypeAssemblies>true</GenerateResourceNeverLockTypeAssemblies>
-    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-    <WixToolPath Condition="'$(WixToolPath)'==''">$(WiX)bin\</WixToolPath>
-    <TargetFrameworkProfile />
+    <Description>WiX Toolset Utility extension</Description>
+    <Title>WiX Toolset Utility extension</Title>
+    <DebugType>embedded</DebugType>
+    <IncludeBuildOutput>false</IncludeBuildOutput>
+    <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
-    <Prefer32Bit>false</Prefer32Bit>
-  </PropertyGroup>
+
   <ItemGroup>
-    <Compile Include="AssemblyInfo.cs" />
-    <Compile Include="PanelSwWixPreprocessor.cs" />
-    <Compile Include="PanelSwWixUnbinder.cs" />
-    <Compile Include="PanelSwWixBinder.cs" />
-    <Compile Include="PanelSwWixCompiler.cs" />
-    <Compile Include="PanelSwWixExtension.cs" />
-    <EmbeddedResource Include="Data\tables.xml">
-      <LogicalName>$(RootNamespace).Data.tables.xml</LogicalName>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <MsgGenSource Include="Data\messages.xml">
-      <ResourcesLogicalName>$(RootNamespace).Data.Messages.resources</ResourcesLogicalName>
-    </MsgGenSource>
-    <EmbeddedResource Include="Xsd\PanelSwWixExtension.xsd">
-      <LogicalName>$(RootNamespace).Xsd.PanelSwWixExtension.xsd</LogicalName>
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <EmbeddedResource Include="$(OutputPath)\..\PanelSwWixLib\PanelSwWixExtension.wixlib">
-      <Link>Data\PanelSwWixExtension.wixlib</Link>
-    </EmbeddedResource>
-    <XsdGenSource Include="Xsd\PanelSwWixExtension.xsd">
-      <CommonNamespace>PanelSw.Wix.Serialize</CommonNamespace>
-      <Namespace>PanelSw.Wix.Extensions.Serialize</Namespace>
-    </XsdGenSource>
+    <EmbeddedResource Include="$(OutputPath)..\PanelSwWixLib\PanelSwWixLib.wixlib" />
   </ItemGroup>
+
   <ItemGroup>
-    <None Include="packages.config" />
-    <None Include="PanelSwWixExtension-psw-wix.nuspec" />
-    <None Include="PanelSwWixExtension.nuspec" />
-    <None Include="Xsd\PanelSwWixExtension.xsx">
-      <DependentUpon>PanelSwWixExtension.xsd</DependentUpon>
-    </None>
+    <PackageReference Include="WixToolset.Extensibility" Version="4.0.0-rc.1" />
+    <PackageReference Include="MSBuildTasks" Version="1.5.0.235" />
+    <PackageReference Include="TidyBuild" Version="1.4.1" />
   </ItemGroup>
-  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Xml" />
-    <Reference Include="wix">
-      <HintPath>$(WixToolPath)\wix.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-  <ItemGroup>
-    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
-      <Install>false</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
-      <Visible>False</Visible>
-      <ProductName>.NET Framework 3.5 SP1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
-      <Visible>False</Visible>
-      <ProductName>Windows Installer 3.1</ProductName>
-      <Install>true</Install>
-    </BootstrapperPackage>
-  </ItemGroup>
-  <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets'))" />
-    <Error Condition="!Exists('..\packages\TidyBuild.1.4.1\build\TidyBuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.4.1\build\TidyBuild.props'))" />
-    <Error Condition="!Exists('..\packages\TidyBuild.1.4.1\build\TidyBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.4.1\build\TidyBuild.targets'))" />
-  </Target>
-  <Import Project="..\packages\TidyBuild.1.4.1\build\TidyBuild.targets" Condition="Exists('..\packages\TidyBuild.1.4.1\build\TidyBuild.targets')" />
+
 </Project>

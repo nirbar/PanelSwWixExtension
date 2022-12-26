@@ -1,20 +1,21 @@
-﻿using Microsoft.Tools.WindowsInstallerXml;
+using WixToolset.Extensibility;
+using WixToolset.Extensibility.Data;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using WixToolset.Data.WindowsInstaller;
 
 namespace PanelSw.Wix.Extensions
 {
-    class PanelSwWixBinder : BinderExtensionEx
+    class PanelSwWixBinder : WixToolset.Extensibility.bind
     {
         private List<string> tempFiles_ = new List<string>();
 
-        public override void DatabaseInitialize(Output output)
+        public override void PreBackendBind(IBindContext context)
         {
-            base.DatabaseInitialize(output);
-
-            SplitFiles(output);
+            base.PreBackendBind(context);
+            SplitFiles(context);
         }
 
         ~PanelSwWixBinder()
@@ -26,10 +27,10 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void SplitFiles(Output output)
+        private void SplitFiles(IBindContext context)
         {
             // Split root file. Replace source path of root file.
-            Table concatFilesTable = output.Tables["PSW_ConcatFiles"];
+            Table concatFilesTable = base.
             if ((concatFilesTable == null) || (concatFilesTable.Rows.Count <= 0))
             {
                 return;
