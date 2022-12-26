@@ -976,9 +976,9 @@ namespace PanelSw.Wix.Extensions
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.ChildNodes)
+            foreach (XElement child in node.Descendants())
             {
-                if (child.NamespaceURI == schema.TargetNamespace)
+                if (child.Name.Namespace.Equals(Namespace))
                 {
                     ParseHelper.UnexpectedElement(node, child);
                 }
@@ -988,8 +988,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_ToLowerCase");
-                row[0] = property;
+                section.AddSymbol(new PSW_ToLowerCase(sourceLineNumbers, property));
             }
         }
 
@@ -1045,9 +1044,9 @@ namespace PanelSw.Wix.Extensions
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.ChildNodes)
+            foreach (XElement child in node.Descendants())
             {
-                if (child.NamespaceURI == schema.TargetNamespace)
+                if (child.Name.Namespace.Equals(Namespace))
                 {
                     ParseHelper.UnexpectedElement(node, child);
                 }
@@ -1057,7 +1056,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_JsonJpathSearch");
+                PSW_JsonJpathSearch row = section.AddSymbol(new PSW_JsonJpathSearch(sourceLineNumbers));
                 row[0] = id;
                 row[1] = property;
                 row[2] = expression;
@@ -1146,7 +1145,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_JsonJPath");
+                PSW_JsonJPath row = section.AddSymbol(new PSW_JsonJPath(sourceLineNumbers));
                 row[0] = id;
                 row[1] = component_;
                 row[2] = filePath;
@@ -1165,7 +1164,7 @@ namespace PanelSw.Wix.Extensions
             ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "DiskSpace");
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_DiskSpace");
+                PSW_DiskSpace row = section.AddSymbol(new PSW_DiskSpace(sourceLineNumbers));
                 row[0] = directory;
             }
         }
@@ -1200,7 +1199,7 @@ namespace PanelSw.Wix.Extensions
             ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "SetPropertyFromPipe");
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_SetPropertyFromPipe");
+                PSW_SetPropertyFromPipe row = section.AddSymbol(new PSW_SetPropertyFromPipe(sourceLineNumbers));
                 row[0] = id;
                 row[1] = pipe;
                 row[2] = timeout;
@@ -1265,7 +1264,7 @@ namespace PanelSw.Wix.Extensions
             ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "CreateSelfSignCertificate");
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_SelfSignCertificate");
+                PSW_SelfSignCertificate row = section.AddSymbol(new PSW_SelfSignCertificate(sourceLineNumbers));
                 row[0] = id;
                 row[1] = component;
                 row[2] = x500;
@@ -1362,7 +1361,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_BackupAndRestore");
+                PSW_BackupAndRestore row = section.AddSymbol(new PSW_BackupAndRestore(sourceLineNumbers));
                 row[0] = id;
                 row[1] = component;
                 row[2] = filepath;
@@ -1418,13 +1417,13 @@ namespace PanelSw.Wix.Extensions
             {
                 // Ensure sub-table exists for queries to succeed even if no sub-entries exist.
                 Core.EnsureTable("PSW_InstallUtil_Arg");
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_InstallUtil");
+                PSW_InstallUtil row = section.AddSymbol(new PSW_InstallUtil(sourceLineNumbers));
                 row[0] = file;
                 row[1] = (int)bitness;
             }
 
             // Iterate child 'Argument' elements
-            foreach (XElement childNode in node.ChildNodes)
+            foreach (XElement childNode in node.Descendants())
             {
                 if (childNode.NodeType != XmlNodeType.Element)
                 {
@@ -1466,7 +1465,7 @@ namespace PanelSw.Wix.Extensions
                     continue;
                 }
 
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_InstallUtil_Arg");
+                PSW_InstallUtil_Arg row = section.AddSymbol(new PSW_InstallUtil_Arg(sourceLineNumbers));
                 row[0] = file;
                 row[1] = argId;
                 row[2] = value;
@@ -1509,7 +1508,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_ForceVersion");
+                PSW_ForceVersion row = section.AddSymbol(new PSW_ForceVersion(sourceLineNumbers));
                 row[0] = file;
                 row[1] = version;
             }
@@ -1645,7 +1644,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_TopShelf");
+                PSW_TopShelf row = section.AddSymbol(new PSW_TopShelf(sourceLineNumbers));
                 row[0] = file;
                 row[1] = serviceName;
                 row[2] = displayName;
@@ -1888,7 +1887,7 @@ namespace PanelSw.Wix.Extensions
             foreach (XElement child in element.ChildNodes)
             {
                 SourceLineNumberCollection repLines = Preprocessor.GetSourceLineNumbers(child);
-                if (child.NamespaceURI == schema.TargetNamespace)
+                if (child.Name.Namespace.Equals(Namespace))
                 {
                     switch (child.Name.LocalName)
                     {
@@ -1942,7 +1941,7 @@ namespace PanelSw.Wix.Extensions
                 // Ensure sub-tables exist for queries to succeed even if no sub-entries exist.
                 Core.EnsureTable("PSW_SqlScript_Replacements");
                 Core.EnsureTable("PSW_SqlScript");
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_SqlScript");
+                PSW_SqlScript row = section.AddSymbol(new PSW_SqlScript(sourceLineNumbers));
                 row[0] = id;
                 row[1] = component;
                 row[2] = binary;
@@ -2026,7 +2025,7 @@ namespace PanelSw.Wix.Extensions
             foreach (XElement child in element.ChildNodes)
             {
                 SourceLineNumberCollection repLines = Preprocessor.GetSourceLineNumbers(child);
-                if (child.NamespaceURI == schema.TargetNamespace)
+                if (child.Name.Namespace.Equals(Namespace))
                 {
                     switch (child.Name.LocalName)
                     {
@@ -2079,7 +2078,7 @@ namespace PanelSw.Wix.Extensions
             {
                 // Ensure sub-tables exist for queries to succeed even if no sub-entries exist.
                 Core.EnsureTable("PSW_XslTransform_Replacements");
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_XslTransform");
+                PSW_XslTransform row = section.AddSymbol(new PSW_XslTransform(sourceLineNumbers));
                 int i = 0;
                 row[i++] = id;
                 row[i++] = file;
@@ -2298,7 +2297,7 @@ namespace PanelSw.Wix.Extensions
             // ExitCode mapping
             foreach (XElement child in element.ChildNodes)
             {
-                if (child.NamespaceURI == schema.TargetNamespace)
+                if (child.Name.Namespace.Equals(Namespace))
                 {
                     switch (child.Name.LocalName)
                     {
@@ -2335,7 +2334,7 @@ namespace PanelSw.Wix.Extensions
                                         }
                                     }
                                 }
-                                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_ExecOnComponent_ExitCode");
+                                PSW_ExecOnComponent_ExitCode row = section.AddSymbol(new PSW_ExecOnComponent_ExitCode(sourceLineNumbers));
                                 row[0] = id;
                                 row[1] = (int)from;
                                 row[2] = (int)to;
@@ -2385,7 +2384,7 @@ namespace PanelSw.Wix.Extensions
                                     Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, child.Name.LocalName, "Expression"));
                                 }
 
-                                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_ExecOn_ConsoleOutput");
+                                PSW_ExecOn_ConsoleOutput row = section.AddSymbol(new PSW_ExecOn_ConsoleOutput(sourceLineNumbers));
                                 row[0] = "std" + Guid.NewGuid().ToString("N");
                                 row[1] = id;
                                 row[2] = regex;
@@ -2426,7 +2425,7 @@ namespace PanelSw.Wix.Extensions
                                     break;
                                 }
 
-                                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_ExecOnComponent_Environment");
+                                PSW_ExecOnComponent_Environment row = section.AddSymbol(new PSW_ExecOnComponent_Environment(sourceLineNumbers));
                                 row[0] = id;
                                 row[1] = name;
                                 row[2] = value;
@@ -2448,7 +2447,7 @@ namespace PanelSw.Wix.Extensions
                 Core.EnsureTable("PSW_ExecOnComponent_ExitCode");
                 Core.EnsureTable("PSW_ExecOn_ConsoleOutput");
                 Core.EnsureTable("PSW_ExecOnComponent_Environment");
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_ExecOnComponent");
+                PSW_ExecOnComponent row = section.AddSymbol(new PSW_ExecOnComponent(sourceLineNumbers));
                 row[0] = id;
                 row[1] = component;
                 row[2] = binary;
@@ -2565,7 +2564,7 @@ namespace PanelSw.Wix.Extensions
             {
                 // Ensure sub-table exists for queries to succeed even if no sub-entries exist.
                 Core.EnsureTable("PSW_ServiceConfig_Dependency");
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_ServiceConfig");
+                PSW_ServiceConfig row = section.AddSymbol(new PSW_ServiceConfig(sourceLineNumbers));
                 row[0] = id;
                 row[1] = component;
                 row[2] = service;
@@ -2622,7 +2621,7 @@ namespace PanelSw.Wix.Extensions
 
                     if (!Messaging.EncounteredError)
                     {
-                        IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_ServiceConfig_Dependency");
+                        PSW_ServiceConfig_Dependency row = section.AddSymbol(new PSW_ServiceConfig_Dependency(sourceLineNumbers));
                         row[0] = id;
                         row[1] = depService;
                         row[2] = group;
@@ -2712,7 +2711,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_Dism");
+                PSW_Dism row = section.AddSymbol(new PSW_Dism(sourceLineNumbers));
                 row[0] = id;
                 row[1] = component;
                 row[2] = features;
@@ -2767,7 +2766,7 @@ namespace PanelSw.Wix.Extensions
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == schema.TargetNamespace)
+                    if (child.Name.Namespace.Equals(Namespace))
                     {
                         ParseHelper.UnexpectedElement(element, child);
                     }
@@ -2812,7 +2811,7 @@ namespace PanelSw.Wix.Extensions
                 taskXml = taskXml.Replace("\n", "");
                 taskXml = taskXml.Replace(Environment.NewLine, "");
 
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_TaskScheduler");
+                PSW_TaskScheduler row = section.AddSymbol(new PSW_TaskScheduler(sourceLineNumbers));
                 row[0] = id;
                 row[1] = taskName;
                 row[2] = component;
@@ -2917,11 +2916,11 @@ namespace PanelSw.Wix.Extensions
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.ChildNodes)
+            foreach (XElement child in node.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == schema.TargetNamespace)
+                    if (child.Name.Namespace.Equals(Namespace))
                     {
                         ParseHelper.UnexpectedElement(node, child);
                     }
@@ -2943,7 +2942,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_CustomUninstallKey");
+                PSW_CustomUninstallKey row = section.AddSymbol(new PSW_CustomUninstallKey(sourceLineNumbers));
                 row[0] = id;
                 row[1] = productCode;
                 row[2] = name;
@@ -3046,11 +3045,11 @@ namespace PanelSw.Wix.Extensions
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.ChildNodes)
+            foreach (XElement child in node.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == schema.TargetNamespace)
+                    if (child.Name.Namespace.Equals(Namespace))
                     {
                         ParseHelper.UnexpectedElement(node, child);
                     }
@@ -3155,11 +3154,11 @@ namespace PanelSw.Wix.Extensions
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.ChildNodes)
+            foreach (XElement child in node.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == schema.TargetNamespace)
+                    if (child.Name.Namespace.Equals(Namespace))
                     {
                         ParseHelper.UnexpectedElement(node, child);
                     }
@@ -3178,7 +3177,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_RemoveRegistryValue");
+                PSW_RemoveRegistryValue row = section.AddSymbol(new PSW_RemoveRegistryValue(sourceLineNumbers));
                 row[0] = id;
                 row[1] = root;
                 row[2] = key;
@@ -3257,9 +3256,9 @@ namespace PanelSw.Wix.Extensions
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.ChildNodes)
+            foreach (XElement child in node.Descendants())
             {
-                if (child.NamespaceURI == schema.TargetNamespace)
+                if (child.Name.Namespace.Equals(Namespace))
                 {
                     ParseHelper.UnexpectedElement(node, child);
                 }
@@ -3269,7 +3268,7 @@ namespace PanelSw.Wix.Extensions
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "CertificateHashSearch");
 
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_CertificateHashSearch");
+                PSW_CertificateHashSearch row = section.AddSymbol(new PSW_CertificateHashSearch(sourceLineNumbers));
                 row[0] = property;
                 row[1] = certName;
                 row[2] = friendlyName;
@@ -3326,9 +3325,9 @@ namespace PanelSw.Wix.Extensions
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.ChildNodes)
+            foreach (XElement child in node.Descendants())
             {
-                if (child.NamespaceURI == schema.TargetNamespace)
+                if (child.Name.Namespace.Equals(Namespace))
                 {
                     ParseHelper.UnexpectedElement(node, child);
                 }
@@ -3338,7 +3337,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_EvaluateExpression");
+                PSW_EvaluateExpression row = section.AddSymbol(new PSW_EvaluateExpression(sourceLineNumbers));
                 row[0] = id;
                 row[1] = property;
                 row[2] = expression;
@@ -3393,7 +3392,7 @@ namespace PanelSw.Wix.Extensions
             ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_PathSearch");
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_PathSearch");
+                PSW_PathSearch row = section.AddSymbol(new PSW_PathSearch(sourceLineNumbers));
                 row[0] = id;
                 row[1] = property;
                 row[2] = file;
@@ -3455,7 +3454,7 @@ namespace PanelSw.Wix.Extensions
             ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_VersionCompare");
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_VersionCompare");
+                PSW_VersionCompare row = section.AddSymbol(new PSW_VersionCompare(sourceLineNumbers));
                 row[0] = id;
                 row[1] = property;
                 row[2] = version1;
@@ -3521,11 +3520,11 @@ namespace PanelSw.Wix.Extensions
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.ChildNodes)
+            foreach (XElement child in node.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == schema.TargetNamespace)
+                    if (child.Name.Namespace.Equals(Namespace))
                     {
                         ParseHelper.UnexpectedElement(node, child);
                     }
@@ -3544,7 +3543,7 @@ namespace PanelSw.Wix.Extensions
             ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "AccountSidSearch");
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_AccountSidSearch");
+                PSW_AccountSidSearch row = section.AddSymbol(new PSW_AccountSidSearch(sourceLineNumbers));
                 row[0] = id;
                 row[1] = property;
                 row[2] = systemName;
@@ -3646,11 +3645,11 @@ namespace PanelSw.Wix.Extensions
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.ChildNodes)
+            foreach (XElement child in node.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == schema.TargetNamespace)
+                    if (child.Name.Namespace.Equals(Namespace))
                     {
                         ParseHelper.UnexpectedElement(node, child);
                     }
@@ -3670,7 +3669,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_XmlSearch");
+                PSW_XmlSearch row = section.AddSymbol(new PSW_XmlSearch(sourceLineNumbers));
                 row[0] = id;
                 row[1] = property;
                 row[2] = filePath;
@@ -3797,7 +3796,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_SqlSearch");
+                PSW_SqlSearch row = section.AddSymbol(new PSW_SqlSearch(sourceLineNumbers));
                 int i = 0;
                 row[i++] = id;
                 row[i++] = property;
@@ -3883,7 +3882,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_WmiSearch");
+                PSW_WmiSearch row = section.AddSymbol(new PSW_WmiSearch(sourceLineNumbers));
                 int i = 0;
                 row[i++] = id;
                 row[i++] = property;
@@ -3987,11 +3986,11 @@ namespace PanelSw.Wix.Extensions
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.ChildNodes)
+            foreach (XElement child in node.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == schema.TargetNamespace)
+                    if (child.Name.Namespace.Equals(Namespace))
                     {
                         ParseHelper.UnexpectedElement(node, child);
                     }
@@ -4010,7 +4009,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_Telemetry");
+                PSW_Telemetry row = section.AddSymbol(new PSW_Telemetry(sourceLineNumbers));
                 row[0] = id;
                 row[1] = url;
                 row[2] = page ?? "";
@@ -4105,11 +4104,11 @@ namespace PanelSw.Wix.Extensions
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.ChildNodes)
+            foreach (XElement child in node.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == schema.TargetNamespace)
+                    if (child.Name.Namespace.Equals(Namespace))
                     {
                         ParseHelper.UnexpectedElement(node, child);
                     }
@@ -4134,7 +4133,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_ShellExecute");
+                PSW_ShellExecute row = section.AddSymbol(new PSW_ShellExecute(sourceLineNumbers));
                 row[0] = id;
                 row[1] = target;
                 row[2] = args;
@@ -4202,11 +4201,11 @@ namespace PanelSw.Wix.Extensions
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.ChildNodes)
+            foreach (XElement child in node.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == schema.TargetNamespace)
+                    if (child.Name.Namespace.Equals(Namespace))
                     {
                         ParseHelper.UnexpectedElement(node, child);
                     }
@@ -4226,7 +4225,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_MsiSqlQuery");
+                PSW_MsiSqlQuery row = section.AddSymbol(new PSW_MsiSqlQuery(sourceLineNumbers));
                 row[0] = id;
                 row[1] = property;
                 row[2] = query;
@@ -4347,11 +4346,11 @@ namespace PanelSw.Wix.Extensions
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.ChildNodes)
+            foreach (XElement child in node.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == schema.TargetNamespace)
+                    if (child.Name.Namespace.Equals(Namespace))
                     {
                         ParseHelper.UnexpectedElement(node, child);
                     }
@@ -4372,7 +4371,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_RegularExpression");
+                PSW_RegularExpression row = section.AddSymbol(new PSW_RegularExpression(sourceLineNumbers));
                 row[0] = id;
                 row[1] = filepath;
                 row[2] = input;
@@ -4415,11 +4414,11 @@ namespace PanelSw.Wix.Extensions
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.ChildNodes)
+            foreach (XElement child in node.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == schema.TargetNamespace)
+                    if (child.Name.Namespace.Equals(Namespace))
                     {
                         ParseHelper.UnexpectedElement(node, child);
                     }
@@ -4434,7 +4433,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_RestartLocalResources");
+                PSW_RestartLocalResources row = section.AddSymbol(new PSW_RestartLocalResources(sourceLineNumbers));
                 row[0] = id;
                 row[1] = path;
                 row[2] = condition;
@@ -4519,11 +4518,11 @@ namespace PanelSw.Wix.Extensions
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.ChildNodes)
+            foreach (XElement child in node.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == schema.TargetNamespace)
+                    if (child.Name.Namespace.Equals(Namespace))
                     {
                         ParseHelper.UnexpectedElement(node, child);
                     }
@@ -4543,7 +4542,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_FileRegex");
+                PSW_FileRegex row = section.AddSymbol(new PSW_FileRegex(sourceLineNumbers));
                 row[0] = id;
                 row[1] = component;
                 row[2] = fileId;
@@ -4628,11 +4627,11 @@ namespace PanelSw.Wix.Extensions
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.ChildNodes)
+            foreach (XElement child in node.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == schema.TargetNamespace)
+                    if (child.Name.Namespace.Equals(Namespace))
                     {
                         ParseHelper.UnexpectedElement(node, child);
                     }
@@ -4655,7 +4654,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_DeletePath");
+                PSW_DeletePath row = section.AddSymbol(new PSW_DeletePath(sourceLineNumbers));
                 row[0] = id;
                 row[1] = filepath;
                 row[2] = (int)flags;
@@ -4721,11 +4720,11 @@ namespace PanelSw.Wix.Extensions
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.ChildNodes)
+            foreach (XElement child in node.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == schema.TargetNamespace)
+                    if (child.Name.Namespace.Equals(Namespace))
                     {
                         ParseHelper.UnexpectedElement(node, child);
                     }
@@ -4744,7 +4743,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_ZipFile");
+                PSW_ZipFile row = section.AddSymbol(new PSW_ZipFile(sourceLineNumbers));
                 row[0] = id;
                 row[1] = dstZipFile;
                 row[2] = srcDir;
@@ -4869,11 +4868,11 @@ namespace PanelSw.Wix.Extensions
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.ChildNodes)
+            foreach (XElement child in node.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
-                    if (child.NamespaceURI == schema.TargetNamespace)
+                    if (child.Name.Namespace.Equals(Namespace))
                     {
                         ParseHelper.UnexpectedElement(node, child);
                     }
@@ -4892,7 +4891,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, ("PSW_Unzip");
+                PSW_Unzip row = section.AddSymbol(new PSW_Unzip(sourceLineNumbers));
                 row[0] = id;
                 row[1] = zipFile;
                 row[2] = dstDir;

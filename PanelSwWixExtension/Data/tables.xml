@@ -340,9 +340,6 @@
     <columnDefinition name="FileName" type="string" length="0" modularize="property" nullable="no" category="formatted" />
   </tableDefinition>
 
-  <tableDefinition name="PSW_ToLowerCase">
-    <columnDefinition name="Property_" type="string" length="72" primaryKey="yes" nullable="no" modularize="property" category="identifier" />
-  </tableDefinition>
 
   <tableDefinition name="PSW_WmiSearch">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />

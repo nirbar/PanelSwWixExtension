@@ -20,13 +20,13 @@ namespace PanelSw.Wix.Extensions.Symbols
             {
                 return new ColumnDefinition[]
                 {
-                        new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column)
-                        , new ColumnDefinition(nameof(Component_), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "Component", keyColumn: 1)
-                        , new ColumnDefinition(nameof(Website), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property)
-                        , new ColumnDefinition(nameof(Stop), ColumnType.Number, 2, false, true, ColumnCategory.Integer, 0, 1)
-                        , new ColumnDefinition(nameof(Start), ColumnType.Number, 2, false, true, ColumnCategory.Integer, 0, 1)
-                        , new ColumnDefinition(nameof(AutoStart), ColumnType.Number, 2, false, true, ColumnCategory.Integer, -1, 1)
-                        , new ColumnDefinition(nameof(ErrorHandling), ColumnType.Number, 2, false, true, ColumnCategory.Integer, 0, 2)
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column)
+                    , new ColumnDefinition(nameof(Component_), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "Component", keyColumn: 1)
+                    , new ColumnDefinition(nameof(Website), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property)
+                    , new ColumnDefinition(nameof(Stop), ColumnType.Number, 2, false, true, ColumnCategory.Integer, 0, 1)
+                    , new ColumnDefinition(nameof(Start), ColumnType.Number, 2, false, true, ColumnCategory.Integer, 0, 1)
+                    , new ColumnDefinition(nameof(AutoStart), ColumnType.Number, 2, false, true, ColumnCategory.Integer, -1, 1)
+                    , new ColumnDefinition(nameof(ErrorHandling), ColumnType.Number, 2, false, true, ColumnCategory.Integer, 0, 2)
                 };
             }
         }

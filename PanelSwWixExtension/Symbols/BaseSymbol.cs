@@ -10,14 +10,14 @@ namespace PanelSw.Wix.Extensions.Symbols
     {
         public BaseSymbol(IntermediateSymbolDefinition definition) : base(definition) { }
 
-        public BaseSymbol(IntermediateSymbolDefinition definition, SourceLineNumber lineNumber, Identifier id) : base(definition, lineNumber, new Identifier(AccessModifier.Global, id)) { }
+        public BaseSymbol(IntermediateSymbolDefinition definition, SourceLineNumber lineNumber, Identifier id) : base(definition, lineNumber, id) { }
 
         public BaseSymbol(IntermediateSymbolDefinition definition, SourceLineNumber lineNumber, string idPrefix) : base(definition, lineNumber, new Identifier(AccessModifier.Global, $"{idPrefix}{Guid.NewGuid().ToString("N")}")) { }
 
-        protected static IntermediateFieldDefinition[] CreateFieldDefinitions(IEnumerable<ColumnDefinition> columns)
+        protected static IntermediateFieldDefinition[] CreateFieldDefinitions(IEnumerable<ColumnDefinition> columns, int firstColumn = 1 /* Skip the Id column for most tables */)
         {
             List<IntermediateFieldDefinition> fieldDefinitions = new List<IntermediateFieldDefinition>();
-            for (int i = 1; i < columns.Count(); ++i)
+            for (int i = firstColumn; i < columns.Count(); ++i)
             {
                 ColumnDefinition column = columns.ElementAt(i);
                 IntermediateFieldType fieldType = IntermediateFieldType.String;
