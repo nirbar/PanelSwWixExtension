@@ -1641,22 +1641,6 @@ namespace PanelSw.Wix.Extensions
             Impersonate = 2 * ASync,
         }
 
-        private int GetLineNumber(SourceLineNumberCollection sourceLineNumbers)
-        {
-            int order = 0;
-            if ((sourceLineNumbers != null) && (sourceLineNumbers.Count > 0))
-            {
-                foreach (SourceLineNumber line in sourceLineNumbers)
-                {
-                    if (line.HasLineNumber)
-                    {
-                        order = line.LineNumber;
-                    }
-                }
-            }
-            return order;
-        }
-
         [Flags]
         private enum SqlExecOn
         {
@@ -1672,7 +1656,6 @@ namespace PanelSw.Wix.Extensions
         private void ParseSqlScriptElement(IntermediateSection section, XElement element, string component)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
-            string id = "sql" + Guid.NewGuid().ToString("N");
             string binary = null;
             string driver = null;
             string server = null;
@@ -1684,7 +1667,7 @@ namespace PanelSw.Wix.Extensions
             string port = null;
             string encrypted = null;
             ErrorHandling? errorHandling = null;
-            int order = 1000000000 + GetLineNumber(sourceLineNumbers);
+            int order = 1000000000 + sourceLineNumbers.LineNumber ?? 0;
             SqlExecOn sqlExecOn = SqlExecOn.None;
             YesNoType aye;
 
@@ -1694,10 +1677,6 @@ namespace PanelSw.Wix.Extensions
                 {
                     switch (attrib.Name.LocalName)
                     {
-                        case "Id":
-                            id = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
-
                         case "BinaryKey":
                             binary = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
@@ -1831,10 +1810,34 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "OnXXX"));
             }
 
-            // ExitCode mapping
-            foreach (XElement child in element.ChildNodes)
+            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_SqlScript");
+
+            PSW_SqlScript row = null;
+            if (!Messaging.EncounteredError)
             {
-                SourceLineNumberCollection repLines = Preprocessor.GetSourceLineNumbers(child);
+                // Ensure sub-tables exist for queries to succeed even if no sub-entries exist.
+                ParseHelper.EnsureTable(section, sourceLineNumbers, "PSW_SqlScript_Replacements");
+                row = section.AddSymbol(new PSW_SqlScript(sourceLineNumbers));
+                row.Component_ = component;
+                row.Binary_ = binary;
+                row.Server = server;
+                row.Instance = instance;
+                row.Port = port;
+                row.Encrypted = encrypted;
+                row.Database = database;
+                row.Username = username;
+                row.Password = password;
+                row.On = (int)sqlExecOn;
+                row.ErrorHandling = (int)(errorHandling ?? ErrorHandling.fail);
+                row.Order = order;
+                row.ConnectionString = connectionString;
+                row.Driver = driver;
+            }
+
+            // ExitCode mapping
+            foreach (XElement child in element.Descendants())
+            {
+                SourceLineNumber repLines = ParseHelper.GetSourceLineNumbers(child);
                 if (child.Name.Namespace.Equals(Namespace))
                 {
                     switch (child.Name.LocalName)
@@ -1843,35 +1846,32 @@ namespace PanelSw.Wix.Extensions
                             {
                                 string from = null;
                                 string to = "";
-                                int repOrder = 1000000000 + GetLineNumber(repLines);
+                                int repOrder = 1000000000 + repLines.LineNumber ?? 0;
                                 foreach (XAttribute a in child.Attributes())
                                 {
-                                    if (!attrib.Name.Namespace.Equals(Namespace))
+                                    if (a.Name.Namespace.Equals(Namespace))
                                     {
-                                        continue;
-                                    }
+                                        switch (a.Name.LocalName)
+                                        {
+                                            case "Text":
+                                                from = ParseHelper.GetAttributeValue(repLines, a);
+                                                break;
 
-                                    switch (a.Name.LocalName)
-                                    {
-                                        case "Text":
-                                            from = ParseHelper.GetAttributeValue(repLines, a);
-                                            break;
+                                            case "Replacement":
+                                                to = ParseHelper.GetAttributeValue(repLines, a, EmptyRule.CanBeEmpty);
+                                                break;
 
-                                        case "Replacement":
-                                            to = ParseHelper.GetAttributeValue(repLines, a, true);
-                                            break;
-
-                                        case "Order":
-                                            repOrder = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, repLines, a, 0, 1000000000);
-                                            break;
+                                            case "Order":
+                                                repOrder = ParseHelper.GetAttributeIntegerValue(repLines, a, 0, 1000000000);
+                                                break;
+                                        }
                                     }
                                 }
 
-                                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, (repLines, "PSW_SqlScript_Replacements");
-                                row[0] = id;
-                                row[1] = from;
-                                row[2] = to;
-                                row[3] = repOrder;
+                                PSW_SqlScript_Replacements row1 = section.AddSymbol(new PSW_SqlScript_Replacements(repLines, row?.Id));
+                                row1.Text = from;
+                                row1.Replacement = to;
+                                row1.Order = repOrder;
                             }
                             break;
 
@@ -1880,31 +1880,6 @@ namespace PanelSw.Wix.Extensions
                             break;
                     }
                 }
-            }
-
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_SqlScript");
-
-            if (!Messaging.EncounteredError)
-            {
-                // Ensure sub-tables exist for queries to succeed even if no sub-entries exist.
-                Core.EnsureTable("PSW_SqlScript_Replacements");
-                Core.EnsureTable("PSW_SqlScript");
-                PSW_SqlScript row = section.AddSymbol(new PSW_SqlScript(sourceLineNumbers));
-                row[0] = id;
-                row[1] = component;
-                row[2] = binary;
-                row[3] = server;
-                row[4] = instance;
-                row[5] = port;
-                row[6] = encrypted;
-                row[7] = database;
-                row[8] = username;
-                row[9] = password;
-                row[10] = (int)sqlExecOn;
-                row[11] = (int)(errorHandling ?? ErrorHandling.fail);
-                row[12] = order;
-                row[13] = connectionString;
-                row[14] = driver;
             }
         }
 
@@ -1968,7 +1943,7 @@ namespace PanelSw.Wix.Extensions
             }
 
             // Text replacements in XSL
-            foreach (XElement child in element.ChildNodes)
+            foreach (XElement child in element.Descendants())
             {
                 SourceLineNumberCollection repLines = Preprocessor.GetSourceLineNumbers(child);
                 if (child.Name.Namespace.Equals(Namespace))
@@ -2241,7 +2216,7 @@ namespace PanelSw.Wix.Extensions
             }
 
             // ExitCode mapping
-            foreach (XElement child in element.ChildNodes)
+            foreach (XElement child in element.Descendants())
             {
                 if (child.Name.Namespace.Equals(Namespace))
                 {
@@ -2521,7 +2496,7 @@ namespace PanelSw.Wix.Extensions
                 row[9] = (int)errorHandling;
             }
 
-            foreach (XElement child in element.ChildNodes)
+            foreach (XElement child in element.Descendants())
             {
                 if (child.NamespaceURI != element.NamespaceURI)
                 {
@@ -2629,7 +2604,7 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            foreach (XElement child in element.ChildNodes)
+            foreach (XElement child in element.Descendants())
             {
                 Core.UnsupportedExtensionElement(element, child);
             }
@@ -2700,7 +2675,7 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            foreach (XElement child in element.ChildNodes)
+            foreach (XElement child in element.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {

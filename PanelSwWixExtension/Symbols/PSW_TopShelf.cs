@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using WixToolset.Data;
 using WixToolset.Data.WindowsInstaller;
