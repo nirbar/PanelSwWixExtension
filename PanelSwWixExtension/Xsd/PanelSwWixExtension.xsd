@@ -222,34 +222,6 @@ The property is not set if Version1 or Version2 cannot be parsed to a version nu
     </xs:complexType>
   </xs:element>
 
-  <xs:element name="UninstallCommand">
-    <xs:annotation>
-      <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="ExePackage" />
-      </xs:appinfo>
-      <xs:documentation>
-        <![CDATA[Executes a custom command to uninstall an ExePackage. Used for which the uninstall is launched via a different executable than the install.]]>
-      </xs:documentation>
-    </xs:annotation>
-    <xs:complexType>
-      <xs:attribute name="Id" use="optional" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Package Id. Defaults to the parent id with a '_uninstall' postfix]]></xs:documentation>
-        </xs:annotation>
-      </xs:attribute>
-      <xs:attribute name="DetectCondition" use="optional" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Detection rule for the parent ExePackage. DetectCondition must be specified in this element or in the parent ExePackage. It is recommended to duplicate the parent DetectCondition and amend with the uninstaller executable path if it is resolved with a variable.]]></xs:documentation>
-        </xs:annotation>
-      </xs:attribute>
-      <xs:attribute name="CommandLine" use="required" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Uninstall command line. May contain formatted values. Note that, the first argument should be the full path to the uninstaller executable and that it should be enclosed in double quotes]]></xs:documentation>
-        </xs:annotation>
-      </xs:attribute>
-    </xs:complexType>
-  </xs:element>
-
   <xs:element name="SplitFile">
     <xs:annotation>
       <xs:appinfo>
@@ -715,11 +687,6 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
       </xs:documentation>
     </xs:annotation>
     <xs:complexType>
-      <xs:attribute name="Id">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Primary key for the argument.]]></xs:documentation>
-        </xs:annotation>
-      </xs:attribute>
       <xs:attribute name="Value" use="required">
         <xs:annotation>
           <xs:documentation><![CDATA[Argument to pass to the .NET installer class]]></xs:documentation>
@@ -739,11 +706,6 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
       <xs:choice minOccurs="0" maxOccurs="unbounded">
         <xs:element ref="Dependency" />
       </xs:choice>
-      <xs:attribute name="Id" type="xs:string">
-        <xs:annotation>
-          <xs:documentation>Identifier for the value (primary key).</xs:documentation>
-        </xs:annotation>
-      </xs:attribute>
       <xs:attribute name="ServiceName" type="xs:string" use="required">
         <xs:annotation>
           <xs:documentation><![CDATA[Service name. Formatted]]></xs:documentation>
@@ -912,11 +874,6 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string">
-            <xs:annotation>
-              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
           <xs:attribute name="TargetZipFile" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation><![CDATA[Target ZIP archive full path.]]></xs:documentation>
@@ -954,11 +911,6 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string">
-            <xs:annotation>
-              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
           <xs:attribute name="ZipFile" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation><![CDATA[ZIP archive full path.]]></xs:documentation>
@@ -1025,11 +977,6 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string">
-            <xs:annotation>
-              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
           <xs:attribute name="EnableFeature" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation><![CDATA[Feature Regex pattern. Any Windows Feature matching the regular expression will be enabled. For example, IIS will match all feature that contain 'IIS' in their name, while '^IIS$' will only match a feature whose full name is IIS.]]></xs:documentation>
@@ -1075,11 +1022,6 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
         <xs:element ref="ConsoleOutput" />
         <xs:element ref="Environment" />
       </xs:choice>
-      <xs:attribute name="Id" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Primary key.]]></xs:documentation>
-        </xs:annotation>
-      </xs:attribute>
       <xs:attribute name="Command" type="xs:string" use="required">
         <xs:annotation>
           <xs:documentation><![CDATA[Command line to execute. The executable to run should be enclosed with double-quotes, unless BinaryKey is specified. This field is formatted.]]></xs:documentation>
@@ -1362,11 +1304,6 @@ Delete folder or file specified by a path. DeletePath entries are processed in o
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string">
-            <xs:annotation>
-              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
           <xs:attribute name="Path" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation>Full file or folder path to delete. This field is formatted.</xs:documentation>
@@ -1412,11 +1349,6 @@ Delete folder or file specified by a path. DeletePath entries are processed in o
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string">
-            <xs:annotation>
-              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
           <xs:attribute name="FilePath" type="xs:string" use="optional">
             <xs:annotation>
               <xs:documentation>Explicit file path if not nested under a File element. This field is formatted.</xs:documentation>
@@ -1483,11 +1415,6 @@ Execute a Regular Expression to replace or find matches in property values.
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string">
-            <xs:annotation>
-              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
           <xs:attribute name="FilePath" type="xs:string" use="optional">
             <xs:annotation>
               <xs:documentation>File path. File contents will be used as input. This field is formatted.</xs:documentation>
@@ -1564,11 +1491,6 @@ Execute a MSI-SQL query on the MSI database.
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string">
-            <xs:annotation>
-              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
           <xs:attribute name="Query" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation>Query to execute against the MSI database.</xs:documentation>
@@ -1601,11 +1523,6 @@ Call ShellExecuteEx with parameters
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string">
-            <xs:annotation>
-              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
           <xs:attribute name="Target" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation>ShellExecuteEx szFile parameter. This field is Formatted.</xs:documentation>
@@ -1682,11 +1599,6 @@ Send telemetry data to a given URL
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string">
-            <xs:annotation>
-              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
           <xs:attribute name="Url" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation>URL of the web site to post telemetry data to. This field should be the host name rather than a full URL; Use example.com rather than http://www.example.com. This field is Formatted</xs:documentation>
@@ -1775,12 +1687,6 @@ Overwrite or create registry values in Software\Microsoft\Windows\CurrentVersion
     </xs:annotation>
     <xs:complexType>
       <xs:simpleContent>
-        <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string">
-            <xs:annotation>
-              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
           <xs:attribute name="ProductCode" type="xs:string" use="optional">
             <xs:annotation>
               <xs:documentation>ProductCode of the product. This field is formatted. If not specified, Current ProductCode is used</xs:documentation>
@@ -1821,11 +1727,6 @@ Overwrite or create registry values in Software\Microsoft\Windows\CurrentVersion
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string">
-            <xs:annotation>
-              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
           <xs:attribute name="FilePath" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation>.INI file full path</xs:documentation>
@@ -1884,11 +1785,6 @@ Read values from a XML file
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string">
-            <xs:annotation>
-              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
           <xs:attribute name="FilePath" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation>XML file full path. This value can be formatted</xs:documentation>
@@ -1982,11 +1878,6 @@ Remove registry values.
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string">
-            <xs:annotation>
-              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
           <xs:attribute name="Root" use="required" type="wix:RegistryRootType">
             <xs:annotation>
               <xs:documentation>Root of the registry hive.</xs:documentation>
@@ -2031,11 +1922,6 @@ Remove registry values.
       <xs:choice minOccurs="0" maxOccurs="unbounded">
         <xs:element ref="Replace" />
       </xs:choice>
-      <xs:attribute name="Id" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Primary key.]]></xs:documentation>
-        </xs:annotation>
-      </xs:attribute>
       <xs:attribute name="BinaryKey" type="xs:string" use="required">
         <xs:annotation>
           <xs:documentation><![CDATA[Binary XSL file]]></xs:documentation>
@@ -2091,11 +1977,6 @@ Remove registry values.
       <xs:choice minOccurs="0" maxOccurs="unbounded">
         <xs:element ref="Replace" />
       </xs:choice>
-      <xs:attribute name="Id" type="xs:string">
-        <xs:annotation>
-          <xs:documentation><![CDATA[Primary key.]]></xs:documentation>
-        </xs:annotation>
-      </xs:attribute>
       <xs:attribute name="BinaryKey" type="xs:string" use="required">
         <xs:annotation>
           <xs:documentation><![CDATA[Binary SQL script file, unicode encoded.]]></xs:documentation>

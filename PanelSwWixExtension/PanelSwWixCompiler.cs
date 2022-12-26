@@ -1394,41 +1394,31 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, "File", "Id"));
             }
 
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_InstallUtilSched");
-
             if (!Messaging.EncounteredError)
             {
                 // Ensure sub-table exists for queries to succeed even if no sub-entries exist.
-                Core.EnsureTable("PSW_InstallUtil_Arg");
-                PSW_InstallUtil row = section.AddSymbol(new PSW_InstallUtil(sourceLineNumbers));
-                row[0] = file;
-                row[1] = (int)bitness;
+                ParseHelper.EnsureTable(section, sourceLineNumbers, "PSW_InstallUtil_Arg");
+
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_InstallUtilSched");
+                PSW_InstallUtil row = section.AddSymbol(new PSW_InstallUtil(sourceLineNumbers, file));
+                row.Flags = (ushort)bitness;
             }
 
             // Iterate child 'Argument' elements
-            foreach (XElement childNode in node.Descendants())
+            foreach (XElement child in node.Descendants())
             {
-                if (childNode.NodeType != XmlNodeType.Element)
+                if (child.Name.Namespace.Equals(Namespace) && !child.Name.LocalName.Equals("Argument"))
                 {
+                    Messaging.Write(ErrorMessages.UnsupportedExtensionElement(sourceLineNumbers, node.Name.LocalName, child.Name.LocalName));
                     continue;
                 }
 
-                XElement child = childNode as XElement;
-                if (!child.Name.LocalName.Equals("Argument", StringComparison.OrdinalIgnoreCase))
-                {
-                    Core.UnsupportedExtensionElement(node, child);
-                }
-
-                string argId = null;
                 string value = null;
                 foreach (XAttribute attrib in child.Attributes())
                 {
-                    switch (attrib.Name.LocalName.ToLower())
+                    switch (attrib.Name.LocalName)
                     {
-                        case "id":
-                            argId = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
-                        case "value":
+                        case "Value":
                             value = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         default:
@@ -1437,21 +1427,17 @@ namespace PanelSw.Wix.Extensions
                     }
                 }
 
-                if (string.IsNullOrEmpty(argId))
-                {
-                    Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, child.Name.LocalName, "Id"));
-                    continue;
-                }
                 if (string.IsNullOrEmpty(value))
                 {
                     Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, child.Name.LocalName, "Value"));
                     continue;
                 }
 
-                PSW_InstallUtil_Arg row = section.AddSymbol(new PSW_InstallUtil_Arg(sourceLineNumbers));
-                row[0] = file;
-                row[1] = argId;
-                row[2] = value;
+                if (!Messaging.EncounteredError)
+                {
+                    PSW_InstallUtil_Arg row = section.AddSymbol(new PSW_InstallUtil_Arg(sourceLineNumbers, file));
+                    row.Value = value;
+                }
             }
         }
 
@@ -3035,7 +3021,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                PSW_ReadIniValues row = section.AddSymbol(section, sourceLineNumbers, id);
+                PSW_ReadIniValues row = section.AddSymbol(new PSW_ReadIniValues(sourceLineNumbers));
                 row.FilePath = FilePath;
                 row[2] = Section;
                 row[3] = Key;

@@ -171,17 +171,6 @@
     <columnDefinition name="Group" type="string" length="0" primaryKey="yes" modularize="property" category="formatted" nullable="yes"/>
   </tableDefinition>
 
-  <tableDefinition name="PSW_InstallUtil">
-    <columnDefinition name="File_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" keyTable="File" keyColumn="1" />
-    <columnDefinition name="Bitness" type="number" length="2" minValue="0" maxValue="127" />
-  </tableDefinition>
-
-  <tableDefinition name="PSW_InstallUtil_Arg">
-    <columnDefinition name="File_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" keyTable="File" keyColumn="1" />
-    <columnDefinition name="Id" primaryKey="yes" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Value" type="string" length="0" modularize="property" category="formatted" />
-  </tableDefinition>
-
   <tableDefinition name="PSW_SqlSearch">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
     <columnDefinition name="Property_" type="string" length="72" modularize="column" category="identifier" />
