@@ -201,11 +201,6 @@
     <columnDefinition name="ErrorHandling" type="number" minValue="0" maxValue="2" length="2" />
   </tableDefinition>
 
-  <tableDefinition name="PSW_ForceVersion">
-    <columnDefinition name="File" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Version" type="string" length="72" modularize="none" category="version" />
-  </tableDefinition>
-
   <tableDefinition name="PSW_EvaluateExpression">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
     <columnDefinition name="Property_" type="string" length="0" modularize="column" category="identifier" />

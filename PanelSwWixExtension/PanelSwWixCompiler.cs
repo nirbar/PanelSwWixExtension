@@ -1472,9 +1472,8 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                PSW_ForceVersion row = section.AddSymbol(new PSW_ForceVersion(sourceLineNumbers));
-                row[0] = file;
-                row[1] = version;
+                PSW_ForceVersion row = section.AddSymbol(new PSW_ForceVersion(sourceLineNumbers, file));
+                row.Version = version;
             }
         }
 
