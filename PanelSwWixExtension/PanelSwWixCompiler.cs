@@ -1277,7 +1277,6 @@ namespace PanelSw.Wix.Extensions
         private void ParseBackupAndRestoreElement(IntermediateSection section, XElement element, string component)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
-            string id = null;
             string filepath = null;
             BackupAndRestore_deferred_Schedule restoreSchedule = BackupAndRestore_deferred_Schedule.BackupAndRestore_deferred_Before_InstallFiles;
             DeletePathFlags flags = 0;
@@ -1286,27 +1285,24 @@ namespace PanelSw.Wix.Extensions
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
-                    switch (attrib.Name.LocalName.ToLower())
+                    switch (attrib.Name.LocalName)
                     {
-                        case "id":
-                            id = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
-                        case "path":
+                        case "Path":
                             filepath = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "ignoremissing":
+                        case "IgnoreMissing":
                             if (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 flags |= DeletePathFlags.IgnoreMissing;
                             }
                             break;
-                        case "ignoreerrors":
+                        case "IgnoreErrors":
                             if (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 flags |= DeletePathFlags.IgnoreErrors;
                             }
                             break;
-                        case "restorescheduling":
+                        case "RestoreScheduling":
                             {
                                 string val = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                                 switch (val)
@@ -1335,10 +1331,6 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            if (string.IsNullOrEmpty(id))
-            {
-                id = "bnr" + Guid.NewGuid().ToString("N");
-            }
             if (string.IsNullOrEmpty(filepath))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Path"));
@@ -1354,10 +1346,9 @@ namespace PanelSw.Wix.Extensions
             if (!Messaging.EncounteredError)
             {
                 PSW_BackupAndRestore row = section.AddSymbol(new PSW_BackupAndRestore(sourceLineNumbers));
-                row[0] = id;
-                row[1] = component;
-                row[2] = filepath;
-                row[3] = (int)flags;
+                row.Component_ = component;
+                row.Path = filepath;
+                row.Flags = (ushort)flags;
             }
         }
 

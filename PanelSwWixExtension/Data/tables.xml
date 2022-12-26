@@ -199,13 +199,6 @@
     <columnDefinition name="ConnectionString" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
   </tableDefinition>
 
-  <tableDefinition name="PSW_BackupAndRestore">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Component_" type="string" length="72" modularize="column" keyTable="Component" keyColumn="1" category="identifier"/>
-    <columnDefinition name="Path" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Flags" type="number" length="2" minValue="0" maxValue="127" />
-  </tableDefinition>
-
   <tableDefinition name="PSW_TopShelf">
     <columnDefinition name="File_" primaryKey="yes" type="string" length="72" modularize="column" category="identifier" keyTable="File" keyColumn="1" />
     <columnDefinition name="ServiceName" type="string" length="0" nullable="yes" category="formatted" modularize="property" />

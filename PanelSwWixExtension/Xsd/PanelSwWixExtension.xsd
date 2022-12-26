@@ -543,11 +543,6 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Id" type="xs:string">
-            <xs:annotation>
-              <xs:documentation>Identifier for the value (primary key).</xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
           <xs:attribute name="Path" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation>Full file or folder path to backup and restore. This field is formatted.</xs:documentation>
