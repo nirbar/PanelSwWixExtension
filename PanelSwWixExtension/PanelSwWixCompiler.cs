@@ -1883,14 +1883,20 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
+        enum InstallUninstallType
+        {
+            install,
+            uninstall,
+            both
+        }
+
         private void ParseXslTransform(IntermediateSection section, XElement element, string component, string file)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
-            string id = "xsl" + Guid.NewGuid().ToString("N");
             string filePath = null;
             string binary = null;
-            int order = 1000000000 + GetLineNumber(sourceLineNumbers);
-            Microsoft.Tools.WindowsInstallerXml.Serialize.InstallUninstallType on = Microsoft.Tools.WindowsInstallerXml.Serialize.InstallUninstallType.install;
+            int order = 1000000000 + sourceLineNumbers.LineNumber ?? 0;
+            InstallUninstallType on = InstallUninstallType.install;
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -1898,10 +1904,6 @@ namespace PanelSw.Wix.Extensions
                 {
                     switch (attrib.Name.LocalName)
                     {
-                        case "Id":
-                            id = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
-
                         case "BinaryKey":
                             binary = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
@@ -1911,7 +1913,13 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         case "On":
-                            on = ParseHelper.GetAttributeInstallUninstallValue(attrib);
+                            {
+                                string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                                if (!Enum.TryParse<InstallUninstallType>(a, out on))
+                                {
+                                    Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, a));
+                                }
+                            }
                             break;
 
                         case "Order":
@@ -1919,7 +1927,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -1937,15 +1945,26 @@ namespace PanelSw.Wix.Extensions
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "BinaryKey"));
             }
-            if (on == Microsoft.Tools.WindowsInstallerXml.Serialize.InstallUninstallType.NotSet)
+
+            PSW_XslTransform row = null;
+            if (!Messaging.EncounteredError)
             {
-                on = Microsoft.Tools.WindowsInstallerXml.Serialize.InstallUninstallType.install;
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_XslTransform");
+                // Ensure sub-tables exist for queries to succeed even if no sub-entries exist.
+                ParseHelper.EnsureTable(section, sourceLineNumbers, "PSW_XslTransform_Replacements");
+                row = section.AddSymbol(new PSW_XslTransform(sourceLineNumbers));
+                row.File_ = file;
+                row.Component_ = component;
+                row.FilePath = filePath;
+                row.XslBinary_ = binary;
+                row.Order = order;
+                row.On = (int)on;
             }
 
             // Text replacements in XSL
             foreach (XElement child in element.Descendants())
             {
-                SourceLineNumberCollection repLines = Preprocessor.GetSourceLineNumbers(child);
+                SourceLineNumber repLines = ParseHelper.GetSourceLineNumbers(child);
                 if (child.Name.Namespace.Equals(Namespace))
                 {
                     switch (child.Name.LocalName)
@@ -1954,35 +1973,35 @@ namespace PanelSw.Wix.Extensions
                             {
                                 string from = null;
                                 string to = "";
-                                int repOrder = 1000000000 + GetLineNumber(repLines);
+                                int repOrder = 1000000000 + repLines.LineNumber ?? 0;
                                 foreach (XAttribute a in child.Attributes())
                                 {
-                                    if (!attrib.Name.Namespace.Equals(Namespace))
+                                    if (a.Name.Namespace.Equals(Namespace))
                                     {
-                                        continue;
-                                    }
+                                        switch (a.Name.LocalName)
+                                        {
+                                            case "Text":
+                                                from = ParseHelper.GetAttributeValue(repLines, a);
+                                                break;
 
-                                    switch (a.Name.LocalName)
-                                    {
-                                        case "Text":
-                                            from = ParseHelper.GetAttributeValue(repLines, a);
-                                            break;
+                                            case "Replacement":
+                                                to = ParseHelper.GetAttributeValue(repLines, a, EmptyRule.CanBeEmpty);
+                                                break;
 
-                                        case "Replacement":
-                                            to = ParseHelper.GetAttributeValue(repLines, a, true);
-                                            break;
-
-                                        case "Order":
-                                            repOrder = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, repLines, a, 0, 1000000000);
-                                            break;
+                                            case "Order":
+                                                repOrder = ParseHelper.GetAttributeIntegerValue(repLines, a, 0, 1000000000);
+                                                break;
+                                        }
                                     }
                                 }
 
-                                IntermediateSymbol row = ParseHelper.CreateSymbol(section, sourceLineNumbers, (repLines, "PSW_XslTransform_Replacements");
-                                row[0] = id;
-                                row[1] = from;
-                                row[2] = to;
-                                row[3] = repOrder;
+                                if (!Messaging.EncounteredError)
+                                {
+                                    PSW_XslTransform_Replacements row1 = section.AddSymbol(new PSW_XslTransform_Replacements(repLines, row.Id);
+                                    row1.Text = from;
+                                    row1.Replacement = to;
+                                    row1.Order = repOrder;
+                                }          
                             }
                             break;
 
@@ -1991,23 +2010,6 @@ namespace PanelSw.Wix.Extensions
                             break;
                     }
                 }
-            }
-
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_XslTransform");
-
-            if (!Messaging.EncounteredError)
-            {
-                // Ensure sub-tables exist for queries to succeed even if no sub-entries exist.
-                Core.EnsureTable("PSW_XslTransform_Replacements");
-                PSW_XslTransform row = section.AddSymbol(new PSW_XslTransform(sourceLineNumbers));
-                int i = 0;
-                row[i++] = id;
-                row[i++] = file;
-                row[i++] = component;
-                row[i++] = filePath;
-                row[i++] = binary;
-                row[i++] = order;
-                row[i++] = (int)on;
             }
         }
 

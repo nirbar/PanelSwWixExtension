@@ -4,13 +4,13 @@ using WixToolset.Data.WindowsInstaller;
 
 namespace PanelSw.Wix.Extensions.Symbols
 {
-    internal class PSW_SqlScript_Replacements : BaseSymbol
+    internal class PSW_XslTransform_Replacements : BaseSymbol
     {
         public static IntermediateSymbolDefinition SymbolDefinition
         {
             get
             {
-                return new IntermediateSymbolDefinition(nameof(PSW_SqlScript_Replacements), CreateFieldDefinitions(ColumnDefinitions, 0), typeof(PSW_SqlScript_Replacements));
+                return new IntermediateSymbolDefinition(nameof(PSW_XslTransform_Replacements), CreateFieldDefinitions(ColumnDefinitions, 0), typeof(PSW_XslTransform_Replacements));
             }
         }
         public static IEnumerable<ColumnDefinition> ColumnDefinitions
@@ -19,7 +19,7 @@ namespace PanelSw.Wix.Extensions.Symbols
             {
                 return new ColumnDefinition[]
                 {
-                    new ColumnDefinition(nameof(SqlScript_), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "PSW_SqlScript", keyColumn: 1)
+                    new ColumnDefinition(nameof(XslTransform_), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "File", keyColumn: 1)
                     , new ColumnDefinition(nameof(Text), ColumnType.Localized, 0, true, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property)
                     , new ColumnDefinition(nameof(Replacement), ColumnType.Localized, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property)
                     , new ColumnDefinition(nameof(Order), ColumnType.Number, 4, false, false, ColumnCategory.Integer, minValue: 0, maxValue: int.MaxValue, modularizeType: ColumnModularizeType.None)
@@ -27,15 +27,15 @@ namespace PanelSw.Wix.Extensions.Symbols
             }
         }
 
-        public PSW_SqlScript_Replacements() : base(SymbolDefinition)
+        public PSW_XslTransform_Replacements() : base(SymbolDefinition)
         { }
 
-        public PSW_SqlScript_Replacements(SourceLineNumber lineNumber, Identifier sqlId) : base(SymbolDefinition, lineNumber, sqlId)
+        public PSW_XslTransform_Replacements(SourceLineNumber lineNumber, Identifier sqlId) : base(SymbolDefinition, lineNumber, sqlId)
         {
-            SqlScript_ = sqlId.Id;
+            XslTransform_ = sqlId.Id;
         }
 
-        public string SqlScript_
+        public string XslTransform_
         {
             get => Fields[0].AsString();
             set => Fields[0].Set(value);
