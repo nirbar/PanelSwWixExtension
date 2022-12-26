@@ -188,19 +188,6 @@
     <columnDefinition name="ConnectionString" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
   </tableDefinition>
 
-  <tableDefinition name="PSW_TopShelf">
-    <columnDefinition name="File_" primaryKey="yes" type="string" length="72" modularize="column" category="identifier" keyTable="File" keyColumn="1" />
-    <columnDefinition name="ServiceName" type="string" length="0" nullable="yes" category="formatted" modularize="property" />
-    <columnDefinition name="DisplayName" type="string" length="0" nullable="yes" category="formatted" />
-    <columnDefinition name="Description" type="string" length="0" nullable="yes" category="formatted" />
-    <columnDefinition name="Instance" length="0" type="string" nullable="yes" category="formatted" />
-    <columnDefinition name="Account" type="number" minValue="0" maxValue="4" length="2" />
-    <columnDefinition name="UserName" type="string" length="0" nullable="yes" category="formatted" />
-    <columnDefinition name="Password" type="string" length="0" nullable="yes" category="formatted" />
-    <columnDefinition name="HowToStart" type="number" minValue="0" maxValue="4" length="2" />
-    <columnDefinition name="ErrorHandling" type="number" minValue="0" maxValue="2" length="2" />
-  </tableDefinition>
-
   <tableDefinition name="PSW_EvaluateExpression">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
     <columnDefinition name="Property_" type="string" length="0" modularize="column" category="identifier" />

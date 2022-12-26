@@ -1524,13 +1524,9 @@ namespace PanelSw.Wix.Extensions
                         case "Account":
                             {
                                 string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                                try
+                                if (!Enum.TryParse<TopShelf_Account>(a, out account))
                                 {
-                                    account = (TopShelf_Account)Enum.Parse(typeof(TopShelf_Account), a);
-                                }
-                                catch
-                                {
-                                    ParseHelper.UnexpectedAttribute(attrib);
+                                    Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, node.Name.LocalName, attrib.Name.LocalName, a));
                                 }
                             }
                             break;
@@ -1538,13 +1534,9 @@ namespace PanelSw.Wix.Extensions
                         case "Start":
                             {
                                 string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                                try
+                                if (!Enum.TryParse<TopShelf_Start>(a, out start))
                                 {
-                                    start = (TopShelf_Start)Enum.Parse(typeof(TopShelf_Start), a);
-                                }
-                                catch
-                                {
-                                    ParseHelper.UnexpectedAttribute(attrib);
+                                    Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, node.Name.LocalName, attrib.Name.LocalName, a));
                                 }
                             }
                             break;
@@ -1552,13 +1544,9 @@ namespace PanelSw.Wix.Extensions
                         case "ErrorHandling":
                             {
                                 string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                                try
+                                if (!Enum.TryParse<ErrorHandling>(a, out promptOnError))
                                 {
-                                    promptOnError = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
-                                }
-                                catch
-                                {
-                                    ParseHelper.UnexpectedAttribute(attrib);
+                                    Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, node.Name.LocalName, attrib.Name.LocalName, a));
                                 }
                             }
                             break;
@@ -1607,17 +1595,16 @@ namespace PanelSw.Wix.Extensions
 
             if (!Messaging.EncounteredError)
             {
-                PSW_TopShelf row = section.AddSymbol(new PSW_TopShelf(sourceLineNumbers));
-                row[0] = file;
-                row[1] = serviceName;
-                row[2] = displayName;
-                row[3] = description;
-                row[4] = instance;
-                row[5] = (int)account;
-                row[6] = userName;
-                row[7] = password;
-                row[8] = (int)start;
-                row[9] = (int)promptOnError;
+                PSW_TopShelf row = section.AddSymbol(new PSW_TopShelf(sourceLineNumbers, file));
+                row.ServiceName = serviceName;
+                row.DisplayName = displayName;
+                row.Description = description;
+                row.Instance = instance;
+                row.Account = (int)account;
+                row.UserName = userName;
+                row.Password = password;
+                row.HowToStart = (int)start;
+                row.ErrorHandling = (int)promptOnError;
             }
         }
 
