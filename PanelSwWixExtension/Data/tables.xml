@@ -234,12 +234,6 @@
     <columnDefinition name="Version" type="string" length="72" modularize="none" category="version" />
   </tableDefinition>
 
-  <tableDefinition name="PSW_SetPropertyFromPipe">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="PipeName" type="string" length="72" primaryKey="yes" modularize="column" category="formatted" />
-    <columnDefinition name="Timeout" type="number" length="4" />
-  </tableDefinition>
-
   <tableDefinition name="PSW_EvaluateExpression">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
     <columnDefinition name="Property_" type="string" length="0" modularize="column" category="identifier" />
