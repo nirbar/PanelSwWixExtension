@@ -255,12 +255,6 @@
     <columnDefinition name="SerialNumber" type="string" length="72" modularize="property" category="formatted" nullable="yes" />
   </tableDefinition>
 
-  <tableDefinition name="PSW_DiskSpace">
-    <columnDefinition name="Directory_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" keyTable="Directory" keyColumn="1"/>
-  </tableDefinition>
-
-
-
   <tableDefinition name="PSW_AccountSidSearch">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
     <columnDefinition name="Property_" type="string" length="0" modularize="property" category="text" />

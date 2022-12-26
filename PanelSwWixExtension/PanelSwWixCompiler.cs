@@ -1153,11 +1153,10 @@ namespace PanelSw.Wix.Extensions
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
 
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "DiskSpace");
             if (!Messaging.EncounteredError)
             {
-                PSW_DiskSpace row = section.AddSymbol(new PSW_DiskSpace(sourceLineNumbers));
-                row[0] = directory;
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "DiskSpace");
+                section.AddSymbol(new PSW_DiskSpace(sourceLineNumbers, directory));
             }
         }
 
