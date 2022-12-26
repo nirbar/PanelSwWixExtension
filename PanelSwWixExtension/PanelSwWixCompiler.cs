@@ -1072,7 +1072,6 @@ namespace PanelSw.Wix.Extensions
         private void ParseJsonJPathElement(IntermediateSection section, XElement node, string component_, string file_)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
-            string id = "jpt" + Guid.NewGuid().ToString("N");
             string jpath = null;
             string value = null;
             string filePath = null;
@@ -1108,19 +1107,15 @@ namespace PanelSw.Wix.Extensions
                         case "ErrorHandling":
                             {
                                 string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                                try
+                                if (!Enum.TryParse< ErrorHandling>(a, out promptOnError))
                                 {
-                                    promptOnError = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
-                                }
-                                catch
-                                {
-                                    ParseHelper.UnexpectedAttribute(attrib);
+                                    Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, node.Name.LocalName, attrib.Name.LocalName, a));
                                 }
                             }
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(node, attrib);
                             break;
                     }
                 }
@@ -1144,14 +1139,13 @@ namespace PanelSw.Wix.Extensions
             if (!Messaging.EncounteredError)
             {
                 PSW_JsonJPath row = section.AddSymbol(new PSW_JsonJPath(sourceLineNumbers));
-                row[0] = id;
-                row[1] = component_;
-                row[2] = filePath;
-                row[3] = file_;
-                row[4] = jpath;
-                row[5] = value;
-                row[6] = (int)jsonFormatting;
-                row[7] = (int)promptOnError;
+                row.Component_ = component_;
+                row.FilePath = filePath;
+                row.File_ = file_;
+                row.JPath = jpath;
+                row.Value = value;
+                row.Formatting = (int)jsonFormatting;
+                row.ErrorHandling = (int)promptOnError;
             }
         }
 
