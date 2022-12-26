@@ -410,17 +410,6 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
     </xs:complexType>
   </xs:element>
 
-  <xs:element name="AlwaysOverwriteFile">
-    <xs:annotation>
-      <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="File" />
-      </xs:appinfo>
-      <xs:documentation>
-        <![CDATA[Sets the highest possible version on a file row (65535.65535.65535.65535) to ensure it overwrites existing file. Use of this element is deprecated. Instead, use ForceVersion]]>
-      </xs:documentation>
-    </xs:annotation>
-  </xs:element>
-
   <xs:element name="ForceVersion">
     <xs:annotation>
       <xs:appinfo>
