@@ -21,6 +21,7 @@ namespace PanelSw.Wix.Extensions
                         new TableDefinition(nameof(PSW_CertificateHashSearch), PSW_CertificateHashSearch.SymbolDefinition, PSW_CertificateHashSearch.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_ConcatFiles), PSW_ConcatFiles.SymbolDefinition, PSW_ConcatFiles.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_CustomUninstallKey), PSW_CustomUninstallKey.SymbolDefinition, PSW_CustomUninstallKey.ColumnDefinitions, symbolIdIsPrimaryKey: true),
+                        new TableDefinition(nameof(PSW_DeletePath), PSW_DeletePath.SymbolDefinition, PSW_DeletePath.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_DiskSpace), PSW_DiskSpace.SymbolDefinition, PSW_DiskSpace.ColumnDefinitions, symbolIdIsPrimaryKey: false), // No Id for this table, just the Directory_ column
                         new TableDefinition(nameof(PSW_Dism), PSW_Dism.SymbolDefinition, PSW_Dism.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_EvaluateExpression), PSW_EvaluateExpression.SymbolDefinition, PSW_EvaluateExpression.ColumnDefinitions, symbolIdIsPrimaryKey: true),

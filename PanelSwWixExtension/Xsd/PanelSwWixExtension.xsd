@@ -1298,16 +1298,6 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
               <xs:documentation>Full file or folder path to delete. This field is formatted.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="IgnoreMissing" type="wix:YesNoType" use="optional">
-            <xs:annotation>
-              <xs:documentation>Deprecated and ignored. Skip is source is missing. Default is no.</xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
-          <xs:attribute name="IgnoreErrors" type="wix:YesNoType" use="optional">
-            <xs:annotation>
-              <xs:documentation>Deprecated and ignored. Do not fail the installation if the file operation fails. Default is no.</xs:documentation>
-            </xs:annotation>
-          </xs:attribute>
           <xs:attribute name="OnlyIfEmpty" type="wix:YesNoType" use="optional">
             <xs:annotation>
               <xs:documentation>If the Path is a folder and that folder contains no files recursively, then delete it. Default is no.</xs:documentation>

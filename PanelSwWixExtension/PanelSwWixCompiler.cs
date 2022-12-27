@@ -1623,7 +1623,7 @@ namespace PanelSw.Wix.Extensions
             string password = null;
             string port = null;
             string encrypted = null;
-            ErrorHandling? errorHandling = null;
+            ErrorHandling errorHandling = ErrorHandling.fail;
             int order = 1000000000 + sourceLineNumbers.LineNumber ?? 0;
             SqlExecOn sqlExecOn = SqlExecOn.None;
             YesNoType aye;
@@ -1679,15 +1679,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         case "ErrorHandling":
-                            string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            try
-                            {
-                                errorHandling = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
-                            }
-                            catch
-                            {
-                                ParseHelper.UnexpectedAttribute(element, attrib);
-                            }
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out errorHandling);
                             break;
 
                         case "OnInstall":
@@ -1785,7 +1777,7 @@ namespace PanelSw.Wix.Extensions
                 row.Username = username;
                 row.Password = password;
                 row.On = (int)sqlExecOn;
-                row.ErrorHandling = (int)(errorHandling ?? ErrorHandling.fail);
+                row.ErrorHandling = (int)errorHandling;
                 row.Order = order;
                 row.ConnectionString = connectionString;
                 row.Driver = driver;
@@ -3794,11 +3786,10 @@ namespace PanelSw.Wix.Extensions
         private void ParseDeletePath(IntermediateSection section, XElement element)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
-            string id = null;
             string filepath = null;
             string condition = null;
             DeletePathFlags flags = DeletePathFlags.AllowReboot | DeletePathFlags.IgnoreErrors | DeletePathFlags.IgnoreMissing;
-            int order = 1000000000 + GetLineNumber(sourceLineNumbers);
+            int order = 1000000000 + sourceLineNumbers.LineNumber ?? 0;
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -3806,15 +3797,8 @@ namespace PanelSw.Wix.Extensions
                 {
                     switch (attrib.Name.LocalName)
                     {
-                        case "Id":
-                            id = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
                         case "Path":
                             filepath = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
-                        case "IgnoreMissing":
-                        case "IgnoreErrors":
-                            Core.OnMessage(WixWarnings.DeprecatedAttribute(element.Name.LocalName, attrib.Name.LocalName));
                             break;
                         case "OnlyIfEmpty":
                             if (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
@@ -3837,55 +3821,26 @@ namespace PanelSw.Wix.Extensions
                             break;
                     }
                 }
-                else
-                {
-                    Core.UnsupportedExtensionAttribute(attrib);
-                }
             }
 
-            if (string.IsNullOrEmpty(id))
-            {
-                id = "dlt" + Guid.NewGuid().ToString("N");
-            }
             if (string.IsNullOrEmpty(filepath))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Path"));
             }
 
-            // find unexpected child elements
-            foreach (XElement child in element.Descendants())
-            {
-                if (XmlNodeType.Element == child.NodeType)
-                {
-                    if (child.Name.Namespace.Equals(Namespace))
-                    {
-                        ParseHelper.UnexpectedElement(element, child);
-                    }
-                    else
-                    {
-                        Core.UnsupportedExtensionElement(element, child);
-                    }
-                }
-                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
-                {
-                    condition = child.Value.Trim();
-                }
-            }
-
-            if (flags.HasFlag(DeletePathFlags.AllowReboot))
-            {
-                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_CheckRebootRequired");
-            }
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "DeletePath");
-
             if (!Messaging.EncounteredError)
             {
+                if (flags.HasFlag(DeletePathFlags.AllowReboot))
+                {
+                    ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_CheckRebootRequired");
+                }
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "DeletePath");
+             
                 PSW_DeletePath row = section.AddSymbol(new PSW_DeletePath(sourceLineNumbers));
-                row[0] = id;
-                row[1] = filepath;
-                row[2] = (int)flags;
-                row[3] = condition;
-                row[4] = order;
+                row.Path = filepath;
+                row.Flags = (int)flags;
+                row.Condition = condition;
+                row.Order = order;
             }
         }
 
@@ -3925,10 +3880,6 @@ namespace PanelSw.Wix.Extensions
                             ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
-                }
-                else
-                {
-                    Core.UnsupportedExtensionAttribute(attrib);
                 }
             }
 
@@ -4057,15 +4008,9 @@ namespace PanelSw.Wix.Extensions
                             }
                             break;
                         case "OverwriteMode":
-                            string b = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            try
+                            if (TryParseEnumAttribute(sourceLineNumbers, element, attrib, out UnzipFlags f))
                             {
-                                UnzipFlags f = (UnzipFlags)Enum.Parse(typeof(UnzipFlags), b);
                                 flags = ((flags & ~UnzipFlags.OverwriteMask) | f);
-                            }
-                            catch
-                            {
-                                ParseHelper.UnexpectedAttribute(element, attrib);
                             }
                             break;
 
