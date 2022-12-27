@@ -2499,7 +2499,6 @@ namespace PanelSw.Wix.Extensions
         private void ParseDismElement(IntermediateSection section, XElement element, string component)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
-            string id = null;
             string features = null;
             string exclude = null;
             string package = null;
@@ -2524,10 +2523,6 @@ namespace PanelSw.Wix.Extensions
                             package = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
 
-                        case "Id":
-                            id = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
-
                         case "Cost":
                             cost = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, int.MaxValue);
                             break;
@@ -2535,27 +2530,18 @@ namespace PanelSw.Wix.Extensions
                         case "ErrorHandling":
                             {
                                 string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                                try
+                                if (!Enum.TryParse(a, out promptOnError))
                                 {
-                                    promptOnError = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
-                                }
-                                catch
-                                {
-                                    ParseHelper.UnexpectedAttribute(attrib);
+                                    Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, a));
                                 }
                             }
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
-            }
-
-            foreach (XElement child in element.Descendants())
-            {
-                Core.UnsupportedExtensionElement(element, child);
             }
 
             if (string.IsNullOrEmpty(component))
@@ -2566,23 +2552,17 @@ namespace PanelSw.Wix.Extensions
             {
                 Messaging.Write(ErrorMessages.ExpectedAttributes(sourceLineNumbers, element.Name.LocalName, "EnableFeature", "PackagePath"));
             }
-            if (string.IsNullOrEmpty(id))
-            {
-                id = "dsm" + Guid.NewGuid().ToString("N");
-            }
-
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "DismSched");
 
             if (!Messaging.EncounteredError)
             {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "DismSched");
                 PSW_Dism row = section.AddSymbol(new PSW_Dism(sourceLineNumbers));
-                row[0] = id;
-                row[1] = component;
-                row[2] = features;
-                row[3] = exclude;
-                row[4] = package;
-                row[5] = cost;
-                row[6] = (int)promptOnError;
+                row.Component_ = component;
+                row.EnableFeatures = features;
+                row.ExcludeFeatures = exclude;
+                row.PackagePath = package;
+                row.Cost = cost;
+                row.ErrorHandling = (int)promptOnError;
             }
         }
 

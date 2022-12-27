@@ -19,6 +19,7 @@ namespace PanelSw.Wix.Extensions
                         new TableDefinition(nameof(PSW_BackupAndRestore), PSW_BackupAndRestore.SymbolDefinition, PSW_BackupAndRestore.ColumnDefinitions, symbolIdIsPrimaryKey: true)
                         , new TableDefinition(nameof(PSW_ConcatFiles), PSW_ConcatFiles.SymbolDefinition, PSW_ConcatFiles.ColumnDefinitions, symbolIdIsPrimaryKey: true)
                         , new TableDefinition(nameof(PSW_DiskSpace), PSW_DiskSpace.SymbolDefinition, PSW_DiskSpace.ColumnDefinitions, symbolIdIsPrimaryKey: false) // No Id for this table, just the Directory_ column
+                        , new TableDefinition(nameof(PSW_Dism), PSW_Dism.SymbolDefinition, PSW_Dism.ColumnDefinitions, symbolIdIsPrimaryKey: true)
                         , new TableDefinition(nameof(PSW_ExecOn_ConsoleOutput), PSW_ExecOn_ConsoleOutput.SymbolDefinition, PSW_ExecOn_ConsoleOutput.ColumnDefinitions, symbolIdIsPrimaryKey: true)
                         , new TableDefinition(nameof(PSW_ExecOnComponent), PSW_ExecOnComponent.SymbolDefinition, PSW_ExecOnComponent.ColumnDefinitions, symbolIdIsPrimaryKey: true)
                         , new TableDefinition(nameof(PSW_ExecOnComponent_Environment), PSW_ExecOnComponent_Environment.SymbolDefinition, PSW_ExecOnComponent_Environment.ColumnDefinitions, symbolIdIsPrimaryKey: false) // No Id for this table, just the File column
