@@ -1,17 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <tableDefinitions xmlns="http://schemas.microsoft.com/wix/2006/tables">
 
-  <tableDefinition name="PSW_XmlSearch">
-                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
-                    new ColumnDefinition(nameof(Property_), ColumnType.String, 0, false, false, ColumnCategory.Text, modularizeType: ColumnModularizeType.Property),
-                    new ColumnDefinition(nameof(FilePath), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
-                    new ColumnDefinition(nameof(Expression), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
-                    new ColumnDefinition(nameof(Language), ColumnType.String, 0, false, true, ColumnCategory.Text, modularizeType: ColumnModularizeType.Property),
-                    new ColumnDefinition(nameof(Namespaces), ColumnType.String, 0, false, true, ColumnCategory.Text, modularizeType: ColumnModularizeType.Property),
-                    new ColumnDefinition(nameof(Match), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 127),
-                    new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
-  </tableDefinition>
-
   <tableDefinition name="PSW_RegularExpression">
                     new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
                     new ColumnDefinition(nameof(FilePath), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),

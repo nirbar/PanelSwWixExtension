@@ -3241,78 +3241,65 @@ namespace PanelSw.Wix.Extensions
         private void ParseXmlSearchElement(IntermediateSection section, XElement node)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
-            string id = null;
             string filePath = null;
             string xpath = null;
-            string property;
             string lang = null;
             string namespaces = null;
             XmlSearchMatch match = XmlSearchMatch.first;
-            string condition = "";
+            string condition = null;
+            Identifier property = null;
 
             if (node.Parent.Name.LocalName != "Property")
             {
                 ParseHelper.UnexpectedElement(node.Parent, node);
+                return;
             }
-            property = node.Parent.Attribute("Id").Value;
+            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, node.Parent.Attribute("Id"));
 
             foreach (XAttribute attrib in node.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
-                    switch (attrib.Name.LocalName.ToLower())
+                    switch (attrib.Name.LocalName)
                     {
-                        case "id":
-                            id = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
-                        case "filepath":
+                        case "FilePath":
                             filePath = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "xpath":
+                        case "XPath":
                             xpath = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "language":
+                        case "Language":
                             lang = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "namespaces":
+                        case "Namespaces":
                             namespaces = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "match":
-                            try
+                        case "Match":
+                            string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            if (!Enum.TryParse(a, out match))
                             {
-                                match = (XmlSearchMatch)Enum.Parse(typeof(XmlSearchMatch), id = ParseHelper.GetAttributeValue(sourceLineNumbers, );
-                            }
-                            catch
-                            {
-                                Messaging.Write(ErrorMessages.ValueNotSupported(sourceLineNumbers, node.Name.LocalName, "Match", id = ParseHelper.GetAttributeValue(sourceLineNumbers, ));
+                                Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, node.Name.LocalName, attrib.Name.LocalName, a));
                             }
                             break;
-                        case "condition":
+                        case "Condition":
                             condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(node, attrib);
                             break;
                     }
                 }
-                else
-                {
-                    Core.UnsupportedExtensionAttribute(attrib);
-                }
             }
 
-            if (string.IsNullOrEmpty(property))
+            if ((property == null) || string.IsNullOrEmpty(property.Id))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Parent.Name.LocalName, "Id"));
+                return;
             }
-            if (!property.ToUpper().Equals(property))
+            if (!property.Id.ToUpper().Equals(property.Id))
             {
-                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
-            }
-            if (string.IsNullOrEmpty(id))
-            {
-                id = "xms" + Guid.NewGuid().ToString("N");
+                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property.Id));
             }
             if (string.IsNullOrEmpty(filePath))
             {
@@ -3323,40 +3310,18 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "XPath"));
             }
 
-            // find unexpected child elements
-            foreach (XElement child in node.Descendants())
-            {
-                if (XmlNodeType.Element == child.NodeType)
-                {
-                    if (child.Name.Namespace.Equals(Namespace))
-                    {
-                        ParseHelper.UnexpectedElement(node, child);
-                    }
-                    else
-                    {
-                        Core.UnsupportedExtensionElement(node, child);
-                    }
-                }
-                else if (((XmlNodeType.CDATA == child.NodeType) || (XmlNodeType.Text == child.NodeType)) && string.IsNullOrEmpty(condition))
-                {
-                    Core.OnMessage(WixWarnings.DeprecatedElement("text", $"Condition attribute in {node.Name.LocalName}"));
-                    condition = child.Value.Trim();
-                }
-            }
-
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "XmlSearch");
-
             if (!Messaging.EncounteredError)
             {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "XmlSearch");
+
                 PSW_XmlSearch row = section.AddSymbol(new PSW_XmlSearch(sourceLineNumbers));
-                row[0] = id;
-                row[1] = property;
-                row[2] = filePath;
-                row[3] = xpath;
-                row[4] = lang;
-                row[5] = namespaces;
-                row[6] = (int)match;
-                row[7] = condition;
+                row.Property_ = property.Id;
+                row.FilePath = filePath;
+                row.Expression = xpath;
+                row.Language = lang;
+                row.Namespaces = namespaces;
+                row.Match = (int)match;
+                row.Condition = condition;
             }
         }
 
