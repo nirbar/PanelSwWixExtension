@@ -3847,7 +3847,6 @@ namespace PanelSw.Wix.Extensions
         private void ParseZipFile(IntermediateSection section, XElement element)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
-            string id = null;
             string dstZipFile = null;
             string srcDir = null;
             string filePattern = "*.*";
@@ -3860,9 +3859,6 @@ namespace PanelSw.Wix.Extensions
                 {
                     switch (attrib.Name.LocalName)
                     {
-                        case "Id":
-                            id = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
                         case "TargetZipFile":
                             dstZipFile = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
@@ -3875,6 +3871,9 @@ namespace PanelSw.Wix.Extensions
                         case "Recursive":
                             recursive = (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes);
                             break;
+                        case "Condition":
+                            condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
 
                         default:
                             ParseHelper.UnexpectedAttribute(element, attrib);
@@ -3883,10 +3882,6 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            if (string.IsNullOrEmpty(id))
-            {
-                id = "zip" + Guid.NewGuid().ToString("N");
-            }
             if (string.IsNullOrEmpty(dstZipFile))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "TargetZipFile"));
@@ -3896,37 +3891,16 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "SourceFolder"));
             }
 
-            // find unexpected child elements
-            foreach (XElement child in element.Descendants())
-            {
-                if (XmlNodeType.Element == child.NodeType)
-                {
-                    if (child.Name.Namespace.Equals(Namespace))
-                    {
-                        ParseHelper.UnexpectedElement(element, child);
-                    }
-                    else
-                    {
-                        Core.UnsupportedExtensionElement(element, child);
-                    }
-                }
-                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
-                {
-                    condition = child.Value.Trim();
-                }
-            }
-
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "ZipFileSched");
-
             if (!Messaging.EncounteredError)
             {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "ZipFileSched");
+
                 PSW_ZipFile row = section.AddSymbol(new PSW_ZipFile(sourceLineNumbers));
-                row[0] = id;
-                row[1] = dstZipFile;
-                row[2] = srcDir;
-                row[3] = filePattern;
-                row[4] = recursive ? 1 : 0;
-                row[5] = condition;
+                row.ZipFile = dstZipFile;
+                row.CompressFolder = srcDir;
+                row.FilePattern = filePattern;
+                row.Recursive = recursive ? 1 : 0;
+                row.Condition = condition;
             }
         }
 

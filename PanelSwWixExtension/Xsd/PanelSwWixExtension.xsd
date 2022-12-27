@@ -899,6 +899,11 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
               <xs:documentation><![CDATA[Whether or not file pattern will be applied recusrsively on the source folder. Defaults to 'yes']]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="Condition" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Whether or not to compress the zip]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>

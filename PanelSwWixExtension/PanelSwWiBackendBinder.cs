@@ -61,6 +61,7 @@ namespace PanelSw.Wix.Extensions
                         new TableDefinition(nameof(PSW_XmlSearch), PSW_XmlSearch.SymbolDefinition, PSW_XmlSearch.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_XslTransform), PSW_XslTransform.SymbolDefinition, PSW_XslTransform.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_XslTransform_Replacements), PSW_XslTransform_Replacements.SymbolDefinition, PSW_XslTransform_Replacements.ColumnDefinitions, symbolIdIsPrimaryKey: false), // No Id for this table, just the XslTransform_ column
+                        new TableDefinition(nameof(PSW_ZipFile), PSW_ZipFile.SymbolDefinition, PSW_ZipFile.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                     };
                 }
 
