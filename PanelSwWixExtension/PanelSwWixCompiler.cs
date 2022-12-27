@@ -2846,7 +2846,6 @@ namespace PanelSw.Wix.Extensions
         private void ParseRemoveRegistryValue(IntermediateSection section, XElement node)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
-            string id = null;
             string root = null;
             string key = null;
             string name = null;
@@ -2857,46 +2856,35 @@ namespace PanelSw.Wix.Extensions
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
-                    switch (attrib.Name.LocalName.ToLower())
+                    switch (attrib.Name.LocalName)
                     {
-                        case "id":
-                            id = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
-                        case "root":
+                        case "Root":
                             root = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "key":
+                        case "Condition":
+                            condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Key":
                             key = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "name":
+                        case "Name":
                             name = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "area":
-                            try
+                        case "Area":
+                            string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            if (!Enum.TryParse(a, out area))
                             {
-                                area = (RegistryArea)Enum.Parse(typeof(RegistryArea), id = ParseHelper.GetAttributeValue(sourceLineNumbers, );
-                            }
-                            catch
-                            {
-                                Messaging.Write(ErrorMessages.ValueNotSupported(sourceLineNumbers, node.Name.LocalName, "Area", id = ParseHelper.GetAttributeValue(sourceLineNumbers, ));
+                                Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, node.Name.LocalName, attrib.Name.LocalName, a));
                             }
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(node, attrib);
                             break;
                     }
                 }
-                else
-                {
-                    Core.UnsupportedExtensionAttribute(attrib);
-                }
             }
 
-            if (string.IsNullOrEmpty(id))
-            {
-                id = "reg" + Guid.NewGuid().ToString("N");
-            }
             if (string.IsNullOrEmpty(key))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Key"));
@@ -2910,38 +2898,16 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Name"));
             }
 
-            // find unexpected child elements
-            foreach (XElement child in node.Descendants())
-            {
-                if (XmlNodeType.Element == child.NodeType)
-                {
-                    if (child.Name.Namespace.Equals(Namespace))
-                    {
-                        ParseHelper.UnexpectedElement(node, child);
-                    }
-                    else
-                    {
-                        Core.UnsupportedExtensionElement(node, child);
-                    }
-                }
-                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
-                {
-                    condition = child.Value.Trim();
-                }
-            }
-
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "RemoveRegistryValue_Immediate");
-
             if (!Messaging.EncounteredError)
             {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "RemoveRegistryValue_Immediate");
                 PSW_RemoveRegistryValue row = section.AddSymbol(new PSW_RemoveRegistryValue(sourceLineNumbers));
-                row[0] = id;
-                row[1] = root;
-                row[2] = key;
-                row[3] = name;
-                row[4] = area.ToString();
-                row[5] = 0;
-                row[6] = condition;
+                row.Root = root;
+                row.Key = key;
+                row.Name = name;
+                row.Area = area.ToString();
+                row.Attributes = 0;
+                row.Condition = condition;
             }
         }
 
