@@ -886,23 +886,23 @@ namespace PanelSw.Wix.Extensions
             row.ErrorHandling = (int)promptOnError;
         }
 
-        private void ParseMd5Hash(IntermediateSection section, XElement node)
+        private void ParseMd5Hash(IntermediateSection section, XElement element)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string property = null;
             string plain = null;
 
-            if (node.Parent.Name.LocalName != "Property")
+            if (element.Parent.Name.LocalName != "Property")
             {
-                ParseHelper.UnexpectedElement(node.Parent, node);
+                ParseHelper.UnexpectedElement(element.Parent, element);
             }
-            property = node.Parent.Attribute("Id").Value;
+            property = element.Parent.Attribute("Id").Value;
             if (!property.ToUpper().Equals(property))
             {
                 Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
             }
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -913,7 +913,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(node, attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -921,19 +921,19 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(property))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Parent.Name.LocalName, "Id"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(plain))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Plain"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Plain"));
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.Descendants())
+            foreach (XElement child in element.Descendants())
             {
                 if (child.Name.Namespace.Equals(Namespace))
                 {
-                    ParseHelper.UnexpectedElement(node, child);
+                    ParseHelper.UnexpectedElement(element, child);
                 }
             }
 
@@ -947,16 +947,16 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseToLowerCase(IntermediateSection section, XElement node)
+        private void ParseToLowerCase(IntermediateSection section, XElement element)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string property = null;
 
-            if (node.Parent.Name.LocalName != "Property")
+            if (element.Parent.Name.LocalName != "Property")
             {
-                ParseHelper.UnexpectedElement(node.Parent, node);
+                ParseHelper.UnexpectedElement(element.Parent, element);
             }
-            property = node.Parent.Attribute("Id").Value;
+            property = element.Parent.Attribute("Id").Value;
             if (!property.ToUpper().Equals(property))
             {
                 Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
@@ -964,15 +964,15 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(property))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Parent.Name.LocalName, "Id"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.Descendants())
+            foreach (XElement child in element.Descendants())
             {
                 if (child.Name.Namespace.Equals(Namespace))
                 {
-                    ParseHelper.UnexpectedElement(node, child);
+                    ParseHelper.UnexpectedElement(element, child);
                 }
             }
 
@@ -984,24 +984,24 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseJsonJpathSearchElement(IntermediateSection section, XElement node)
+        private void ParseJsonJpathSearchElement(IntermediateSection section, XElement element)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string property = null;
             string expression = null;
             string file = null;
 
-            if (node.Parent.Name.LocalName != "Property")
+            if (element.Parent.Name.LocalName != "Property")
             {
-                ParseHelper.UnexpectedElement(node.Parent, node);
+                ParseHelper.UnexpectedElement(element.Parent, element);
             }
-            property = node.Parent.Attribute("Id").Value;
+            property = element.Parent.Attribute("Id").Value;
             if (!property.ToUpper().Equals(property))
             {
                 Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
             }
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -1015,7 +1015,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(node, attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -1023,23 +1023,23 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(property))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Parent.Name.LocalName, "Id"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(expression))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "JPath"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "JPath"));
             }
             if (string.IsNullOrEmpty(file))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "FilePath"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "FilePath"));
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.Descendants())
+            foreach (XElement child in element.Descendants())
             {
                 if (child.Name.Namespace.Equals(Namespace))
                 {
-                    ParseHelper.UnexpectedElement(node, child);
+                    ParseHelper.UnexpectedElement(element, child);
                 }
             }
 
@@ -1061,16 +1061,16 @@ namespace PanelSw.Wix.Extensions
             Boolean
         }
 
-        private void ParseJsonJPathElement(IntermediateSection section, XElement node, string component_, string file_)
+        private void ParseJsonJPathElement(IntermediateSection section, XElement element, string component_, string file_)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string jpath = null;
             string value = null;
             string filePath = null;
             JsonFormatting jsonFormatting = JsonFormatting.Raw;
             ErrorHandling promptOnError = ErrorHandling.fail;
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -1089,15 +1089,15 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         case "Formatting":
-                            TryParseEnumAttribute(sourceLineNumbers, node, attrib, out jsonFormatting);
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out jsonFormatting);
                             break;
 
                         case "ErrorHandling":
-                            TryParseEnumAttribute(sourceLineNumbers, node, attrib, out promptOnError);
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out promptOnError);
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(node, attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -1105,15 +1105,15 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(file_) == string.IsNullOrEmpty(filePath))
             {
-                Messaging.Write(ErrorMessages.IllegalAttributeWhenNested(sourceLineNumbers, node.Name.LocalName, "FilePath", "File"));
+                Messaging.Write(ErrorMessages.IllegalAttributeWhenNested(sourceLineNumbers, element.Name.LocalName, "FilePath", "File"));
             }
             if (string.IsNullOrEmpty(jpath))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "JPath"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "JPath"));
             }
             if (string.IsNullOrEmpty(value))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Value"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Value"));
             }
 
             ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "JsonJpathSched");
@@ -1342,23 +1342,23 @@ namespace PanelSw.Wix.Extensions
             x64 = 2
         }
 
-        private void ParseInstallUtilElement(IntermediateSection section, XElement node, string file)
+        private void ParseInstallUtilElement(IntermediateSection section, XElement element, string file)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             InstallUtil_Bitness bitness = InstallUtil_Bitness.asComponent;
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
                         case "Bitness":
-                            TryParseEnumAttribute(sourceLineNumbers, node, attrib, out bitness);
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out bitness);
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(node, attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -1380,11 +1380,11 @@ namespace PanelSw.Wix.Extensions
             }
 
             // Iterate child 'Argument' elements
-            foreach (XElement child in node.Descendants())
+            foreach (XElement child in element.Descendants())
             {
                 if (child.Name.Namespace.Equals(Namespace) && !child.Name.LocalName.Equals("Argument"))
                 {
-                    Messaging.Write(ErrorMessages.UnsupportedExtensionElement(sourceLineNumbers, node.Name.LocalName, child.Name.LocalName));
+                    Messaging.Write(ErrorMessages.UnsupportedExtensionElement(sourceLineNumbers, element.Name.LocalName, child.Name.LocalName));
                     continue;
                 }
 
@@ -1416,12 +1416,12 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseForceVersionElement(IntermediateSection section, XElement node, string file)
+        private void ParseForceVersionElement(IntermediateSection section, XElement element, string file)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string version = "65535.65535.65535.65535";
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -1432,7 +1432,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(node, attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -1477,9 +1477,9 @@ namespace PanelSw.Wix.Extensions
             prompt = 2
         }
 
-        private void ParseTopShelfElement(IntermediateSection section, XElement node, string file)
+        private void ParseTopShelfElement(IntermediateSection section, XElement element, string file)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             TopShelf_Account account = TopShelf_Account.none;
             TopShelf_Start start = TopShelf_Start.none;
             string serviceName = null;
@@ -1490,22 +1490,22 @@ namespace PanelSw.Wix.Extensions
             string password = null;
             ErrorHandling promptOnError = ErrorHandling.fail;
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
                         case "Account":
-                            TryParseEnumAttribute(sourceLineNumbers, node, attrib, out account);
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out account);
                             break;
 
                         case "Start":
-                            TryParseEnumAttribute(sourceLineNumbers, node, attrib, out start);
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out start);
                             break;
 
                         case "ErrorHandling":
-                            TryParseEnumAttribute(sourceLineNumbers, node, attrib, out promptOnError);
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out promptOnError);
                             break;
 
                         case "ServiceName":
@@ -1533,7 +1533,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(node, attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -2593,9 +2593,9 @@ namespace PanelSw.Wix.Extensions
             delete = 2
         }
 
-        private void ParseCustomUninstallKeyElement(IntermediateSection section, XElement node)
+        private void ParseCustomUninstallKeyElement(IntermediateSection section, XElement element)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string productCode = null;
             string name = null;
             string data = null;
@@ -2603,7 +2603,7 @@ namespace PanelSw.Wix.Extensions
             string condition = null;
             CustomUninstallKeyAttributes attributes = CustomUninstallKeyAttributes.write;
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -2622,14 +2622,14 @@ namespace PanelSw.Wix.Extensions
                             datatype = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Operation": //TODO Isn't documented in the XSD
-                            TryParseEnumAttribute(sourceLineNumbers, node, attrib, out attributes);
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out attributes);
                             break;
                         case "Condition":
                             condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(node, attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -2637,17 +2637,17 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(name))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Name"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Name"));
             }
 
             if (string.IsNullOrEmpty(data))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Data"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Data"));
             }
 
             if (string.IsNullOrEmpty(datatype))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "DataType"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "DataType"));
             }
 
             if (!Messaging.EncounteredError)
@@ -2672,9 +2672,9 @@ namespace PanelSw.Wix.Extensions
             IgnoreErrors = 1
         }
 
-        private void ParseReadIniValuesElement(IntermediateSection section, XElement node, XElement parent)
+        private void ParseReadIniValuesElement(IntermediateSection section, XElement element, XElement parent)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string DestProperty = null;
             string FilePath = null;
             string Section = null;
@@ -2687,7 +2687,7 @@ namespace PanelSw.Wix.Extensions
                 DestProperty = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, parent.Attribute("Id")).Id;
             }
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -2696,7 +2696,7 @@ namespace PanelSw.Wix.Extensions
                         case "DestProperty":
                             if (!string.IsNullOrEmpty(DestProperty))
                             {
-                                Messaging.Write(ErrorMessages.ExpectedAttributeInElementOrParent(sourceLineNumbers, node.Name.LocalName, attrib.Name.LocalName, parent.Name.LocalName));
+                                Messaging.Write(ErrorMessages.ExpectedAttributeInElementOrParent(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, parent.Name.LocalName));
                                 return;
                             }
                             DestProperty = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
@@ -2718,7 +2718,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(node, attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -2726,7 +2726,7 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(DestProperty))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "DestProperty"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "DestProperty"));
             }
             if (!DestProperty.ToUpper().Equals(DestProperty))
             {
@@ -2735,17 +2735,17 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(FilePath))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "FilePath"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "FilePath"));
             }
 
             if (string.IsNullOrEmpty(Key))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Key"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Key"));
             }
 
             if (string.IsNullOrEmpty(Section))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Section"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Section"));
             }
 
             if (!Messaging.EncounteredError)
@@ -2768,16 +2768,16 @@ namespace PanelSw.Wix.Extensions
             Default
         }
 
-        private void ParseRemoveRegistryValue(IntermediateSection section, XElement node)
+        private void ParseRemoveRegistryValue(IntermediateSection section, XElement element)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string root = null;
             string key = null;
             string name = null;
             RegistryArea area = RegistryArea.Default;
             string condition = "";
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -2796,11 +2796,11 @@ namespace PanelSw.Wix.Extensions
                             name = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Area":
-                            TryParseEnumAttribute(sourceLineNumbers, node, attrib, out area);
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out area);
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(node, attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -2808,15 +2808,15 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(key))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Key"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Key"));
             }
             if (string.IsNullOrEmpty(root))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Root"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Root"));
             }
             if (string.IsNullOrEmpty(name))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Name"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Name"));
             }
 
             if (!Messaging.EncounteredError)
@@ -2832,26 +2832,26 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseCertificateHashSearchElement(IntermediateSection section, XElement node)
+        private void ParseCertificateHashSearchElement(IntermediateSection section, XElement element)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string property = null;
             string certName = null;
             string friendlyName = null;
             string issuer = null;
             string serial = null;
 
-            if (node.Parent.Name.LocalName != "Property")
+            if (element.Parent.Name.LocalName != "Property")
             {
-                ParseHelper.UnexpectedElement(node.Parent, node);
+                ParseHelper.UnexpectedElement(element.Parent, element);
             }
-            property = node.Parent.Attribute("Id").Value;
+            property = element.Parent.Attribute("Id").Value;
             if (!property.ToUpper().Equals(property))
             {
                 Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
             }
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -2874,7 +2874,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(node, attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -2882,25 +2882,25 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(property))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Parent.Name.LocalName, "Id"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
             }
 
             // At least CertName OR (Issuer AND Serial) OR FriendlyName
             if (string.IsNullOrEmpty(issuer) != string.IsNullOrEmpty(serial))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttributes(sourceLineNumbers, node.Name.LocalName, "Issuer", "SerialNumber"));
+                Messaging.Write(ErrorMessages.ExpectedAttributes(sourceLineNumbers, element.Name.LocalName, "Issuer", "SerialNumber"));
             }
             if (string.IsNullOrEmpty(certName) && string.IsNullOrEmpty(issuer) && string.IsNullOrEmpty(friendlyName))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttributes(sourceLineNumbers, node.Name.LocalName, "Issuer", "SerialNumber", "CertName", "FriendlyName"));
+                Messaging.Write(ErrorMessages.ExpectedAttributes(sourceLineNumbers, element.Name.LocalName, "Issuer", "SerialNumber", "CertName", "FriendlyName"));
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.Descendants())
+            foreach (XElement child in element.Descendants())
             {
                 if (child.Name.Namespace.Equals(Namespace))
                 {
-                    ParseHelper.UnexpectedElement(node, child);
+                    ParseHelper.UnexpectedElement(element, child);
                 }
             }
 
@@ -2916,24 +2916,24 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseEvaluateElement(IntermediateSection section, XElement node)
+        private void ParseEvaluateElement(IntermediateSection section, XElement element)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string property = null;
             string expression = null;
             int order = 1000000000 + sourceLineNumbers.LineNumber ?? 0;
 
-            if (node.Parent.Name.LocalName != "Property")
+            if (element.Parent.Name.LocalName != "Property")
             {
-                ParseHelper.UnexpectedElement(node.Parent, node);
+                ParseHelper.UnexpectedElement(element.Parent, element);
             }
-            property = node.Parent.Attribute("Id").Value;
+            property = element.Parent.Attribute("Id").Value;
             if (!property.ToUpper().Equals(property))
             {
                 Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
             }
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -2947,7 +2947,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(node, attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -2955,11 +2955,11 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(property))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Parent.Name.LocalName, "Id"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
             }
             if (string.IsNullOrEmpty(expression))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Expression"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Expression"));
             }
 
             if (!Messaging.EncounteredError)
@@ -2973,20 +2973,20 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParsePathSearchElement(IntermediateSection section, XElement node)
+        private void ParsePathSearchElement(IntermediateSection section, XElement element)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string file = null;
             Identifier property = null;
 
-            if (node.Parent.Name.LocalName != "Property")
+            if (element.Parent.Name.LocalName != "Property")
             {
-                ParseHelper.UnexpectedElement(node.Parent, node);
+                ParseHelper.UnexpectedElement(element.Parent, element);
                 return;
             }
-            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, node.Parent.Attribute("Id"));
+            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, element.Parent.Attribute("Id"));
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -2996,7 +2996,7 @@ namespace PanelSw.Wix.Extensions
                             file = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         default:
-                            ParseHelper.UnexpectedAttribute(node, attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -3004,7 +3004,7 @@ namespace PanelSw.Wix.Extensions
 
             if ((property == null) || string.IsNullOrEmpty(property.Id))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Parent.Name.LocalName, "Id"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
                 return;
             }
             if (!property.Id.ToUpper().Equals(property.Id))
@@ -3013,7 +3013,7 @@ namespace PanelSw.Wix.Extensions
             }
             if (string.IsNullOrEmpty(file))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "FileName"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "FileName"));
             }
 
             if (!Messaging.EncounteredError)
@@ -3026,21 +3026,21 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseVersionCompareElement(IntermediateSection section, XElement node)
+        private void ParseVersionCompareElement(IntermediateSection section, XElement element)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string version1 = null;
             string version2 = null;
             Identifier property = null;
 
-            if (node.Parent.Name.LocalName != "Property")
+            if (element.Parent.Name.LocalName != "Property")
             {
-                ParseHelper.UnexpectedElement(node.Parent, node);
+                ParseHelper.UnexpectedElement(element.Parent, element);
                 return;
             }
-            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, node.Parent.Attribute("Id"));
+            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, element.Parent.Attribute("Id"));
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -3053,7 +3053,7 @@ namespace PanelSw.Wix.Extensions
                             version2 = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         default:
-                            ParseHelper.UnexpectedAttribute(node, attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -3061,7 +3061,7 @@ namespace PanelSw.Wix.Extensions
 
             if ((property == null) || string.IsNullOrEmpty(property.Id))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Parent.Name.LocalName, "Id"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
                 return;
             }
             if (!property.Id.ToUpper().Equals(property.Id))
@@ -3070,11 +3070,11 @@ namespace PanelSw.Wix.Extensions
             }
             if (string.IsNullOrEmpty(version1))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Version1"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Version1"));
             }
             if (string.IsNullOrEmpty(version2))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Version2"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Version2"));
             }
 
             if (!Messaging.EncounteredError)
@@ -3088,22 +3088,22 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseAccountSidSearchElement(IntermediateSection section, XElement node)
+        private void ParseAccountSidSearchElement(IntermediateSection section, XElement element)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string systemName = null;
             string accountName = null;
             string condition = "";
             Identifier property = null;
 
-            if (node.Parent.Name.LocalName != "Property")
+            if (element.Parent.Name.LocalName != "Property")
             {
-                ParseHelper.UnexpectedElement(node.Parent, node);
+                ParseHelper.UnexpectedElement(element.Parent, element);
                 return;
             }
-            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, node.Parent.Attribute("Id"));
+            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, element.Parent.Attribute("Id"));
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -3120,7 +3120,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(node, attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -3128,7 +3128,7 @@ namespace PanelSw.Wix.Extensions
 
             if ((property == null) || string.IsNullOrEmpty(property.Id))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Parent.Name.LocalName, "Id"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
                 return;
             }
             if (!property.Id.ToUpper().Equals(property.Id))
@@ -3137,7 +3137,7 @@ namespace PanelSw.Wix.Extensions
             }
             if (string.IsNullOrEmpty(accountName))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "AccountName"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "AccountName"));
             }
 
             if (!Messaging.EncounteredError)
@@ -3159,9 +3159,9 @@ namespace PanelSw.Wix.Extensions
             enforceSingle
         }
 
-        private void ParseXmlSearchElement(IntermediateSection section, XElement node)
+        private void ParseXmlSearchElement(IntermediateSection section, XElement element)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string filePath = null;
             string xpath = null;
             string lang = null;
@@ -3170,14 +3170,14 @@ namespace PanelSw.Wix.Extensions
             string condition = null;
             Identifier property = null;
 
-            if (node.Parent.Name.LocalName != "Property")
+            if (element.Parent.Name.LocalName != "Property")
             {
-                ParseHelper.UnexpectedElement(node.Parent, node);
+                ParseHelper.UnexpectedElement(element.Parent, element);
                 return;
             }
-            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, node.Parent.Attribute("Id"));
+            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, element.Parent.Attribute("Id"));
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -3196,14 +3196,14 @@ namespace PanelSw.Wix.Extensions
                             namespaces = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Match":
-                            TryParseEnumAttribute(sourceLineNumbers, node, attrib, out match);
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out match);
                             break;
                         case "Condition":
                             condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(node, attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -3211,7 +3211,7 @@ namespace PanelSw.Wix.Extensions
 
             if ((property == null) || string.IsNullOrEmpty(property.Id))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Parent.Name.LocalName, "Id"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
                 return;
             }
             if (!property.Id.ToUpper().Equals(property.Id))
@@ -3220,11 +3220,11 @@ namespace PanelSw.Wix.Extensions
             }
             if (string.IsNullOrEmpty(filePath))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "FilePath"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "FilePath"));
             }
             if (string.IsNullOrEmpty(xpath))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "XPath"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "XPath"));
             }
 
             if (!Messaging.EncounteredError)
@@ -3242,9 +3242,9 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseSqlSearchElement(IntermediateSection section, XElement node)
+        private void ParseSqlSearchElement(IntermediateSection section, XElement element)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string server = null;
             string connectionString = null;
             string instance = null;
@@ -3259,14 +3259,14 @@ namespace PanelSw.Wix.Extensions
             int order = 1000000000 + sourceLineNumbers.LineNumber ?? 0;
             Identifier property = null;
 
-            if (node.Parent.Name.LocalName != "Property")
+            if (element.Parent.Name.LocalName != "Property")
             {
-                ParseHelper.UnexpectedElement(node.Parent, node);
+                ParseHelper.UnexpectedElement(element.Parent, element);
                 return;
             }
-            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, node.Parent.Attribute("Id"));
+            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, element.Parent.Attribute("Id"));
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -3306,11 +3306,11 @@ namespace PanelSw.Wix.Extensions
                             encrypted = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "ErrorHandling":
-                            TryParseEnumAttribute(sourceLineNumbers, node, attrib, out errorHandling);
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out errorHandling);
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(node, attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -3318,7 +3318,7 @@ namespace PanelSw.Wix.Extensions
 
             if ((property == null) || string.IsNullOrEmpty(property.Id))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Parent.Name.LocalName, "Id"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
                 return;
             }
             if (!property.Id.ToUpper().Equals(property.Id))
@@ -3328,15 +3328,15 @@ namespace PanelSw.Wix.Extensions
             if (!string.IsNullOrEmpty(connectionString) &&
                 (!string.IsNullOrEmpty(server) || !string.IsNullOrEmpty(instance) || !string.IsNullOrEmpty(database) || !string.IsNullOrEmpty(port) || !string.IsNullOrEmpty(encrypted) || !string.IsNullOrEmpty(password) || !string.IsNullOrEmpty(username)))
             {
-                Messaging.Write(ErrorMessages.IllegalAttributeWithOtherAttribute(sourceLineNumbers, node.Name.LocalName, "ConnectionString", "any other"));
+                Messaging.Write(ErrorMessages.IllegalAttributeWithOtherAttribute(sourceLineNumbers, element.Name.LocalName, "ConnectionString", "any other"));
             }
             if (string.IsNullOrEmpty(server) && string.IsNullOrEmpty(connectionString))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttributes(sourceLineNumbers, node.Name.LocalName, "Server", "ConnectionString"));
+                Messaging.Write(ErrorMessages.ExpectedAttributes(sourceLineNumbers, element.Name.LocalName, "Server", "ConnectionString"));
             }
             if (string.IsNullOrEmpty(query))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Query"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Query"));
             }
 
             if (!Messaging.EncounteredError)
@@ -3360,9 +3360,9 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseWmiSearchElement(IntermediateSection section, XElement node)
+        private void ParseWmiSearchElement(IntermediateSection section, XElement element)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string nmspace = null;
             string query = null;
             string resultProp = null;
@@ -3370,14 +3370,14 @@ namespace PanelSw.Wix.Extensions
             int order = 1000000000 + sourceLineNumbers.LineNumber ?? 0;
             Identifier property = null;
 
-            if (node.Parent.Name.LocalName != "Property")
+            if (element.Parent.Name.LocalName != "Property")
             {
-                ParseHelper.UnexpectedElement(node.Parent, node);
+                ParseHelper.UnexpectedElement(element.Parent, element);
                 return;
             }
-            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, node.Parent.Attribute("Id"));
+            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, element.Parent.Attribute("Id"));
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -3400,7 +3400,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(node, attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -3408,7 +3408,7 @@ namespace PanelSw.Wix.Extensions
 
             if ((property == null) || string.IsNullOrEmpty(property.Id))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Parent.Name.LocalName, "Id"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
                 return;
             }
             if (!property.Id.ToUpper().Equals(property.Id))
@@ -3417,7 +3417,7 @@ namespace PanelSw.Wix.Extensions
             }
             if (string.IsNullOrEmpty(query))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Query"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Query"));
             }
 
             if (!Messaging.EncounteredError)
@@ -3444,10 +3444,9 @@ namespace PanelSw.Wix.Extensions
             Secure = 8
         }
 
-        private void ParseTelemetry(IntermediateSection section, XElement node)
+        private void ParseTelemetry(IntermediateSection section, XElement element)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
-            string id = null;
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string url = null;
             string page = null;
             string method = null;
@@ -3455,46 +3454,43 @@ namespace PanelSw.Wix.Extensions
             ExecutePhase flags = ExecutePhase.None;
             string condition = "";
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName.ToLower())
                     {
-                        case "id":
-                            id = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
-                        case "url":
+                        case "Url":
                             url = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "page":
+                        case "Page":
                             page = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "method":
+                        case "Method":
                             method = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "data":
+                        case "Data":
                             data = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "onsuccess":
+                        case "OnSuccess":
                             if (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 flags |= ExecutePhase.OnCommit;
                             }
                             break;
-                        case "onstart":
+                        case "OnStart":
                             if (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 flags |= ExecutePhase.OnExecute;
                             }
                             break;
-                        case "onfailure":
+                        case "OnFailure":
                             if (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 flags |= ExecutePhase.OnRollback;
                             }
                             break;
-                        case "secure":
+                        case "Secure":
                             if (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 flags |= ExecutePhase.Secure;
@@ -3502,67 +3498,38 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
-                else
-                {
-                    Core.UnsupportedExtensionAttribute(attrib);
-                }
             }
 
-            if (string.IsNullOrEmpty(id))
-            {
-                id = "tlm" + Guid.NewGuid().ToString("N");
-            }
             if (string.IsNullOrEmpty(url))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Url"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Url"));
             }
             if (string.IsNullOrEmpty(method))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Method"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Method"));
             }
-
-            // find unexpected child elements
-            foreach (XElement child in node.Descendants())
-            {
-                if (XmlNodeType.Element == child.NodeType)
-                {
-                    if (child.Name.Namespace.Equals(Namespace))
-                    {
-                        ParseHelper.UnexpectedElement(node, child);
-                    }
-                    else
-                    {
-                        Core.UnsupportedExtensionElement(node, child);
-                    }
-                }
-                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
-                {
-                    condition = child.Value.Trim();
-                }
-            }
-
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "Telemetry");
 
             if (!Messaging.EncounteredError)
             {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "Telemetry");
+
                 PSW_Telemetry row = section.AddSymbol(new PSW_Telemetry(sourceLineNumbers));
-                row[0] = id;
-                row[1] = url;
-                row[2] = page ?? "";
-                row[3] = method;
-                row[4] = data ?? "";
-                row[5] = (int)flags;
-                row[6] = condition;
+                row.Url = url;
+                row.Page = page ?? "";
+                row.Method = method;
+                row.Data = data ?? "";
+                row.Flags = (int)flags;
+                row.Condition = condition;
             }
         }
 
-        private void ParseShellExecute(IntermediateSection section, XElement node)
+        private void ParseShellExecute(IntermediateSection section, XElement element)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string id = null;
             string target = null;
             string args = "";
@@ -3573,7 +3540,7 @@ namespace PanelSw.Wix.Extensions
             ExecutePhase flags = ExecutePhase.None;
             string condition = "";
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -3624,7 +3591,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -3640,21 +3607,21 @@ namespace PanelSw.Wix.Extensions
             }
             if (string.IsNullOrEmpty(target))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Target"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Target"));
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.Descendants())
+            foreach (XElement child in element.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
                     if (child.Name.Namespace.Equals(Namespace))
                     {
-                        ParseHelper.UnexpectedElement(node, child);
+                        ParseHelper.UnexpectedElement(element, child);
                     }
                     else
                     {
-                        Core.UnsupportedExtensionElement(node, child);
+                        Core.UnsupportedExtensionElement(element, child);
                     }
                 }
                 else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
@@ -3686,15 +3653,15 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseMsiSqlQuery(IntermediateSection section, XElement node, XElement parent)
+        private void ParseMsiSqlQuery(IntermediateSection section, XElement element, XElement parent)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string id = null;
             string query = null;
             string condition = null;
             string property = null;
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -3711,7 +3678,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -3737,26 +3704,26 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(query))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Query"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Query"));
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.Descendants())
+            foreach (XElement child in element.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
                     if (child.Name.Namespace.Equals(Namespace))
                     {
-                        ParseHelper.UnexpectedElement(node, child);
+                        ParseHelper.UnexpectedElement(element, child);
                     }
                     else
                     {
-                        Core.UnsupportedExtensionElement(node, child);
+                        Core.UnsupportedExtensionElement(element, child);
                     }
                 }
                 else if (((XmlNodeType.CDATA == child.NodeType) || (XmlNodeType.Text == child.NodeType)) && string.IsNullOrEmpty(condition))
                 {
-                    Core.OnMessage(WixWarnings.DeprecatedElement("text", $"Condition attribute in {node.Name.LocalName}"));
+                    Core.OnMessage(WixWarnings.DeprecatedElement("text", $"Condition attribute in {element.Name.LocalName}"));
                     condition = child.Value.Trim();
                 }
             }
@@ -3793,9 +3760,9 @@ namespace PanelSw.Wix.Extensions
             , Extended = 2
         };
 
-        private void ParseRegularExpression(IntermediateSection section, XElement node)
+        private void ParseRegularExpression(IntermediateSection section, XElement element)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string id = null;
             string filepath = null;
             string input = null;
@@ -3806,12 +3773,12 @@ namespace PanelSw.Wix.Extensions
             string condition = null;
             int order = 1000000000 + GetLineNumber(sourceLineNumbers);
 
-            if (node.Parent.Name.LocalName == "Property")
+            if (element.Parent.Name.LocalName == "Property")
             {
-                prop = node.Parent.Attribute("Id").Value;
+                prop = element.Parent.Attribute("Id").Value;
             }
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -3836,7 +3803,7 @@ namespace PanelSw.Wix.Extensions
                         case "DstProperty":
                             if (!string.IsNullOrEmpty(prop))
                             {
-                                Messaging.Write(ErrorMessages.ExpectedAttributeInElementOrParent(sourceLineNumbers, node.Name.LocalName, attrib.Name.LocalName, node.Parent.Name.LocalName));
+                                Messaging.Write(ErrorMessages.ExpectedAttributeInElementOrParent(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, element.Parent.Name.LocalName));
                             }
                             prop = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
@@ -3854,7 +3821,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -3870,11 +3837,11 @@ namespace PanelSw.Wix.Extensions
             }
             if (string.IsNullOrEmpty(regex))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Expression"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Expression"));
             }
             if (string.IsNullOrEmpty(prop))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "DstProperty"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "DstProperty"));
             }
             if (!prop.ToUpper().Equals(prop))
             {
@@ -3882,27 +3849,27 @@ namespace PanelSw.Wix.Extensions
             }
             if (string.IsNullOrEmpty(input) == string.IsNullOrEmpty(filepath))
             {
-                Messaging.Write(ErrorMessages.IllegalAttributeWithOtherAttribute(sourceLineNumbers, node.Name.LocalName, "Input", "FilePath"));
+                Messaging.Write(ErrorMessages.IllegalAttributeWithOtherAttribute(sourceLineNumbers, element.Name.LocalName, "Input", "FilePath"));
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.Descendants())
+            foreach (XElement child in element.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
                     if (child.Name.Namespace.Equals(Namespace))
                     {
-                        ParseHelper.UnexpectedElement(node, child);
+                        ParseHelper.UnexpectedElement(element, child);
                     }
                     else
                     {
-                        Core.UnsupportedExtensionElement(node, child);
+                        Core.UnsupportedExtensionElement(element, child);
                     }
                 }
                 // Condition can be specified on attribute 'Condition' in which case embedded text may be the property default value.
                 else if (((XmlNodeType.CDATA == child.NodeType) || (XmlNodeType.Text == child.NodeType)) && string.IsNullOrEmpty(condition))
                 {
-                    Core.OnMessage(WixWarnings.DeprecatedElement("text", $"Condition attribute in {node.Name.LocalName}"));
+                    Core.OnMessage(WixWarnings.DeprecatedElement("text", $"Condition attribute in {element.Name.LocalName}"));
                     condition = child.Value.Trim();
                 }
             }
@@ -3924,14 +3891,14 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseRestartLocalResources(IntermediateSection section, XElement node)
+        private void ParseRestartLocalResources(IntermediateSection section, XElement element)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string id = "rst" + Guid.NewGuid().ToString("N");
             string path = null;
             string condition = null;
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -3942,7 +3909,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -3950,17 +3917,17 @@ namespace PanelSw.Wix.Extensions
 
             if (string.IsNullOrEmpty(path))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Path"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Path"));
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.Descendants())
+            foreach (XElement child in element.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
                     if (child.Name.Namespace.Equals(Namespace))
                     {
-                        ParseHelper.UnexpectedElement(node, child);
+                        ParseHelper.UnexpectedElement(element, child);
                     }
                 }
                 else if (((XmlNodeType.CDATA == child.NodeType) || (XmlNodeType.Text == child.NodeType)) && string.IsNullOrEmpty(condition))
@@ -3988,9 +3955,9 @@ namespace PanelSw.Wix.Extensions
             ReverseUnicode
         };
 
-        private void ParseFileRegex(IntermediateSection section, XElement node, string component, string fileId)
+        private void ParseFileRegex(IntermediateSection section, XElement element, string component, string fileId)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string id = null;
             string filepath = null;
             string condition = null;
@@ -4000,7 +3967,7 @@ namespace PanelSw.Wix.Extensions
             bool ignoreCase = false;
             int order = 1000000000 + GetLineNumber(sourceLineNumbers);
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -4033,7 +4000,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -4049,31 +4016,31 @@ namespace PanelSw.Wix.Extensions
             }
             if (string.IsNullOrEmpty(regex))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Regex"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Regex"));
             }
             if (string.IsNullOrEmpty(fileId) == string.IsNullOrEmpty(filepath))
             {
                 // Either under File or specify FilePath, not both
-                Messaging.Write(ErrorMessages.IllegalAttributeWhenNested(sourceLineNumbers, node.Name.LocalName, "FilePath", "Product"));
+                Messaging.Write(ErrorMessages.IllegalAttributeWhenNested(sourceLineNumbers, element.Name.LocalName, "FilePath", "Product"));
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.Descendants())
+            foreach (XElement child in element.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
                     if (child.Name.Namespace.Equals(Namespace))
                     {
-                        ParseHelper.UnexpectedElement(node, child);
+                        ParseHelper.UnexpectedElement(element, child);
                     }
                     else
                     {
-                        Core.UnsupportedExtensionElement(node, child);
+                        Core.UnsupportedExtensionElement(element, child);
                     }
                 }
                 else if (((XmlNodeType.CDATA == child.NodeType) || (XmlNodeType.Text == child.NodeType)) && string.IsNullOrEmpty(condition))
                 {
-                    Core.OnMessage(WixWarnings.DeprecatedElement("text", $"Condition attribute in {node.Name.LocalName}"));
+                    Core.OnMessage(WixWarnings.DeprecatedElement("text", $"Condition attribute in {element.Name.LocalName}"));
                     condition = child.Value.Trim();
                 }
             }
@@ -4105,16 +4072,16 @@ namespace PanelSw.Wix.Extensions
             AllowReboot = 2 * OnlyIfEmpty
         }
 
-        private void ParseDeletePath(IntermediateSection section, XElement node)
+        private void ParseDeletePath(IntermediateSection section, XElement element)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string id = null;
             string filepath = null;
             string condition = null;
             DeletePathFlags flags = DeletePathFlags.AllowReboot | DeletePathFlags.IgnoreErrors | DeletePathFlags.IgnoreMissing;
             int order = 1000000000 + GetLineNumber(sourceLineNumbers);
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -4128,7 +4095,7 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "IgnoreMissing":
                         case "IgnoreErrors":
-                            Core.OnMessage(WixWarnings.DeprecatedAttribute(node.Name.LocalName, attrib.Name.LocalName));
+                            Core.OnMessage(WixWarnings.DeprecatedAttribute(element.Name.LocalName, attrib.Name.LocalName));
                             break;
                         case "OnlyIfEmpty":
                             if (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
@@ -4147,7 +4114,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -4163,21 +4130,21 @@ namespace PanelSw.Wix.Extensions
             }
             if (string.IsNullOrEmpty(filepath))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Path"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Path"));
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.Descendants())
+            foreach (XElement child in element.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
                     if (child.Name.Namespace.Equals(Namespace))
                     {
-                        ParseHelper.UnexpectedElement(node, child);
+                        ParseHelper.UnexpectedElement(element, child);
                     }
                     else
                     {
-                        Core.UnsupportedExtensionElement(node, child);
+                        Core.UnsupportedExtensionElement(element, child);
                     }
                 }
                 else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
@@ -4203,9 +4170,9 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseZipFile(IntermediateSection section, XElement node)
+        private void ParseZipFile(IntermediateSection section, XElement element)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string id = null;
             string dstZipFile = null;
             string srcDir = null;
@@ -4213,7 +4180,7 @@ namespace PanelSw.Wix.Extensions
             bool recursive = true;
             string condition = null;
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -4236,7 +4203,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -4252,25 +4219,25 @@ namespace PanelSw.Wix.Extensions
             }
             if (string.IsNullOrEmpty(dstZipFile))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "TargetZipFile"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "TargetZipFile"));
             }
             if (string.IsNullOrEmpty(srcDir))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "SourceFolder"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "SourceFolder"));
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.Descendants())
+            foreach (XElement child in element.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
                     if (child.Name.Namespace.Equals(Namespace))
                     {
-                        ParseHelper.UnexpectedElement(node, child);
+                        ParseHelper.UnexpectedElement(element, child);
                     }
                     else
                     {
-                        Core.UnsupportedExtensionElement(node, child);
+                        Core.UnsupportedExtensionElement(element, child);
                     }
                 }
                 else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
@@ -4311,16 +4278,16 @@ namespace PanelSw.Wix.Extensions
             OnRollback = 0x40,
         };
 
-        private void ParseUnzip(IntermediateSection section, XElement node)
+        private void ParseUnzip(IntermediateSection section, XElement element)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string id = null;
             string zipFile = null;
             string dstDir = null;
             string condition = null;
             UnzipFlags flags = UnzipFlags.Unmodified | UnzipFlags.CreateRoot;
 
-            foreach (XAttribute attrib in node.Attributes())
+            foreach (XAttribute attrib in element.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
@@ -4379,12 +4346,12 @@ namespace PanelSw.Wix.Extensions
                             }
                             catch
                             {
-                                ParseHelper.UnexpectedAttribute(attrib);
+                                ParseHelper.UnexpectedAttribute(element, attrib);
                             }
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -4400,25 +4367,25 @@ namespace PanelSw.Wix.Extensions
             }
             if (string.IsNullOrEmpty(zipFile))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "ZipFile"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "ZipFile"));
             }
             if (string.IsNullOrEmpty(dstDir))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "TargetFolder"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "TargetFolder"));
             }
 
             // find unexpected child elements
-            foreach (XElement child in node.Descendants())
+            foreach (XElement child in element.Descendants())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
                     if (child.Name.Namespace.Equals(Namespace))
                     {
-                        ParseHelper.UnexpectedElement(node, child);
+                        ParseHelper.UnexpectedElement(element, child);
                     }
                     else
                     {
-                        Core.UnsupportedExtensionElement(node, child);
+                        Core.UnsupportedExtensionElement(element, child);
                     }
                 }
                 else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
