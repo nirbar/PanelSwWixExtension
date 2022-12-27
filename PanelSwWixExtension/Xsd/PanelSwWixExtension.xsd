@@ -1875,12 +1875,14 @@ Call ShellExecuteEx with parameters
       <xs:documentation><![CDATA[Register processes with the Restart Manager if they reside in the specified folder]]></xs:documentation>
     </xs:annotation>
     <xs:complexType>
-      <xs:choice minOccurs="0" maxOccurs="unbounded">
-        <xs:element ref="Replace" />
-      </xs:choice>
       <xs:attribute name="Path" type="xs:string" use="required">
         <xs:annotation>
           <xs:documentation><![CDATA[Folder path]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Condition" type="xs:string" use="optional">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Condition to close the applications]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
     </xs:complexType>

@@ -3662,7 +3662,6 @@ namespace PanelSw.Wix.Extensions
         private void ParseRestartLocalResources(IntermediateSection section, XElement element)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
-            string id = "rst" + Guid.NewGuid().ToString("N");
             string path = null;
             string condition = null;
 
@@ -3674,6 +3673,10 @@ namespace PanelSw.Wix.Extensions
                     {
                         case "Path":
                             path = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        case "Condition":
+                            condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
 
                         default:
@@ -3688,30 +3691,13 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Path"));
             }
 
-            // find unexpected child elements
-            foreach (XElement child in element.Descendants())
-            {
-                if (XmlNodeType.Element == child.NodeType)
-                {
-                    if (child.Name.Namespace.Equals(Namespace))
-                    {
-                        ParseHelper.UnexpectedElement(element, child);
-                    }
-                }
-                else if (((XmlNodeType.CDATA == child.NodeType) || (XmlNodeType.Text == child.NodeType)) && string.IsNullOrEmpty(condition))
-                {
-                    condition = child.Value.Trim();
-                }
-            }
-
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "RestartLocalResources");
-
             if (!Messaging.EncounteredError)
             {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "RestartLocalResources");
+
                 PSW_RestartLocalResources row = section.AddSymbol(new PSW_RestartLocalResources(sourceLineNumbers));
-                row[0] = id;
-                row[1] = path;
-                row[2] = condition;
+                row.Path = path;
+                row.Condition = condition;
             }
         }
 
