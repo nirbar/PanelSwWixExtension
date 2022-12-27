@@ -3363,27 +3363,19 @@ namespace PanelSw.Wix.Extensions
         private void ParseWmiSearchElement(IntermediateSection section, XElement node)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
-            string id = "wmi" + Guid.NewGuid().ToString("N");
-            string property = null;
             string nmspace = null;
             string query = null;
             string resultProp = null;
             string condition = null;
-            int order = 1000000000 + GetLineNumber(sourceLineNumbers);
+            int order = 1000000000 + sourceLineNumbers.LineNumber ?? 0;
+            Identifier property = null;
 
-            if (!node.Parent.Name.LocalName.Equals("Property"))
+            if (node.Parent.Name.LocalName != "Property")
             {
                 ParseHelper.UnexpectedElement(node.Parent, node);
+                return;
             }
-            property = node.Parent.Attribute("Id").Value;
-            if (string.IsNullOrWhiteSpace(property))
-            {
-                Messaging.Write(ErrorMessages.ParentElementAttributeRequired(sourceLineNumbers, node.Parent.Name.LocalName, "Id", node.Name.LocalName));
-            }
-            if (!property.ToUpper().Equals(property))
-            {
-                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
-            }
+            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, node.Parent.Attribute("Id"));
 
             foreach (XAttribute attrib in node.Attributes())
             {
@@ -3408,34 +3400,37 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(node, attrib);
                             break;
                     }
                 }
-                else
-                {
-                    Core.UnsupportedExtensionAttribute(attrib);
-                }
             }
 
+            if ((property == null) || string.IsNullOrEmpty(property.Id))
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Parent.Name.LocalName, "Id"));
+                return;
+            }
+            if (!property.Id.ToUpper().Equals(property.Id))
+            {
+                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property.Id));
+            }
             if (string.IsNullOrEmpty(query))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Query"));
             }
 
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "WmiSearch");
-
             if (!Messaging.EncounteredError)
             {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "WmiSearch");
+
                 PSW_WmiSearch row = section.AddSymbol(new PSW_WmiSearch(sourceLineNumbers));
-                int i = 0;
-                row[i++] = id;
-                row[i++] = property;
-                row[i++] = condition;
-                row[i++] = nmspace;
-                row[i++] = query;
-                row[i++] = resultProp;
-                row[i++] = order;
+                row.Property_ = property.Id;
+                row.Condition = condition;
+                row.Namespace = nmspace;
+                row.Query = query;
+                row.ResultProperty = resultProp;
+                row.Order = order;
             }
         }
 
