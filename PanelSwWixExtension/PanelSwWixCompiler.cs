@@ -3925,7 +3925,6 @@ namespace PanelSw.Wix.Extensions
         private void ParseUnzip(IntermediateSection section, XElement element)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
-            string id = null;
             string zipFile = null;
             string dstDir = null;
             string condition = null;
@@ -3937,9 +3936,6 @@ namespace PanelSw.Wix.Extensions
                 {
                     switch (attrib.Name.LocalName)
                     {
-                        case "Id":
-                            id = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
                         case "ZipFile":
                             zipFile = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
@@ -3987,22 +3983,17 @@ namespace PanelSw.Wix.Extensions
                                 flags = ((flags & ~UnzipFlags.OverwriteMask) | f);
                             }
                             break;
+                        case "Condition":
+                            condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
 
                         default:
                             ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
-                else
-                {
-                    Core.UnsupportedExtensionAttribute(attrib);
-                }
             }
 
-            if (string.IsNullOrEmpty(id))
-            {
-                id = "uzp" + Guid.NewGuid().ToString("N");
-            }
             if (string.IsNullOrEmpty(zipFile))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "ZipFile"));
@@ -4012,36 +4003,15 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "TargetFolder"));
             }
 
-            // find unexpected child elements
-            foreach (XElement child in element.Descendants())
-            {
-                if (XmlNodeType.Element == child.NodeType)
-                {
-                    if (child.Name.Namespace.Equals(Namespace))
-                    {
-                        ParseHelper.UnexpectedElement(element, child);
-                    }
-                    else
-                    {
-                        Core.UnsupportedExtensionElement(element, child);
-                    }
-                }
-                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
-                {
-                    condition = child.Value.Trim();
-                }
-            }
-
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "UnzipSched");
-
             if (!Messaging.EncounteredError)
             {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "UnzipSched");
+
                 PSW_Unzip row = section.AddSymbol(new PSW_Unzip(sourceLineNumbers));
-                row[0] = id;
-                row[1] = zipFile;
-                row[2] = dstDir;
-                row[3] = (int)flags;
-                row[4] = condition;
+                row.ZipFile = zipFile;
+                row.TargetFolder = dstDir;
+                row.Flags = (int)flags;
+                row.Condition = condition;
             }
         }
 

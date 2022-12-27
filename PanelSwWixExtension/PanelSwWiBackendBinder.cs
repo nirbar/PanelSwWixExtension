@@ -55,6 +55,7 @@ namespace PanelSw.Wix.Extensions
                         new TableDefinition(nameof(PSW_Telemetry), PSW_Telemetry.SymbolDefinition, PSW_Telemetry.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_ToLowerCase), PSW_ToLowerCase.SymbolDefinition, PSW_ToLowerCase.ColumnDefinitions, symbolIdIsPrimaryKey: false), // No Id for this table, just the Property_ column
                         new TableDefinition(nameof(PSW_TopShelf), PSW_TopShelf.SymbolDefinition, PSW_TopShelf.ColumnDefinitions, symbolIdIsPrimaryKey: false), // No Id for this table, just the File_ column
+                        new TableDefinition(nameof(PSW_Unzip), PSW_Unzip.SymbolDefinition, PSW_Unzip.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_VersionCompare), PSW_VersionCompare.SymbolDefinition, PSW_VersionCompare.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_WebsiteConfig), PSW_WebsiteConfig.SymbolDefinition, PSW_WebsiteConfig.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_WmiSearch), PSW_WmiSearch.SymbolDefinition, PSW_WmiSearch.ColumnDefinitions, symbolIdIsPrimaryKey: true),

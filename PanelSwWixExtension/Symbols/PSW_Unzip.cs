@@ -4,13 +4,13 @@ using WixToolset.Data.WindowsInstaller;
 
 namespace PanelSw.Wix.Extensions.Symbols
 {
-    internal class PSW_ZipFile : BaseSymbol
+    internal class PSW_Unzip : BaseSymbol
     {
         public static IntermediateSymbolDefinition SymbolDefinition
         {
             get
             {
-                return new IntermediateSymbolDefinition(nameof(PSW_ZipFile), CreateFieldDefinitions(ColumnDefinitions), typeof(PSW_ZipFile));
+                return new IntermediateSymbolDefinition(nameof(PSW_Unzip), CreateFieldDefinitions(ColumnDefinitions), typeof(PSW_Unzip));
             }
         }
         public static IEnumerable<ColumnDefinition> ColumnDefinitions
@@ -21,18 +21,17 @@ namespace PanelSw.Wix.Extensions.Symbols
                 {
                     new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
                     new ColumnDefinition(nameof(ZipFile), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
-                    new ColumnDefinition(nameof(CompressFolder), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
-                    new ColumnDefinition(nameof(FilePattern), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
-                    new ColumnDefinition(nameof(Recursive), ColumnType.Number, 1, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 1),
+                    new ColumnDefinition(nameof(TargetFolder), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Flags), ColumnType.Number, 4, false, false, ColumnCategory.Integer, minValue: 0, maxValue: ushort.MaxValue),
                     new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
                 };
             }
         }
 
-        public PSW_ZipFile() : base(SymbolDefinition)
+        public PSW_Unzip() : base(SymbolDefinition)
         { }
 
-        public PSW_ZipFile(SourceLineNumber lineNumber) : base(SymbolDefinition, lineNumber, "zip")
+        public PSW_Unzip(SourceLineNumber lineNumber) : base(SymbolDefinition, lineNumber, "uzp")
         { }
 
         public string ZipFile
@@ -41,28 +40,22 @@ namespace PanelSw.Wix.Extensions.Symbols
             set => Fields[0].Set(value);
         }
 
-        public string CompressFolder
+        public string TargetFolder
         {
             get => Fields[1].AsString();
             set => Fields[1].Set(value);
         }
 
-        public string FilePattern
+        public int Flags
         {
-            get => Fields[2].AsString();
+            get => Fields[2].AsNumber();
             set => Fields[2].Set(value);
-        }
-
-        public int Recursive
-        {
-            get => Fields[3].AsNumber();
-            set => Fields[3].Set(value);
         }
 
         public string Condition
         {
-            get => Fields[4].AsString();
-            set => Fields[4].Set(value);
+            get => Fields[3].AsString();
+            set => Fields[3].Set(value);
         }
     }
 }
