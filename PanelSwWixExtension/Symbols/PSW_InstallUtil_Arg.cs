@@ -20,9 +20,9 @@ namespace PanelSw.Wix.Extensions.Symbols
             {
                 return new ColumnDefinition[]
                 {
-                    new ColumnDefinition(nameof(File_), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "File", keyColumn: 1)
-                    , new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column)
-                    , new ColumnDefinition(nameof(Value), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property)
+                    new ColumnDefinition(nameof(File_), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "File", keyColumn: 1),
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 0, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Value), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
                 };
             }
         }

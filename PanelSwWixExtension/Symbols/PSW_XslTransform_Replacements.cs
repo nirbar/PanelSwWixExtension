@@ -19,10 +19,10 @@ namespace PanelSw.Wix.Extensions.Symbols
             {
                 return new ColumnDefinition[]
                 {
-                    new ColumnDefinition(nameof(XslTransform_), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "File", keyColumn: 1)
-                    , new ColumnDefinition(nameof(Text), ColumnType.Localized, 0, true, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property)
-                    , new ColumnDefinition(nameof(Replacement), ColumnType.Localized, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property)
-                    , new ColumnDefinition(nameof(Order), ColumnType.Number, 4, false, false, ColumnCategory.Integer, minValue: 0, maxValue: int.MaxValue, modularizeType: ColumnModularizeType.None)
+                    new ColumnDefinition(nameof(XslTransform_), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "PSW_XslTransform", keyColumn: 1),
+                    new ColumnDefinition(nameof(Text), ColumnType.Localized, 0, true, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Replacement), ColumnType.Localized, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Order), ColumnType.Number, 4, false, false, ColumnCategory.Integer, minValue: 0, maxValue: int.MaxValue),
                 };
             }
         }

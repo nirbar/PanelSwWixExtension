@@ -10,7 +10,7 @@ namespace PanelSw.Wix.Extensions.Symbols
         {
             get
             {
-                return new IntermediateSymbolDefinition(nameof(PSW_ConcatFiles), CreateFieldDefinitions(ColumnDefinitions), typeof(PSW_ConcatFiles));
+                return new IntermediateSymbolDefinition(nameof(PSW_ConcatFiles), CreateFieldDefinitions(ColumnDefinitions, 0), typeof(PSW_ConcatFiles));
             }
         }
         public static IEnumerable<ColumnDefinition> ColumnDefinitions
@@ -19,11 +19,11 @@ namespace PanelSw.Wix.Extensions.Symbols
             {
                 return new ColumnDefinition[]
                 {
-                    new ColumnDefinition(nameof(Component_), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "Component", keyColumn: 1)
-                    , new ColumnDefinition(nameof(RootFile_), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "File", keyColumn: 1)
-                    , new ColumnDefinition(nameof(MyFile_), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "File", keyColumn: 1)
-                    , new ColumnDefinition(nameof(Order), ColumnType.Number, 4, false, false, ColumnCategory.Integer, minValue: 0, maxValue: int.MaxValue, modularizeType: ColumnModularizeType.None)
-                    , new ColumnDefinition(nameof(Size), ColumnType.Number, 4, false, false, ColumnCategory.Integer, minValue: 0, maxValue: int.MaxValue, modularizeType: ColumnModularizeType.None)
+                    new ColumnDefinition(nameof(Component_), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "Component", keyColumn: 1),
+                    new ColumnDefinition(nameof(RootFile_), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "File", keyColumn: 1),
+                    new ColumnDefinition(nameof(MyFile_), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "File", keyColumn: 1),
+                    new ColumnDefinition(nameof(Order), ColumnType.Number, 4, false, false, ColumnCategory.Integer, minValue: 0, maxValue: int.MaxValue),
+                    new ColumnDefinition(nameof(Size), ColumnType.Number, 4, false, false, ColumnCategory.Integer, minValue: 0, maxValue: int.MaxValue),
                 };
             }
         }

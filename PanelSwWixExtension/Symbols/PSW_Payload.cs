@@ -10,7 +10,7 @@ namespace PanelSw.Wix.Extensions.Symbols
         {
             get
             {
-                return new IntermediateSymbolDefinition(nameof(PSW_Payload), CreateFieldDefinitions(ColumnDefinitions), typeof(PSW_Payload));
+                return new IntermediateSymbolDefinition(nameof(PSW_Payload), CreateFieldDefinitions(ColumnDefinitions, 0), typeof(PSW_Payload));
             }
         }
         public static IEnumerable<ColumnDefinition> ColumnDefinitions
@@ -19,8 +19,8 @@ namespace PanelSw.Wix.Extensions.Symbols
             {
                 return new ColumnDefinition[]
                 {
-                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "Binary", keyColumn: 1)
-                    , new ColumnDefinition(nameof(Name), ColumnType.String, 0, false, false, ColumnCategory.AnyPath, modularizeType: ColumnModularizeType.None)
+                    new ColumnDefinition(nameof(BinaryKey_), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "Binary", keyColumn: 1),
+                    new ColumnDefinition(nameof(Name), ColumnType.String, 0, false, false, ColumnCategory.AnyPath),
                 };
             }
         }
@@ -31,10 +31,16 @@ namespace PanelSw.Wix.Extensions.Symbols
         public PSW_Payload(SourceLineNumber lineNumber, string binaryKey) : base(SymbolDefinition, lineNumber, new Identifier(AccessModifier.Global, binaryKey))
         { }
 
-        public string Name
+        public string BinaryKey_
         {
             get => Fields[0].AsString();
             set => Fields[0].Set(value);
+        }
+
+        public string Name
+        {
+            get => Fields[1].AsString();
+            set => Fields[1].Set(value);
         }
     }
 }

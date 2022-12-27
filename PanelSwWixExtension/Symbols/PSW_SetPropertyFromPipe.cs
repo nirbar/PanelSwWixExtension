@@ -19,9 +19,9 @@ namespace PanelSw.Wix.Extensions.Symbols
             {
                 return new ColumnDefinition[]
                 {
-                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column)
-                    , new ColumnDefinition(nameof(PipeName), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property)
-                    , new ColumnDefinition(nameof(Timeout), ColumnType.Number, 4, false, false, ColumnCategory.Integer, 0, int.MaxValue)
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(PipeName), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Timeout), ColumnType.Number, 4, false, false, ColumnCategory.Integer),
                 };
             }
         }

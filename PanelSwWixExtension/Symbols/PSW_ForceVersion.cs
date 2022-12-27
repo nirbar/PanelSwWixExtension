@@ -19,8 +19,8 @@ namespace PanelSw.Wix.Extensions.Symbols
             {
                 return new ColumnDefinition[]
                 {
-                    new ColumnDefinition(nameof(File), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "File", keyColumn: 1)
-                    , new ColumnDefinition(nameof(Version), ColumnType.String, 72, false, false, ColumnCategory.Version)
+                    new ColumnDefinition(nameof(File), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "File", keyColumn: 1),
+                    new ColumnDefinition(nameof(Version), ColumnType.String, 72, false, false, ColumnCategory.Version),
                 };
             }
         }

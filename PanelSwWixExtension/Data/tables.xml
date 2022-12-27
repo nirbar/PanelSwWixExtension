@@ -1,244 +1,234 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <tableDefinitions xmlns="http://schemas.microsoft.com/wix/2006/tables">
+  <tableDefinition name="PSW_CustomUninstallKey">
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(ProductCode), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Name), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Data), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(DataType), ColumnType.String, 0, false, true, ColumnCategory.Text, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Attributes), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 127, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Property),
+  </tableDefinition>
+
   <tableDefinition name="PSW_RemoveRegistryValue">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Root" type="string" length="0" modularize="property" category="text" />
-    <columnDefinition name="Key" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Name" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Area" type="string" length="0" modularize="property" category="text" />
-    <columnDefinition name="Attributes" type="number" length="2" nullable="yes" minValue="0" maxValue="127" />
-    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Root), ColumnType.String, 0, false, false, ColumnCategory.Text, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Key), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Name), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Area), ColumnType.String, 0, false, false, ColumnCategory.Text, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Attributes), ColumnType.Number, 2, false, true, ColumnCategory.Integer, minValue: 0, maxValue: 127),
+                    new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
   </tableDefinition>
 
   <tableDefinition name="PSW_XmlSearch">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Property_" type="string" length="0" modularize="property" category="text" />
-    <columnDefinition name="FilePath" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Expression" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Language" type="string" length="0" nullable="yes" modularize="property" category="text" />
-    <columnDefinition name="Namespaces" type="string" length="0" nullable="yes" modularize="property" category="text" />
-    <columnDefinition name="Match" type="number" length="2" nullable="no" minValue="0" maxValue="127" />
-    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Property_), ColumnType.String, 0, false, false, ColumnCategory.Text, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(FilePath), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Expression), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Language), ColumnType.String, 0, false, true, ColumnCategory.Text, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Namespaces), ColumnType.String, 0, false, true, ColumnCategory.Text, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Match), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 127),
+                    new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
   </tableDefinition>
 
   <tableDefinition name="PSW_RegularExpression">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="FilePath" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="Input" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="Expression" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Replacement" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="DstProperty_" type="string" length="0" modularize="property" category="text" />
-    <columnDefinition name="Flags" type="number" length="2" nullable="yes" minValue="0" maxValue="127" />
-    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
-    <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(FilePath), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Input), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Expression), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Replacement), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(DstProperty_), ColumnType.String, 0, false, false, ColumnCategory.Text, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Flags), ColumnType.Number, 2, false, true, ColumnCategory.Integer, minValue: 0, maxValue: 127),
+                    new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
+                    new ColumnDefinition(nameof(Order), ColumnType.Number, 4, false, false, ColumnCategory.Integer, minValue: 0, maxValue: int.MaxValue),
   </tableDefinition>
 
   <tableDefinition name="PSW_FileRegex">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Component_" type="string" length="72" modularize="column" category="identifier" keyTable="Component" keyColumn="1" nullable="yes" />
-    <columnDefinition name="File_" type="string" length="72" modularize="column" category="identifier" keyTable="File" keyColumn="1" nullable="yes" />
-    <columnDefinition name="FilePath" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="Regex" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Replacement" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="IgnoreCase" type="number" length="2" nullable="yes" minValue="0" maxValue="127" />
-    <columnDefinition name="Encoding" type="number" length="2" nullable="no" minValue="0" maxValue="127" />
-    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
-    <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Component_), ColumnType.String, 72, false, true, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "Component", keyColumn: 1),
+                    new ColumnDefinition(nameof(File_), ColumnType.String, 72, false, true, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "File", keyColumn: 1),
+                    new ColumnDefinition(nameof(FilePath), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Regex), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Replacement), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(IgnoreCase), ColumnType.Number, 2, false, true, ColumnCategory.Integer, minValue: 0, maxValue: 127),
+                    new ColumnDefinition(nameof(Encoding), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 127),
+                    new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
+                    new ColumnDefinition(nameof(Order), ColumnType.Number, 4, false, false, ColumnCategory.Integer, minValue: 0, maxValue: int.MaxValue),
   </tableDefinition>
 
   <tableDefinition name="PSW_Telemetry">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Url" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Page" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="Method" type="string" length="0" modularize="property" category="text" />
-    <columnDefinition name="Data" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="Flags" type="number" length="2" minValue="0" maxValue="127" />
-    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Url), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Page), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Method), ColumnType.String, 0, false, false, ColumnCategory.Text, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Data), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Flags), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 127),
+                    new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
   </tableDefinition>
 
   <tableDefinition name="PSW_ShellExecute">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Target" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Args" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Verb" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="WorkingDir" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Show" type="number" length="2" minValue="0" maxValue="127" />
-    <columnDefinition name="Wait" type="number" length="2" minValue="0" maxValue="127" />
-    <columnDefinition name="Flags" type="number" length="2" minValue="0" maxValue="127" />
-    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Target), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Args), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Verb), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(WorkingDir), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Show), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 127),
+                    new ColumnDefinition(nameof(Wait), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 127),
+                    new ColumnDefinition(nameof(Flags), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 127),
+                    new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
   </tableDefinition>
 
   <tableDefinition name="PSW_MsiSqlQuery">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Property_" type="string" length="0" modularize="property" nullable="yes" category="identifier" />
-    <columnDefinition name="Query" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Property_), ColumnType.String, 0, false, true, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Query), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
   </tableDefinition>
 
   <tableDefinition name="PSW_DeletePath">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Path" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Flags" type="number" length="2" minValue="0" maxValue="127" />
-    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
-    <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Path), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Flags), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 127),
+                    new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
+                    new ColumnDefinition(nameof(Order), ColumnType.Number, 4, false, false, ColumnCategory.Integer, minValue: 0, maxValue: int.MaxValue),
   </tableDefinition>
 
   <tableDefinition name="PSW_TaskScheduler">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="TaskName" type="string" length="72" modularize="column" category="formatted" />
-    <columnDefinition name="Component_" type="string" length="72" modularize="column" keyTable="Component" keyColumn="1" category="identifier"/>
-    <columnDefinition name="TaskXml" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="User" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="Password" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-  </tableDefinition>
-
-  <tableDefinition name="PSW_ExecOnComponent">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Component_" type="string" length="72" modularize="column" keyTable="Component" keyColumn="1" category="identifier"/>
-    <columnDefinition name="Binary_" type="string" length="72" modularize="column" keyTable="Binary" keyColumn="1" category="identifier" nullable="yes"/>
-    <columnDefinition name="Command" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="WorkingDirectory" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="Flags" type="number" length="4" minValue="0" maxValue="65535" />
-    <columnDefinition name="ErrorHandling" type="number" minValue="0" maxValue="2" length="2" />
-    <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
-    <columnDefinition name="User_" type="string" length="72" modularize="column" keyTable="User" keyColumn="1" category="identifier" nullable="yes"/>
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(TaskName), ColumnType.String, 72, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Component_), ColumnType.String, 72, false, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "Component", keyColumn: 1),
+                    new ColumnDefinition(nameof(TaskXml), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(User), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Password), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
   </tableDefinition>
 
   <tableDefinition name="PSW_ExecOnComponent_ExitCode">
-    <columnDefinition primaryKey="yes" name="ExecOnId_" type="string" length="72" modularize="column" category="identifier" keyTable="PSW_ExecOnComponent" keyColumn="1" />
-    <columnDefinition primaryKey="yes" name="From" type="number" length="4" minValue="0" maxValue="65535" />
-    <columnDefinition name="To" type="number" length="4" minValue="0" maxValue="65535" />
-  </tableDefinition>
-
-  <tableDefinition name="PSW_ExecOn_ConsoleOutput">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="ExecOnId_" type="string" length="72" modularize="column" category="identifier" keyTable="PSW_ExecOnComponent" keyColumn="1" />
-    <columnDefinition name="Expression" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Flags" type="number" length="4" minValue="0" maxValue="1" />
-    <columnDefinition name="ErrorHandling" type="number" minValue="0" maxValue="2" length="2" />
-    <columnDefinition name="PromptText" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
   </tableDefinition>
 
   <tableDefinition name="PSW_ExecOnComponent_Environment">
-    <columnDefinition primaryKey="yes" name="ExecOnId_" type="string" length="72" modularize="column" category="identifier" keyTable="PSW_ExecOnComponent" keyColumn="1" />
-    <columnDefinition primaryKey="yes" name="Name" type="string" length="0" />
-    <columnDefinition name="Value" type="string" length="0" modularize="property" category="formatted" />
+                    new ColumnDefinition(nameof(ExecOnId_), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "PSW_ExecOnComponent", keyColumn: 1),
+                    new ColumnDefinition(nameof(Name), ColumnType.String, 0, true, false),
+                    new ColumnDefinition(nameof(Value), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
   </tableDefinition>
 
   <tableDefinition name="PSW_Dism">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Component_" type="string" length="72" modularize="column" keyTable="Component" keyColumn="1" category="identifier"/>
-    <columnDefinition name="EnableFeatures" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="ExcludeFeatures" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="PackagePath" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="Cost" type="number" minValue="0" length="4" />
-    <columnDefinition name="ErrorHandling" type="number" minValue="0" maxValue="2" length="2" />
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Component_), ColumnType.String, 72, false, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "Component", keyColumn: 1),
+                    new ColumnDefinition(nameof(EnableFeatures), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(ExcludeFeatures), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(PackagePath), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Cost), ColumnType.Number, 4, false, false, ColumnCategory.Integer, 0),
+                    new ColumnDefinition(nameof(ErrorHandling), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 2),
   </tableDefinition>
 
   <tableDefinition name="PSW_ZipFile">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="ZipFile" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="CompressFolder" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="FilePattern" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Recursive" type="number" length="1" minValue="0" maxValue="1" />
-    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(ZipFile), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(CompressFolder), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(FilePattern), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Recursive), ColumnType.Number, 1, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 1),
+                    new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
   </tableDefinition>
 
   <tableDefinition name="PSW_Unzip">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="ZipFile" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="TargetFolder" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Flags" type="number" length="4" minValue="0" maxValue="65535" />
-    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(ZipFile), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(TargetFolder), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Flags), ColumnType.Number, 4, false, false, ColumnCategory.Integer, minValue: 0, maxValue: ushort.MaxValue),
+                    new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
   </tableDefinition>
 
   <tableDefinition name="PSW_ServiceConfig">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Component_" type="string" length="72" modularize="column" keyTable="Component" keyColumn="1" category="identifier"/>
-    <columnDefinition name="ServiceName" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="CommandLine" type="string" length="0" modularize="property" nullable="yes" category="formatted" />
-    <columnDefinition name="Account" type="string" length="0" modularize="property" nullable="yes" category="formatted" />
-    <columnDefinition name="Password" type="string" length="0" modularize="property" nullable="yes" category="formatted" />
-    <columnDefinition name="Start" type="number" length="2" minValue="-1" maxValue="4" />
-    <columnDefinition name="DelayStart" type="number" length="2" minValue="-1" maxValue="1" />
-    <columnDefinition name="LoadOrderGroup" type="string" length="0" modularize="property" nullable="yes" category="formatted" />
-    <columnDefinition name="ErrorHandling" type="number" minValue="0" maxValue="2" length="2" />
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Component_), ColumnType.String, 72, false, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "Component", keyColumn: 1),
+                    new ColumnDefinition(nameof(ServiceName), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(CommandLine), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Account), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Password), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Start), ColumnType.Number, 2, false, false, ColumnCategory.Integer, 4),
+                    new ColumnDefinition(nameof(DelayStart), ColumnType.Number, 2, false, false, ColumnCategory.Integer, 1),
+                    new ColumnDefinition(nameof(LoadOrderGroup), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(ErrorHandling), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 2),
   </tableDefinition>
 
   <tableDefinition name="PSW_ServiceConfig_Dependency">
-    <columnDefinition name="ServiceConfig_" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" keyTable="PSW_ServiceConfig" keyColumn="1" />
-    <columnDefinition name="Service" type="string" length="0" primaryKey="yes" modularize="property" category="formatted" nullable="yes"/>
-    <columnDefinition name="Group" type="string" length="0" primaryKey="yes" modularize="property" category="formatted" nullable="yes"/>
+                    new ColumnDefinition(nameof(ServiceConfig_), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "PSW_ServiceConfig", keyColumn: 1),
+                    new ColumnDefinition(nameof(Service), ColumnType.String, 0, true, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Group), ColumnType.String, 0, true, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
   </tableDefinition>
 
   <tableDefinition name="PSW_SqlSearch">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Property_" type="string" length="72" modularize="column" category="identifier" />
-    <columnDefinition name="Server" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="Instance" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="Port" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="Encrypted" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="Database" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="Username" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="Password" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="Query" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
-    <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
-    <columnDefinition name="ErrorHandling" type="number" minValue="0" maxValue="2" length="2" />
-    <columnDefinition name="ConnectionString" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Property_), ColumnType.String, 72, false, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Server), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Instance), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Port), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Encrypted), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Database), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Username), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Password), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Query), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
+                    new ColumnDefinition(nameof(Order), ColumnType.Number, 4, false, false, ColumnCategory.Integer, minValue: 0, maxValue: int.MaxValue),
+                    new ColumnDefinition(nameof(ErrorHandling), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 2),
+                    new ColumnDefinition(nameof(ConnectionString), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
   </tableDefinition>
 
   <tableDefinition name="PSW_EvaluateExpression">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Property_" type="string" length="0" modularize="column" category="identifier" />
-    <columnDefinition name="Expression" type="string" length="72" modularize="property" category="formatted" />
-    <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Property_), ColumnType.String, 0, false, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Expression), ColumnType.String, 72, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Order), ColumnType.Number, 4, false, false, ColumnCategory.Integer, minValue: 0, maxValue: int.MaxValue),
   </tableDefinition>
 
   <tableDefinition name="PSW_CertificateHashSearch">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="CertName" type="string" length="72" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="FriendlyName" type="string" length="72" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="Issuer" type="string" length="72" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="SerialNumber" type="string" length="72" modularize="property" category="formatted" nullable="yes" />
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(CertName), ColumnType.String, 72, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(FriendlyName), ColumnType.String, 72, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Issuer), ColumnType.String, 72, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(SerialNumber), ColumnType.String, 72, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
   </tableDefinition>
 
   <tableDefinition name="PSW_AccountSidSearch">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Property_" type="string" length="0" modularize="property" category="text" />
-    <columnDefinition name="SystemName" type="string" length="0" modularize="property" nullable="yes" category="formatted" />
-    <columnDefinition name="AccountName" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Property_), ColumnType.String, 0, false, false, ColumnCategory.Text, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(SystemName), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(AccountName), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
   </tableDefinition>
 
   <tableDefinition name="PSW_VersionCompare">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Property_" type="string" length="0" modularize="property" category="identifier" />
-    <columnDefinition name="Version1" type="string" length="0" modularize="property" nullable="yes" category="formatted" />
-    <columnDefinition name="Version2" type="string" length="0" modularize="property" nullable="yes" category="formatted" />
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Property_), ColumnType.String, 0, false, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Version1), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Version2), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
   </tableDefinition>
 
   <tableDefinition name="PSW_PathSearch">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Property_" type="string" length="0" modularize="property" category="identifier" />
-    <columnDefinition name="FileName" type="string" length="0" modularize="property" nullable="no" category="formatted" />
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Property_), ColumnType.String, 0, false, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(FileName), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
   </tableDefinition>
 
-
   <tableDefinition name="PSW_WmiSearch">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Property_" type="string" length="72" modularize="column" category="identifier" />
-    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
-    <columnDefinition name="Namespace" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
-    <columnDefinition name="Query" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="ResultProperty" type="string" length="0" modularize="property" category="formatted" nullable="yes"/>
-    <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Property_), ColumnType.String, 72, false, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
+                    new ColumnDefinition(nameof(Namespace), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Query), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(ResultProperty), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Order), ColumnType.Number, 4, false, false, ColumnCategory.Integer, minValue: 0, maxValue: int.MaxValue),
   </tableDefinition>
 
   <tableDefinition name="PSW_RestartLocalResources">
-    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
-    <columnDefinition name="Path" type="string" length="72" modularize="column" category="formatted" />
-    <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
+                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Path), ColumnType.String, 72, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
   </tableDefinition>
 
+  <tableDefinition name="PSW_Payload">
+  </tableDefinition>
+
+  <tableDefinition name="PSW_ConcatFiles">
+  </tableDefinition>
 </tableDefinitions>

@@ -19,8 +19,8 @@ namespace PanelSw.Wix.Extensions.Symbols
             {
                 return new ColumnDefinition[]
                 {
-                    new ColumnDefinition(nameof(File_), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "File", keyColumn: 1)
-                    , new ColumnDefinition(nameof(Flags), ColumnType.Number, 2, false, false, ColumnCategory.Integer, 0, 127)
+                    new ColumnDefinition(nameof(File_), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "File", keyColumn: 1),
+                    new ColumnDefinition(nameof(Bitness), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 127),
                 };
             }
         }
@@ -39,7 +39,7 @@ namespace PanelSw.Wix.Extensions.Symbols
             set => Fields[0].Set(value);
         }
 
-        public ushort Flags
+        public ushort Bitness
         {
             get => (ushort)Fields[1].AsNumber();
             set => Fields[1].Set(value);
