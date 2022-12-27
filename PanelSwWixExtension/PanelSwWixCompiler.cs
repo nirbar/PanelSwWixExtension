@@ -3626,10 +3626,16 @@ namespace PanelSw.Wix.Extensions
         private void ParseMsiSqlQuery(IntermediateSection section, XElement element, XElement parent)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
-            string id = null;
             string query = null;
             string condition = null;
-            string property = null;
+            Identifier property = null;
+
+            if (element.Parent.Name.LocalName != "Property")
+            {
+                ParseHelper.UnexpectedElement(element.Parent, element);
+                return;
+            }
+            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, element.Parent.Attribute("Id"));
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -3637,9 +3643,6 @@ namespace PanelSw.Wix.Extensions
                 {
                     switch (attrib.Name.LocalName)
                     {
-                        case "Id":
-                            id = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
                         case "Query":
                             query = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
@@ -3652,61 +3655,30 @@ namespace PanelSw.Wix.Extensions
                             break;
                     }
                 }
-                else
-                {
-                    Core.UnsupportedExtensionAttribute(attrib);
-                }
             }
 
-            if ((parent != null) && parent.Name.LocalName.Equals("Property"))
+            if ((property == null) || string.IsNullOrEmpty(property.Id))
             {
-                property = parent.Attribute("Id")?.Value;
-                if (!property.ToUpper().Equals(property))
-                {
-                    Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
-                }
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
+                return;
             }
-
-            if (string.IsNullOrEmpty(id))
+            if (!property.Id.ToUpper().Equals(property.Id))
             {
-                id = "msq" + Guid.NewGuid().ToString("N");
+                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property.Id));
             }
-
             if (string.IsNullOrEmpty(query))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Query"));
             }
 
-            // find unexpected child elements
-            foreach (XElement child in element.Descendants())
-            {
-                if (XmlNodeType.Element == child.NodeType)
-                {
-                    if (child.Name.Namespace.Equals(Namespace))
-                    {
-                        ParseHelper.UnexpectedElement(element, child);
-                    }
-                    else
-                    {
-                        Core.UnsupportedExtensionElement(element, child);
-                    }
-                }
-                else if (((XmlNodeType.CDATA == child.NodeType) || (XmlNodeType.Text == child.NodeType)) && string.IsNullOrEmpty(condition))
-                {
-                    Core.OnMessage(WixWarnings.DeprecatedElement("text", $"Condition attribute in {element.Name.LocalName}"));
-                    condition = child.Value.Trim();
-                }
-            }
-
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "MsiSqlQuery");
-
             if (!Messaging.EncounteredError)
             {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "MsiSqlQuery");
+
                 PSW_MsiSqlQuery row = section.AddSymbol(new PSW_MsiSqlQuery(sourceLineNumbers));
-                row[0] = id;
-                row[1] = property;
-                row[2] = query;
-                row[3] = condition;
+                row.Property_ = property.Id;
+                row.Query = query;
+                row.Condition = condition;
             }
         }
 
