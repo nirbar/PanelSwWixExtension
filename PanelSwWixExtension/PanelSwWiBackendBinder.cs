@@ -42,6 +42,7 @@ namespace PanelSw.Wix.Extensions
                         new TableDefinition(nameof(PSW_ServiceConfig), PSW_ServiceConfig.SymbolDefinition, PSW_ServiceConfig.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_ServiceConfig_Dependency), PSW_ServiceConfig_Dependency.SymbolDefinition, PSW_ServiceConfig_Dependency.ColumnDefinitions, symbolIdIsPrimaryKey: false), // No Id for this table, just the SqlScript_ column
                         new TableDefinition(nameof(PSW_SetPropertyFromPipe), PSW_SetPropertyFromPipe.SymbolDefinition, PSW_SetPropertyFromPipe.ColumnDefinitions, symbolIdIsPrimaryKey: true),
+                        new TableDefinition(nameof(PSW_ShellExecute), PSW_ShellExecute.SymbolDefinition, PSW_ShellExecute.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_SqlScript), PSW_SqlScript.SymbolDefinition, PSW_SqlScript.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_SqlScript_Replacements), PSW_SqlScript_Replacements.SymbolDefinition, PSW_SqlScript_Replacements.ColumnDefinitions, symbolIdIsPrimaryKey: false), // No Id for this table, just the SqlScript_ column
                         new TableDefinition(nameof(PSW_SqlSearch), PSW_SqlSearch.SymbolDefinition, PSW_SqlSearch.ColumnDefinitions, symbolIdIsPrimaryKey: true),

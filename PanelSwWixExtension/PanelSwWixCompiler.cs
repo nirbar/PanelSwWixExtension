@@ -3530,7 +3530,6 @@ namespace PanelSw.Wix.Extensions
         private void ParseShellExecute(IntermediateSection section, XElement element)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
-            string id = null;
             string target = null;
             string args = "";
             string workDir = "";
@@ -3544,46 +3543,46 @@ namespace PanelSw.Wix.Extensions
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
-                    switch (attrib.Name.LocalName.ToLower())
+                    switch (attrib.Name.LocalName)
                     {
-                        case "id":
-                            id = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
-                        case "target":
+                        case "Target":
                             target = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "args":
+                        case "Args":
                             args = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "workingdir":
+                        case "Condition":
+                            condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "WorkingDir":
                             workDir = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "verb":
+                        case "Verb":
                             verb = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "wait":
+                        case "Wait":
                             if (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 wait = 1;
                             }
                             break;
-                        case "show":
+                        case "Show":
                             show = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 15);
                             break;
 
-                        case "oncommit":
+                        case "OnCommit":
                             if (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 flags |= ExecutePhase.OnCommit;
                             }
                             break;
-                        case "onexecute":
+                        case "OnExecute":
                             if (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 flags |= ExecutePhase.OnExecute;
                             }
                             break;
-                        case "onrollback":
+                        case "OnRollback":
                             if (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
                                 flags |= ExecutePhase.OnRollback;
@@ -3595,39 +3594,11 @@ namespace PanelSw.Wix.Extensions
                             break;
                     }
                 }
-                else
-                {
-                    Core.UnsupportedExtensionAttribute(attrib);
-                }
             }
 
-            if (string.IsNullOrEmpty(id))
-            {
-                id = "shl" + Guid.NewGuid().ToString("N");
-            }
             if (string.IsNullOrEmpty(target))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Target"));
-            }
-
-            // find unexpected child elements
-            foreach (XElement child in element.Descendants())
-            {
-                if (XmlNodeType.Element == child.NodeType)
-                {
-                    if (child.Name.Namespace.Equals(Namespace))
-                    {
-                        ParseHelper.UnexpectedElement(element, child);
-                    }
-                    else
-                    {
-                        Core.UnsupportedExtensionElement(element, child);
-                    }
-                }
-                else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
-                {
-                    condition = child.Value.Trim();
-                }
             }
 
             // Default to execute deferred.
@@ -3641,15 +3612,14 @@ namespace PanelSw.Wix.Extensions
             if (!Messaging.EncounteredError)
             {
                 PSW_ShellExecute row = section.AddSymbol(new PSW_ShellExecute(sourceLineNumbers));
-                row[0] = id;
-                row[1] = target;
-                row[2] = args;
-                row[3] = verb;
-                row[4] = workDir;
-                row[5] = show;
-                row[6] = wait;
-                row[7] = (int)flags;
-                row[8] = condition;
+                row.Target = target;
+                row.Args = args;
+                row.Verb = verb;
+                row.WorkingDir = workDir;
+                row.Show = show;
+                row.Wait = wait;
+                row.Flags = (int)flags;
+                row.Condition = condition;
             }
         }
 

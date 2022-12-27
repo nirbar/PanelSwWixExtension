@@ -1568,6 +1568,11 @@ Call ShellExecuteEx with parameters
               <xs:documentation>Whether or not to post this data during execute sequence (deferred, right after InstallInitialize). If neither OnXXX attribute is pecified as 'yes' then OnExecute='yes' will be the default.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="Condition" use="optional" default="no" type="wix:YesNoType">
+            <xs:annotation>
+              <xs:documentation>Whether or not to execute</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>
