@@ -1185,7 +1185,7 @@ namespace PanelSw.Wix.Extensions
         private void ParseCreateSelfSignCertificateElement(IntermediateSection section, XElement element, string component)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
-            string id = null;
+            Identifier id = null;
             string password = null;
             string x500 = null;
             string subjectAltName = null;
@@ -1199,7 +1199,7 @@ namespace PanelSw.Wix.Extensions
                     switch (attrib.Name.LocalName.ToLower())
                     {
                         case "id":
-                            id = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            id = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, attrib);
                             break;
                         case "password":
                             password = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
@@ -1228,7 +1228,7 @@ namespace PanelSw.Wix.Extensions
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, "Component", "Id"));
             }
-            if (string.IsNullOrEmpty(id))
+            if (string.IsNullOrEmpty(id?.Id))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Id"));
             }
@@ -1240,7 +1240,7 @@ namespace PanelSw.Wix.Extensions
             if (!Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "CreateSelfSignCertificate");
-                PSW_SelfSignCertificate row = section.AddSymbol(new PSW_SelfSignCertificate(sourceLineNumbers, id));
+                PSW_SelfSignCertificate row = section.AddSymbol(new PSW_SelfSignCertificate(sourceLineNumbers, id.Id));
                 row.Component_ = component;
                 row.X500 = x500;
                 row.SubjectAltNames = subjectAltName;
@@ -2675,17 +2675,13 @@ namespace PanelSw.Wix.Extensions
         private void ParseReadIniValuesElement(IntermediateSection section, XElement element, XElement parent)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
-            string DestProperty = null;
             string FilePath = null;
             string Section = null;
             string Key = null;
             YesNoType IgnoreErrors = YesNoType.No;
             string condition = null;
-
-            if ((parent != null) && parent.Name.LocalName.Equals("Property"))
-            {
-                DestProperty = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, parent.Attribute("Id")).Id;
-            }
+            Identifier property = null;
+            TryGetParentSearchPropertyId(sourceLineNumbers, element, out property);
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -2693,14 +2689,6 @@ namespace PanelSw.Wix.Extensions
                 {
                     switch (attrib.Name.LocalName)
                     {
-                        case "DestProperty":
-                            if (!string.IsNullOrEmpty(DestProperty))
-                            {
-                                Messaging.Write(ErrorMessages.ExpectedAttributeInElementOrParent(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, parent.Name.LocalName));
-                                return;
-                            }
-                            DestProperty = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
                         case "FilePath":
                             FilePath = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
@@ -2722,15 +2710,6 @@ namespace PanelSw.Wix.Extensions
                             break;
                     }
                 }
-            }
-
-            if (string.IsNullOrEmpty(DestProperty))
-            {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "DestProperty"));
-            }
-            if (!DestProperty.ToUpper().Equals(DestProperty))
-            {
-                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", DestProperty));
             }
 
             if (string.IsNullOrEmpty(FilePath))
@@ -2755,7 +2734,7 @@ namespace PanelSw.Wix.Extensions
                 row.FilePath = FilePath;
                 row.Section = Section;
                 row.Key = Key;
-                row.DestProperty = DestProperty;
+                row.DestProperty = property.Id;
                 row.Attributes = (IgnoreErrors == YesNoType.Yes) ? 1 : 0;
                 row.Condition = condition;
             }
@@ -2978,13 +2957,7 @@ namespace PanelSw.Wix.Extensions
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string file = null;
             Identifier property = null;
-
-            if (element.Parent.Name.LocalName != "Property")
-            {
-                ParseHelper.UnexpectedElement(element.Parent, element);
-                return;
-            }
-            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, element.Parent.Attribute("Id"));
+            TryGetParentSearchPropertyId(sourceLineNumbers, element, out property);
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -3002,15 +2975,6 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            if ((property == null) || string.IsNullOrEmpty(property.Id))
-            {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
-                return;
-            }
-            if (!property.Id.ToUpper().Equals(property.Id))
-            {
-                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property.Id));
-            }
             if (string.IsNullOrEmpty(file))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "FileName"));
@@ -3032,13 +2996,7 @@ namespace PanelSw.Wix.Extensions
             string version1 = null;
             string version2 = null;
             Identifier property = null;
-
-            if (element.Parent.Name.LocalName != "Property")
-            {
-                ParseHelper.UnexpectedElement(element.Parent, element);
-                return;
-            }
-            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, element.Parent.Attribute("Id"));
+            TryGetParentSearchPropertyId(sourceLineNumbers, element, out property);
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -3059,15 +3017,6 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            if ((property == null) || string.IsNullOrEmpty(property.Id))
-            {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
-                return;
-            }
-            if (!property.Id.ToUpper().Equals(property.Id))
-            {
-                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property.Id));
-            }
             if (string.IsNullOrEmpty(version1))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Version1"));
@@ -3095,13 +3044,7 @@ namespace PanelSw.Wix.Extensions
             string accountName = null;
             string condition = "";
             Identifier property = null;
-
-            if (element.Parent.Name.LocalName != "Property")
-            {
-                ParseHelper.UnexpectedElement(element.Parent, element);
-                return;
-            }
-            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, element.Parent.Attribute("Id"));
+            TryGetParentSearchPropertyId(sourceLineNumbers, element, out property);
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -3126,15 +3069,6 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            if ((property == null) || string.IsNullOrEmpty(property.Id))
-            {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
-                return;
-            }
-            if (!property.Id.ToUpper().Equals(property.Id))
-            {
-                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property.Id));
-            }
             if (string.IsNullOrEmpty(accountName))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "AccountName"));
@@ -3169,13 +3103,7 @@ namespace PanelSw.Wix.Extensions
             XmlSearchMatch match = XmlSearchMatch.first;
             string condition = null;
             Identifier property = null;
-
-            if (element.Parent.Name.LocalName != "Property")
-            {
-                ParseHelper.UnexpectedElement(element.Parent, element);
-                return;
-            }
-            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, element.Parent.Attribute("Id"));
+            TryGetParentSearchPropertyId(sourceLineNumbers, element, out property);
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -3209,15 +3137,6 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            if ((property == null) || string.IsNullOrEmpty(property.Id))
-            {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
-                return;
-            }
-            if (!property.Id.ToUpper().Equals(property.Id))
-            {
-                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property.Id));
-            }
             if (string.IsNullOrEmpty(filePath))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "FilePath"));
@@ -3258,13 +3177,7 @@ namespace PanelSw.Wix.Extensions
             ErrorHandling errorHandling = ErrorHandling.fail;
             int order = 1000000000 + sourceLineNumbers.LineNumber ?? 0;
             Identifier property = null;
-
-            if (element.Parent.Name.LocalName != "Property")
-            {
-                ParseHelper.UnexpectedElement(element.Parent, element);
-                return;
-            }
-            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, element.Parent.Attribute("Id"));
+            TryGetParentSearchPropertyId(sourceLineNumbers, element, out property);
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -3316,15 +3229,6 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            if ((property == null) || string.IsNullOrEmpty(property.Id))
-            {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
-                return;
-            }
-            if (!property.Id.ToUpper().Equals(property.Id))
-            {
-                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property.Id));
-            }
             if (!string.IsNullOrEmpty(connectionString) &&
                 (!string.IsNullOrEmpty(server) || !string.IsNullOrEmpty(instance) || !string.IsNullOrEmpty(database) || !string.IsNullOrEmpty(port) || !string.IsNullOrEmpty(encrypted) || !string.IsNullOrEmpty(password) || !string.IsNullOrEmpty(username)))
             {
@@ -3369,13 +3273,7 @@ namespace PanelSw.Wix.Extensions
             string condition = null;
             int order = 1000000000 + sourceLineNumbers.LineNumber ?? 0;
             Identifier property = null;
-
-            if (element.Parent.Name.LocalName != "Property")
-            {
-                ParseHelper.UnexpectedElement(element.Parent, element);
-                return;
-            }
-            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, element.Parent.Attribute("Id"));
+            TryGetParentSearchPropertyId(sourceLineNumbers, element, out property);
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -3406,15 +3304,6 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            if ((property == null) || string.IsNullOrEmpty(property.Id))
-            {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
-                return;
-            }
-            if (!property.Id.ToUpper().Equals(property.Id))
-            {
-                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property.Id));
-            }
             if (string.IsNullOrEmpty(query))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Query"));
@@ -3629,13 +3518,7 @@ namespace PanelSw.Wix.Extensions
             string query = null;
             string condition = null;
             Identifier property = null;
-
-            if (element.Parent.Name.LocalName != "Property")
-            {
-                ParseHelper.UnexpectedElement(element.Parent, element);
-                return;
-            }
-            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, element.Parent.Attribute("Id"));
+            TryGetParentSearchPropertyId(sourceLineNumbers, element, out property);
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -3657,15 +3540,6 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            if ((property == null) || string.IsNullOrEmpty(property.Id))
-            {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
-                return;
-            }
-            if (!property.Id.ToUpper().Equals(property.Id))
-            {
-                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property.Id));
-            }
             if (string.IsNullOrEmpty(query))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Query"));
@@ -3705,20 +3579,15 @@ namespace PanelSw.Wix.Extensions
         private void ParseRegularExpression(IntermediateSection section, XElement element)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
-            string id = null;
             string filepath = null;
             string input = null;
             string regex = null;
             string replacement = null;
-            string prop = null;
             int flags = 0;
             string condition = null;
-            int order = 1000000000 + GetLineNumber(sourceLineNumbers);
-
-            if (element.Parent.Name.LocalName == "Property")
-            {
-                prop = element.Parent.Attribute("Id").Value;
-            }
+            int order = 1000000000 + sourceLineNumbers.LineNumber ?? 0;
+            Identifier property = null;
+            TryGetParentSearchPropertyId(sourceLineNumbers, element, out property);
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -3726,9 +3595,6 @@ namespace PanelSw.Wix.Extensions
                 {
                     switch (attrib.Name.LocalName)
                     {
-                        case "Id":
-                            id = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
                         case "FilePath":
                             filepath = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
@@ -3739,21 +3605,20 @@ namespace PanelSw.Wix.Extensions
                             regex = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Replacement":
-                            replacement = ParseHelper.GetAttributeValue(attrib, true);
+                            replacement = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib, EmptyRule.CanBeEmpty);
                             flags |= (int)RegexSearchFlags.Replace;
                             break;
-                        case "DstProperty":
-                            if (!string.IsNullOrEmpty(prop))
-                            {
-                                Messaging.Write(ErrorMessages.ExpectedAttributeInElementOrParent(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, element.Parent.Name.LocalName));
-                            }
-                            prop = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
                         case "IgnoreCase":
-                            flags |= (int)RegexMatchFlags.IgnoreCare << 2;
+                            if (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
+                            {
+                                flags |= (int)RegexMatchFlags.IgnoreCare << 2;
+                            }
                             break;
                         case "Extended":
-                            flags |= (int)RegexMatchFlags.Extended << 2;
+                            if (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
+                            {
+                                flags |= (int)RegexMatchFlags.Extended << 2;
+                            }
                             break;
                         case "Condition":
                             condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
@@ -3767,69 +3632,30 @@ namespace PanelSw.Wix.Extensions
                             break;
                     }
                 }
-                else
-                {
-                    Core.UnsupportedExtensionAttribute(attrib);
-                }
             }
 
-            if (string.IsNullOrEmpty(id))
-            {
-                id = "rgx" + Guid.NewGuid().ToString("N");
-            }
             if (string.IsNullOrEmpty(regex))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Expression"));
-            }
-            if (string.IsNullOrEmpty(prop))
-            {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "DstProperty"));
-            }
-            if (!prop.ToUpper().Equals(prop))
-            {
-                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", prop));
             }
             if (string.IsNullOrEmpty(input) == string.IsNullOrEmpty(filepath))
             {
                 Messaging.Write(ErrorMessages.IllegalAttributeWithOtherAttribute(sourceLineNumbers, element.Name.LocalName, "Input", "FilePath"));
             }
 
-            // find unexpected child elements
-            foreach (XElement child in element.Descendants())
-            {
-                if (XmlNodeType.Element == child.NodeType)
-                {
-                    if (child.Name.Namespace.Equals(Namespace))
-                    {
-                        ParseHelper.UnexpectedElement(element, child);
-                    }
-                    else
-                    {
-                        Core.UnsupportedExtensionElement(element, child);
-                    }
-                }
-                // Condition can be specified on attribute 'Condition' in which case embedded text may be the property default value.
-                else if (((XmlNodeType.CDATA == child.NodeType) || (XmlNodeType.Text == child.NodeType)) && string.IsNullOrEmpty(condition))
-                {
-                    Core.OnMessage(WixWarnings.DeprecatedElement("text", $"Condition attribute in {element.Name.LocalName}"));
-                    condition = child.Value.Trim();
-                }
-            }
-
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "RegularExpression");
-
             if (!Messaging.EncounteredError)
             {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "RegularExpression");
+
                 PSW_RegularExpression row = section.AddSymbol(new PSW_RegularExpression(sourceLineNumbers));
-                row[0] = id;
-                row[1] = filepath;
-                row[2] = input;
-                row[3] = regex;
-                row[4] = replacement;
-                row[5] = prop;
-                row[6] = flags;
-                row[7] = condition;
-                row[8] = order;
+                row.FilePath = filepath;
+                row.Input = input;
+                row.Expression = regex;
+                row.Replacement = replacement;
+                row.DstProperty_ = property.Id;
+                row.Flags = flags;
+                row.Condition = condition;
+                row.Order = order;
             }
         }
 
@@ -4356,6 +4182,30 @@ namespace PanelSw.Wix.Extensions
             if (string.IsNullOrEmpty(v) || !Enum.TryParse<T>(v, out value))
             {
                 Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, v));
+                return false;
+            }
+            return true;
+        }
+
+        private bool TryGetParentSearchPropertyId(SourceLineNumber sourceLineNumbers, XElement child, out Identifier property)
+        {
+            property = null;
+
+            if (!child.Parent.Name.LocalName.Equals("Property"))
+            {
+                ParseHelper.UnexpectedElement(child.Parent, child);
+                return false;
+            }
+
+            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, child.Parent.Attribute("Id"));
+            if ((property == null) || string.IsNullOrEmpty(property.Id))
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, child.Parent.Name.LocalName, "Id"));
+                return false;
+            }
+            if (!property.Id.ToUpper().Equals(property.Id))
+            {
+                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property.Id));
                 return false;
             }
             return true;
