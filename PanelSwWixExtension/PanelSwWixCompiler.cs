@@ -852,14 +852,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         case "ErrorHandling":
-                            {
-                                string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                                if (!Enum.TryParse(a, out promptOnError))
-                                {
-                                    Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, a));
-                                    return;
-                                }
-                            }
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out promptOnError);
                             break;
 
                         default:
@@ -1096,21 +1089,11 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         case "Formatting":
-                            string formatting = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            if (!Enum.TryParse(formatting, true, out jsonFormatting))
-                            {
-                                Messaging.Write(ErrorMessages.IllegalAttributeValueWithLegalList(sourceLineNumbers, node.Name.LocalName, attrib.Name.LocalName, formatting, $"{JsonFormatting.Raw}, {JsonFormatting.String}"));
-                            }
+                            TryParseEnumAttribute(sourceLineNumbers, node, attrib, out jsonFormatting);
                             break;
 
                         case "ErrorHandling":
-                            {
-                                string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                                if (!Enum.TryParse< ErrorHandling>(a, out promptOnError))
-                                {
-                                    Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, node.Name.LocalName, attrib.Name.LocalName, a));
-                                }
-                            }
+                            TryParseEnumAttribute(sourceLineNumbers, node, attrib, out promptOnError);
                             break;
 
                         default:
@@ -1371,11 +1354,7 @@ namespace PanelSw.Wix.Extensions
                     switch (attrib.Name.LocalName)
                     {
                         case "Bitness":
-                            string b = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            if (!Enum.TryParse(b, out bitness))
-                            {
-                                Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, node.Name.LocalName, attrib.Name.LocalName, b));
-                            }
+                            TryParseEnumAttribute(sourceLineNumbers, node, attrib, out bitness);
                             break;
 
                         default:
@@ -1518,33 +1497,15 @@ namespace PanelSw.Wix.Extensions
                     switch (attrib.Name.LocalName)
                     {
                         case "Account":
-                            {
-                                string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                                if (!Enum.TryParse<TopShelf_Account>(a, out account))
-                                {
-                                    Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, node.Name.LocalName, attrib.Name.LocalName, a));
-                                }
-                            }
+                            TryParseEnumAttribute(sourceLineNumbers, node, attrib, out account);
                             break;
 
                         case "Start":
-                            {
-                                string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                                if (!Enum.TryParse<TopShelf_Start>(a, out start))
-                                {
-                                    Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, node.Name.LocalName, attrib.Name.LocalName, a));
-                                }
-                            }
+                            TryParseEnumAttribute(sourceLineNumbers, node, attrib, out start);
                             break;
 
                         case "ErrorHandling":
-                            {
-                                string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                                if (!Enum.TryParse<ErrorHandling>(a, out promptOnError))
-                                {
-                                    Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, node.Name.LocalName, attrib.Name.LocalName, a));
-                                }
-                            }
+                            TryParseEnumAttribute(sourceLineNumbers, node, attrib, out promptOnError);
                             break;
 
                         case "ServiceName":
@@ -1909,13 +1870,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         case "On":
-                            {
-                                string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                                if (!Enum.TryParse<InstallUninstallType>(a, out on))
-                                {
-                                    Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, a));
-                                }
-                            }
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out on);
                             break;
 
                         case "Order":
@@ -2054,11 +2009,7 @@ namespace PanelSw.Wix.Extensions
                         break;
 
                     case "ErrorHandling":
-                        string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                        if (!Enum.TryParse<ErrorHandling>(a, out errorHandling))
-                        {
-                            Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, a));
-                        }
+                        TryParseEnumAttribute(sourceLineNumbers, element, attrib, out errorHandling);
                         break;
 
                     case "Wait":
@@ -2268,11 +2219,7 @@ namespace PanelSw.Wix.Extensions
                                                 break;
 
                                             case "Behavior":
-                                                string val = ParseHelper.GetAttributeValue(sourceLineNumbers, a);
-                                                if (!Enum.TryParse(val, out stdoutHandling))
-                                                {
-                                                    Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, child.Name.LocalName, a.Name.LocalName, val));
-                                                }
+                                                TryParseEnumAttribute(sourceLineNumbers, child, a, out stdoutHandling);
                                                 break;
                                         }
                                     }
@@ -2385,13 +2332,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         case "Start":
-                            {
-                                string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                                if (!Enum.TryParse(a, out start))
-                                {
-                                    Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, a));
-                                }
-                            }
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out start);
                             break;
 
                         case "LoadOrderGroup":
@@ -2399,13 +2340,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         case "ErrorHandling":
-                            {
-                                string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                                if (!Enum.TryParse(a, out errorHandling))
-                                {
-                                    Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, a));
-                                }
-                            }
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out errorHandling);
                             break;
 
                         default:
@@ -2528,13 +2463,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         case "ErrorHandling":
-                            {
-                                string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                                if (!Enum.TryParse(a, out promptOnError))
-                                {
-                                    Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, a));
-                                }
-                            }
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out promptOnError);
                             break;
 
                         default:
@@ -2693,11 +2622,7 @@ namespace PanelSw.Wix.Extensions
                             datatype = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Operation": //TODO Isn't documented in the XSD
-                            string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            if (!Enum.TryParse(a, out attributes))
-                            {
-                                Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, node.Name.LocalName, attrib.Name.LocalName, a));
-                            }
+                            TryParseEnumAttribute(sourceLineNumbers, node, attrib, out attributes);
                             break;
                         case "Condition":
                             condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
@@ -2871,11 +2796,7 @@ namespace PanelSw.Wix.Extensions
                             name = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Area":
-                            string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            if (!Enum.TryParse(a, true, out area))
-                            {
-                                Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, node.Name.LocalName, attrib.Name.LocalName, a));
-                            }
+                            TryParseEnumAttribute(sourceLineNumbers, node, attrib, out area);
                             break;
 
                         default:
@@ -3275,11 +3196,7 @@ namespace PanelSw.Wix.Extensions
                             namespaces = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Match":
-                            string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            if (!Enum.TryParse(a, out match))
-                            {
-                                Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, node.Name.LocalName, attrib.Name.LocalName, a));
-                            }
+                            TryParseEnumAttribute(sourceLineNumbers, node, attrib, out match);
                             break;
                         case "Condition":
                             condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
@@ -3328,8 +3245,6 @@ namespace PanelSw.Wix.Extensions
         private void ParseSqlSearchElement(IntermediateSection section, XElement node)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
-            string id = "sql" + Guid.NewGuid().ToString("N");
-            string property = null;
             string server = null;
             string connectionString = null;
             string instance = null;
@@ -3341,21 +3256,15 @@ namespace PanelSw.Wix.Extensions
             string port = null;
             string encrypted = null;
             ErrorHandling errorHandling = ErrorHandling.fail;
-            int order = 1000000000 + GetLineNumber(sourceLineNumbers);
+            int order = 1000000000 + sourceLineNumbers.LineNumber ?? 0;
+            Identifier property = null;
 
-            if (!node.Parent.Name.LocalName.Equals("Property"))
+            if (node.Parent.Name.LocalName != "Property")
             {
                 ParseHelper.UnexpectedElement(node.Parent, node);
+                return;
             }
-            property = node.Parent.Attribute("Id").Value;
-            if (string.IsNullOrWhiteSpace(property))
-            {
-                Messaging.Write(ErrorMessages.ParentElementAttributeRequired(sourceLineNumbers, node.Parent.Name.LocalName, "Id", node.Name.LocalName));
-            }
-            if (!property.ToUpper().Equals(property))
-            {
-                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
-            }
+            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, node.Parent.Attribute("Id"));
 
             foreach (XAttribute attrib in node.Attributes())
             {
@@ -3397,36 +3306,30 @@ namespace PanelSw.Wix.Extensions
                             encrypted = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "ErrorHandling":
-                            {
-                                string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                                try
-                                {
-                                    errorHandling = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
-                                }
-                                catch
-                                {
-                                    ParseHelper.UnexpectedAttribute(attrib);
-                                }
-                            }
+                            TryParseEnumAttribute(sourceLineNumbers, node, attrib, out errorHandling);
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(node, attrib);
                             break;
                     }
                 }
-                else
-                {
-                    Core.UnsupportedExtensionAttribute(attrib);
-                }
             }
 
+            if ((property == null) || string.IsNullOrEmpty(property.Id))
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Parent.Name.LocalName, "Id"));
+                return;
+            }
+            if (!property.Id.ToUpper().Equals(property.Id))
+            {
+                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property.Id));
+            }
             if (!string.IsNullOrEmpty(connectionString) &&
                 (!string.IsNullOrEmpty(server) || !string.IsNullOrEmpty(instance) || !string.IsNullOrEmpty(database) || !string.IsNullOrEmpty(port) || !string.IsNullOrEmpty(encrypted) || !string.IsNullOrEmpty(password) || !string.IsNullOrEmpty(username)))
             {
                 Messaging.Write(ErrorMessages.IllegalAttributeWithOtherAttribute(sourceLineNumbers, node.Name.LocalName, "ConnectionString", "any other"));
             }
-
             if (string.IsNullOrEmpty(server) && string.IsNullOrEmpty(connectionString))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttributes(sourceLineNumbers, node.Name.LocalName, "Server", "ConnectionString"));
@@ -3436,26 +3339,24 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Query"));
             }
 
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "SqlSearch");
-
             if (!Messaging.EncounteredError)
             {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "SqlSearch");
+
                 PSW_SqlSearch row = section.AddSymbol(new PSW_SqlSearch(sourceLineNumbers));
-                int i = 0;
-                row[i++] = id;
-                row[i++] = property;
-                row[i++] = server;
-                row[i++] = instance;
-                row[i++] = port;
-                row[i++] = encrypted;
-                row[i++] = database;
-                row[i++] = username;
-                row[i++] = password;
-                row[i++] = query;
-                row[i++] = condition;
-                row[i++] = order;
-                row[i++] = (int)errorHandling;
-                row[i++] = connectionString;
+                row.Property_ = property.Id;
+                row.Server = server;
+                row.Instance = instance;
+                row.Port = port;
+                row.Encrypted = encrypted;
+                row.Database = database;
+                row.Username = username;
+                row.Password = password;
+                row.Query = query;
+                row.Condition = condition;
+                row.Order = order;
+                row.ErrorHandling = (int)errorHandling;
+                row.ConnectionString = connectionString;
             }
         }
 
@@ -4542,6 +4443,18 @@ namespace PanelSw.Wix.Extensions
                 row[3] = (int)flags;
                 row[4] = condition;
             }
+        }
+
+        private bool TryParseEnumAttribute<T>(SourceLineNumber sourceLineNumbers, XElement element, XAttribute attrib, out T value) where T: struct
+        {
+            value = default(T);
+            string v = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+            if (string.IsNullOrEmpty(v) || !Enum.TryParse<T>(v, out value))
+            {
+                Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, v));
+                return false;
+            }
+            return true;
         }
     }
 }
