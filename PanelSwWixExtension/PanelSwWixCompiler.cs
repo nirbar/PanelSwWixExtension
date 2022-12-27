@@ -2569,7 +2569,6 @@ namespace PanelSw.Wix.Extensions
         private void ParseTaskSchedulerElement(IntermediateSection section, XElement element, string component)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
-            string id = "tsk" + Guid.NewGuid().ToString("N");
             string taskXml = null;
             string taskName = null;
             string user = null;
@@ -2598,7 +2597,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -2611,10 +2610,6 @@ namespace PanelSw.Wix.Extensions
                     if (child.Name.Namespace.Equals(Namespace))
                     {
                         ParseHelper.UnexpectedElement(element, child);
-                    }
-                    else
-                    {
-                        Core.UnsupportedExtensionElement(element, child);
                     }
                 }
                 else if (XmlNodeType.CDATA == child.NodeType || XmlNodeType.Text == child.NodeType)
@@ -2644,22 +2639,21 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttributesWithOtherAttribute(sourceLineNumbers, element.Name.LocalName, "User", "Password"));
             }
 
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "TaskScheduler");
-
             if (!Messaging.EncounteredError)
             {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "TaskScheduler");
+
                 taskXml = taskXml.Trim();
                 taskXml = taskXml.Replace("\r", "");
                 taskXml = taskXml.Replace("\n", "");
                 taskXml = taskXml.Replace(Environment.NewLine, "");
 
                 PSW_TaskScheduler row = section.AddSymbol(new PSW_TaskScheduler(sourceLineNumbers));
-                row[0] = id;
-                row[1] = taskName;
-                row[2] = component;
-                row[3] = taskXml;
-                row[4] = user;
-                row[5] = password;
+                row.TaskName = taskName;
+                row.Component_ = component;
+                row.TaskXml = taskXml;
+                row.User = user;
+                row.Password = password;
             }
         }
 
