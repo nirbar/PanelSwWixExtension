@@ -2354,7 +2354,6 @@ namespace PanelSw.Wix.Extensions
         private void ParseServiceConfigElement(IntermediateSection section, XElement element, string component)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
-            string id = null;
             string service = null;
             string commandLine = null;
             string account = null;
@@ -2369,10 +2368,6 @@ namespace PanelSw.Wix.Extensions
                 {
                     switch (attrib.Name.LocalName)
                     {
-                        case "Id":
-                            id = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
-
                         case "ServiceName":
                             service = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
@@ -2390,7 +2385,13 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         case "Start":
-                            start = (ServiceStart)Enum.Parse(typeof(ServiceStart), id = ParseHelper.GetAttributeValue(sourceLineNumbers, );
+                            {
+                                string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                                if (!Enum.TryParse(a, out start))
+                                {
+                                    Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, a));
+                                }
+                            }
                             break;
 
                         case "LoadOrderGroup":
@@ -2400,19 +2401,15 @@ namespace PanelSw.Wix.Extensions
                         case "ErrorHandling":
                             {
                                 string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                                try
+                                if (!Enum.TryParse(a, out errorHandling))
                                 {
-                                    errorHandling = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
-                                }
-                                catch
-                                {
-                                    ParseHelper.UnexpectedAttribute(attrib);
+                                    Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, a));
                                 }
                             }
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
                     }
                 }
@@ -2430,81 +2427,75 @@ namespace PanelSw.Wix.Extensions
             {
                 Messaging.Write(ErrorMessages.ExpectedAttributesWithOtherAttribute(sourceLineNumbers, element.Name.LocalName, "Password", "Account"));
             }
-            if (string.IsNullOrEmpty(id))
-            {
-                id = "svc" + Guid.NewGuid().ToString("N");
-            }
 
             ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_ServiceConfig");
 
+            PSW_ServiceConfig mainRow = null;
             if (!Messaging.EncounteredError)
             {
                 // Ensure sub-table exists for queries to succeed even if no sub-entries exist.
                 ParseHelper.EnsureTable(section, sourceLineNumbers, "PSW_ServiceConfig_Dependency");
-                PSW_ServiceConfig row = section.AddSymbol(new PSW_ServiceConfig(sourceLineNumbers));
-                row[0] = id;
-                row[1] = component;
-                row[2] = service;
-                row[3] = commandLine;
-                row[4] = account;
-                row[5] = password;
-                row[6] = (start == ServiceStart.autoDelayed) ? (int)ServiceStart.auto : (int)start;
-                row[7] = (start == ServiceStart.autoDelayed) ? 1 : (start == ServiceStart.auto) ? 0 : -1;
-                row[8] = loadOrderGroup;
-                row[9] = (int)errorHandling;
+                mainRow = section.AddSymbol(new PSW_ServiceConfig(sourceLineNumbers));
+                mainRow.Component_ = component;
+                mainRow.ServiceName = service;
+                mainRow.CommandLine = commandLine;
+                mainRow.Account = account;
+                mainRow.Password = password;
+                mainRow.Start = (start == ServiceStart.autoDelayed) ? (short)ServiceStart.auto : (short)start;
+                mainRow.DelayStart = (start == ServiceStart.autoDelayed) ? (short)1 : (start == ServiceStart.auto) ? (short)0 : (short)-1;
+                mainRow.LoadOrderGroup = loadOrderGroup;
+                mainRow.ErrorHandling = (short)errorHandling;
             }
 
             foreach (XElement child in element.Descendants())
             {
-                if (child.NamespaceURI != element.NamespaceURI)
+                if (child.Name.Namespace.Equals(Namespace))
                 {
-                    continue;
-                }
-
-                if (!child.Name.LocalName.Equals("Dependency"))
-                {
-                    Core.UnsupportedExtensionElement(element, child);
-                    continue;
-                }
-
-                foreach (XAttribute attrib in child.Attributes())
-                {
-                    if (attrib.Name.Namespace.Equals(Namespace))
+                    if (!child.Name.LocalName.Equals("Dependency"))
                     {
-                        string depService = null;
-                        string group = null;
+                        ParseHelper.UnexpectedElement(element, child);
+                        continue;
+                    }
 
-                        switch (attrib.Name.LocalName)
+                    foreach (XAttribute attrib in child.Attributes())
+                    {
+                        if (attrib.Name.Namespace.Equals(Namespace))
                         {
-                            case "Service":
-                                depService = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                                break;
+                            string depService = null;
+                            string group = null;
 
-                            case "Group":
-                                group = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                                break;
+                            switch (attrib.Name.LocalName)
+                            {
+                                case "Service":
+                                    depService = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                                    break;
 
-                            default:
-                                ParseHelper.UnexpectedAttribute(attrib);
-                                break;
-                        }
+                                case "Group":
+                                    group = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                                    break;
 
-                        if (string.IsNullOrEmpty(depService) && string.IsNullOrEmpty(group))
-                        {
-                            Messaging.Write(ErrorMessages.ExpectedAttributes(sourceLineNumbers, child.Name.LocalName, "Service", "Group"));
-                        }
+                                default:
+                                    ParseHelper.UnexpectedAttribute(child, attrib);
+                                    break;
+                            }
 
-                        if (!Messaging.EncounteredError)
-                        {
-                            PSW_ServiceConfig_Dependency row = section.AddSymbol(new PSW_ServiceConfig_Dependency(sourceLineNumbers));
-                            row[0] = id;
-                            row[1] = depService;
-                            row[2] = group;
+                            if (string.IsNullOrEmpty(depService) && string.IsNullOrEmpty(group))
+                            {
+                                Messaging.Write(ErrorMessages.ExpectedAttributes(sourceLineNumbers, child.Name.LocalName, "Service", "Group"));
+                            }
+
+                            if (!Messaging.EncounteredError)
+                            {
+                                PSW_ServiceConfig_Dependency row = section.AddSymbol(new PSW_ServiceConfig_Dependency(sourceLineNumbers, mainRow.Id));
+                                row.Service = depService;
+                                row.Group = group;
+                            }
                         }
                     }
                 }
             }
         }
+
         private void ParseDismElement(IntermediateSection section, XElement element, string component)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
