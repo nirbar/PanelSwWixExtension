@@ -193,6 +193,11 @@ The property is not set if Version1 or Version2 cannot be parsed to a version nu
               <xs:documentation>If not supplied, the account name translation begins on the local system. If the name cannot be resolved on the local system, this function will try to resolve the name using domain controllers trusted by the local system.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="Condition" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Condition on executing the search.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>

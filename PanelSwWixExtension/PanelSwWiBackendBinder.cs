@@ -16,6 +16,7 @@ namespace PanelSw.Wix.Extensions
                 {
                     _tableDefinition = new List<TableDefinition>
                     {
+                        new TableDefinition(nameof(PSW_AccountSidSearch), PSW_AccountSidSearch.SymbolDefinition, PSW_AccountSidSearch.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_BackupAndRestore), PSW_BackupAndRestore.SymbolDefinition, PSW_BackupAndRestore.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_CertificateHashSearch), PSW_CertificateHashSearch.SymbolDefinition, PSW_CertificateHashSearch.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_ConcatFiles), PSW_ConcatFiles.SymbolDefinition, PSW_ConcatFiles.ColumnDefinitions, symbolIdIsPrimaryKey: true),

@@ -3170,18 +3170,17 @@ namespace PanelSw.Wix.Extensions
         private void ParseAccountSidSearchElement(IntermediateSection section, XElement node)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
-            string id = "sid" + Guid.NewGuid().ToString("N"); ;
             string systemName = null;
             string accountName = null;
-            string property = null;
             string condition = "";
+            Identifier property = null;
 
             if (node.Parent.Name.LocalName != "Property")
             {
                 ParseHelper.UnexpectedElement(node.Parent, node);
                 return;
             }
-            property = node.Parent.Attribute("Id").Value;
+            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, node.Parent.Attribute("Id"));
 
             foreach (XAttribute attrib in node.Attributes())
             {
@@ -3200,60 +3199,35 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(node, attrib);
                             break;
                     }
                 }
-                else
-                {
-                    Core.UnsupportedExtensionAttribute(attrib);
-                }
             }
 
-            if (string.IsNullOrEmpty(property))
+            if ((property == null) || string.IsNullOrEmpty(property.Id))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Parent.Name.LocalName, "Id"));
                 return;
             }
-            if (!property.ToUpper().Equals(property))
+            if (!property.Id.ToUpper().Equals(property.Id))
             {
-                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
+                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property.Id));
             }
             if (string.IsNullOrEmpty(accountName))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "AccountName"));
             }
 
-            // find unexpected child elements
-            foreach (XElement child in node.Descendants())
-            {
-                if (XmlNodeType.Element == child.NodeType)
-                {
-                    if (child.Name.Namespace.Equals(Namespace))
-                    {
-                        ParseHelper.UnexpectedElement(node, child);
-                    }
-                    else
-                    {
-                        Core.UnsupportedExtensionElement(node, child);
-                    }
-                }
-                else if (((XmlNodeType.CDATA == child.NodeType) || (XmlNodeType.Text == child.NodeType)) && string.IsNullOrEmpty(condition))
-                {
-                    Core.OnMessage(WixWarnings.DeprecatedElement("text", $"Condition attribute in {node.Name.LocalName}"));
-                    condition = child.Value.Trim();
-                }
-            }
-
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "AccountSidSearch");
             if (!Messaging.EncounteredError)
             {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "AccountSidSearch");
+
                 PSW_AccountSidSearch row = section.AddSymbol(new PSW_AccountSidSearch(sourceLineNumbers));
-                row[0] = id;
-                row[1] = property;
-                row[2] = systemName;
-                row[3] = accountName;
-                row[4] = condition;
+                row.Property_ = property.Id;
+                row.SystemName = systemName;
+                row.AccountName = accountName;
+                row.Condition = condition;
             }
         }
 
