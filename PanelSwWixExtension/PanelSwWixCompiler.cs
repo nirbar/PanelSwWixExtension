@@ -3055,20 +3055,15 @@ namespace PanelSw.Wix.Extensions
         private void ParsePathSearchElement(IntermediateSection section, XElement node)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
-            string id = "pth" + Guid.NewGuid().ToString("N"); ;
             string file = null;
-            string property = null;
+            Identifier property = null;
 
             if (node.Parent.Name.LocalName != "Property")
             {
                 ParseHelper.UnexpectedElement(node.Parent, node);
                 return;
             }
-            property = node.Parent.Attribute("Id").Value;
-            if (!property.ToUpper().Equals(property))
-            {
-                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
-            }
+            property = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, node.Parent.Attribute("Id"));
 
             foreach (XAttribute attrib in node.Attributes())
             {
@@ -3080,16 +3075,20 @@ namespace PanelSw.Wix.Extensions
                             file = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(node, attrib);
                             break;
                     }
                 }
             }
 
-            if (string.IsNullOrEmpty(property))
+            if ((property == null) || string.IsNullOrEmpty(property.Id))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Parent.Name.LocalName, "Id"));
                 return;
+            }
+            if (!property.Id.ToUpper().Equals(property.Id))
+            {
+                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property.Id));
             }
             if (string.IsNullOrEmpty(file))
             {
@@ -3100,9 +3099,8 @@ namespace PanelSw.Wix.Extensions
             if (!Messaging.EncounteredError)
             {
                 PSW_PathSearch row = section.AddSymbol(new PSW_PathSearch(sourceLineNumbers));
-                row[0] = id;
-                row[1] = property;
-                row[2] = file;
+                row.Property_ = property.Id;
+                row.FileName = file;
             }
         }
 
