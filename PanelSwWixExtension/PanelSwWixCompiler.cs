@@ -3712,14 +3712,13 @@ namespace PanelSw.Wix.Extensions
         private void ParseFileRegex(IntermediateSection section, XElement element, string component, string fileId)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
-            string id = null;
             string filepath = null;
             string condition = null;
             string regex = null;
             string replacement = null;
             FileEncoding encoding = FileEncoding.AutoDetect;
             bool ignoreCase = false;
-            int order = 1000000000 + GetLineNumber(sourceLineNumbers);
+            int order = 1000000000 + sourceLineNumbers.LineNumber ?? 0;
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -3727,9 +3726,6 @@ namespace PanelSw.Wix.Extensions
                 {
                     switch (attrib.Name.LocalName)
                     {
-                        case "Id":
-                            id = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
                         case "FilePath":
                             filepath = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
@@ -3740,14 +3736,13 @@ namespace PanelSw.Wix.Extensions
                             regex = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Replacement":
-                            replacement = ParseHelper.GetAttributeValue(attrib, true);
+                            replacement = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib, EmptyRule.CanBeEmpty);
                             break;
                         case "IgnoreCase":
                             ignoreCase = true;
                             break;
                         case "Encoding":
-                            string enc = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            encoding = (FileEncoding)Enum.Parse(typeof(FileEncoding), enc);
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out encoding);
                             break;
                         case "Order":
                             order = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
@@ -3758,16 +3753,8 @@ namespace PanelSw.Wix.Extensions
                             break;
                     }
                 }
-                else
-                {
-                    Core.UnsupportedExtensionAttribute(attrib);
-                }
             }
 
-            if (string.IsNullOrEmpty(id))
-            {
-                id = "frx" + Guid.NewGuid().ToString("N");
-            }
             if (string.IsNullOrEmpty(regex))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Regex"));
@@ -3778,42 +3765,20 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.IllegalAttributeWhenNested(sourceLineNumbers, element.Name.LocalName, "FilePath", "Product"));
             }
 
-            // find unexpected child elements
-            foreach (XElement child in element.Descendants())
-            {
-                if (XmlNodeType.Element == child.NodeType)
-                {
-                    if (child.Name.Namespace.Equals(Namespace))
-                    {
-                        ParseHelper.UnexpectedElement(element, child);
-                    }
-                    else
-                    {
-                        Core.UnsupportedExtensionElement(element, child);
-                    }
-                }
-                else if (((XmlNodeType.CDATA == child.NodeType) || (XmlNodeType.Text == child.NodeType)) && string.IsNullOrEmpty(condition))
-                {
-                    Core.OnMessage(WixWarnings.DeprecatedElement("text", $"Condition attribute in {element.Name.LocalName}"));
-                    condition = child.Value.Trim();
-                }
-            }
-
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "FileRegex_Immediate");
-
             if (!Messaging.EncounteredError)
             {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "FileRegex_Immediate");
+
                 PSW_FileRegex row = section.AddSymbol(new PSW_FileRegex(sourceLineNumbers));
-                row[0] = id;
-                row[1] = component;
-                row[2] = fileId;
-                row[3] = filepath;
-                row[4] = regex;
-                row[5] = replacement ?? "";
-                row[6] = ignoreCase ? 1 : 0;
-                row[7] = (int)encoding;
-                row[8] = condition;
-                row[9] = order;
+                row.Component_ = component;
+                row.File_ = fileId;
+                row.FilePath = filepath;
+                row.Regex = regex;
+                row.Replacement = replacement ?? "";
+                row.IgnoreCase = ignoreCase ? 1 : 0;
+                row.Encoding = (int)encoding;
+                row.Condition = condition;
+                row.Order = order;
             }
         }
 
