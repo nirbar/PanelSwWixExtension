@@ -2750,7 +2750,6 @@ namespace PanelSw.Wix.Extensions
         private void ParseReadIniValuesElement(IntermediateSection section, XElement node, XElement parent)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
-            string id = null;
             string DestProperty = null;
             string FilePath = null;
             string Section = null;
@@ -2769,9 +2768,6 @@ namespace PanelSw.Wix.Extensions
                 {
                     switch (attrib.Name.LocalName)
                     {
-                        case "Id":
-                            id = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
                         case "DestProperty":
                             if (!string.IsNullOrEmpty(DestProperty))
                             {
@@ -2803,11 +2799,6 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            if (string.IsNullOrEmpty(id))
-            {
-                id = "ini" + Guid.NewGuid().ToString("N");
-            }
-
             if (string.IsNullOrEmpty(DestProperty))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "DestProperty"));
@@ -2832,38 +2823,16 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Section"));
             }
 
-            // find unexpected child elements
-            foreach (XElement child in node.Descendants())
-            {
-                if (XmlNodeType.Element == child.NodeType)
-                {
-                    if (child.Name.Namespace.Equals(Namespace))
-                    {
-                        ParseHelper.UnexpectedElement(node, child);
-                    }
-                    else
-                    {
-                        Core.UnsupportedExtensionElement(node, child);
-                    }
-                }
-                else if (((XmlNodeType.CDATA == child.NodeType) || (XmlNodeType.Text == child.NodeType)) && string.IsNullOrEmpty(condition))
-                {
-                    Core.OnMessage(WixWarnings.DeprecatedElement("text", $"Condition attribute in {node.Name.LocalName}"));
-                    condition = child.Value.Trim();
-                }
-            }
-
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "ReadIniValues");
-
             if (!Messaging.EncounteredError)
             {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "ReadIniValues");
                 PSW_ReadIniValues row = section.AddSymbol(new PSW_ReadIniValues(sourceLineNumbers));
                 row.FilePath = FilePath;
-                row[2] = Section;
-                row[3] = Key;
-                row[4] = DestProperty;
-                row[5] = (IgnoreErrors == YesNoType.Yes) ? 1 : 0;
-                row[6] = condition;
+                row.Section = Section;
+                row.Key = Key;
+                row.DestProperty = DestProperty;
+                row.Attributes = (IgnoreErrors == YesNoType.Yes) ? 1 : 0;
+                row.Condition = condition;
             }
         }
 
