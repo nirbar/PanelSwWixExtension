@@ -1368,17 +1368,13 @@ namespace PanelSw.Wix.Extensions
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
-                    switch (attrib.Name.LocalName.ToLower())
+                    switch (attrib.Name.LocalName)
                     {
-                        case "bitness":
+                        case "Bitness":
                             string b = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            try
+                            if (!Enum.TryParse(b, out bitness))
                             {
-                                bitness = (InstallUtil_Bitness)Enum.Parse(typeof(InstallUtil_Bitness), b);
-                            }
-                            catch
-                            {
-                                ParseHelper.UnexpectedAttribute(node, attrib);
+                                Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, node.Name.LocalName, attrib.Name.LocalName, b));
                             }
                             break;
 
@@ -1401,7 +1397,7 @@ namespace PanelSw.Wix.Extensions
 
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_InstallUtilSched");
                 PSW_InstallUtil row = section.AddSymbol(new PSW_InstallUtil(sourceLineNumbers, file));
-                row.Flags = (ushort)bitness;
+                row.Bitness = (ushort)bitness;
             }
 
             // Iterate child 'Argument' elements
@@ -1997,7 +1993,7 @@ namespace PanelSw.Wix.Extensions
 
                                 if (!Messaging.EncounteredError)
                                 {
-                                    PSW_XslTransform_Replacements row1 = section.AddSymbol(new PSW_XslTransform_Replacements(repLines, row.Id);
+                                    PSW_XslTransform_Replacements row1 = section.AddSymbol(new PSW_XslTransform_Replacements(repLines, row.Id));
                                     row1.Text = from;
                                     row1.Replacement = to;
                                     row1.Order = repOrder;
@@ -2016,30 +2012,19 @@ namespace PanelSw.Wix.Extensions
         private void ParseExecOnComponentElement(IntermediateSection section, XElement element, string component)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
-            string id = null;
             string binary = null;
             string command = null;
             string workDir = null;
             ExecOnComponentFlags flags = ExecOnComponentFlags.None;
-            ErrorHandling? errorHandling = null;
-            int order = 1000000000 + GetLineNumber(sourceLineNumbers);
+            ErrorHandling errorHandling = ErrorHandling.fail;
+            int order = 1000000000 + sourceLineNumbers.LineNumber ?? 0;
             YesNoType aye;
             string user = null;
-
-            if (element.HasAttribute("IgnoreExitCode") && element.HasAttribute("ErrorHandling"))
-            {
-                Messaging.Write(ErrorMessages.IllegalAttributeWithOtherAttribute(sourceLineNumbers, element.Name.LocalName, "IgnoreExitCode", "ErrorHandling"));
-                return;
-            }
 
             foreach (XAttribute attrib in element.Attributes())
             {
                 switch (attrib.Name.LocalName)
                 {
-                    case "Id":
-                        id = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                        break;
-
                     case "Command":
                         command = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                         break;
@@ -2068,29 +2053,11 @@ namespace PanelSw.Wix.Extensions
                         user = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                         break;
 
-                    case "IgnoreExitCode":
-                        Core.OnMessage(WixWarnings.DeprecatedAttribute(element.Name.LocalName, attrib.Name.LocalName));
-                        aye = ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib);
-                        if (aye == YesNoType.Yes)
-                        {
-                            errorHandling = ErrorHandling.ignore;
-                        }
-                        break;
-
                     case "ErrorHandling":
                         string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                        try
+                        if (!Enum.TryParse<ErrorHandling>(a, out errorHandling))
                         {
-                            errorHandling = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
-                        }
-                        catch
-                        {
-                            ParseHelper.UnexpectedAttribute(attrib);
-                        }
-
-                        if (element.HasAttribute("IgnoreExitCode"))
-                        {
-                            Messaging.Write(ErrorMessages.IllegalAttributeWithOtherAttribute(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, "IgnoreExitCode"));
+                            Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, a));
                         }
                         break;
 
@@ -2099,10 +2066,6 @@ namespace PanelSw.Wix.Extensions
                         if (aye == YesNoType.No)
                         {
                             flags |= ExecOnComponentFlags.ASync;
-                            if (errorHandling == null)
-                            {
-                                errorHandling = ErrorHandling.ignore; // Really isn't checked on async, but just to be on the safe side.
-                            }
                         }
                         break;
 
@@ -2187,7 +2150,7 @@ namespace PanelSw.Wix.Extensions
                         break;
 
                     default:
-                        ParseHelper.UnexpectedAttribute(attrib);
+                        ParseHelper.UnexpectedAttribute(element, attrib);
                         break;
                 }
             }
@@ -2195,10 +2158,6 @@ namespace PanelSw.Wix.Extensions
             if (string.IsNullOrEmpty(component))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, "Component", "Id"));
-            }
-            if (string.IsNullOrEmpty(id))
-            {
-                id = "exc" + Guid.NewGuid().ToString("N");
             }
             if (string.IsNullOrEmpty(command))
             {
@@ -2212,9 +2171,29 @@ namespace PanelSw.Wix.Extensions
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "BeforeXXX or AfterXXX"));
             }
-            if (((flags & ExecOnComponentFlags.ASync) == ExecOnComponentFlags.ASync) && (errorHandling != ErrorHandling.ignore))
+            if ((flags & ExecOnComponentFlags.ASync) == ExecOnComponentFlags.ASync)
             {
-                Messaging.Write(ErrorMessages.IllegalAttributeValueWithOtherAttribute(sourceLineNumbers, element.Name.LocalName, "Wait", "no", "ErrorHandling"));
+                errorHandling = ErrorHandling.ignore;
+            }
+
+
+            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "ExecOnComponent");
+            PSW_ExecOnComponent row = null;
+            if (!Messaging.EncounteredError)
+            {
+                // Ensure sub-tables exist for queries to succeed even if no sub-entries exist.
+                ParseHelper.EnsureTable(section, sourceLineNumbers, "PSW_ExecOnComponent_ExitCode");
+                ParseHelper.EnsureTable(section, sourceLineNumbers, "PSW_ExecOn_ConsoleOutput");
+                ParseHelper.EnsureTable(section, sourceLineNumbers, "PSW_ExecOnComponent_Environment");
+                row = section.AddSymbol(new PSW_ExecOnComponent(sourceLineNumbers));
+                row.Component_ = component;
+                row.Binary_ = binary;
+                row.Command = command;
+                row.WorkingDirectory = workDir;
+                row.Flags = (int)flags;
+                row.ErrorHandling = (int)errorHandling;
+                row.Order = order;
+                row.User_ = user;
             }
 
             // ExitCode mapping
@@ -2257,10 +2236,9 @@ namespace PanelSw.Wix.Extensions
                                         }
                                     }
                                 }
-                                PSW_ExecOnComponent_ExitCode row = section.AddSymbol(new PSW_ExecOnComponent_ExitCode(sourceLineNumbers));
-                                row[0] = id;
-                                row[1] = (int)from;
-                                row[2] = (int)to;
+                                PSW_ExecOnComponent_ExitCode row1 = section.AddSymbol(new PSW_ExecOnComponent_ExitCode(sourceLineNumbers, row.Id));
+                                row1.From = from;
+                                row1.To = to;
                             }
                             break;
 
@@ -2290,9 +2268,10 @@ namespace PanelSw.Wix.Extensions
                                                 break;
 
                                             case "Behavior":
-                                                if (!Enum.TryParse<ErrorHandling>(ParseHelper.GetAttributeValue(sourceLineNumbers, a), out stdoutHandling))
+                                                string val = ParseHelper.GetAttributeValue(sourceLineNumbers, a);
+                                                if (!Enum.TryParse(val, out stdoutHandling))
                                                 {
-                                                    ParseHelper.UnexpectedAttribute(child, a);
+                                                    Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, child.Name.LocalName, a.Name.LocalName, val));
                                                 }
                                                 break;
                                         }
@@ -2307,13 +2286,11 @@ namespace PanelSw.Wix.Extensions
                                     Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, child.Name.LocalName, "Expression"));
                                 }
 
-                                PSW_ExecOn_ConsoleOutput row = section.AddSymbol(new PSW_ExecOn_ConsoleOutput(sourceLineNumbers));
-                                row[0] = "std" + Guid.NewGuid().ToString("N");
-                                row[1] = id;
-                                row[2] = regex;
-                                row[3] = onMatch ? 1 : 0;
-                                row[4] = (int)stdoutHandling;
-                                row[5] = prompt;
+                                PSW_ExecOn_ConsoleOutput row1 = section.AddSymbol(new PSW_ExecOn_ConsoleOutput(sourceLineNumbers, row.Id));
+                                row1.Expression = regex;
+                                row1.Flags = onMatch ? 1 : 0;
+                                row1.ErrorHandling = (int)stdoutHandling;
+                                row1.PromptText = prompt;
                             }
                             break;
 
@@ -2337,7 +2314,7 @@ namespace PanelSw.Wix.Extensions
                                                 break;
 
                                             default:
-                                                Core.UnsupportedExtensionAttribute(a);
+                                                ParseHelper.UnexpectedAttribute(child, a);
                                                 break;
                                         }
                                     }
@@ -2348,10 +2325,9 @@ namespace PanelSw.Wix.Extensions
                                     break;
                                 }
 
-                                PSW_ExecOnComponent_Environment row = section.AddSymbol(new PSW_ExecOnComponent_Environment(sourceLineNumbers));
-                                row[0] = id;
-                                row[1] = name;
-                                row[2] = value;
+                                PSW_ExecOnComponent_Environment row1 = section.AddSymbol(new PSW_ExecOnComponent_Environment(sourceLineNumbers, row.Id));
+                                row1.Name = name;
+                                row1.Value = value;
                             }
                             break;
 
@@ -2360,26 +2336,6 @@ namespace PanelSw.Wix.Extensions
                             break;
                     }
                 }
-            }
-
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "ExecOnComponent");
-
-            if (!Messaging.EncounteredError)
-            {
-                // Ensure sub-tables exist for queries to succeed even if no sub-entries exist.
-                Core.EnsureTable("PSW_ExecOnComponent_ExitCode");
-                Core.EnsureTable("PSW_ExecOn_ConsoleOutput");
-                Core.EnsureTable("PSW_ExecOnComponent_Environment");
-                PSW_ExecOnComponent row = section.AddSymbol(new PSW_ExecOnComponent(sourceLineNumbers));
-                row[0] = id;
-                row[1] = component;
-                row[2] = binary;
-                row[3] = command;
-                row[4] = workDir;
-                row[5] = (int)flags;
-                row[6] = (int)(errorHandling ?? ErrorHandling.fail);
-                row[7] = order;
-                row[8] = user;
             }
         }
 
@@ -2484,7 +2440,7 @@ namespace PanelSw.Wix.Extensions
             if (!Messaging.EncounteredError)
             {
                 // Ensure sub-table exists for queries to succeed even if no sub-entries exist.
-                Core.EnsureTable("PSW_ServiceConfig_Dependency");
+                ParseHelper.EnsureTable(section, sourceLineNumbers, "PSW_ServiceConfig_Dependency");
                 PSW_ServiceConfig row = section.AddSymbol(new PSW_ServiceConfig(sourceLineNumbers));
                 row[0] = id;
                 row[1] = component;
