@@ -1,5 +1,9 @@
 using PanelSw.Wix.Extensions.Symbols;
+using System;
 using System.Collections.Generic;
+using System.IO;
+using WixToolset.Data;
+using WixToolset.Data.Symbols;
 using WixToolset.Data.WindowsInstaller;
 using WixToolset.Extensibility;
 
@@ -67,6 +71,86 @@ namespace PanelSw.Wix.Extensions
                 }
 
                 return _tableDefinition;
+            }
+        }
+
+        private List<string> tempFiles_ = new List<string>();
+        ~PanelSwWiBackendBinder()
+        {
+            // Delete temporary files
+            foreach (string f in tempFiles_)
+            {
+                File.Delete(f);
+            }
+        }
+
+        public override void SymbolsFinalized(IntermediateSection section)
+        {
+            base.SymbolsFinalized(section);
+            SplitFiles(section);
+        }
+
+        private void SplitFiles(IntermediateSection section)
+        {
+            // This section is empty, need to iterate the other sections
+            List<PSW_ConcatFiles> concatFiles = new List<PSW_ConcatFiles>();
+            foreach (IntermediateSection intermediate in base.Context.IntermediateRepresentation.Sections)
+            {
+                foreach (IntermediateSymbol symbol in intermediate.Symbols)
+                {
+                    if (symbol is PSW_ConcatFiles concatSymbol)
+                    {
+                        concatFiles.Add(concatSymbol);
+                    }
+                }
+            }
+
+            concatFiles.Sort(new ConcatFilesComparer());
+
+            string tmpPath = Path.GetTempPath();
+            Table wixFileTable = output.Tables["WixFile"];
+            FileSymbol rootWixFile = null;
+            int splitSize = Int32.MaxValue;
+            FileStream rootFileStream = null;
+            try
+            {
+                foreach (PSW_ConcatFiles concatSymbol in concatFiles)
+                {
+                    // New root file
+                    if (!currConcatFileRow[1].Equals(rootWixFile?.File))
+                    {
+                        splitSize = (int)currConcatFileRow.Fields[4].Data;
+                        rootWixFile = Find(wixFileTable, currConcatFileRow.Fields[1].Data) as WixFileRow;
+                        if (rootWixFile == null)
+                        {
+                            Core.OnMessage(WixErrors.WixFileNotFound(currConcatFileRow.Fields[1].Data.ToString()));
+                            return;
+                        }
+
+                        rootFileStream?.Dispose();
+                        rootFileStream = null; // Ensure no double-dispose in case next line throws
+                        rootFileStream = File.OpenRead(rootWixFile.Source);
+
+                        string splId = "spl" + Guid.NewGuid().ToString("N");
+                        rootWixFile.Source = Path.Combine(tmpPath, splId);
+                        tempFiles_.Add(rootWixFile.Source);
+                        CopyFilePart(rootFileStream, rootWixFile.Source, splitSize);
+                    }
+
+                    WixFileRow currWixFile = Find(wixFileTable, currConcatFileRow.Fields[2].Data) as WixFileRow;
+                    if (currWixFile == null)
+                    {
+                        Core.OnMessage(WixErrors.WixFileNotFound(currConcatFileRow.Fields[2].Data.ToString()));
+                        return;
+                    }
+
+                    tempFiles_.Add(currWixFile.Source);
+                    CopyFilePart(rootFileStream, currWixFile.Source, splitSize);
+                }
+            }
+            finally
+            {
+                rootFileStream?.Dispose();
             }
         }
     }
