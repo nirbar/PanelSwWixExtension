@@ -2998,10 +2998,9 @@ namespace PanelSw.Wix.Extensions
         private void ParseEvaluateElement(IntermediateSection section, XElement node)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(node);
-            string id = "_" + Guid.NewGuid().ToString("N");
             string property = null;
             string expression = null;
-            int order = 1000000000 + GetLineNumber(sourceLineNumbers);
+            int order = 1000000000 + sourceLineNumbers.LineNumber ?? 0;
 
             if (node.Parent.Name.LocalName != "Property")
             {
@@ -3027,7 +3026,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(node, attrib);
                             break;
                     }
                 }
@@ -3042,24 +3041,14 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "Expression"));
             }
 
-            // find unexpected child elements
-            foreach (XElement child in node.Descendants())
-            {
-                if (child.Name.Namespace.Equals(Namespace))
-                {
-                    ParseHelper.UnexpectedElement(node, child);
-                }
-            }
-
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "EvaluateExpression");
-
             if (!Messaging.EncounteredError)
             {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "EvaluateExpression");
+
                 PSW_EvaluateExpression row = section.AddSymbol(new PSW_EvaluateExpression(sourceLineNumbers));
-                row[0] = id;
-                row[1] = property;
-                row[2] = expression;
-                row[3] = order;
+                row.Property_ = property;
+                row.Expression = expression;
+                row.Order = order;
             }
         }
 
