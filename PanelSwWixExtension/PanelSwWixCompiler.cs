@@ -2660,9 +2660,8 @@ namespace PanelSw.Wix.Extensions
         [Flags]
         private enum CustomUninstallKeyAttributes
         {
-            None = 0,
-            Write = 1,
-            Delete = 2
+            write = 1,
+            delete = 2
         }
 
         private void ParseCustomUninstallKeyElement(IntermediateSection section, XElement node)
@@ -2672,63 +2671,43 @@ namespace PanelSw.Wix.Extensions
             string name = null;
             string data = null;
             string datatype = "REG_SZ";
-            string id = null;
             string condition = null;
-            CustomUninstallKeyAttributes attributes = CustomUninstallKeyAttributes.None;
+            CustomUninstallKeyAttributes attributes = CustomUninstallKeyAttributes.write;
 
             foreach (XAttribute attrib in node.Attributes())
             {
                 if (attrib.Name.Namespace.Equals(Namespace))
                 {
-                    switch (attrib.Name.LocalName.ToLower())
+                    switch (attrib.Name.LocalName)
                     {
-                        case "id":
-                            id = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            if (string.IsNullOrEmpty(name))
-                            {
-                                name = id;
-                            }
-                            break;
-                        case "productcode":
+                        case "ProductCode":
                             productCode = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "name":
+                        case "Name":
                             name = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "data":
+                        case "Data":
                             data = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "datatype":
+                        case "DataType":
                             datatype = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "operation":
-                            if (id = ParseHelper.GetAttributeValue(sourceLineNumbers, .Equals("delete", StringComparison.OrdinalIgnoreCase))
+                        case "Operation": //TODO Isn't documented in the XSD
+                            string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            if (!Enum.TryParse(a, out attributes))
                             {
-                                attributes |= CustomUninstallKeyAttributes.Delete;
-                            }
-                            if (id = ParseHelper.GetAttributeValue(sourceLineNumbers, .Equals("write", StringComparison.OrdinalIgnoreCase))
-                            {
-                                attributes |= CustomUninstallKeyAttributes.Write;
+                                Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, node.Name.LocalName, attrib.Name.LocalName, a));
                             }
                             break;
-                        case "condition":
+                        case "Condition":
                             condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(node, attrib);
                             break;
                     }
                 }
-                else
-                {
-                    Core.UnsupportedExtensionAttribute(attrib);
-                }
-            }
-
-            if (string.IsNullOrEmpty(id))
-            {
-                id = "uni" + Guid.NewGuid().ToString("N");
             }
 
             if (string.IsNullOrEmpty(name))
@@ -2746,46 +2725,19 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, node.Name.LocalName, "DataType"));
             }
 
-            if (attributes == CustomUninstallKeyAttributes.None)
-            {
-                attributes = CustomUninstallKeyAttributes.Write;
-            }
-
-            // find unexpected child elements
-            foreach (XElement child in node.Descendants())
-            {
-                if (XmlNodeType.Element == child.NodeType)
-                {
-                    if (child.Name.Namespace.Equals(Namespace))
-                    {
-                        ParseHelper.UnexpectedElement(node, child);
-                    }
-                    else
-                    {
-                        Core.UnsupportedExtensionElement(node, child);
-                    }
-                }
-                else if (((XmlNodeType.CDATA == child.NodeType) || (XmlNodeType.Text == child.NodeType)) && string.IsNullOrEmpty(condition))
-                {
-                    Core.OnMessage(WixWarnings.DeprecatedElement("text", $"Condition attribute in {node.Name.LocalName}"));
-                    condition = child.Value.Trim();
-                }
-            }
-
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "CustomUninstallKey_Immediate");
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "CustomUninstallKey_deferred");
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "CustomUninstallKey_rollback");
-
             if (!Messaging.EncounteredError)
             {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "CustomUninstallKey_Immediate");
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "CustomUninstallKey_deferred");
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "CustomUninstallKey_rollback");
+
                 PSW_CustomUninstallKey row = section.AddSymbol(new PSW_CustomUninstallKey(sourceLineNumbers));
-                row[0] = id;
-                row[1] = productCode;
-                row[2] = name;
-                row[3] = data;
-                row[4] = datatype;
-                row[5] = (int)attributes;
-                row[6] = condition;
+                row.ProductCode = productCode;
+                row.Name = name;
+                row.Data = data;
+                row.DataType = datatype;
+                row.Attributes = (int)attributes;
+                row.Condition = condition;
             }
         }
 

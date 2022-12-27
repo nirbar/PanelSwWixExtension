@@ -1,15 +1,5 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
 <tableDefinitions xmlns="http://schemas.microsoft.com/wix/2006/tables">
-  <tableDefinition name="PSW_CustomUninstallKey">
-                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
-                    new ColumnDefinition(nameof(ProductCode), ColumnType.String, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
-                    new ColumnDefinition(nameof(Name), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
-                    new ColumnDefinition(nameof(Data), ColumnType.String, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
-                    new ColumnDefinition(nameof(DataType), ColumnType.String, 0, false, true, ColumnCategory.Text, modularizeType: ColumnModularizeType.Property),
-                    new ColumnDefinition(nameof(Attributes), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 127, modularizeType: ColumnModularizeType.Property),
-                    new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Property),
-  </tableDefinition>
-
   <tableDefinition name="PSW_RemoveRegistryValue">
                     new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
                     new ColumnDefinition(nameof(Root), ColumnType.String, 0, false, false, ColumnCategory.Text, modularizeType: ColumnModularizeType.Property),

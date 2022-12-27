@@ -1371,7 +1371,7 @@ Delete folder or file specified by a path. DeletePath entries are processed in o
           </xs:attribute>
           <xs:attribute name="Condition" type="xs:string" use="optional">
             <xs:annotation>
-              <xs:documentation>Condition on executing the query. May be specified in this attribute or as inner text.</xs:documentation>
+              <xs:documentation>Condition on executing the query.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="Order" type="xs:integer" default="255">
@@ -1493,7 +1493,7 @@ Execute a MSI-SQL query on the MSI database.
           </xs:attribute>
           <xs:attribute name="Condition" type="xs:string" use="optional">
             <xs:annotation>
-              <xs:documentation>Condition on executing the query. May be specified in this attribute or as inner text.</xs:documentation>
+              <xs:documentation>Condition on executing the query</xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>
@@ -1682,6 +1682,7 @@ Overwrite or create registry values in Software\Microsoft\Windows\CurrentVersion
     </xs:annotation>
     <xs:complexType>
       <xs:simpleContent>
+        <xs:extension base="xs:string">
           <xs:attribute name="ProductCode" type="xs:string" use="optional">
             <xs:annotation>
               <xs:documentation>ProductCode of the product. This field is formatted. If not specified, Current ProductCode is used</xs:documentation>
@@ -1700,6 +1701,11 @@ Overwrite or create registry values in Software\Microsoft\Windows\CurrentVersion
           <xs:attribute name="DataType" default="REG_SZ" use="optional" type="RegistryValueType">
             <xs:annotation>
               <xs:documentation>Data type of the registry value. One of REG_SZ, REG_DWORD. Default is REG_SZ</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Condition" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Condition on executing the modification</xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>
@@ -1749,7 +1755,7 @@ Overwrite or create registry values in Software\Microsoft\Windows\CurrentVersion
           </xs:attribute>
           <xs:attribute name="Condition" type="xs:string" use="optional">
             <xs:annotation>
-              <xs:documentation>Condition on executing the query. May be specified in this attribute or as inner text.</xs:documentation>
+              <xs:documentation>Condition on executing the query.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>
