@@ -115,14 +115,6 @@
                     new ColumnDefinition(nameof(Order), ColumnType.Number, 4, false, false, ColumnCategory.Integer, minValue: 0, maxValue: int.MaxValue),
   </tableDefinition>
 
-  <tableDefinition name="PSW_CertificateHashSearch">
-                    new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
-                    new ColumnDefinition(nameof(CertName), ColumnType.String, 72, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
-                    new ColumnDefinition(nameof(FriendlyName), ColumnType.String, 72, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
-                    new ColumnDefinition(nameof(Issuer), ColumnType.String, 72, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
-                    new ColumnDefinition(nameof(SerialNumber), ColumnType.String, 72, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
-  </tableDefinition>
-
   <tableDefinition name="PSW_AccountSidSearch">
                     new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
                     new ColumnDefinition(nameof(Property_), ColumnType.String, 0, false, false, ColumnCategory.Text, modularizeType: ColumnModularizeType.Property),

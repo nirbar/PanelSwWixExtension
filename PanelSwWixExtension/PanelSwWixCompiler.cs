@@ -2872,7 +2872,7 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "Area":
                             string a = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            if (!Enum.TryParse(a, out area))
+                            if (!Enum.TryParse(a, true, out area))
                             {
                                 Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, node.Name.LocalName, attrib.Name.LocalName, a));
                             }
@@ -2953,13 +2953,9 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         default:
-                            ParseHelper.UnexpectedAttribute(attrib);
+                            ParseHelper.UnexpectedAttribute(node, attrib);
                             break;
                     }
-                }
-                else
-                {
-                    Core.UnsupportedExtensionAttribute(attrib);
                 }
             }
 
@@ -2991,12 +2987,11 @@ namespace PanelSw.Wix.Extensions
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "CertificateHashSearch");
 
-                PSW_CertificateHashSearch row = section.AddSymbol(new PSW_CertificateHashSearch(sourceLineNumbers));
-                row[0] = property;
-                row[1] = certName;
-                row[2] = friendlyName;
-                row[3] = issuer;
-                row[4] = serial;
+                PSW_CertificateHashSearch row = section.AddSymbol(new PSW_CertificateHashSearch(sourceLineNumbers, property));
+                row.CertName = certName;
+                row.FriendlyName = friendlyName;
+                row.Issuer = issuer;
+                row.SerialNumber = serial;
             }
         }
 
