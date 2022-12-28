@@ -18,7 +18,7 @@
     <ProjectReference Include="..\wixlib\PanelSwWixLib.wixproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="$(OutputPath)..\..\PanelSwWixLib\PanelSwWixLib.wixlib" />
+    <EmbeddedResource Include="$(OutputPath)..\..\PanelSwWixLib\PanelSwWixLib.wixlib" LogicalName="PanelSwWixLib.wixlib"/>
   </ItemGroup>
 
   <ItemGroup>

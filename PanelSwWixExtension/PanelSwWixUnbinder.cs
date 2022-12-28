@@ -1,9 +1,8 @@
-﻿using Microsoft.Tools.WindowsInstallerXml;
 using System;
 using System.Collections.Generic;
 
 namespace PanelSw.Wix.Extensions
-{
+{/*
     class PanelSwWixUnbinder : UnbinderExtension
     {
         TableDefinitionCollection tableDefinitions_;
@@ -432,5 +431,6 @@ namespace PanelSw.Wix.Extensions
             public Table ForeignTable;
             public int ForeignKeyIndex;
         }
-    }
+   }
+    */
 }

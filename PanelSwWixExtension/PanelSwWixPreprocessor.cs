@@ -1,11 +1,10 @@
-﻿using Microsoft.Tools.WindowsInstallerXml;
 using System;
 using System.IO;
 using System.Linq;
-
+/*
 namespace PanelSw.Wix.Extensions
 {
-    class PanelSwWixPreprocessor : PreprocessorExtension
+    class PanelSwWixPreprocessor : WixToolset.Extensibility.BasePreprocessorExtension
     {
         public override string[] Prefixes => new string[] { "psw" };
 
@@ -62,3 +61,4 @@ namespace PanelSw.Wix.Extensions
         }
     }
 }
+*/
