@@ -1,4 +1,4 @@
-﻿<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
 
   <!-- PanelSwCustomActions.dll binary -->
   <Fragment>
@@ -6,8 +6,8 @@
   </Fragment>
   <!-- PswManagedCA.CA.dll binary -->
   <Fragment>
-    <Binary Id="PswManagedCA.X64.dll" SuppressModularization="yes" SourceFile="$(var.TargetDir)..\..\..\obj\$(var.Configuration)\PswManagedCA\x64\PswManagedCA.CA.dll"></Binary>
-    <Binary Id="PswManagedCA.X86.dll" SuppressModularization="yes" SourceFile="$(var.TargetDir)..\..\..\obj\$(var.Configuration)\PswManagedCA\x86\PswManagedCA.CA.dll"></Binary>
+    <Binary Id="PswManagedCA.X64.dll" SuppressModularization="yes" SourceFile="$(var.TargetDir)..\PswManagedCA\x64\PswManagedCA.CA.dll"></Binary>
+    <Binary Id="PswManagedCA.X86.dll" SuppressModularization="yes" SourceFile="$(var.TargetDir)..\PswManagedCA\x86\PswManagedCA.CA.dll"></Binary>
   </Fragment>
   <!-- DismX64.dll binary -->
   <Fragment>

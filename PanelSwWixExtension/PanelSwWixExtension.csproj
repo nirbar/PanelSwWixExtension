@@ -5,19 +5,26 @@
     <RootNamespace>PanelSw.Wix.Extensions</RootNamespace>
     <Description>WiX Toolset Utility extension</Description>
     <Title>WiX Toolset Utility extension</Title>
-    <DebugType>embedded</DebugType>
+    <DebugType>portable</DebugType>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <Optimize>False</Optimize>
+  </PropertyGroup>
+
+  <ItemGroup Condition=" '$(NCrunch)'=='' ">
+    <ProjectReference Include="..\wixlib\PanelSwWixLib.wixproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
+  </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="$(OutputPath)..\PanelSwWixLib\PanelSwWixLib.wixlib" />
+    <EmbeddedResource Include="$(OutputPath)..\..\PanelSwWixLib\PanelSwWixLib.wixlib" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="WixToolset.Extensibility" Version="4.0.0-rc.1" />
     <PackageReference Include="MSBuildTasks" Version="1.5.0.235" />
-    <PackageReference Include="TidyBuild" Version="1.4.1" />
+    <PackageReference Include="TidyBuild" Version="1.5.0" />
   </ItemGroup>
 
 </Project>

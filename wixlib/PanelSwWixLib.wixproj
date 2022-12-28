@@ -1,21 +1,20 @@
-<Project Sdk="WixToolset.Sdk/4.0.0-rc.1">
+﻿<Project Sdk="WixToolset.Sdk/4.0.0-rc.1">
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <LibBindFiles>true</LibBindFiles>
+    <BindFiles>true</BindFiles>
+    <PreBuildEvent>"$(MSBuildBinPath)\MSBuild.exe" "$(MSBuildThisFileDirectory)..\PswManagedCA\PswManagedCA.csproj" "/p:Platform=x64;Configuration=$(Configuration);SolutionDir=$(SolutionDir)\"</PreBuildEvent>
+    <PreBuildEvent>$(PreBuildEvent) &amp;&amp; "$(MSBuildBinPath)\MSBuild.exe" "$(MSBuildThisFileDirectory)..\PswManagedCA\PswManagedCA.csproj" "/p:Platform=x86;Configuration=$(Configuration);SolutionDir=$(SolutionDir)\"</PreBuildEvent>
+    <PreBuildEvent>$(PreBuildEvent) &amp;&amp; "$(MSBuildBinPath)\MSBuild.exe" "$(MSBuildThisFileDirectory)..\Dism\Dism.vcxproj" "/p:Platform=Win32;Configuration=$(Configuration);SolutionDir=$(SolutionDir)\"</PreBuildEvent>
+    <PreBuildEvent>$(PreBuildEvent) &amp;&amp; "$(MSBuildBinPath)\MSBuild.exe" "$(MSBuildThisFileDirectory)..\Dism\Dism.vcxproj" "/p:Platform=x64;Configuration=$(Configuration);SolutionDir=$(SolutionDir)\"</PreBuildEvent>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DeferredExePackage\DeferredExePackage.vcxproj"/>
-    <ProjectReference Include="..\PanelSwCustomActions\PanelSwCustomActions.vcxproj"/>
+    <ProjectReference Include="..\DeferredExePackage\DeferredExePackage.vcxproj" />
+    <ProjectReference Include="..\PanelSwCustomActions\PanelSwCustomActions.vcxproj" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="WixToolset.Util.wixext" Version="4.0.0-rc.1" />
     <PackageReference Include="MSBuildTasks" Version="1.5.0.235" />
-    <PackageReference Include="TidyBuild" Version="1.4.1" />
+    <PackageReference Include="TidyBuild" Version="1.5.0" />
   </ItemGroup>
-  <Target Name="BeforeBuild">
-    <MSBuild Projects="$(SolutionDir)\Dism\Dism.vcxproj" Targets="Rebuild" Properties="Configuration=$(Configuration);Platform=Win32" />
-    <MSBuild Projects="$(SolutionDir)\Dism\Dism.vcxproj" Targets="Rebuild" Properties="Configuration=$(Configuration);Platform=x64" />
-    <MSBuild Projects="$(SolutionDir)\PswManagedCA\PswManagedCA.csproj" Targets="Rebuild" Properties="Configuration=$(Configuration);Platform=x86" />
-    <MSBuild Projects="$(SolutionDir)\PswManagedCA\PswManagedCA.csproj" Targets="Rebuild" Properties="Configuration=$(Configuration);Platform=x64" />
-  </Target>
 </Project>
