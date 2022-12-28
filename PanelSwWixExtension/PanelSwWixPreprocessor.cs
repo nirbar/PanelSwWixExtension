@@ -1,12 +1,17 @@
 using System;
 using System.IO;
 using System.Linq;
-/*
+using WixToolset.Data;
+using WixToolset.Extensibility.Services;
+
 namespace PanelSw.Wix.Extensions
 {
     class PanelSwWixPreprocessor : WixToolset.Extensibility.BasePreprocessorExtension
     {
-        public override string[] Prefixes => new string[] { "psw" };
+        public PanelSwWixPreprocessor()
+        {
+            Prefixes = new string[] { "psw" };
+        }
 
         public override string EvaluateFunction(string prefix, string function, string[] args)
         {
@@ -15,26 +20,30 @@ namespace PanelSw.Wix.Extensions
                 case "VarNullOrEmpty":
                     if (args.Length != 1 || string.IsNullOrEmpty(args[0]))
                     {
-                        throw new WixException(WixErrors.InvalidPreprocessorFunction(null, function));
+                        Messaging.Write(ErrorMessages.InvalidPreprocessorFunction(null, function));
+                        break;
                     }
 
-                    string val = Core.GetVariableValue(null, args[0], true);
+                    string val = PreprocessHelper.GetVariableValue(Context, "var", args[0]);
                     return string.IsNullOrEmpty(val) ? "1" : "0";
 
                 case "AutoGuid":
                     if (args.Length == 0)
                     {
-                        throw new WixException(WixErrors.InvalidPreprocessorFunction(null, function));
+                        Messaging.Write(ErrorMessages.InvalidPreprocessorFunction(null, function));
+                        break;
                     }
 
+                    IBackendHelper backendHelper = base.Context.ServiceProvider.GetService<IBackendHelper>();
                     string key = args.Aggregate((a, c) => $"{a}\\{c}");
-                    string guid = CompilerCore.NewGuid(new Guid("{F026BBCE-4776-402C-BF36-352781805165}"), key);
+                    string guid = backendHelper.CreateGuid(new Guid("{F026BBCE-4776-402C-BF36-352781805165}"), key);
                     return guid;
 
                 case "FileExists":
                     if (args.Length != 1 || string.IsNullOrEmpty(args[0]))
                     {
-                        throw new WixException(WixErrors.InvalidPreprocessorFunction(null, function));
+                        Messaging.Write(ErrorMessages.InvalidPreprocessorFunction(null, function));
+                        break;
                     }
 
                     return File.Exists(args[0]) ? "1" : "0";
@@ -42,7 +51,8 @@ namespace PanelSw.Wix.Extensions
                 case "DirExists":
                     if (args.Length != 1 || string.IsNullOrEmpty(args[0]))
                     {
-                        throw new WixException(WixErrors.InvalidPreprocessorFunction(null, function));
+                        Messaging.Write(ErrorMessages.InvalidPreprocessorFunction(null, function));
+                        break;
                     }
 
                     return Directory.Exists(args[0]) ? "1" : "0";
@@ -50,15 +60,14 @@ namespace PanelSw.Wix.Extensions
                 case "DirEmpty":
                     if (args.Length != 1 || string.IsNullOrEmpty(args[0]))
                     {
-                        throw new WixException(WixErrors.InvalidPreprocessorFunction(null, function));
+                        Messaging.Write(ErrorMessages.InvalidPreprocessorFunction(null, function));
+                        break;
                     }
 
                     return (Directory.Exists(args[0]) && (Directory.GetFiles(args[0], "*", SearchOption.AllDirectories).Length > 0)) ? "0" : "1";
-
-                default:
-                    return null;
             }
+
+            return null;
         }
     }
 }
-*/
