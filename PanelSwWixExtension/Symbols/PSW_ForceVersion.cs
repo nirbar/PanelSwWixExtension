@@ -36,13 +36,13 @@ namespace PanelSw.Wix.Extensions.Symbols
         public string File
         {
             get => Fields[0].AsString();
-            set => Fields[0].Set(value);
+            set => this.Set(0, value);
         }
 
         public string Version
         {
             get => Fields[1].AsString();
-            set => Fields[1].Set(value);
+            set => this.Set(1, value);
         }
     }
 }

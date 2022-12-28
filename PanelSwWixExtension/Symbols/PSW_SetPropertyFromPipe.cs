@@ -35,13 +35,13 @@ namespace PanelSw.Wix.Extensions.Symbols
         public string PipeName
         {
             get => Fields[0].AsString();
-            set => Fields[0].Set(value);
+            set => this.Set(0, value);
         }
 
         public int Timeout
         {
             get => Fields[1].AsNumber();
-            set => Fields[1].Set(value);
+            set => this.Set(1, value);
         }
     }
 }

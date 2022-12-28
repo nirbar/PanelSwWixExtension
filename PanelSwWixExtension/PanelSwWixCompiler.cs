@@ -308,7 +308,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -354,7 +354,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -424,7 +424,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -831,7 +831,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -904,7 +904,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -928,19 +928,10 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Plain"));
             }
 
-            // find unexpected child elements
-            foreach (XElement child in element.Descendants())
-            {
-                if (child.Name.Namespace.Equals(Namespace))
-                {
-                    ParseHelper.UnexpectedElement(element, child);
-                }
-            }
-
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "Md5Hash");
-
             if (!Messaging.EncounteredError)
             {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "Md5Hash");
+
                 PSW_Md5Hash row = section.AddSymbol(new PSW_Md5Hash(sourceLineNumbers));
                 row.Property_ = property;
                 row.Plain = plain;
@@ -967,19 +958,10 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
             }
 
-            // find unexpected child elements
-            foreach (XElement child in element.Descendants())
-            {
-                if (child.Name.Namespace.Equals(Namespace))
-                {
-                    ParseHelper.UnexpectedElement(element, child);
-                }
-            }
-
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_ToLowerCase");
-
             if (!Messaging.EncounteredError)
             {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_ToLowerCase");
+
                 section.AddSymbol(new PSW_ToLowerCase(sourceLineNumbers, property));
             }
         }
@@ -1003,7 +985,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -1034,19 +1016,10 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "FilePath"));
             }
 
-            // find unexpected child elements
-            foreach (XElement child in element.Descendants())
-            {
-                if (child.Name.Namespace.Equals(Namespace))
-                {
-                    ParseHelper.UnexpectedElement(element, child);
-                }
-            }
-
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "JsonJpathSearch");
-
             if (!Messaging.EncounteredError)
             {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "JsonJpathSearch");
+
                 PSW_JsonJpathSearch row = section.AddSymbol(new PSW_JsonJpathSearch(sourceLineNumbers));
                 row.Property_ = property;
                 row.JPath = expression;
@@ -1072,7 +1045,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -1150,7 +1123,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -1194,26 +1167,26 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
-                    switch (attrib.Name.LocalName.ToLower())
+                    switch (attrib.Name.LocalName)
                     {
-                        case "id":
+                        case "Id":
                             id = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, attrib);
                             break;
-                        case "password":
+                        case "Password":
                             password = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "expiry":
+                        case "Expiry":
                             expiry = (ushort)ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, ushort.MaxValue);
                             break;
-                        case "x500":
+                        case "X500":
                             x500 = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "deleteoncommit":
+                        case "DeleteOnCommit":
                             deleteOnCommit = (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes);
                             break;
-                        case "subjectaltname":
+                        case "SubjectAltName":
                             subjectAltName = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
 
@@ -1240,6 +1213,7 @@ namespace PanelSw.Wix.Extensions
             if (!Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "CreateSelfSignCertificate");
+
                 PSW_SelfSignCertificate row = section.AddSymbol(new PSW_SelfSignCertificate(sourceLineNumbers, id.Id));
                 row.Component_ = component;
                 row.X500 = x500;
@@ -1266,7 +1240,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -1349,7 +1323,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -1423,7 +1397,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -1492,7 +1466,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -1630,7 +1604,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -1798,7 +1772,7 @@ namespace PanelSw.Wix.Extensions
                                 int repOrder = 1000000000 + repLines.LineNumber ?? 0;
                                 foreach (XAttribute a in child.Attributes())
                                 {
-                                    if (a.Name.Namespace.Equals(Namespace))
+                                    if (string.IsNullOrEmpty(a.Name.Namespace.NamespaceName) || a.Name.Namespace.Equals(Namespace))
                                     {
                                         switch (a.Name.LocalName)
                                         {
@@ -1849,7 +1823,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -1919,7 +1893,7 @@ namespace PanelSw.Wix.Extensions
                                 int repOrder = 1000000000 + repLines.LineNumber ?? 0;
                                 foreach (XAttribute a in child.Attributes())
                                 {
-                                    if (a.Name.Namespace.Equals(Namespace))
+                                    if (string.IsNullOrEmpty(a.Name.Namespace.NamespaceName) || a.Name.Namespace.Equals(Namespace))
                                     {
                                         switch (a.Name.LocalName)
                                         {
@@ -2151,7 +2125,7 @@ namespace PanelSw.Wix.Extensions
                                 ushort from = 0, to = 0;
                                 foreach (XAttribute a in child.Attributes())
                                 {
-                                    if (a.Name.Namespace.Equals(Namespace))
+                                    if (string.IsNullOrEmpty(a.Name.Namespace.NamespaceName) || a.Name.Namespace.Equals(Namespace))
                                     {
                                         switch (a.Name.LocalName)
                                         {
@@ -2194,7 +2168,7 @@ namespace PanelSw.Wix.Extensions
 
                                 foreach (XAttribute a in child.Attributes())
                                 {
-                                    if (a.Name.Namespace.Equals(Namespace))
+                                    if (string.IsNullOrEmpty(a.Name.Namespace.NamespaceName) || a.Name.Namespace.Equals(Namespace))
                                     {
                                         switch (a.Name.LocalName)
                                         {
@@ -2240,7 +2214,7 @@ namespace PanelSw.Wix.Extensions
 
                                 foreach (XAttribute a in child.Attributes())
                                 {
-                                    if (a.Name.Namespace.Equals(Namespace))
+                                    if (string.IsNullOrEmpty(a.Name.Namespace.NamespaceName) || a.Name.Namespace.Equals(Namespace))
                                     {
                                         switch (a.Name.LocalName)
                                         {
@@ -2303,7 +2277,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -2386,7 +2360,7 @@ namespace PanelSw.Wix.Extensions
 
                     foreach (XAttribute attrib in child.Attributes())
                     {
-                        if (attrib.Name.Namespace.Equals(Namespace))
+                        if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                         {
                             string depService = null;
                             string group = null;
@@ -2434,7 +2408,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -2497,7 +2471,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -2541,6 +2515,14 @@ namespace PanelSw.Wix.Extensions
                     }
                     taskXml = child.Value;
                 }
+            }
+            if (!string.IsNullOrEmpty(element.Value))
+            {
+                if (!string.IsNullOrWhiteSpace(taskXml))
+                {
+                    Messaging.Write(ErrorMessages.IllegalAttributeWithInnerText(sourceLineNumbers, element.Name.LocalName, "XmlFile"));
+                }
+                taskXml = element.Value;
             }
 
             if (string.IsNullOrEmpty(component))
@@ -2597,7 +2579,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -2677,7 +2659,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -2750,7 +2732,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -2824,7 +2806,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -2866,15 +2848,6 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttributes(sourceLineNumbers, element.Name.LocalName, "Issuer", "SerialNumber", "CertName", "FriendlyName"));
             }
 
-            // find unexpected child elements
-            foreach (XElement child in element.Descendants())
-            {
-                if (child.Name.Namespace.Equals(Namespace))
-                {
-                    ParseHelper.UnexpectedElement(element, child);
-                }
-            }
-
             if (!Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "CertificateHashSearch");
@@ -2906,7 +2879,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -2953,7 +2926,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -2992,7 +2965,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3040,7 +3013,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3099,7 +3072,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3173,7 +3146,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3269,7 +3242,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3337,7 +3310,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName.ToLower())
                     {
@@ -3422,7 +3395,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3514,7 +3487,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3583,7 +3556,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3659,7 +3632,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3714,7 +3687,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3793,7 +3766,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3855,7 +3828,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3932,7 +3905,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (attrib.Name.Namespace.Equals(Namespace))
+                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
                 {
                     switch (attrib.Name.LocalName)
                     {

@@ -38,19 +38,19 @@ namespace PanelSw.Wix.Extensions.Symbols
         public string ExecOnId_
         {
             get => Fields[0].AsString();
-            set => Fields[0].Set(value);
+            set => this.Set(0, value);
         }
 
         public string Name
         {
             get => Fields[1].AsString();
-            set => Fields[1].Set(value);
+            set => this.Set(1, value);
         }
 
         public string Value
         {
             get => Fields[2].AsString();
-            set => Fields[2].Set(value);
+            set => this.Set(2, value);
         }
     }
 }

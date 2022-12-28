@@ -46,79 +46,79 @@ namespace PanelSw.Wix.Extensions.Symbols
         public string Property_
         {
             get => Fields[0].AsString();
-            set => Fields[0].Set(value);
+            set => this.Set(0, value);
         }
 
         public string Server
         {
             get => Fields[1].AsString();
-            set => Fields[1].Set(value);
+            set => this.Set(1, value);
         }
 
         public string Instance
         {
             get => Fields[2].AsString();
-            set => Fields[2].Set(value);
+            set => this.Set(2, value);
         }
 
         public string Port
         {
             get => Fields[3].AsString();
-            set => Fields[3].Set(value);
+            set => this.Set(3, value);
         }
 
         public string Encrypted
         {
             get => Fields[4].AsString();
-            set => Fields[4].Set(value);
+            set => this.Set(4, value);
         }
 
         public string Database
         {
             get => Fields[5].AsString();
-            set => Fields[5].Set(value);
+            set => this.Set(5, value);
         }
 
         public string Username
         {
             get => Fields[6].AsString();
-            set => Fields[6].Set(value);
+            set => this.Set(6, value);
         }
 
         public string Password
         {
             get => Fields[7].AsString();
-            set => Fields[7].Set(value);
+            set => this.Set(7, value);
         }
 
         public string Query
         {
             get => Fields[8].AsString();
-            set => Fields[8].Set(value);
+            set => this.Set(8, value);
         }
 
         public string Condition
         {
             get => Fields[9].AsString();
-            set => Fields[9].Set(value);
+            set => this.Set(9, value);
         }
 
         public int Order
         {
             get => Fields[10].AsNumber();
-            set => Fields[10].Set(value);
+            set => this.Set(10, value);
         }
 
         public int ErrorHandling
         {
             get => Fields[11].AsNumber();
-            set => Fields[11].Set(value);
+            set => this.Set(11, value);
         }
 
         public string ConnectionString
         {
             get => Fields[12].AsString();
-            set => Fields[12].Set(value);
+            set => this.Set(12, value);
         }
     }
 }

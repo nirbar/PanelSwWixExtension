@@ -25,8 +25,7 @@
     <file src="..\README.md" target="README.md" />
 
     <!-- lib -->
-    <file src="..\build\bin\Release\CaCommon\CaCommon.lib" target="tools\lib\v141_xp"/>
-    <file src="..\build-v142\bin\Release\CaCommon\CaCommon.lib" target="tools\lib\v142"/>
+    <file src="..\build\bin\Release\CaCommon\CaCommon.lib" target="tools\lib\v142"/>
     <!-- inc -->
     <file src="..\CaCommon\DeferredActionBase.h" target="tools\include"/>
     <file src="..\CaCommon\RegistryKey.h" target="tools\include"/>

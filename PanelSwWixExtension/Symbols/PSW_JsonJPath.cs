@@ -40,43 +40,43 @@ namespace PanelSw.Wix.Extensions.Symbols
         public string Component_
         {
             get => Fields[0].AsString();
-            set => Fields[0].Set(value);
+            set => this.Set(0, value);
         }
 
         public string FilePath
         {
             get => Fields[1].AsString();
-            set => Fields[1].Set(value);
+            set => this.Set(1, value);
         }
 
         public string File_
         {
             get => Fields[2].AsString();
-            set => Fields[2].Set(value);
+            set => this.Set(2, value);
         }
 
         public string JPath
         {
             get => Fields[3].AsString();
-            set => Fields[3].Set(value);
+            set => this.Set(3, value);
         }
 
         public string Value
         {
             get => Fields[4].AsString();
-            set => Fields[4].Set(value);
+            set => this.Set(4, value);
         }
 
         public int Formatting
         {
             get => Fields[5].AsNumber();
-            set => Fields[5].Set(value);
+            set => this.Set(5, value);
         }
 
         public int ErrorHandling
         {
             get => Fields[6].AsNumber();
-            set => Fields[6].Set(value);
+            set => this.Set(6, value);
         }
     }
 }

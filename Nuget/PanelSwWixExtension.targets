@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 
   <!-- Properties and Items used in C++ projects -->
@@ -6,7 +6,6 @@
     <PanelSwIncPath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\include\'))</PanelSwIncPath>
     <IncludePath>$(PanelSwIncPath);$(IncludePath)</IncludePath>
 
-    <PanelSwLibPath Condition="'$(PlatformToolset)'=='v141_xp' OR '$(PlatformToolset)'=='v140_xp'">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\lib\v141_xp\'))</PanelSwLibPath>
     <PanelSwLibPath Condition="'$(PlatformToolset)'=='v142' OR '$(PlatformToolset)'=='v141' OR '$(PlatformToolset)'=='v140'">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\lib\v142\'))</PanelSwLibPath>
     <LibraryPath Condition="'$(PanelSwLibPath)' != ''">$(PanelSwLibPath);$(LibraryPath)</LibraryPath>
   </PropertyGroup>

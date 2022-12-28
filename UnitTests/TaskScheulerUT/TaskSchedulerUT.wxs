@@ -1,36 +1,26 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
-  <Product Id="{769C11E5-D811-4CE3-BE79-CC23725E6B38}" Name="$(var.ProjectName)" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{8DC7207F-59B4-45E6-90B0-75769F8040B8}">
-    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
-
-    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
-    <MediaTemplate />
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
+  <Package Name="$(var.ProjectName)" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{8DC7207F-59B4-45E6-90B0-75769F8040B8}" InstallerVersion="200" ProductCode="{769C11E5-D811-4CE3-BE79-CC23725E6B38}"><MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
 
-    <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder">
-        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
-      </Directory>
-    </Directory>
+    
 
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
-    <Property Id="TASK_USER"/>
-    <Property Id="TASK_PASSWORD"/>
+    <Property Id="TASK_USER" />
+    <Property Id="TASK_PASSWORD" />
 
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component>
-        <File Source="$(sys.SOURCEFILEPATH)" />
+        <File Id="___sys.SOURCEFILEPATH_" Source="$(sys.SOURCEFILEPATH)" />
       </Component>
-      <Component Id="TASK_USER" Guid="{43081895-EEA9-454F-A0CA-1DC17302B49B}">
-        <Condition><![CDATA[TASK_USER]]></Condition>
-        <CreateFolder/>
+      <Component Id="TASK_USER" Guid="{43081895-EEA9-454F-A0CA-1DC17302B49B}" Condition="TASK_USER">
+        
+        <CreateFolder />
         <PanelSW:TaskScheduler TaskName="TaskScheuler user [TASK_USER]" User="[TASK_USER]" Password="[TASK_PASSWORD]">
-          <![CDATA[
-<?xml version="1.0" encoding="UTF-16"?>
+          <![CDATA[<?xml version="1.0" encoding="UTF-16"?>
 <Task version="1.2" xmlns="http://schemas.microsoft.com/windows/2004/02/mit/task">
   <RegistrationInfo>
     <Author>[TASK_USER]</Author>
@@ -73,17 +63,20 @@
       <Arguments>none</Arguments>
     </Exec>
   </Actions>
-</Task>
-]]>
+</Task>]]>
         </PanelSW:TaskScheduler>
       </Component>
-      <Component Id="TASK_System" Guid="{E12E78E8-5570-4B04-A03A-792D9E5C3AC4}">
-        <Condition><![CDATA[NOT TASK_USER]]></Condition>
-        <CreateFolder/>
-        <PanelSW:TaskScheduler TaskName="TaskScheuler system" XmlFile="$(sys.SOURCEFILEDIR)SystemTask.xml"/>
-        <PanelSW:TaskScheduler TaskName="TaskScheuler system 2" XmlFile="!(wix.HERE)SystemTask.xml"/>
+      <Component Id="TASK_System" Guid="{E12E78E8-5570-4B04-A03A-792D9E5C3AC4}" Condition="NOT TASK_USER">
+        
+        <CreateFolder />
+        <PanelSW:TaskScheduler TaskName="TaskScheuler system" XmlFile="$(sys.SOURCEFILEDIR)SystemTask.xml" />
+        <PanelSW:TaskScheduler TaskName="TaskScheuler system 2" XmlFile="!(wix.HERE)SystemTask.xml" />
       </Component>
     </ComponentGroup>
-    <WixVariable Id="HERE" Value="$(sys.SOURCEFILEDIR)"/>
-  </Product>
+    <WixVariable Id="HERE" Value="$(sys.SOURCEFILEDIR)" />
+  
+      <StandardDirectory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+      </StandardDirectory>
+    </Package>
 </Wix>

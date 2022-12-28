@@ -38,31 +38,31 @@ namespace PanelSw.Wix.Extensions.Symbols
         public string ZipFile
         {
             get => Fields[0].AsString();
-            set => Fields[0].Set(value);
+            set => this.Set(0, value);
         }
 
         public string CompressFolder
         {
             get => Fields[1].AsString();
-            set => Fields[1].Set(value);
+            set => this.Set(1, value);
         }
 
         public string FilePattern
         {
             get => Fields[2].AsString();
-            set => Fields[2].Set(value);
+            set => this.Set(2, value);
         }
 
         public int Recursive
         {
             get => Fields[3].AsNumber();
-            set => Fields[3].Set(value);
+            set => this.Set(3, value);
         }
 
         public string Condition
         {
             get => Fields[4].AsString();
-            set => Fields[4].Set(value);
+            set => this.Set(4, value);
         }
     }
 }

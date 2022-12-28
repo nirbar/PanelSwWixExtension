@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using WixToolset.Extensibility;
-using WixToolset.Extensibility.Services;
 
 namespace PanelSw.Wix.Extensions
 {

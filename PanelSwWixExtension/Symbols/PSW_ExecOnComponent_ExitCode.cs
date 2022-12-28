@@ -37,19 +37,19 @@ namespace PanelSw.Wix.Extensions.Symbols
         public string ExecOnId_
         {
             get => Fields[0].AsString();
-            set => Fields[0].Set(value);
+            set => this.Set(0, value);
         }
 
         public ushort From
         {
             get => (ushort)Fields[1].AsNumber();
-            set => Fields[1].Set(value);
+            set => this.Set(1, value);
         }
 
         public ushort To
         {
             get => (ushort)Fields[2].AsNumber();
-            set => Fields[2].Set(value);
+            set => this.Set(2, value);
         }
     }
 }

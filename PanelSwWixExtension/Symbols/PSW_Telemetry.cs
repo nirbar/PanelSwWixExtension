@@ -39,37 +39,37 @@ namespace PanelSw.Wix.Extensions.Symbols
         public string Url
         {
             get => Fields[0].AsString();
-            set => Fields[0].Set(value);
+            set => this.Set(0, value);
         }
 
         public string Page
         {
             get => Fields[1].AsString();
-            set => Fields[1].Set(value);
+            set => this.Set(1, value);
         }
 
         public string Method
         {
             get => Fields[2].AsString();
-            set => Fields[2].Set(value);
+            set => this.Set(2, value);
         }
 
         public string Data
         {
             get => Fields[3].AsString();
-            set => Fields[3].Set(value);
+            set => this.Set(3, value);
         }
 
         public int Flags
         {
             get => Fields[4].AsNumber();
-            set => Fields[4].Set(value);
+            set => this.Set(4, value);
         }
 
         public string Condition
         {
             get => Fields[5].AsString();
-            set => Fields[5].Set(value);
+            set => this.Set(5, value);
         }
     }
 }

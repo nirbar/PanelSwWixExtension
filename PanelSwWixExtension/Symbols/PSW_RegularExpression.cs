@@ -41,49 +41,49 @@ namespace PanelSw.Wix.Extensions.Symbols
         public string FilePath
         {
             get => Fields[0].AsString();
-            set => Fields[0].Set(value);
+            set => this.Set(0, value);
         }
 
         public string Input
         {
             get => Fields[1].AsString();
-            set => Fields[1].Set(value);
+            set => this.Set(1, value);
         }
 
         public string Expression
         {
             get => Fields[2].AsString();
-            set => Fields[2].Set(value);
+            set => this.Set(2, value);
         }
 
         public string Replacement
         {
             get => Fields[3].AsString();
-            set => Fields[3].Set(value);
+            set => this.Set(3, value);
         }
 
         public string DstProperty_
         {
             get => Fields[4].AsString();
-            set => Fields[4].Set(value);
+            set => this.Set(4, value);
         }
 
         public int Flags
         {
             get => Fields[5].AsNumber();
-            set => Fields[5].Set(value);
+            set => this.Set(5, value);
         }
 
         public string Condition
         {
             get => Fields[6].AsString();
-            set => Fields[6].Set(value);
+            set => this.Set(6, value);
         }
 
         public int Order
         {
             get => Fields[7].AsNumber();
-            set => Fields[7].Set(value);
+            set => this.Set(7, value);
         }
     }
 }

@@ -36,13 +36,13 @@ namespace PanelSw.Wix.Extensions.Symbols
         public string File_
         {
             get => Fields[0].AsString();
-            set => Fields[0].Set(value);
+            set => this.Set(0, value);
         }
 
         public ushort Bitness
         {
             get => (ushort)Fields[1].AsNumber();
-            set => Fields[1].Set(value);
+            set => this.Set(1, value);
         }
     }
 }
