@@ -5,15 +5,4 @@
     <PanelSwWixExtension>$(PanelSwWixExtensionDir)\PanelSwWixExtension.dll</PanelSwWixExtension>
     <DefineConstants>PanelSwWixExtensionDir=$(PanelSwWixExtensionDir);PanelSwWixExtension=$(PanelSwWixExtension);$(DefineConstants)</DefineConstants>
   </PropertyGroup>
-  <ItemGroup>
-    <WixExtension Include="PanelSwWixExtension">
-      <HintPath>$(PanelSwWixExtension)</HintPath>
-      <Name>PanelSwWixExtension</Name>
-    </WixExtension>
-  </ItemGroup>
-  <ItemGroup>
-    <BindInputPaths Include="$(PanelSwWixExtensionDir)">
-      <BindName>PanelSwWixExtension</BindName>
-    </BindInputPaths>
-  </ItemGroup>
 </Project>

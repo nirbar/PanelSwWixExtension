@@ -35,7 +35,7 @@
   <xs:element name="Payload">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Package" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
       </xs:appinfo>
@@ -364,7 +364,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="SetPropertyFromPipe">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Package" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
       </xs:appinfo>
@@ -870,7 +870,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="ZipFile">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Package" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
       </xs:appinfo>
@@ -912,7 +912,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="Unzip">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Package" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
       </xs:appinfo>
@@ -1292,7 +1292,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="DeletePath">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Package" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
       </xs:appinfo>
@@ -1327,7 +1327,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
     <xs:annotation>
       <xs:appinfo>
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="File" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Package" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
       </xs:appinfo>
@@ -1465,7 +1465,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="ShellExecute">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Package" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Patch" />
@@ -1537,7 +1537,7 @@ Call ShellExecuteEx with parameters
   <xs:element name="Telemetry">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Package" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Patch" />
@@ -1616,7 +1616,7 @@ Call ShellExecuteEx with parameters
   <xs:element name="CustomUninstallKey">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Package" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
       </xs:appinfo>
@@ -1782,7 +1782,7 @@ Call ShellExecuteEx with parameters
   <xs:element name="RemoveRegistryValue">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Package" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
       </xs:appinfo>
@@ -1869,7 +1869,7 @@ Call ShellExecuteEx with parameters
     <xs:annotation>
       <xs:appinfo>
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Package" />
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
       </xs:appinfo>
       <xs:documentation><![CDATA[Register processes with the Restart Manager if they reside in the specified folder]]></xs:documentation>

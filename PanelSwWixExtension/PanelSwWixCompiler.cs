@@ -1,17 +1,13 @@
-using WixToolset.Extensibility;
+using PanelSw.Wix.Extensions.Symbols;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Reflection;
-using System.Xml;
-using System.Xml.Schema;
-using System.Xml.Linq;
-using System.Runtime.CompilerServices;
-using WixToolset.Data;
-using WixToolset.Data.WindowsInstaller;
-using WixToolset.Data.Symbols;
-using PanelSw.Wix.Extensions.Symbols;
 using System.Linq;
+using System.Xml;
+using System.Xml.Linq;
+using WixToolset.Data;
+using WixToolset.Data.Symbols;
+using WixToolset.Extensibility;
 
 namespace PanelSw.Wix.Extensions
 {
@@ -35,7 +31,7 @@ namespace PanelSw.Wix.Extensions
             {
                 case "Fragment":
                 case "Module":
-                case "Product":
+                case "Package":
                     switch (element.Name.LocalName)
                     {
                         case "CustomUninstallKey":
@@ -309,7 +305,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -355,7 +351,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -405,7 +401,7 @@ namespace PanelSw.Wix.Extensions
 
                 fileElement.Parent.Add(splitFileElement);
 
-                if (!Messaging.EncounteredError)
+                if (CheckNoCData(element) && !Messaging.EncounteredError)
                 {
                     PSW_ConcatFiles row = section.AddSymbol(new PSW_ConcatFiles(sourceLineNumbers));
                     row.Component_ = componentId;
@@ -425,7 +421,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -651,7 +647,7 @@ namespace PanelSw.Wix.Extensions
                     break;
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 WixPatchRefSymbol patchReferenceRow;
                 foreach (string ca in customActions)
@@ -832,7 +828,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -872,19 +868,17 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Website"));
             }
 
-            if (Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
-                return;
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_WebsiteConfigSched");
+                PSW_WebsiteConfig row = section.AddSymbol(new PSW_WebsiteConfig(sourceLineNumbers, id));
+                row.Component_ = component;
+                row.Website = website;
+                row.Stop = stop ? 1 : 0;
+                row.Start = start ? 1 : 0;
+                row.AutoStart = (autoStart == YesNoDefaultType.Yes) ? 1 : (autoStart == YesNoDefaultType.No) ? 0 : -1;
+                row.ErrorHandling = (int)promptOnError;
             }
-
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_WebsiteConfigSched");
-            PSW_WebsiteConfig row = section.AddSymbol(new PSW_WebsiteConfig(sourceLineNumbers, id));
-            row.Component_ = component;
-            row.Website = website;
-            row.Stop = stop ? 1 : 0;
-            row.Start = start ? 1 : 0;
-            row.AutoStart = (autoStart == YesNoDefaultType.Yes) ? 1 : (autoStart == YesNoDefaultType.No) ? 0 : -1;
-            row.ErrorHandling = (int)promptOnError;
         }
 
         private void ParseMd5Hash(IntermediateSection section, XElement element)
@@ -905,7 +899,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -929,7 +923,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Plain"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "Md5Hash");
 
@@ -959,7 +953,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_ToLowerCase");
 
@@ -986,7 +980,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -1017,7 +1011,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "FilePath"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "JsonJpathSearch");
 
@@ -1046,7 +1040,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -1092,7 +1086,7 @@ namespace PanelSw.Wix.Extensions
 
             ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "JsonJpathSched");
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 PSW_JsonJPath row = section.AddSymbol(new PSW_JsonJPath(sourceLineNumbers));
                 row.Component_ = component_;
@@ -1109,7 +1103,7 @@ namespace PanelSw.Wix.Extensions
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "DiskSpace");
                 section.AddSymbol(new PSW_DiskSpace(sourceLineNumbers, directory));
@@ -1124,7 +1118,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -1147,7 +1141,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "PipeName"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "SetPropertyFromPipe");
                 PSW_SetPropertyFromPipe row = section.AddSymbol(new PSW_SetPropertyFromPipe(sourceLineNumbers));
@@ -1168,7 +1162,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -1211,7 +1205,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "X500"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "CreateSelfSignCertificate");
 
@@ -1241,7 +1235,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -1301,7 +1295,7 @@ namespace PanelSw.Wix.Extensions
             ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "BackupAndRestore");
             ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "Property", restoreSchedule.ToString());
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 PSW_BackupAndRestore row = section.AddSymbol(new PSW_BackupAndRestore(sourceLineNumbers));
                 row.Component_ = component;
@@ -1324,7 +1318,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -1344,7 +1338,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, "File", "Id"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 // Ensure sub-table exists for queries to succeed even if no sub-entries exist.
                 ParseHelper.EnsureTable(section, sourceLineNumbers, "PSW_InstallUtil_Arg");
@@ -1383,7 +1377,7 @@ namespace PanelSw.Wix.Extensions
                     continue;
                 }
 
-                if (!Messaging.EncounteredError)
+                if (CheckNoCData(element) && !Messaging.EncounteredError)
                 {
                     PSW_InstallUtil_Arg row = section.AddSymbol(new PSW_InstallUtil_Arg(sourceLineNumbers, file));
                     row.Value = value;
@@ -1398,7 +1392,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -1420,7 +1414,7 @@ namespace PanelSw.Wix.Extensions
 
             ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "ForceVersion");
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 PSW_ForceVersion row = section.AddSymbol(new PSW_ForceVersion(sourceLineNumbers, file));
                 row.Version = version;
@@ -1467,7 +1461,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -1525,7 +1519,7 @@ namespace PanelSw.Wix.Extensions
 
             ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "TopShelf");
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 PSW_TopShelf row = section.AddSymbol(new PSW_TopShelf(sourceLineNumbers, file));
                 row.ServiceName = serviceName;
@@ -1605,7 +1599,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -1773,7 +1767,7 @@ namespace PanelSw.Wix.Extensions
                                 int repOrder = 1000000000 + repLines.LineNumber ?? 0;
                                 foreach (XAttribute a in child.Attributes())
                                 {
-                                    if (string.IsNullOrEmpty(a.Name.Namespace.NamespaceName) || a.Name.Namespace.Equals(Namespace))
+                                    if (IsMyAttribute(child, a))
                                     {
                                         switch (a.Name.LocalName)
                                         {
@@ -1792,10 +1786,13 @@ namespace PanelSw.Wix.Extensions
                                     }
                                 }
 
-                                PSW_SqlScript_Replacements row1 = section.AddSymbol(new PSW_SqlScript_Replacements(repLines, row?.Id));
-                                row1.Text = from;
-                                row1.Replacement = to;
-                                row1.Order = repOrder;
+                                if (CheckNoCData(child) && !Messaging.EncounteredError)
+                                {
+                                    PSW_SqlScript_Replacements row1 = section.AddSymbol(new PSW_SqlScript_Replacements(repLines, row?.Id));
+                                    row1.Text = from;
+                                    row1.Replacement = to;
+                                    row1.Order = repOrder;
+                                }
                             }
                             break;
 
@@ -1824,7 +1821,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -1894,7 +1891,7 @@ namespace PanelSw.Wix.Extensions
                                 int repOrder = 1000000000 + repLines.LineNumber ?? 0;
                                 foreach (XAttribute a in child.Attributes())
                                 {
-                                    if (string.IsNullOrEmpty(a.Name.Namespace.NamespaceName) || a.Name.Namespace.Equals(Namespace))
+                                    if (IsMyAttribute(child, a))
                                     {
                                         switch (a.Name.LocalName)
                                         {
@@ -1913,7 +1910,7 @@ namespace PanelSw.Wix.Extensions
                                     }
                                 }
 
-                                if (!Messaging.EncounteredError)
+                                if (CheckNoCData(child) && !Messaging.EncounteredError)
                                 {
                                     PSW_XslTransform_Replacements row1 = section.AddSymbol(new PSW_XslTransform_Replacements(repLines, row.Id));
                                     row1.Text = from;
@@ -2126,7 +2123,7 @@ namespace PanelSw.Wix.Extensions
                                 ushort from = 0, to = 0;
                                 foreach (XAttribute a in child.Attributes())
                                 {
-                                    if (string.IsNullOrEmpty(a.Name.Namespace.NamespaceName) || a.Name.Namespace.Equals(Namespace))
+                                    if (IsMyAttribute(child, a))
                                     {
                                         switch (a.Name.LocalName)
                                         {
@@ -2154,9 +2151,12 @@ namespace PanelSw.Wix.Extensions
                                         }
                                     }
                                 }
-                                PSW_ExecOnComponent_ExitCode row1 = section.AddSymbol(new PSW_ExecOnComponent_ExitCode(sourceLineNumbers, row.Id));
-                                row1.From = from;
-                                row1.To = to;
+                                if (CheckNoCData(child) && !Messaging.EncounteredError)
+                                {
+                                    PSW_ExecOnComponent_ExitCode row1 = section.AddSymbol(new PSW_ExecOnComponent_ExitCode(sourceLineNumbers, row.Id));
+                                    row1.From = from;
+                                    row1.To = to;
+                                }
                             }
                             break;
 
@@ -2169,7 +2169,7 @@ namespace PanelSw.Wix.Extensions
 
                                 foreach (XAttribute a in child.Attributes())
                                 {
-                                    if (string.IsNullOrEmpty(a.Name.Namespace.NamespaceName) || a.Name.Namespace.Equals(Namespace))
+                                    if (IsMyAttribute(child, a))
                                     {
                                         switch (a.Name.LocalName)
                                         {
@@ -2200,11 +2200,14 @@ namespace PanelSw.Wix.Extensions
                                     Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, child.Name.LocalName, "Expression"));
                                 }
 
-                                PSW_ExecOn_ConsoleOutput row1 = section.AddSymbol(new PSW_ExecOn_ConsoleOutput(sourceLineNumbers, row.Id));
-                                row1.Expression = regex;
-                                row1.Flags = onMatch ? 1 : 0;
-                                row1.ErrorHandling = (int)stdoutHandling;
-                                row1.PromptText = prompt;
+                                if (CheckNoCData(child) && !Messaging.EncounteredError)
+                                {
+                                    PSW_ExecOn_ConsoleOutput row1 = section.AddSymbol(new PSW_ExecOn_ConsoleOutput(sourceLineNumbers, row.Id));
+                                    row1.Expression = regex;
+                                    row1.Flags = onMatch ? 1 : 0;
+                                    row1.ErrorHandling = (int)stdoutHandling;
+                                    row1.PromptText = prompt;
+                                }
                             }
                             break;
 
@@ -2215,7 +2218,7 @@ namespace PanelSw.Wix.Extensions
 
                                 foreach (XAttribute a in child.Attributes())
                                 {
-                                    if (string.IsNullOrEmpty(a.Name.Namespace.NamespaceName) || a.Name.Namespace.Equals(Namespace))
+                                    if (IsMyAttribute(child, a))
                                     {
                                         switch (a.Name.LocalName)
                                         {
@@ -2239,9 +2242,12 @@ namespace PanelSw.Wix.Extensions
                                     break;
                                 }
 
-                                PSW_ExecOnComponent_Environment row1 = section.AddSymbol(new PSW_ExecOnComponent_Environment(sourceLineNumbers, row.Id));
-                                row1.Name = name;
-                                row1.Value = value;
+                                if (CheckNoCData(child) && !Messaging.EncounteredError)
+                                {
+                                    PSW_ExecOnComponent_Environment row1 = section.AddSymbol(new PSW_ExecOnComponent_Environment(sourceLineNumbers, row.Id));
+                                    row1.Name = name;
+                                    row1.Value = value;
+                                }
                             }
                             break;
 
@@ -2278,7 +2284,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -2361,7 +2367,7 @@ namespace PanelSw.Wix.Extensions
 
                     foreach (XAttribute attrib in child.Attributes())
                     {
-                        if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                        if (IsMyAttribute(element, attrib))
                         {
                             string depService = null;
                             string group = null;
@@ -2386,7 +2392,7 @@ namespace PanelSw.Wix.Extensions
                                 Messaging.Write(ErrorMessages.ExpectedAttributes(sourceLineNumbers, child.Name.LocalName, "Service", "Group"));
                             }
 
-                            if (!Messaging.EncounteredError)
+                            if (CheckNoCData(child) && !Messaging.EncounteredError)
                             {
                                 PSW_ServiceConfig_Dependency row = section.AddSymbol(new PSW_ServiceConfig_Dependency(sourceLineNumbers, mainRow.Id));
                                 row.Service = depService;
@@ -2409,7 +2415,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -2449,7 +2455,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttributes(sourceLineNumbers, element.Name.LocalName, "EnableFeature", "PackagePath"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "DismSched");
                 PSW_Dism row = section.AddSymbol(new PSW_Dism(sourceLineNumbers));
@@ -2472,7 +2478,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -2543,7 +2549,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttributesWithOtherAttribute(sourceLineNumbers, element.Name.LocalName, "User", "Password"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "TaskScheduler");
 
@@ -2580,7 +2586,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -2625,7 +2631,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "DataType"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "CustomUninstallKey_Immediate");
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "CustomUninstallKey_deferred");
@@ -2660,7 +2666,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -2702,7 +2708,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Section"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "ReadIniValues");
                 PSW_ReadIniValues row = section.AddSymbol(new PSW_ReadIniValues(sourceLineNumbers));
@@ -2733,7 +2739,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -2773,7 +2779,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Name"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "RemoveRegistryValue_Immediate");
                 PSW_RemoveRegistryValue row = section.AddSymbol(new PSW_RemoveRegistryValue(sourceLineNumbers));
@@ -2807,7 +2813,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -2849,7 +2855,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttributes(sourceLineNumbers, element.Name.LocalName, "Issuer", "SerialNumber", "CertName", "FriendlyName"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "CertificateHashSearch");
 
@@ -2880,7 +2886,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -2907,7 +2913,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Expression"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "EvaluateExpression");
 
@@ -2927,7 +2933,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -2946,7 +2952,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "FileName"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_PathSearch");
 
@@ -2966,7 +2972,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -2992,7 +2998,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Version2"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_VersionCompare");
 
@@ -3014,7 +3020,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3040,7 +3046,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "AccountName"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "AccountSidSearch");
 
@@ -3073,7 +3079,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3112,7 +3118,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "XPath"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "XmlSearch");
 
@@ -3147,7 +3153,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3209,7 +3215,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Query"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "SqlSearch");
 
@@ -3243,7 +3249,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3275,7 +3281,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Query"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "WmiSearch");
 
@@ -3311,7 +3317,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName.ToLower())
                     {
@@ -3368,7 +3374,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Method"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "Telemetry");
 
@@ -3396,7 +3402,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3464,7 +3470,7 @@ namespace PanelSw.Wix.Extensions
 
             ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "ShellExecute_Immediate");
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 PSW_ShellExecute row = section.AddSymbol(new PSW_ShellExecute(sourceLineNumbers));
                 row.Target = target;
@@ -3488,7 +3494,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3511,7 +3517,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Query"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "MsiSqlQuery");
 
@@ -3557,7 +3563,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3609,7 +3615,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.IllegalAttributeWithOtherAttribute(sourceLineNumbers, element.Name.LocalName, "Input", "FilePath"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "RegularExpression");
 
@@ -3633,7 +3639,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3657,7 +3663,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Path"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "RestartLocalResources");
 
@@ -3688,7 +3694,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3728,10 +3734,10 @@ namespace PanelSw.Wix.Extensions
             if (string.IsNullOrEmpty(fileId) == string.IsNullOrEmpty(filepath))
             {
                 // Either under File or specify FilePath, not both
-                Messaging.Write(ErrorMessages.IllegalAttributeWhenNested(sourceLineNumbers, element.Name.LocalName, "FilePath", "Product"));
+                Messaging.Write(ErrorMessages.IllegalAttributeWhenNested(sourceLineNumbers, element.Name.LocalName, "FilePath", "Package"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "FileRegex_Immediate");
 
@@ -3767,7 +3773,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3802,7 +3808,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Path"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 if (flags.HasFlag(DeletePathFlags.AllowReboot))
                 {
@@ -3829,7 +3835,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3865,7 +3871,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "SourceFolder"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "ZipFileSched");
 
@@ -3906,7 +3912,7 @@ namespace PanelSw.Wix.Extensions
 
             foreach (XAttribute attrib in element.Attributes())
             {
-                if (string.IsNullOrEmpty(attrib.Name.Namespace.NamespaceName) || attrib.Name.Namespace.Equals(Namespace))
+                if (IsMyAttribute(element, attrib))
                 {
                     switch (attrib.Name.LocalName)
                     {
@@ -3977,7 +3983,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "TargetFolder"));
             }
 
-            if (!Messaging.EncounteredError)
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "UnzipSched");
 
@@ -4020,6 +4026,30 @@ namespace PanelSw.Wix.Extensions
             if (!property.Id.ToUpper().Equals(property.Id))
             {
                 Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property.Id));
+                return false;
+            }
+            return true;
+        }
+
+        private bool IsMyAttribute(XElement element, XAttribute attrib)
+        {
+            return ((element.Name.Namespace.Equals(Namespace) && string.IsNullOrEmpty(attrib.Name.NamespaceName)) || attrib.Name.Namespace.Equals(Namespace));
+        }
+
+        private bool CheckNoCData(XElement element)
+        {
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
+            foreach (XElement child in element.Descendants())
+            {
+                if ((child.NodeType == XmlNodeType.Text) || (child.NodeType == XmlNodeType.CDATA))
+                {
+                    Messaging.Write(ErrorMessages.IllegalInnerText(sourceLineNumbers, element.Name.LocalName, child.Value));
+                    return false;
+                }
+            }
+            if (!string.IsNullOrEmpty(element.Value))
+            {
+                Messaging.Write(ErrorMessages.IllegalInnerText(sourceLineNumbers, element.Name.LocalName, element.Value));
                 return false;
             }
             return true;
