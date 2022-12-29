@@ -11,6 +11,7 @@ using WixToolset.Data;
 using WixToolset.Data.WindowsInstaller;
 using WixToolset.Data.Symbols;
 using PanelSw.Wix.Extensions.Symbols;
+using System.Linq;
 
 namespace PanelSw.Wix.Extensions
 {
@@ -4022,6 +4023,109 @@ namespace PanelSw.Wix.Extensions
                 return false;
             }
             return true;
+        }
+
+        public override void PostCompile(Intermediate intermediate)
+        {
+            base.PostCompile(intermediate);
+            SplitFiles(intermediate);
+        }
+
+        private void SplitFiles(Intermediate intermediate)
+        {
+            // This section is empty, need to iterate the other sections
+            List<PSW_ConcatFiles> concatFiles = new List<PSW_ConcatFiles>();
+            List<FileSymbol> allFiles = new List<FileSymbol>();
+            foreach (IntermediateSection section in intermediate.Sections)
+            {
+                foreach (IntermediateSymbol symbol in section.Symbols)
+                {
+                    if (symbol is PSW_ConcatFiles concatSymbol)
+                    {
+                        concatFiles.Add(concatSymbol);
+                    }
+                    else if (symbol is FileSymbol f)
+                    {
+                        allFiles.Add(f);
+                    }
+                }
+            }
+
+            concatFiles.Sort(new ConcatFilesComparer());
+
+            string tmpPath = Path.GetTempPath();
+            FileSymbol rootWixFile = null;
+            int splitSize = Int32.MaxValue;
+            FileStream rootFileStream = null;
+            try
+            {
+                foreach (PSW_ConcatFiles concatSymbol in concatFiles)
+                {
+                    // New root file
+                    if (!concatSymbol.RootFile_.Equals(rootWixFile?.Id?.Id))
+                    {
+                        splitSize = concatSymbol.Size;
+                        rootWixFile = allFiles.FirstOrDefault(f => f.Id.Id.Equals(concatSymbol.RootFile_));
+                        if (rootWixFile == null)
+                        {
+                            Messaging.Write(ErrorMessages.WixFileNotFound(concatSymbol.RootFile_));
+                            return;
+                        }
+
+                        rootFileStream?.Dispose();
+                        rootFileStream = null; // Ensure no double-dispose in case next line throws
+                        rootFileStream = File.OpenRead(rootWixFile.Source.Path);
+
+                        string splId = "spl" + Guid.NewGuid().ToString("N");
+                        rootWixFile.Source.Path = Path.Combine(tmpPath, splId);
+                        CopyFilePart(rootFileStream, rootWixFile.Source.Path, splitSize);
+                    }
+
+                    FileSymbol currWixFile = allFiles.FirstOrDefault(f => f.Id.Id.Equals(concatSymbol.MyFile_));
+                    if (currWixFile == null)
+                    {
+                        Messaging.Write(ErrorMessages.WixFileNotFound(concatSymbol.MyFile_));
+                        return;
+                    }
+
+                    CopyFilePart(rootFileStream, currWixFile.Source.Path, splitSize);
+                }
+            }
+            finally
+            {
+                rootFileStream?.Dispose();
+            }
+        }
+
+        private void CopyFilePart(FileStream srcFile, string dstFile, int copySize)
+        {
+            byte[] buffer = new byte[1024 * 1024]; // 1MB chunks
+            long tmpFileSize = 0;
+            using (FileStream dstFileStream = File.OpenWrite(dstFile))
+            {
+                while ((tmpFileSize < copySize) && (srcFile.Position < srcFile.Length))
+                {
+                    int chunkSize = (int)Math.Min(copySize - tmpFileSize, buffer.Length);
+                    chunkSize = srcFile.Read(buffer, 0, chunkSize);
+                    dstFileStream.Write(buffer, 0, chunkSize);
+                    tmpFileSize += chunkSize;
+                }
+            }
+        }
+    }
+
+    class ConcatFilesComparer : IComparer<PSW_ConcatFiles>
+    {
+        int IComparer<PSW_ConcatFiles>.Compare(PSW_ConcatFiles x, PSW_ConcatFiles y)
+        {
+            int rootFileCmp = x.RootFile_.CompareTo(y.RootFile_);
+            if (rootFileCmp != 0)
+            {
+                return rootFileCmp;
+            }
+
+            // Same file; Compare by order
+            return x.Order.CompareTo(y.Order);
         }
     }
 }

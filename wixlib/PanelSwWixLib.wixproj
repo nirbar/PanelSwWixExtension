@@ -9,7 +9,6 @@
     <PreBuildEvent>$(PreBuildEvent) &amp;&amp; "$(MSBuildBinPath)\MSBuild.exe" "$(MSBuildThisFileDirectory)..\Dism\Dism.vcxproj" "/p:Platform=x64;Configuration=$(Configuration);SolutionDir=$(SolutionDir)\"</PreBuildEvent>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DeferredExePackage\DeferredExePackage.vcxproj" />
     <ProjectReference Include="..\PanelSwCustomActions\PanelSwCustomActions.vcxproj" />
   </ItemGroup>
   <ItemGroup>

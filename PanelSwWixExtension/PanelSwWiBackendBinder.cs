@@ -457,49 +457,49 @@ namespace PanelSw.Wix.Extensions
                         new TableDefinition(nameof(PSW_AccountSidSearch), PSW_AccountSidSearch.SymbolDefinition, PSW_AccountSidSearch.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_BackupAndRestore), PSW_BackupAndRestore.SymbolDefinition, PSW_BackupAndRestore.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_CertificateHashSearch), PSW_CertificateHashSearch.SymbolDefinition, PSW_CertificateHashSearch.ColumnDefinitions, symbolIdIsPrimaryKey: true),
-                        new TableDefinition(nameof(PSW_ConcatFiles), PSW_ConcatFiles.SymbolDefinition, PSW_ConcatFiles.ColumnDefinitions, symbolIdIsPrimaryKey: true),
+                        new TableDefinition(nameof(PSW_ConcatFiles), PSW_ConcatFiles.SymbolDefinition, PSW_ConcatFiles.ColumnDefinitions, symbolIdIsPrimaryKey: false),
                         new TableDefinition(nameof(PSW_CustomUninstallKey), PSW_CustomUninstallKey.SymbolDefinition, PSW_CustomUninstallKey.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_DeletePath), PSW_DeletePath.SymbolDefinition, PSW_DeletePath.ColumnDefinitions, symbolIdIsPrimaryKey: true),
-                        new TableDefinition(nameof(PSW_DiskSpace), PSW_DiskSpace.SymbolDefinition, PSW_DiskSpace.ColumnDefinitions, symbolIdIsPrimaryKey: false), // No Id for this table, just the Directory_ column
+                        new TableDefinition(nameof(PSW_DiskSpace), PSW_DiskSpace.SymbolDefinition, PSW_DiskSpace.ColumnDefinitions, symbolIdIsPrimaryKey: false),
                         new TableDefinition(nameof(PSW_Dism), PSW_Dism.SymbolDefinition, PSW_Dism.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_EvaluateExpression), PSW_EvaluateExpression.SymbolDefinition, PSW_EvaluateExpression.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_ExecOn_ConsoleOutput), PSW_ExecOn_ConsoleOutput.SymbolDefinition, PSW_ExecOn_ConsoleOutput.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_ExecOnComponent), PSW_ExecOnComponent.SymbolDefinition, PSW_ExecOnComponent.ColumnDefinitions, symbolIdIsPrimaryKey: true),
-                        new TableDefinition(nameof(PSW_ExecOnComponent_Environment), PSW_ExecOnComponent_Environment.SymbolDefinition, PSW_ExecOnComponent_Environment.ColumnDefinitions, symbolIdIsPrimaryKey: false), // No Id for this table, just the File column
-                        new TableDefinition(nameof(PSW_ExecOnComponent_ExitCode), PSW_ExecOnComponent_ExitCode.SymbolDefinition, PSW_ExecOnComponent_ExitCode.ColumnDefinitions, symbolIdIsPrimaryKey: false), // No Id for this table, just the File column
+                        new TableDefinition(nameof(PSW_ExecOnComponent_Environment), PSW_ExecOnComponent_Environment.SymbolDefinition, PSW_ExecOnComponent_Environment.ColumnDefinitions, symbolIdIsPrimaryKey: false),
+                        new TableDefinition(nameof(PSW_ExecOnComponent_ExitCode), PSW_ExecOnComponent_ExitCode.SymbolDefinition, PSW_ExecOnComponent_ExitCode.ColumnDefinitions, symbolIdIsPrimaryKey: false),
                         new TableDefinition(nameof(PSW_FileRegex), PSW_FileRegex.SymbolDefinition, PSW_FileRegex.ColumnDefinitions, symbolIdIsPrimaryKey: true),
-                        new TableDefinition(nameof(PSW_ForceVersion), PSW_ForceVersion.SymbolDefinition, PSW_ForceVersion.ColumnDefinitions, symbolIdIsPrimaryKey: false), // No Id for this table, just the File column
-                        new TableDefinition(nameof(PSW_InstallUtil), PSW_InstallUtil.SymbolDefinition, PSW_InstallUtil.ColumnDefinitions, symbolIdIsPrimaryKey: false), // No Id for this table, just the File_ column
-                        new TableDefinition(nameof(PSW_InstallUtil_Arg), PSW_InstallUtil_Arg.SymbolDefinition, PSW_InstallUtil_Arg.ColumnDefinitions, symbolIdIsPrimaryKey: false), // No Id for this table, just the File_ column
+                        new TableDefinition(nameof(PSW_ForceVersion), PSW_ForceVersion.SymbolDefinition, PSW_ForceVersion.ColumnDefinitions, symbolIdIsPrimaryKey: false),
+                        new TableDefinition(nameof(PSW_InstallUtil), PSW_InstallUtil.SymbolDefinition, PSW_InstallUtil.ColumnDefinitions, symbolIdIsPrimaryKey: false),
+                        new TableDefinition(nameof(PSW_InstallUtil_Arg), PSW_InstallUtil_Arg.SymbolDefinition, PSW_InstallUtil_Arg.ColumnDefinitions, symbolIdIsPrimaryKey: false),
                         new TableDefinition(nameof(PSW_JsonJPath), PSW_JsonJPath.SymbolDefinition, PSW_JsonJPath.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_JsonJpathSearch), PSW_JsonJpathSearch.SymbolDefinition, PSW_JsonJpathSearch.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_Md5Hash), PSW_Md5Hash.SymbolDefinition, PSW_Md5Hash.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_MsiSqlQuery), PSW_MsiSqlQuery.SymbolDefinition, PSW_MsiSqlQuery.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_PathSearch), PSW_PathSearch.SymbolDefinition, PSW_PathSearch.ColumnDefinitions, symbolIdIsPrimaryKey: true),
-                        new TableDefinition(nameof(PSW_Payload), PSW_Payload.SymbolDefinition, PSW_Payload.ColumnDefinitions, symbolIdIsPrimaryKey: true),
+                        new TableDefinition(nameof(PSW_Payload), PSW_Payload.SymbolDefinition, PSW_Payload.ColumnDefinitions, symbolIdIsPrimaryKey: false),
                         new TableDefinition(nameof(PSW_ReadIniValues), PSW_ReadIniValues.SymbolDefinition, PSW_ReadIniValues.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_RegularExpression), PSW_RegularExpression.SymbolDefinition, PSW_RegularExpression.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_RemoveRegistryValue), PSW_RemoveRegistryValue.SymbolDefinition, PSW_RemoveRegistryValue.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_RestartLocalResources), PSW_RestartLocalResources.SymbolDefinition, PSW_RestartLocalResources.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_SelfSignCertificate), PSW_SelfSignCertificate.SymbolDefinition, PSW_SelfSignCertificate.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_ServiceConfig), PSW_ServiceConfig.SymbolDefinition, PSW_ServiceConfig.ColumnDefinitions, symbolIdIsPrimaryKey: true),
-                        new TableDefinition(nameof(PSW_ServiceConfig_Dependency), PSW_ServiceConfig_Dependency.SymbolDefinition, PSW_ServiceConfig_Dependency.ColumnDefinitions, symbolIdIsPrimaryKey: false), // No Id for this table, just the SqlScript_ column
+                        new TableDefinition(nameof(PSW_ServiceConfig_Dependency), PSW_ServiceConfig_Dependency.SymbolDefinition, PSW_ServiceConfig_Dependency.ColumnDefinitions, symbolIdIsPrimaryKey: false),
                         new TableDefinition(nameof(PSW_SetPropertyFromPipe), PSW_SetPropertyFromPipe.SymbolDefinition, PSW_SetPropertyFromPipe.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_ShellExecute), PSW_ShellExecute.SymbolDefinition, PSW_ShellExecute.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_SqlScript), PSW_SqlScript.SymbolDefinition, PSW_SqlScript.ColumnDefinitions, symbolIdIsPrimaryKey: true),
-                        new TableDefinition(nameof(PSW_SqlScript_Replacements), PSW_SqlScript_Replacements.SymbolDefinition, PSW_SqlScript_Replacements.ColumnDefinitions, symbolIdIsPrimaryKey: false), // No Id for this table, just the SqlScript_ column
+                        new TableDefinition(nameof(PSW_SqlScript_Replacements), PSW_SqlScript_Replacements.SymbolDefinition, PSW_SqlScript_Replacements.ColumnDefinitions, symbolIdIsPrimaryKey: false),
                         new TableDefinition(nameof(PSW_SqlSearch), PSW_SqlSearch.SymbolDefinition, PSW_SqlSearch.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_TaskScheduler), PSW_TaskScheduler.SymbolDefinition, PSW_TaskScheduler.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_Telemetry), PSW_Telemetry.SymbolDefinition, PSW_Telemetry.ColumnDefinitions, symbolIdIsPrimaryKey: true),
-                        new TableDefinition(nameof(PSW_ToLowerCase), PSW_ToLowerCase.SymbolDefinition, PSW_ToLowerCase.ColumnDefinitions, symbolIdIsPrimaryKey: false), // No Id for this table, just the Property_ column
-                        new TableDefinition(nameof(PSW_TopShelf), PSW_TopShelf.SymbolDefinition, PSW_TopShelf.ColumnDefinitions, symbolIdIsPrimaryKey: false), // No Id for this table, just the File_ column
+                        new TableDefinition(nameof(PSW_ToLowerCase), PSW_ToLowerCase.SymbolDefinition, PSW_ToLowerCase.ColumnDefinitions, symbolIdIsPrimaryKey: false),
+                        new TableDefinition(nameof(PSW_TopShelf), PSW_TopShelf.SymbolDefinition, PSW_TopShelf.ColumnDefinitions, symbolIdIsPrimaryKey: false),
                         new TableDefinition(nameof(PSW_Unzip), PSW_Unzip.SymbolDefinition, PSW_Unzip.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_VersionCompare), PSW_VersionCompare.SymbolDefinition, PSW_VersionCompare.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_WebsiteConfig), PSW_WebsiteConfig.SymbolDefinition, PSW_WebsiteConfig.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_WmiSearch), PSW_WmiSearch.SymbolDefinition, PSW_WmiSearch.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_XmlSearch), PSW_XmlSearch.SymbolDefinition, PSW_XmlSearch.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_XslTransform), PSW_XslTransform.SymbolDefinition, PSW_XslTransform.ColumnDefinitions, symbolIdIsPrimaryKey: true),
-                        new TableDefinition(nameof(PSW_XslTransform_Replacements), PSW_XslTransform_Replacements.SymbolDefinition, PSW_XslTransform_Replacements.ColumnDefinitions, symbolIdIsPrimaryKey: false), // No Id for this table, just the XslTransform_ column
+                        new TableDefinition(nameof(PSW_XslTransform_Replacements), PSW_XslTransform_Replacements.SymbolDefinition, PSW_XslTransform_Replacements.ColumnDefinitions, symbolIdIsPrimaryKey: false),
                         new TableDefinition(nameof(PSW_ZipFile), PSW_ZipFile.SymbolDefinition, PSW_ZipFile.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                     };
                 }
@@ -525,11 +525,11 @@ namespace PanelSw.Wix.Extensions
         public override void SymbolsFinalized(IntermediateSection section)
         {
             base.SymbolsFinalized(section);
-            SplitFiles(section);
+            GetSplitFiles(section);
             ResolveTaskScheduler(section);
         }
 
-        private void SplitFiles(IntermediateSection section)
+        private void GetSplitFiles(IntermediateSection section)
         {
             // This section is empty, need to iterate the other sections
             List<PSW_ConcatFiles> concatFiles = new List<PSW_ConcatFiles>();
@@ -549,65 +549,18 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            concatFiles.Sort(new ConcatFilesComparer());
-
-            string tmpPath = Path.GetTempPath();
-            FileSymbol rootWixFile = null;
-            int splitSize = Int32.MaxValue;
-            FileStream rootFileStream = null;
-            try
+            // Collect temporary file paths to later delete
+            foreach (PSW_ConcatFiles concat in concatFiles)
             {
-                foreach (PSW_ConcatFiles concatSymbol in concatFiles)
+                FileSymbol fileSymbol = allFiles.FirstOrDefault(f => f.Id.Id.Equals(concat.RootFile_));
+                if ((fileSymbol != null) && !tempFiles_.Contains(fileSymbol.Source.Path))
                 {
-                    // New root file
-                    if (!concatSymbol.RootFile_.Equals(rootWixFile?.Id?.Id))
-                    {
-                        splitSize = concatSymbol.Size;
-                        rootWixFile = allFiles.FirstOrDefault(f => f.Id.Id.Equals(concatSymbol.RootFile_));
-                        if (rootWixFile == null)
-                        {
-                            Messaging.Write(ErrorMessages.WixFileNotFound(concatSymbol.RootFile_));
-                            return;
-                        }
-
-                        rootFileStream?.Dispose();
-                        rootFileStream = null; // Ensure no double-dispose in case next line throws
-                        rootFileStream = File.OpenRead(rootWixFile.Source.Path);
-
-                        string splId = "spl" + Guid.NewGuid().ToString("N");
-                        rootWixFile.Source.Path = Path.Combine(tmpPath, splId);
-                        tempFiles_.Add(rootWixFile.Source.Path);
-                        CopyFilePart(rootFileStream, rootWixFile.Source.Path, splitSize);
-                    }
-
-                    FileSymbol currWixFile =  allFiles.FirstOrDefault(f => f.Id.Id.Equals(concatSymbol.MyFile_));
-                    if (currWixFile == null)
-                    {
-                        Messaging.Write(ErrorMessages.WixFileNotFound(concatSymbol.MyFile_));
-                        return;
-                    }
-
-                    tempFiles_.Add(currWixFile.Source.Path);
-                    CopyFilePart(rootFileStream, currWixFile.Source.Path, splitSize);
+                    tempFiles_.Add(fileSymbol.Source.Path);
                 }
-            }
-            finally
-            {
-                rootFileStream?.Dispose();
-            }
-        }
-        private void CopyFilePart(FileStream srcFile, string dstFile, int copySize)
-        {
-            byte[] buffer = new byte[1024 * 1024]; // 1MB chunks
-            long tmpFileSize = 0;
-            using (FileStream dstFileStream = File.OpenWrite(dstFile))
-            {
-                while ((tmpFileSize < copySize) && (srcFile.Position < srcFile.Length))
+                fileSymbol = allFiles.FirstOrDefault(f => f.Id.Id.Equals(concat.MyFile_));
+                if ((fileSymbol != null) && !tempFiles_.Contains(fileSymbol.Source.Path))
                 {
-                    int chunkSize = (int)Math.Min(copySize - tmpFileSize, buffer.Length);
-                    chunkSize = srcFile.Read(buffer, 0, chunkSize);
-                    dstFileStream.Write(buffer, 0, chunkSize);
-                    tmpFileSize += chunkSize;
+                    tempFiles_.Add(fileSymbol.Source.Path);
                 }
             }
         }
@@ -645,21 +598,6 @@ namespace PanelSw.Wix.Extensions
                 xml = xml.Replace(Environment.NewLine, "");
                 r.TaskXml = xml;
             }
-        }
-    }
-
-    class ConcatFilesComparer : IComparer<PSW_ConcatFiles>
-    {
-        int IComparer<PSW_ConcatFiles>.Compare(PSW_ConcatFiles x, PSW_ConcatFiles y)
-        {
-            int rootFileCmp = x.RootFile_.CompareTo(y.RootFile_);
-            if (rootFileCmp != 0)
-            {
-                return rootFileCmp;
-            }
-
-            // Same file; Compare by order
-            return x.Order.CompareTo(y.Order);
         }
     }
 }
