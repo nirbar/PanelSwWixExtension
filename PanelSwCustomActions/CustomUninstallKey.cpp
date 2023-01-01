@@ -133,7 +133,6 @@ HRESULT CCustomUninstallKey::CreateCustomActionData()
 		{
 		case MSICONDITION::MSICONDITION_NONE:
 		case MSICONDITION::MSICONDITION_TRUE:
-			WcaLog( LOGLEVEL::LOGMSG_STANDARD, "Condition evaluated true/none for %ls", pId);
 			break;
 
 		case MSICONDITION::MSICONDITION_FALSE:
