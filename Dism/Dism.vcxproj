@@ -58,6 +58,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <AdditionalIncludeDirectories>$(DismApiDir)Include;$(WindowsKitSharedDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
       <AdditionalDependencies>legacy_stdio_definitions.lib;msi.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
