@@ -1,0 +1,9 @@
+{
+  "msbuild-sdks": {
+    "WixToolset.Sdk": "4.0.0-rc.1"
+  },
+  "sdk": {
+    "version": "6.0.300",
+    "rollForward": "latestMinor"
+  }
+}

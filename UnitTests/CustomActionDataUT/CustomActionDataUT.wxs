@@ -1,38 +1,31 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
 
-  <Product Id="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}" Name="CustomActionDataUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}">
-    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
+  <Package Name="CustomActionDataUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}" InstallerVersion="200" ProductCode="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}">
 
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
-    <MediaTemplate />
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
-  </Product>
+  </Package>
 
-  <Fragment>
-    <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder">
-        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
-      </Directory>
-    </Directory>
+  <Fragment><Property Id="MSIFASTINSTALL" Value="1"></Property>
 
-    <Property Id="MSIFASTINSTALL" Value="1"></Property>
-
-    <CustomAction Id="Test" BinaryKey="WixCA" DllEntry="WixQuietExec" PanelSW:CustomActionData='"cmd" /C DEL "[INSTALLFOLDER]"' PanelSW:ActionStartText="My custom action text" Execute='deferred' Impersonate='no'/>
+    <CustomAction Id="Test" DllEntry="WixQuietExec" PanelSW:CustomActionData="&quot;cmd&quot; /C DEL &quot;[INSTALLFOLDER]&quot;" PanelSW:ActionStartText="My custom action text" Execute="deferred" Impersonate="no" BinaryRef="Wix4UtilCA_X86" />
     <InstallExecuteSequence>
-      <Custom Action='Test' Before='InstallFiles'/>
+      <Custom Action="Test" Before="InstallFiles" />
     </InstallExecuteSequence>
 
-  </Fragment>
+  
+      <StandardDirectory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+      </StandardDirectory>
+    </Fragment>
 
   <Fragment>
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component>
-        <File Source="$(sys.SOURCEFILEPATH)"/>
+        <File Source="$(sys.SOURCEFILEPATH)" />
       </Component>
     </ComponentGroup>
   </Fragment>

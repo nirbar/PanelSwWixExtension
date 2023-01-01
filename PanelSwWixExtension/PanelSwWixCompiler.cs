@@ -670,11 +670,6 @@ namespace PanelSw.Wix.Extensions
         public override void ParseAttribute(Intermediate intermediate, IntermediateSection section, XElement parentElement, XAttribute attribute, IDictionary<string, string> context)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(parentElement);
-            if (!parentElement.Name.Namespace.Equals(Namespace))
-            {
-                ParseHelper.UnexpectedAttribute(parentElement, attribute);
-                return;
-            }
 
             switch (parentElement.Name.LocalName)
             {
