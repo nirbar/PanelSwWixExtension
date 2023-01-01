@@ -1,55 +1,45 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
-
-  <Product Id="{769C11E5-D811-4CE3-BE79-CC23725E6B38}" Name="$(var.ProjectName)" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{8DC7207F-59B4-45E6-90B0-75769F8040B8}">
-    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
-
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:util="http://wixtoolset.org/schemas/v4/wxs/util" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
+  <Package Name="$(var.ProjectName)" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{8DC7207F-59B4-45E6-90B0-75769F8040B8}" InstallerVersion="200" ProductCode="{769C11E5-D811-4CE3-BE79-CC23725E6B38}">
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
-    <MediaTemplate />
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
 
-    <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder">
-        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
-      </Directory>
-    </Directory>
+    <Property Id="MSIFASTINSTALL" Value="1" />
+    <Property Id="GOOGLE" Hidden="yes" Value="www.google.com" />
+    <Property Id="PACKETS" Hidden="yes" Value="Packets" />
 
-    <Property Id="MSIFASTINSTALL" Value="1"/>
-    <Property Id="GOOGLE" Hidden="yes" Value="www.google.com"/>
-    <Property Id="PACKETS" Hidden="yes" Value="Packets"/>
+    <Binary Id="TestBinary.exe" SourceFile="..\..\build\protobuf\$(var.Configuration)\protoc.exe" />
 
-    <Binary Id="TestBinary" SourceFile="..\..\build\protobuf\$(var.Configuration)\protoc.exe"/>
-
-    <Property Id="MY_PASSWORD" Hidden="yes"/>
-    <util:User Domain="[MY_DOMAIN]" Name="[MY_NAME]" Password="[MY_PASSWORD]" Id="me"/>
+    <Property Id="MY_PASSWORD" Hidden="yes" />
+    <util:User Domain="[MY_DOMAIN]" Name="[MY_NAME]" Password="[MY_PASSWORD]" Id="me" />
 
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component>
         <File Source="$(sys.SOURCEFILEPATH)" />
-        <PanelSW:ExecOn Command='"ping.exe" "[GOOGLE]"' OnInstall='yes' OnInstallRollback='yes' OnReinstall='yes' OnReinstallRollback='yes' OnUninstall='yes' OnUninstallRollback='yes'
-                        BeforeStopServices='yes' AfterStopServices='yes' BeforeStartServices='yes' AfterStartServices='yes' WorkingDirectory='[INSTALLFOLDER]'>
-          <PanelSW:ConsoleOutput Expression='\b[PACKETS]\b' Behavior='prompt' BehaviorOnMatch='yes' PromptText='Packets detected'/>
-          <PanelSW:ConsoleOutput Expression='\boogle\b' Behavior='prompt' BehaviorOnMatch='no' PromptText='We did not ping oogle'/>
-          <PanelSW:ExitCode Value='0' Behavior='scheduleReboot'/>
+        <PanelSW:ExecOn Command="&quot;ping.exe&quot; &quot;[GOOGLE]&quot;" OnInstall="yes" OnInstallRollback="yes" OnReinstall="yes" OnReinstallRollback="yes" OnUninstall="yes" OnUninstallRollback="yes" BeforeStopServices="yes" AfterStopServices="yes" BeforeStartServices="yes" AfterStartServices="yes" WorkingDirectory="[INSTALLFOLDER]">
+          <PanelSW:ConsoleOutput Expression="\b[PACKETS]\b" Behavior="prompt" BehaviorOnMatch="yes" PromptText="Packets detected" />
+          <PanelSW:ConsoleOutput Expression="\boogle\b" Behavior="prompt" BehaviorOnMatch="no" PromptText="We did not ping oogle" />
+          <PanelSW:ExitCode Value="0" Behavior="scheduleReboot" />
         </PanelSW:ExecOn>
-        <PanelSW:ExecOn Command='"ping.exe" "[GOOGLE]"' OnInstall='yes' OnInstallRollback='yes' OnReinstall='yes' OnReinstallRollback='yes' OnUninstall='yes' OnUninstallRollback='yes'
-                        BeforeStopServices='yes' AfterStopServices='yes' BeforeStartServices='yes' AfterStartServices='yes' Impersonate='yes' WorkingDirectory='[INSTALLFOLDER]'>
-          <PanelSW:Environment Name='ABC' Value='NIR'/>
+        <PanelSW:ExecOn Command="&quot;ping.exe&quot; &quot;[GOOGLE]&quot;" OnInstall="yes" OnInstallRollback="yes" OnReinstall="yes" OnReinstallRollback="yes" OnUninstall="yes" OnUninstallRollback="yes" BeforeStopServices="yes" AfterStopServices="yes" BeforeStartServices="yes" AfterStartServices="yes" Impersonate="yes" WorkingDirectory="[INSTALLFOLDER]">
+          <PanelSW:Environment Name="ABC" Value="NIR" />
         </PanelSW:ExecOn>
 
-        <PanelSW:ExecOn Command='CMD /C "EXIT /b 1"' BeforeStopServices='yes' OnInstall='yes' ErrorHandling='prompt'/>
+        <PanelSW:ExecOn Command="CMD /C &quot;EXIT /b 1&quot;" BeforeStopServices="yes" OnInstall="yes" ErrorHandling="prompt" />
 
-        <PanelSW:ExecOn Command='CMD /C "TYPE "{*non_printable.txt}""' BinaryKey='non_printable.txt' BeforeStopServices='yes' OnInstall='yes' ErrorHandling='prompt'/>
+        <PanelSW:ExecOn Command="CMD /C &quot;TYPE &quot;{*non_printable.txt}&quot;&quot;" BinaryKey="non_printable.txt" BeforeStopServices="yes" OnInstall="yes" ErrorHandling="prompt" />
 
-        <PanelSW:ExecOn BinaryKey='TestBinary' Command='--version' BeforeStartServices='yes' OnInstall='yes'/>
-        <PanelSW:ExecOn Impersonate='no' User='me' BeforeStartServices='yes' OnInstall='yes' Command='"notepad.exe"' ErrorHandling='prompt'/>
+        <PanelSW:ExecOn BinaryKey="TestBinary.exe" Command='"{*TestBinary.exe}" --version' BeforeStartServices="yes" OnInstall="yes" />
+        <PanelSW:ExecOn Impersonate="no" User="me" BeforeStartServices="yes" OnInstall="yes" Command="&quot;notepad.exe&quot;" ErrorHandling="prompt" />
       </Component>
     </ComponentGroup>
 
-    <Binary SourceFile='$(sys.SOURCEFILEDIR)non-printable.txt' Id='non_printable.txt'/>
-  </Product>
+    <Binary SourceFile="$(sys.SOURCEFILEDIR)non-printable.txt" Id="non_printable.txt" />
+
+    <StandardDirectory Id="ProgramFilesFolder">
+      <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+    </StandardDirectory>
+  </Package>
 </Wix>

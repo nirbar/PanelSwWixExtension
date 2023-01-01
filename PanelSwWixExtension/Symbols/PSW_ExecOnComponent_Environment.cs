@@ -21,7 +21,7 @@ namespace PanelSw.Wix.Extensions.Symbols
                 return new ColumnDefinition[]
                 {
                     new ColumnDefinition(nameof(ExecOnId_), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "PSW_ExecOnComponent", keyColumn: 1),
-                    new ColumnDefinition(nameof(Name), ColumnType.Localized, 0, true, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Name), ColumnType.String, 0, true, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
                     new ColumnDefinition(nameof(Value), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
                 };
             }

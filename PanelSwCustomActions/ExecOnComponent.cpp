@@ -177,7 +177,7 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		// Impersonate a user?
 		if (!userId.IsNullOrEmpty())
 		{
-			hr = szSubQuery.Format(L"SELECT `Domain`, `Name`, `Password` FROM `User` WHERE `User`='%ls'", (LPCWSTR)userId);
+			hr = szSubQuery.Format(L"SELECT `Domain`, `Name`, `Password` FROM `Wix4User` WHERE `User`='%ls'", (LPCWSTR)userId);
 			ExitOnFailure(hr, "Failed to format string");
 
 			hr = WcaOpenExecuteView((LPCWSTR)szSubQuery, &hSubView);
