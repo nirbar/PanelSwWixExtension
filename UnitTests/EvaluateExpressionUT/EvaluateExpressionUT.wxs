@@ -1,48 +1,41 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
-     xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
-     >
-  <Product Id="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}" Name="RegexUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}">
-    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
-
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension">
+  <Package Name="RegexUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}" InstallerVersion="200" ProductCode="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}">
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
-    <MediaTemplate />
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <Component Directory="INSTALLFOLDER">
-        <File Source="$(sys.SOURCEFILEPATH)" />
+        <File Id="___sys.SOURCEFILEPATH_" Source="$(sys.SOURCEFILEPATH)" />
       </Component>
     </Feature>
 
-    <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder">
-        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
-      </Directory>
-    </Directory>
-
-    <Property Id="MSIFASTINSTALL" Value="1"/>
+    <Property Id="MSIFASTINSTALL" Value="1" />
 
     <Property Id="TEST" Value="2">
-      <PanelSW:Evaluate Expression="[TEST] * 2"/>
-      <PanelSW:Evaluate Expression="[TEST] + 1" Order="1"/>
+      <PanelSW:Evaluate Expression="[TEST] * 2" />
+      <PanelSW:Evaluate Expression="[TEST] + 1" Order="1" />
     </Property>
 
     <Property Id="PI" Value="pi">
-      <PanelSW:Evaluate Expression="[PI] * 2"/>
-      <PanelSW:Evaluate Expression="[PI] + 1" Order="1"/>
+      <PanelSW:Evaluate Expression="[PI] * 2" />
+      <PanelSW:Evaluate Expression="[PI] + 1" Order="1" />
     </Property>
 
-    <CustomActionRef Id="WixExitEarlyWithSuccess" />
-    <CustomAction Id="BadResult" Error="29000"/>
-    <CustomAction Id="BadPiResult" Error="29001"/>
+    <ExitEarlyWithSuccess xmlns="http://wixtoolset.org/schemas/v4/wxs/util" />
+    <CustomAction Id="BadResult" Error="29000" />
+    <CustomAction Id="BadPiResult" Error="29001" />
+    <CustomActionRef Id="TerminateSuccessfully_Immediate"/>
     <UI>
-      <Error Id="29000"><![CDATA[TEST evaluated to [TEST]]]></Error>
-      <Error Id="29001"><![CDATA[PI evaluated to [PI]]]></Error>
+      <Error Id="29000" Message="TEST evaluated to [TEST]" />
+      <Error Id="29001" Message="PI evaluated to [PI]" />
     </UI>
     <InstallExecuteSequence>
-      <Custom Action="BadResult" After="EvaluateExpression"><![CDATA[TEST <> 6]]></Custom>
-      <Custom Action="BadPiResult" After="BadResult"><![CDATA[PI <> "8.283186"]]></Custom>
-      <Custom Action="WixExitEarlyWithSuccess" After="BadPiResult"/>
+      <Custom Action="BadResult" After="EvaluateExpression" Condition="TEST &lt;&gt; 6" />
+      <Custom Action="BadPiResult" After="BadResult" Condition="PI &lt;&gt; &quot;8.283186&quot;" />
+      <Custom Action="TerminateSuccessfully_Immediate" After="BadPiResult" />
     </InstallExecuteSequence>
-  </Product>
+
+    <StandardDirectory Id="ProgramFilesFolder">
+      <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+    </StandardDirectory>
+  </Package>
 </Wix>
