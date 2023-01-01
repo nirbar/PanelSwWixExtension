@@ -10,7 +10,7 @@ namespace PanelSw.Wix.Extensions.Symbols
         {
             get
             {
-                return new IntermediateSymbolDefinition(nameof(PSW_CertificateHashSearch), CreateFieldDefinitions(ColumnDefinitions, 0), typeof(PSW_CertificateHashSearch));
+                return new IntermediateSymbolDefinition(nameof(PSW_CertificateHashSearch), CreateFieldDefinitions(ColumnDefinitions), typeof(PSW_CertificateHashSearch));
             }
         }
         public static IEnumerable<ColumnDefinition> ColumnDefinitions

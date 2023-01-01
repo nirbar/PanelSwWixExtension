@@ -75,6 +75,7 @@
     <ClCompile Include="AccountNames.cpp" />
     <ClCompile Include="CheckRebootRequired.cpp" />
     <ClCompile Include="ConcatFiles.cpp" />
+    <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="FolderPaths.cpp" />
     <ClCompile Include="ForceVersion.cpp" />
     <ClCompile Include="AccountSidSearch.cpp" />

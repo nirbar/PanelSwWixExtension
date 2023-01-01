@@ -309,7 +309,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
       </xs:appinfo>
       <xs:documentation>
-        <![CDATA[Find a certificate hash in local machine MY store. Either CertName or both Issuer and SerialNumber should be specified]]>
+        <![CDATA[Find a certificate hash in local machine stores. Either CertName or both Issuer and SerialNumber should be specified]]>
       </xs:documentation>
     </xs:annotation>
 

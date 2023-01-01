@@ -1,0 +1,21 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension">
+  <Package Name="BackupAndRestoreUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}" InstallerVersion="200"><MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." AllowSameVersionUpgrades="yes" Schedule="afterInstallInitialize" />
+    
+    <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
+      <Component Directory="INSTALLFOLDER">
+        <File Source="$(sys.SOURCEFILEPATH)" />
+        <PanelSW:CreateSelfSignCertificate Id="_1" Expiry="200" Password="123654" X500="CN=panel-sw.co.il" />
+      </Component>
+    </Feature>
+
+    <Property Id="MSIFASTINSTALL" Value="7"></Property>
+    <Property Id="CERT_HASH">
+      <PanelSW:CertificateHashSearch FriendlyName="VeriSign Class 3 Public Primary CA" />
+    </Property>
+    <Launch Condition="Installed OR CERT_HASH" Message="Bad Cert" />
+  
+      <StandardDirectory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+      </StandardDirectory>
+    </Package>
+</Wix>
