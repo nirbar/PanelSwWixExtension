@@ -7,6 +7,7 @@ using System.Xml;
 using System.Xml.Linq;
 using WixToolset.Data;
 using WixToolset.Data.Symbols;
+using WixToolset.Data.WindowsInstaller;
 using WixToolset.Extensibility;
 
 namespace PanelSw.Wix.Extensions
@@ -96,15 +97,14 @@ namespace PanelSw.Wix.Extensions
                     }
                     break;
 
+                case "StandardDirectory":
                 case "DirectoryRef":
                 case "Directory":
                     {
-                        string directoryId = context["DirectoryId"];
-
                         switch (element.Name.LocalName)
                         {
                             case "DiskSpace":
-                                ParseDiskSpaceElement(section, element, directoryId);
+                                ParseDiskSpaceElement(section, parentElement, element);
                                 break;
 
                             default:
@@ -1094,14 +1094,30 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseDiskSpaceElement(IntermediateSection section, XElement element, string directory)
+        private void ParseDiskSpaceElement(IntermediateSection section, XElement parentElement, XElement element)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
+            Identifier directory;
+            string directoryId;
+
+            XAttribute idAttrib = parentElement.Attribute("Id");
+            if (idAttrib == null)
+            {
+                Messaging.Write(ErrorMessages.ParentElementAttributeRequired(sourceLineNumbers, parentElement.Name.LocalName, "Id", element.Name.LocalName));
+                return;
+            }
+            directory = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, idAttrib);
+            if (directory == null)
+            {
+                Messaging.Write(ErrorMessages.ParentElementAttributeRequired(sourceLineNumbers, parentElement.Name.LocalName, "Id", element.Name.LocalName));
+                return;
+            }
+            directoryId = WindowsInstallerStandard.GetPlatformSpecificDirectoryId(directory.Id, Context.Platform);
 
             if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "DiskSpace");
-                section.AddSymbol(new PSW_DiskSpace(sourceLineNumbers, directory));
+                section.AddSymbol(new PSW_DiskSpace(sourceLineNumbers, directoryId));
             }
         }
 
