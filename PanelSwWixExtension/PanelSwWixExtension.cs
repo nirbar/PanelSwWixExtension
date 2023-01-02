@@ -19,6 +19,6 @@ namespace PanelSw.Wix.Extensions
             System.Diagnostics.Debugger.Launch();
             return base.TryCreateExtension(extensionType, out extension);
         }
-*/
+//*/
     }
 }

@@ -29,7 +29,7 @@ namespace PanelSw.Wix.Extensions.Symbols
         public PSW_ExecOnComponent_ExitCode() : base(SymbolDefinition)
         { }
 
-        public PSW_ExecOnComponent_ExitCode(SourceLineNumber lineNumber, Identifier execOnId) : base(SymbolDefinition, lineNumber, execOnId)
+        public PSW_ExecOnComponent_ExitCode(SourceLineNumber lineNumber, Identifier execOnId) : base(SymbolDefinition, lineNumber, "eoc")
         {
             ExecOnId_ = execOnId.Id;
         }

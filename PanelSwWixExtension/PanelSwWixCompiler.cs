@@ -2376,6 +2376,7 @@ namespace PanelSw.Wix.Extensions
                         continue;
                     }
 
+                    sourceLineNumbers = ParseHelper.GetSourceLineNumbers(child);
                     foreach (XAttribute attrib in child.Attributes())
                     {
                         if (IsMyAttribute(element, attrib))

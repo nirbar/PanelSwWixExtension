@@ -30,7 +30,7 @@ namespace PanelSw.Wix.Extensions.Symbols
         public PSW_ExecOnComponent_Environment() : base(SymbolDefinition)
         { }
 
-        public PSW_ExecOnComponent_Environment(SourceLineNumber lineNumber, Identifier execOnId) : base(SymbolDefinition, lineNumber, execOnId)
+        public PSW_ExecOnComponent_Environment(SourceLineNumber lineNumber, Identifier execOnId) : base(SymbolDefinition, lineNumber, "eoe")
         {
             ExecOnId_ = execOnId.Id;
         }

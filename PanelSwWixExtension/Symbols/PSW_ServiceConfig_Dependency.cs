@@ -29,7 +29,7 @@ namespace PanelSw.Wix.Extensions.Symbols
         public PSW_ServiceConfig_Dependency() : base(SymbolDefinition)
         { }
 
-        public PSW_ServiceConfig_Dependency(SourceLineNumber lineNumber, Identifier svcId) : base(SymbolDefinition, lineNumber, svcId)
+        public PSW_ServiceConfig_Dependency(SourceLineNumber lineNumber, Identifier svcId) : base(SymbolDefinition, lineNumber, "scd")
         {
             ServiceConfig_ = svcId.Id;
         }

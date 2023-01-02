@@ -30,7 +30,7 @@ namespace PanelSw.Wix.Extensions.Symbols
         public PSW_SqlScript_Replacements() : base(SymbolDefinition)
         { }
 
-        public PSW_SqlScript_Replacements(SourceLineNumber lineNumber, Identifier sqlId) : base(SymbolDefinition, lineNumber, sqlId)
+        public PSW_SqlScript_Replacements(SourceLineNumber lineNumber, Identifier sqlId) : base(SymbolDefinition, lineNumber, "sqr")
         {
             SqlScript_ = sqlId.Id;
         }

@@ -30,9 +30,9 @@ namespace PanelSw.Wix.Extensions.Symbols
         public PSW_XslTransform_Replacements() : base(SymbolDefinition)
         { }
 
-        public PSW_XslTransform_Replacements(SourceLineNumber lineNumber, Identifier sqlId) : base(SymbolDefinition, lineNumber, sqlId)
+        public PSW_XslTransform_Replacements(SourceLineNumber lineNumber, Identifier xslId) : base(SymbolDefinition, lineNumber, "xsr")
         {
-            XslTransform_ = sqlId.Id;
+            XslTransform_ = xslId.Id;
         }
 
         public string XslTransform_
