@@ -13,5 +13,12 @@ namespace PanelSw.Wix.Extensions
             typeof(PanelSwWixCompiler),
             typeof(PanelSwWixExtData),
         };
+/*        
+        public override bool TryCreateExtension(Type extensionType, out object extension)
+        {
+            System.Diagnostics.Debugger.Launch();
+            return base.TryCreateExtension(extensionType, out extension);
+        }
+*/
     }
 }
