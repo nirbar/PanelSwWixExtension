@@ -3501,7 +3501,6 @@ namespace PanelSw.Wix.Extensions
             string query = null;
             string condition = null;
             Identifier property = null;
-            TryGetParentSearchPropertyId(sourceLineNumbers, element, out property);
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -3527,13 +3526,17 @@ namespace PanelSw.Wix.Extensions
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Query"));
             }
+            if (query.StartsWith("select", StringComparison.OrdinalIgnoreCase))
+            {
+                TryGetParentSearchPropertyId(sourceLineNumbers, element, out property);
+            }
 
             if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "MsiSqlQuery");
 
                 PSW_MsiSqlQuery row = section.AddSymbol(new PSW_MsiSqlQuery(sourceLineNumbers));
-                row.Property_ = property.Id;
+                row.Property_ = property?.Id;
                 row.Query = query;
                 row.Condition = condition;
             }

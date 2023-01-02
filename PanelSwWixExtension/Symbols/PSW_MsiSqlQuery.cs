@@ -20,7 +20,7 @@ namespace PanelSw.Wix.Extensions.Symbols
                 return new ColumnDefinition[]
                 {
                     new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
-                    new ColumnDefinition(nameof(Property_), ColumnType.String, 0, false, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(Property_), ColumnType.String, 0, false, true, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Property),
                     new ColumnDefinition(nameof(Query), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
                     new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
                 };
