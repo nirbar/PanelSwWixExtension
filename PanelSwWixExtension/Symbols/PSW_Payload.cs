@@ -20,7 +20,7 @@ namespace PanelSw.Wix.Extensions.Symbols
                 return new ColumnDefinition[]
                 {
                     new ColumnDefinition(nameof(BinaryKey_), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "Binary", keyColumn: 1),
-                    new ColumnDefinition(nameof(Name), ColumnType.String, 0, false, false, ColumnCategory.AnyPath),
+                    new ColumnDefinition(nameof(Name), ColumnType.String, 0, false, false, ColumnCategory.Text),
                 };
             }
         }
@@ -29,7 +29,9 @@ namespace PanelSw.Wix.Extensions.Symbols
         { }
 
         public PSW_Payload(SourceLineNumber lineNumber, string binaryKey) : base(SymbolDefinition, lineNumber, new Identifier(AccessModifier.Global, binaryKey))
-        { }
+        {
+            BinaryKey_ = binaryKey;
+        }
 
         public string BinaryKey_
         {
