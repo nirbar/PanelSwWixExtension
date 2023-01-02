@@ -1318,6 +1318,11 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
               <xs:documentation>If a lock prevents file removal then defer the removal to after reboot. Default is yes.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="Condition" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Condition on executing the deletion.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>
