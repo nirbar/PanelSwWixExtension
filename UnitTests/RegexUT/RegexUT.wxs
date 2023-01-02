@@ -1,87 +1,68 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
-  <Product Id="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}" Name="RegexUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}">
-    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
-
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
+  <Package Name="RegexUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}" InstallerVersion="200" ProductCode="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}">
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
-    <MediaTemplate />
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <Component Directory="INSTALLFOLDER">
-        <File Source="$(sys.SOURCEFILEPATH)">
-          <PanelSW:FileRegex Regex="\bRegularExpressio(\w)\b" Replacement="$1_RegularExpressio" IgnoreCase="no"/>
-          <PanelSW:FileRegex Regex="&lt;!-(-.*-)-&gt;" Replacement="- Hi $1 -" IgnoreCase="no" Condition="SKIP_ME"/>
+        <File Id="RegexUT.wxs" Source="$(sys.SOURCEFILEPATH)">
+          <PanelSW:FileRegex Regex="\bRegularExpressio(\w)\b" Replacement="$1_RegularExpressio" IgnoreCase="no" />
+          <PanelSW:FileRegex Regex="&lt;!-(-.*-)-&gt;" Replacement="- Hi $1 -" IgnoreCase="no" Condition="SKIP_ME" />
         </File>
       </Component>
       <Component Directory="INSTALLFOLDER">
         <File Source="$(var.ProjectDir)Unicode.ini">
-          <PanelSW:FileRegex Regex="\[BSMALL]=" Replacement="[MB460]" Encoding="AutoDetect"/>
+          <PanelSW:FileRegex Regex="\[BSMALL]=" Replacement="[MB460]" Encoding="AutoDetect" />
         </File>
       </Component>
     </Feature>
-    <PanelSW:FileRegex FilePath="[SOMEWHERE]" Regex="\bCurrentMappingFile=" Replacement="[NEWMAPPINGFILE]" Encoding="Unicode" Condition="SOMEWHERE"/>
-    <PanelSW:FileRegex FilePath="[INSTALLFOLDER]RegexUT.wxs" Regex="$$(?![\[]\r\n[\]])" Replacement="new file end" Order="1" Condition="$RegexUT.wxs >= 3"/>
-
-    <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder">
-        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
-      </Directory>
-    </Directory>
+    <PanelSW:FileRegex FilePath="[SOMEWHERE]" Regex="\bCurrentMappingFile=" Replacement="[NEWMAPPINGFILE]" Encoding="Unicode" Condition="SOMEWHERE" />
+    <PanelSW:FileRegex FilePath="[#RegexUT.wxs]" Regex="$$(?![\[]\r\n[\]])" Replacement="new file end" Order="1" Condition="$RegexUT.wxs &gt;= 3" />
 
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
 
     <Property Id="MY_INPUT" Value="Test Text" />
     <Property Id="REGEX_MATCH">
-      <PanelSW:RegularExpression Input="My Input is [MY_INPUT]"
-                                 Expression="is (.*)"/>
+      <PanelSW:RegularExpression Input="My Input is [MY_INPUT]" Expression="is (.*)" />
     </Property>
-    <PanelSW:RegularExpression Input="My Input is [MY_INPUT]"
-                               DstProperty="REGEX_REPLACE"
-                               Replacement="IS YOUR INPUT"
-                               IgnoreCase="yes"
-                               Expression="\bIS\b\s+(.*)" Order="0"
-                               />
-    <PanelSW:RegularExpression Input="My Input is [MY_INPUT]"
-                               DstProperty="REGEX_REPLACE_3"
-                               Replacement="IS YOUR INPUT"
-                               IgnoreCase="yes"
-                               Expression="\bS\b\s+(.*)"
-                               />
-    <PanelSW:RegularExpression Input="[REGEX_REPLACE]"
-                               DstProperty="REGEX_REPLACE"
-                               Replacement="OUR"
-                               Expression="YOUR" Order="1"
-                               />
-    <PanelSW:RegularExpression FilePath="[System64Folder]drivers\etc\hosts"
-                               DstProperty="HOSTS"
-                               Expression=".*127\.0\.0\.1.*"
-                               />
+    <Property Id="REGEX_REPLACE">
+      <PanelSW:RegularExpression Input="My Input is [MY_INPUT]" Replacement="IS YOUR INPUT" IgnoreCase="yes" Expression="\bIS\b\s+(.*)" Order="0" />
+      <PanelSW:RegularExpression Input="[REGEX_REPLACE]" Replacement="OUR" Expression="YOUR" Order="1" />
+    </Property>
+    <Property Id="REGEX_REPLACE_3">
+      <PanelSW:RegularExpression Input="My Input is [MY_INPUT]" Replacement="IS YOUR INPUT" IgnoreCase="yes" Expression="\bS\b\s+(.*)" />
+    </Property>
+    <Property Id="HOSTS">
+      <PanelSW:RegularExpression FilePath="[System64Folder]drivers\etc\hosts" Expression=".*127\.0\.0\.1.*" />
+    </Property>
     <Property Id="REPLACE_WITH_EMPTY" Value="1 0 0" Hidden="yes">
-      <PanelSW:RegularExpression Input="[REPLACE_WITH_EMPTY]" Expression="0" Replacement=""/>
+      <PanelSW:RegularExpression Input="[REPLACE_WITH_EMPTY]" Expression="0" Replacement="" />
     </Property>
-    
+
     <CustomAction Id="TextRegexMatch" Error="REGEX_MATCH_1 Should be '[MY_INPUT]'" Execute="immediate" />
     <CustomAction Id="TextRegexReplace" Error="REGEX_REPLACE Should be 'My Input IS OUR INPUT'" Execute="immediate" />
     <CustomAction Id="TextRegexReplace2" Error="REGEX_REPLACE_3 Should be 'My Input is Test Text'" Execute="immediate" />
     <CustomAction Id="TextRegexReplace3" Error="REPLACE_WITH_EMPTY Should be '1  '" Execute="immediate" />
-    <CustomActionRef Id="TerminateSuccessfully_Immediate"/>
+    <CustomActionRef Id="TerminateSuccessfully_Immediate" />
     <InstallUISequence>
-      <Custom Action="TextRegexMatch" After="RegularExpression"><![CDATA[REGEX_MATCH_1<>MY_INPUT]]></Custom>
-      <Custom Action="TextRegexReplace" After="TextRegexMatch"><![CDATA[REGEX_REPLACE<>"My Input IS OUR INPUT"]]></Custom>
-      <Custom Action="TextRegexReplace2" After="TextRegexMatch"><![CDATA[REGEX_REPLACE_3<>"My Input is Test Text"]]></Custom>
-      <Custom Action="TextRegexReplace3" After="TextRegexMatch"><![CDATA[REPLACE_WITH_EMPTY<>"1  "]]></Custom>
+      <Custom Action="TextRegexMatch" After="RegularExpression" Condition="REGEX_MATCH_1&lt;&gt;MY_INPUT" />
+      <Custom Action="TextRegexReplace" After="TextRegexMatch" Condition="REGEX_REPLACE&lt;&gt;&quot;My Input IS OUR INPUT&quot;" />
+      <Custom Action="TextRegexReplace2" After="TextRegexMatch" Condition="REGEX_REPLACE_3&lt;&gt;&quot;My Input is Test Text&quot;" />
+      <Custom Action="TextRegexReplace3" After="TextRegexMatch" Condition="REPLACE_WITH_EMPTY&lt;&gt;&quot;1  &quot;" />
     </InstallUISequence>
     <InstallExecuteSequence>
-      <Custom Action="TextRegexMatch" After="RegularExpression"><![CDATA[REGEX_MATCH_1<>MY_INPUT]]></Custom>
-      <Custom Action="TextRegexReplace" After="TextRegexMatch"><![CDATA[REGEX_REPLACE<>"My Input IS OUR INPUT"]]></Custom>
-      <Custom Action="TextRegexReplace2" After="TextRegexMatch"><![CDATA[REGEX_REPLACE_3<>"My Input is Test Text"]]></Custom>
-      <Custom Action="TextRegexReplace3" After="TextRegexMatch"><![CDATA[REPLACE_WITH_EMPTY<>"1  "]]></Custom>
-      <Custom Action="TerminateSuccessfully_Immediate" Before="InstallInitialize"><![CDATA[Not Installed And Not DONT_TERMINATE]]></Custom>
+      <Custom Action="TextRegexMatch" After="RegularExpression" Condition="REGEX_MATCH_1&lt;&gt;MY_INPUT" />
+      <Custom Action="TextRegexReplace" After="TextRegexMatch" Condition="REGEX_REPLACE&lt;&gt;&quot;My Input IS OUR INPUT&quot;" />
+      <Custom Action="TextRegexReplace2" After="TextRegexMatch" Condition="REGEX_REPLACE_3&lt;&gt;&quot;My Input is Test Text&quot;" />
+      <Custom Action="TextRegexReplace3" After="TextRegexMatch" Condition="REPLACE_WITH_EMPTY&lt;&gt;&quot;1  &quot;" />
+      <Custom Action="TerminateSuccessfully_Immediate" Before="InstallInitialize" Condition="Not Installed And Not DONT_TERMINATE" />
     </InstallExecuteSequence>
 
-    <Property Id="MB460" Value="MB460=" Hidden="yes"/>
-    <Property Id="BSMALL" Value="bSmall" Hidden="yes"/>
+    <Property Id="MB460" Value="MB460=" Hidden="yes" />
+    <Property Id="BSMALL" Value="bSmall" Hidden="yes" />
     <Property Id="NEWMAPPINGFILE" Value="NewMappingFile=" />
-  </Product>
+
+    <StandardDirectory Id="ProgramFilesFolder">
+      <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+    </StandardDirectory>
+  </Package>
 </Wix>
