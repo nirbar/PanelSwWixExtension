@@ -1388,7 +1388,7 @@ namespace PanelSw.Wix.Extensions
                     continue;
                 }
 
-                if (CheckNoCData(element) && !Messaging.EncounteredError)
+                if (CheckNoCData(child) && !Messaging.EncounteredError)
                 {
                     PSW_InstallUtil_Arg row = section.AddSymbol(new PSW_InstallUtil_Arg(sourceLineNumbers, file));
                     row.Value = value;
@@ -1528,10 +1528,10 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.IllegalAttributeValueWithOtherAttribute(sourceLineNumbers, "TopShelf", "Account", "custom", "UserName"));
             }
 
-            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "TopShelf");
-
             if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "TopShelf");
+
                 PSW_TopShelf row = section.AddSymbol(new PSW_TopShelf(sourceLineNumbers, file));
                 row.ServiceName = serviceName;
                 row.DisplayName = displayName;

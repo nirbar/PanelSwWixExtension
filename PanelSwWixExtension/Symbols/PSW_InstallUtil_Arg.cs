@@ -33,6 +33,7 @@ namespace PanelSw.Wix.Extensions.Symbols
         public PSW_InstallUtil_Arg(SourceLineNumber lineNumber, string file) : base(SymbolDefinition, lineNumber, "iua")
         {
             File_ = file;
+            this.Set(1, Id.Id);
         }
 
         public string File_
