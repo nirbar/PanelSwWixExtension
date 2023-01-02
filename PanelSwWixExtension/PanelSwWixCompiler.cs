@@ -4010,7 +4010,7 @@ namespace PanelSw.Wix.Extensions
         {
             value = default(T);
             string v = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-            if (string.IsNullOrEmpty(v) || !Enum.TryParse<T>(v, out value))
+            if (string.IsNullOrEmpty(v) || !Enum.TryParse<T>(v, true, out value))
             {
                 Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, v));
                 return false;

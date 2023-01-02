@@ -1,0 +1,38 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
+  <Package Name="JsonJPathUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}" InstallerVersion="200" ProductCode="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}">
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+    <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
+      <Component Directory="INSTALLFOLDER">
+        <File Id="Json_Object.json" Source="$(var.ProjectDir)Json-Object.json">
+          <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == '[HiddenTest]')[\]]" Value="{ &quot;Name&quot;: &quot;MyName&quot;, &quot;Customer&quot;: &quot;Id&quot;, &quot;Customer1&quot;: &quot;Id1&quot;, &quot;Customer2&quot;: &quot;Id2&quot;, &quot;Customer3&quot;: &quot;Id3&quot;, &quot;Customer4&quot;: &quot;Id4&quot; }" />
+          <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'Contoso')[\]].Name" Value="Contoso &quot;2&quot; \backslashed\ 'Quoted'" Formatting="string" />
+          <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'MyName')[\]].Customer1" Value="TrUE" Formatting="boolean" />
+          <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'MyName')[\]].Customer2" Value="FALsE" Formatting="boolean" />
+          <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'MyName')[\]].Customer3" Value="0" Formatting="boolean" />
+          <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'MyName')[\]].Customer4" Value="[HiddenTest]" Formatting="boolean" />
+          <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'Missing')[\]].Customer4" Value="[HiddenTest]" Formatting="boolean" ErrorHandling="prompt" />
+        </File>
+        <PanelSW:JsonJPath FilePath="[#Json_Object.json]" JPath="$.Manufacturers[\[]?(@.Name == '[HiddenTest]')[\]]" Value="{ &quot;Customer&quot;: &quot;Id&quot;, &quot;Customer1&quot;: &quot;Id1&quot;, &quot;Customer2&quot;: &quot;Id2&quot;, &quot;Customer3&quot;: &quot;Id3&quot;, &quot;Customer4&quot;: &quot;Id4&quot; }" ErrorHandling="ignore" />
+      </Component>
+    </Feature>
+
+    <Property Id="HiddenTest" Value="Acme Co" Hidden="yes" />
+    <Property Id="JSON_TEST">
+      <PanelSW:JsonJpathSearch JPath="$.Manufacturers[\[]?(@.Name == '[HiddenTest]')[\]].Products[\[]0[\]].Name" FilePath="$(var.ProjectDir)JsonObject.json" />
+    </Property>
+    <Property Id="Anvil" Value="&quot;Anvil&quot;" />
+    <Launch Condition="Installed Or (JSON_TEST=Anvil) OR SKIP_ANVIL" Message="Expected JSON_TEST=Anvil" />
+
+    <Property Id="JSON_NULL_TEST">
+      <PanelSW:JsonJpathSearch JPath="$.Manufacturers[\[]?(@.Name == 'UnAcme Co')[\]].Products[\[]0[\]].Name" FilePath="$(var.ProjectDir)JsonObject.json" />
+    </Property>
+    <Launch Condition="Installed Or Not JSON_NULL_TEST" Message="Expected JSON_NULL_TEST=&lt;nothing&gt;" />
+
+    <Property Id="MSIFASTINSTALL" Value="7" />
+
+    <StandardDirectory Id="ProgramFilesFolder">
+      <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+    </StandardDirectory>
+  </Package>
+</Wix>
