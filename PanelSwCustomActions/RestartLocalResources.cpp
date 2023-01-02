@@ -18,7 +18,8 @@ extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall)
     PMSIHANDLE hRecord;
     std::list<LPWSTR> lstFolders;
     CRestartLocalResources cad;
-    LPWSTR szDevicePath;
+    CWixString szDevicePath;
+    CWixString szCanoncanilzedPath;
     CWixString szCustomActionData;
 
     hr = WcaInitialize(hInstall, __FUNCTION__);
@@ -62,12 +63,15 @@ extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall)
             }
         }
 
-        hr = CFileOperations::PathToDevicePath((LPCWSTR)szPath, &szDevicePath);
+        hr = CFileOperations::PathToDevicePath((LPCWSTR)szPath, (LPWSTR*)szDevicePath);
         ExitOnFailure(hr, "Failed to get target folder in device path form");
-        WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will Enumerate processes in '%ls'", szDevicePath);
 
-        lstFolders.push_back(szDevicePath);
-        szDevicePath = nullptr;
+		hr = PathCanonicalizeForComparison((LPCWSTR)szDevicePath, PATH_CANONICALIZE_APPEND_EXTENDED_PATH_PREFIX | PATH_CANONICALIZE_KEEP_UNC_ROOT | PATH_CANONICALIZE_BACKSLASH_TERMINATE, (LPWSTR*)szCanoncanilzedPath);
+		ExitOnFailure(hr, "Failed to canonicalize the directory.");
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will Enumerate processes in '%ls'", (LPCWSTR)szCanoncanilzedPath);
+
+        lstFolders.push_back(szCanoncanilzedPath.Detach());
+		szDevicePath.Release();
     }
     hr = S_OK;
 
@@ -95,8 +99,6 @@ LExit:
     {
         ReleaseStr(f);
     }
-
-    ReleaseStr(szDevicePath);
 
     er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
     return WcaFinalize(er);
@@ -397,6 +399,18 @@ LExit:
     ReleaseHandle(hProc);
 
     return hr;
+}
+
+bool CRestartLocalResources::IsExeInFolder::operator()(const LPCWSTR& szFolder) const
+{
+	HRESULT hr = S_OK;
+	DWORD dwRes = 0;
+	DWORD dwStrLen = ::wcslen(szFolder);
+
+	dwRes = ::CompareStringW(LOCALE_NEUTRAL, NORM_IGNORECASE, szFolder, dwStrLen, szFullExePath, dwStrLen);
+
+LExit:
+	return (SUCCEEDED(hr) && (dwRes == CSTR_EQUAL));
 }
 
 HRESULT CRestartLocalResources::Initialize()

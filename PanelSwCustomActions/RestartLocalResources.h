@@ -40,14 +40,10 @@ private:
 	HMODULE hGetProcessImageFileNameDll_ = NULL;
 
 	// Helper struct to find a folder that contains the exe by path
-	struct
+	struct IsExeInFolder
 	{
 		WCHAR szFullExePath[MAX_PATH + 1];
 
-		bool operator()(const LPCWSTR& szFolder) const
-		{
-			HRESULT hr = PathDirectoryContainsPath(szFolder, szFullExePath);
-			return (hr == S_OK);
-		}
+		bool operator()(const LPCWSTR& szFolder) const;
 	} visInFolder_;
 };
