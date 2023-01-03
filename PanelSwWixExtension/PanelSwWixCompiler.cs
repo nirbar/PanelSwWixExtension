@@ -3331,7 +3331,7 @@ namespace PanelSw.Wix.Extensions
             {
                 if (IsMyAttribute(element, attrib))
                 {
-                    switch (attrib.Name.LocalName.ToLower())
+                    switch (attrib.Name.LocalName)
                     {
                         case "Url":
                             url = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);

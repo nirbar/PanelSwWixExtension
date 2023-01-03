@@ -1,0 +1,26 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension">
+  <Package Name="TelemetryUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="Microsoft" UpgradeCode="4ba1a99f-7eb4-491d-882d-b4d69a91c63b" InstallerVersion="200">
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+    <Feature Id="ProductFeature" Title="TelemetryUT" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+  </Package>
+
+  <Fragment>
+    <Property Id="MSIFASTINSTALL" Value="1"></Property>
+    <PanelSW:Telemetry Page="/search?q=panel-sw" Url="www.google.co.il" Method="GET" OnStart="yes" />
+
+    <StandardDirectory Id="ProgramFilesFolder">
+      <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+    </StandardDirectory>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="Test">
+        <File Source="$(sys.SOURCEFILEPATH)" KeyPath="yes"/>
+      </Component>
+    </ComponentGroup>
+  </Fragment>
+</Wix>
