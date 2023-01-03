@@ -6,7 +6,7 @@
     <PanelSwIncPath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\include\'))</PanelSwIncPath>
     <IncludePath>$(PanelSwIncPath);$(IncludePath)</IncludePath>
 
-    <PanelSwLibPath Condition="'$(PlatformToolset)'=='v142' OR '$(PlatformToolset)'=='v141' OR '$(PlatformToolset)'=='v140'">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\lib\v142\'))</PanelSwLibPath>
+    <PanelSwLibPath Condition="$(PlatformToolset.ToLower().StartsWith('v14'))">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\lib\v142\'))</PanelSwLibPath>
     <LibraryPath Condition="'$(PanelSwLibPath)' != ''">$(PanelSwLibPath);$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   

@@ -9,12 +9,12 @@
     <Manufacturer>Panel::Software</Manufacturer>
 
     <!--
-    <NugetPrereleaseVersion>-psw-wix</NugetPrereleaseVersion>
+    <NugetPrereleaseVersion>-rc.1</NugetPrereleaseVersion>
     -->
     
     <!-- CMake -->
     <CMakeDir Condition="'$(CMakeDir)'==''">D:\Tools\cmake-3.21.3-windows-x86_64\</CMakeDir>
-    <CMakeVsVersion Condition="'$(CMakeVsVersion)'==''">Visual Studio 16 2019</CMakeVsVersion>
+    <CMakeVsVersion Condition="'$(CMakeVsVersion)'==''">Visual Studio 17 2022</CMakeVsVersion>
     <PlatformToolset Condition="'$(PlatformToolset)'==''">v142</PlatformToolset>
     <XPDeprecationWarning>false</XPDeprecationWarning>
 

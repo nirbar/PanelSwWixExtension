@@ -1,9 +1,9 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <Import Project="$(SolutionDir)TidyBuild.user.targets" Condition="Exists('$(SolutionDir)TidyBuild.user.targets')" />
 
-  <Target Name="NugetPack" AfterTargets="Build" Condition="'$(Configuration)'=='Release' And '$(DisableNuget)'=='' And Exists('$(ProjectDir)$(MSBuildProjectName)$(NugetPrereleaseVersion).nuspec')">
-    <Exec Command='"$(NugetDir)nuget.exe" pack "$(ProjectDir)$(MSBuildProjectName)$(NugetPrereleaseVersion).nuspec" -Version "$(FullVersion)$(NugetPrereleaseVersion)" -OutputDirectory "$(SolutionDir)build\nuget-out"' 
+  <Target Name="NugetPack" AfterTargets="Build" Condition="'$(Configuration)'=='Release' And '$(DisableNuget)'=='' And Exists('$(ProjectDir)$(MSBuildProjectName).nuspec')">
+    <Exec Command='"$(NugetDir)nuget.exe" pack "$(ProjectDir)$(MSBuildProjectName).nuspec" -Version "$(FullVersion)$(NugetPrereleaseVersion)" -OutputDirectory "$(SolutionDir)build\nuget-out"' 
           WorkingDirectory="$(ProjectDir)"/>
   </Target>
 </Project>
