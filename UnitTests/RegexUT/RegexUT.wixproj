@@ -16,7 +16,7 @@
     </WixExtension>
     <PackageReference Include="WixToolset.Util.wixext" Version="4.0.0-rc.1" />
     <PackageReference Include="MSBuildTasks" Version="1.5.0.235" />
-    <PackageReference Include="TidyBuild" Version="1.5.0" />
+    <PackageReference Include="TidyBuild" Version="1.5.1" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Unicode.ini" />
