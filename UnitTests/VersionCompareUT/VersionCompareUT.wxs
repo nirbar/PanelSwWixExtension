@@ -1,62 +1,62 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension">
-  <Product Id="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}" Name="VersionCompareUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}">
-    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
-
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension">
+  <Package Name="VersionCompareUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}" InstallerVersion="200" ProductCode="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}">
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
-    <MediaTemplate />
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <Component Directory="INSTALLFOLDER">
-        <File Source="$(sys.SOURCEFILEPATH)"/>
+        <File Source="$(sys.SOURCEFILEPATH)" />
       </Component>
     </Feature>
 
-    <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder">
-        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
-      </Directory>
-    </Directory>
-
     <Property Id="TEST_SMALLER">
-      <PanelSW:VersionCompare Version1="1.9.0.0" Version2="1.10.0.0"/>
+      <PanelSW:VersionCompare Version1="1.9.0.0" Version2="1.10.0.0" />
     </Property>
-    <Condition Message="1.9.0.0 is smaller than 1.10.0.0"><![CDATA[TEST_SMALLER<0]]></Condition>
+    <Launch Condition="TEST_SMALLER&lt;0" Message="1.9.0.0 is smaller than 1.10.0.0" />
 
     <Property Id="TEST_LARGER">
-      <PanelSW:VersionCompare Version2="1.9.0.0" Version1="1.10.0.0"/>
+      <PanelSW:VersionCompare Version2="1.9.0.0" Version1="1.10.0.0" />
     </Property>
-    <Condition Message="1.10.0.0 is larger than 1.9.0.0"><![CDATA[TEST_LARGER>0]]></Condition>
+    <Launch Condition="TEST_LARGER&gt;0" Message="1.10.0.0 is larger than 1.9.0.0" />
 
     <Property Id="TEST_EQUAL">
-      <PanelSW:VersionCompare Version2="1.10.0.0" Version1="1.010.0.0"/>
+      <PanelSW:VersionCompare Version2="1.10.0.0" Version1="1.010.0.0" />
     </Property>
-    <Condition Message="1.10.0.0 is same as 1.010.0.0"><![CDATA[TEST_EQUAL=0]]></Condition>
+    <Launch Condition="TEST_EQUAL=0" Message="1.10.0.0 is same as 1.010.0.0" />
 
-    <Property Id="VER1" Value="1.0.9.58"/>
-    <Property Id="VER2" Value="1.0.10"/>
-    <Property Id="VER3" Value="1.0.010"/>
+    <Property Id="VER1" Value="1.0.9.58" />
+    <Property Id="VER2" Value="1.0.10" />
+    <Property Id="VER3" Value="1.0.010" />
 
     <Property Id="TEST_SMALLER1">
-      <PanelSW:VersionCompare Version1="[VER1]" Version2="[VER2]"/>
+      <PanelSW:VersionCompare Version1="[VER1]" Version2="[VER2]" />
     </Property>
-    <Condition Message="[VER1] is smaller than [VER2]"><![CDATA[TEST_SMALLER1<0]]></Condition>
+    <Launch Condition="TEST_SMALLER1&lt;0" Message="[VER1] is smaller than [VER2]" />
 
     <Property Id="TEST_LARGER1">
-      <PanelSW:VersionCompare Version1="[VER2]" Version2="[VER1]"/>
+      <PanelSW:VersionCompare Version1="[VER2]" Version2="[VER1]" />
     </Property>
-    <Condition Message="[VER2] is larger than [VER1]"><![CDATA[TEST_LARGER1>0]]></Condition>
+    <Launch Condition="TEST_LARGER1&gt;0" Message="[VER2] is larger than [VER1]" />
 
     <Property Id="TEST_EQUAL1">
-      <PanelSW:VersionCompare Version2="[VER2]" Version1="[VER3]"/>
+      <PanelSW:VersionCompare Version2="[VER2]" Version1="[VER3]" />
     </Property>
-    <Condition Message="[VER2] is same as [VER3]"><![CDATA[TEST_EQUAL1=0]]></Condition>
+    <Launch Condition="TEST_EQUAL1=0" Message="[VER2] is same as [VER3]" />
+
+    <Property Id="TEST_NO_VER">
+      <PanelSW:VersionCompare Version2="abcd" Version1="efgh" />
+    </Property>
+    <Launch Condition="Not TEST_NO_VER" Message="Expected an empty result" />
 
     <InstallExecuteSequence>
-      <Custom Action="WixExitEarlyWithSuccess" After="LaunchConditions"/>
+      <Custom Action="TerminateSuccessfully_Immediate" After="LaunchConditions" />
     </InstallExecuteSequence>
     <InstallUISequence>
-      <Custom Action="WixExitEarlyWithSuccess" After="LaunchConditions"/>
+      <Custom Action="TerminateSuccessfully_Immediate" After="LaunchConditions" />
     </InstallUISequence>
-  </Product>
+    <CustomActionRef Id="TerminateSuccessfully_Immediate"/>
+
+    <StandardDirectory Id="ProgramFilesFolder">
+      <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+    </StandardDirectory>
+  </Package>
 </Wix>
