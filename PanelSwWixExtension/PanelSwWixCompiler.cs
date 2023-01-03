@@ -2561,7 +2561,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttributesWithOtherAttribute(sourceLineNumbers, element.Name.LocalName, "User", "Password"));
             }
 
-            if (CheckNoCData(element) && !Messaging.EncounteredError)
+            if (!Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "TaskScheduler");
 
