@@ -1,3 +1,4 @@
 EXPORTS
-    CreateBootstrapperBAFunction
+    BAFunctionsCreate
+    BAFunctionsDestroy
 
