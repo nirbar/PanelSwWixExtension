@@ -14,7 +14,7 @@ name: "CodeQL"
 on:
   push:
     tags:
-      - v*
+      - wix3-v*
   workflow_dispatch:
 
 jobs:
