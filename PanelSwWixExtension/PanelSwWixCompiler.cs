@@ -1096,7 +1096,7 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private enum JsonFormatting
+        public enum JsonFormatting
         {
             Raw,
             String,
@@ -1309,7 +1309,7 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private enum BackupAndRestore_deferred_Schedule
+        public enum BackupAndRestore_deferred_Schedule
         {
             BackupAndRestore_deferred_Before_InstallFiles,
             BackupAndRestore_deferred_After_DuplicateFiles,
@@ -1658,7 +1658,7 @@ namespace PanelSw.Wix.Extensions
         }
 
         [Flags]
-        private enum SqlExecOn
+        public enum SqlExecOn
         {
             None = 0,
             Install = 1,
@@ -2679,7 +2679,7 @@ namespace PanelSw.Wix.Extensions
         }
 
         [Flags]
-        private enum CustomUninstallKeyAttributes
+        public enum CustomUninstallKeyAttributes
         {
             write = 1,
             delete = 2
@@ -2758,7 +2758,7 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private enum ReadIniValuesAttributes
+        public enum ReadIniValuesAttributes
         {
             None = 0,
             IgnoreErrors = 1
@@ -2832,7 +2832,7 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private enum RegistryArea
+        public enum RegistryArea
         {
             x86,
             x64,
@@ -3173,7 +3173,7 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private enum XmlSearchMatch
+        public enum XmlSearchMatch
         {
             first,
             all,
@@ -3419,7 +3419,7 @@ namespace PanelSw.Wix.Extensions
         }
 
         [Flags]
-        private enum ExecutePhase
+        public enum ExecutePhase
         {
             None = 0,
             OnExecute = 1,
@@ -3803,7 +3803,7 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private enum FileEncoding
+        public enum FileEncoding
         {
             AutoDetect,
             MultiByte,
@@ -3889,7 +3889,7 @@ namespace PanelSw.Wix.Extensions
         }
 
         [Flags]
-        private enum DeletePathFlags
+        public enum DeletePathFlags
         {
             IgnoreMissing = 1,
             IgnoreErrors = 2 * IgnoreMissing,
