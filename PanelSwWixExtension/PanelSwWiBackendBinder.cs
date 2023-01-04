@@ -98,71 +98,88 @@ namespace PanelSw.Wix.Extensions
         // Include some WiX/MSI tables
         private void IncludeWixTables(WindowsInstallerData data, Dictionary<string, List<ForeignRelation>> tableForeignKeys)
         {
+            Table binaryTable = data.Tables["Binary"];
+            Table fileTable = data.Tables["File"];
             Table propertyTable = data.Tables["Property"];
             Table componentTable = data.Tables["Component"];
             Table directoryTable = data.Tables["Directory"];
-            Table userTable = data.Tables["User"];
-            Table fileShareTable = data.Tables["FileShare"];
-            Table groupTable = data.Tables["Group"];
+            Table userTable = data.Tables["Wix4User"];
+            Table fileShareTable = data.Tables["Wix4FileShare"];
+            Table groupTable = data.Tables["Wix4Group"];
+            Table xmlConfigTable = data.Tables["Wix4XmlConfig"];
 
             // Windows Installer tables
             tableForeignKeys["AppSearch"] = new List<ForeignRelation>();
             tableForeignKeys["AppSearch"].Add(new ForeignRelation(0, propertyTable, 0));
 
-            tableForeignKeys["ServiceConfig"] = new List<ForeignRelation>();
-            tableForeignKeys["ServiceConfig"].Add(new ForeignRelation(1, componentTable, 0));
+            tableForeignKeys["MsiServiceConfig"] = new List<ForeignRelation>();
+            tableForeignKeys["MsiServiceConfig"].Add(new ForeignRelation(5, componentTable, 0));
 
             // WixUtilExtension
-            tableForeignKeys["WixCloseApplication"] = new List<ForeignRelation>();
+            tableForeignKeys["Wix4CloseApplication"] = new List<ForeignRelation>();
 
-            tableForeignKeys["WixRemoveFolderEx"] = new List<ForeignRelation>();
-            tableForeignKeys["WixRemoveFolderEx"].Add(new ForeignRelation(1, componentTable, 0));
+            tableForeignKeys["Wix4RemoveFolderEx"] = new List<ForeignRelation>();
+            tableForeignKeys["Wix4RemoveFolderEx"].Add(new ForeignRelation(1, componentTable, 0));
 
-            tableForeignKeys["WixRestartResource"] = new List<ForeignRelation>();
-            tableForeignKeys["WixRestartResource"].Add(new ForeignRelation(1, componentTable, 0));
+            tableForeignKeys["Wix4RemoveRegistryKeyEx"] = new List<ForeignRelation>();
+            tableForeignKeys["Wix4RemoveRegistryKeyEx"].Add(new ForeignRelation(1, componentTable, 0));
 
-            tableForeignKeys["FileShare"] = new List<ForeignRelation>();
-            tableForeignKeys["FileShare"].Add(new ForeignRelation(2, componentTable, 0));
-            tableForeignKeys["FileShare"].Add(new ForeignRelation(4, directoryTable, 0));
-            tableForeignKeys["FileShare"].Add(new ForeignRelation(5, userTable, 0));
+            tableForeignKeys["Wix4RestartResource"] = new List<ForeignRelation>();
+            tableForeignKeys["Wix4RestartResource"].Add(new ForeignRelation(1, componentTable, 0));
 
-            tableForeignKeys["FileSharePermissions"] = new List<ForeignRelation>();
-            tableForeignKeys["FileSharePermissions"].Add(new ForeignRelation(0, fileShareTable, 0));
+            tableForeignKeys["Wix4FileShare"] = new List<ForeignRelation>();
+            tableForeignKeys["Wix4FileShare"].Add(new ForeignRelation(2, componentTable, 0));
+            tableForeignKeys["Wix4FileShare"].Add(new ForeignRelation(4, directoryTable, 0));
 
-            tableForeignKeys["Group"] = new List<ForeignRelation>();
-            tableForeignKeys["Group"].Add(new ForeignRelation(1, componentTable, 0));
+            tableForeignKeys["Wix4FileSharePermissions"] = new List<ForeignRelation>();
+            tableForeignKeys["Wix4FileSharePermissions"].Add(new ForeignRelation(0, fileShareTable, 0));
+            tableForeignKeys["Wix4FileSharePermissions"].Add(new ForeignRelation(1, userTable, 0));
 
-            tableForeignKeys["WixInternetShortcut"] = new List<ForeignRelation>();
-            tableForeignKeys["WixInternetShortcut"].Add(new ForeignRelation(1, componentTable, 0));
-            tableForeignKeys["WixInternetShortcut"].Add(new ForeignRelation(2, directoryTable, 0));
+            tableForeignKeys["Wix4Group"] = new List<ForeignRelation>();
+            tableForeignKeys["Wix4Group"].Add(new ForeignRelation(1, componentTable, 0));
 
-            tableForeignKeys["PerformanceCategory"] = new List<ForeignRelation>();
-            tableForeignKeys["PerformanceCategory"].Add(new ForeignRelation(1, componentTable, 0));
+            tableForeignKeys["Wix4InternetShortcut"] = new List<ForeignRelation>();
+            tableForeignKeys["Wix4InternetShortcut"].Add(new ForeignRelation(1, componentTable, 0));
+            tableForeignKeys["Wix4InternetShortcut"].Add(new ForeignRelation(2, directoryTable, 0));
 
-            tableForeignKeys["Perfmon"] = new List<ForeignRelation>();
-            tableForeignKeys["Perfmon"].Add(new ForeignRelation(0, componentTable, 0));
+            tableForeignKeys["Wix4PerformanceCategory"] = new List<ForeignRelation>();
+            tableForeignKeys["Wix4PerformanceCategory"].Add(new ForeignRelation(1, componentTable, 0));
 
-            tableForeignKeys["PerfmonManifest"] = new List<ForeignRelation>();
-            tableForeignKeys["PerfmonManifest"].Add(new ForeignRelation(0, componentTable, 0));
+            tableForeignKeys["Wix4Perfmon"] = new List<ForeignRelation>();
+            tableForeignKeys["Wix4Perfmon"].Add(new ForeignRelation(0, componentTable, 0));
 
-            tableForeignKeys["EventManifest"] = new List<ForeignRelation>();
-            tableForeignKeys["EventManifest"].Add(new ForeignRelation(0, componentTable, 0));
+            tableForeignKeys["Wix4PerfmonManifest"] = new List<ForeignRelation>();
+            tableForeignKeys["Wix4PerfmonManifest"].Add(new ForeignRelation(0, componentTable, 0));
 
-            tableForeignKeys["SecureObjects"] = new List<ForeignRelation>();
-            tableForeignKeys["SecureObjects"].Add(new ForeignRelation(5, componentTable, 0));
+            tableForeignKeys["Wix4EventManifest"] = new List<ForeignRelation>();
+            tableForeignKeys["Wix4EventManifest"].Add(new ForeignRelation(0, componentTable, 0));
 
-            tableForeignKeys["User"] = new List<ForeignRelation>();
-            tableForeignKeys["User"].Add(new ForeignRelation(1, componentTable, 0));
+            tableForeignKeys["Wix4SecureObject"] = new List<ForeignRelation>();
+            tableForeignKeys["Wix4SecureObject"].Add(new ForeignRelation(6, componentTable, 0));
 
-            tableForeignKeys["UserGroup"] = new List<ForeignRelation>();
-            tableForeignKeys["UserGroup"].Add(new ForeignRelation(0, userTable, 0));
-            tableForeignKeys["UserGroup"].Add(new ForeignRelation(1, groupTable, 0));
+            tableForeignKeys["Wix4ServiceConfig"] = new List<ForeignRelation>();
+            tableForeignKeys["Wix4ServiceConfig"].Add(new ForeignRelation(1, componentTable, 0));
 
-            tableForeignKeys["XmlFile"] = new List<ForeignRelation>();
-            tableForeignKeys["XmlFile"].Add(new ForeignRelation(6, componentTable, 0));
+            tableForeignKeys["Wix4TouchFile"] = new List<ForeignRelation>();
+            tableForeignKeys["Wix4TouchFile"].Add(new ForeignRelation(1, componentTable, 0));
 
-            tableForeignKeys["XmlConfig"] = new List<ForeignRelation>();
-            tableForeignKeys["XmlConfig"].Add(new ForeignRelation(7, componentTable, 0));
+            tableForeignKeys["Wix4User"] = new List<ForeignRelation>();
+            tableForeignKeys["Wix4User"].Add(new ForeignRelation(1, componentTable, 0));
+
+            tableForeignKeys["Wix4UserGroup"] = new List<ForeignRelation>();
+            tableForeignKeys["Wix4UserGroup"].Add(new ForeignRelation(0, userTable, 0));
+            tableForeignKeys["Wix4UserGroup"].Add(new ForeignRelation(1, groupTable, 0));
+
+            tableForeignKeys["Wix4XmlFile"] = new List<ForeignRelation>();
+            tableForeignKeys["Wix4XmlFile"].Add(new ForeignRelation(6, componentTable, 0));
+
+            tableForeignKeys["Wix4XmlConfig"] = new List<ForeignRelation>();
+            tableForeignKeys["Wix4XmlConfig"].Add(new ForeignRelation(2, xmlConfigTable, 0));
+            tableForeignKeys["Wix4XmlConfig"].Add(new ForeignRelation(8, componentTable, 0));
+
+            tableForeignKeys["Wix4FormatFile"] = new List<ForeignRelation>();
+            tableForeignKeys["Wix4FormatFile"].Add(new ForeignRelation(0, binaryTable, 0));
+            tableForeignKeys["Wix4FormatFile"].Add(new ForeignRelation(1, fileTable, 0));
         }
 
         private void ResolveAppSearch(WindowsInstallerData data, IDictionary<Row, string> rowToFilterId)
