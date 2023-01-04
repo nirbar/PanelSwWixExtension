@@ -211,7 +211,7 @@
   <Target Name="BuildProtobuf" BeforeTargets="ProtoBuffCompile" Condition="!Exists('$(BuildFolder)\protobuf\$(Configuration)\protoc.exe')">
     <MakeDir Directories="$(BuildFolder)\protobuf" />
     <MakeDir Directories="$(IntDir)\..\protobuf" />
-    <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; -G &quot;$(CMakeVsVersion)&quot; -A Win32 -T $(PlatformToolset),host=x86 ..\..\protobuf\cmake -Dprotobuf_BUILD_TESTS=OFF" WorkingDirectory="$(BuildFolder)\protobuf" />
+    <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; -G &quot;$(CMakeVsVersion)&quot; -A Win32 -T $(PlatformToolset),host=x86 ..\..\protobuf -Dprotobuf_BUILD_TESTS=OFF" WorkingDirectory="$(BuildFolder)\protobuf" />
     <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; --build . --config $(Configuration)" WorkingDirectory="$(BuildFolder)\protobuf" />
   </Target>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

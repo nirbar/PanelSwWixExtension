@@ -105,10 +105,10 @@
     <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
     <Import Project="..\packages\TidyBuild.1.5.1\build\TidyBuild.targets" Condition="Exists('..\packages\TidyBuild.1.5.1\build\TidyBuild.targets')" />
   </ImportGroup>
-  <Target Name="BuildProtobuf" BeforeTargets="ProtoBuffCompile">
+  <Target Name="BuildProtobuf" BeforeTargets="ProtoBuffCompile" Condition="!Exists('$(BuildFolder)\protobuf\$(Configuration)\libprotobuf-lite.lib')">
     <MakeDir Directories="$(BuildFolder)\protobuf" />
     <MakeDir Directories="$(IntDir)\..\protobuf" />
-    <Exec Command="&quot;$(CMakeDir)\bin\cmake.exe&quot; -G &quot;Visual Studio 15 2017&quot; -T $(PlatformToolset) ..\..\protobuf\cmake -Dprotobuf_BUILD_TESTS=OFF" WorkingDirectory="$(BuildFolder)\protobuf" />
+    <Exec Command="&quot;$(CMakeDir)\bin\cmake.exe&quot; -G &quot;$(CMakeVsVersion)&quot; -A Win32 -T $(PlatformToolset) ..\..\protobuf -Dprotobuf_BUILD_TESTS=OFF" WorkingDirectory="$(BuildFolder)\protobuf" />
     <Exec Command="&quot;$(CMakeDir)\bin\cmake.exe&quot; --build . --config $(Configuration)" WorkingDirectory="$(BuildFolder)\protobuf" />
   </Target>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
