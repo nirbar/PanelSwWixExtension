@@ -17,7 +17,7 @@ namespace PanelSw.Wix.Extensions
     /// </summary>
     public sealed class PanelSwWixCompiler : BaseCompilerExtension
     {
-        public override XNamespace Namespace => XNamespace.Get("http://schemas.panel-sw.co.il/wix/WixExtension");
+        public override XNamespace Namespace => PanelSwWixExtension.Namespace;
 
         /// <summary>
         /// Processes an element for the Compiler.
