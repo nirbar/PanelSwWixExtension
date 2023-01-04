@@ -1,95 +1,69 @@
-﻿<?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
-
-  <Product Id="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}" Name="XmlSearchUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}">
-    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
-
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
+  <Package Name="XmlSearchUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}" InstallerVersion="200" ProductCode="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}">
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
-    <MediaTemplate />
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
-  </Product>
+  </Package>
 
   <Fragment>
-    <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder">
-        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
-      </Directory>
-    </Directory>
-
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
+    <Property Id="SOURCE_FILE" Value="$(sys.SOURCEFILEPATH)"/>
 
     <!-- XSLPattern -->
     <Property Id="XSLPATTERNTEST">
-      <PanelSW:XmlSearch Id="Test1"
-                         FilePath="$(sys.SOURCEFILEPATH)"
-                         XPath="/Wix/Product/@Id"
-                         Language="XSLPattern"
-                         Match="enforceSingle"/>
+      <PanelSW:XmlSearch FilePath="[SOURCE_FILE]" XPath="/Wix/Package/@ProductCode" Language="XSLPattern" Match="enforceSingle" />
     </Property>
-    <Condition Message="Expected XSLPATTERNTEST=[ProductCode]"><![CDATA[XSLPATTERNTEST=ProductCode]]></Condition>
-
+    <Launch Condition="XSLPATTERNTEST=ProductCode" Message="Expected XSLPATTERNTEST=[ProductCode]" />
 
     <!-- XPath with namespace -->
     <!-- fn:substring-before(/wix:Wix/wix:Product[\[]@Name='[ProductName]'[\]]/@Id,'[\}]') -->
-    <Property Id="HiddenProductName" Hidden="yes"/>
-    <SetProperty Id="HiddenProductName" Value="[ProductName]" Sequence="both" Before="XmlSearch"/>
+    <Property Id="HiddenProductName" Hidden="yes" />
+    <SetProperty Id="HiddenProductName" Value="[ProductName]" Sequence="both" Before="XmlSearch" />
     <Property Id="XPATHTEST">
-      <PanelSW:XmlSearch Id="Test2"
-                         FilePath="$(sys.SOURCEFILEPATH)"
-                         XPath="/wix:Wix/wix:Product[\[]@Name='[HiddenProductName]'[\]]/@Id"
-                         Language="XPath"
-                         Namespaces="xmlns:wix='http://schemas.microsoft.com/wix/2006/wi' xmlns:fn='http://www.w3.org/2005/xpath-functions'"
-                         Match="enforceSingle"/>
+      <PanelSW:XmlSearch FilePath="[SOURCE_FILE]" XPath="/wix:Wix/wix:Package[\[]@Name='[HiddenProductName]'[\]]/@ProductCode" Language="XPath" Namespaces="xmlns:wix='http://wixtoolset.org/schemas/v4/wxs' xmlns:fn='http://www.w3.org/2005/xpath-functions'" Match="enforceSingle" />
     </Property>
-    <Condition Message="Expected XPATHTEST=[ProductCode]"><![CDATA[XPATHTEST=ProductCode]]></Condition>
+    <Launch Condition="XPATHTEST=ProductCode" Message="Expected XPATHTEST=[ProductCode]" />
 
     <!-- XPath with namespace -->
     <!-- fn:substring-before(/wix:Wix/wix:Product[\[]@Name='[ProductName]'[\]]/@Id,'[\}]') -->
     <Property Id="XPATHTEST2">
-      <PanelSW:XmlSearch Id="Test3"
-                         FilePath="$(sys.SOURCEFILEPATH)"
-                         XPath="/wix:Wix/wix:Product[\[]contains( ./@Name,'[ProductName]')[\]]/@Id"
-                         Language="XPath"
-                         Namespaces="xmlns:wix='http://schemas.microsoft.com/wix/2006/wi' xmlns:fn='http://www.w3.org/2005/xpath-functions'"
-                         Match="enforceSingle"/>
+      <PanelSW:XmlSearch FilePath="[SOURCE_FILE]" XPath="/wix:Wix/wix:Package[\[]contains( ./@Name,'[ProductName]')[\]]/@ProductCode" Language="XPath" Namespaces="xmlns:wix='http://wixtoolset.org/schemas/v4/wxs' xmlns:fn='http://www.w3.org/2005/xpath-functions'" Match="enforceSingle" />
     </Property>
-    <Condition Message="Expected XPATHTEST2=[ProductCode]"><![CDATA[XPATHTEST2=ProductCode]]></Condition>
+    <Launch Condition="XPATHTEST2=ProductCode" Message="Expected XPATHTEST2=[ProductCode]" />
 
     <!-- Not failing on no-match -->
     <Property Id="XPATHTEST3">
-      <PanelSW:XmlSearch Id="Test4"
-                         FilePath="$(sys.SOURCEFILEPATH)"
-                         XPath="/wix:Wix/wix:NoProduct[\[]contains( ./@Name,'[ProductName]')[\]]/@Id"
-                         Language="XPath"
-                         Namespaces="xmlns:wix='http://schemas.microsoft.com/wix/2006/wi' xmlns:fn='http://www.w3.org/2005/xpath-functions'"
-                         Match="first"/>
+      <PanelSW:XmlSearch FilePath="[SOURCE_FILE]" XPath="/wix:Wix/wix:NoPackage[\[]contains( ./@Name,'[ProductName]')[\]]/@ProductCode" Language="XPath" Namespaces="xmlns:wix='http://wixtoolset.org/schemas/v4/wxs' xmlns:fn='http://www.w3.org/2005/xpath-functions'" Match="first" />
     </Property>
+    <Launch Condition="Not XPATHTEST3" Message="Expected XPATHTEST3 to be empty" />
+
+    <StandardDirectory Id="ProgramFilesFolder">
+      <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+    </StandardDirectory>
   </Fragment>
 
   <Fragment>
-    <Binary SourceFile="$(sys.SOURCEFILEDIR)XSLTFile1.xslt" Id="XslTransform"/>
-    <Property Id="FILE_NAME" Value="someName.xml" Hidden="yes"/>
+    <Binary SourceFile="$(sys.SOURCEFILEDIR)XSLTFile1.xslt" Id="XslTransform" />
+    <Property Id="FILE_NAME" Value="someName.xml" Hidden="yes" />
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component>
-        <File Source="$(sys.SOURCEFILEPATH)">
+        <File Source="$(sys.SOURCEFILEPATH)" Id="XmlSearch.wxs">
           <PanelSW:XslTransform BinaryKey="XslTransform">
             <!-- Expecting to get <File Name="someNAME.xml" -->
-            <PanelSW:Replace Text="\[\[]FILE_NAME\[\]]" Replacement="[FILE_NAME]"/>
+            <PanelSW:Replace Text="\[\[]FILE_NAME\[\]]" Replacement="[FILE_NAME]" />
           </PanelSW:XslTransform>
         </File>
 
         <!--Expecting to do nothing since [FILE_NAME] was already replaced -->
         <PanelSW:XslTransform BinaryKey="XslTransform" FilePath="[#XmlSearch.wxs]">
-          <PanelSW:Replace Text="\[\[]FILE_NAME\[\]]" Replacement="[SOME_TEXT]"/>
+          <PanelSW:Replace Text="\[\[]FILE_NAME\[\]]" Replacement="[SOME_TEXT]" />
         </PanelSW:XslTransform>
 
         <!--Expecting to do nothing since [FILE_NAME] was already replaced -->
-        <PanelSW:XslTransform BinaryKey="XslTransform" FilePath="$(sys.SOURCEFILEPATH)" On="uninstall">
-          <PanelSW:Replace Text="\[\[]FILE_NAME\[\]]" Replacement="no-file"/>
+        <PanelSW:XslTransform BinaryKey="XslTransform" FilePath="[#XmlSearch.wxs]" On="uninstall">
+          <PanelSW:Replace Text="\[\[]FILE_NAME\[\]]" Replacement="no-file" />
         </PanelSW:XslTransform>
       </Component>
     </ComponentGroup>

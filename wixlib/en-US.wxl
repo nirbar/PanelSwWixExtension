@@ -1,66 +1,56 @@
-<?xml version="1.0" encoding="utf-8"?>
-<WixLocalization Culture="en-us" xmlns="http://schemas.microsoft.com/wix/2006/localization">
-  <String Overridable="yes" Id="CustomUninstallKey">Writing additional registry values</String>
-  <String Overridable="yes" Id="RemoveRegistryValue">Removing additional registry values</String>
-  <String Overridable="yes" Id="Telemetry">Posting telemetry data</String>
-  <String Overridable="yes" Id="ShellExecute">Executing command "[1]" [2] in "[3]" with verb [4]</String>
-  <String Overridable="yes" Id="TaskScheduler">Configuring Scheduled Tasks</String>
-  <String Overridable="yes" Id="ExecOnComponent"><![CDATA[Executing custom actions]]></String>
-  <String Overridable="yes" Id="ExecOnComponentTemplate"><![CDATA[Executing [1]]]></String>
-  <String Overridable="yes" Id="ExecOnFailure"><![CDATA[Failed executing command [2]]]></String>
-  <String Overridable="yes" Id="ExecOnConsoleFailure"><![CDATA[Command [2] yielded error
-[3]]]></String>  
-  <String Overridable="yes" Id="ServiceConfig"><![CDATA[Configuring Services]]></String>
-  <String Overridable="yes" Id="ServiceConfigFailure"><![CDATA[Failed configuring service [2]]]></String>
-  <String Overridable="yes" Id="InstallUtil"><![CDATA[Installing .NET service assemblies]]></String>
-  <String Overridable="yes" Id="SqlSearch"><![CDATA[Executing SQL queries]]></String>
-  <String Overridable="yes" Id="PSW_SqlSearchFailure"><![CDATA[Failed executing SQL query '[2]':
-[3]]]>
-  </String>
-  <String Overridable="yes" Id="BackupAndRestore"><![CDATA[Migrating configurations]]></String>
-  <String Overridable="yes" Id="TopShelf"><![CDATA[Installing TopShelf services]]></String>
-  <String Overridable="yes" Id="TopShelfFailure"><![CDATA[Failed configuring service [2]]]></String>
-  <String Overridable="yes" Id="CreateSelfSignCertificate"><![CDATA[Creating self-signed certificates]]></String>
-  <String Overridable="yes" Id="FileRegex"><![CDATA[Find & replace in file]]></String>
-  <String Overridable="yes" Id="FileRegexTemplate"><![CDATA[Editing [1]]]></String>
-  <String Overridable="yes" Id="ForceVersion"><![CDATA[Rewriting file version]]></String>
-  <String Overridable="yes" Id="SetPropertyFromPipe"><![CDATA[Reading properties from pipe]]></String>
-  <String Overridable="yes" Id="EvaluateExpression"><![CDATA[Evaluating expressions]]></String>
-  <String Overridable="yes" Id="CertificateHashSearch"><![CDATA[Find certificate hash]]></String>
-  <String Overridable="yes" Id="ZipFile"><![CDATA[Creating ZIP archive]]></String>
-  <String Overridable="yes" Id="ZipFileTemplate"><![CDATA[Compressing from [1] to [2]]]></String>
-  <String Overridable="yes" Id="Unzip"><![CDATA[Extracting ZIP archive]]></String>
-  <String Overridable="yes" Id="UnzipTemplate"><![CDATA[Extracting from [1] to [2]]]></String>
-  <String Overridable="yes" Id="DiskSpace"><![CDATA[Calculating available disk space]]></String>
-  <String Overridable="yes" Id="Dism"><![CDATA[Enable Windows roles and features]]></String>
-  <String Overridable="yes" Id="DismTemplate"><![CDATA[Enabling [1]]]></String>
-  <String Overridable="yes" Id="DismPackageFailure"><![CDATA[Failed adding a Windows Feature package [2]:
-[3]]]></String>
-  <String Overridable="yes" Id="DismFeatureFailure"><![CDATA[Failed enabling Windows Feature [2]:
-[3]]]></String>
-  <String Overridable="yes" Id="JsonJpath"><![CDATA[Editing Json files]]></String>
-  <String Overridable="yes" Id="JsonJpathTemplate"><![CDATA[Editing [1]]]></String>
-  <String Overridable="yes" Id="JsonJpathSearch"><![CDATA[Searching in Json files]]></String>
-  <String Overridable="yes" Id="AccountSidSearch"><![CDATA[Detecting account security identifier]]></String>
-  <String Overridable="yes" Id="PSW_SqlScript"><![CDATA[Executing SQL scripts]]></String>
-  <String Overridable="yes" Id="PSW_SqlScriptTemplate"><![CDATA[Executing SQL scripts on Server '[1]' Instance '[2]' Database '[3]']]></String>
-  <String Overridable="yes" Id="PSW_SqlScriptFailure"><![CDATA[Failed executing SQL script
-[2]]]>
-  </String>
-  <String Overridable="yes" Id="PSW_WebsiteConfig"><![CDATA[Configuring websites]]></String>
-  <String Overridable="yes" Id="WebsiteConfigFailure"><![CDATA[Failed configuring website [2]
-[3]]]></String>
-  <String Overridable="yes" Id="PSW_VersionCompare"><![CDATA[Comparing versions]]></String>
-  <String Overridable="yes" Id="PSW_PathSearch"><![CDATA[Searching file on PATH]]></String>
-  <String Overridable="yes" Id="PSW_XslTransform"><![CDATA[Applying XSL transforms]]></String>
-  <String Overridable="yes" Id="PSW_ToLowerCase"><![CDATA[Converting to lowercase]]></String>
-  <String Overridable="yes" Id="PSW_CheckRebootRequired"><![CDATA[Checking whether or not reboot is required]]></String>
-  <String Overridable="yes" Id="JsonJpathFailure"><![CDATA[Failed setting JsonJpath '[2]' to '[3]' in file '[4]'.
-[5]]]></String>
-  <String Overridable="yes" Id="WmiSearch"><![CDATA[Executing WMI queries]]></String>
-  <String Overridable="yes" Id="RestartLocalResources"><![CDATA[Restarting resources]]></String>
-  <String Overridable="yes" Id="RestartLocalResourcesTemplate"><![CDATA[Closing [1]]]></String>
-  <String Overridable="yes" Id="Md5Hash"><![CDATA[Computing MD5 hash]]></String>
-  <String Overridable="yes" Id="ConcatFiles"><![CDATA[Reconstructing files]]></String>
-  <String Overridable="yes" Id="ExtractPayload"><![CDATA[Extracting temporary files]]></String>
+﻿<WixLocalization Culture="en-us" xmlns="http://wixtoolset.org/schemas/v4/wxl">
+  <String Overridable="yes" Id="CustomUninstallKey" Value="Writing additional registry values" />
+  <String Overridable="yes" Id="RemoveRegistryValue" Value="Removing additional registry values" />
+  <String Overridable="yes" Id="Telemetry" Value="Posting telemetry data" />
+  <String Overridable="yes" Id="ShellExecute" Value="Executing command &quot;[1]&quot; [2] in &quot;[3]&quot; with verb [4]" />
+  <String Overridable="yes" Id="TaskScheduler" Value="Configuring Scheduled Tasks" />
+  <String Overridable="yes" Id="ExecOnComponent" Value="Executing custom actions" />
+  <String Overridable="yes" Id="ExecOnComponentTemplate" Value="Executing [1]" />
+  <String Overridable="yes" Id="ExecOnFailure" Value="Failed executing command [2]" />
+  <String Overridable="yes" Id="ExecOnConsoleFailure" Value="Command [2] yielded error&#xA;[3]" />  
+  <String Overridable="yes" Id="ServiceConfig" Value="Configuring Services" />
+  <String Overridable="yes" Id="ServiceConfigFailure" Value="Failed configuring service [2]" />
+  <String Overridable="yes" Id="InstallUtil" Value="Installing .NET service assemblies" />
+  <String Overridable="yes" Id="SqlSearch" Value="Executing SQL queries" />
+  <String Overridable="yes" Id="PSW_SqlSearchFailure" Value="Failed executing SQL query '[2]':&#xA;[3]" />
+  <String Overridable="yes" Id="BackupAndRestore" Value="Migrating configurations" />
+  <String Overridable="yes" Id="TopShelf" Value="Installing TopShelf services" />
+  <String Overridable="yes" Id="TopShelfFailure" Value="Failed configuring service [2]" />
+  <String Overridable="yes" Id="CreateSelfSignCertificate" Value="Creating self-signed certificates" />
+  <String Overridable="yes" Id="FileRegex" Value="Find &amp; replace in file" />
+  <String Overridable="yes" Id="FileRegexTemplate" Value="Editing [1]" />
+  <String Overridable="yes" Id="ForceVersion" Value="Rewriting file version" />
+  <String Overridable="yes" Id="SetPropertyFromPipe" Value="Reading properties from pipe" />
+  <String Overridable="yes" Id="EvaluateExpression" Value="Evaluating expressions" />
+  <String Overridable="yes" Id="CertificateHashSearch" Value="Find certificate hash" />
+  <String Overridable="yes" Id="ZipFile" Value="Creating ZIP archive" />
+  <String Overridable="yes" Id="ZipFileTemplate" Value="Compressing from [1] to [2]" />
+  <String Overridable="yes" Id="Unzip" Value="Extracting ZIP archive" />
+  <String Overridable="yes" Id="UnzipTemplate" Value="Extracting from [1] to [2]" />
+  <String Overridable="yes" Id="DiskSpace" Value="Calculating available disk space" />
+  <String Overridable="yes" Id="Dism" Value="Enable Windows roles and features" />
+  <String Overridable="yes" Id="DismTemplate" Value="Enabling [1]" />
+  <String Overridable="yes" Id="DismPackageFailure" Value="Failed adding a Windows Feature package [2]:&#xA;[3]" />
+  <String Overridable="yes" Id="DismFeatureFailure" Value="Failed enabling Windows Feature [2]:&#xA;[3]" />
+  <String Overridable="yes" Id="JsonJpath" Value="Editing Json files" />
+  <String Overridable="yes" Id="JsonJpathTemplate" Value="Editing [1]" />
+  <String Overridable="yes" Id="JsonJpathSearch" Value="Searching in Json files" />
+  <String Overridable="yes" Id="AccountSidSearch" Value="Detecting account security identifier" />
+  <String Overridable="yes" Id="PSW_SqlScript" Value="Executing SQL scripts" />
+  <String Overridable="yes" Id="PSW_SqlScriptTemplate" Value="Executing SQL scripts on Server '[1]' Instance '[2]' Database '[3]'" />
+  <String Overridable="yes" Id="PSW_SqlScriptFailure" Value="Failed executing SQL script&#xA;[2]" />
+  <String Overridable="yes" Id="PSW_WebsiteConfig" Value="Configuring websites" />
+  <String Overridable="yes" Id="WebsiteConfigFailure" Value="Failed configuring website [2]&#xA;[3]" />
+  <String Overridable="yes" Id="PSW_VersionCompare" Value="Comparing versions" />
+  <String Overridable="yes" Id="PSW_PathSearch" Value="Searching file on PATH" />
+  <String Overridable="yes" Id="PSW_XslTransform" Value="Applying XSL transforms" />
+  <String Overridable="yes" Id="PSW_ToLowerCase" Value="Converting to lowercase" />
+  <String Overridable="yes" Id="PSW_CheckRebootRequired" Value="Checking whether or not reboot is required" />
+  <String Overridable="yes" Id="JsonJpathFailure" Value="Failed setting JsonJpath '[2]' to '[3]' in file '[4]'.&#xA;[5]" />
+  <String Overridable="yes" Id="WmiSearch" Value="Executing WMI queries" />
+  <String Overridable="yes" Id="RestartLocalResources" Value="Restarting resources" />
+  <String Overridable="yes" Id="RestartLocalResourcesTemplate" Value="Closing [1]" />
+  <String Overridable="yes" Id="Md5Hash" Value="Computing MD5 hash" />
+  <String Overridable="yes" Id="ConcatFiles" Value="Reconstructing files" />
+  <String Overridable="yes" Id="ExtractPayload" Value="Extracting temporary files" />
 </WixLocalization>

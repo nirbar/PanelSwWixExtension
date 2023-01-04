@@ -1,8 +1,5 @@
-
-#include "stdafx.h"
-#include "..\CaCommon\WixString.h"
+#include "pch.h"
 #include "..\CaCommon\DeferredActionBase.h"
-#include <fileutil.h>
 #include <errno.h>
 #include <objbase.h>
 #include <msxml6.h>

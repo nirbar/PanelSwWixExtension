@@ -1,8 +1,6 @@
-#include "stdafx.h"
-#include <WixString.h>
+#include "pch.h"
 #include <ShellAPI.h>
 #include <Shlobj.h>
-#include <shelutil.h>
 #include <map>
 using namespace std;
 

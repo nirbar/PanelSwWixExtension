@@ -1,8 +1,5 @@
+#include "pch.h"
 #include "FileOperations.h"
-#include "../CaCommon/WixString.h"
-#include <fileutil.h>
-#include <dirutil.h>
-#include <pathutil.h>
 #include <Shellapi.h>
 #include <Shlwapi.h>
 #include "fileOperationsDetails.pb.h"
@@ -247,11 +244,11 @@ HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool
 	ExitOnFailure(hr, "Failed formatting string");
 
 	// Remove trailing slashes
-	for (size_t i = ::wcslen(szFromNull) - 1; ((i > 1) && ((szFromNull[i] == L'\\') || (szFromNull[i] == L'/'))); --i)
+	for (size_t i = ::wcslen(szFrom) - 1; ((i > 1) && ((szFromNull[i] == L'\\') || (szFromNull[i] == L'/'))); --i)
 	{
 		szFromNull[i] = NULL;
 	}
-	for (size_t i = ::wcslen(szToNull) - 1; ((i > 1) && ((szToNull[i] == L'\\') || (szToNull[i] == L'/'))); --i)
+	for (size_t i = ::wcslen(szTo) - 1; ((i > 1) && ((szToNull[i] == L'\\') || (szToNull[i] == L'/'))); --i)
 	{
 		szToNull[i] = NULL;
 	}
@@ -289,6 +286,8 @@ HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool
 			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Failed copying '%ls' to '%ls'; Ignoring error (%i)", szFromNull, szToNull, nRes);
 			ExitFunction1(hr = S_FALSE);
 		}
+		hr = E_FAIL;
+		ExitOnFailure(hr, "Failed copying file '%ls' to '%ls'. Result %i, Aborted=%i", szFromNull, szToNull, nRes, opInfo.fAnyOperationsAborted);
 	}
 	ExitOnWin32Error(nRes, hr, "Failed copying file '%ls' to '%ls'", szFromNull, szToNull);
 	ExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed copying file (operation aborted)");
@@ -647,7 +646,7 @@ LRetry:
 	}
 	else
 	{
-		hr = PathCreateTempFile((LPCWSTR)szParentFolder, szPrefix, INFINITE, FILE_ATTRIBUTE_NORMAL, pszTempName, nullptr);
+		hr = PathCreateTempFile((LPCWSTR)szParentFolder, szPrefix, INFINITE, L"TMP", FILE_ATTRIBUTE_NORMAL, pszTempName, nullptr);
 	}
 	if ((hr == E_PATHNOTFOUND) && szParentFolder.StrLen())
 	{

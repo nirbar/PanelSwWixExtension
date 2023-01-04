@@ -1,34 +1,29 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
-  <Product Id="{769C11E5-D811-4CE3-BE79-CC23725E6B38}" Name="$(var.ProjectName)" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{8DC7207F-59B4-45E6-90B0-75769F8040B8}">
-    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
-
-    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
-    <MediaTemplate />
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
+  <Package Name="$(var.ProjectName)" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{8DC7207F-59B4-45E6-90B0-75769F8040B8}" InstallerVersion="200" ProductCode="{769C11E5-D811-4CE3-BE79-CC23725E6B38}"><MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+    
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
 
-    <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder">
-        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup"/>
-      </Directory>
-    </Directory>
+    
 
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
 
     <ComponentGroup Id="ProductComponents">
       <Component Directory="INSTALLFOLDER">
-        <File Source="$(sys.SOURCEFILEPATH)"/>
+        <File Source="$(sys.SOURCEFILEPATH)" />
       </Component>
     </ComponentGroup>
 
-    <PanelSW:Payload Source="$(sys.SOURCEFILEPATH)" Name="test\txt.txt"/>
-    <CustomAction Id="typeTxt" BinaryKey="WixCA" DllEntry="WixQuietExec64" Execute="deferred" PanelSW:CustomActionData='"CMD" /C "TYPE "[PayloadFolder]test\txt.txt""'/>
+    <PanelSW:Payload Source="$(sys.SOURCEFILEPATH)" Name="test\txt.txt" />
+    <CustomAction Id="typeTxt" DllEntry="WixQuietExec64" Execute="deferred" PanelSW:CustomActionData="&quot;CMD&quot; /C &quot;TYPE &quot;[PayloadFolder]test\txt.txt&quot;&quot;" BinaryRef="Wix4UtilCA_X86" />
     <InstallExecuteSequence>
-      <Custom Action='typeTxt' Before='StopServices'/>
+      <Custom Action="typeTxt" Before="StopServices" />
     </InstallExecuteSequence>
-  </Product>
+  
+      <StandardDirectory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+      </StandardDirectory>
+    </Package>
 </Wix>

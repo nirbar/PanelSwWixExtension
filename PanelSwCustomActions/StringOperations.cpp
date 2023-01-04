@@ -1,4 +1,4 @@
-#include "../CaCommon/WixString.h"
+#include "pch.h"
 
 #define SplitProp L"PROPERTY_TO_SPLIT"
 #define SplitTokenProp L"STRING_SPLIT_TOKEN"
@@ -22,7 +22,7 @@ extern "C" UINT __stdcall SplitString(MSIHANDLE hInstall)
 
 	// Get property-to-split name
 	hr = WcaGetProperty(SplitProp, (LPWSTR*)szPropName);
-	ExitOnFailure1(hr, "Failed getting %ls", SplitProp);
+	ExitOnFailure(hr, "Failed getting %ls", SplitProp);
 	if (szPropName.IsNullOrEmpty())
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "No property name to split...");
@@ -32,7 +32,7 @@ extern "C" UINT __stdcall SplitString(MSIHANDLE hInstall)
 
 	// Get string-to-split
 	hr = WcaGetProperty((LPCWSTR)szPropName, (LPWSTR*)szFullString);
-	ExitOnFailure1(hr, "Failed getting %ls", (LPCWSTR)szPropName);
+	ExitOnFailure(hr, "Failed getting %ls", (LPCWSTR)szPropName);
 	if (szFullString.IsNullOrEmpty())
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "No string to split...");
@@ -42,7 +42,7 @@ extern "C" UINT __stdcall SplitString(MSIHANDLE hInstall)
 
 	// Get token-to-split-by
 	hr = WcaGetProperty(SplitTokenProp, (LPWSTR*)szToken);
-	ExitOnFailure1(hr, "Failed getting %ls", SplitTokenProp);
+	ExitOnFailure(hr, "Failed getting %ls", SplitTokenProp);
 	if (szToken.IsNullOrEmpty())
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "No token to split by...");
@@ -61,7 +61,7 @@ extern "C" UINT __stdcall SplitString(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed formatting string");
 
 		hr = WcaSetProperty((LPCWSTR)szDstPropName, szCurrValue);
-		ExitOnFailure1(hr, "Failed setting property '%ls'", (LPCWSTR)szDstPropName);
+		ExitOnFailure(hr, "Failed setting property '%ls'", (LPCWSTR)szDstPropName);
 	}
 
 	if (hr == E_NOMOREITEMS)
@@ -97,7 +97,7 @@ extern "C" UINT __stdcall TrimString(MSIHANDLE hInstall)
 
 	// Get property-to-trim name
 	hr = WcaGetProperty(TrimProp, (LPWSTR*)szPropName);
-	ExitOnFailure1(hr, "Failed getting %ls", TrimProp);
+	ExitOnFailure(hr, "Failed getting %ls", TrimProp);
 	if (szPropName.IsNullOrEmpty())
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "No property name to trim...");
@@ -107,7 +107,7 @@ extern "C" UINT __stdcall TrimString(MSIHANDLE hInstall)
 
 	// Get string-to-trim
 	hr = WcaGetProperty((LPCWSTR)szPropName, (LPWSTR*)szFullString);
-	ExitOnFailure1(hr, "Failed getting %ls", (LPCWSTR)szPropName);
+	ExitOnFailure(hr, "Failed getting %ls", (LPCWSTR)szPropName);
 	if (szFullString.IsNullOrEmpty())
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "No string to trim...");
@@ -157,12 +157,12 @@ extern "C" UINT __stdcall TrimString(MSIHANDLE hInstall)
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "%ls is all white-spaces", szPropName);
 
 		hr = WcaSetProperty(szPropName, L"");
-		ExitOnFailure1(hr, "Failed setting %ls", (LPCWSTR)szPropName);
+		ExitOnFailure(hr, "Failed setting %ls", (LPCWSTR)szPropName);
 	}
 
 	pFirst = i + (LPCWSTR)szFullString;
 	hr = WcaSetProperty(szPropName, pFirst);
-	ExitOnFailure1(hr, "Failed setting %ls", (LPCWSTR)szPropName);
+	ExitOnFailure(hr, "Failed setting %ls", (LPCWSTR)szPropName);
 
 LExit:
 

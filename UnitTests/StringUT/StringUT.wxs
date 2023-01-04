@@ -1,36 +1,29 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
-
-  <Product Id="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}" Name="StringUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}">
-    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
-
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
+  <Package Name="StringUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}" InstallerVersion="200" ProductCode="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}">
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
-    <MediaTemplate />
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <Component Id="Test" Directory="INSTALLFOLDER">
-        <File Source="$(sys.SOURCEFILEPATH)"/>
+        <File Source="$(sys.SOURCEFILEPATH)" />
       </Component>
     </Feature>
 
-    <Property Id='LOWERCASE_TEST' Value='A TEST for UPPerToLoweR'>
-      <PanelSW:ToLowerCase/>
+    <Property Id="LOWERCASE_TEST" Value="A TEST for UPPerToLoweR">
+      <PanelSW:ToLowerCase />
     </Property>
-    <Condition Message="Expected LOWERCASE_TEST='a test for uppertolower'"><![CDATA[LOWERCASE_TEST="a test for uppertolower"]]></Condition>
+    <Launch Condition="LOWERCASE_TEST=&quot;a test for uppertolower&quot;" Message="Expected LOWERCASE_TEST='a test for uppertolower'" />
     <InstallUISequence>
-      <Custom Action="WixExitEarlyWithSuccess" After="LaunchConditions"/>
+      <Custom Action="TerminateSuccessfully_Immediate" After="LaunchConditions" />
     </InstallUISequence>
     <InstallExecuteSequence>
-      <Custom Action="WixExitEarlyWithSuccess" After="LaunchConditions"/>
+      <Custom Action="TerminateSuccessfully_Immediate" After="LaunchConditions" />
     </InstallExecuteSequence>
+    <CustomActionRef Id="TerminateSuccessfully_Immediate"/>
 
-    <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder">
-        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
-      </Directory>
-    </Directory>
+    <Property Id="MSIFASTINSTALL" Value="7" />
 
-    <Property Id="MSIFASTINSTALL" Value="7"/>
-  </Product>
+    <StandardDirectory Id="ProgramFilesFolder">
+      <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+    </StandardDirectory>
+  </Package>
 </Wix>

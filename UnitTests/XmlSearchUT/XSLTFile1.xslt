@@ -1,6 +1,6 @@
 ﻿<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
                 xmlns:text="my-text"
-                xmlns:wix="http://schemas.microsoft.com/wix/2006/wi"
+                xmlns:wix="http://wixtoolset.org/schemas/v4/wxs"
                 xmlns:msxsl="urn:schemas-microsoft-com:xslt" exclude-result-prefixes="msxsl">
   <xsl:output method="xml" indent="yes" encoding="utf-8" omit-xml-declaration="yes"/>
 

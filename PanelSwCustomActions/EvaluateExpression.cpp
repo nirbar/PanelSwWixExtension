@@ -1,5 +1,4 @@
-#include "../CaCommon/WixString.h"
-#include <memutil.h>
+#include "pch.h"
 #pragma push_macro("min")
 #define min min
 #pragma push_macro("max")

@@ -1,9 +1,6 @@
-#include "stdafx.h"
-#include <wcautil.h>
-#include <strutil.h>
+#include "pch.h"
 #include <list>
 #include <string>
-#include "..\CaCommon\WixString.h"
 #include <Shlwapi.h>
 #pragma comment (lib, "Shlwapi.lib")
 using namespace std;

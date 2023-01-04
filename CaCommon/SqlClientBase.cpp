@@ -1,3 +1,4 @@
+#include "pch.h"
 #include "SqlClientBase.h"
 #include <wcautil.h>
 #include <strutil.h>

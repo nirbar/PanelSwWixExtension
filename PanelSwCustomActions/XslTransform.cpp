@@ -1,11 +1,8 @@
+#include "pch.h"
 #include "XslTransform.h"
 #include "FileOperations.h"
 #include "FileRegex.h"
-#include "../CaCommon/WixString.h"
 #include "XslTransformDetails.pb.h"
-#include <wcautil.h>
-#include <memutil.h>
-#include <fileutil.h>
 #include "google\protobuf\any.h"
 #include <objbase.h>
 #include <msxml6.h>

@@ -1,8 +1,4 @@
-#include "stdafx.h"
-#include <fileutil.h>
-#include <wcautil.h>
-#include <strutil.h>
-#include <memutil.h>
+#include "pch.h"
 #include <shlwapi.h>
 #include <DismApi.h>
 #include <regex>

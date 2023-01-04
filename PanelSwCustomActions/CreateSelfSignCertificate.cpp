@@ -1,7 +1,4 @@
-#include "stdafx.h"
-#include <WixString.h>
-#include <pathutil.h>
-#include <memutil.h>
+#include "pch.h"
 #include <Wincrypt.h>
 #include "FileOperations.h"
 #pragma comment (lib, "Crypt32.lib")
@@ -188,7 +185,7 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall)
 		bRes = ::PFXExportCertStoreEx(hStore, &cryptBlob, password, nullptr, EXPORT_PRIVATE_KEYS | REPORT_NOT_ABLE_TO_EXPORT_PRIVATE_KEY | REPORT_NO_PRIVATE_KEY);
 		ExitOnNullWithLastError(bRes, hr, "Failed exporting certificate memory store");
 
-		hr = PathCreateTempFile(nullptr, L"PFX%05i.tmp", INFINITE, FILE_ATTRIBUTE_NORMAL, (LPWSTR*)szFile, nullptr);
+		hr = PathCreateTempFile(nullptr, L"PFX%05i.tmp", INFINITE, L"PFX", FILE_ATTRIBUTE_NORMAL, (LPWSTR*)szFile, nullptr);
 		ExitOnFailure(hr, "Failed getting temporary file name");
 
 		if (deleteOnCommit)

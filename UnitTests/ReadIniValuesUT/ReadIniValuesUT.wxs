@@ -1,0 +1,42 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension">
+  <Package Name="ReadIniValuesUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="Microsoft" UpgradeCode="d377fd04-a940-4ed2-8d55-e2f1f6f39d2d" InstallerVersion="200" Scope="perUser">
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+    <Property Id="MSIFASTINSTALL" Value="1"></Property>
+
+    <Feature Id="ProductFeature" Title="ReadIniValuesUT" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component Id="JustFile">
+        <File Source="$(sys.SOURCEFILEPATH)"/>
+      </Component>
+    </ComponentGroup>
+
+    <Property Id="TST_TEST_VALUE">
+      <PanelSW:ReadIniValues FilePath="$(var.ProjectDir)TEST.INI" Key="VALUE" Section="SECTION" IgnoreErrors="yes" />
+    </Property>
+    <Property Id="TST_NULL">
+      <PanelSW:ReadIniValues FilePath="$(var.ProjectDir)TEST.INI" Key="NO_VALUE" Section="SECTION" IgnoreErrors="yes" />
+    </Property>
+    <Property Id="TST_NULL_1">
+      <PanelSW:ReadIniValues FilePath="$(var.ProjectDir)TEST1.INI" Key="VALUE" Section="SECTION" IgnoreErrors="yes" />
+    </Property>
+
+    <UI>
+      <Error Id="10000" Message="UnitTest failed" />
+    </UI>
+    <InstallExecuteSequence>
+      <!-- Error if conditions show failure. -->
+      <Custom Action="ReadIniValuesTest" Before="InstallFinalize" Condition="(Not TST_TEST_VALUE=&quot;TEST_VALUE&quot;) Or TST_NULL Or TST_NULL_1" />
+      <!-- Terminate Successfully -->
+      <Custom Action="TerminateSuccessfully_Immediate" After="ReadIniValuesTest"></Custom>
+    </InstallExecuteSequence>
+    <CustomAction Id="ReadIniValuesTest" Error="10000" Execute="immediate" Return="check"></CustomAction>
+
+    <StandardDirectory Id="ProgramFilesFolder">
+      <Directory Id="INSTALLFOLDER" Name="ReadIniValuesUT" />
+    </StandardDirectory>
+  </Package>
+</Wix>

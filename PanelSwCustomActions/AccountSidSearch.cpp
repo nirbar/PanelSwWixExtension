@@ -1,6 +1,5 @@
-#include "stdafx.h"
+#include "pch.h"
 #include <aclutil.h>
-#include "..\CaCommon\WixString.h"
 
 extern "C" UINT __stdcall AccountSidSearch(MSIHANDLE hInstall)
 {

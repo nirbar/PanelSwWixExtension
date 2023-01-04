@@ -1,41 +1,32 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
-  <Product Id="{769C11E5-D811-4CE3-BE79-CC23725E6B38}" Name="$(var.ProjectName)" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{8DC7207F-59B4-45E6-90B0-75769F8040B8}">
-    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
-
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
+  <Package Name="$(var.ProjectName)" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{8DC7207F-59B4-45E6-90B0-75769F8040B8}" InstallerVersion="200" ProductCode="{769C11E5-D811-4CE3-BE79-CC23725E6B38}">
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
-    <MediaTemplate />
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
 
-    <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder">
-        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup">
-          <Directory Id="EmptyDir" Name="Maybe empty">
-            <Directory Id="DeleteMeDir" Name="DeleteMe"/>
-          </Directory>
-        </Directory>
-      </Directory>
-    </Directory>
-
-    <PanelSW:DeletePath Path="[EmptyDir]" OnlyIfEmpty="yes"><![CDATA[Not Installed]]></PanelSW:DeletePath>
-    <PanelSW:DeletePath Path="[DeleteMeDir]FileOperationsUT.wxs"><![CDATA[Not Installed]]></PanelSW:DeletePath>
-    <PanelSW:DeletePath Path="[EmptyDir]" OnlyIfEmpty="yes" AllowReboot="no"><![CDATA[Not Installed]]></PanelSW:DeletePath>
-    <InstallExecuteSequence>
-      <Custom Action="PromptCancel_Deferred" After="DeletePath"/>
-    </InstallExecuteSequence>
+    <PanelSW:DeletePath Path="[EmptyDir]" OnlyIfEmpty="yes" Condition="Not Installed"/>
+    <PanelSW:DeletePath Path="[DeleteMeDir]FileOperationsUT.wxs" Condition="Not Installed"/>
+    <PanelSW:DeletePath Path="[EmptyDir]" OnlyIfEmpty="yes" AllowReboot="no" Condition="Not Installed"/>
 
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
 
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-      <Component Id="Test" Guid="*">
+      <Component Id="Test">
         <File Id="Test" Source="$(sys.SOURCEFILEPATH)" KeyPath="yes">
-          <CopyFile Id="DeleteMeDir" DestinationDirectory="DeleteMeDir"/>
+          <CopyFile Id="DeleteMeDir" DestinationDirectory="DeleteMeDir" />
         </File>
+        <CreateFolder Directory="DeleteMeDir"/>
       </Component>
     </ComponentGroup>
-  </Product>
+
+    <StandardDirectory Id="ProgramFilesFolder">
+      <Directory Id="INSTALLFOLDER" Name="UnitTestSetup">
+        <Directory Id="EmptyDir" Name="Maybe empty">
+          <Directory Id="DeleteMeDir" Name="DeleteMe" />
+        </Directory>
+      </Directory>
+    </StandardDirectory>
+  </Package>
 </Wix>

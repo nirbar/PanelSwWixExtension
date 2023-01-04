@@ -1,9 +1,5 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "FileOperations.h"
-#include "..\CaCommon\WixString.h"
-#include <memutil.h>
-#include <pathutil.h>
-#include <dirutil.h>
 
 extern "C" UINT __stdcall ExtractPayload(MSIHANDLE hInstall)
 {

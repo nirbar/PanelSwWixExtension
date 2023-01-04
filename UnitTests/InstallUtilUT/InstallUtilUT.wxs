@@ -1,0 +1,70 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension">
+  <Package Name="InstallUtilUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}" InstallerVersion="200" ProductCode="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}">
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+    <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
+      <!-- Configuring:
+        Twice the same service (same file path, action, bitness, and arguments)
+        Once the same service with different arguments
+        Once the same service with different bitness
+        One different service with matching action, bitness, and arguments
+        
+        All in all, 4 services should be scheduled: 1*x64, 3*x86
+      -->
+      <Component Directory="INSTALLFOLDER" Condition="1=1">
+
+        <File Id="___var.ProjectDir_Product.wxs" Source="$(sys.SOURCEFILEPATH)">
+          <PanelSW:InstallUtil>
+            <PanelSW:Argument Value="1" />
+            <PanelSW:Argument Value="3" />
+          </PanelSW:InstallUtil>
+          <PanelSW:TopShelf Account="custom" Description="MyDesc" Instance="[inst]" ServiceName="qwe" Start="manual" UserName="un" Password="psw" DisplayName="dn" ErrorHandling="prompt" />
+        </File>
+      </Component>
+      <Component Directory="INSTALLFOLDER" Condition="2=2">
+
+        <File Id="Test2" Source="$(sys.SOURCEFILEPATH)">
+          <PanelSW:InstallUtil>
+            <PanelSW:Argument Value="1" />
+            <PanelSW:Argument Value="3" />
+          </PanelSW:InstallUtil>
+          <PanelSW:TopShelf Account="custom" Description="MyDesc" Instance="[inst]" ServiceName="qwe" Start="manual" UserName="un" Password="psw" DisplayName="dn" ErrorHandling="prompt" />
+        </File>
+      </Component>
+      <Component Directory="INSTALLFOLDER" Condition="2=2">
+
+        <File Id="Test3" Source="$(sys.SOURCEFILEPATH)">
+          <PanelSW:InstallUtil>
+            <PanelSW:Argument Value="1" />
+          </PanelSW:InstallUtil>
+          <PanelSW:TopShelf Account="custom" Description="MyDesc" Instance="[inst]" ServiceName="qwe" Start="manual" UserName="un" Password="psw" DisplayName="dn" ErrorHandling="prompt" />
+        </File>
+      </Component>
+      <Component Directory="INSTALLFOLDER" Condition="2=2">
+
+        <File Id="Test4" Source="$(sys.SOURCEFILEPATH)">
+          <PanelSW:InstallUtil Bitness="x64">
+            <PanelSW:Argument Value="1" />
+            <PanelSW:Argument Value="3" />
+          </PanelSW:InstallUtil>
+          <PanelSW:TopShelf Account="custom" Description="MyDesc" Instance="[inst]" ServiceName="qwe" Start="manual" UserName="un" Password="psw" DisplayName="dn" ErrorHandling="prompt" />
+        </File>
+      </Component>
+      <Component Directory="INSTALLFOLDER">
+        <File Id="Other.wxs" Source="$(sys.SOURCEFILEPATH)" Name="Other.wxs">
+          <PanelSW:InstallUtil>
+            <PanelSW:Argument Value="1" />
+            <PanelSW:Argument Value="3" />
+          </PanelSW:InstallUtil>
+          <PanelSW:TopShelf Account="custom" Description="MyDesc" Instance="[inst]" ServiceName="qwe" Start="manual" UserName="un" Password="psw" DisplayName="dn" ErrorHandling="prompt" />
+        </File>
+      </Component>
+    </Feature>
+
+    <Property Id="MSIFASTINSTALL" Value="7" />
+
+    <StandardDirectory Id="ProgramFilesFolder">
+      <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+    </StandardDirectory>
+  </Package>
+</Wix>

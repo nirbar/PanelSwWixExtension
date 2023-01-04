@@ -1,6 +1,5 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "../CaCommon/DeferredActionBase.h"
-#include "../CaCommon/WixString.h"
 #include "Telemetry.h"
 #include "ShellExecute.h"
 #include "FileRegex.h"

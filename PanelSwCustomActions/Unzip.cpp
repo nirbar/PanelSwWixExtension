@@ -1,6 +1,6 @@
+#include "pch.h"
 #include "Unzip.h"
 #include "FileOperations.h"
-#include "..\CaCommon\WixString.h"
 #include "..\poco\Zip\include\Poco\Zip\ZipArchive.h"
 #include "..\poco\Zip\include\Poco\Zip\ZipStream.h"
 #include "..\poco\Zip\include\Poco\Zip\Compress.h"
@@ -9,9 +9,6 @@
 #include "..\poco\Foundation\include\Poco\StreamCopier.h"
 #include "unzipDetails.pb.h"
 #include "zipDetails.pb.h"
-#include <memutil.h>
-#include <pathutil.h>
-#include <fileutil.h>
 #include <Windows.h>
 #include <fstream>
 #include <shlwapi.h>

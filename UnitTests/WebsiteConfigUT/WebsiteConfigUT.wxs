@@ -1,0 +1,22 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension">
+  <Package Name="WebsiteConfigUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}" InstallerVersion="200" ProductCode="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}">
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+    <Property Id="DEFAULT_WEB_SITE" Value="Default Web Site" />
+    <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
+      <Component Directory="INSTALLFOLDER">
+        <File Source="$(sys.SOURCEFILEPATH)" />
+        <PanelSW:WebsiteConfig Website="[DEFAULT_WEB_SITE]" Stop="yes" />
+      </Component>
+      <Component Directory="INSTALLFOLDER" Condition="1 = 0">
+
+        <File Id="Product1.wxs" Source="$(sys.SOURCEFILEPATH)" Name="Product1.wxs" />
+        <PanelSW:WebsiteConfig Website="Default Web Site" />
+      </Component>
+    </Feature>
+
+    <StandardDirectory Id="ProgramFilesFolder">
+      <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+    </StandardDirectory>
+  </Package>
+</Wix>

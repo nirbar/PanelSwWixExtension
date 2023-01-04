@@ -1,9 +1,7 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "RegDataSerializer.h"
 #include "../CaCommon/RegistryKey.h"
 #include <memory>
-#include <strutil.h>
-#include <memutil.h>
 #include <atlenc.h>
 #include <stdlib.h>
 

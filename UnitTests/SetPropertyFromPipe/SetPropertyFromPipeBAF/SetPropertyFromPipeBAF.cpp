@@ -1,20 +1,25 @@
-
-#include "BalBaseBootstrapperApplication.h"
-#include "IBootstrapperBAFunction.h"
+#include <Windows.h>
+#include <Msi.h>
+#include <dutil.h>
+#include <BootstrapperEngine.h>
+#include <BootstrapperApplication.h>
+#include <IBootstrapperApplication.h>
+#include <BalBaseBAFunctions.h>
+#include <BalBaseBAFunctionsProc.h>
 #include <rpc.h>
 #include <strutil.h>
+#include <balutil.h>
 #include <string>
 #include "setPropertyFromPipeDetails.pb.h"
-#pragma comment (lib, "balutil.lib")
-#pragma comment (lib, "dutil.lib")
 #pragma comment (lib, "Rpcrt4.lib")
 using namespace ::com::panelsw::ca;
 
 #define PROP_NAME	L"MY_PROP"
 #define PROP_VAL	L"MY_VALUE"
+static HRESULT CreateBAFunctions(HMODULE hModule, const BA_FUNCTIONS_CREATE_ARGS* pArgs, BA_FUNCTIONS_CREATE_RESULTS* pResults);
+static HINSTANCE vhInstance = nullptr;
 
-
-class SetPropertyFromPipeBAF : public IBootstrapperBAFunction
+class SetPropertyFromPipeBAF : public CBalBaseBAFunctions
 {
 public:
 
@@ -51,8 +56,13 @@ public:
 		return hr;
 	}
 
-	STDMETHODIMP OnDetect() 
-	{ 
+	STDMETHODIMP OnDetectBegin(
+		__in BOOL /*fCached*/,
+		__in BOOTSTRAPPER_REGISTRATION_TYPE /*registrationType*/,
+		__in DWORD /*cPackages*/,
+		__inout BOOL* /*pfCancel*/
+	) override
+	{
 		HRESULT hr = S_OK;
 		UUID pipeId;
 		RPC_WSTR szPipeUuid = nullptr;
@@ -69,9 +79,9 @@ public:
 		BalExitOnFailure(hr, "Failed formatting string");
 
 		hPipe_ = ::CreateNamedPipe(szLocalPipeName, PIPE_ACCESS_OUTBOUND | FILE_FLAG_FIRST_PIPE_INSTANCE, PIPE_TYPE_MESSAGE | PIPE_READMODE_MESSAGE | PIPE_WAIT | PIPE_REJECT_REMOTE_CLIENTS, 1, 0, 0, 0, nullptr);
-		BalExitOnNullWithLastError1((hPipe_ != INVALID_HANDLE_VALUE), hr, "Failed creating pipe '%ls'", szLocalPipeName);
+		BalExitOnNullWithLastError((hPipe_ != INVALID_HANDLE_VALUE), hr, "Failed creating pipe '%ls'", szLocalPipeName);
 
-		hr = pEngine_->SetVariableString(L"PIPE_NAME", szLocalPipeName);
+		hr = m_pEngine->SetVariableString(L"PIPE_NAME", szLocalPipeName, TRUE);
 		BalExitOnFailure(hr, "Failed setting variable");
 
 		hThread_ = ::CreateThread(nullptr, 0, ThreadFunc, this, 0, nullptr);
@@ -87,18 +97,14 @@ public:
 		return hr;
 	}
 
-	STDMETHODIMP OnDetectComplete() { return S_OK; }
-	STDMETHODIMP OnPlan() { return S_OK; }
-	STDMETHODIMP OnPlanComplete() { return S_OK; }
-
 	static DWORD WINAPI ThreadFunc(LPVOID lpThreadParameter)
 	{
 		((SetPropertyFromPipeBAF*)lpThreadParameter)->SendProperty();
 		return ERROR_SUCCESS;
 	}
 
-	SetPropertyFromPipeBAF(IBootstrapperEngine* pEngine)
-		: pEngine_(pEngine)
+	SetPropertyFromPipeBAF(HMODULE hModule, IBootstrapperEngine* pEngine, const BA_FUNCTIONS_CREATE_ARGS* pArgs) 
+		: CBalBaseBAFunctions(hModule, pEngine, pArgs)
 		, hPipe_(INVALID_HANDLE_VALUE)
 		, hThread_(NULL)
 	{
@@ -118,25 +124,72 @@ public:
 	}
 
 private:
-	IBootstrapperEngine * pEngine_;
 	HANDLE hPipe_;
 	HANDLE hThread_;
 };
 
+extern "C" BOOL WINAPI DllMain(
+	IN HINSTANCE hInstance,
+	IN DWORD dwReason,
+	IN LPVOID /* pvReserved */
+)
+{
+	switch (dwReason)
+	{
+	case DLL_PROCESS_ATTACH:
+		::DisableThreadLibraryCalls(hInstance);
+		vhInstance = hInstance;
+		break;
 
-extern "C" __declspec(dllexport) HRESULT WINAPI CreateBootstrapperBAFunction(IBootstrapperEngine* pEngine, HMODULE, IBootstrapperBAFunction** ppBAFunction)
+	case DLL_PROCESS_DETACH:
+		vhInstance = NULL;
+		break;
+	}
+
+	return TRUE;
+}
+
+extern "C" HRESULT WINAPI BAFunctionsCreate(
+	__in const BA_FUNCTIONS_CREATE_ARGS * pArgs,
+	__inout BA_FUNCTIONS_CREATE_RESULTS * pResults
+)
+{
+	HRESULT hr = S_OK;
+
+	hr = CreateBAFunctions(vhInstance, pArgs, pResults);
+	BalExitOnFailure(hr, "Failed to create BAFunctions interface.");
+
+LExit:
+	return hr;
+}
+
+extern "C" void WINAPI BAFunctionsDestroy(
+	__in const BA_FUNCTIONS_DESTROY_ARGS* /*pArgs*/,
+	__inout BA_FUNCTIONS_DESTROY_RESULTS* /*pResults*/
+)
+{
+	BalUninitialize();
+}
+
+static HRESULT CreateBAFunctions(HMODULE hModule, const BA_FUNCTIONS_CREATE_ARGS * pArgs, BA_FUNCTIONS_CREATE_RESULTS * pResults)
 {
 	HRESULT hr = S_OK;
 	SetPropertyFromPipeBAF* pBAFunction = nullptr;
+	IBootstrapperEngine* pEngine = nullptr;
 
-	BalInitialize(pEngine);
+	hr = BalInitializeFromCreateArgs(pArgs->pBootstrapperCreateArgs, &pEngine);
+	ExitOnFailure(hr, "Failed to initialize Bal.");
 
-	pBAFunction = new SetPropertyFromPipeBAF(pEngine);
+	pBAFunction = new SetPropertyFromPipeBAF(hModule, pEngine, pArgs);
 	BalExitOnNullWithLastError(pBAFunction, hr, "Failed instantiating IBootstrapperBAFunction");
 
-	*ppBAFunction = pBAFunction;
-    
+	pResults->pfnBAFunctionsProc = BalBaseBAFunctionsProc;
+	pResults->pvBAFunctionsProcContext = pBAFunction;
+	pBAFunction = nullptr;
+
 LExit:
+	ReleaseObject(pBAFunction);
+	ReleaseObject(pEngine);
 
 	return hr;
 }

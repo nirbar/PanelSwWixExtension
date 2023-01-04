@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+
+  <!-- Properties and Items used in C++ projects -->
+  <PropertyGroup Condition="'$(MSBuildProjectExtension)'=='.vcxproj'">
+    <PanelSwIncPath>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\include\'))</PanelSwIncPath>
+    <IncludePath>$(PanelSwIncPath);$(IncludePath)</IncludePath>
+
+    <PanelSwLibPath Condition="$(PlatformToolset.ToLower().StartsWith('v14'))">$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\lib\v142\'))</PanelSwLibPath>
+    <LibraryPath Condition="'$(PanelSwLibPath)' != ''">$(PanelSwLibPath);$(LibraryPath)</LibraryPath>
+  </PropertyGroup>
+  
+  <ItemGroup Condition="'$(MSBuildProjectExtension)'=='.vcxproj'">
+    <Xsd Remove="PanelSwWixExtension.xsd" Condition='$([System.Version]::Parse("$(MSBuildVersion)").CompareTo($([System.Version]::Parse("15.0")))) &gt;= 0'/>
+    <Xsd Remove="$(MSBuildProjectDirectory)\PanelSwWixExtension.xsd" Condition='$([System.Version]::Parse("$(MSBuildVersion)").CompareTo($([System.Version]::Parse("15.0")))) &gt;= 0'/>
+
+    <AdditionalIncludeDirectories Include="$(PanelSwIncPath)"/>
+    <AdditionalLibraryDirectories Include="$(PanelSwLibPath)" Condition="'$(PanelSwLibPath)' != ''"/>
+  </ItemGroup>
+  
+  <ItemDefinitionGroup Condition="'$(MSBuildProjectExtension)'=='.vcxproj'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(PanelSwIncPath);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <AdditionalLibraryDirectories Condition="'$(PanelSwLibPath)' != ''">$(PanelSwLibPath);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies Condition="'$(PanelSwLibPath)' != ''">$(PanelSwLibPath)\CaCommon.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  
+  <ItemGroup>
+    <WixExtension Include="$(PanelSwWixExtension)" Condition=" Exists('$(PanelSwWixExtension)') " />
+    <UnsupportedWixExtension Include="$(MSBuildThisFileName)" Condition=" !Exists('$(PanelSwWixExtension)') " />
+  </ItemGroup>
+  <ItemGroup>
+    <BindInputPaths Include="$(PanelSwWixExtensionDir)">
+      <BindName>PanelSwWixExtension</BindName>
+    </BindInputPaths>
+  </ItemGroup>
+
+</Project>

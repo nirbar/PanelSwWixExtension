@@ -1,4 +1,4 @@
-#include "stdafx.h"
+#include "pch.h"
 #include "SummaryStream.h"
 #include "WixString.h"
 #include <wtypes.h>

@@ -1,0 +1,20 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension">
+  <Package Name="CustomUninstallKeyUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="Nir Bar" UpgradeCode="370186f7-0cd5-4fb1-82c1-382311d94780" InstallerVersion="200" ProductCode="{9972FF2F-0828-4B45-81A0-9E71B07DFC83}">
+
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+    <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+
+    <Property Id="MSIFASTINSTALL" Value="1"/>
+    <PanelSW:CustomUninstallKey Name="SystemComponent" Data="1" DataType="REG_DWORD" />
+    <PanelSW:CustomUninstallKey Name="SystemComponent" ProductCode="AddressBook" Data="1" DataType="REG_DWORD" />
+
+    <ComponentGroup Id="ProductComponents" Directory="TARGETDIR">
+      <Component Id="Test">
+        <RegistryValue KeyPath="yes" Id="CustomUninstallKeyUT" Key="Software\Panel-SW.co.il\CustomUninstallKeyUT" Root="HKCU" Name="Test" Type="integer" Value="1" />
+      </Component>
+    </ComponentGroup>
+  </Package>
+</Wix>

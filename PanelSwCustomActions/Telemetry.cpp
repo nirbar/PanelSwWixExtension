@@ -1,5 +1,5 @@
+#include "pch.h"
 #include "Telemetry.h"
-#include "../CaCommon/WixString.h"
 #include "telemetryDetails.pb.h"
 #include <Winhttp.h>
 #pragma comment (lib, "Winhttp.lib")

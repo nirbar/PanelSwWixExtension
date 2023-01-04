@@ -1,14 +1,14 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29806.167
+# Visual Studio Version 17
+VisualStudioVersion = 17.1.32421.90
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "PanelSwWixLib", "wixlib\PanelSwWixLib.wixproj", "{B6AC15A8-5EF9-4F89-ACCC-3F5C3FC04BCE}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "PanelSwWixLib", "wixlib\PanelSwWixLib.wixproj", "{B6AC15A8-5EF9-4F89-ACCC-3F5C3FC04BCE}"
 	ProjectSection(ProjectDependencies) = postProject
 		{0C3A56AA-8073-44E1-8DE4-C257D581BFF0} = {0C3A56AA-8073-44E1-8DE4-C257D581BFF0}
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PanelSwWixExtension", "PanelSwWixExtension\PanelSwWixExtension.csproj", "{69972F7F-F1CF-44AA-8F76-B4A5A4F1B309}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PanelSwWixExtension", "PanelSwWixExtension\PanelSwWixExtension.csproj", "{69972F7F-F1CF-44AA-8F76-B4A5A4F1B309}"
 	ProjectSection(ProjectDependencies) = postProject
 		{B6AC15A8-5EF9-4F89-ACCC-3F5C3FC04BCE} = {B6AC15A8-5EF9-4F89-ACCC-3F5C3FC04BCE}
 	EndProjectSection
@@ -21,64 +21,65 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PanelSwCustomActions", "Pan
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "UnitTests", "UnitTests", "{B533D9FC-4927-4A05-892D-B90E8BEDCF5D}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "ReadIniValuesUT", "UnitTests\ReadIniValuesUT\ReadIniValuesUT.wixproj", "{EEC5D4C5-9873-42E1-8A7F-79DB5314592B}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "ReadIniValuesUT", "UnitTests\ReadIniValuesUT\ReadIniValuesUT.wixproj", "{EEC5D4C5-9873-42E1-8A7F-79DB5314592B}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "CustomUninstallKeyUT", "UnitTests\CustomUninstallKeyUT\CustomUninstallKeyUT.wixproj", "{5E7E80C3-8093-4DF6-AD3D-DE3F2872B01F}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "CustomUninstallKeyUT", "UnitTests\CustomUninstallKeyUT\CustomUninstallKeyUT.wixproj", "{5E7E80C3-8093-4DF6-AD3D-DE3F2872B01F}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "RemoveRegistryValueUT", "UnitTests\RemoveRegistryValueUT\RemoveRegistryValueUT.wixproj", "{301175D9-93BD-49D2-8AE2-31693630372C}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "RemoveRegistryValueUT", "UnitTests\RemoveRegistryValueUT\RemoveRegistryValueUT.wixproj", "{301175D9-93BD-49D2-8AE2-31693630372C}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "XmlSearchUT", "UnitTests\XmlSearchUT\XmlSearchUT.wixproj", "{0631B7FA-D5A5-4B4B-8289-E0415420D6C7}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "XmlSearchUT", "UnitTests\XmlSearchUT\XmlSearchUT.wixproj", "{0631B7FA-D5A5-4B4B-8289-E0415420D6C7}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CaCommon", "CaCommon\CaCommon.vcxproj", "{7C6B230A-9186-4C1E-B61D-E803CC36A347}"
 	ProjectSection(ProjectDependencies) = postProject
 		{46D02BC4-720A-4B33-AA27-4103E7349F02} = {46D02BC4-720A-4B33-AA27-4103E7349F02}
 	EndProjectSection
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "TelemetryUT", "UnitTests\TelemetryUT\TelemetryUT.wixproj", "{12C34100-BC94-48E7-AE28-8B62CAD23155}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "TelemetryUT", "UnitTests\TelemetryUT\TelemetryUT.wixproj", "{12C34100-BC94-48E7-AE28-8B62CAD23155}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "MsiSqlQueryUT", "UnitTests\MsiSqlQueryUT\MsiSqlQueryUT.wixproj", "{9831ED5E-E812-484B-BDCF-AB27ED9297F6}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "MsiSqlQueryUT", "UnitTests\MsiSqlQueryUT\MsiSqlQueryUT.wixproj", "{9831ED5E-E812-484B-BDCF-AB27ED9297F6}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "RegexUT", "UnitTests\RegexUT\RegexUT.wixproj", "{738E0950-AD2F-49B0-A791-94E7E011E233}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "RegexUT", "UnitTests\RegexUT\RegexUT.wixproj", "{738E0950-AD2F-49B0-A791-94E7E011E233}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "FileOperationsUT", "UnitTests\FileOperationsUT\FileOperationsUT.wixproj", "{2B87572F-9B38-4F39-A213-97C1AC64703E}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "FileOperationsUT", "UnitTests\FileOperationsUT\FileOperationsUT.wixproj", "{2B87572F-9B38-4F39-A213-97C1AC64703E}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "TaskScheulerUT", "UnitTests\TaskScheulerUT\TaskScheulerUT.wixproj", "{31F20547-2522-4643-AE23-B5B4E25A8852}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "TaskScheulerUT", "UnitTests\TaskScheulerUT\TaskScheulerUT.wixproj", "{31F20547-2522-4643-AE23-B5B4E25A8852}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{096EB3BA-5DCA-4121-8407-C93F31997339}"
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 		.github\workflows\codeql-analysis.yml = .github\workflows\codeql-analysis.yml
 		.github\workflows\github-actions-build.yml = .github\workflows\github-actions-build.yml
+		global.json = global.json
 		nuget.config = nuget.config
-		Nuget\PanelSwWixExtension.props = Nuget\PanelSwWixExtension.props
-		Nuget\PanelSwWixExtension.targets = Nuget\PanelSwWixExtension.targets
+		Nuget\PanelSwWixExtension4.props = Nuget\PanelSwWixExtension4.props
+		Nuget\PanelSwWixExtension4.targets = Nuget\PanelSwWixExtension4.targets
 		README.md = README.md
 		TidyBuild.custom.props = TidyBuild.custom.props
 		TidyBuild.custom.targets = TidyBuild.custom.targets
 		TidyBuild.user.props = TidyBuild.user.props
 	EndProjectSection
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "ExecOnComponentUT", "UnitTests\ExecOnComponentUT\ExecOnComponentUT.wixproj", "{80C0972A-EB37-4DF3-95DB-704EB7F7965C}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "ExecOnComponentUT", "UnitTests\ExecOnComponentUT\ExecOnComponentUT.wixproj", "{80C0972A-EB37-4DF3-95DB-704EB7F7965C}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "DismUT", "UnitTests\DismUT\DismUT.wixproj", "{E9A9526B-0AD2-4DE2-A154-6558B99A4287}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "DismUT", "UnitTests\DismUT\DismUT.wixproj", "{E9A9526B-0AD2-4DE2-A154-6558B99A4287}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PswManagedCA", "PswManagedCA\PswManagedCA.csproj", "{EEC82796-3809-4D8B-9F2B-D9F1DB044E39}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PswManagedCA", "PswManagedCA\PswManagedCA.csproj", "{EEC82796-3809-4D8B-9F2B-D9F1DB044E39}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "ZipFileUT", "UnitTests\ZipFileUT\ZipFileUT.wixproj", "{272D736A-5479-4915-B8FE-5A0D908AB61F}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "ZipFileUT", "UnitTests\ZipFileUT\ZipFileUT.wixproj", "{272D736A-5479-4915-B8FE-5A0D908AB61F}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Dism", "Dism\Dism.vcxproj", "{CB9038CA-D9A1-4014-BA48-661AFA842A41}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Dism", "Dism\Dism.vcxproj", "{E08BD5F2-B8DE-4EEE-A77F-FD82678664AC}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "ServiceConfigUT", "UnitTests\ServiceConfigUT\ServiceConfigUT.wixproj", "{C6FC6CB8-13AD-48BE-8FB1-8A7BC5790896}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "ServiceConfigUT", "UnitTests\ServiceConfigUT\ServiceConfigUT.wixproj", "{C6FC6CB8-13AD-48BE-8FB1-8A7BC5790896}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "CleanPendingFileRenameOperationsUT", "UnitTests\CleanPendingFileRenameOperationsUT\CleanPendingFileRenameOperationsUT.wixproj", "{EA03A92C-1984-4F2A-9D4F-4EA2C451AE05}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "CleanPendingFileRenameOperationsUT", "UnitTests\CleanPendingFileRenameOperationsUT\CleanPendingFileRenameOperationsUT.wixproj", "{EA03A92C-1984-4F2A-9D4F-4EA2C451AE05}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "InstallUtilUT", "UnitTests\InstallUtilUT\InstallUtilUT.wixproj", "{7F31BB12-8494-4A6E-A2B8-ECF9FE25B460}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "InstallUtilUT", "UnitTests\InstallUtilUT\InstallUtilUT.wixproj", "{7F31BB12-8494-4A6E-A2B8-ECF9FE25B460}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "SqlSearchUT", "UnitTests\SqlSearchUT\SqlSearchUT.wixproj", "{4B0E8514-6BEE-41A5-AD4B-DF5F3BFEEFEF}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "SqlSearchUT", "UnitTests\SqlSearchUT\SqlSearchUT.wixproj", "{4B0E8514-6BEE-41A5-AD4B-DF5F3BFEEFEF}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "BackupAndRestoreUT", "UnitTests\BackupAndRestoreUT\BackupAndRestoreUT.wixproj", "{21F86B1E-9F55-4CC8-93C7-BD237157B7F5}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "BackupAndRestoreUT", "UnitTests\BackupAndRestoreUT\BackupAndRestoreUT.wixproj", "{21F86B1E-9F55-4CC8-93C7-BD237157B7F5}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "CreateSelfSignCertificateUT", "UnitTests\CreateSelfSignCertificateUT\CreateSelfSignCertificateUT.wixproj", "{95697A34-1519-42EC-A96B-3090AE6EAE2A}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "CreateSelfSignCertificateUT", "UnitTests\CreateSelfSignCertificateUT\CreateSelfSignCertificateUT.wixproj", "{95697A34-1519-42EC-A96B-3090AE6EAE2A}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ProtoCaLib", "ProtoCaLib\ProtoCaLib.vcxproj", "{46D02BC4-720A-4B33-AA27-4103E7349F02}"
 EndProject
@@ -90,43 +91,39 @@ Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "SetPropertyFromPipeBootstra
 EndProject
 Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "SetPropertyFromPipeSetup", "UnitTests\SetPropertyFromPipe\SetPropertyFromPipeSetup\SetPropertyFromPipeSetup.wixproj", "{C3F36939-174F-4A7C-880E-B25875B7ABDC}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "EvaluateExpressionUT", "UnitTests\EvaluateExpressionUT\EvaluateExpressionUT.wixproj", "{CBA21767-A300-4048-BCD4-4757F6FD0BEA}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "EvaluateExpressionUT", "UnitTests\EvaluateExpressionUT\EvaluateExpressionUT.wixproj", "{CBA21767-A300-4048-BCD4-4757F6FD0BEA}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "DiskSpaceUT", "UnitTests\DiskSpaceUT\DiskSpaceUT.wixproj", "{58646CCF-55D2-4131-BCAC-8670D372BA83}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "DiskSpaceUT", "UnitTests\DiskSpaceUT\DiskSpaceUT.wixproj", "{58646CCF-55D2-4131-BCAC-8670D372BA83}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "JsonJPathUT", "UnitTests\JsonJPathUT\JsonJPathUT.wixproj", "{CF761D68-A8DE-41F3-8888-91B0C70B2C8E}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "JsonJPathUT", "UnitTests\JsonJPathUT\JsonJPathUT.wixproj", "{CF761D68-A8DE-41F3-8888-91B0C70B2C8E}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "AccountNamesUT", "UnitTests\AccountNamesUT\AccountNamesUT.wixproj", "{49D91747-0876-4315-AD43-089EAC141670}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "AccountNamesUT", "UnitTests\AccountNamesUT\AccountNamesUT.wixproj", "{49D91747-0876-4315-AD43-089EAC141670}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "AccountSidSearchUT", "UnitTests\AccountSidSearchUT\AccountSidSearchUT.wixproj", "{9373BDEE-4179-45BD-BA91-467C37729852}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "AccountSidSearchUT", "UnitTests\AccountSidSearchUT\AccountSidSearchUT.wixproj", "{9373BDEE-4179-45BD-BA91-467C37729852}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "ForceVersionUT", "UnitTests\ForceVersionUT\ForceVersionUT.wixproj", "{F773F85B-CD8B-4FDD-ABFC-B74C018AB900}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "ForceVersionUT", "UnitTests\ForceVersionUT\ForceVersionUT.wixproj", "{F773F85B-CD8B-4FDD-ABFC-B74C018AB900}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "WebsiteConfigUT", "UnitTests\WebsiteConfigUT\WebsiteConfigUT.wixproj", "{742496FF-76A2-419C-BA48-BE8C6C1C23EB}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "WebsiteConfigUT", "UnitTests\WebsiteConfigUT\WebsiteConfigUT.wixproj", "{742496FF-76A2-419C-BA48-BE8C6C1C23EB}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "VersionCompareUT", "UnitTests\VersionCompareUT\VersionCompareUT.wixproj", "{E386BD7E-2DDC-4F30-8FD0-2ED41E851159}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "VersionCompareUT", "UnitTests\VersionCompareUT\VersionCompareUT.wixproj", "{E386BD7E-2DDC-4F30-8FD0-2ED41E851159}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "PathSearchUT", "UnitTests\PathSearchUT\PathSearchUT.wixproj", "{0FBEE09F-52C0-4AA2-8238-D55067106829}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "PathSearchUT", "UnitTests\PathSearchUT\PathSearchUT.wixproj", "{0FBEE09F-52C0-4AA2-8238-D55067106829}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "CustomActionDataUT", "UnitTests\CustomActionDataUT\CustomActionDataUT.wixproj", "{F0FAAEE2-E1C5-4122-80FA-CE8CA58F7621}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "CustomActionDataUT", "UnitTests\CustomActionDataUT\CustomActionDataUT.wixproj", "{F0FAAEE2-E1C5-4122-80FA-CE8CA58F7621}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "StringUT", "UnitTests\StringUT\StringUT.wixproj", "{60408F7C-8FEB-4F24-A437-6DE8850223AB}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "StringUT", "UnitTests\StringUT\StringUT.wixproj", "{60408F7C-8FEB-4F24-A437-6DE8850223AB}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "WmiSearchUT", "UnitTests\WmiSearchUT\WmiSearchUT.wixproj", "{426A6EC1-D3D6-4A88-85B9-4595A04E6D4A}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "WmiSearchUT", "UnitTests\WmiSearchUT\WmiSearchUT.wixproj", "{426A6EC1-D3D6-4A88-85B9-4595A04E6D4A}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "RestartLocalResourcesUT", "UnitTests\RestartLocalResourcesUT\RestartLocalResourcesUT.wixproj", "{71CA675A-453F-4756-924F-CD36C6C162E8}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "RestartLocalResourcesUT", "UnitTests\RestartLocalResourcesUT\RestartLocalResourcesUT.wixproj", "{71CA675A-453F-4756-924F-CD36C6C162E8}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "Md5HashUT", "UnitTests\Md5HashUT\Md5HashUT.wixproj", "{42520F9E-9D2A-4FD8-B747-2CC03120F588}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "Md5HashUT", "UnitTests\Md5HashUT\Md5HashUT.wixproj", "{42520F9E-9D2A-4FD8-B747-2CC03120F588}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "SplitFileUT", "UnitTests\SplitFileUT\SplitFileUT.wixproj", "{1C727FB4-460C-4EDA-B751-0593E2910B4C}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "SplitFileUT", "UnitTests\SplitFileUT\SplitFileUT.wixproj", "{1C727FB4-460C-4EDA-B751-0593E2910B4C}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DeferredExePackage", "DeferredExePackage\DeferredExePackage.vcxproj", "{B729FB3C-25CF-4216-940D-69EA78779CD7}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "PreprocessorUT", "UnitTests\PreprocessorUT\PreprocessorUT.wixproj", "{9D192FCB-1D43-4DA7-902E-8076E757A045}"
 EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "UninstallCommandUT", "UnitTests\UninstallCommandUT\UninstallCommandUT.wixproj", "{E7BE201C-6623-453D-800E-05592B391E95}"
-EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "PreprocessorUT", "UnitTests\PreprocessorUT\PreprocessorUT.wixproj", "{9D192FCB-1D43-4DA7-902E-8076E757A045}"
-EndProject
-Project("{930C7802-8A8C-48F9-8165-68863BCCD9DD}") = "PayloadUT", "UnitTests\PayloadUT\PayloadUT.wixproj", "{D3F4B72D-4C8D-4CED-91B6-33AB2A926A49}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "PayloadUT", "UnitTests\PayloadUT\PayloadUT.wixproj", "{D3F4B72D-4C8D-4CED-91B6-33AB2A926A49}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -147,7 +144,6 @@ Global
 		{69972F7F-F1CF-44AA-8F76-B4A5A4F1B309}.Debug|x86.ActiveCfg = Release|Any CPU
 		{69972F7F-F1CF-44AA-8F76-B4A5A4F1B309}.Debug|x86.Build.0 = Release|Any CPU
 		{69972F7F-F1CF-44AA-8F76-B4A5A4F1B309}.Release|x64.ActiveCfg = Release|Any CPU
-		{69972F7F-F1CF-44AA-8F76-B4A5A4F1B309}.Release|x64.Build.0 = Release|Any CPU
 		{69972F7F-F1CF-44AA-8F76-B4A5A4F1B309}.Release|x86.ActiveCfg = Release|Any CPU
 		{69972F7F-F1CF-44AA-8F76-B4A5A4F1B309}.Release|x86.Build.0 = Release|Any CPU
 		{0C3A56AA-8073-44E1-8DE4-C257D581BFF0}.Debug|x64.ActiveCfg = Release|Win32
@@ -210,16 +206,16 @@ Global
 		{EEC82796-3809-4D8B-9F2B-D9F1DB044E39}.Debug|x86.ActiveCfg = Release|x86
 		{EEC82796-3809-4D8B-9F2B-D9F1DB044E39}.Release|x64.ActiveCfg = Release|x86
 		{EEC82796-3809-4D8B-9F2B-D9F1DB044E39}.Release|x86.ActiveCfg = Release|x86
-		{EEC82796-3809-4D8B-9F2B-D9F1DB044E39}.Release|x86.Build.0 = Release|x86
 		{272D736A-5479-4915-B8FE-5A0D908AB61F}.Debug|x64.ActiveCfg = Release|x86
 		{272D736A-5479-4915-B8FE-5A0D908AB61F}.Debug|x86.ActiveCfg = Release|x86
 		{272D736A-5479-4915-B8FE-5A0D908AB61F}.Release|x64.ActiveCfg = Release|x86
 		{272D736A-5479-4915-B8FE-5A0D908AB61F}.Release|x86.ActiveCfg = Release|x86
-		{CB9038CA-D9A1-4014-BA48-661AFA842A41}.Debug|x64.ActiveCfg = Release|Win32
-		{CB9038CA-D9A1-4014-BA48-661AFA842A41}.Debug|x86.ActiveCfg = Release|Win32
-		{CB9038CA-D9A1-4014-BA48-661AFA842A41}.Release|x64.ActiveCfg = Release|Win32
-		{CB9038CA-D9A1-4014-BA48-661AFA842A41}.Release|x86.ActiveCfg = Release|Win32
-		{CB9038CA-D9A1-4014-BA48-661AFA842A41}.Release|x86.Build.0 = Release|Win32
+		{E08BD5F2-B8DE-4EEE-A77F-FD82678664AC}.Debug|x64.ActiveCfg = Release|x64
+		{E08BD5F2-B8DE-4EEE-A77F-FD82678664AC}.Debug|x64.Build.0 = Release|x64
+		{E08BD5F2-B8DE-4EEE-A77F-FD82678664AC}.Debug|x86.ActiveCfg = Release|Win32
+		{E08BD5F2-B8DE-4EEE-A77F-FD82678664AC}.Debug|x86.Build.0 = Release|Win32
+		{E08BD5F2-B8DE-4EEE-A77F-FD82678664AC}.Release|x64.ActiveCfg = Release|Win32
+		{E08BD5F2-B8DE-4EEE-A77F-FD82678664AC}.Release|x86.ActiveCfg = Release|Win32
 		{C6FC6CB8-13AD-48BE-8FB1-8A7BC5790896}.Debug|x64.ActiveCfg = Release|x86
 		{C6FC6CB8-13AD-48BE-8FB1-8A7BC5790896}.Debug|x86.ActiveCfg = Release|x86
 		{C6FC6CB8-13AD-48BE-8FB1-8A7BC5790896}.Release|x64.ActiveCfg = Release|x86
@@ -322,18 +318,6 @@ Global
 		{1C727FB4-460C-4EDA-B751-0593E2910B4C}.Debug|x86.Build.0 = Debug|x86
 		{1C727FB4-460C-4EDA-B751-0593E2910B4C}.Release|x64.ActiveCfg = Release|x86
 		{1C727FB4-460C-4EDA-B751-0593E2910B4C}.Release|x86.ActiveCfg = Release|x86
-		{B729FB3C-25CF-4216-940D-69EA78779CD7}.Debug|x64.ActiveCfg = Release|Win32
-		{B729FB3C-25CF-4216-940D-69EA78779CD7}.Debug|x64.Build.0 = Release|Win32
-		{B729FB3C-25CF-4216-940D-69EA78779CD7}.Debug|x86.ActiveCfg = Release|Win32
-		{B729FB3C-25CF-4216-940D-69EA78779CD7}.Debug|x86.Build.0 = Release|Win32
-		{B729FB3C-25CF-4216-940D-69EA78779CD7}.Release|x64.ActiveCfg = Release|Win32
-		{B729FB3C-25CF-4216-940D-69EA78779CD7}.Release|x86.ActiveCfg = Release|Win32
-		{B729FB3C-25CF-4216-940D-69EA78779CD7}.Release|x86.Build.0 = Release|Win32
-		{E7BE201C-6623-453D-800E-05592B391E95}.Debug|x64.ActiveCfg = Release|x86
-		{E7BE201C-6623-453D-800E-05592B391E95}.Debug|x86.ActiveCfg = Release|x86
-		{E7BE201C-6623-453D-800E-05592B391E95}.Release|x64.ActiveCfg = Release|x86
-		{E7BE201C-6623-453D-800E-05592B391E95}.Release|x86.ActiveCfg = Release|x86
-		{E7BE201C-6623-453D-800E-05592B391E95}.Release|x86.Build.0 = Release|x86
 		{9D192FCB-1D43-4DA7-902E-8076E757A045}.Debug|x64.ActiveCfg = Debug|x86
 		{9D192FCB-1D43-4DA7-902E-8076E757A045}.Debug|x86.ActiveCfg = Debug|x86
 		{9D192FCB-1D43-4DA7-902E-8076E757A045}.Debug|x86.Build.0 = Debug|x86
@@ -344,7 +328,6 @@ Global
 		{D3F4B72D-4C8D-4CED-91B6-33AB2A926A49}.Debug|x86.Build.0 = Debug|x86
 		{D3F4B72D-4C8D-4CED-91B6-33AB2A926A49}.Release|x64.ActiveCfg = Release|x86
 		{D3F4B72D-4C8D-4CED-91B6-33AB2A926A49}.Release|x86.ActiveCfg = Release|x86
-		{D3F4B72D-4C8D-4CED-91B6-33AB2A926A49}.Release|x86.Build.0 = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -387,7 +370,6 @@ Global
 		{71CA675A-453F-4756-924F-CD36C6C162E8} = {B533D9FC-4927-4A05-892D-B90E8BEDCF5D}
 		{42520F9E-9D2A-4FD8-B747-2CC03120F588} = {B533D9FC-4927-4A05-892D-B90E8BEDCF5D}
 		{1C727FB4-460C-4EDA-B751-0593E2910B4C} = {B533D9FC-4927-4A05-892D-B90E8BEDCF5D}
-		{E7BE201C-6623-453D-800E-05592B391E95} = {B533D9FC-4927-4A05-892D-B90E8BEDCF5D}
 		{9D192FCB-1D43-4DA7-902E-8076E757A045} = {B533D9FC-4927-4A05-892D-B90E8BEDCF5D}
 		{D3F4B72D-4C8D-4CED-91B6-33AB2A926A49} = {B533D9FC-4927-4A05-892D-B90E8BEDCF5D}
 	EndGlobalSection

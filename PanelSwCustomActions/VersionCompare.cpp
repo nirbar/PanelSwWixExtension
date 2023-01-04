@@ -1,6 +1,4 @@
-#include "stdafx.h"
-#include "../CaCommon/WixString.h"
-#include <fileutil.h>
+#include "pch.h"
 
 extern "C" UINT __stdcall VersionCompare(MSIHANDLE hInstall)
 {
@@ -41,7 +39,7 @@ extern "C" UINT __stdcall VersionCompare(MSIHANDLE hInstall)
 		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)ver2);
 		ExitOnFailure(hr, "Failed to get Version2.");
 
-		if (FAILED(FileVersionFromString(ver1, &ullVer1.HighPart, &ullVer1.LowPart)) || FAILED(FileVersionFromString(ver2, &ullVer2.HighPart, &ullVer2.LowPart)))
+		if (FAILED(FileVersionFromStringEx(ver1, 0, &ullVer1.QuadPart)) || FAILED(FileVersionFromStringEx(ver2, 0, &ullVer2.QuadPart)))
 		{
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed parsing '%ls' or '%ls' as version. Skipping comparison for property '%ls'", (LPCWSTR)ver1, (LPCWSTR)ver2, (LPCWSTR)property);
 			continue;

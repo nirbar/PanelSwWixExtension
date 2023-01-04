@@ -1,5 +1,5 @@
 #pragma once
-#include "stdafx.h"
+#include "pch.h"
 #include <windows.h>
 #include "google\protobuf\message_lite.h"
 #include "command.pb.h"

@@ -1,5 +1,6 @@
-[![PanelSwWixExtension](https://github.com/nirbar/PanelSwWixExtension/actions/workflows/github-actions-build.yml/badge.svg?branch=master)](https://github.com/nirbar/PanelSwWixExtension/actions/workflows/github-actions-build.yml)
-[![NuGet version (PanelSwWixExtension)](https://img.shields.io/nuget/v/PanelSwWixExtension.svg?style=flat-square)](https://www.nuget.org/packages/PanelSwWixExtension/)
+[![PanelSwWixExtension](https://github.com/nirbar/PanelSwWixExtension/actions/workflows/github-actions-build.yml/badge.svg?branch=master4)](https://github.com/nirbar/PanelSwWixExtension/actions/workflows/github-actions-build.yml)
+WiX v3 [![NuGet version (PanelSwWixExtension)](https://img.shields.io/nuget/v/PanelSwWixExtension.svg?style=flat-square)](https://www.nuget.org/packages/PanelSwWixExtension/)
+WiX v4 [![NuGet version (PanelSwWixExtension4)](https://img.shields.io/nuget/v/PanelSwWixExtension4.svg?style=flat-square)](https://www.nuget.org/packages/PanelSwWixExtension4/)
 
 PanelSwWixExtension from the creator of [JetBA](https://github.com/nirbar/JetBA-Binaries) is the most comprehensive open source [WiX](http://wixtoolset.org/) extension. 
 I would like to thank JetBrains for their [support](https://www.jetbrains.com/community/opensource/) of this project
@@ -10,7 +11,7 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
   - *Md5Hash*: Computes MD5 hash.
   - *WmiSearch*: Execute a WMI query.
   - *PathSearch*: Search for a file on PATH environment variable folder list.
-  - *VersionCompare*: Compare two versions, set result to property as -1, 0, or 1
+  - *VersionCompare*: Compare two versions, set result to property to value in range -4 to +4, denoting the version part that was different (-+4 if Major part was different, -+3 for Minor part, etc.)
   - *ForceVersion*: Force a specified version for a file. Version overwrite is done on runtime in the MSI database.
   - *AccountSidSearch*: Lookup an account's SID by account name.
   - *JsonJpathSearch*: Read JSON values
@@ -48,8 +49,6 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
   - *BackupAndRestore*: Backup a file before install or upgarde and restore it after.
   - *SqlScript*: Execute SQL scripts, optionally with text replacements.
   - *SplitFile*: Splits a file to parts during build, and reconstruct it during install. Used to workaround MSI limitation of 2GB file size.
-- Bundle Actions:
-  - *ExePackage/UninstallCommand*: Execute a custom command to uninstall an ExePackage. Used for packages which the uninstall is launched via a different executable than the install.
 
 ## Preprocessor
 - *$(psw.VarNullOrEmpty(VAR_NAME))*: Return 1 if the variable is not defined, or if it defined as empty. Return 0 otherwise
@@ -153,5 +152,5 @@ After building a unit test project, you'll need to shutdown Visual Studio before
 This is due to the unfortunate habit of Visual Studio to hold the extension file in use.
 You may find it convenient to build unit test projects from a command prompt to workaround this limitation
 ~~~~~~~~~~~~
-MSBuild UnitTests\VersionCompareUT\VersionCompareUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
+MSBuild UnitTests\ForceVersionUT\ForceVersionUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
 ~~~~~~~~~~~~

@@ -1,4 +1,5 @@
-#include "stdafx.h"
+// dllmain.cpp : Defines the entry point for the DLL application.
+#include "pch.h"
 
 // DllMain - Initialize and cleanup WiX custom action utils.
 extern "C" BOOL WINAPI DllMain(__in HINSTANCE hInst, __in ULONG ulReason, __in LPVOID)

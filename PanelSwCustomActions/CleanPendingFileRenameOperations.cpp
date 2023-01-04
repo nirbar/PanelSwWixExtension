@@ -1,7 +1,5 @@
 
-#include "stdafx.h"
-#include <strutil.h>
-#include <regutil.h>
+#include "pch.h"
 #include <vector>
 #include <list>
 #include <Shlwapi.h>
@@ -107,7 +105,7 @@ extern "C" UINT __stdcall CleanPendingFileRenameOperationsSched(MSIHANDLE hInsta
 		ExitOnFailure(hr, "Failed to get Component.");
 
 		compAction = WcaGetComponentToDo((LPCWSTR)szComponent);
-		if (compAction != WCA_TODO::WCA_TODO_INSTALL)
+		if ((compAction != WCA_TODO::WCA_TODO_INSTALL) && (compAction != WCA_TODO::WCA_TODO_REINSTALL))
 		{
 			continue;
 		}

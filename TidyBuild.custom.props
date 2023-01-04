@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <Import Project="$(MSBuildThisFileDirectory)TidyBuild.user.props" Condition="Exists('$(MSBuildThisFileDirectory)TidyBuild.user.props')"/>
   <PropertyGroup>
@@ -9,22 +9,29 @@
     <Manufacturer>Panel::Software</Manufacturer>
 
     <!--
-    <NugetPrereleaseVersion>-psw-wix</NugetPrereleaseVersion>
+    <NugetPrereleaseVersion>-rc.1</NugetPrereleaseVersion>
     -->
     
     <!-- CMake -->
     <CMakeDir Condition="'$(CMakeDir)'==''">D:\Tools\cmake-3.21.3-windows-x86_64\</CMakeDir>
-    <CMakeVsVersion Condition="'$(CMakeVsVersion)'==''">Visual Studio 16 2019</CMakeVsVersion>
-    <PlatformToolset Condition="'$(PlatformToolset)'==''">v141_xp</PlatformToolset>
+    <CMakeVsVersion Condition="'$(CMakeVsVersion)'==''">Visual Studio 17 2022</CMakeVsVersion>
+    <PlatformToolset Condition="'$(PlatformToolset)'==''">v142</PlatformToolset>
     <XPDeprecationWarning>false</XPDeprecationWarning>
 
+    <WindowsKitSharedDir Condition="'$(WindowsKitSharedDir)'=='' And Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\shared\')">C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\shared\</WindowsKitSharedDir>
+    <WindowsKitSharedDir Condition="'$(WindowsKitSharedDir)'=='' And Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\')">C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\</WindowsKitSharedDir>
+    <WindowsKitSharedDir Condition="'$(WindowsKitSharedDir)'=='' And Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\shared\')">C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\shared\</WindowsKitSharedDir>
     <DismApiDir Condition="'$(DismApiDir)'==''">C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\</DismApiDir>
     <NugetDir Condition="'$(NugetDir)'==''">$(MSBuildThisFileDirectory)..\..\Tools\</NugetDir>
 
-    <DefineConstants>JetVersion=$(FullVersion);JetProductName=$(ProductName);JetManufacturer=$(Manufacturer)</DefineConstants>
+    <DefineConstants Condition="'$(MSBuildProjectExtension)' != '.csproj'">JetVersion=$(FullVersion);JetProductName=$(ProductName);JetManufacturer=$(Manufacturer)</DefineConstants>
 
     <SuppressPdbOutput>true</SuppressPdbOutput>
     <SignAssembly Condition="Exists('$(AssemblyOriginatorKeyFile)')">true</SignAssembly>
+
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
   </PropertyGroup>
   
   <!--TODO Future changes:

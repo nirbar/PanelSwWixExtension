@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <package xmlns="http://schemas.microsoft.com/packaging/2013/01/nuspec.xsd">
   <metadata minClientVersion="2.7">
-    <id>PanelSwWixExtension</id>
+    <id>PanelSwWixExtension4</id>
     <version>1.1.21</version>
     <title>Wix Extension</title>
     <authors>Nir Bar</authors>
@@ -19,14 +19,12 @@
   <files>
     <file src="..\Nuget\*" target="build" />
     <file src="..\build\bin\Release\PanelSwWixExtension\PanelSwWixExtension.dll" target="tools\lib"/>
-    <file src="..\build\bin\Release\DeferredExePackage\DeferredExePackage.exe" target="tools\lib"/>
     <file src=".\Xsd\PanelSwWixExtension.xsd" target="content"/>
     <file src="..\LICENSE" target="LICENSE" />
     <file src="..\README.md" target="README.md" />
 
     <!-- lib -->
-    <file src="..\build\bin\Release\CaCommon\CaCommon.lib" target="tools\lib\v141_xp"/>
-    <file src="..\build-v142\bin\Release\CaCommon\CaCommon.lib" target="tools\lib\v142"/>
+    <file src="..\build\bin\Release\CaCommon\CaCommon.lib" target="tools\lib\v142"/>
     <!-- inc -->
     <file src="..\CaCommon\DeferredActionBase.h" target="tools\include"/>
     <file src="..\CaCommon\RegistryKey.h" target="tools\include"/>

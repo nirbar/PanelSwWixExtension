@@ -1,0 +1,17 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:bal="http://wixtoolset.org/schemas/v4/wxs/bal">
+  <Bundle Name="SetPropertyFromPipeBootstrapper" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7">
+    <BootstrapperApplication>
+      <Payload SourceFile="$(var.SetPropertyFromPipeBAF.TargetPath)" bal:BAFunctions="yes" />
+      <WixStandardBootstrapperApplication Theme="rtfLicense" LicenseUrl="www.google.com" xmlns="http://wixtoolset.org/schemas/v4/wxs/bal"/>
+    </BootstrapperApplication>
+
+    <Variable Name="PIPE_NAME" Value="" Type="formatted" />
+
+    <Chain ParallelCache="yes" DisableSystemRestore="yes">
+
+      <MsiPackage SourceFile="$(var.SetPropertyFromPipeSetup.TargetPath)">
+        <MsiProperty Name="PIPE_NAME" Value="[PIPE_NAME]" />
+      </MsiPackage>
+    </Chain>
+  </Bundle>
+</Wix>

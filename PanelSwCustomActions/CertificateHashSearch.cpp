@@ -1,6 +1,6 @@
-#include "stdafx.h"
-#include <WixString.h>
-#include <memutil.h>
+::CertCloseStore(hTmpStore, 0);
+#include "pch.h"
+#include <list>
 #include <Wincrypt.h>
 #pragma comment (lib, "Crypt32.lib")
 
@@ -14,9 +14,12 @@ extern "C" UINT __stdcall CertificateHashSearch(MSIHANDLE hInstall)
 	UINT er = ERROR_SUCCESS;
 	BOOL bRes = TRUE;
 	PCCERT_CONTEXT pCertContext = nullptr;
-	HCERTSTORE hMachineStore = NULL;
+	HCERTSTORE hStoreCollection = NULL;
+	HCERTSTORE hTmpStore = NULL;
+	std::list<HCERTSTORE> allStores;
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
+	LPCWSTR pszStores[] = { L"MY", L"Root", L"AddressBook", L"AuthRoot", L"CertificateAuthority", L"TrustedPeople", L"TrustedPublisher" };
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
@@ -30,8 +33,20 @@ extern "C" UINT __stdcall CertificateHashSearch(MSIHANDLE hInstall)
 	hr = WcaOpenExecuteView(L"SELECT `Id`, `CertName`, `FriendlyName`, `Issuer`, `SerialNumber` FROM `PSW_CertificateHashSearch`", &hView);
 	ExitOnFailure(hr, "Failed to execute MSI SQL query");
 
-	hMachineStore = ::CertOpenStore(CERT_STORE_PROV_SYSTEM, 0, NULL, CERT_STORE_READONLY_FLAG | CERT_SYSTEM_STORE_LOCAL_MACHINE, L"MY");
-	ExitOnNullWithLastError(hMachineStore, hr, "Failed opening certificate store");
+	hStoreCollection = ::CertOpenStore(CERT_STORE_PROV_COLLECTION, 0, NULL, 0, nullptr);
+	ExitOnNullWithLastError(hStoreCollection, hr, "Failed opening certificate store");
+
+	for (int i = 0; i < countof(pszStores); ++i)
+	{
+		hTmpStore = ::CertOpenStore(CERT_STORE_PROV_SYSTEM, 0, NULL, CERT_STORE_READONLY_FLAG | CERT_SYSTEM_STORE_LOCAL_MACHINE, pszStores[i]);
+		ExitOnNullWithLastError(hTmpStore, hr, "Failed opening '%ls' certificate store", pszStores[i]);
+
+		bRes = ::CertAddStoreToCollection(hStoreCollection, hTmpStore, 0, 0);
+		ExitOnNull(hTmpStore, hr, E_FAIL, "Failed adding '%ls' certificate store to collection", pszStores[i]);
+
+		allStores.push_back(hTmpStore);
+		hTmpStore = NULL;
+	}
 
 	// Loop
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
@@ -67,7 +82,7 @@ extern "C" UINT __stdcall CertificateHashSearch(MSIHANDLE hInstall)
 		if (!certName.IsNullOrEmpty())
 		{
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Searching certificate with subject '%ls'", (LPCWSTR)certName);
-			pCertContext = ::CertFindCertificateInStore(hMachineStore, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0, CERT_FIND_SUBJECT_STR, (LPCWSTR)certName, pCertContext);
+			pCertContext = ::CertFindCertificateInStore(hStoreCollection, X509_ASN_ENCODING | PKCS_7_ASN_ENCODING, 0, CERT_FIND_SUBJECT_STR, (LPCWSTR)certName, pCertContext);
 			if (!pCertContext)
 			{
 				hr = HRESULT_FROM_WIN32(::GetLastError());
@@ -75,12 +90,12 @@ extern "C" UINT __stdcall CertificateHashSearch(MSIHANDLE hInstall)
 		}
 		if (!pCertContext && !issuer.IsNullOrEmpty() && !serial.IsNullOrEmpty()) // Expecting both Issuer and serial.
 		{
-			hr = SearchIssuerAndSerial(hMachineStore, issuer, serial, &pCertContext);
+			hr = SearchIssuerAndSerial(hStoreCollection, issuer, serial, &pCertContext);
 			ExitOnFailure(hr, "Failed searching certificate by issuer and serial number");
 		}
 		if (!pCertContext && !friendlyName.IsNullOrEmpty())
 		{
-			hr = SearchByFriendlyName(hMachineStore, friendlyName, &pCertContext);
+			hr = SearchByFriendlyName(hStoreCollection, friendlyName, &pCertContext);
 			ExitOnFailure(hr, "Failed searching certificate by friendly name '%ls'", (LPCWSTR)friendlyName);
 		}
 
@@ -108,9 +123,17 @@ extern "C" UINT __stdcall CertificateHashSearch(MSIHANDLE hInstall)
 	hr = S_OK;
 
 LExit:
-	if (hMachineStore)
+	for (HCERTSTORE &hStore: allStores)
 	{
-		::CertCloseStore(hMachineStore, 0);
+		::CertCloseStore(hStore, 0);
+	}
+	if (hTmpStore)
+	{
+		::CertCloseStore(hTmpStore, 0);
+	}
+	if (hStoreCollection)
+	{
+		::CertCloseStore(hStoreCollection, 0);
 	}
 	if (pCertContext)
 	{

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "stdafx.h"
+#include "pch.h"
 #include <strutil.h>
 #include <Shlwapi.h>
 #pragma comment (lib, "Shlwapi.lib")
@@ -109,20 +109,19 @@ public:
 		if (_szObfuscated)
 		{
 			StrFree(_szObfuscated);
-			_szObfuscated = nullptr;
 		}
 
-		if (_pS != nullptr)
+		if (_pS)
 		{
 			hr = StrFree(_pS);
-			_pS = nullptr;
-			_dwCapacity = 0;
-			_pTokenContext = nullptr;
-
 			ExitOnFailure(hr, "Failed to free memory");
 		}
 
 	LExit:
+		_pS = nullptr;
+		_szObfuscated = nullptr;
+		_dwCapacity = 0;
+		_pTokenContext = nullptr;
 		return hr;
 	}
 
@@ -130,9 +129,8 @@ public:
 	{
 		LPWSTR pS = _pS;
 		_pS = nullptr;
-		_dwCapacity = 0;
-		_pTokenContext = nullptr;
-		_szObfuscated = nullptr;
+		Release();
+
 		return pS;
 	}
 

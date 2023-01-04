@@ -1,36 +1,23 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension"
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
-  <Product Id="{769C11E5-D811-4CE3-BE79-CC23725E6B38}" Name="$(var.ProjectName)" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{8DC7207F-59B4-45E6-90B0-75769F8040B8}">
-    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
-
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
+  <Package Name="$(var.ProjectName)" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{8DC7207F-59B4-45E6-90B0-75769F8040B8}" InstallerVersion="200" ProductCode="{769C11E5-D811-4CE3-BE79-CC23725E6B38}">
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
-    <MediaTemplate />
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
 
-    <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder">
-        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup">
-          <Directory Id="INSTALLFOLDER1" Name="1"/>
-        </Directory>
-      </Directory>
-    </Directory>
-
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
 
-    <PanelSW:ZipFile Id="_1" SourceFolder="[INSTALLFOLDER]" TargetZipFile="[INSTALLFOLDER]1.zip"><![CDATA[Not Installed]]></PanelSW:ZipFile>
-    <PanelSW:Unzip Id="_1" TargetFolder="[INSTALLFOLDER]" ZipFile="[INSTALLFOLDER]1.zip" OverwriteMode="Unmodified"><![CDATA[Not Installed]]></PanelSW:Unzip>
-    <PanelSW:Unzip Id="_2" TargetFolder="[WindowsVolume]1\2\3" ZipFile="[INSTALLFOLDER]1.zip" Overwrite="yes"><![CDATA[Not Installed]]></PanelSW:Unzip>
-    <PanelSW:Unzip TargetFolder="[WindowsVolume]1\2\4" ZipFile="[INSTALLFOLDER]1.zip" Overwrite="yes" DeleteZip="yes" CreateRootFolder="no"><![CDATA[Not Installed]]></PanelSW:Unzip>
-    <PanelSW:Unzip TargetFolder="[INSTALLFOLDER]npp" ZipFile="[#npp.7.7.1.bin.zip]" OverwriteMode="Always"><![CDATA[&ProductFeature >= 3]]></PanelSW:Unzip>
+    <PanelSW:ZipFile SourceFolder="[INSTALLFOLDER]" TargetZipFile="[INSTALLFOLDER]1.zip" Condition="Not Installed"/>
+    <PanelSW:Unzip TargetFolder="[INSTALLFOLDER]" ZipFile="[INSTALLFOLDER]1.zip" OverwriteMode="Unmodified" Condition="Not Installed"/>
+    <PanelSW:Unzip TargetFolder="[WindowsVolume]1\2\3" ZipFile="[INSTALLFOLDER]1.zip" Overwrite="yes" Condition="Not Installed"/>
+    <PanelSW:Unzip TargetFolder="[WindowsVolume]1\2\4" ZipFile="[INSTALLFOLDER]1.zip" Overwrite="yes" DeleteZip="yes" CreateRootFolder="no" Condition="Not Installed"/>
+    <PanelSW:Unzip TargetFolder="[INSTALLFOLDER]npp" ZipFile="[#npp.8.4.7.portable.x64.zip]" OverwriteMode="Always" Condition="&amp;ProductFeature &gt;= 3"/>
 
     <ComponentGroup Id="ProductComponents">
       <Component Directory="INSTALLFOLDER">
-        <File Source="$(sys.SOURCEFILEPATH)"/>
-        <RemoveFile On="both" Name="1.zip" Id="_1"/>
+        <File Source="$(sys.SOURCEFILEPATH)" />
+        <RemoveFile On="both" Name="1.zip" Id="_1" />
       </Component>
       <Component Directory="INSTALLFOLDER">
         <File Source="$(var.ProjectDir)SizeZero.txt" />
@@ -39,12 +26,18 @@
         <File Source="$(var.ProjectDir)ZipFileUT.wixproj" ReadOnly="yes" />
       </Component>
       <Component Directory="INSTALLFOLDER">
-        <File Source="D:\Tools\npp.7.7.1.bin.zip" />
+        <File Source="D:\Tools\npp.8.4.7.portable.x64.zip" Id="npp.8.4.7.portable.x64.zip" />
       </Component>
     </ComponentGroup>
-    
+
     <InstallExecuteSequence>
-      <Custom Action="UnzipSched" After="ZipFileSched"/>
+      <Custom Action="UnzipSched" After="ZipFileSched" />
     </InstallExecuteSequence>
-  </Product>
+
+    <StandardDirectory Id="ProgramFilesFolder">
+      <Directory Id="INSTALLFOLDER" Name="UnitTestSetup">
+        <Directory Id="INSTALLFOLDER1" Name="1" />
+      </Directory>
+    </StandardDirectory>
+  </Package>
 </Wix>

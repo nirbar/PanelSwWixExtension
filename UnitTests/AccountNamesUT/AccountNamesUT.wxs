@@ -1,31 +1,19 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi"
-     xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension"
-     >
-  <Product Id="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}" Name="AccountNamesUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}">
-    <Package InstallerVersion="200" Compressed="yes" InstallScope="perMachine" />
-
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+  <Package Name="AccountNamesUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}" InstallerVersion="200" ProductCode="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}">
+    
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
-    <MediaTemplate />
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
-  </Product>
+  </Package>
 
-  <Fragment>
-    <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder">
-        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
-      </Directory>
-    </Directory>
-
-    <PropertyRef Id="UserDesktopFolder"/>
-    <PropertyRef Id="BUILTIN_ADMINISTRATORS"/>
-    <Condition Message="Expected BUILTIN_ADMINISTRATORS=BUILTIN\Administrators"><![CDATA[BUILTIN_ADMINISTRATORS="BUILTIN\Administrators"]]></Condition>
-    <Condition Message="Expected BUILTIN_ADMINISTRATORS_DOMAIN=BUILTIN"><![CDATA[BUILTIN_ADMINISTRATORS_DOMAIN="BUILTIN"]]></Condition>
-    <Condition Message="Expected BUILTIN_ADMINISTRATORS_NAME=Administrators"><![CDATA[BUILTIN_ADMINISTRATORS_NAME="Administrators"]]></Condition>
-    <Condition Message="Expected UserDesktopFolder to contain 'Desktop'"><![CDATA[UserDesktopFolder ~>< "Desktop"]]></Condition>
+  <Fragment><PropertyRef Id="UserDesktopFolder" />
+    <PropertyRef Id="BUILTIN_ADMINISTRATORS" />
+    <Launch Condition="BUILTIN_ADMINISTRATORS=&quot;BUILTIN\Administrators&quot;" Message="Expected BUILTIN_ADMINISTRATORS=BUILTIN\Administrators" />
+    <Launch Condition="BUILTIN_ADMINISTRATORS_DOMAIN=&quot;BUILTIN&quot;" Message="Expected BUILTIN_ADMINISTRATORS_DOMAIN=BUILTIN" />
+    <Launch Condition="BUILTIN_ADMINISTRATORS_NAME=&quot;Administrators&quot;" Message="Expected BUILTIN_ADMINISTRATORS_NAME=Administrators" />
+    <Launch Condition="UserDesktopFolder ~&gt;&lt; &quot;Desktop&quot;" Message="Expected UserDesktopFolder to contain 'Desktop'" />
 
     <!-- Terminate after validating result. -->
     <InstallUISequence>
@@ -35,12 +23,16 @@
       <Custom Action="TerminateSuccessfully_Immediate" After="LaunchConditions"></Custom>
     </InstallExecuteSequence>
 
-  </Fragment>
+  
+      <StandardDirectory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+      </StandardDirectory>
+    </Fragment>
 
   <Fragment>
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component>
-        <File Source="$(sys.SOURCEFILEPATH)"/>
+        <File Source="$(sys.SOURCEFILEPATH)" />
       </Component>
     </ComponentGroup>
   </Fragment>

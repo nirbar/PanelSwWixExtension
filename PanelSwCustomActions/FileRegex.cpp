@@ -1,10 +1,7 @@
+#include "pch.h"
 #include "FileRegex.h"
 #include "FileOperations.h"
-#include "../CaCommon/WixString.h"
 #include <regex>
-#include <dictutil.h>
-#include <memutil.h>
-#include <pathutil.h>
 using namespace std;
 using namespace ::com::panelsw::ca;
 using namespace google::protobuf;

@@ -1,5 +1,4 @@
-#include "stdafx.h"
-#include <WixString.h>
+#include "pch.h"
 #include <Sddl.h>
 #include <map>
 #pragma comment (lib, "Advapi32.lib")
