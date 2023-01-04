@@ -1,5 +1,6 @@
 [![PanelSwWixExtension](https://github.com/nirbar/PanelSwWixExtension/actions/workflows/github-actions-build.yml/badge.svg?branch=master)](https://github.com/nirbar/PanelSwWixExtension/actions/workflows/github-actions-build.yml)
-[![NuGet version (PanelSwWixExtension)](https://img.shields.io/nuget/v/PanelSwWixExtension.svg?style=flat-square)](https://www.nuget.org/packages/PanelSwWixExtension/)
+WiX v3 [![NuGet version (PanelSwWixExtension)](https://img.shields.io/nuget/v/PanelSwWixExtension.svg?style=flat-square)](https://www.nuget.org/packages/PanelSwWixExtension/)
+WiX v4 [![NuGet version (PanelSwWixExtension4)](https://img.shields.io/nuget/v/PanelSwWixExtension4.svg?style=flat-square)](https://www.nuget.org/packages/PanelSwWixExtension4/)
 
 PanelSwWixExtension from the creator of [JetBA](https://github.com/nirbar/JetBA-Binaries) is the most comprehensive open source [WiX](http://wixtoolset.org/) extension. 
 I would like to thank JetBrains for their [support](https://www.jetbrains.com/community/opensource/) of this project
@@ -10,7 +11,7 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
   - *Md5Hash*: Computes MD5 hash.
   - *WmiSearch*: Execute a WMI query.
   - *PathSearch*: Search for a file on PATH environment variable folder list.
-  - *VersionCompare*: Compare two versions, set result to property as -1, 0, or 1
+  - *VersionCompare*: Compare two versions, set result to property in range -4 to +4, denoting the version part that was different.
   - *ForceVersion*: Force a specified version for a file. Version overwrite is done on runtime in the MSI database.
   - *AccountSidSearch*: Lookup an account's SID by account name.
   - *JsonJpathSearch*: Read JSON values
