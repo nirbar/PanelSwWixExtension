@@ -2,13 +2,13 @@ using PanelSw.Wix.Extensions.Symbols;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using WixToolset.Data;
 using WixToolset.Data.Symbols;
 using WixToolset.Data.WindowsInstaller;
 using WixToolset.Extensibility;
-using WixToolset.Extensibility.Data;
 
 namespace PanelSw.Wix.Extensions
 {
@@ -32,11 +32,32 @@ namespace PanelSw.Wix.Extensions
                 case nameof(PSW_ConcatFiles):
                     DecompileConcatFiles(table);
                     break;
+                case nameof(PSW_CustomUninstallKey):
+                    DecompileCustomUninstallKey(table);
+                    break;
                 default:
                     return false;
             }
 
             return true;
+        }
+
+        private void DecompileCustomUninstallKey(Table table)
+        {
+            foreach (var row in table.Rows)
+            {
+                PSW_CustomUninstallKey symbol = new PSW_CustomUninstallKey();
+                symbol.LoadFromRow(row, out string junk);
+
+                XElement xCustomUninstallKey = new XElement(PanelSwWixExtension.Namespace + "CustomUninstallKey");
+                SetAttributeIfNotNull(xCustomUninstallKey, nameof(symbol.ProductCode), symbol.ProductCode);
+                SetAttributeIfNotNull(xCustomUninstallKey, nameof(symbol.Name), symbol.Name);
+                SetAttributeIfNotNull(xCustomUninstallKey, nameof(symbol.Data), symbol.Data);
+                SetAttributeIfNotNull(xCustomUninstallKey, nameof(symbol.DataType), symbol.DataType);
+                SetAttributeIfNotNull(xCustomUninstallKey, nameof(symbol.Condition), symbol.Condition);
+
+                DecompilerHelper.AddElementToRoot(xCustomUninstallKey);
+            }
         }
 
         public override void PreDecompileTables(TableIndexedCollection tables)
@@ -315,6 +336,14 @@ namespace PanelSw.Wix.Extensions
                 }
 
                 xComponent.Add(xBackupAndRestore);
+            }
+        }
+
+        private void SetAttributeIfNotNull(XElement element, string attribName, string value)
+        {
+            if (!string.IsNullOrEmpty(value))
+            {
+                element.SetAttributeValue(attribName, value);
             }
         }
     }
