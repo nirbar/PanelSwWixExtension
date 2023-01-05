@@ -180,7 +180,8 @@
   </Fragment>
 
   <Fragment>
-    <Property Id="DOMAIN_ADMINISTRATORS" Value="N/A" />
+    <!-- We set one property to Secure, so we'll be able to detect it in decompile -->
+    <Property Id="DOMAIN_ADMINISTRATORS" Value="N/A" Secure="yes" />
     <Property Id="DOMAIN_GUESTS" Value="N/A" />
     <Property Id="DOMAIN_USERS" Value="N/A" />
     <Property Id="ENTERPRISE_DOMAIN_CONTROLLERS" Value="N/A" />

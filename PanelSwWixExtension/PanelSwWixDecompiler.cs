@@ -1,11 +1,14 @@
 using PanelSw.Wix.Extensions.Symbols;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using WixToolset.Data;
+using WixToolset.Data.Symbols;
 using WixToolset.Data.WindowsInstaller;
 using WixToolset.Extensibility;
+using WixToolset.Extensibility.Data;
 
 namespace PanelSw.Wix.Extensions
 {
@@ -71,6 +74,7 @@ namespace PanelSw.Wix.Extensions
                                 propValue = propValue.Replace("BackupAndRestore_deferred_After_RemoveExistingProducts", "");
                             }
 
+                            propValue = propValue.Replace("TerminateSuccessfully_Deferred", "");
                             propValue = propValue.Replace("BackupAndRestore_commit", "");
                             propValue = propValue.Replace("BackupAndRestore_deferred", "");
                             propValue = propValue.Replace("BackupAndRestore_rollback", "");
@@ -80,6 +84,58 @@ namespace PanelSw.Wix.Extensions
                             propValue = propValue.Trim(';');
                             propRow[1] = propValue;
                         }
+                    }
+                    else if (propName.Equals("SecureCustomProperties"))
+                    {
+                        string propValue = propRow.FieldAsString(1);
+                        if (!string.IsNullOrEmpty(propValue))
+                        {
+                            if (propValue.Contains("DOMAIN_ADMINISTRATORS"))
+                            {
+                                XElement caRef = DecompilerHelper.AddElementToRoot("CustomActionRef");
+                                caRef.SetAttributeValue("Id", "AccountNames");
+                            }
+                        }
+                    }
+                }
+            }
+
+            // PanelSw actions
+            if (tables.TryGetTable("InstallUISequence", out Table installUISequence))
+            {
+                foreach (string a in new string[] { "TerminateSuccessfully_Immediate", "Rollback_Immediate", "PromptCancel_Immediate" })
+                {
+                    Row actionRow = installUISequence.Rows.FirstOrDefault(r => a.Equals(r[0]?.ToString()));
+                    if (actionRow != null)
+                    {
+                        XElement caRef = DecompilerHelper.AddElementToRoot("CustomActionRef");
+                        caRef.SetAttributeValue("Id", a);
+
+                        XElement uiSeq = DecompilerHelper.AddElementToRoot(SequenceTable.InstallUISequence.ToString());
+                        XElement caAction = DecompilerHelper.CreateElement("Custom");
+                        caAction.SetAttributeValue("Action", a);
+                        caAction.SetAttributeValue("Condition", actionRow.Fields[1]?.ToString());
+                        caAction.SetAttributeValue("Sequence", actionRow.Fields[2]?.ToString());
+                        uiSeq.Add(caAction);
+                    }
+                }
+            }
+            if (tables.TryGetTable("InstallExecuteSequence", out Table installExeSequence))
+            {
+                foreach (string a in new string[] { "TerminateSuccessfully_Immediate", "TerminateSuccessfully_Deferred", "Rollback_Immediate", "Rollback_Deferred", "PromptCancel_Immediate", "PromptCancel_Deferred" })
+                {
+                    Row actionRow = installUISequence.Rows.FirstOrDefault(r => a.Equals(r[0]?.ToString()));
+                    if (actionRow != null)
+                    {
+                        XElement caRef = DecompilerHelper.AddElementToRoot("CustomActionRef");
+                        caRef.SetAttributeValue("Id", a);
+
+                        XElement uiSeq = DecompilerHelper.AddElementToRoot(SequenceTable.InstallUISequence.ToString());
+                        XElement caAction = DecompilerHelper.CreateElement("Custom");
+                        caAction.SetAttributeValue("Action", a);
+                        caAction.SetAttributeValue("Condition", actionRow.Fields[1]?.ToString());
+                        caAction.SetAttributeValue("Sequence", actionRow.Fields[2]?.ToString());
+                        uiSeq.Add(caAction);
                     }
                 }
             }
