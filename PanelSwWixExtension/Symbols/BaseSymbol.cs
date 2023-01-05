@@ -66,5 +66,28 @@ namespace PanelSw.Wix.Extensions.Symbols
             }
             return fieldDefinitions.ToArray();
         }
+
+        public bool LoadFromRow(Row row, out string id)
+        {
+            id = null;
+            TableDefinition definition = PanelSwWixExtension.TableDefinitions.FirstOrDefault(td => td.Name.Equals(GetType().Name));
+            if (definition == null)
+            {
+                return false;
+            }
+
+            int offset = definition.SymbolIdIsPrimaryKey ? 1 : 0;
+            if (definition.SymbolIdIsPrimaryKey)
+            {
+                offset = 1;
+                id = row[0]?.ToString();
+            }
+
+            for (int i = offset; i < definition.Columns.Count(); ++i)
+            {
+                this.Set(i - offset, row[i]?.ToString());
+            }
+            return true;
+        }
     }
 }

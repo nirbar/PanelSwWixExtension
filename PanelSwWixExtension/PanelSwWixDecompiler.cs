@@ -1,11 +1,9 @@
 using PanelSw.Wix.Extensions.Symbols;
-using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Xml.Linq;
+using System.Xml.XPath;
 using WixToolset.Data;
-using WixToolset.Data.Symbols;
 using WixToolset.Data.WindowsInstaller;
 using WixToolset.Extensibility;
 
@@ -19,11 +17,17 @@ namespace PanelSw.Wix.Extensions
         {
             switch (table.Name)
             {
-                case "PSW_AccountSidSearch":
-                    this.DecompileAccountSidSearch(table);
+                case nameof(PSW_AccountSidSearch):
+                    DecompileAccountSidSearch(table);
                     break;
-                case "PSW_BackupAndRestore":
-                    this.DecompileBackupAndRestore(table);
+                case nameof(PSW_BackupAndRestore):
+                    DecompileBackupAndRestore(table);
+                    break;
+                case nameof(PSW_CertificateHashSearch):
+                    DecompileCertificateHashSearch(table);
+                    break;
+                case nameof(PSW_ConcatFiles):
+                    DecompileConcatFiles(table);
                     break;
                 default:
                     return false;
@@ -81,33 +85,134 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
+        public override void PostDecompileTables(TableIndexedCollection tables)
+        {
+            MergeSplitFiles();
+        }
+
+        private void MergeSplitFiles()
+        {
+            _concatFiles.Sort(new ConcatFilesComparer());
+            foreach (PSW_ConcatFiles concatFile in _concatFiles)
+            {
+                XElement compFile = DecompilerHelper.RootElement.XPathSelectElement($"//*[local-name() = 'File' and @Id='{concatFile.MyFile_}']");
+                if (!string.IsNullOrEmpty(Context.ExtractFolder))
+                {
+                    XElement rootFile = DecompilerHelper.RootElement.XPathSelectElement($"//*[local-name() = 'File' and @Id='{concatFile.RootFile_}']");
+                    string rootSource = rootFile.Attribute("Source")?.Value.Substring("SourceDir\\".Length);
+                    rootSource = Path.Combine(Context.ExtractFolder, rootSource);
+
+                    string compSource = compFile.Attribute("Source")?.Value.Substring("SourceDir\\".Length);
+                    compSource = Path.Combine(Context.ExtractFolder, compSource);
+
+                    // Merge to root
+                    if (File.Exists(compSource) && File.Exists(rootSource))
+                    {
+                        using (FileStream wf = File.OpenWrite(rootSource))
+                        {
+                            wf.Seek(0, SeekOrigin.End);
+                            using (FileStream rf = File.OpenRead(compSource))
+                            {
+                                rf.CopyTo(wf);
+                            }
+                        }
+                        File.Delete(compSource);
+                    }
+
+                }
+                compFile.Remove();
+            }
+        }
+
+        private List<PSW_ConcatFiles> _concatFiles = new List<PSW_ConcatFiles>();
+        private void DecompileConcatFiles(Table table)
+        {
+            foreach (var row in table.Rows)
+            {
+                PSW_ConcatFiles symbol = new PSW_ConcatFiles();
+                symbol.LoadFromRow(row, out string junk);
+                _concatFiles.Add(symbol);
+
+                // Already added split file
+                if (symbol.Order > 1)
+                {
+                    continue;
+                }
+                if (!DecompilerHelper.TryGetIndexedElement("File", symbol.RootFile_, out XElement xRootFile))
+                {
+                    Messaging.Write(WarningMessages.ExpectedForeignRow(row.SourceLineNumbers, table.Name, row.GetPrimaryKey(), "RootFile_", symbol.RootFile_, "File"));
+                    return;
+                }
+
+                XElement xSplitFile = new XElement(PanelSwWixExtension.Namespace + "SplitFile");
+                xSplitFile.SetAttributeValue(nameof(symbol.Size), symbol.Size);
+
+                xRootFile.Add(xSplitFile);
+            }
+        }
+
+        private void DecompileCertificateHashSearch(Table table)
+        {
+            foreach (var row in table.Rows)
+            {
+                PSW_CertificateHashSearch symbol = new PSW_CertificateHashSearch();
+                symbol.LoadFromRow(row, out string propName);
+
+                XElement xProperty = null;
+                if (!DecompilerHelper.TryGetIndexedElement("Property", propName, out xProperty))
+                {
+                    xProperty = DecompilerHelper.AddElementToRoot("Property");
+                    xProperty.SetAttributeValue("Id", propName);
+                }
+
+                XElement xCertificateHashSearch = new XElement(PanelSwWixExtension.Namespace + "CertificateHashSearch");
+                if (!string.IsNullOrEmpty(symbol.CertName))
+                {
+                    xCertificateHashSearch.SetAttributeValue(nameof(symbol.CertName), symbol.CertName);
+                }
+                if (!string.IsNullOrEmpty(symbol.FriendlyName))
+                {
+                    xCertificateHashSearch.SetAttributeValue(nameof(symbol.FriendlyName), symbol.FriendlyName);
+                }
+                if (!string.IsNullOrEmpty(symbol.Issuer))
+                {
+                    xCertificateHashSearch.SetAttributeValue(nameof(symbol.Issuer), symbol.Issuer);
+                }
+                if (!string.IsNullOrEmpty(symbol.SerialNumber))
+                {
+                    xCertificateHashSearch.SetAttributeValue(nameof(symbol.SerialNumber), symbol.SerialNumber);
+                }
+
+                xProperty.Add(xCertificateHashSearch);
+            }
+        }
+
         private void DecompileAccountSidSearch(Table table)
         {
             foreach (var row in table.Rows)
             {
-                string propName = row.FieldAsString(1);
+                PSW_AccountSidSearch symbol = new PSW_AccountSidSearch();
+                symbol.LoadFromRow(row, out string propName);
+
                 XElement xProperty = null;
-                if (!this.DecompilerHelper.TryGetIndexedElement("Property", propName, out xProperty))
+                if (!DecompilerHelper.TryGetIndexedElement("Property", propName, out xProperty))
                 {
-                    xProperty = this.DecompilerHelper.AddElementToRoot("Property");
+                    xProperty = DecompilerHelper.AddElementToRoot("Property");
                     xProperty.SetAttributeValue("Id", propName);
                 }
 
                 XElement xAccountSidSearch = new XElement(PanelSwWixExtension.Namespace + "AccountSidSearch");
-                string systemName = row.FieldAsString(2);
-                if (!string.IsNullOrEmpty(systemName))
+                if (!string.IsNullOrEmpty(symbol.SystemName))
                 {
-                    xAccountSidSearch.SetAttributeValue("SystemName", systemName);
+                    xAccountSidSearch.SetAttributeValue(nameof(symbol.SystemName), symbol.SystemName);
                 }
-                string accountName = row.FieldAsString(3);
-                if (!string.IsNullOrEmpty(accountName))
+                if (!string.IsNullOrEmpty(symbol.AccountName))
                 {
-                    xAccountSidSearch.SetAttributeValue("AccountName", accountName);
+                    xAccountSidSearch.SetAttributeValue(nameof(symbol.AccountName), symbol.AccountName);
                 }
-                string condition = row.FieldAsString(4);
-                if (!string.IsNullOrEmpty(condition))
+                if (!string.IsNullOrEmpty(symbol.Condition))
                 {
-                    xAccountSidSearch.SetAttributeValue("Condition", condition);
+                    xAccountSidSearch.SetAttributeValue(nameof(symbol.Condition), symbol.Condition);
                 }
 
                 xProperty.Add(xAccountSidSearch);
@@ -119,22 +224,23 @@ namespace PanelSw.Wix.Extensions
         {
             foreach (var row in table.Rows)
             {
-                string component = row.FieldAsString(1);
-                if (!this.DecompilerHelper.TryGetIndexedElement("Component", component, out XElement xComponent))
+                PSW_BackupAndRestore symbol = new PSW_BackupAndRestore();
+                symbol.LoadFromRow(row, out string junk);
+
+                if (!DecompilerHelper.TryGetIndexedElement("Component", symbol.Component_, out XElement xComponent))
                 {
-                    this.Messaging.Write(WarningMessages.ExpectedForeignRow(row.SourceLineNumbers, table.Name, row.GetPrimaryKey(), "Component_", component, "Component"));
+                    Messaging.Write(WarningMessages.ExpectedForeignRow(row.SourceLineNumbers, table.Name, row.GetPrimaryKey(), "Component_", symbol.Component_, "Component"));
                     return;
                 }
 
                 XElement xBackupAndRestore = new XElement(PanelSwWixExtension.Namespace + "BackupAndRestore");
-                xBackupAndRestore.SetAttributeValue("Path", row.FieldAsString(2));
+                xBackupAndRestore.SetAttributeValue("Path", symbol.Path);
 
-                int flags = row.FieldAsInteger(3);
-                if ((flags & (int)PanelSwWixCompiler.DeletePathFlags.IgnoreMissing) != 0)
+                if ((symbol.Flags & (int)PanelSwWixCompiler.DeletePathFlags.IgnoreMissing) != 0)
                 {
                     xBackupAndRestore.SetAttributeValue("IgnoreMissing", "yes");
                 }
-                if ((flags & (int)PanelSwWixCompiler.DeletePathFlags.IgnoreErrors) != 0)
+                if ((symbol.Flags & (int)PanelSwWixCompiler.DeletePathFlags.IgnoreErrors) != 0)
                 {
                     xBackupAndRestore.SetAttributeValue("IgnoreErrors", "yes");
                 }

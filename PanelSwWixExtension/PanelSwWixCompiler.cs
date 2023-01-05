@@ -4278,7 +4278,7 @@ namespace PanelSw.Wix.Extensions
         }
     }
 
-    class ConcatFilesComparer : IComparer<PSW_ConcatFiles>
+    internal class ConcatFilesComparer : IComparer<PSW_ConcatFiles>
     {
         int IComparer<PSW_ConcatFiles>.Compare(PSW_ConcatFiles x, PSW_ConcatFiles y)
         {
