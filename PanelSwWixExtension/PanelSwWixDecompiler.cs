@@ -35,11 +35,38 @@ namespace PanelSw.Wix.Extensions
                 case nameof(PSW_CustomUninstallKey):
                     DecompileCustomUninstallKey(table);
                     break;
+                case nameof(PSW_DeletePath):
+                    DecompileDeletePath(table);
+                    break;
                 default:
                     return false;
             }
 
             return true;
+        }
+
+        private void DecompileDeletePath(Table table)
+        {
+            foreach (var row in table.Rows)
+            {
+                PSW_DeletePath symbol = new PSW_DeletePath();
+                symbol.LoadFromRow(row, out string junk);
+
+                XElement xDeletePath = new XElement(PanelSwWixExtension.Namespace + "DeletePath");
+                xDeletePath.SetAttributeValue(nameof(symbol.Path), symbol.Path);
+                SetAttributeIfNotNull(xDeletePath, nameof(symbol.Condition), symbol.Condition);
+
+                if ((symbol.Flags & (int)PanelSwWixCompiler.DeletePathFlags.AllowReboot) == 0)
+                {
+                    xDeletePath.SetAttributeValue(nameof(PanelSwWixCompiler.DeletePathFlags.AllowReboot), "no");
+                }
+                if ((symbol.Flags & (int)PanelSwWixCompiler.DeletePathFlags.OnlyIfEmpty) != 0)
+                {
+                    xDeletePath.SetAttributeValue(nameof(PanelSwWixCompiler.DeletePathFlags.OnlyIfEmpty), "yes");
+                }
+
+                DecompilerHelper.AddElementToRoot(xDeletePath);
+            }
         }
 
         private void DecompileCustomUninstallKey(Table table)
@@ -243,22 +270,10 @@ namespace PanelSw.Wix.Extensions
                 }
 
                 XElement xCertificateHashSearch = new XElement(PanelSwWixExtension.Namespace + "CertificateHashSearch");
-                if (!string.IsNullOrEmpty(symbol.CertName))
-                {
-                    xCertificateHashSearch.SetAttributeValue(nameof(symbol.CertName), symbol.CertName);
-                }
-                if (!string.IsNullOrEmpty(symbol.FriendlyName))
-                {
-                    xCertificateHashSearch.SetAttributeValue(nameof(symbol.FriendlyName), symbol.FriendlyName);
-                }
-                if (!string.IsNullOrEmpty(symbol.Issuer))
-                {
-                    xCertificateHashSearch.SetAttributeValue(nameof(symbol.Issuer), symbol.Issuer);
-                }
-                if (!string.IsNullOrEmpty(symbol.SerialNumber))
-                {
-                    xCertificateHashSearch.SetAttributeValue(nameof(symbol.SerialNumber), symbol.SerialNumber);
-                }
+                SetAttributeIfNotNull(xCertificateHashSearch, nameof(symbol.CertName), symbol.CertName);
+                SetAttributeIfNotNull(xCertificateHashSearch, nameof(symbol.FriendlyName), symbol.FriendlyName);
+                SetAttributeIfNotNull(xCertificateHashSearch, nameof(symbol.Issuer), symbol.Issuer);
+                SetAttributeIfNotNull(xCertificateHashSearch, nameof(symbol.SerialNumber), symbol.SerialNumber);
 
                 xProperty.Add(xCertificateHashSearch);
             }
@@ -279,18 +294,9 @@ namespace PanelSw.Wix.Extensions
                 }
 
                 XElement xAccountSidSearch = new XElement(PanelSwWixExtension.Namespace + "AccountSidSearch");
-                if (!string.IsNullOrEmpty(symbol.SystemName))
-                {
-                    xAccountSidSearch.SetAttributeValue(nameof(symbol.SystemName), symbol.SystemName);
-                }
-                if (!string.IsNullOrEmpty(symbol.AccountName))
-                {
-                    xAccountSidSearch.SetAttributeValue(nameof(symbol.AccountName), symbol.AccountName);
-                }
-                if (!string.IsNullOrEmpty(symbol.Condition))
-                {
-                    xAccountSidSearch.SetAttributeValue(nameof(symbol.Condition), symbol.Condition);
-                }
+                SetAttributeIfNotNull(xAccountSidSearch, nameof(symbol.SystemName), symbol.SystemName);
+                SetAttributeIfNotNull(xAccountSidSearch, nameof(symbol.AccountName), symbol.AccountName);
+                SetAttributeIfNotNull(xAccountSidSearch, nameof(symbol.Condition), symbol.Condition);
 
                 xProperty.Add(xAccountSidSearch);
             }
@@ -315,11 +321,11 @@ namespace PanelSw.Wix.Extensions
 
                 if ((symbol.Flags & (int)PanelSwWixCompiler.DeletePathFlags.IgnoreMissing) != 0)
                 {
-                    xBackupAndRestore.SetAttributeValue("IgnoreMissing", "yes");
+                    xBackupAndRestore.SetAttributeValue(nameof(PanelSwWixCompiler.DeletePathFlags.IgnoreMissing), "yes");
                 }
                 if ((symbol.Flags & (int)PanelSwWixCompiler.DeletePathFlags.IgnoreErrors) != 0)
                 {
-                    xBackupAndRestore.SetAttributeValue("IgnoreErrors", "yes");
+                    xBackupAndRestore.SetAttributeValue(nameof(PanelSwWixCompiler.DeletePathFlags.IgnoreErrors), "yes");
                 }
 
                 if (_backupAndRestoreSchedule == PanelSwWixCompiler.BackupAndRestore_deferred_Schedule.BackupAndRestore_deferred_After_DuplicateFiles)
