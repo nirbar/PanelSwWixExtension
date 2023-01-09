@@ -38,11 +38,35 @@ namespace PanelSw.Wix.Extensions
                 case nameof(PSW_DeletePath):
                     DecompileDeletePath(table);
                     break;
+                case nameof(PSW_DiskSpace):
+                    DecompileDiskSpace(table);
+                    break;
                 default:
                     return false;
             }
 
             return true;
+        }
+
+        private void DecompileDiskSpace(Table table)
+        {
+            foreach (var row in table.Rows)
+            {
+                PSW_DiskSpace symbol = new PSW_DiskSpace();
+                symbol.LoadFromRow(row, out string junk);
+
+                XElement xDiskSpace = new XElement(PanelSwWixExtension.Namespace + "DiskSpace");
+
+                if (!DecompilerHelper.TryGetIndexedElement("Directory", symbol.Directory_, out XElement xDir)
+                    && !DecompilerHelper.TryGetIndexedElement("DirectoryRef", symbol.Directory_, out xDir)
+                    && !DecompilerHelper.TryGetIndexedElement("StandardDirectory", symbol.Directory_, out xDir))
+                {
+                    Messaging.Write(WarningMessages.ExpectedForeignRow(row.SourceLineNumbers, table.Name, row.GetPrimaryKey(), "Directory_", symbol.Directory_, "Directory"));
+                    return;
+                }
+
+                xDir.Add(xDiskSpace);
+            }
         }
 
         private void DecompileDeletePath(Table table)
@@ -172,13 +196,13 @@ namespace PanelSw.Wix.Extensions
             {
                 foreach (string a in new string[] { "TerminateSuccessfully_Immediate", "TerminateSuccessfully_Deferred", "Rollback_Immediate", "Rollback_Deferred", "PromptCancel_Immediate", "PromptCancel_Deferred" })
                 {
-                    Row actionRow = installUISequence.Rows.FirstOrDefault(r => a.Equals(r[0]?.ToString()));
+                    Row actionRow = installExeSequence.Rows.FirstOrDefault(r => a.Equals(r[0]?.ToString()));
                     if (actionRow != null)
                     {
                         XElement caRef = DecompilerHelper.AddElementToRoot("CustomActionRef");
                         caRef.SetAttributeValue("Id", a);
 
-                        XElement uiSeq = DecompilerHelper.AddElementToRoot(SequenceTable.InstallUISequence.ToString());
+                        XElement uiSeq = DecompilerHelper.AddElementToRoot(SequenceTable.InstallExecuteSequence.ToString());
                         XElement caAction = DecompilerHelper.CreateElement("Custom");
                         caAction.SetAttributeValue("Action", a);
                         caAction.SetAttributeValue("Condition", actionRow.Fields[1]?.ToString());
