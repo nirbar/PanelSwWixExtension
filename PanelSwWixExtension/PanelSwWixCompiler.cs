@@ -1511,7 +1511,7 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        enum TopShelf_Account
+        public enum TopShelf_Account
         {
             custom = 0,
             localSystem = 1,
@@ -1520,7 +1520,7 @@ namespace PanelSw.Wix.Extensions
             none = 4,
         }
 
-        enum TopShelf_Start
+        public enum TopShelf_Start
         {
             disabled = 0,
             auto = 1,
@@ -1529,7 +1529,7 @@ namespace PanelSw.Wix.Extensions
             none = 4,
         }
 
-        enum ErrorHandling
+        public enum ErrorHandling
         {
             fail = 0,
             ignore = 1,

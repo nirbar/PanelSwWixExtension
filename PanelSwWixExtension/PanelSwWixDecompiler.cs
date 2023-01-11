@@ -1,4 +1,5 @@
 using PanelSw.Wix.Extensions.Symbols;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -41,11 +42,38 @@ namespace PanelSw.Wix.Extensions
                 case nameof(PSW_DiskSpace):
                     DecompileDiskSpace(table);
                     break;
+                case nameof(PSW_Dism):
+                    DecompileDism(table);
+                    break;
                 default:
                     return false;
             }
 
             return true;
+        }
+
+        private void DecompileDism(Table table)
+        {
+            foreach (var row in table.Rows)
+            {
+                PSW_Dism symbol = new PSW_Dism();
+                symbol.LoadFromRow(row, out string junk);
+
+                XElement xDism = new XElement(PanelSwWixExtension.Namespace + "Dism");
+                xDism.SetAttributeValue(nameof(PSW_Dism.EnableFeatures), symbol.EnableFeatures);
+                xDism.SetAttributeValue(nameof(PSW_Dism.Cost), symbol.Cost);
+                SetAttributeEnum<PanelSwWixCompiler.ErrorHandling>(xDism, nameof(PSW_Dism.ErrorHandling), symbol.ErrorHandling);
+                SetAttributeIfNotNull(xDism, nameof(PSW_Dism.ExcludeFeatures), symbol.ExcludeFeatures);
+                SetAttributeIfNotNull(xDism, nameof(PSW_Dism.PackagePath), symbol.PackagePath);
+
+                if (!DecompilerHelper.TryGetIndexedElement("Component", symbol.Component_, out XElement xComponent))
+                {
+                    Messaging.Write(WarningMessages.ExpectedForeignRow(row.SourceLineNumbers, table.Name, row.GetPrimaryKey(), "Component_", symbol.Component_, "Component"));
+                    return;
+                }
+
+                xComponent.Add(xDism);
+            }
         }
 
         private void DecompileDiskSpace(Table table)
@@ -375,6 +403,11 @@ namespace PanelSw.Wix.Extensions
             {
                 element.SetAttributeValue(attribName, value);
             }
+        }
+
+        private void SetAttributeEnum<T>(XElement element, string attribName, int val) where T : struct
+        {
+            element.SetAttributeValue(attribName, Enum.GetName(typeof(T), val));
         }
     }
 }
