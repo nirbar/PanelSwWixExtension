@@ -3,13 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using WixToolset.Data;
 using WixToolset.Data.Symbols;
 using WixToolset.Data.WindowsInstaller;
 using WixToolset.Extensibility;
+using WixToolset.Extensibility.Data;
 
 namespace PanelSw.Wix.Extensions
 {
@@ -48,11 +48,90 @@ namespace PanelSw.Wix.Extensions
                 case nameof(PSW_EvaluateExpression):
                     DecompileEvaluateExpression(table);
                     break;
+                case nameof(PSW_ExecOnComponent):
+                    DecompileExecOn(table);
+                    break;
+                case nameof(PSW_ExecOn_ConsoleOutput):
+                case nameof(PSW_ExecOnComponent_ExitCode):
+                case nameof(PSW_ExecOnComponent_Environment):
+                    throw new NotImplementedException();
+
                 default:
                     return false;
             }
 
             return true;
+        }
+
+        private void DecompileExecOn(Table table)
+        {
+            foreach (var row in table.Rows)
+            {
+                PSW_ExecOnComponent symbol = new PSW_ExecOnComponent();
+                symbol.LoadFromRow(row, out string junk);
+
+                XElement xExecOn = new XElement(PanelSwWixExtension.Namespace + "ExecOn");
+                _execOn[symbol.Id.Id] = symbol;
+                xDism.SetAttributeValue(nameof(PSW_Dism.EnableFeatures), symbol.EnableFeatures);
+                xDism.SetAttributeValue(nameof(PSW_Dism.Cost), symbol.Cost);
+                SetAttributeEnum<PanelSwWixCompiler.ErrorHandling>(xDism, nameof(PSW_Dism.ErrorHandling), symbol.ErrorHandling);
+                SetAttributeIfNotNull(xDism, nameof(PSW_Dism.ExcludeFeatures), symbol.ExcludeFeatures);
+                SetAttributeIfNotNull(xDism, nameof(PSW_Dism.PackagePath), symbol.PackagePath);
+
+                if (!DecompilerHelper.TryGetIndexedElement("Component", symbol.Component_, out XElement xComponent))
+                {
+                    Messaging.Write(WarningMessages.ExpectedForeignRow(row.SourceLineNumbers, table.Name, row.GetPrimaryKey(), "Component_", symbol.Component_, "Component"));
+                    return;
+                }
+                xComponent.Add(xExecOn);
+            }
+        }
+
+        private Dictionary<string, PSW_ExecOnComponent> _execOn = new Dictionary<string, PSW_ExecOnComponent>();
+        private List<PSW_ExecOnComponent_Environment> _execOnEnv = new List<PSW_ExecOnComponent_Environment>();
+        private List<PSW_ExecOnComponent_ExitCode> _execOnExit = new List<PSW_ExecOnComponent_ExitCode>();
+        private List<PSW_ExecOn_ConsoleOutput> _execOnConsole = new List<PSW_ExecOn_ConsoleOutput>();
+        private void PostDecompileExecOn()
+        {
+            foreach (string oldId in _execOn.Keys)
+            {
+                PSW_ExecOnComponent execOn = _execOn[oldId];
+                DecompilerHelper.TryGetIndexedElement(nameof(PSW_ExecOnComponent), oldId, out XElement xExecOn);
+                if (xExecOn == null)
+                {
+                    Messaging.Write(ErrorMessages.IdentifierNotFound(nameof(PSW_ExecOnComponent), oldId));
+                    return;
+                }
+
+                IEnumerable<PSW_ExecOnComponent_Environment> myEnv = _execOnEnv.FindAll(x => x.ExecOnId_.Equals(oldId));
+                foreach (PSW_ExecOnComponent_Environment env in myEnv)
+                {
+                    XElement xEnv = new XElement(PanelSwWixExtension.Namespace + "Environment");
+                    xEnv.SetAttributeValue(nameof(PSW_ExecOnComponent_Environment.Name), env.Name);
+                    xEnv.SetAttributeValue(nameof(PSW_ExecOnComponent_Environment.Value), env.Value);
+                    xExecOn.Add(xEnv);
+                }
+
+                IEnumerable<PSW_ExecOnComponent_ExitCode> myExit = _execOnExit.FindAll(x => x.ExecOnId_.Equals(oldId));
+                foreach (PSW_ExecOnComponent_ExitCode ext in myExit)
+                {
+                    XElement xExit = new XElement(PanelSwWixExtension.Namespace + "ExitCode");
+                    SetAttributeEnum<PanelSwWixCompiler.ExitCode>(xExit, "Behavior", ext.To);
+                    xExit.SetAttributeValue("Value", ext.From);
+                    xExecOn.Add(xExit);
+                }
+
+                IEnumerable<PSW_ExecOn_ConsoleOutput> myConsole = _execOnConsole.FindAll(x => x.ExecOnId_.Equals(oldId));
+                foreach (PSW_ExecOn_ConsoleOutput cns in myConsole)
+                {
+                    XElement xConsoleOutput = new XElement(PanelSwWixExtension.Namespace + "ConsoleOutput");
+                    xConsoleOutput.SetAttributeValue(nameof(PSW_ExecOn_ConsoleOutput.Expression), cns.Expression);
+                    SetAttributeEnum<PanelSwWixCompiler.ErrorHandling>(xConsoleOutput, "Behavior", cns.ErrorHandling);
+                    SetAttributeIfNotNull(xConsoleOutput, nameof(PSW_ExecOn_ConsoleOutput.PromptText), cns.PromptText);
+                    SetAttributeYesNo(xConsoleOutput, "BehaviorOnMatch", (cns.Flags == 1));
+                    xExecOn.Add(xConsoleOutput);
+                }
+            }
         }
 
         private void DecompileEvaluateExpression(Table table)
@@ -440,6 +519,17 @@ namespace PanelSw.Wix.Extensions
         private void SetAttributeEnum<T>(XElement element, string attribName, int val) where T : struct
         {
             element.SetAttributeValue(attribName, Enum.GetName(typeof(T), val));
+        }
+
+        private void SetAttributeYesNo(XElement element, string attribName, bool val)
+        {
+            element.SetAttributeValue(attribName, val ? "yes" : "no");
+        }
+
+        public override void PostDecompile(IWindowsInstallerDecompileResult result)
+        {
+            base.PostDecompile(result);
+            PostDecompileExecOn();
         }
     }
 }

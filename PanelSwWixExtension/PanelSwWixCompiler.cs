@@ -2034,6 +2034,13 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
+        public enum ExitCode
+        {
+            success = 0,
+            scheduleReboot = 3010,
+            error = 0x4005
+        }
+
         private void ParseExecOnComponentElement(IntermediateSection section, XElement element, string component)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
