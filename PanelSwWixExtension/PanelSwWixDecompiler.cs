@@ -45,11 +45,43 @@ namespace PanelSw.Wix.Extensions
                 case nameof(PSW_Dism):
                     DecompileDism(table);
                     break;
+                case nameof(PSW_EvaluateExpression):
+                    DecompileEvaluateExpression(table);
+                    break;
                 default:
                     return false;
             }
 
             return true;
+        }
+
+        private void DecompileEvaluateExpression(Table table)
+        {
+            List<PSW_EvaluateExpression> allEval = new List<PSW_EvaluateExpression>();
+            foreach (var row in table.Rows)
+            {
+                PSW_EvaluateExpression symbol = new PSW_EvaluateExpression();
+                symbol.LoadFromRow(row, out string junk);
+                allEval.Add(symbol);
+            }
+            allEval.Sort();
+
+            foreach (PSW_EvaluateExpression symbol in allEval)
+            {
+                XElement xEvaluate = new XElement(PanelSwWixExtension.Namespace + "Evaluate");
+                xEvaluate.SetAttributeValue(nameof(PSW_EvaluateExpression.Expression), symbol.Expression);
+                if (symbol.Order < 1000000000)
+                {
+                    xEvaluate.SetAttributeValue(nameof(PSW_EvaluateExpression.Order), symbol.Order);
+                }
+
+                if (!DecompilerHelper.TryGetIndexedElement("Property", symbol.Property_, out XElement xProperty))
+                {
+                    xProperty = DecompilerHelper.AddElementToRoot("Property");
+                    xProperty.SetAttributeValue("Id", symbol.Property_);
+                }
+                xProperty.Add(xEvaluate);
+            }
         }
 
         private void DecompileDism(Table table)

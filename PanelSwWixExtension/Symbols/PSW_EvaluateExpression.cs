@@ -1,10 +1,11 @@
+using System;
 using System.Collections.Generic;
 using WixToolset.Data;
 using WixToolset.Data.WindowsInstaller;
 
 namespace PanelSw.Wix.Extensions.Symbols
 {
-    internal class PSW_EvaluateExpression : BaseSymbol
+    internal class PSW_EvaluateExpression : BaseSymbol, IComparable<PSW_EvaluateExpression>
     {
         public static IntermediateSymbolDefinition SymbolDefinition
         {
@@ -49,6 +50,16 @@ namespace PanelSw.Wix.Extensions.Symbols
         {
             get => Fields[2].AsNumber();
             set => this.Set(2, value);
+        }
+
+        int IComparable<PSW_EvaluateExpression>.CompareTo(PSW_EvaluateExpression other)
+        {
+            int res = Property_.CompareTo(other.Property_);
+            if (res == 0)
+            {
+                res = Order.CompareTo(other.Order);
+            }
+            return -res;
         }
     }
 }

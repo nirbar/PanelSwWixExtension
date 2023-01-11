@@ -18,7 +18,7 @@ namespace PanelSw.Wix.Extensions
             typeof(PanelSwBurnBackendBinder),
             typeof(PanelSwWixDecompiler),
         };
-
+		
 #if DEBUG
         public override bool TryCreateExtension(Type extensionType, out object extension)
         {
