@@ -1439,7 +1439,7 @@ namespace PanelSw.Wix.Extensions
             }
 
             // Iterate child 'Argument' elements
-            foreach (XElement child in element.Descendants())
+            foreach (XElement child in element.Elements())
             {
                 if (child.Name.Namespace.Equals(Namespace) && !child.Name.LocalName.Equals("Argument"))
                 {
@@ -1847,7 +1847,7 @@ namespace PanelSw.Wix.Extensions
             }
 
             // ExitCode mapping
-            foreach (XElement child in element.Descendants())
+            foreach (XElement child in element.Elements())
             {
                 SourceLineNumber repLines = ParseHelper.GetSourceLineNumbers(child);
                 if (child.Name.Namespace.Equals(Namespace))
@@ -1979,7 +1979,7 @@ namespace PanelSw.Wix.Extensions
             }
 
             // Text replacements in XSL
-            foreach (XElement child in element.Descendants())
+            foreach (XElement child in element.Elements())
             {
                 SourceLineNumber repLines = ParseHelper.GetSourceLineNumbers(child);
                 if (child.Name.Namespace.Equals(Namespace))
@@ -2229,7 +2229,7 @@ namespace PanelSw.Wix.Extensions
             }
 
             // ExitCode mapping
-            foreach (XElement child in element.Descendants())
+            foreach (XElement child in element.Elements())
             {
                 if (child.Name.Namespace.Equals(Namespace))
                 {
@@ -2472,7 +2472,7 @@ namespace PanelSw.Wix.Extensions
                 mainRow.ErrorHandling = (short)errorHandling;
             }
 
-            foreach (XElement child in element.Descendants())
+            foreach (XElement child in element.Elements())
             {
                 if (child.Name.Namespace.Equals(Namespace))
                 {
@@ -2623,7 +2623,7 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            foreach (XElement child in element.Descendants())
+            foreach (XElement child in element.Elements())
             {
                 if (XmlNodeType.Element == child.NodeType)
                 {
@@ -4180,7 +4180,7 @@ namespace PanelSw.Wix.Extensions
         private bool CheckNoCData(XElement element)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
-            foreach (XElement child in element.Descendants())
+            foreach (XElement child in element.Elements())
             {
                 if ((child.NodeType == XmlNodeType.Text) || (child.NodeType == XmlNodeType.CDATA))
                 {

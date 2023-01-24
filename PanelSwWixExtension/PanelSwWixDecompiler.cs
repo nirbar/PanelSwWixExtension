@@ -54,9 +54,10 @@ namespace PanelSw.Wix.Extensions
                 case nameof(PSW_ExecOn_ConsoleOutput):
                 case nameof(PSW_ExecOnComponent_ExitCode):
                 case nameof(PSW_ExecOnComponent_Environment):
-                    throw new NotImplementedException();
+                    throw new NotImplementedException(); //TODO
 
                 default:
+                    throw new NotImplementedException(); //TODO
                     return false;
             }
 
