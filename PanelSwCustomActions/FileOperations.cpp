@@ -532,10 +532,10 @@ HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRe
 		ExitOnFailure(hr, "Failed allocating string");
 
 		hFind = ::FindFirstFile(szFullPattern, &FindFileData);
-		if ((hFind == INVALID_HANDLE_VALUE) && (::GetLastError() == ERROR_FILE_NOT_FOUND))
+		if ((hFind == INVALID_HANDLE_VALUE) && ((::GetLastError() == ERROR_FILE_NOT_FOUND) || IsReparsePoint(szFullFolder)))
 		{
 			ExitFunction();
-		}		
+		}
 		ExitOnNullWithLastError((hFind != INVALID_HANDLE_VALUE), hr, "Failed searching files in '%ls'", szFullFolder);
 
 		do
@@ -557,7 +557,7 @@ HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRe
 			}
 
 		} while (::FindNextFile(hFind, &FindFileData));
-		ExitOnNullWithLastError((::GetLastError() == ERROR_NO_MORE_FILES), hr, "Failed searching files in '%ls'", szFullFolder)
+		ExitOnNullWithLastError((::GetLastError() == ERROR_NO_MORE_FILES), hr, "Failed searching files in '%ls'", szFullFolder);
 
 		::FindClose(hFind);
 		hFind = INVALID_HANDLE_VALUE;
@@ -577,10 +577,10 @@ HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRe
 	}
 
 	hFind = ::FindFirstFile(szFullPattern, &FindFileData);
-	if ((hFind == INVALID_HANDLE_VALUE) && (::GetLastError() == ERROR_FILE_NOT_FOUND))
+	if ((hFind == INVALID_HANDLE_VALUE) && ((::GetLastError() == ERROR_FILE_NOT_FOUND) || IsReparsePoint(szFullFolder)))
 	{
 		ExitFunction();
-	}		
+	}
 	ExitOnNullWithLastError((hFind != INVALID_HANDLE_VALUE), hr, "Failed searching files in '%ls'", szFullPattern);
 
 	do
@@ -603,7 +603,7 @@ HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRe
 		ExitOnFailure(hr, "Failed allocating string");
 
 	} while (::FindNextFile(hFind, &FindFileData));
-	ExitOnNullWithLastError((::GetLastError() == ERROR_NO_MORE_FILES), hr, "Failed searching files in '%ls'", szFullPattern)
+	ExitOnNullWithLastError((::GetLastError() == ERROR_NO_MORE_FILES), hr, "Failed searching files in '%ls'", szFullPattern);
 
 LExit:
 
@@ -663,4 +663,15 @@ LRetry:
 
 LExit:
 	return hr;
+}
+
+bool CFileOperations::IsReparsePoint(LPCWSTR szPath)
+{
+	HRESULT hr = S_OK;
+
+	DWORD dwAttrib = ::GetFileAttributes(szPath);
+	ExitOnNullWithLastError((dwAttrib != INVALID_FILE_ATTRIBUTES), hr, "Failed to get file attributes for '%ls'", szPath);
+
+LExit:
+	return ((dwAttrib & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT);
 }
