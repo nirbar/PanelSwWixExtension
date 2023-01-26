@@ -136,6 +136,10 @@ HRESULT CRestartLocalResources::RegisterWithRm(const std::list<LPWSTR>& lstFolde
         hr = RmuAddProcessById(pSession, prcId.first);
         ExitOnFailure(hr, "Failed adding process %u '%ls' to RestartManager", prcId.first, prcId.second);
     }
+	
+	hr = RmuEndSession(pSession);
+	pSession = nullptr;
+	ExitOnFailure(hr, "Failed to finalize registration with RestartManager session '%ls'.", (LPCWSTR)szSessionKey);
 
 LExit:
     ReleaseMem(pSession);
