@@ -27,7 +27,7 @@ public:
 	static HRESULT PathToDevicePath(LPCWSTR szPath, LPWSTR* pszDevicePath);
 	static HRESULT ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRecursive, LPWSTR** pszFiles, UINT* pcFiles);
 	static HRESULT MakeTemporaryName(LPCWSTR szBackupOf, LPCWSTR szPrefix, bool bIsFolder, LPWSTR* pszTempName);
-	static bool IsReparsePoint(LPCWSTR szPath);
+	static bool IsSymbolicLinkOrMount(LPCWSTR szPath);
 
 protected:
 	

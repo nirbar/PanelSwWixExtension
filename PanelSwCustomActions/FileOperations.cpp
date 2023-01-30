@@ -518,6 +518,12 @@ HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRe
 	WIN32_FIND_DATA FindFileData;
 	HANDLE hFind = INVALID_HANDLE_VALUE;
 
+	if (IsSymbolicLinkOrMount(szFolder))
+	{
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Folder '%ls' is a symbolic link or a mount point, so not enumerating its files");
+		ExitFunction();
+	}
+
 	hr = StrAllocString(&szFullFolder, szFolder, 0);
 	ExitOnFailure(hr, "Failed allocating string");
 
@@ -531,10 +537,6 @@ HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRe
 		ExitOnFailure(hr, "Failed allocating string");
 
 		hFind = ::FindFirstFile(szFullPattern, &FindFileData);
-		if ((hFind == INVALID_HANDLE_VALUE) && ((::GetLastError() == ERROR_FILE_NOT_FOUND) || IsReparsePoint(szFullFolder)))
-		{
-			ExitFunction();
-		}
 		ExitOnNullWithLastError((hFind != INVALID_HANDLE_VALUE), hr, "Failed searching files in '%ls'", szFullFolder);
 
 		do
@@ -576,18 +578,10 @@ HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRe
 	}
 
 	hFind = ::FindFirstFile(szFullPattern, &FindFileData);
-	if ((hFind == INVALID_HANDLE_VALUE) && ((::GetLastError() == ERROR_FILE_NOT_FOUND) || IsReparsePoint(szFullFolder)))
-	{
-		ExitFunction();
-	}
 	ExitOnNullWithLastError((hFind != INVALID_HANDLE_VALUE), hr, "Failed searching files in '%ls'", szFullPattern);
 
 	do
 	{
-		if ((::wcscmp(L".", FindFileData.cFileName) == 0) || (::wcscmp(L"..", FindFileData.cFileName) == 0))
-		{
-			continue;
-		}
 		if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
 		{
 			continue;
@@ -664,13 +658,21 @@ LExit:
 	return hr;
 }
 
-bool CFileOperations::IsReparsePoint(LPCWSTR szPath)
+bool CFileOperations::IsSymbolicLinkOrMount(LPCWSTR szPath)
 {
+	HANDLE hFind = INVALID_HANDLE_VALUE;
+	WIN32_FIND_DATA wfaData;
 	HRESULT hr = S_OK;
 
-	DWORD dwAttrib = ::GetFileAttributes(szPath);
-	ExitOnNullWithLastError((dwAttrib != INVALID_FILE_ATTRIBUTES), hr, "Failed to get file attributes for '%ls'", szPath);
+	hFind = ::FindFirstFile(szPath, &wfaData);
+	ExitOnNullWithLastError((hFind && (hFind != INVALID_HANDLE_VALUE)), hr, "Path '%ls' can't be checked for reparse point tag");
 
 LExit:
-	return ((dwAttrib & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT);
+	if (hFind && (hFind != INVALID_HANDLE_VALUE))
+	{
+		::FindClose(hFind);
+	}
+
+	return SUCCEEDED(hr) ? (((wfaData.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT) 
+		&& ((wfaData.dwReserved0 == IO_REPARSE_TAG_SYMLINK) || (wfaData.dwReserved0 == IO_REPARSE_TAG_MOUNT_POINT))) : false;
 }
