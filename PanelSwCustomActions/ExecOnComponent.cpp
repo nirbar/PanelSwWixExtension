@@ -848,17 +848,28 @@ HRESULT CExecOnComponent::LogProcessOutput(HANDLE hStdErrOut, LPWSTR* pszText /*
 	LPWSTR szLog = nullptr;
 	DWORD dwLogStart = 0;
 	LPCWSTR szLogEnd = 0;
+	bool bIsLast = false;
 
 	pBuffer = reinterpret_cast<BYTE*>(MemAlloc(OUTPUT_BUFFER_SIZE, FALSE));
 	ExitOnNull(pBuffer, hr, E_OUTOFMEMORY, "Failed to allocate buffer for output.");
 
-	while (dwBytes != 0)
+	while (!bIsLast && (dwBytes != 0))
 	{
 		dwBytes = OUTPUT_BUFFER_SIZE;
 		::ZeroMemory(pBuffer, OUTPUT_BUFFER_SIZE);
 
 		bRes = ::ReadFile(hStdErrOut, pBuffer, OUTPUT_BUFFER_SIZE - sizeof(WCHAR), &dwBytes, nullptr);
-		ExitOnNullWithLastError((bRes || (::GetLastError() == ERROR_BROKEN_PIPE /* Happens if the process terminated. Still may have data to read */)), hr, "Failed to read from handle.");
+		// Happens if the process terminated. Still may have data to read
+		if (!bRes && (::GetLastError() == ERROR_BROKEN_PIPE))
+		{
+			bRes = TRUE;
+			bIsLast = true;
+		}
+		ExitOnNullWithLastError(bRes, hr, "Failed to read from handle.");
+		if (!dwBytes)
+		{
+			break;
+		}
 
 		// On first read, test multibyte or unicode
 		if (encoding == FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_None)
