@@ -24,7 +24,9 @@ protected:
 private:
 	HRESULT SetEnvironment(const ::google::protobuf::Map<std::string, com::panelsw::ca::ObfuscatedString> &customEnv);
 
-	HRESULT LogProcessOutput(HANDLE hStdErrOut, LPWSTR *pszText);
+	HRESULT LaunchProcess(LPCWSTR szCommand, HANDLE* phProcess, HANDLE* phStdOut);
+
+	HRESULT LogProcessOutput(HANDLE hProc, HANDLE hStdErrOut, LPWSTR *pszText);
 
 	// S_FALSE: Had no matches, go on with error handling.
 	// S_OK: Ignore errors and continue
