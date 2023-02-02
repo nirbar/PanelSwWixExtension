@@ -696,7 +696,7 @@ LRetry:
 
 	if (SUCCEEDED(hr))
 	{
-		LogProcessOutput(hStdOut, ((details.consoleouputremap_size() > 0) ? (LPWSTR*)szLog : nullptr));
+		LogProcessOutput(hProc, hStdOut, ((details.consoleouputremap_size() > 0) ? (LPWSTR*)szLog : nullptr));
 
 		hr = ProcWaitForCompletion(hProc, INFINITE, &exitCode);
 		if (SUCCEEDED(hr))
@@ -833,10 +833,10 @@ LExit:
 	return hr;
 }
 
-HRESULT CExecOnComponent::LogProcessOutput(HANDLE hStdErrOut, LPWSTR* pszText /* Need to detect whether this is unicode or multibyte */)
+HRESULT CExecOnComponent::LogProcessOutput(HANDLE hProcess, HANDLE hStdErrOut, LPWSTR* pszText /* Need to detect whether this is unicode or multibyte */)
 {
-	const int OUTPUT_BUFFER_SIZE = 1024;
-	DWORD dwBytes = OUTPUT_BUFFER_SIZE;
+	DWORD dwBufferSize = 0;
+	DWORD dwBytes = 0;
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
 	BYTE* pBuffer = nullptr;
@@ -844,28 +844,73 @@ HRESULT CExecOnComponent::LogProcessOutput(HANDLE hStdErrOut, LPWSTR* pszText /*
 	LPWSTR szLog = nullptr;
 	DWORD dwLogStart = 0;
 	LPCWSTR szLogEnd = 0;
-	bool bIsLast = false;
+	OVERLAPPED overlapped;
+	HANDLE rghHandles[2];
+	DWORD dwRes = ERROR_SUCCESS;
 
-	pBuffer = reinterpret_cast<BYTE*>(MemAlloc(OUTPUT_BUFFER_SIZE, FALSE));
+	bRes = ::GetNamedPipeInfo(hStdErrOut, nullptr, &dwBufferSize, nullptr, nullptr);
+	ExitOnNullWithLastError(bRes, hr, "Failed to get stdout buffer size");
+
+	pBuffer = reinterpret_cast<BYTE*>(MemAlloc(dwBufferSize, FALSE));
 	ExitOnNull(pBuffer, hr, E_OUTOFMEMORY, "Failed to allocate buffer for output.");
 
-	while (!bIsLast && (dwBytes != 0))
-	{
-		dwBytes = OUTPUT_BUFFER_SIZE;
-		::ZeroMemory(pBuffer, OUTPUT_BUFFER_SIZE);
+	overlapped.hEvent = ::CreateEvent(nullptr, TRUE, FALSE, nullptr);
+	ExitOnNullWithLastError((overlapped.hEvent && (overlapped.hEvent != INVALID_HANDLE_VALUE)), hr, "Failed to create event");
 
-		bRes = ::ReadFile(hStdErrOut, pBuffer, OUTPUT_BUFFER_SIZE - sizeof(WCHAR), &dwBytes, nullptr);
-		// Happens if the process terminated. Still may have data to read
-		if (!bRes && (::GetLastError() == ERROR_BROKEN_PIPE))
+	rghHandles[0] = hProcess;
+	rghHandles[1] = overlapped.hEvent;
+
+	bRes = ::ConnectNamedPipe(hStdErrOut, &overlapped);
+	if (!bRes)
+	{
+		dwRes = ::GetLastError();
+		if (dwRes == ERROR_IO_PENDING)
+		{
+			dwRes = ::WaitForSingleObject(overlapped.hEvent, INFINITE);
+			ExitOnNull((dwRes == WAIT_OBJECT_0), hr, HRESULT_FROM_WIN32(dwRes), "Failed to wait for process to connect to stdout");
+			bRes = TRUE;
+		}
+		else if (dwRes == ERROR_PIPE_CONNECTED)
 		{
 			bRes = TRUE;
-			bIsLast = true;
 		}
-		ExitOnNullWithLastError(bRes, hr, "Failed to read from handle.");
-		if (!dwBytes)
+		ExitOnNullWithLastError(bRes, hr, "Failed to connect to stdout");
+	}
+
+	while (true)
+	{
+		bRes = ::ResetEvent(overlapped.hEvent);
+		ExitOnNullWithLastError(bRes, hr, "Failed to reset event");
+
+		bRes = ::ReadFile(hStdErrOut, pBuffer, dwBufferSize, nullptr, &overlapped);
+		if (!bRes)
+		{
+			dwRes = ::GetLastError();
+			if (dwRes == ERROR_BROKEN_PIPE)
+			{
+				break;
+			}
+			ExitOnNullWithLastError((dwRes == ERROR_IO_PENDING), hr, "Failed to wait for stdout data");
+		}
+
+		dwRes = ::WaitForMultipleObjects(ARRAYSIZE(rghHandles), rghHandles, FALSE, INFINITE);
+		// Process terminated, or pipe abandoned
+		if ((dwRes == WAIT_OBJECT_0) || (dwRes == WAIT_ABANDONED_0) || (dwRes == (WAIT_ABANDONED_0 + 1)))
 		{
 			break;
 		}
+		ExitOnNullWithLastError((dwRes != WAIT_FAILED), hr, "Failed to wait for process to terminate or write to stdout");
+		if (dwRes != (WAIT_OBJECT_0 + 1))
+		{
+			ExitOnWin32Error(dwRes, hr, "Failed to wait for process to terminate or write to stdout.");
+		}
+
+		bRes = ::GetOverlappedResult(hStdErrOut, &overlapped, &dwBytes, FALSE);
+		if (!bRes && (::GetLastError() == ERROR_BROKEN_PIPE))
+		{
+			break;
+		}
+		ExitOnNullWithLastError(bRes, hr, "Failed to read stdout");
 
 		// On first read, test multibyte or unicode
 		if (encoding == FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_None)
@@ -876,13 +921,13 @@ HRESULT CExecOnComponent::LogProcessOutput(HANDLE hStdErrOut, LPWSTR* pszText /*
 		switch (encoding)
 		{
 		case FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_MultiByte:
-			hr = StrAllocConcatFormatted(&szLog, L"%hs", pBuffer);
+			hr = StrAllocConcatFormatted(&szLog, L"%.*hs", dwBytes, pBuffer);
 			ExitOnFailure(hr, "Failed to concatenate output strings");
 			break;
 
 		case FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_ReverseUnicode:
 		case FileRegexDetails::FileEncoding::FileRegexDetails_FileEncoding_Unicode:
-			hr = StrAllocConcat(&szLog, (LPCWSTR)(LPVOID)pBuffer, 0);
+			hr = StrAllocConcatFormatted(&szLog, L"%.*ls", dwBytes / sizeof(WCHAR), (LPCWSTR)(LPVOID)pBuffer, 0);
 			ExitOnFailure(hr, "Failed to concatenate output strings");
 			break;
 		}
@@ -948,6 +993,7 @@ HRESULT CExecOnComponent::LogProcessOutput(HANDLE hStdErrOut, LPWSTR* pszText /*
 LExit:
 	ReleaseMem(pBuffer);
 	ReleaseStr(szLog);
+	ReleaseHandle(overlapped.hEvent);
 
 	return hr;
 }
