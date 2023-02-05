@@ -123,7 +123,7 @@ HRESULT CRestartLocalResources::RegisterWithRm(const std::list<LPWSTR>& lstFolde
     hr = RmuJoinSession(&pSession, (LPCWSTR)szSessionKey);
     ExitOnFailure(hr, "Failed to join RestartManager session '%ls'.", (LPCWSTR)szSessionKey);
 
-    hr = EnumerateLocalProcesses(lstFolders, mapProcId);
+    hr = EnumerateLocalProcesses(lstFolders, mapProcId, false);
     ExitOnFailure(hr, "Failed to enumerate processes");
 
     for (const std::pair<DWORD, LPWSTR>& prcId : mapProcId)
@@ -202,7 +202,7 @@ HRESULT CRestartLocalResources::Execute(const std::list<LPWSTR>& lstFolders)
     BOOL bRes = TRUE;
     std::map<DWORD, LPWSTR> mapProcId;
 
-    hr = EnumerateLocalProcesses(lstFolders, mapProcId);
+    hr = EnumerateLocalProcesses(lstFolders, mapProcId, true);
     ExitOnFailure(hr, "Failed enumerating local processes");
     if (mapProcId.size() <= 0)
     {
@@ -349,16 +349,22 @@ LExit:
     return TRUE;
 }
 
-HRESULT CRestartLocalResources::EnumerateLocalProcesses(const std::list<LPWSTR>& lstFolders, std::map<DWORD, LPWSTR>& mapProcId)
+HRESULT CRestartLocalResources::EnumerateLocalProcesses(const std::list<LPWSTR>& lstFolders, std::map<DWORD, LPWSTR>& mapProcId, bool bIgnoreServices)
 {
     HRESULT hr = S_OK;
     HANDLE hSnap = INVALID_HANDLE_VALUE;
     PROCESSENTRY32W peData;
     HANDLE hProc = nullptr;
     LPWSTR szProcessName = nullptr;
+	std::list<DWORD> lstServices;
 
     hr = Initialize();
     ExitOnFailure(hr, "Failed to initialize");
+
+	if (!bIgnoreServices) 
+	{
+		GetServices(&lstServices);
+	}
 
     hSnap = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
     ExitOnNullWithLastError((hSnap && (hSnap != INVALID_HANDLE_VALUE)), hr, "Failed creating processes snapshot");
@@ -389,6 +395,13 @@ HRESULT CRestartLocalResources::EnumerateLocalProcesses(const std::list<LPWSTR>&
         {
             WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Detected process %u: '%ls'", peData.th32ProcessID, visInFolder_.szFullExePath);
 
+			// Process is a service?
+			if (std::any_of(lstServices.begin(), lstServices.end(), [&](DWORD a) -> bool { return (peData.th32ProcessID == a);}))
+			{
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Process %u is a service, so ignoring it", peData.th32ProcessID);
+				continue;
+			}
+
             hr = StrAllocString(&szProcessName, peData.szExeFile, 0);
             ExitOnFailure(hr, "Failed to allocate memory");
 
@@ -403,6 +416,45 @@ LExit:
     ReleaseHandle(hProc);
 
     return hr;
+}
+
+HRESULT CRestartLocalResources::GetServices(std::list<DWORD>* plstServices)
+{
+	HRESULT hr = S_OK;
+	BOOL bRes = TRUE;
+	SC_HANDLE hServices = NULL;
+	ENUM_SERVICE_STATUS_PROCESS* pServices = nullptr;
+	DWORD dwBuffSize = 0;
+	DWORD dwHandle = 0;
+	DWORD nServices = 0;
+
+	hServices = ::OpenSCManager(nullptr, nullptr, SC_MANAGER_ENUMERATE_SERVICE);
+	ExitOnNullWithLastError(hServices, hr, "Failed to open service manager");
+
+	bRes = ::EnumServicesStatusEx(hServices, SC_ENUM_PROCESS_INFO, SERVICE_TYPE_ALL, SERVICE_ACTIVE, nullptr, 0, &dwBuffSize, &nServices, &dwHandle, nullptr);
+	if (!bRes && (::GetLastError() == ERROR_MORE_DATA))
+	{
+		pServices = (ENUM_SERVICE_STATUS_PROCESS*)MemAlloc(dwBuffSize, FALSE);
+		ExitOnNull(pServices, hr, HRESULT_FROM_WIN32(ERROR_NOT_ENOUGH_MEMORY), "Failed to allocate memory");
+
+		dwHandle = 0;
+		bRes = ::EnumServicesStatusEx(hServices, SC_ENUM_PROCESS_INFO, SERVICE_TYPE_ALL, SERVICE_ACTIVE, (BYTE*)pServices, dwBuffSize, &dwBuffSize, &nServices, &dwHandle, nullptr);
+	}
+	ExitOnNullWithLastError(bRes, hr, "Failed to enumerate services");
+
+	for (DWORD i = 0; i < nServices; ++i)
+	{
+		plstServices->push_back(pServices[i].ServiceStatusProcess.dwProcessId);
+	}
+
+LExit:
+	if (hServices)
+	{
+		::CloseServiceHandle(hServices);
+	}
+	ReleaseMem(pServices);
+
+	return hr;
 }
 
 bool CRestartLocalResources::IsExeInFolder::operator()(const LPCWSTR& szFolder) const
