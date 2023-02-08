@@ -913,6 +913,10 @@ HRESULT CExecOnComponent::LogProcessOutput(HANDLE hProcess, HANDLE hStdErrOut, L
 		}
 
 		bRes = ::GetOverlappedResult(hStdErrOut, &overlapped, &dwBytes, FALSE);
+		if (!bRes && (::GetLastError() == ERROR_BROKEN_PIPE))
+		{
+			break;
+		}
 		ExitOnNullWithLastError(bRes, hr, "Failed to read stdout");
 
 		// On first read, test multibyte or unicode
