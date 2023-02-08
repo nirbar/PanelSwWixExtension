@@ -45,8 +45,8 @@
 
         <PanelSW:ExecOn Command='CMD /C "TYPE "{*non_printable.txt}""' BinaryKey='non_printable.txt' BeforeStopServices='yes' OnInstall='yes' ErrorHandling='prompt'/>
 
-        <PanelSW:ExecOn BinaryKey='TestBinary' Command='--version' BeforeStartServices='yes' OnInstall='yes'/>
-        <PanelSW:ExecOn Impersonate='no' User='me' BeforeStartServices='yes' OnInstall='yes' Command='"notepad.exe"' ErrorHandling='prompt'/>
+        <PanelSW:ExecOn BinaryKey='TestBinary' Command='--version' BeforeStartServices='yes' OnInstall='yes' Order='-1'/>
+        <PanelSW:ExecOn Impersonate='no' User='me' BeforeStartServices='yes' OnInstall='yes' Command='"notepad.exe"' ErrorHandling='prompt' Order='-2'/>
       </Component>
     </ComponentGroup>
 

@@ -1966,7 +1966,11 @@ namespace PanelSw.Wix.Extensions
                         break;
 
                     case "Order":
-                        order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
+                        order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                        if (order < 0)
+                        {
+                            order += int.MaxValue;
+                        }
                         break;
 
                     case "ErrorHandling":
@@ -2088,7 +2092,11 @@ namespace PanelSw.Wix.Extensions
                                             break;
 
                                         case "Order":
-                                            repOrder = Core.GetAttributeIntegerValue(repLines, a, 0, 1000000000);
+                                            repOrder = Core.GetAttributeIntegerValue(repLines, a, -1000000000, 1000000000);
+                                            if (repOrder < 0)
+                                            {
+                                                repOrder += int.MaxValue;
+                                            }
                                             break;
                                     }
                                 }
@@ -2169,7 +2177,11 @@ namespace PanelSw.Wix.Extensions
                         break;
 
                     case "Order":
-                        order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
+                        order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                        if (order < 0)
+                        {
+                            order += int.MaxValue;
+                        }
                         break;
 
                     default:
@@ -2226,7 +2238,11 @@ namespace PanelSw.Wix.Extensions
                                             break;
 
                                         case "Order":
-                                            repOrder = Core.GetAttributeIntegerValue(repLines, a, 0, 1000000000);
+                                            repOrder = Core.GetAttributeIntegerValue(repLines, a, -1000000000, 1000000000);
+                                            if (repOrder < 0)
+                                            {
+                                                repOrder += int.MaxValue;
+                                            }
                                             break;
                                     }
                                 }
@@ -2309,7 +2325,11 @@ namespace PanelSw.Wix.Extensions
                         break;
 
                     case "Order":
-                        order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
+                        order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                        if (order < 0)
+                        {
+                            order += int.MaxValue;
+                        }
                         break;
 
                     case "Impersonate":
@@ -3501,7 +3521,11 @@ namespace PanelSw.Wix.Extensions
                             expression = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Order":
-                            order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
+                            order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                            if (order < 0)
+                            {
+                                order += int.MaxValue;
+                            }
                             break;
 
                         default:
@@ -3948,7 +3972,11 @@ namespace PanelSw.Wix.Extensions
                             condition = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Order":
-                            order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
+                            order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                            if (order < 0)
+                            {
+                                order += int.MaxValue;
+                            }
                             break;
                         case "Port":
                             port = Core.GetAttributeValue(sourceLineNumbers, attrib);
@@ -4063,7 +4091,11 @@ namespace PanelSw.Wix.Extensions
                             condition = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Order":
-                            order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
+                            order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                            if (order < 0)
+                            {
+                                order += int.MaxValue;
+                            }
                             break;
 
                         default:
@@ -4514,7 +4546,11 @@ namespace PanelSw.Wix.Extensions
                             condition = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Order":
-                            order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
+                            order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                            if (order < 0)
+                            {
+                                order += int.MaxValue;
+                            }
                             break;
 
                         default:
@@ -4693,7 +4729,11 @@ namespace PanelSw.Wix.Extensions
                             encoding = (FileEncoding)Enum.Parse(typeof(FileEncoding), enc);
                             break;
                         case "Order":
-                            order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
+                            order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                            if (order < 0)
+                            {
+                                order += int.MaxValue;
+                            }
                             break;
 
                         default:

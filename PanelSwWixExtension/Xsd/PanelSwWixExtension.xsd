@@ -378,7 +378,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
       </xs:attribute>
       <xs:attribute name="Order" use="optional" type="xs:int" default="0">
         <xs:annotation>
-          <xs:documentation><![CDATA[Order of execution, defaults to line number. Expressions with explicit order field will be executed before expressions with implicit order]]></xs:documentation>
+          <xs:documentation><![CDATA[Order of execution, defaults to line number. Expressions with explicit order field will be executed before expressions with implicit order. Negative Order values will be executed last in increasing order. For example, Order="-1" will be executed last, after Order="-2"]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
     </xs:complexType>
@@ -636,7 +636,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
           </xs:attribute>
           <xs:attribute name="Order" type="xs:integer" use="optional">
             <xs:annotation>
-              <xs:documentation><![CDATA[Order of query execution, defaults to line number. Commands with explicit order field will be executed before commands with implicit order]]></xs:documentation>
+              <xs:documentation><![CDATA[Order of query execution, defaults to line number. Commands with explicit order field will be executed before commands with implicit order. Negative Order values will be executed last in increasing order. For example, Order="-1" will be executed last, after Order="-2"]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="Port" type="xs:string" use="optional" default="0">
@@ -691,7 +691,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
           </xs:attribute>
           <xs:attribute name="Order" type="xs:integer" use="optional">
             <xs:annotation>
-              <xs:documentation><![CDATA[Order of query execution, defaults to line number. Commands with explicit order field will be executed before commands with implicit order]]></xs:documentation>
+              <xs:documentation><![CDATA[Order of query execution, defaults to line number. Commands with explicit order field will be executed before commands with implicit order. Negative Order values will be executed last in increasing order. For example, Order="-1" will be executed last, after Order="-2"]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>
@@ -1197,7 +1197,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
 
       <xs:attribute name="Order" type="xs:integer">
         <xs:annotation>
-          <xs:documentation><![CDATA[Order of command execution, defaults to line number. Commands with explicit order field will be executed before commands with implicit order]]></xs:documentation>
+          <xs:documentation><![CDATA[Order of command execution, defaults to line number. Commands with explicit positive Order field will be executed before commands with implicit order. Negative Order values will be executed last in increasing order. For example, Order="-1" will be executed last, after Order="-2"]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
     </xs:complexType>
@@ -1310,7 +1310,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
           </xs:attribute>
           <xs:attribute name="Order" type="xs:integer">
             <xs:annotation>
-              <xs:documentation><![CDATA[Order of text replacement, defaults to line number. Replacements with explicit order field will be executed before replacements with implicit order]]></xs:documentation>
+              <xs:documentation><![CDATA[Order of text replacement, defaults to line number. Replacements with explicit order field will be executed before replacements with implicit order. Negative Order values will be executed last in increasing order. For example, Order="-1" will be executed last, after Order="-2"]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>
@@ -1465,7 +1465,7 @@ Delete folder or file specified by a path. DeletePath entries are processed in o
           </xs:attribute>
           <xs:attribute name="Order" type="xs:integer" default="255">
             <xs:annotation>
-              <xs:documentation><![CDATA[Order of regex execution, defaults to line number. Expressions with explicit order field will be executed before expressions with implicit order.]]></xs:documentation>
+              <xs:documentation><![CDATA[Order of regex execution, defaults to line number. Expressions with explicit order field will be executed before expressions with implicit order. Negative Order values will be executed last in increasing order. For example, Order="-1" will be executed last, after Order="-2"]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>
@@ -1541,7 +1541,7 @@ Execute a Regular Expression to replace or find matches in property values.
           </xs:attribute>
           <xs:attribute name="Order" type="xs:integer" default="255">
             <xs:annotation>
-              <xs:documentation><![CDATA[Order of regex execution, defaults to line number. Expressions with explicit order field will be executed before expressions with implicit order.]]></xs:documentation>
+              <xs:documentation><![CDATA[Order of regex execution, defaults to line number. Expressions with explicit order field will be executed before expressions with implicit order. Negative Order values will be executed last in increasing order. For example, Order="-1" will be executed last, after Order="-2"]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="Condition" type="xs:string" use="optional">
@@ -2064,7 +2064,7 @@ Remove registry values.
       </xs:attribute>
       <xs:attribute name="Order" type="xs:integer">
         <xs:annotation>
-          <xs:documentation><![CDATA[Order of XSL execution, defaults to line number. XSL with explicit order field will be executed before XSL with implicit order]]></xs:documentation>
+          <xs:documentation><![CDATA[Order of XSL execution, defaults to line number. XSL with explicit order field will be executed before XSL with implicit order. Negative Order values will be executed last in increasing order. For example, Order="-1" will be executed last, after Order="-2"]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="On" type="wix:InstallUninstallType">
@@ -2159,7 +2159,7 @@ Remove registry values.
       </xs:attribute>
       <xs:attribute name="Order" type="xs:integer">
         <xs:annotation>
-          <xs:documentation><![CDATA[Order of script execution, defaults to line number. Scripts with explicit order field will be executed before scripts with implicit order]]></xs:documentation>
+          <xs:documentation><![CDATA[Order of script execution, defaults to line number. Scripts with explicit order field will be executed before scripts with implicit order. Negative Order values will be executed last in increasing order. For example, Order="-1" will be executed last, after Order="-2"]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
       <xs:attribute name="Port" type="xs:string" use="optional" default="0">
