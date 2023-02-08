@@ -343,7 +343,7 @@ namespace PanelSw.Wix.Extensions
             PSW_Payload pldRow = section.AddSymbol(new PSW_Payload(sourceLineNumbers, binaryKey));
             pldRow.Name = name;
         }
-        
+
         private void ParseSplitFileElement(IntermediateSection section, XElement fileElement, XElement element, string componentId, string fileId)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
@@ -786,7 +786,7 @@ namespace PanelSw.Wix.Extensions
             WixActionSymbol sequenceRow = section.AddSymbol(new WixActionSymbol(sourceLineNumbers, new Identifier(AccessModifier.Global, $"InstallExecuteSequence/Set{caId}")));
             sequenceRow.Action = $"Set{caId}";
             sequenceRow.SequenceTable = SequenceTable.InstallExecuteSequence;
-            sequenceRow.Condition = null; 
+            sequenceRow.Condition = null;
             sequenceRow.Before = caId;
             sequenceRow.After = null;
             sequenceRow.Overridable = false;
@@ -1655,7 +1655,11 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         case "Order":
-                            order = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
+                            order = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                            if (order < 0)
+                            {
+                                order += int.MaxValue;
+                            }
                             break;
 
                         case "ErrorHandling":
@@ -1791,7 +1795,11 @@ namespace PanelSw.Wix.Extensions
                                                 break;
 
                                             case "Order":
-                                                repOrder = ParseHelper.GetAttributeIntegerValue(repLines, a, 0, 1000000000);
+                                                repOrder = ParseHelper.GetAttributeIntegerValue(repLines, a, -1000000000, 1000000000);
+                                                if (repOrder < 0)
+                                                {
+                                                    repOrder += int.MaxValue;
+                                                }
                                                 break;
                                         }
                                     }
@@ -1849,7 +1857,11 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         case "Order":
-                            order = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
+                            order = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                            if (order < 0)
+                            {
+                                order += int.MaxValue;
+                            }
                             break;
 
                         default:
@@ -1915,7 +1927,11 @@ namespace PanelSw.Wix.Extensions
                                                 break;
 
                                             case "Order":
-                                                repOrder = ParseHelper.GetAttributeIntegerValue(repLines, a, 0, 1000000000);
+                                                repOrder = ParseHelper.GetAttributeIntegerValue(repLines, a, -1000000000, 1000000000);
+                                                if (repOrder < 0)
+                                                {
+                                                    repOrder += int.MaxValue;
+                                                }
                                                 break;
                                         }
                                     }
@@ -1927,7 +1943,7 @@ namespace PanelSw.Wix.Extensions
                                     row1.Text = from;
                                     row1.Replacement = to;
                                     row1.Order = repOrder;
-                                }          
+                                }
                             }
                             break;
 
@@ -1968,7 +1984,11 @@ namespace PanelSw.Wix.Extensions
                         break;
 
                     case "Order":
-                        order = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
+                        order = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                        if (order < 0)
+                        {
+                            order += int.MaxValue;
+                        }
                         break;
 
                     case "Impersonate":
@@ -2906,7 +2926,11 @@ namespace PanelSw.Wix.Extensions
                             expression = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Order":
-                            order = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
+                            order = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                            if (order < 0)
+                            {
+                                order += int.MaxValue;
+                            }
                             break;
 
                         default:
@@ -3194,7 +3218,11 @@ namespace PanelSw.Wix.Extensions
                             condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Order":
-                            order = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
+                            order = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                            if (order < 0)
+                            {
+                                order += int.MaxValue;
+                            }
                             break;
                         case "Port":
                             port = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
@@ -3278,7 +3306,11 @@ namespace PanelSw.Wix.Extensions
                             condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Order":
-                            order = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
+                            order = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                            if (order < 0)
+                            {
+                                order += int.MaxValue;
+                            }
                             break;
 
                         default:
@@ -3611,7 +3643,11 @@ namespace PanelSw.Wix.Extensions
                             condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Order":
-                            order = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
+                            order = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                            if (order < 0)
+                            {
+                                order += int.MaxValue;
+                            }
                             break;
 
                         default:
@@ -3732,7 +3768,11 @@ namespace PanelSw.Wix.Extensions
                             TryParseEnumAttribute(sourceLineNumbers, element, attrib, out encoding);
                             break;
                         case "Order":
-                            order = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, 1000000000);
+                            order = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                            if (order < 0)
+                            {
+                                order += int.MaxValue;
+                            }
                             break;
 
                         default:
@@ -3830,7 +3870,7 @@ namespace PanelSw.Wix.Extensions
                     ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_CheckRebootRequired");
                 }
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "DeletePath");
-             
+
                 PSW_DeletePath row = section.AddSymbol(new PSW_DeletePath(sourceLineNumbers));
                 row.Path = filepath;
                 row.Flags = (int)flags;
@@ -4010,7 +4050,7 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private bool TryParseEnumAttribute<T>(SourceLineNumber sourceLineNumbers, XElement element, XAttribute attrib, out T value) where T: struct
+        private bool TryParseEnumAttribute<T>(SourceLineNumber sourceLineNumbers, XElement element, XAttribute attrib, out T value) where T : struct
         {
             value = default(T);
             string v = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
