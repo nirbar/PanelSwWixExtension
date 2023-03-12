@@ -643,14 +643,23 @@ LRetry:
 	{
 		hr = PathCreateTempFile((LPCWSTR)szParentFolder, szPrefix, INFINITE, FILE_ATTRIBUTE_NORMAL, pszTempName, nullptr);
 	}
-	if ((hr == E_PATHNOTFOUND) && szParentFolder.StrLen())
+	if (szParentFolder.StrLen()) // Retry any folder upto the root
 	{
-		::PathRemoveBackslashW((LPWSTR)szParentFolder);
-		::PathRemoveFileSpecW((LPWSTR)szParentFolder);
-		if (szParentFolder.StrLen() < 3)
+		hr = S_OK;
+
+		if (::PathIsRoot(szParentFolder))
 		{
 			szParentFolder.Release();
+			goto LRetry;
 		}
+		::PathRemoveBackslashW((LPWSTR)szParentFolder);
+		if (::PathIsRoot(szParentFolder))
+		{
+			szParentFolder.Release();
+			goto LRetry;
+		}
+
+		::PathRemoveFileSpecW((LPWSTR)szParentFolder);
 		goto LRetry;
 	}
 	ExitOnFailure(hr, "Failed getting temporary path in '%ls'", (LPCWSTR)szParentFolder);
