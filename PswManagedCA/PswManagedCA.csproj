@@ -16,8 +16,8 @@
 
   <ItemGroup>
     <PackageReference Include="TidyBuild" Version="1.5.1" />
-    <PackageReference Include="WixToolset.Dtf.CustomAction" Version="4.0.0-rc.2" />
-    <PackageReference Include="WixToolset.Dtf.WindowsInstaller" Version="4.0.0-rc.2" />
+    <PackageReference Include="WixToolset.Dtf.CustomAction" Version="4.0.0-rc.3" />
+    <PackageReference Include="WixToolset.Dtf.WindowsInstaller" Version="4.0.0-rc.3" />
     <PackageReference Include="Microsoft.Web.Administration" Version="11.1.0" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
   </ItemGroup>

@@ -9,7 +9,7 @@
     <Manufacturer>Panel::Software</Manufacturer>
 
     <!--
-    <NugetPrereleaseVersion>-rc.1</NugetPrereleaseVersion>
+    <NugetPrereleaseVersion>-rc.3</NugetPrereleaseVersion>
     -->
     
     <!-- CMake -->

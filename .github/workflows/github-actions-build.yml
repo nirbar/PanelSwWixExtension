@@ -5,7 +5,7 @@ on:
       - wix4-v*
   workflow_dispatch:
 env:
-  NUGET_PRERELEASE_VERSION: '-rc.2'
+  NUGET_PRERELEASE_VERSION: '-rc.3'
 jobs:
   PanelSwWixExtension-Build:
     runs-on: windows-latest
