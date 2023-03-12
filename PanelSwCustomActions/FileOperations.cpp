@@ -643,7 +643,7 @@ LRetry:
 	{
 		hr = PathCreateTempFile((LPCWSTR)szParentFolder, szPrefix, INFINITE, FILE_ATTRIBUTE_NORMAL, pszTempName, nullptr);
 	}
-	if (szParentFolder.StrLen()) // Retry any folder upto the root
+	if (FAILED(hr) && szParentFolder.StrLen()) // Retry any folder up to the root
 	{
 		hr = S_OK;
 
