@@ -27,7 +27,7 @@ message ServciceConfigDetails{
 	bytes password = 4;
 	ServiceStart start = 5;
 	bytes loadOrderGroup = 6;
-	bytes dependencies = 7;
+	repeated bytes dependencies = 7;
 	ErrorHandling errorHandling = 8;
 	DelayStart delayStart = 9;
 	uint32 serviceType = 10;

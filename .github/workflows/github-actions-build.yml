@@ -47,6 +47,8 @@ jobs:
 
       - name: Publish nuget packages to github and nuget.org
         if: ${{ github.event.inputs.publish_nuget == 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_PAT }}
         run: |
           dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
           dotnet nuget push build\nuget-out\PanelSwWixExtension4.${{ env.FULL_VERSION }}${{ env.NUGET_PRERELEASE_VERSION }}.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source github

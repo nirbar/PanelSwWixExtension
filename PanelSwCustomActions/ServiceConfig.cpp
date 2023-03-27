@@ -17,7 +17,9 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 	SC_HANDLE hManager = NULL;
 	SC_HANDLE hService = NULL;
 	QUERY_SERVICE_CONFIG* pServiceCfg = nullptr;
-	LPWSTR szDependencies = nullptr;
+	LPWSTR szDepService = nullptr;
+	LPWSTR szDepGroup = nullptr;
+	std::list<LPWSTR> lstDependencies, lstRlbkDependencies;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
@@ -43,6 +45,14 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
 		ExitOnFailure(hr, "Failed to fetch record.");
+		ReleaseNullStr(szDepGroup);
+		ReleaseNullStr(szDepService);
+		for (LPWSTR sz : lstDependencies)
+		{
+			ReleaseStr(sz);
+		}
+		lstDependencies.clear();
+		lstRlbkDependencies.clear();
 
 		// Get fields
 		CWixString szId, szComponent, szServiceName, szCommand, szCommandFormat, szAccount, szPassword, szLoadOrderGroupFmt, szLoadOrderGroup;
@@ -80,7 +90,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 		if (compAction != WCA_TODO::WCA_TODO_INSTALL)
 		{
 			// In case of no-action, we just check if the service is marked for deletion to notify reboot is reqired.
-			oDeferred.AddServiceConfig(szServiceName, nullptr, nullptr, nullptr, ServciceConfigDetails::ServiceStart::ServciceConfigDetails_ServiceStart_unchanged, nullptr, nullptr, ErrorHandling::ignore, ServciceConfigDetails_DelayStart::ServciceConfigDetails_DelayStart_unchanged1, SERVICE_NO_CHANGE);
+			oDeferred.AddServiceConfig(szServiceName, nullptr, nullptr, nullptr, ServciceConfigDetails::ServiceStart::ServciceConfigDetails_ServiceStart_unchanged, nullptr, lstDependencies, ErrorHandling::ignore, ServciceConfigDetails_DelayStart::ServciceConfigDetails_DelayStart_unchanged1, SERVICE_NO_CHANGE);
 
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping configuration of service '%ls' since component is not installed", (LPCWSTR)szServiceName);
 			continue;
@@ -161,51 +171,31 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 		while ((hr = WcaFetchRecord(hSubView, &hSubRecord)) != E_NOMOREITEMS)
 		{
 			ExitOnFailure(hr, "Failed to fetch record.");
-			CWixString szServiceFmt, szGroup;
+			ReleaseNullStr(szDepGroup);
+			ReleaseNullStr(szDepService);
+			CWixString szGroup;
 
-			hr = WcaGetRecordString(hSubRecord, 1, (LPWSTR*)szServiceFmt);
+			hr = WcaGetRecordFormattedString(hSubRecord, 1, &szDepService);
 			ExitOnFailure(hr, "Failed to get Dependency.");
 			hr = WcaGetRecordFormattedString(hSubRecord, 2, (LPWSTR*)szGroup);
 			ExitOnFailure(hr, "Failed to get Group.");
 
 			if (!szGroup.IsNullOrEmpty())
-			{
+			{				
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will add to service '%ls' dependency on group '%ls'", (LPCWSTR)szServiceName, (LPCWSTR)szGroup);
-				if (szDependencies == nullptr)
-				{
-					hr = StrAllocFormatted(&szDependencies, L"%lc%ls%lc", SC_GROUP_IDENTIFIER, (LPCWSTR)szGroup, L'\0');
-					ExitOnFailure(hr, "Failed creating multstring.");
-				}
-				else
-				{
-					CWixString szTmp;
 
-					hr = szTmp.Format(L"%lc%ls", SC_GROUP_IDENTIFIER, (LPCWSTR)szGroup);
-					ExitOnFailure(hr, "Failed formatting string");
+				hr = StrAllocFormatted(&szDepGroup, L"%lc%ls", SC_GROUP_IDENTIFIER, (LPCWSTR)szGroup);
+				ExitOnFailure(hr, "Failed allocating string");
 
-					hr = MultiSzInsertString(&szDependencies, nullptr, 0, (LPCWSTR)szTmp);
-					ExitOnFailure(hr, "Failed inserting to multi-string");
-				}
+				lstDependencies.push_back(szDepGroup);
+				szDepGroup = nullptr;
 			}
 
-			if (!szServiceFmt.IsNullOrEmpty())
+			if (szDepService && *szDepService)
 			{
-				CWixString szService;
-
-				hr = szService.MsiFormat(szServiceFmt, nullptr);
-				ExitOnFailure(hr, "Failed to format string");
-
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will add to service '%ls' dependency on service '%ls'", (LPCWSTR)szServiceName, (LPCWSTR)szService);
-				if (szDependencies == nullptr)
-				{
-					hr = StrAllocFormatted(&szDependencies, L"%ls%lc", (LPCWSTR)szService, L'\0');
-					ExitOnFailure(hr, "Failed creating multstring.");
-				}
-				else
-				{
-					hr = MultiSzInsertString(&szDependencies, nullptr, 0, (LPCWSTR)szService);
-					ExitOnFailure(hr, "Failed inserting to multi-string");
-				}
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will add to service '%ls' dependency on service '%ls'", (LPCWSTR)szServiceName, szDepService);
+				lstDependencies.push_back(szDepService);
+				szDepService = nullptr;
 			}
 		}
 
@@ -246,16 +236,22 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 
 				rlbkDelayStart = delayStart.fDelayedAutostart ? ServciceConfigDetails_DelayStart::ServciceConfigDetails_DelayStart_yes : ServciceConfigDetails_DelayStart::ServciceConfigDetails_DelayStart_no;
 			}
+			if (pServiceCfg->lpDependencies)
+			{
+				for (LPWSTR sz = pServiceCfg->lpDependencies; sz && *sz; sz += 1 + wcslen(sz))
+				{
+					lstRlbkDependencies.push_back(sz);
+				}
+			}
 
-			hr = oRollback.AddServiceConfig((LPCWSTR)szServiceName, pServiceCfg->lpBinaryPathName, pServiceCfg->lpServiceStartName, nullptr, pServiceCfg->dwStartType, pServiceCfg->lpLoadOrderGroup, szDependencies, ErrorHandling::ignore, rlbkDelayStart, pServiceCfg->dwServiceType);
+			hr = oRollback.AddServiceConfig((LPCWSTR)szServiceName, pServiceCfg->lpBinaryPathName, pServiceCfg->lpServiceStartName, nullptr, pServiceCfg->dwStartType, pServiceCfg->lpLoadOrderGroup, lstRlbkDependencies, ErrorHandling::ignore, rlbkDelayStart, pServiceCfg->dwServiceType);
 			ExitOnFailure(hr, "Failed creating rollback CustomActionData");
 
 			ReleaseNullMem(pServiceCfg);
 			ReleaseServiceHandle(hService);
-			ReleaseNullStr(szDependencies);
 		}
 
-		hr = oDeferred.AddServiceConfig(szServiceName, szCommand, szAccount, szPassword, start, szLoadOrderGroup, szDependencies, (ErrorHandling)errorHandling, (ServciceConfigDetails_DelayStart)nDelayStart, dwServiceType);
+		hr = oDeferred.AddServiceConfig(szServiceName, szCommand, szAccount, szPassword, start, szLoadOrderGroup, lstDependencies, (ErrorHandling)errorHandling, (ServciceConfigDetails_DelayStart)nDelayStart, dwServiceType);
 		ExitOnFailure(hr, "Failed creating CustomActionData");
 	}
 
@@ -273,16 +269,21 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 
 LExit:
 	ReleaseStr(szCustomActionData);
-	ReleaseStr(szDependencies);
+	ReleaseStr(szDepGroup);
+	ReleaseStr(szDepService);
 	ReleaseNullMem(pServiceCfg);
 	ReleaseServiceHandle(hService);
 	ReleaseServiceHandle(hManager);
+	for (LPWSTR sz : lstDependencies)
+	{
+		ReleaseStr(sz);
+	}
 
 	dwRes = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(dwRes);
 }
 
-HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, LPCWSTR szLoadOrderGroup, LPCWSTR szDependencies, ErrorHandling errorHandling, ServciceConfigDetails_DelayStart delayStart, DWORD dwServiceType)
+HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, LPCWSTR szLoadOrderGroup, const std::list<LPWSTR> &lstDependencies, ErrorHandling errorHandling, ServciceConfigDetails_DelayStart delayStart, DWORD dwServiceType)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command* pCmd = nullptr;
@@ -313,14 +314,9 @@ HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szComman
 	{
 		pDetails->set_loadordergroup(szLoadOrderGroup, WSTR_BYTE_SIZE(szLoadOrderGroup));
 	}
-	if (szDependencies)
+	for (const LPCWSTR szDep : lstDependencies)
 	{
-		DWORD dwLen = 0;
-		hr = ::MultiSzLen(szDependencies, &dwLen);
-		ExitOnFailure(hr, "Failed getting multi-string length");
-		dwLen *= sizeof(WCHAR);
-
-		pDetails->set_dependencies(szDependencies, dwLen);
+		pDetails->add_dependencies(szDep, WSTR_BYTE_SIZE(szDep));
 	}
 	pDetails->set_start((ServciceConfigDetails::ServiceStart)start);
 	pDetails->set_delaystart(delayStart);
@@ -345,7 +341,7 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 	LPCWSTR szAccount = nullptr;
 	LPCWSTR szPassword = nullptr;
 	LPCWSTR szLoadOrderGroup = nullptr;
-	LPCWSTR szDependencies = nullptr;
+	LPWSTR szDependencies = nullptr;
 	DWORD bRes = TRUE;
 	ServciceConfigDetails details;
 
@@ -356,6 +352,8 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 	if (details.account().size() > sizeof(WCHAR)) // Larger than NULL
 	{
 		szAccount = (LPCWSTR)(LPVOID)details.account().data();
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Service '%ls' account '%ls'", szServiceName, szAccount);
+		
 		if (details.password().size() > sizeof(WCHAR))// Larger than NULL
 		{
 			szPassword = (LPCWSTR)(LPVOID)details.password().data();
@@ -364,14 +362,27 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 	if (details.commandline().size() > sizeof(WCHAR))
 	{
 		szCommandLine = (LPCWSTR)(LPVOID)details.commandline().data();
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Service '%ls' command line '%ls'", szServiceName, szCommandLine);
 	}
 	if (details.loadordergroup().size() > 0) // May be empty
 	{
 		szLoadOrderGroup = (LPCWSTR)(LPVOID)details.loadordergroup().data();
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Service '%ls' load order group '%ls'", szServiceName, szLoadOrderGroup);
 	}
-	if (details.dependencies().size() > 0) // May be empty
+	for (const std::string dep : details.dependencies())
 	{
-		szDependencies = (LPCWSTR)(LPVOID)details.dependencies().data();
+		LPCWSTR szDep = (LPCWSTR)(LPVOID)dep.data();
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Service '%ls' dependency '%ls'", szServiceName, szDep);
+		if (szDependencies)
+		{
+			hr = MultiSzPrepend(&szDependencies, nullptr, szDep);
+			ExitOnFailure(hr, "Failed to allocate string");
+		}
+		else
+		{
+			hr = StrAllocFormatted(&szDependencies, L"%ls%lc", szDep, L'\0');
+			ExitOnFailure(hr, "Failed to allocate string");
+		}
 	}
 
 LRetry:
@@ -387,6 +398,7 @@ LRetry:
 	ExitOnFailure(hr, "Failed configuring service '%ls'", szServiceName);
 
 LExit:
+	ReleaseStr(szDependencies);
 	return hr;
 }
 
