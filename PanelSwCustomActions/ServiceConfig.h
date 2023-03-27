@@ -1,6 +1,7 @@
 #pragma once
 #include "../CaCommon/DeferredActionBase.h"
 #include <map>
+#include <list>
 #include "ErrorHandling.pb.h"
 #include "servciceConfigDetails.pb.h"
 
@@ -11,7 +12,7 @@ public:
 
 	CServiceConfig() : CDeferredActionBase("ServiceConfig") { }
 
-	HRESULT AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, LPCWSTR szLoadOrderGroup, LPCWSTR szDependencies, ::com::panelsw::ca::ErrorHandling errorHandling, ::com::panelsw::ca::ServciceConfigDetails_DelayStart delayStart, DWORD dwServiceType);
+	HRESULT AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, LPCWSTR szLoadOrderGroup, const std::list<LPWSTR> &lstDependencies, ::com::panelsw::ca::ErrorHandling errorHandling, ::com::panelsw::ca::ServciceConfigDetails_DelayStart delayStart, DWORD dwServiceType);
 
 protected:
 	
