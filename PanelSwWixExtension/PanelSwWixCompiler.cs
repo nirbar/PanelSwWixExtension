@@ -458,7 +458,7 @@ namespace PanelSw.Wix.Extensions
                 parentElement.ParentNode.InsertAfter(uninstallElement, sourceLineElement);
             }
         }
-        
+
         private void ParseSplitFileElement(XmlElement fileElement, XmlElement element, string componentId, string fileId)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
@@ -956,6 +956,7 @@ namespace PanelSw.Wix.Extensions
             bool start = false;
             YesNoDefaultType autoStart = YesNoDefaultType.Default;
             ErrorHandling promptOnError = ErrorHandling.fail;
+            int order = 1000000000 + GetLineNumber(sourceLineNumbers);
 
             foreach (XmlAttribute attrib in element.Attributes)
             {
@@ -996,6 +997,14 @@ namespace PanelSw.Wix.Extensions
                         }
                         break;
 
+                    case "Order":
+                        order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                        if (order < 0)
+                        {
+                            order += int.MaxValue;
+                        }
+                        break;
+
                     default:
                         Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                         break;
@@ -1025,6 +1034,7 @@ namespace PanelSw.Wix.Extensions
             row[4] = start ? 1 : 0;
             row[5] = (autoStart == YesNoDefaultType.Yes) ? 1 : (autoStart == YesNoDefaultType.No) ? 0 : -1;
             row[6] = (int)promptOnError;
+            row[7] = order;
         }
 
         private void ParseMd5Hash(XmlNode node)
