@@ -9,7 +9,7 @@ on:
         type: boolean
 
 env:
-  NUGET_PRERELEASE_VERSION: '-rc.3'
+  NUGET_PRERELEASE_VERSION: '-rc.4'
 
 jobs:
   PanelSwWixExtension-Build:
