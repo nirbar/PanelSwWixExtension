@@ -29,7 +29,7 @@ namespace PswManagedCA
             session.Log($"Initialized from {me.Name} v{me.Version}");
 
             List<WebsiteConfigCatalog> catalogs = new List<WebsiteConfigCatalog>();
-            using (View view = session.Database.OpenView("SELECT `Component_`, `Website`, `Stop`, `Start`, `AutoStart`, `ErrorHandling` FROM `PSW_WebsiteConfig`"))
+            using (View view = session.Database.OpenView("SELECT `Component_`, `Website`, `Stop`, `Start`, `AutoStart`, `ErrorHandling` FROM `PSW_WebsiteConfig` ORDER BY `Order`"))
             {
                 view.Execute(null);
 

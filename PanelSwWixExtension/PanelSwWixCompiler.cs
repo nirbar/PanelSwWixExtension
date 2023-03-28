@@ -820,6 +820,7 @@ namespace PanelSw.Wix.Extensions
             bool start = false;
             YesNoDefaultType autoStart = YesNoDefaultType.Default;
             ErrorHandling promptOnError = ErrorHandling.fail;
+            int order = 1000000000 + sourceLineNumbers.LineNumber ?? 0;
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -845,6 +846,14 @@ namespace PanelSw.Wix.Extensions
 
                         case "ErrorHandling":
                             TryParseEnumAttribute(sourceLineNumbers, element, attrib, out promptOnError);
+                            break;
+
+                        case "Order":
+                            order = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                            if (order < 0)
+                            {
+                                order += int.MaxValue;
+                            }
                             break;
 
                         default:
@@ -873,6 +882,7 @@ namespace PanelSw.Wix.Extensions
                 row.Start = start ? 1 : 0;
                 row.AutoStart = (autoStart == YesNoDefaultType.Yes) ? 1 : (autoStart == YesNoDefaultType.No) ? 0 : -1;
                 row.ErrorHandling = (int)promptOnError;
+                row.Order = order;
             }
         }
 

@@ -26,6 +26,7 @@ namespace PanelSw.Wix.Extensions.Symbols
                     new ColumnDefinition(nameof(Start), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 1),
                     new ColumnDefinition(nameof(AutoStart), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: -1, maxValue: 1),
                     new ColumnDefinition(nameof(ErrorHandling), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 2),
+                    new ColumnDefinition(nameof(Order), ColumnType.Number, 4, false, false, ColumnCategory.Integer, minValue: 0, maxValue: int.MaxValue),
                 };
             }
         }
@@ -70,6 +71,12 @@ namespace PanelSw.Wix.Extensions.Symbols
         {
             get => Fields[5].AsNumber();
             set => this.Set(5, value);
+        }
+
+        public int Order
+        {
+            get => Fields[6].AsNumber();
+            set => this.Set(6, value);
         }
     }
 }
