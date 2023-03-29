@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    
+    <BuildFolder Condition="'$(BuildFolder)'==''">$(MSBuildThisFileDirectory)build\</BuildFolder>
+    <OutputPath Condition="'$(OutputPath)'==''">$(BuildFolder)bin\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
+    <OutDirLib Condition="'$(OutDirLib)'==''">$(BuildFolder)lib\$(Configuration)\</OutDirLib>
+    <IntermediateOutputPath Condition="'$(IntermediateOutputPath)'==''">$(BuildFolder)obj\$(Configuration)\$(MSBuildProjectName)\</IntermediateOutputPath>
+    <MSBuildProjectExtensionsPath Condition="'$(MSBuildProjectExtensionsPath )'==''">$(IntermediateOutputPath)</MSBuildProjectExtensionsPath >
+    
+    <OutDir Condition="'$(OutDir)'==''">$(OutputPath)</OutDir>
+    <IntDir Condition="'$(IntDir)'==''">$(IntermediateOutputPath)</IntDir>
+    <OutputDirectory Condition="'$(OutputDirectory)'==''">$(OutputPath)</OutputDirectory>
+    <IntermediateDirectory Condition="'$(IntermediateDirectory)'==''">$(IntermediateOutputPath)</IntermediateDirectory>
+
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+  </PropertyGroup>
+</Project>
