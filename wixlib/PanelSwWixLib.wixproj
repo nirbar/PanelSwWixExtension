@@ -1,10 +1,10 @@
-﻿<Project Sdk="WixToolset.Sdk">
+<Project Sdk="WixToolset.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <LibBindFiles>true</LibBindFiles>
     <BindFiles>true</BindFiles>
-    <PreBuildEvent>"$(MSBuildBinPath)\MSBuild.exe" "$(MSBuildThisFileDirectory)..\PswManagedCA\PswManagedCA.csproj" "/p:Platform=x64;Configuration=$(Configuration);SolutionDir=$(SolutionDir)\"</PreBuildEvent>
-    <PreBuildEvent>$(PreBuildEvent) &amp;&amp; "$(MSBuildBinPath)\MSBuild.exe" "$(MSBuildThisFileDirectory)..\PswManagedCA\PswManagedCA.csproj" "/p:Platform=x86;Configuration=$(Configuration);SolutionDir=$(SolutionDir)\"</PreBuildEvent>
+    <PreBuildEvent>"$(MSBuildBinPath)\MSBuild.exe" "$(MSBuildThisFileDirectory)..\PswManagedCA\PswManagedCA.csproj" /restore "/p:Platform=x64;Configuration=$(Configuration);SolutionDir=$(SolutionDir)\"</PreBuildEvent>
+    <PreBuildEvent>$(PreBuildEvent) &amp;&amp; "$(MSBuildBinPath)\MSBuild.exe" "$(MSBuildThisFileDirectory)..\PswManagedCA\PswManagedCA.csproj" /restore "/p:Platform=x86;Configuration=$(Configuration);SolutionDir=$(SolutionDir)\"</PreBuildEvent>
     <PreBuildEvent>$(PreBuildEvent) &amp;&amp; "$(MSBuildBinPath)\MSBuild.exe" "$(MSBuildThisFileDirectory)..\Dism\Dism.vcxproj" "/p:Platform=Win32;Configuration=$(Configuration);SolutionDir=$(SolutionDir)\"</PreBuildEvent>
     <PreBuildEvent>$(PreBuildEvent) &amp;&amp; "$(MSBuildBinPath)\MSBuild.exe" "$(MSBuildThisFileDirectory)..\Dism\Dism.vcxproj" "/p:Platform=x64;Configuration=$(Configuration);SolutionDir=$(SolutionDir)\"</PreBuildEvent>
   </PropertyGroup>
@@ -12,7 +12,7 @@
     <ProjectReference Include="..\PanelSwCustomActions\PanelSwCustomActions.vcxproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="WixToolset.Util.wixext" Version="4.0.0-rc.4" />
+    <PackageReference Include="WixToolset.Util.wixext" Version="4.0.0" />
     <PackageReference Include="MSBuildTasks" Version="1.5.0.235" />
     <PackageReference Include="TidyBuild" Version="1.5.1" />
   </ItemGroup>

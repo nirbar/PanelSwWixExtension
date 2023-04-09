@@ -9,7 +9,7 @@ on:
         type: boolean
 
 env:
-  NUGET_PRERELEASE_VERSION: '-rc.4'
+  NUGET_PRERELEASE_VERSION: ''
 
 jobs:
   PanelSwWixExtension-Build:
@@ -38,7 +38,7 @@ jobs:
           cmake.exe --build build\poco --config Release
 
       - name: Build PanelSwWixExtension for default WiX
-        run: msbuild PanelSwWixExtension.sln -p:Configuration=Release -p:Platform=x86 -p:NugetDir="" -p:FullVersion=${{ env.FULL_VERSION }} -p:NugetPrereleaseVersion=${{ env.NUGET_PRERELEASE_VERSION }}
+        run: msbuild PanelSwWixExtension.sln -restore -p:Configuration=Release -p:Platform=x86 -p:NugetDir="" -p:FullVersion=${{ env.FULL_VERSION }} -p:NugetPrereleaseVersion=${{ env.NUGET_PRERELEASE_VERSION }}
 
       - uses: actions/upload-artifact@v3.1.2
         with:
