@@ -1196,7 +1196,7 @@ HRESULT CExecOnComponent::LaunchProcess(LPCWSTR szCommand, HANDLE* phProcess, HA
 	hOutWrite = ::CreateFile(szStdOutPipeName, FILE_WRITE_DATA | SYNCHRONIZE | FILE_FLAG_OVERLAPPED, 0, &sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
 	ExitOnNullWithLastError((hOutWrite && (hOutWrite != INVALID_HANDLE_VALUE)), hr, "Failed to open named pipe for stdout writer");
 
-	bRes = ::DuplicateHandle(::GetCurrentProcess(), hOutWrite, ::GetCurrentProcess(), &hErrWrite, 0, FALSE, DUPLICATE_SAME_ACCESS);
+	bRes = ::DuplicateHandle(::GetCurrentProcess(), hOutWrite, ::GetCurrentProcess(), &hErrWrite, 0, TRUE, DUPLICATE_SAME_ACCESS);
 	ExitOnNullWithLastError((bRes && hErrWrite && (hErrWrite != INVALID_HANDLE_VALUE)), hr, "Failed to duplicate named pipe from stdout to stderr");
 
 	bRes = ::DuplicateHandle(::GetCurrentProcess(), hOutTemp, ::GetCurrentProcess(), &hOutRead, 0, FALSE, DUPLICATE_SAME_ACCESS);

@@ -9,7 +9,7 @@ on:
         type: boolean
 
 env:
-  CUSTOM_WIX_VERSION: '3.12.0-c176'
+  CUSTOM_WIX_VERSION: '3.12.0-c182'
 
 jobs:
   PanelSwWixExtension-Build:
