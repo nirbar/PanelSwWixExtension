@@ -26,6 +26,8 @@ private:
 
 	HRESULT LogProcessOutput(HANDLE hProc, HANDLE hStdErrOut, LPWSTR *pszText);
 
+	HRESULT LaunchProcess(LPCWSTR szCommand, HANDLE* phProcess, HANDLE* phStdOut);
+
 	// S_FALSE: Had no matches, go on with error handling.
 	// S_OK: Ignore errors and continue
 	// E_RETRY: Retry

@@ -9,6 +9,7 @@ using namespace std;
 using namespace com::panelsw::ca;
 using namespace google::protobuf;
 #pragma comment (lib, "shlwapi.lib")
+#pragma comment (lib, "Rpcrt4.lib")
 
 enum Flags
 {
@@ -647,7 +648,7 @@ HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command)
 			bImpersonated = true;
 		}
 
-		hr = ProcExecute(nullptr, const_cast<LPWSTR>(szCommand), &hProc, nullptr, nullptr);
+		hr = LaunchProcess(const_cast<LPWSTR>(szCommand), &hProc, nullptr);
 		ExitOnFailure(hr, "Failed to launch command '%ls'", szCommand);
 		hr = S_OK;
 		ExitFunction();
@@ -682,7 +683,7 @@ LRetry:
 	}
 
 	// By default, exitCode is what the process returned. If couldn't execute the process, use failure code is result.
-	hr = ProcExecute(nullptr, commandLineCopy, &hProc, nullptr, &hStdOut);
+	hr = LaunchProcess(commandLineCopy, &hProc, &hStdOut);
 
 	if (bImpersonated)
 	{
@@ -1135,5 +1136,113 @@ HRESULT CExecOnComponent::SetEnvironment(const ::google::protobuf::Map<std::stri
 	}
 
 LExit:
+	return hr;
+}
+
+HRESULT CExecOnComponent::LaunchProcess(LPCWSTR szCommand, HANDLE* phProcess, HANDLE* phStdOut)
+{
+	const UINT OUTPUT_BUFFER_SIZE = 1024;
+	HRESULT hr = S_OK;
+	SECURITY_ATTRIBUTES sa;
+	RPC_STATUS rs = RPC_S_OK;
+	UUID guid = {};
+	WCHAR wzGuid[39];
+	CWixString szStdInPipeName;
+	CWixString szStdOutPipeName;
+	BOOL bRes = TRUE;
+	HANDLE hOutTemp = INVALID_HANDLE_VALUE;
+	HANDLE hInTemp = INVALID_HANDLE_VALUE;
+	HANDLE hOutRead = INVALID_HANDLE_VALUE;
+	HANDLE hOutWrite = INVALID_HANDLE_VALUE;
+	HANDLE hErrWrite = INVALID_HANDLE_VALUE;
+	HANDLE hInRead = INVALID_HANDLE_VALUE;
+	HANDLE hInWrite = INVALID_HANDLE_VALUE;
+	PROCESS_INFORMATION pi = { };
+	STARTUPINFOW si = { };
+	CWixString szCmdLIne;
+
+	ZeroMemory(&sa, sizeof(sa));
+	ZeroMemory(&si, sizeof(si));
+	ZeroMemory(&pi, sizeof(pi));
+
+	// Generate unique pipe names
+	rs = ::UuidCreate(&guid);
+	hr = HRESULT_FROM_RPC(rs);
+	ExitOnFailure(hr, "Failed to create working folder guid.");
+
+	bRes = ::StringFromGUID2(guid, wzGuid, countof(wzGuid));
+	ExitOnNull(bRes, hr, E_OUTOFMEMORY, "Failed to convert UUID to string");
+
+	hr = szStdInPipeName.Format(L"\\\\.\\pipe\\%ls-stdin", wzGuid);
+	ExitOnFailure(hr, "Failed to create stdin pipe name.");
+
+	hr = szStdOutPipeName.Format(L"\\\\.\\pipe\\%ls-stdout", wzGuid);
+	ExitOnFailure(hr, "Failed to create stdout pipe name.");
+
+	// Fill out security structure so we can inherit handles
+	sa.nLength = sizeof(SECURITY_ATTRIBUTES);
+	sa.bInheritHandle = TRUE;
+	sa.lpSecurityDescriptor = NULL;
+
+	// Create pipes
+	hOutTemp = ::CreateNamedPipe(szStdOutPipeName, PIPE_ACCESS_INBOUND | FILE_FLAG_OVERLAPPED, PIPE_TYPE_BYTE | PIPE_READMODE_BYTE | PIPE_WAIT, 1, OUTPUT_BUFFER_SIZE, OUTPUT_BUFFER_SIZE, NMPWAIT_USE_DEFAULT_WAIT, &sa);
+	ExitOnNullWithLastError((hOutTemp && (hOutTemp != INVALID_HANDLE_VALUE)), hr, "Failed to create named pipe for stdout reader");
+
+	hOutWrite = ::CreateFile(szStdOutPipeName, FILE_WRITE_DATA | SYNCHRONIZE | FILE_FLAG_OVERLAPPED, 0, &sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	ExitOnNullWithLastError((hOutWrite && (hOutWrite != INVALID_HANDLE_VALUE)), hr, "Failed to open named pipe for stdout writer");
+
+	bRes = ::DuplicateHandle(::GetCurrentProcess(), hOutWrite, ::GetCurrentProcess(), &hErrWrite, 0, TRUE, DUPLICATE_SAME_ACCESS);
+	ExitOnNullWithLastError((bRes && hErrWrite && (hErrWrite != INVALID_HANDLE_VALUE)), hr, "Failed to duplicate named pipe from stdout to stderr");
+
+	bRes = ::DuplicateHandle(::GetCurrentProcess(), hOutTemp, ::GetCurrentProcess(), &hOutRead, 0, FALSE, DUPLICATE_SAME_ACCESS);
+	ExitOnNullWithLastError((bRes && hOutRead && (hOutRead != INVALID_HANDLE_VALUE)), hr, "Failed to duplicate named pipe for stdout reader");
+	::CloseHandle(hOutTemp);
+	hOutTemp = INVALID_HANDLE_VALUE;
+
+	hInTemp = ::CreateNamedPipe(szStdInPipeName, PIPE_ACCESS_OUTBOUND, PIPE_TYPE_BYTE | PIPE_WAIT, 1, OUTPUT_BUFFER_SIZE, OUTPUT_BUFFER_SIZE, NMPWAIT_USE_DEFAULT_WAIT, &sa);
+	ExitOnNullWithLastError((hInTemp && (hInTemp != INVALID_HANDLE_VALUE)), hr, "Failed to create named pipe for stdin writer");
+
+	hInRead = ::CreateFile(szStdInPipeName, FILE_READ_DATA, 0, &sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+	ExitOnNullWithLastError((hInRead && (hInRead != INVALID_HANDLE_VALUE)), hr, "Failed to open named pipe for stdin reader");
+
+	bRes = ::DuplicateHandle(::GetCurrentProcess(), hInTemp, ::GetCurrentProcess(), &hInWrite, 0, FALSE, DUPLICATE_SAME_ACCESS);
+	ExitOnNullWithLastError((hInWrite && (hInWrite != INVALID_HANDLE_VALUE)), hr, "Failed to duplicate named pipe for stdin writer");
+	::CloseHandle(hInTemp);
+	hInTemp = INVALID_HANDLE_VALUE;
+
+	si.cb = sizeof(STARTUPINFOW);
+	si.dwFlags = STARTF_USESTDHANDLES;
+	si.hStdInput = hInRead;
+	si.hStdOutput = hOutWrite;
+	si.hStdError = hErrWrite;
+
+	hr = szCmdLIne.Copy(szCommand);
+	ExitOnFailure(hr, "Failed to copy string");
+
+	bRes = ::CreateProcessW(nullptr, (LPWSTR)szCmdLIne, nullptr, nullptr, TRUE, ::GetPriorityClass(::GetCurrentProcess()) | CREATE_NO_WINDOW, nullptr, nullptr, &si, &pi);
+	ExitOnNullWithLastError(bRes, hr, "Failed to create process");
+
+	if (phStdOut)
+	{
+		*phStdOut = hOutRead;
+		hOutRead = INVALID_HANDLE_VALUE;
+	}
+	if (phProcess)
+	{
+		*phProcess = pi.hProcess;
+		pi.hProcess = INVALID_HANDLE_VALUE;
+	}
+
+LExit:
+	ReleaseFileHandle(hOutRead);
+	ReleaseFileHandle(hOutWrite);
+	ReleaseFileHandle(hErrWrite);
+	ReleaseFileHandle(hInRead);
+	ReleaseFileHandle(hInWrite);
+	ReleaseFileHandle(hOutTemp);
+	ReleaseFileHandle(hInTemp);
+	ReleaseFileHandle(pi.hProcess);
+	ReleaseFileHandle(pi.hThread);
+
 	return hr;
 }
