@@ -12,13 +12,15 @@ namespace PanelSw.Wix.Extensions
             typeof(PanelSwWiBackendBinder),
             typeof(PanelSwWixCompiler),
             typeof(PanelSwWixExtData),
+            typeof(PanelSwBurnBackendBinder),
         };
-        /*
+
+#if DEBUG
         public override bool TryCreateExtension(Type extensionType, out object extension)
         {
             System.Diagnostics.Debugger.Launch();
             return base.TryCreateExtension(extensionType, out extension);
         }
-        //*/
+#endif
     }
 }

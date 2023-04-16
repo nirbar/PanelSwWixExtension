@@ -25,6 +25,9 @@ namespace PanelSw.Wix.Extensions
                 case "PSW_ConcatFiles":
                     symbolDefinition = PSW_ConcatFiles.SymbolDefinition;
                     break;
+                case "PSW_ContainerTemplate":
+                    symbolDefinition = PSW_ContainerTemplate.SymbolDefinition;
+                    break;
                 case "PSW_CustomUninstallKey":
                     symbolDefinition = PSW_CustomUninstallKey.SymbolDefinition;
                     break;

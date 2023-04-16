@@ -30,6 +30,19 @@ namespace PanelSw.Wix.Extensions
         {
             switch (parentElement.Name.LocalName)
             {
+                case "Bundle":
+                    switch (element.Name.LocalName)
+                    {
+                        case "ContainerTemplate":
+                            ParseContainerTemplateElement(section, element);
+                            break;
+
+                        default:
+                            ParseHelper.UnexpectedElement(parentElement, element);
+                            break;
+                    }
+                    break;
+
                 case "Fragment":
                 case "Module":
                 case "Package":
@@ -294,6 +307,62 @@ namespace PanelSw.Wix.Extensions
                 default:
                     ParseHelper.UnexpectedElement(parentElement, element);
                     break;
+            }
+        }
+
+        private void ParseContainerTemplateElement(IntermediateSection section, XElement element)
+        {
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
+            string cabinetTemplate = "bundle-attached-{0}.cab";
+            ContainerType defaultType = ContainerType.Attached;
+            int maximumUncompressedContainerSize = Int32.MaxValue; // 2GB
+            long maximumUncompressedExeSize = -1; // 4GB
+
+            foreach (XAttribute attrib in element.Attributes())
+            {
+                if (IsMyAttribute(element, attrib))
+                {
+                    switch (attrib.Name.LocalName)
+                    {
+                        case "CabinetTemplate":
+                            cabinetTemplate = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "DefaultType":
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out defaultType);
+                            break;
+                        case "MaximumUncompressedContainerSize":
+                            maximumUncompressedContainerSize = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, 1, Int32.MaxValue);
+                            break;
+                        case "MaximumUncompressedExeSize":
+                            maximumUncompressedExeSize = ParseHelper.GetAttributeLongValue(sourceLineNumbers, attrib, 1, UInt32.MaxValue);
+                            break;
+                        default:
+                            ParseHelper.UnexpectedAttribute(element, attrib);
+                            break;
+                    }
+                }
+            }
+
+            if (!cabinetTemplate.Contains("{0}"))
+            {
+                Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, element.Name.LocalName, "CabinetTemplate", cabinetTemplate, "Must contain format string {0}"));
+            }
+            if ((defaultType == ContainerType.Detached) && (maximumUncompressedExeSize > 0))
+            {
+                Messaging.Write(ErrorMessages.IllegalAttributeValueWithOtherAttribute(sourceLineNumbers, element.Name.LocalName, "DefaultType", defaultType.ToString(), "MaximumUncompressedExeSize"));
+            }
+            if (maximumUncompressedExeSize < 0)
+            {
+                maximumUncompressedExeSize = UInt32.MaxValue; //4GB
+            }
+
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
+            {
+                PSW_ContainerTemplate symbol = section.AddSymbol(new PSW_ContainerTemplate(sourceLineNumbers));
+                symbol.CabinetTemplate = cabinetTemplate;
+                symbol.DefaultType = defaultType;
+                symbol.MaximumUncompressedContainerSize = maximumUncompressedContainerSize;
+                symbol.MaximumUncompressedExeSize = maximumUncompressedExeSize;
             }
         }
 
