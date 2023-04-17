@@ -2,6 +2,7 @@ using PanelSw.Wix.Extensions.Symbols;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using WixToolset.Data;
 using WixToolset.Data.Burn;
 using WixToolset.Data.Symbols;
@@ -46,9 +47,11 @@ namespace PanelSw.Wix.Extensions
         {
             PSW_ContainerTemplate containerTemplate = null;
             WixBundleContainerSymbol defaultContainer = null;
-            List<WixBundlePayloadSymbol> payloadSymbols = new List<WixBundlePayloadSymbol>();
+            List<WixBundlePayloadSymbol> allPayloadSymbols = new List<WixBundlePayloadSymbol>();
+            List<WixBundlePayloadSymbol> myPayloadSymbols = new List<WixBundlePayloadSymbol>();
+            List<WixBundleContainerSymbol> containerSymbols = new List<WixBundleContainerSymbol>();
+            List<WixGroupSymbol> groupSymbols = new List<WixGroupSymbol>();
             Dictionary<WixBundleContainerSymbol, long> containerSize = new Dictionary<WixBundleContainerSymbol, long>();
-            long exeSize = 0;
 
             foreach (IntermediateSection intermediate in Context.IntermediateRepresentation.Sections)
             {
@@ -65,23 +68,19 @@ namespace PanelSw.Wix.Extensions
                     }
                     else if (symbol is WixBundlePayloadSymbol p)
                     {
-                        switch (p.ContainerRef)
+                        allPayloadSymbols.Add(p);
+                        if (BurnConstants.BurnDefaultAttachedContainerName.Equals(p.ContainerRef))
                         {
-                            case BurnConstants.BurnDefaultAttachedContainerName:
-                                payloadSymbols.Add(p);
-                                break;
-                            case BurnConstants.BurnUXContainerName:
-                                if (!p.FileSize.HasValue && File.Exists(p.SourceFile?.Path))
-                                {
-                                    FileInfo fileInfo = new FileInfo(p.SourceFile.Path);
-                                    exeSize += fileInfo.Length;
-                                }
-                                else
-                                {
-                                    exeSize += p.FileSize ?? 0;
-                                }
-                                break;
+                            myPayloadSymbols.Add(p);
                         }
+                    }
+                    else if (symbol is WixBundleContainerSymbol c)
+                    {
+                        containerSymbols.Add(c);
+                    }
+                    else if (symbol is WixGroupSymbol g)
+                    {
+                        groupSymbols.Add(g);
                     }
                 }
             }
@@ -91,21 +90,58 @@ namespace PanelSw.Wix.Extensions
                 return;
             }
 
-            // Best effort to group payloads by package
-            payloadSymbols.Sort((p1, p2) => p1.ParentPackagePayloadRef?.CompareTo(p2.ParentPackagePayloadRef) ?? 0);
+            // Calculate exe size: Sum of payloads in attached containers
+            long exeSize = 0;
+            foreach (WixBundleContainerSymbol containerSymbol1 in containerSymbols)
+            {
+                if (containerSymbol1.Type.Equals(ContainerType.Attached) && !BurnConstants.BurnDefaultAttachedContainerName.Equals(containerSymbol1.Id.Id))
+                {
+                    IEnumerable<WixGroupSymbol> containerPayloadGroups = groupSymbols.Where(g => g.ParentType.Equals(ComplexReferenceParentType.Container) && g.ParentId.Equals(containerSymbol1.Id.Id) && g.ChildType.Equals(ComplexReferenceChildType.Payload));
+                    foreach (WixGroupSymbol groupSymbol in containerPayloadGroups)
+                    {
+                        WixBundlePayloadSymbol payload = allPayloadSymbols.First(p => p.Id.Id.Equals(groupSymbol.ChildId));
+                        if (!payload.FileSize.HasValue && File.Exists(payload.SourceFile?.Path))
+                        {
+                            FileInfo fileInfo = new FileInfo(payload.SourceFile.Path);
+                            exeSize += fileInfo.Length;
+                        }
+                        else
+                        {
+                            exeSize += payload.FileSize ?? 0;
+                        }
+                    }
+                }
+            }
+
+            // Order payloads by package and layout-groups
+            myPayloadSymbols.Sort((p1, p2) => SortPayloads(p1, p2, groupSymbols));
 
             defaultContainer.Name = string.Format(containerTemplate.CabinetTemplate, 0);
             defaultContainer.Type = containerTemplate.DefaultType;
-            foreach (WixBundlePayloadSymbol payload in payloadSymbols)
+            WixBundleContainerSymbol prevContainer = null;
+            WixBundlePayloadSymbol prevPayload = null;
+            foreach (WixBundlePayloadSymbol payload in myPayloadSymbols)
             {
                 WixBundleContainerSymbol container = null;
 
-                foreach (WixBundleContainerSymbol containerSymbol in containerSize.Keys)
+                // Prefer the previous container if belongs to the same package/layout
+                if ((prevContainer != null) && (prevPayload != null)
+                    && ((!payload.FileSize.HasValue || (containerSize[prevContainer] + payload.FileSize.Value) < containerTemplate.MaximumUncompressedContainerSize)) // Previous container has enough capacity
+                    && (SortPayloads(payload, prevPayload, groupSymbols) == 0)) // This payload and the previous one belong to the same package/layout
                 {
-                    if (!payload.FileSize.HasValue || (containerSize[containerSymbol] + payload.FileSize.Value) < containerTemplate.MaximumUncompressedContainerSize)
+                    container = prevContainer;
+                }
+
+                // Find the first container with sufficient size
+                if (container == null)
+                {
+                    foreach (WixBundleContainerSymbol containerSymbol in containerSize.Keys)
                     {
-                        container = containerSymbol;
-                        break;
+                        if (!payload.FileSize.HasValue || (containerSize[containerSymbol] + payload.FileSize.Value) < containerTemplate.MaximumUncompressedContainerSize)
+                        {
+                            container = containerSymbol;
+                            break;
+                        }
                     }
                 }
 
@@ -125,6 +161,8 @@ namespace PanelSw.Wix.Extensions
 
                 containerSize[container] += payload.FileSize ?? 0;
                 payload.ContainerRef = container.Id.Id;
+                prevContainer = container;
+                prevPayload = payload;
             }
 
             // Assign attached/detached
@@ -146,6 +184,34 @@ namespace PanelSw.Wix.Extensions
                     }
                 }
             }
+        }
+
+        // Best effort to group payloads by package and payload group (layout)
+        private int SortPayloads(WixBundlePayloadSymbol p1, WixBundlePayloadSymbol p2, IEnumerable<WixGroupSymbol> groups)
+        {
+            WixGroupSymbol p1Group = groups.FirstOrDefault(g => g.ParentType.Equals(ComplexReferenceParentType.Package) && g.ChildType.Equals(ComplexReferenceChildType.Payload) && g.ChildId.Equals(p1.Id.Id));
+            WixGroupSymbol p2Group = groups.FirstOrDefault(g => g.ParentType.Equals(ComplexReferenceParentType.Package) && g.ChildType.Equals(ComplexReferenceChildType.Payload) && g.ChildId.Equals(p2.Id.Id));
+            if ((p1Group != null) && (p2Group != null))
+            {
+                return p1Group.ParentId.CompareTo(p2Group.ParentId);
+            }
+            if ((p1Group != null) || (p2Group != null)) // If one is a package and the other isn't, we place package first
+            {
+                return (p1Group == null) ? 1 : -1;
+            }
+
+            p1Group = groups.FirstOrDefault(g => g.ParentType.Equals(ComplexReferenceParentType.Layout) && g.ChildType.Equals(ComplexReferenceChildType.Payload) && g.ChildId.Equals(p1.Id.Id));
+            p2Group = groups.FirstOrDefault(g => g.ParentType.Equals(ComplexReferenceParentType.Layout) && g.ChildType.Equals(ComplexReferenceChildType.Payload) && g.ChildId.Equals(p2.Id.Id));
+            if ((p1Group != null) && (p2Group != null))
+            {
+                return p1Group.ParentId.CompareTo(p2Group.ParentId);
+            }
+            if ((p1Group != null) || (p2Group != null)) // If one is a layout and the other isn't, we place layout last
+            {
+                return (p1Group == null) ? -1 : 1;
+            }
+
+            return 0;
         }
     }
 }

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -14,11 +14,11 @@
     <Optimize>False</Optimize>
   </PropertyGroup>
 
-  <ItemGroup Condition=" '$(NCrunch)'=='' ">
+  <ItemGroup>
     <ProjectReference Include="..\wixlib\PanelSwWixLib.wixproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="$(OutputPath)..\..\PanelSwWixLib\PanelSwWixLib.wixlib" LogicalName="PanelSwWixLib.wixlib"/>
+    <EmbeddedResource Include="$(BuildFolder)bin\Release\PanelSwWixLib\PanelSwWixLib.wixlib" LogicalName="PanelSwWixLib.wixlib"/>
   </ItemGroup>
 
   <ItemGroup>
