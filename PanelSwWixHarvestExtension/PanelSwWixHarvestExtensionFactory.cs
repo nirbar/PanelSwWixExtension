@@ -2,17 +2,13 @@ using System;
 using System.Collections.Generic;
 using WixToolset.Extensibility;
 
-namespace PanelSw.Wix.Extensions
+namespace PanelSw.Wix.HarvestExtension
 {
-    public sealed class PanelSwWixExtension : BaseExtensionFactory
+    public sealed class PanelSwWixHarvestExtensionFactory : BaseExtensionFactory
     {
         protected override IReadOnlyCollection<Type> ExtensionTypes => new Type[]
         {
-            typeof(PanelSwWixPreprocessor),
-            typeof(PanelSwWiBackendBinder),
-            typeof(PanelSwWixCompiler),
-            typeof(PanelSwWixExtData),
-            typeof(PanelSwBurnBackendBinder),
+            typeof(PanelSwWixHarvestExtension),
         };
 
 #if DEBUG

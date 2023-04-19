@@ -126,6 +126,8 @@ Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "PreprocessorUT", "UnitTests
 EndProject
 Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "PayloadUT", "UnitTests\PayloadUT\PayloadUT.wixproj", "{D3F4B72D-4C8D-4CED-91B6-33AB2A926A49}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PanelSwWixHarvestExtension", "PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.csproj", "{3463E375-46E1-46DD-9AF4-8E925F581B93}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x86 = Debug|x86
@@ -234,6 +236,10 @@ Global
 		{D3F4B72D-4C8D-4CED-91B6-33AB2A926A49}.Debug|x86.ActiveCfg = Debug|x86
 		{D3F4B72D-4C8D-4CED-91B6-33AB2A926A49}.Debug|x86.Build.0 = Debug|x86
 		{D3F4B72D-4C8D-4CED-91B6-33AB2A926A49}.Release|x86.ActiveCfg = Release|x86
+		{3463E375-46E1-46DD-9AF4-8E925F581B93}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{3463E375-46E1-46DD-9AF4-8E925F581B93}.Debug|x86.Build.0 = Debug|Any CPU
+		{3463E375-46E1-46DD-9AF4-8E925F581B93}.Release|x86.ActiveCfg = Release|Any CPU
+		{3463E375-46E1-46DD-9AF4-8E925F581B93}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

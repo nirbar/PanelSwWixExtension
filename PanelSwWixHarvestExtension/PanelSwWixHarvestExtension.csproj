@@ -1,10 +1,10 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
-    <RootNamespace>PanelSw.Wix.Extensions</RootNamespace>
-    <Description>WiX Toolset Utility extension</Description>
-    <Title>WiX Toolset Utility extension</Title>
+    <RootNamespace>PanelSw.Wix.HarvestExtension</RootNamespace>
+    <Description>WiX Toolset Harvest extension</Description>
+    <Title>WiX Toolset Harvest extension</Title>
     <DebugType>portable</DebugType>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
@@ -15,17 +15,17 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.csproj" />
-    <ProjectReference Include="..\wixlib\PanelSwWixLib.wixproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="$(BuildFolder)bin\Release\PanelSwWixLib\PanelSwWixLib.wixlib" LogicalName="PanelSwWixLib.wixlib" />
+    <Reference Include="heat.dll">
+      <HintPath>$(PkgWixToolset_Heat)\tools\net6.0\heat.dll</HintPath>
+      <Private>false</Private>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="WixToolset.Extensibility" Version="4.0.0" />
     <PackageReference Include="MSBuildTasks" Version="1.5.0.235" />
     <PackageReference Include="TidyBuild" Version="1.5.1" />
+    <PackageReference Include="WixToolset.Heat" Version="4.0.0" GeneratePathProperty="true" />
   </ItemGroup>
 
 </Project>

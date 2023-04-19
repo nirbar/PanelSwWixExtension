@@ -6,7 +6,7 @@ using WixToolset.Harvesters.Data;
 using WixToolset.Harvesters.Extensibility;
 using WixToolset.Harvesters.Serialize;
 
-namespace PanelSw.Wix.Extensions
+namespace PanelSw.Wix.HarvestExtension
 {
     internal class PanelSwWixHarvestMutator : BaseMutatorExtension
     {

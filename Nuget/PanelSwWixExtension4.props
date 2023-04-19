@@ -3,6 +3,7 @@
   <PropertyGroup>
     <PanelSwWixExtensionDir>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)..\tools\lib'))</PanelSwWixExtensionDir>
     <PanelSwWixExtension>$(PanelSwWixExtensionDir)\PanelSwWixExtension.dll</PanelSwWixExtension>
+    <PanelSwWixHarvestExtension>$(PanelSwWixExtensionDir)\PanelSwWixHarvestExtension.dll</PanelSwWixHarvestExtension>
     <DefineConstants>PanelSwWixExtensionDir=$(PanelSwWixExtensionDir);PanelSwWixExtension=$(PanelSwWixExtension);$(DefineConstants)</DefineConstants>
   </PropertyGroup>
 </Project>
