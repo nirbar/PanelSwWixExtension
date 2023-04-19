@@ -7,6 +7,11 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
 
 ## PanelSwWixExtension WiX Elements
 
+- Bundle elements:
+  - *ContainerTemplate*: A container template to which bundle payloads can be assigned
+- Heat extension command line arguments:
+  - *-inc*: Semicolon seperated list of filename to include. Wildcards are accepted. If specified, any file not matching the pattern will be excluded
+  - *-exc*: Semicolon seperated list of filename to exclude. Wildcards are accepted. If specified, any file matching the pattern will be excluded
 - Immediate Actions:
   - *Md5Hash*: Computes MD5 hash.
   - *WmiSearch*: Execute a WMI query.

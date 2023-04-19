@@ -13,6 +13,7 @@ namespace PanelSw.Wix.Extensions
             typeof(PanelSwWixCompiler),
             typeof(PanelSwWixExtData),
             typeof(PanelSwBurnBackendBinder),
+            typeof(PanelSwWixHarvestExtension),
         };
 
 #if DEBUG

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -16,15 +16,19 @@
 
   <ItemGroup>
     <ProjectReference Include="..\wixlib\PanelSwWixLib.wixproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
+    <Reference Include="heat.exe">
+      <HintPath>$(HeatExe)</HintPath>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="$(BuildFolder)bin\Release\PanelSwWixLib\PanelSwWixLib.wixlib" LogicalName="PanelSwWixLib.wixlib"/>
+    <EmbeddedResource Include="$(BuildFolder)bin\Release\PanelSwWixLib\PanelSwWixLib.wixlib" LogicalName="PanelSwWixLib.wixlib" />
   </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="WixToolset.Extensibility" Version="4.0.0" />
     <PackageReference Include="MSBuildTasks" Version="1.5.0.235" />
     <PackageReference Include="TidyBuild" Version="1.5.1" />
+    <PackageReference Include="WixToolset.Heat" Version="4.0.0" />
   </ItemGroup>
 
 </Project>
