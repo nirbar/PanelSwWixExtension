@@ -10,8 +10,7 @@
     <Compile Include="StringUT.wxs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="MSBuildTasks" Version="1.5.0.235" />
-    <PackageReference Include="TidyBuild" Version="1.5.1" />
+    <PackageReference Include="TidyBuild" Version="1.5.2" />
     <WixExtension Include="PanelSwWixExtension">
       <HintPath>$(BuildFolder)\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</HintPath>
       <Name>PanelSwWixExtension</Name>
