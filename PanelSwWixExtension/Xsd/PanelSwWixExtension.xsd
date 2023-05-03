@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <xs:schema xmlns:html="http://www.w3.org/1999/xhtml"
-            xmlns:wix="http://schemas.microsoft.com/wix/2006/wi"
+            xmlns:wix="http://wixtoolset.org/schemas/v4/wxs"
              xmlns:xs="http://www.w3.org/2001/XMLSchema"
             xmlns:xse="http://schemas.microsoft.com/wix/2005/XmlSchemaExtension"
       targetNamespace="http://schemas.panel-sw.co.il/wix/WixExtension"
@@ -12,12 +12,12 @@
       This extension significantly simplifies various system tasks that aren't natively supported by Windows installer.
     </xs:documentation>
   </xs:annotation>
-  <xs:import namespace="http://schemas.microsoft.com/wix/2006/wi" />
+  <xs:import namespace="http://wixtoolset.org/schemas/v4/wxs" />
 
   <xs:attribute name="CustomActionData" type="xs:string">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="CustomAction" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="CustomAction" />
       </xs:appinfo>
       <xs:documentation><![CDATA[Add a SetProperty custom action sequenced before the custom action that sets CustomActionData for it. Note that CustomActionData is only relevant for deferred, rollback, and commit actions. This field is formatted.]]></xs:documentation>
     </xs:annotation>
@@ -26,7 +26,7 @@
   <xs:attribute name="ActionStartText" type="xs:string">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="CustomAction" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="CustomAction" />
       </xs:appinfo>
       <xs:documentation><![CDATA[Define an ActionStart text for the custom action. If ActionData template is also required, use wix:ProgressText instead. This field is formatted.]]></xs:documentation>
     </xs:annotation>
@@ -35,9 +35,9 @@
   <xs:element name="Payload">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Package" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Package" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Module" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Fragment" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Defines a payload to be extracted temporarily during MSI execution. The payload is extracted to "PayloadFolder" after InstallInitialize, and deleted on rollback or commit]]>
@@ -64,7 +64,7 @@
   <xs:element name="ContainerTemplate">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Bundle" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Bundle" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[A container template to which bundle payloads can be assigned]]>
@@ -101,7 +101,7 @@
   <xs:element name="CustomPatchRef">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="PatchFamily" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="PatchFamily" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Adds a reference to a custom table and key]]>
@@ -128,7 +128,7 @@
   <xs:element name="Md5Hash">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Property" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Computes a MD5 hash and stores it in the property]]>
@@ -150,7 +150,7 @@
   <xs:element name="PathSearch">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Property" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Search for a file on PATH environment variable. If the file is found, the full path is placed in the target property. If the file is not found on path then the property is left unchanged]]>
@@ -172,7 +172,7 @@
   <xs:element name="ToLowerCase">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Property" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Convert property value to lowercase.]]>
@@ -183,7 +183,7 @@
   <xs:element name="VersionCompare">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Property" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Compare versions. The target property is set to a positive value if Version1 is greater than Version2; Negative if Version1 is smaller than Version2; 0 if both versions are the same. 
@@ -211,7 +211,7 @@ The property is not set if Version1 or Version2 cannot be parsed to a version nu
   <xs:element name="AccountSidSearch">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Property" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Lookup an account security identifier]]>
@@ -243,7 +243,7 @@ The property is not set if Version1 or Version2 cannot be parsed to a version nu
   <xs:element name="JsonJpathSearch">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Property" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Searches values in JSON-formatted file]]>
@@ -267,7 +267,7 @@ The property is not set if Version1 or Version2 cannot be parsed to a version nu
   <xs:element name="SplitFile">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="File" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="File" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Split a file to parts during build, and reconstruct it during install. Used to workaround MSI limitation of 2GB file size.
@@ -287,8 +287,8 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="JsonJPath">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="File" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="File" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Component" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Set values in JSON-formatted file]]>
@@ -327,8 +327,8 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="DiskSpace">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Directory" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="DirectoryRef" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Directory" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="DirectoryRef" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Calculate disk free space for a directory. The free space is set to property '*DirectoryId*_DISK_FREE_SPACE' in bytes, and to property '*DirectoryId*_DISK_FREE_SPACE_GB' in gigabytes.
@@ -343,7 +343,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="CertificateHashSearch">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Property" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Find a certificate hash in local machine stores. Either CertName or both Issuer and SerialNumber should be specified]]>
@@ -377,7 +377,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="Evaluate">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Property" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Evaluates mathematical expressions using ExprTk library.]]>
@@ -401,9 +401,9 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="SetPropertyFromPipe">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Package" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Package" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Module" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Fragment" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Reads property values from a pipe. Property values are send to a pipe in a Protobuf message. Proto file is .\ProtoCaLib\setPropertyFromPipeDetails.proto, included in the Nuget package.]]>
@@ -427,7 +427,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="ForceVersion">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="File" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="File" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Sets a specified version on file. The version is set on runtime, rather than in MSI directly.]]>
@@ -445,7 +445,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="CreateSelfSignCertificate">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Component" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Create a self-signed certificate when parent component is installed]]>
@@ -489,7 +489,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="TopShelf">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="File" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="File" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Install a TopShelf service when the parent component is installed and uninstalls it when the parent component is removed]]>
@@ -548,7 +548,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="BackupAndRestore">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Component" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Backup file or folder as an immediate custom action and then restore it on specified schedule]]>
@@ -585,7 +585,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="SqlSearch">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Property" />
       </xs:appinfo>
       <xs:documentation><![CDATA[Execute scalar SQL query]]></xs:documentation>
     </xs:annotation>
@@ -660,7 +660,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="WmiSearch">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Property" />
       </xs:appinfo>
       <xs:documentation><![CDATA[Execute WQL query]]></xs:documentation>
     </xs:annotation>
@@ -700,7 +700,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="InstallUtil">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="File" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="File" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Install a .NET installer class when the parent component is installed and uninstalls it when the parent component is removed]]>
@@ -740,7 +740,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="ServiceConfig">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Component" />
       </xs:appinfo>
       <xs:documentation><![CDATA[Configures some service parameters. You can use ServiceConfig to test whether the service is disabled or marked for deletion. In this case, only specify ServiceName and set ErrorHandling to 'ignore'. If a service is disabled or marked for deletion then a reboot will be required.]]></xs:documentation>
     </xs:annotation>
@@ -867,7 +867,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="WebsiteConfig">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Component" />
       </xs:appinfo>
       <xs:documentation><![CDATA[Configure an existing website. Note that it may be useful to schedule this action after WiX iis extension's ConfigureIIs action.]]></xs:documentation>
     </xs:annotation>
@@ -912,9 +912,9 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="ZipFile">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Package" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Package" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Module" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Fragment" />
       </xs:appinfo>
       <xs:documentation><![CDATA[Creates a ZIP archive from selected files.]]></xs:documentation>
     </xs:annotation>
@@ -954,9 +954,9 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="Unzip">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Package" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Package" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Module" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Fragment" />
       </xs:appinfo>
       <xs:documentation><![CDATA[Extract a ZIP archive to selected folder. If the archive was created by PanelSW:ZipFile, preserve file creation, access, and modification times.]]></xs:documentation>
     </xs:annotation>
@@ -1027,7 +1027,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="Dism">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Component" />
       </xs:appinfo>
       <xs:documentation><![CDATA[Enable Windows Feature using DISM API. Features will be installed when the parent component is being installed or repaired.]]></xs:documentation>
     </xs:annotation>
@@ -1067,7 +1067,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="ExecOn">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Component" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Execute a custom command on component action. Command execution results are handled firstly by ConsoleOutput directives, then by exit code and ExitCode directives, and finally by ErrorHandling attribute]]>
@@ -1299,7 +1299,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="TaskScheduler">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Component" />
       </xs:appinfo>
       <xs:documentation><![CDATA[Add a task to Windows Task Scheduler. Task definition XML should be in inner text or as file path in XmlFile attribute]]></xs:documentation>
     </xs:annotation>
@@ -1334,9 +1334,9 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="DeletePath">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Package" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Package" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Module" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Fragment" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Delete folder or file specified by a path. DeletePath entries are processed in order of source line number.]]>
@@ -1373,10 +1373,10 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="FileRegex">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="File" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Package" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="File" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Package" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Module" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Fragment" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Execute a Regular Expression to perform find & replace operations within files. This element can be nested under File element, or specify a FilePath explictly]]>
@@ -1428,7 +1428,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="RegularExpression">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Property" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Execute a Regular Expression to replace or find matches in property values.]]>
@@ -1485,7 +1485,7 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="MsiSqlQuery">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Property" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Execute a MSI-SQL query on the MSI database.]]>
@@ -1512,10 +1512,10 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
   <xs:element name="ShellExecute">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Package" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Patch" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Package" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Fragment" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Module" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Patch" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[
@@ -1584,10 +1584,10 @@ Call ShellExecuteEx with parameters
   <xs:element name="Telemetry">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Package" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Patch" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Package" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Fragment" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Module" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Patch" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Send telemetry data to a given URL]]>
@@ -1663,9 +1663,9 @@ Call ShellExecuteEx with parameters
   <xs:element name="CustomUninstallKey">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Package" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Package" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Module" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Fragment" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Overwrite or create registry values in Software\Microsoft\Windows\CurrentVersion\Uninstall\[ProductCode].]]>
@@ -1707,7 +1707,7 @@ Call ShellExecuteEx with parameters
   <xs:element name="ReadIniValues">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Property" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Read values from a .INI file]]>
@@ -1749,7 +1749,7 @@ Call ShellExecuteEx with parameters
   <xs:element name="XmlSearch">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Property" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Read values from a XML file]]>
@@ -1829,9 +1829,9 @@ Call ShellExecuteEx with parameters
   <xs:element name="RemoveRegistryValue">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Package" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Package" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Module" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Fragment" />
       </xs:appinfo>
       <xs:documentation>
         <![CDATA[Remove registry values.]]>
@@ -1880,8 +1880,8 @@ Call ShellExecuteEx with parameters
   <xs:element name="XslTransform">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="File" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="File" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Component" />
       </xs:appinfo>
       <xs:documentation><![CDATA[Apply an XSL transform on an installed XML file]]></xs:documentation>
     </xs:annotation>
@@ -1915,9 +1915,9 @@ Call ShellExecuteEx with parameters
   <xs:element name="RestartLocalResources">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Package" />
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Fragment" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Package" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Module" />
       </xs:appinfo>
       <xs:documentation><![CDATA[Register processes with the Restart Manager if they reside in the specified folder]]></xs:documentation>
     </xs:annotation>
@@ -1938,7 +1938,7 @@ Call ShellExecuteEx with parameters
   <xs:element name="SqlScript">
     <xs:annotation>
       <xs:appinfo>
-        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Component" />
       </xs:appinfo>
       <xs:documentation><![CDATA[Execute a SQL script on component action.]]></xs:documentation>
     </xs:annotation>
