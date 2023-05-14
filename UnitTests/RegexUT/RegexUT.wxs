@@ -61,7 +61,7 @@
     <Property Id="BSMALL" Value="bSmall" Hidden="yes" />
     <Property Id="NEWMAPPINGFILE" Value="NewMappingFile=" />
 
-    <StandardDirectory Id="ProgramFilesFolder">
+    <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
     </StandardDirectory>
   </Package>

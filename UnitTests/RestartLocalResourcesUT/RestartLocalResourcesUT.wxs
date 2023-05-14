@@ -18,7 +18,7 @@
 
     <PanelSW:RestartLocalResources Path="C:\Users\Administrator\Desktop\Notepad++\" />
 
-    <StandardDirectory Id="ProgramFilesFolder">
+    <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="RestartLocalResourcesUT" />
     </StandardDirectory>
   </Package>

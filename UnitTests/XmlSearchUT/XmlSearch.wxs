@@ -5,8 +5,15 @@
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
+
+    <CustomActionRef Id="Wix4ExitEarlyWithSuccess_A64"/>
+    <InstallExecuteSequence>
+      <Custom Action="Wix4ExitEarlyWithSuccess_A64" After="LaunchConditions" Overridable="no" />
+    </InstallExecuteSequence>
   </Package>
 
+  
+  
   <Fragment>
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
     <Property Id="SOURCE_FILE" Value="$(sys.SOURCEFILEPATH)"/>
@@ -39,7 +46,7 @@
     </Property>
     <Launch Condition="Not XPATHTEST3" Message="Expected XPATHTEST3 to be empty" />
 
-    <StandardDirectory Id="ProgramFilesFolder">
+    <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
     </StandardDirectory>
   </Fragment>

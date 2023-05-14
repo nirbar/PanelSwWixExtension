@@ -28,7 +28,7 @@
       <Custom Action="TerminateSuccessfully_Immediate" After="LaunchConditions"></Custom>
     </InstallExecuteSequence>
 
-    <StandardDirectory Id="ProgramFilesFolder">
+    <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
     </StandardDirectory>
   </Fragment>

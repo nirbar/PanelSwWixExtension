@@ -35,7 +35,7 @@
     </InstallExecuteSequence>
     <CustomAction Id="ReadIniValuesTest" Error="10000" Execute="immediate" Return="check"></CustomAction>
 
-    <StandardDirectory Id="ProgramFilesFolder">
+    <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="ReadIniValuesUT" />
     </StandardDirectory>
   </Package>

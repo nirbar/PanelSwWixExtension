@@ -73,7 +73,7 @@
     </ComponentGroup>
     <WixVariable Id="HERE" Value="$(sys.SOURCEFILEDIR)" />
 
-    <StandardDirectory Id="ProgramFilesFolder">
+    <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
     </StandardDirectory>
   </Package>

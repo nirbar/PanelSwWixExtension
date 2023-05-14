@@ -14,7 +14,7 @@
     </Property>
     <Launch Condition="Installed OR CERT_HASH" Message="Bad Cert" />
   
-      <StandardDirectory Id="ProgramFilesFolder">
+      <StandardDirectory Id="ProgramFiles6432Folder">
         <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
       </StandardDirectory>
     </Package>

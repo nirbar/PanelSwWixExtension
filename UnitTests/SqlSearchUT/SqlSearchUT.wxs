@@ -33,7 +33,7 @@
     </Property>
     <Launch Condition="NOT SQL_TABLE_EXISTS OR (SQL_TABLE_EXISTS = 0) OR LARGE_TEXT" Message="Expected table '[SQL_TABLE]' to not exist or to have data in it if it does exist" />
 
-    <StandardDirectory Id="ProgramFilesFolder">
+    <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="SqlSearchUT" />
     </StandardDirectory>
   </Package>

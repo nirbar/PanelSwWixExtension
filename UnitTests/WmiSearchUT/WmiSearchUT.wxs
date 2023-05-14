@@ -28,7 +28,7 @@
       <Custom Action="TerminateSuccessfully_Immediate" After="LaunchConditions" />
     </InstallUISequence>
 
-    <StandardDirectory Id="ProgramFilesFolder">
+    <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="WmiSearchUT" />
     </StandardDirectory>
   </Package>

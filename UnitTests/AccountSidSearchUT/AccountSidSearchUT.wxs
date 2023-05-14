@@ -27,7 +27,7 @@
     </InstallExecuteSequence>
 
 
-    <StandardDirectory Id="ProgramFilesFolder">
+    <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
     </StandardDirectory>
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">

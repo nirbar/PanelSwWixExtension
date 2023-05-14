@@ -21,7 +21,7 @@
       </Component>
     </ComponentGroup>
 
-    <StandardDirectory Id="ProgramFilesFolder">
+    <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="UnitTestSetup">
         <Directory Id="EmptyDir" Name="Maybe empty">
           <Directory Id="DeleteMeDir" Name="DeleteMe" />

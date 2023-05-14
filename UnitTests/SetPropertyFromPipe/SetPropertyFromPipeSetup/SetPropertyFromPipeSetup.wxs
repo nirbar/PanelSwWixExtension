@@ -12,7 +12,7 @@
   <Fragment>
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
 
-    <StandardDirectory Id="ProgramFilesFolder">
+    <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
     </StandardDirectory>
   </Fragment>

@@ -20,7 +20,7 @@
     <PanelSW:FileRegex FilePath="[#BackupAndRestoreUT.wxs]" Regex="RegularExpression" Replacement="_RegularExpression" IgnoreCase="no" Condition="Not Installed"/>
    
   
-      <StandardDirectory Id="ProgramFilesFolder">
+      <StandardDirectory Id="ProgramFiles6432Folder">
         <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
       </StandardDirectory>
     </Package>

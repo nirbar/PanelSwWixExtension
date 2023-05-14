@@ -11,7 +11,7 @@
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
     <PanelSW:Telemetry Page="/search?q=panel-sw" Url="www.google.co.il" Method="GET" OnStart="yes" />
 
-    <StandardDirectory Id="ProgramFilesFolder">
+    <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
     </StandardDirectory>
   </Fragment>

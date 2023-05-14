@@ -12,7 +12,7 @@
     <PanelSW:RemoveRegistryValue Root="HKLM" Key="Software\PanelSW\Nir" Name="Bar" Area="x86" Condition="COND1"/>
     <PanelSW:RemoveRegistryValue Root="HKLM" Key="Software\PanelSW\Nir" Name="Bar" Area="x64"/>
 
-    <StandardDirectory Id="ProgramFilesFolder">
+    <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
     </StandardDirectory>
   </Fragment>

@@ -25,7 +25,7 @@
     <CustomActionRef Id="CleanPendingFileRenameOperations" />
     <Property Id="MSIFASTINSTALL" Value="7" />
 
-    <StandardDirectory Id="ProgramFilesFolder">
+    <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
     </StandardDirectory>
   </Package>

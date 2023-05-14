@@ -34,7 +34,7 @@
       <Custom Action="TerminateSuccessfully_Immediate" After="BadPiResult" />
     </InstallExecuteSequence>
 
-    <StandardDirectory Id="ProgramFilesFolder">
+    <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
     </StandardDirectory>
   </Package>

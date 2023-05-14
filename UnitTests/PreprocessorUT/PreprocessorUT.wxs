@@ -111,7 +111,7 @@
     <?error Expected folder '$(sys.SOURCEFILEDIR)empty)' to be empty?>
     <?endif?>
 
-    <StandardDirectory Id="ProgramFilesFolder">
+    <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
     </StandardDirectory>
   </Package>
