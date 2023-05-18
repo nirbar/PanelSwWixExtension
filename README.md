@@ -5,6 +5,8 @@ WiX v4 [![NuGet version (PanelSwWixExtension4)](https://img.shields.io/nuget/v/P
 PanelSwWixExtension from the creator of [JetBA](https://github.com/nirbar/JetBA-Binaries) is the most comprehensive open source [WiX](http://wixtoolset.org/) extension. 
 I would like to thank JetBrains for their [support](https://www.jetbrains.com/community/opensource/) of this project
 
+[Contact me](https://www.panel-sw.com/) should you require any additional features, custom WiX fixes and enhancements, or for license to the commercial JetBA WiX WPF UI framework
+
 ## PanelSwWixExtension WiX Elements
 
 - Immediate Actions:
