@@ -61,12 +61,12 @@ namespace PanelSw.Wix.Extensions
                 case nameof(PSW_ExecOnComponent_Environment):
                     DecompileExecOnEnvironment(table);
                     break;
-
                 case nameof(PSW_FileRegex):
                     DecompileFileRegex(table);
                     break;
-
                 case nameof(PSW_ForceVersion):
+                    DecompileForceVersion(table);
+                    break;
                 case nameof(PSW_InstallUtil):
                 case nameof(PSW_InstallUtil_Arg):
                 case nameof(PSW_JsonJPath):
@@ -242,6 +242,28 @@ namespace PanelSw.Wix.Extensions
                     SetAttributeYesNo(xConsoleOutput, "BehaviorOnMatch", (cns.Flags == 1));
                     xExecOn.Add(xConsoleOutput);
                 }
+            }
+        }
+
+        private void DecompileForceVersion(Table table)
+        {
+            foreach (Row row in table.Rows)
+            {
+                PSW_ForceVersion symbol = new PSW_ForceVersion();
+                symbol.LoadFromRow(row, out string junk);
+
+                XElement xForceVersion = new XElement(PanelSwWixExtension.Namespace + "ForceVersion");
+                if (symbol.Version != "65535.65535.65535.65535")
+                {
+                    xForceVersion.SetAttributeValue(nameof(symbol.Version), symbol.Version);
+                }
+
+                if (!DecompilerHelper.TryGetIndexedElement("File", symbol.File, out XElement xFile))
+                {
+                    Messaging.Write(ErrorMessages.FileIdentifierNotFound(null, symbol.File));
+                    continue;
+                }
+                xFile.Add(xForceVersion);
             }
         }
 
