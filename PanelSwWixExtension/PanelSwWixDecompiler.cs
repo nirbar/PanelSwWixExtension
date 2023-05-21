@@ -62,8 +62,44 @@ namespace PanelSw.Wix.Extensions
                     DecompileExecOnEnvironment(table);
                     break;
 
+                case nameof(PSW_FileRegex):
+                    DecompileFileRegex(table);
+                    break;
+
+                case nameof(PSW_ForceVersion):
+                case nameof(PSW_InstallUtil):
+                case nameof(PSW_InstallUtil_Arg):
+                case nameof(PSW_JsonJPath):
+                case nameof(PSW_JsonJpathSearch):
+                case nameof(PSW_Md5Hash):
+                case nameof(PSW_MsiSqlQuery):
+                case nameof(PSW_PathSearch):
+                case nameof(PSW_Payload):
+                case nameof(PSW_ReadIniValues):
+                case nameof(PSW_RegularExpression):
+                case nameof(PSW_RemoveRegistryValue):
+                case nameof(PSW_RestartLocalResources):
+                case nameof(PSW_SelfSignCertificate):
+                case nameof(PSW_ServiceConfig):
+                case nameof(PSW_ServiceConfig_Dependency):
+                case nameof(PSW_SetPropertyFromPipe):
+                case nameof(PSW_ShellExecute):
+                case nameof(PSW_SqlScript):
+                case nameof(PSW_SqlScript_Replacements):
+                case nameof(PSW_SqlSearch):
+                case nameof(PSW_TaskScheduler):
+                case nameof(PSW_Telemetry):
+                case nameof(PSW_ToLowerCase):
+                case nameof(PSW_TopShelf):
+                case nameof(PSW_Unzip):
+                case nameof(PSW_VersionCompare):
+                case nameof(PSW_WebsiteConfig):
+                case nameof(PSW_WmiSearch):
+                case nameof(PSW_XmlSearch):
+                case nameof(PSW_XslTransform):
+                case nameof(PSW_XslTransform_Replacements):
+                case nameof(PSW_ZipFile):
                 default:
-                    throw new NotImplementedException(); //TODO
                     return false;
             }
 
@@ -205,6 +241,63 @@ namespace PanelSw.Wix.Extensions
                     SetAttributeIfNotNull(xConsoleOutput, nameof(PSW_ExecOn_ConsoleOutput.PromptText), cns.PromptText);
                     SetAttributeYesNo(xConsoleOutput, "BehaviorOnMatch", (cns.Flags == 1));
                     xExecOn.Add(xConsoleOutput);
+                }
+            }
+        }
+
+        private void DecompileFileRegex(Table table)
+        {
+            List<PSW_FileRegex> allFileRegex = new List<PSW_FileRegex>();
+            foreach (var row in table.Rows)
+            {
+                PSW_FileRegex symbol = new PSW_FileRegex();
+                symbol.LoadFromRow(row, out string junk);
+                allFileRegex.Add(symbol);
+            }
+            allFileRegex.Sort();
+
+            foreach (PSW_FileRegex symbol in allFileRegex)
+            {
+                XElement xFileRegex = new XElement(PanelSwWixExtension.Namespace + "FileRegex");
+                xFileRegex.SetAttributeValue(nameof(PSW_FileRegex.Regex), symbol.Regex);
+                SetAttributeIfNotNull(xFileRegex, nameof(PSW_FileRegex.Replacement), symbol.Replacement);
+                SetAttributeIfNotNull(xFileRegex, nameof(PSW_FileRegex.FilePath), symbol.FilePath);
+                SetAttributeIfNotNull(xFileRegex, nameof(PSW_FileRegex.Condition), symbol.Condition);
+                if (symbol.Order < 1000000000)
+                {
+                    xFileRegex.SetAttributeValue(nameof(PSW_FileRegex.Order), symbol.Order);
+                }
+                PanelSwWixCompiler.FileEncoding fileEncoding = (PanelSwWixCompiler.FileEncoding)symbol.Encoding;
+                if (fileEncoding != PanelSwWixCompiler.FileEncoding.AutoDetect)
+                {
+                    xFileRegex.SetAttributeValue(nameof(PSW_FileRegex.Encoding), fileEncoding);
+                }
+                if (symbol.IgnoreCase != 0)
+                {
+                    xFileRegex.SetAttributeValue(nameof(PSW_FileRegex.IgnoreCase), "yes");
+                }
+
+                if (!string.IsNullOrEmpty(symbol.File_))
+                {
+                    if (!DecompilerHelper.TryGetIndexedElement("File", symbol.File_, out XElement xFile))
+                    {
+                        Messaging.Write(ErrorMessages.FileIdentifierNotFound(null, symbol.File_));
+                        continue;
+                    }
+                    xFile.Add(xFileRegex);
+                }
+                else if (!string.IsNullOrEmpty(symbol.Component_))
+                {
+                    if (!DecompilerHelper.TryGetIndexedElement("Component", symbol.Component_, out XElement xComponent))
+                    {
+                        Messaging.Write(ErrorMessages.IdentifierNotFound("Component", symbol.Component_));
+                        continue;
+                    }
+                    xComponent.Add(xFileRegex);
+                }
+                else
+                {
+                    DecompilerHelper.AddElementToRoot(xFileRegex);
                 }
             }
         }

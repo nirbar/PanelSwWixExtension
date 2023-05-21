@@ -3848,7 +3848,11 @@ namespace PanelSw.Wix.Extensions
                             replacement = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib, EmptyRule.CanBeEmpty);
                             break;
                         case "IgnoreCase":
-                            ignoreCase = true;
+                            YesNoType aye = ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                            if (aye == YesNoType.Yes)
+                            {
+                                ignoreCase = true;
+                            }
                             break;
                         case "Encoding":
                             TryParseEnumAttribute(sourceLineNumbers, element, attrib, out encoding);

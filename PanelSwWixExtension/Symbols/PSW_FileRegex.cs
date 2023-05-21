@@ -1,10 +1,11 @@
+using System;
 using System.Collections.Generic;
 using WixToolset.Data;
 using WixToolset.Data.WindowsInstaller;
 
 namespace PanelSw.Wix.Extensions.Symbols
 {
-    internal class PSW_FileRegex : BaseSymbol
+    internal class PSW_FileRegex : BaseSymbol, IComparable<PSW_FileRegex>
     {
         public static IntermediateSymbolDefinition SymbolDefinition
         {
@@ -91,6 +92,20 @@ namespace PanelSw.Wix.Extensions.Symbols
         {
             get => Fields[8].AsNumber();
             set => this.Set(8, value);
+        }
+
+        int IComparable<PSW_FileRegex>.CompareTo(PSW_FileRegex other)
+        {
+            if (string.IsNullOrEmpty(File_))
+            {
+                return string.IsNullOrEmpty(other.File_) ? Order.CompareTo(other.Order) : 1;
+            }
+            if (string.IsNullOrEmpty(other.File_))
+            {
+                return -1;
+            }
+            int fileComp = File_.CompareTo(other.File_);
+            return (fileComp == 0) ? Order.CompareTo(other.Order) : fileComp;
         }
     }
 }
