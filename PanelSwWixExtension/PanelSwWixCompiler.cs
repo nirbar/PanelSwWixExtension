@@ -1096,7 +1096,7 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        public enum JsonFormatting
+        internal enum JsonFormatting
         {
             Raw,
             String,
@@ -1309,7 +1309,7 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        public enum BackupAndRestore_deferred_Schedule
+        internal enum BackupAndRestore_deferred_Schedule
         {
             BackupAndRestore_deferred_Before_InstallFiles,
             BackupAndRestore_deferred_After_DuplicateFiles,
@@ -1394,7 +1394,7 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        enum InstallUtil_Bitness
+        internal enum InstallUtil_Bitness
         {
             asComponent = 0,
             x86 = 1,
@@ -1511,7 +1511,7 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        public enum TopShelf_Account
+        internal enum TopShelf_Account
         {
             custom = 0,
             localSystem = 1,
@@ -1520,7 +1520,7 @@ namespace PanelSw.Wix.Extensions
             none = 4,
         }
 
-        public enum TopShelf_Start
+        internal enum TopShelf_Start
         {
             disabled = 0,
             auto = 1,
@@ -1529,7 +1529,7 @@ namespace PanelSw.Wix.Extensions
             none = 4,
         }
 
-        public enum ErrorHandling
+        internal enum ErrorHandling
         {
             fail = 0,
             ignore = 1,
@@ -1626,7 +1626,7 @@ namespace PanelSw.Wix.Extensions
 
         // Definition must match ExeOnComponent.cpp
         [Flags]
-        enum ExecOnComponentFlags
+        internal enum ExecOnComponentFlags
         {
             None = 0,
 
@@ -1658,7 +1658,7 @@ namespace PanelSw.Wix.Extensions
         }
 
         [Flags]
-        public enum SqlExecOn
+        internal enum SqlExecOn
         {
             None = 0,
             Install = 1,
@@ -1902,7 +1902,7 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        enum InstallUninstallType
+        internal enum InstallUninstallType
         {
             install,
             uninstall,
@@ -2034,7 +2034,7 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        public enum ExitCode
+        internal enum ExitCode
         {
             success = 0,
             scheduleReboot = 3010,
@@ -2376,7 +2376,7 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        enum ServiceStart : int
+        internal enum ServiceStart : int
         {
             boot = 0,
             unchanged = -1,
@@ -2686,7 +2686,7 @@ namespace PanelSw.Wix.Extensions
         }
 
         [Flags]
-        public enum CustomUninstallKeyAttributes
+        internal enum CustomUninstallKeyAttributes
         {
             write = 1,
             delete = 2
@@ -2765,7 +2765,7 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        public enum ReadIniValuesAttributes
+        internal enum ReadIniValuesAttributes
         {
             None = 0,
             IgnoreErrors = 1
@@ -2839,7 +2839,7 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        public enum RegistryArea
+        internal enum RegistryArea
         {
             x86,
             x64,
@@ -3180,7 +3180,7 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        public enum XmlSearchMatch
+        internal enum XmlSearchMatch
         {
             first,
             all,
@@ -3426,7 +3426,7 @@ namespace PanelSw.Wix.Extensions
         }
 
         [Flags]
-        public enum ExecutePhase
+        internal enum ExecutePhase
         {
             None = 0,
             OnExecute = 1,
@@ -3662,20 +3662,20 @@ namespace PanelSw.Wix.Extensions
         }
 
         [Flags]
-        enum RegexSearchFlags
+        internal enum RegexSearchFlags
         {
             Search = 0
             , Replace = 1
         };
 
         [Flags]
-        enum RegexResultFlags
+        internal enum RegexResultFlags
         {
             MustMatch = 1
         };
 
         [Flags]
-        enum RegexMatchFlags
+        internal enum RegexMatchFlags
         {
             IgnoreCare = 1
             , Extended = 2
@@ -3810,7 +3810,7 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        public enum FileEncoding
+        internal enum FileEncoding
         {
             AutoDetect,
             MultiByte,
@@ -3896,7 +3896,7 @@ namespace PanelSw.Wix.Extensions
         }
 
         [Flags]
-        public enum DeletePathFlags
+        internal enum DeletePathFlags
         {
             IgnoreMissing = 1,
             IgnoreErrors = 2 * IgnoreMissing,
@@ -4026,7 +4026,7 @@ namespace PanelSw.Wix.Extensions
         }
 
         [Flags]
-        enum UnzipFlags
+        internal enum UnzipFlags
         {
             // Overwrite mode
             Never = 0,

@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Xml.Linq;
 using System.Xml.XPath;
 using WixToolset.Data;
@@ -52,9 +53,14 @@ namespace PanelSw.Wix.Extensions
                     DecompileExecOn(table);
                     break;
                 case nameof(PSW_ExecOn_ConsoleOutput):
+                    DecompileExecOnConsoleOutput(table);
+                    break;
                 case nameof(PSW_ExecOnComponent_ExitCode):
+                    DecompileExecOnExitCode(table);
+                    break;
                 case nameof(PSW_ExecOnComponent_Environment):
-                    throw new NotImplementedException(); //TODO
+                    DecompileExecOnEnvironment(table);
+                    break;
 
                 default:
                     throw new NotImplementedException(); //TODO
@@ -69,26 +75,101 @@ namespace PanelSw.Wix.Extensions
             foreach (var row in table.Rows)
             {
                 PSW_ExecOnComponent symbol = new PSW_ExecOnComponent();
-                symbol.LoadFromRow(row, out string junk);
+                symbol.LoadFromRow(row, out string id);
 
                 XElement xExecOn = new XElement(PanelSwWixExtension.Namespace + "ExecOn");
-                _execOn[symbol.Id.Id] = symbol;
-                xDism.SetAttributeValue(nameof(PSW_Dism.EnableFeatures), symbol.EnableFeatures);
-                xDism.SetAttributeValue(nameof(PSW_Dism.Cost), symbol.Cost);
-                SetAttributeEnum<PanelSwWixCompiler.ErrorHandling>(xDism, nameof(PSW_Dism.ErrorHandling), symbol.ErrorHandling);
-                SetAttributeIfNotNull(xDism, nameof(PSW_Dism.ExcludeFeatures), symbol.ExcludeFeatures);
-                SetAttributeIfNotNull(xDism, nameof(PSW_Dism.PackagePath), symbol.PackagePath);
-
                 if (!DecompilerHelper.TryGetIndexedElement("Component", symbol.Component_, out XElement xComponent))
                 {
                     Messaging.Write(WarningMessages.ExpectedForeignRow(row.SourceLineNumbers, table.Name, row.GetPrimaryKey(), "Component_", symbol.Component_, "Component"));
                     return;
                 }
                 xComponent.Add(xExecOn);
+
+                _execOn[id] = xExecOn;
+                xExecOn.SetAttributeValue(nameof(PSW_ExecOnComponent.Command), symbol.Command);
+
+                // Flags
+                PanelSwWixCompiler.ExecOnComponentFlags flags = (PanelSwWixCompiler.ExecOnComponentFlags)symbol.Flags;
+                if (flags.HasFlag(PanelSwWixCompiler.ExecOnComponentFlags.ASync))
+                {
+                    xExecOn.SetAttributeValue("Wait", "no");
+                }
+                Dictionary<PanelSwWixCompiler.ExecOnComponentFlags, string> yesFlags = new Dictionary<PanelSwWixCompiler.ExecOnComponentFlags, string>();
+                yesFlags[PanelSwWixCompiler.ExecOnComponentFlags.OnInstall] = nameof(PanelSwWixCompiler.ExecOnComponentFlags.OnInstall);
+                yesFlags[PanelSwWixCompiler.ExecOnComponentFlags.OnRemove] = nameof(PanelSwWixCompiler.ExecOnComponentFlags.OnRemove);
+                yesFlags[PanelSwWixCompiler.ExecOnComponentFlags.OnReinstall] = nameof(PanelSwWixCompiler.ExecOnComponentFlags.OnReinstall);
+                yesFlags[PanelSwWixCompiler.ExecOnComponentFlags.OnInstallRollback] = nameof(PanelSwWixCompiler.ExecOnComponentFlags.OnInstallRollback);
+                yesFlags[PanelSwWixCompiler.ExecOnComponentFlags.OnRemoveRollback] = nameof(PanelSwWixCompiler.ExecOnComponentFlags.OnRemoveRollback);
+                yesFlags[PanelSwWixCompiler.ExecOnComponentFlags.OnReinstallRollback] = nameof(PanelSwWixCompiler.ExecOnComponentFlags.OnReinstallRollback);
+                yesFlags[PanelSwWixCompiler.ExecOnComponentFlags.BeforeStopServices] = nameof(PanelSwWixCompiler.ExecOnComponentFlags.BeforeStopServices);
+                yesFlags[PanelSwWixCompiler.ExecOnComponentFlags.AfterStopServices] = nameof(PanelSwWixCompiler.ExecOnComponentFlags.AfterStopServices);
+                yesFlags[PanelSwWixCompiler.ExecOnComponentFlags.BeforeStartServices] = nameof(PanelSwWixCompiler.ExecOnComponentFlags.BeforeStartServices);
+                yesFlags[PanelSwWixCompiler.ExecOnComponentFlags.AfterStartServices] = nameof(PanelSwWixCompiler.ExecOnComponentFlags.AfterStartServices);
+                yesFlags[PanelSwWixCompiler.ExecOnComponentFlags.Impersonate] = nameof(PanelSwWixCompiler.ExecOnComponentFlags.Impersonate);
+                foreach (PanelSwWixCompiler.ExecOnComponentFlags flag in yesFlags.Keys)
+                {
+                    if (flags.HasFlag(flag))
+                    {
+                        xExecOn.SetAttributeValue(yesFlags[flag], "yes");
+                    }
+                }
+
+                // Optional attributes
+                SetAttributeIfNotNull(xExecOn, "BinaryKey", symbol.Binary_);
+                SetAttributeIfNotNull(xExecOn, nameof(PSW_ExecOnComponent.WorkingDirectory), symbol.WorkingDirectory);
+                SetAttributeIfNotNull(xExecOn, "User", symbol.User_);
+                if (symbol.ErrorHandling != (int)PanelSwWixCompiler.ErrorHandling.fail)
+                {
+                    SetAttributeEnum<PanelSwWixCompiler.ErrorHandling>(xExecOn, nameof(symbol.ErrorHandling), symbol.ErrorHandling);
+                }
+
+                // Order
+                if ((symbol.Order >= 0) && (symbol.Order <= 1000000000))
+                {
+                    xExecOn.SetAttributeValue(nameof(PSW_ExecOnComponent.Order), symbol.Order);
+                }
+                else if (symbol.Order > 2000000000) // Assuming no code has over 2B lines, so we're interpreting is as negative order
+                {
+                    xExecOn.SetAttributeValue(nameof(PSW_ExecOnComponent.Order), symbol.Order - int.MaxValue);
+                }
+                else // Dirty part- implicit order which we can't reproduce in decompile
+                {
+                    xExecOn.SetAttributeValue(nameof(PSW_ExecOnComponent.Order), symbol.Order - 500000000);
+                }
             }
         }
 
-        private Dictionary<string, PSW_ExecOnComponent> _execOn = new Dictionary<string, PSW_ExecOnComponent>();
+        private void DecompileExecOnEnvironment(Table table)
+        {
+            foreach (var row in table.Rows)
+            {
+                PSW_ExecOnComponent_Environment symbol = new PSW_ExecOnComponent_Environment();
+                symbol.LoadFromRow(row, out string junk);
+                _execOnEnv.Add(symbol);
+            }
+        }
+
+        private void DecompileExecOnExitCode(Table table)
+        {
+            foreach (var row in table.Rows)
+            {
+                PSW_ExecOnComponent_ExitCode symbol = new PSW_ExecOnComponent_ExitCode();
+                symbol.LoadFromRow(row, out string junk);
+                _execOnExit.Add(symbol);
+            }
+        }
+
+        private void DecompileExecOnConsoleOutput(Table table)
+        {
+            foreach (var row in table.Rows)
+            {
+                PSW_ExecOn_ConsoleOutput symbol = new PSW_ExecOn_ConsoleOutput();
+                symbol.LoadFromRow(row, out string junk);
+                _execOnConsole.Add(symbol);
+            }
+        }
+
+        private Dictionary<string, XElement> _execOn = new Dictionary<string, XElement>();
         private List<PSW_ExecOnComponent_Environment> _execOnEnv = new List<PSW_ExecOnComponent_Environment>();
         private List<PSW_ExecOnComponent_ExitCode> _execOnExit = new List<PSW_ExecOnComponent_ExitCode>();
         private List<PSW_ExecOn_ConsoleOutput> _execOnConsole = new List<PSW_ExecOn_ConsoleOutput>();
@@ -96,14 +177,7 @@ namespace PanelSw.Wix.Extensions
         {
             foreach (string oldId in _execOn.Keys)
             {
-                PSW_ExecOnComponent execOn = _execOn[oldId];
-                DecompilerHelper.TryGetIndexedElement(nameof(PSW_ExecOnComponent), oldId, out XElement xExecOn);
-                if (xExecOn == null)
-                {
-                    Messaging.Write(ErrorMessages.IdentifierNotFound(nameof(PSW_ExecOnComponent), oldId));
-                    return;
-                }
-
+                XElement xExecOn = _execOn[oldId];
                 IEnumerable<PSW_ExecOnComponent_Environment> myEnv = _execOnEnv.FindAll(x => x.ExecOnId_.Equals(oldId));
                 foreach (PSW_ExecOnComponent_Environment env in myEnv)
                 {
@@ -293,6 +367,24 @@ namespace PanelSw.Wix.Extensions
                             propValue = propValue.Replace("FileRegex_commit", "");
                             propValue = propValue.Replace("FileRegex_deferred", "");
                             propValue = propValue.Replace("FileRegex_rollback", "");
+                            propValue = propValue.Replace("ExecOnComponent_AfterStart_deferred", "");
+                            propValue = propValue.Replace("ExecOnComponent_AfterStart_rollback", "");
+                            propValue = propValue.Replace("ExecOnComponent_AfterStop_deferred", "");
+                            propValue = propValue.Replace("ExecOnComponent_AfterStop_rollback", "");
+                            propValue = propValue.Replace("ExecOnComponent_BeforeStart_deferred", "");
+                            propValue = propValue.Replace("ExecOnComponent_BeforeStart_rollback", "");
+                            propValue = propValue.Replace("ExecOnComponent_BeforeStop_deferred", "");
+                            propValue = propValue.Replace("ExecOnComponent_BeforeStop_rollback", "");
+                            propValue = propValue.Replace("ExecOnComponent_Imp_AfterStart_deferred", "");
+                            propValue = propValue.Replace("ExecOnComponent_Imp_AfterStart_rollback", "");
+                            propValue = propValue.Replace("ExecOnComponent_Imp_AfterStop_deferred", "");
+                            propValue = propValue.Replace("ExecOnComponent_Imp_AfterStop_rollback", "");
+                            propValue = propValue.Replace("ExecOnComponent_Imp_BeforeStart_deferred", "");
+                            propValue = propValue.Replace("ExecOnComponent_Imp_BeforeStart_rollback", "");
+                            propValue = propValue.Replace("ExecOnComponent_Imp_BeforeStop_deferred", "");
+                            propValue = propValue.Replace("ExecOnComponent_Imp_BeforeStop_rollback", "");
+                            propValue = propValue.Replace("ExecOnComponentCommit", "");
+                            propValue = propValue.Replace("ExecOnComponentRollback", "");
                             propValue = propValue.Trim(';');
                             propRow[1] = propValue;
                         }
