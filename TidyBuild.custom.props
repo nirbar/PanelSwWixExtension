@@ -23,8 +23,10 @@
     <WindowsKitSharedDir Condition="'$(WindowsKitSharedDir)'=='' And Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\shared\')">C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\shared\</WindowsKitSharedDir>
     <DismApiDir Condition="'$(DismApiDir)'==''">C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\</DismApiDir>
     <NugetDir Condition="'$(NugetDir)'==''">$(MSBuildThisFileDirectory)..\..\Tools\</NugetDir>
+    <DisableArm64 Condition="'$(DisableArm64)' == ''">false</DisableArm64>
+    <DisableNuget Condition="'$(DisableArm64)' == 'true'">true</DisableNuget>
 
-    <DefineConstants Condition="'$(MSBuildProjectExtension)' != '.csproj'">JetVersion=$(FullVersion);JetProductName=$(ProductName);JetManufacturer=$(Manufacturer);$(DefineConstants)</DefineConstants>
+    <DefineConstants Condition="'$(MSBuildProjectExtension)' != '.csproj'">JetVersion=$(FullVersion);JetProductName=$(ProductName);JetManufacturer=$(Manufacturer);DisableArm64=$(DisableArm64);$(DefineConstants)</DefineConstants>
 
     <SuppressPdbOutput>true</SuppressPdbOutput>
     <SignAssembly Condition="Exists('$(AssemblyOriginatorKeyFile)')">true</SignAssembly>

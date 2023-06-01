@@ -11,8 +11,12 @@
   </Fragment>
   <!-- DismX64.dll binary -->
   <Fragment>
+    <?if $(var.CaPlatform) = ARM64?>
+    <Binary Id="Dism.X64.dll" SuppressModularization="yes" SourceFile="!(bindpath.Dism.ARM64)\Dism.dll"></Binary>
+    <?else?>
     <Binary Id="Dism.X64.dll" SuppressModularization="yes" SourceFile="!(bindpath.Dism.x64)\Dism.dll"></Binary>
     <Binary Id="Dism.X86.dll" SuppressModularization="yes" SourceFile="!(bindpath.Dism.Win32)\Dism.dll"></Binary>
+    <?endif?>
   </Fragment>
 
   <!-- ShellExecute -->
@@ -364,20 +368,26 @@
   <Fragment>
     <CustomAction Id="DismSched" SuppressModularization="yes" DllEntry="DismSched" Execute="immediate" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="DismX64" SuppressModularization="yes" DllEntry="Dism" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="Dism.X64.dll" />
+    <?if $(var.CaPlatform) != ARM64?>
     <CustomAction Id="DismX86" SuppressModularization="yes" DllEntry="Dism" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="Dism.X86.dll" />
+    <?endif?>
     <CustomActionRef Id="PSW_CheckRebootRequired" />
 
     <InstallExecuteSequence>
       <Custom Action="DismSched" Before="StopServices" Overridable="yes" Condition="(VersionNT &gt; 601)" />
       <Custom Action="DismX64" After="DismSched" Overridable="yes" Condition="DismX64" />
+      <?if $(var.CaPlatform) != ARM64?>
       <Custom Action="DismX86" After="DismSched" Overridable="yes" Condition="DismX86" />
+      <?endif?>
     </InstallExecuteSequence>
     <UI>
       <Error Id="27003" Message="!(loc.DismPackageFailure)" />
       <Error Id="27004" Message="!(loc.DismFeatureFailure)" />
       <ProgressText Action="DismSched" Message="!(loc.Dism)" />
       <ProgressText Action="DismX64" Template="!(loc.DismTemplate)" Message="!(loc.Dism)" />
+      <?if $(var.CaPlatform) != ARM64?>
       <ProgressText Action="DismX86" Template="!(loc.DismTemplate)" Message="!(loc.Dism)" />
+      <?endif?>
     </UI>
   </Fragment>
 

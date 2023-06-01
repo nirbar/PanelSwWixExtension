@@ -20,6 +20,7 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="$(BaseBuildFolder)x86\bin\Release\PanelSwWixLib\Win32\PanelSwWixLib.wixlib" LogicalName="PanelSwWixLib.Win32.wixlib" />
+    <EmbeddedResource Include="$(BaseBuildFolder)x86\bin\Release\PanelSwWixLib\ARM64\PanelSwWixLib.wixlib" LogicalName="PanelSwWixLib.ARM64.wixlib" Condition="'$(DisableArm64)' != 'true'" />
   </ItemGroup>
 
   <ItemGroup>

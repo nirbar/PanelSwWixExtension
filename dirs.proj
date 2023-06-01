@@ -15,7 +15,14 @@
     <ProjectReference Include="Dism\Dism.vcxproj" Properties="Platform=x64" Targets="Restore;Build" BuildInParallel="false"/>
     <ProjectReference Include="PswManagedCA\PswManagedCA.csproj" Properties="Platform=x64" Targets="Restore;Build" BuildInParallel="false"/>
 
+    <!-- ARM64 -->
+    <ProjectReference Include="ProtoCaLib\ProtoCaLib.vcxproj" Properties="Platform=ARM64" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="CaCommon\CaCommon.vcxproj" Properties="Platform=ARM64" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="Dism\Dism.vcxproj" Properties="Platform=ARM64" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="PanelSwCustomActions\PanelSwCustomActions.vcxproj" Properties="Platform=ARM64" Targets="Restore;Build" BuildInParallel="false"/>
+
     <!-- WiX -->
+    <ProjectReference Include="wixlib\PanelSwWixLib.wixproj" Properties="CaPlatform=ARM64;Platform=x86" Targets="Restore;Build" BuildInParallel="false" Condition="'$(DisableArm64)' != 'true'" />
     <ProjectReference Include="wixlib\PanelSwWixLib.wixproj" Properties="CaPlatform=Win32;Platform=x86" Targets="Restore;Build" BuildInParallel="false" />
     <ProjectReference Include="PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.csproj" Properties="Platform=AnyCPU" Targets="Restore;Build" BuildInParallel="false" />
     <ProjectReference Include="PanelSwWixExtension\PanelSwWixExtension.csproj" Properties="Platform=AnyCPU" Targets="Restore;Build" BuildInParallel="false" />

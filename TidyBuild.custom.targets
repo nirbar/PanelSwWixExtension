@@ -6,4 +6,12 @@
     <Exec Command='"$(NugetDir)nuget.exe" pack "$(ProjectDir)$(MSBuildProjectName).nuspec" -Version "$(FullVersion)$(NugetPrereleaseVersion)" -OutputDirectory "$(MSBuildThisFileDirectory)nuget-out"' 
           WorkingDirectory="$(ProjectDir)"/>
   </Target>
+
+  <Target Name="ShouldSkipProject" Returns="@(ProjectToSkip)">
+    <ItemGroup>
+      <ProjectToSkip Include="$(MSBuildProjectFullPath)"
+                     Condition="('$(DisableArm64)' == 'true') And ('$(Platform)' == 'ARM64')"
+                     Message="Exclude $(Platform) build of project '$(MSBuildProjectName)'" />
+    </ItemGroup>
+  </Target>
 </Project>

@@ -174,7 +174,8 @@ namespace PanelSw.Wix.Extensions
         public override Intermediate GetLibrary(ISymbolDefinitionCreator symbolDefinitions)
         {
             Assembly me = Assembly.GetExecutingAssembly();
-            return Intermediate.Load(me, "PanelSwWixLib.Win32.wixlib", symbolDefinitions);
+            string libName = string.Format("PanelSwWixLib.{0}.wixlib", _preprocessor?.PreprocessorContext?.Platform == Platform.ARM64 ? "ARM64" : "Win32");
+            return Intermediate.Load(me, libName, symbolDefinitions);
         }
     }
 }

@@ -26,6 +26,7 @@
 
     <!-- lib -->
     <file src="..\build\x86\bin\Release\CaCommon\CaCommon.lib" target="tools\lib\v142\x86"/>
+    <file src="..\build\ARM64\bin\Release\CaCommon\CaCommon.lib" target="tools\lib\v142\ARM64"/>
     <!-- inc -->
     <file src="..\CaCommon\DeferredActionBase.h" target="tools\include"/>
     <file src="..\CaCommon\RegistryKey.h" target="tools\include"/>
