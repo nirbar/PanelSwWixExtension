@@ -7,9 +7,11 @@ on:
         required: true
         default: false
         type: boolean
-
-env:
-  NUGET_PRERELEASE_VERSION: ''
+      psw_wix_version:
+        description: 'PanelSwWix4 version'
+        required: true
+        default: 5.0.0-psw-wix.0113-3
+        type: string
 
 jobs:
   PanelSwWixExtension-Build:
@@ -31,31 +33,29 @@ jobs:
       - name: Prepare for build
         run: |
           choco install windows-adk
+          dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
           nuget restore
-          cmake.exe -G "Visual Studio 17 2022" -T v142,host=x86 -A Win32 .\protobuf -Dprotobuf_BUILD_TESTS=OFF -B build\protobuf
-          cmake.exe --build build\protobuf --config Release
-          cmake.exe -G "Visual Studio 17 2022" -T v142,host=x86 -A Win32 .\poco -DPOCO_STATIC=ON -DPOCO_MT=ON -B build\poco
-          cmake.exe --build build\poco --config Release
 
-      - name: Build PanelSwWixExtension for default WiX
-        run: msbuild PanelSwWixExtension.sln -restore -p:Configuration=Release -p:Platform=x86 -p:NugetDir="" -p:FullVersion=${{ env.FULL_VERSION }} -p:NugetPrereleaseVersion=${{ env.NUGET_PRERELEASE_VERSION }}
+      - name: Build PanelSwWixExtension
+        run: msbuild dirs.proj -restore -p:NugetDir="" -p:FullVersion=${{ env.FULL_VERSION }} "-p:SolutionDir=${{ github.workspace }}\"
+
+      - name: Build PanelSwWixExtension with PanelSwWix4
+        run: |
+          msbuild dirs.proj -t:WixtoolsetToPanelSwWix4 "-p:PanelSwWix4Version=${{ github.event.inputs.psw_wix_version }}"
+          Remove-Item ("${{ github.workspace }}" + "\build") -Recurse -Force
+          dotnet restore dirs.proj "-p:PanelSwWix4Version=${{ github.event.inputs.psw_wix_version }}"
+          msbuild dirs.proj -restore -p:NugetDir="" -p:FullVersion=${{ env.FULL_VERSION }} "-p:PanelSwWix4Version=${{ github.event.inputs.psw_wix_version }}" "-p:NugetPrereleaseVersion=-psw-wix" "-p:SolutionDir=${{ github.workspace }}\"
 
       - uses: actions/upload-artifact@v3.1.2
         with:
           name: nuget
-          path: build\nuget-out\*.nupkg
+          path: nuget-out\*.nupkg
 
       - name: Publish nuget packages to github and nuget.org
         if: ${{ github.event.inputs.publish_nuget == 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_PAT }}
         run: |
-          dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
-          dotnet nuget push build\nuget-out\PanelSwWixExtension4.${{ env.FULL_VERSION }}${{ env.NUGET_PRERELEASE_VERSION }}.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source github
-          dotnet nuget push build\nuget-out\PanelSwWixExtension4.${{ env.FULL_VERSION }}${{ env.NUGET_PRERELEASE_VERSION }}.nupkg --api-key ${{ secrets.NUGET_TOKEN }} --source https://api.nuget.org/v3/index.json
-          git tag wix4-v${{ env.FULL_VERSION }}
+          dotnet nuget push nuget-out\PanelSwWixExtension4.*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source github
+          git v${{ env.FULL_VERSION }}
           git push --tags
-
-
-
-

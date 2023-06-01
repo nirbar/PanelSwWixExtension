@@ -19,12 +19,12 @@
     <ProjectReference Include="..\wixlib\PanelSwWixLib.wixproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="$(BuildFolder)bin\Release\PanelSwWixLib\PanelSwWixLib.wixlib" LogicalName="PanelSwWixLib.wixlib" />
+    <EmbeddedResource Include="$(BaseBuildFolder)x86\bin\Release\PanelSwWixLib\Win32\PanelSwWixLib.wixlib" LogicalName="PanelSwWixLib.Win32.wixlib" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="WixToolset.Extensibility" Version="4.0.0" />
-    <PackageReference Include="TidyBuild" Version="1.5.2" />
+    <PackageReference Include="WixToolset.Extensibility"/>
+    <PackageReference Include="TidyBuild"/>
   </ItemGroup>
 
 </Project>

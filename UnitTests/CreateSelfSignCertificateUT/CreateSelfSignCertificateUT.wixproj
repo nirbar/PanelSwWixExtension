@@ -12,10 +12,10 @@
   </ItemGroup>
   <ItemGroup>
     <WixExtension Include="PanelSwWixExtension">
-      <HintPath>$(BuildFolder)\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</HintPath>
+      <HintPath>$(BuildFolder)AnyCPU\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</HintPath>
       <Name>PanelSwWixExtension</Name>
     </WixExtension>
-    <PackageReference Include="WixToolset.Util.wixext" Version="4.0.0" />
-    <PackageReference Include="TidyBuild" Version="1.5.2" />
+    <PackageReference Include="WixToolset.Util.wixext" />
+    <PackageReference Include="TidyBuild" />
   </ItemGroup>
 </Project>

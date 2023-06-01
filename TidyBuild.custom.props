@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildThisFileDirectory)TidyBuild.user.props" Condition="Exists('$(MSBuildThisFileDirectory)TidyBuild.user.props')"/>
   <PropertyGroup>
     <FullVersion>3.5.1</FullVersion>
@@ -11,9 +11,9 @@
     <!--
     <NugetPrereleaseVersion>-rc.3</NugetPrereleaseVersion>
     -->
-    
+
     <!-- CMake -->
-    <CMakeDir Condition="'$(CMakeDir)'==''">D:\Tools\cmake-3.21.3-windows-x86_64\</CMakeDir>
+    <CMakeDir Condition="'$(CMakeDir)' == ''"></CMakeDir>
     <CMakeVsVersion Condition="'$(CMakeVsVersion)'==''">Visual Studio 17 2022</CMakeVsVersion>
     <PlatformToolset Condition="'$(PlatformToolset)'==''">v142</PlatformToolset>
     <XPDeprecationWarning>false</XPDeprecationWarning>
@@ -24,7 +24,7 @@
     <DismApiDir Condition="'$(DismApiDir)'==''">C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\</DismApiDir>
     <NugetDir Condition="'$(NugetDir)'==''">$(MSBuildThisFileDirectory)..\..\Tools\</NugetDir>
 
-    <DefineConstants Condition="'$(MSBuildProjectExtension)' != '.csproj'">JetVersion=$(FullVersion);JetProductName=$(ProductName);JetManufacturer=$(Manufacturer)</DefineConstants>
+    <DefineConstants Condition="'$(MSBuildProjectExtension)' != '.csproj'">JetVersion=$(FullVersion);JetProductName=$(ProductName);JetManufacturer=$(Manufacturer);$(DefineConstants)</DefineConstants>
 
     <SuppressPdbOutput>true</SuppressPdbOutput>
     <SignAssembly Condition="Exists('$(AssemblyOriginatorKeyFile)')">true</SignAssembly>
@@ -33,7 +33,31 @@
     <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
     <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
   </PropertyGroup>
-  
+
+  <PropertyGroup Label="Build folders">
+    <BaseBuildFolder Condition="'$(BaseBuildFolder)'==''">$(MSBuildThisFileDirectory)build\</BaseBuildFolder>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'==''">$(BaseBuildFolder)obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath Condition="'$(MSBuildProjectExtensionsPath )'==''">$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath >
+
+    <BuildFolderCommon Condition="'$(BuildFolderCommon)'==''">$([System.IO.Path]::GetFullPath('$(BaseBuildFolder)..\build-common\'))</BuildFolderCommon>
+    <BuildFolderWin32 Condition="'$(BuildFolderWin32)'==''">$(BaseBuildFolder)x86\</BuildFolderWin32>
+    <BuildFolder Condition="'$(BuildFolder)'=='' And ('$(Platform)' == 'Win32' Or '$(Platform)' == 'x86')">$(BuildFolderWin32)</BuildFolder>
+    <BuildFolder Condition="'$(BuildFolder)'==''">$(BaseBuildFolder)$(Platform)\</BuildFolder>
+
+    <OutputPath Condition="'$(OutputPath)'==''">$(BuildFolder)bin\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
+    <OutDirLib Condition="'$(OutDirLib)'==''">$(BuildFolder)lib\$(Configuration)\</OutDirLib>
+    <IntermediateOutputPath Condition="'$(IntermediateOutputPath)'==''">$(BuildFolder)obj\$(Configuration)\$(MSBuildProjectName)\</IntermediateOutputPath>
+
+    <OutDir Condition="'$(OutDir)'==''">$(OutputPath)</OutDir>
+    <IntDir Condition="'$(IntDir)'==''">$(IntermediateOutputPath)</IntDir>
+    <OutputDirectory Condition="'$(OutputDirectory)'==''">$(OutputPath)</OutputDirectory>
+    <IntermediateDirectory Condition="'$(IntermediateDirectory)'==''">$(IntermediateOutputPath)</IntermediateDirectory>
+
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+  </PropertyGroup>
+
   <!--TODO Future changes:
   - Remember property (store by HKMU\Software\ProductCode)
   - Progress on Unzip

@@ -10,8 +10,8 @@
     <Compile Include="SetPropertyFromPipeBootstrapper.wxs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="WixToolset.Bal.wixext" Version="4.0.0" />
-    <PackageReference Include="TidyBuild" Version="1.5.2" />
+    <PackageReference Include="WixToolset.Bal.wixext"/>
+    <PackageReference Include="TidyBuild" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\SetPropertyFromPipeBAF\SetPropertyFromPipeBAF.vcxproj">

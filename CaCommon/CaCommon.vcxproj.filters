@@ -86,8 +86,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
-    <None Include="protobuf\command.proto" />
-    <None Include="protobuf\customActionData.proto" />
+    <None Include="..\ProtoCaLib\customActionData.proto">
+      <Filter>Protobuf</Filter>
+    </None>
+    <None Include="..\ProtoCaLib\command.proto">
+      <Filter>Protobuf</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(IntDir)\Version.rc">

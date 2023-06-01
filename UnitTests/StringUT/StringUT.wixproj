@@ -10,9 +10,9 @@
     <Compile Include="StringUT.wxs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="TidyBuild" Version="1.5.2" />
+    <PackageReference Include="TidyBuild" />
     <WixExtension Include="PanelSwWixExtension">
-      <HintPath>$(BuildFolder)\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</HintPath>
+      <HintPath>$(BuildFolder)AnyCPU\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</HintPath>
       <Name>PanelSwWixExtension</Name>
     </WixExtension>
   </ItemGroup>

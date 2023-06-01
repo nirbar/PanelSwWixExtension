@@ -7,7 +7,7 @@ end_of_line = crlf
 insert_final_newline = true
 
 # WiX- 2 space indentation
-[*.wx*]
+[*.{wx*,.yml}]
 indent_style = space
 indent_size = 2
 charset = utf-8

@@ -12,7 +12,7 @@
 
   <Fragment><Property Id="MSIFASTINSTALL" Value="1"></Property>
   
-      <StandardDirectory Id="ProgramFilesFolder">
+      <StandardDirectory Id="ProgramFiles6432Folder">
         <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
       </StandardDirectory>
     </Fragment>
@@ -25,7 +25,7 @@
         </File>
       </Component>
       <Component>
-        <File Id="PanelSwWixExtension.dll" Source="$(sys.SOURCEFILEDIR)..\..\build\bin\$(var.Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll">
+        <File Id="PanelSwWixExtension.dll" Source="$(sys.SOURCEFILEDIR)..\..\build\AnyCPU\bin\$(var.Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll">
           <PanelSW:ForceVersion />
         </File>
       </Component>

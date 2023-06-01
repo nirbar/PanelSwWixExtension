@@ -18,14 +18,14 @@
 
   <files>
     <file src="..\Nuget\*" target="build" />
-    <file src="..\build\bin\Release\PanelSwWixExtension\PanelSwWixExtension.dll" target="tools\lib"/>
-    <file src="..\build\bin\Release\PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.dll" target="tools\lib"/>
+    <file src="..\build\AnyCPU\bin\Release\PanelSwWixExtension\PanelSwWixExtension.dll" target="tools\lib"/>
+    <file src="..\build\AnyCPU\bin\Release\PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.dll" target="tools\lib"/>
     <file src=".\Xsd\PanelSwWixExtension.xsd" target="content"/>
     <file src="..\LICENSE" target="LICENSE" />
     <file src="..\README.md" target="README.md" />
 
     <!-- lib -->
-    <file src="..\build\bin\Release\CaCommon\CaCommon.lib" target="tools\lib\v142"/>
+    <file src="..\build\x86\bin\Release\CaCommon\CaCommon.lib" target="tools\lib\v142\x86"/>
     <!-- inc -->
     <file src="..\CaCommon\DeferredActionBase.h" target="tools\include"/>
     <file src="..\CaCommon\RegistryKey.h" target="tools\include"/>
@@ -34,8 +34,8 @@
     <file src="..\CaCommon\SqlQuery.h" target="tools\include"/>
     <file src="..\CaCommon\SummaryStream.h" target="tools\include"/>
     <file src="..\CaCommon\WixString.h" target="tools\include"/>
-    <file src="..\build\obj\Release\protobuf\command.pb.h" target="tools\include"/>
-    <file src="..\build\obj\Release\protobuf\customActionData.pb.h" target="tools\include"/>
+    <file src="..\build\x86\obj\Release\protobuf\command.pb.h" target="tools\include"/>
+    <file src="..\build\x86\obj\Release\protobuf\customActionData.pb.h" target="tools\include"/>
   </files>
 
 </package>

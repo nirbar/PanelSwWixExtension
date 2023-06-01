@@ -16,15 +16,16 @@
 
   <ItemGroup>
     <Reference Include="heat.dll">
-      <HintPath>$(PkgWixToolset_Heat)\tools\net6.0\heat.dll</HintPath>
+      <HintPath Condition="Exists('$(PkgWixToolset_Heat)\tools\net6.0\heat.dll')">$(PkgWixToolset_Heat)\tools\net6.0\heat.dll</HintPath>
+      <HintPath Condition="Exists('$(PkgPanelSwWix4_Heat)\tools\net6.0\heat.dll')">$(PkgPanelSwWix4_Heat)\tools\net6.0\heat.dll</HintPath>
       <Private>false</Private>
     </Reference>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="WixToolset.Extensibility" Version="4.0.0" />
-    <PackageReference Include="TidyBuild" Version="1.5.2" />
-    <PackageReference Include="WixToolset.Heat" Version="4.0.0" GeneratePathProperty="true" />
+    <PackageReference Include="WixToolset.Extensibility"/>
+    <PackageReference Include="TidyBuild"/>
+    <PackageReference Include="WixToolset.Heat" GeneratePathProperty="true" />
   </ItemGroup>
 
 </Project>

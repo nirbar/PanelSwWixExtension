@@ -14,7 +14,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToEx
 	HRESULT hrErr = S_OK;
 	LPWSTR szCustomActionData = nullptr;
 	BYTE* pData = nullptr;
-	DWORD dwDataSize = 0;
+	SIZE_T nDataSize = 0;
 	BOOL bRes = TRUE;
 	CDeferredActionBase* pExecutor = nullptr;
 	CustomActionData cad;
@@ -55,14 +55,14 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToEx
 		ExitFunction();
 	}
 
-	hr = StrAllocBase85Decode(szCustomActionData, &pData, &dwDataSize);
+	hr = StrAllocBase85Decode(szCustomActionData, &pData, &nDataSize);
 	if (FAILED(hr))
 	{
 		FirstLog(hInstall, "Failed decoding CustomActionData");
 		ExitFunction();
 	}
 
-	bRes = cad.ParseFromArray(pData, dwDataSize);
+	bRes = cad.ParseFromArray(pData, nDataSize);
 	if (!bRes)
 	{
 		hr = E_FAIL;

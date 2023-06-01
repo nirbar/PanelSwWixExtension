@@ -1,18 +1,25 @@
-<Project Sdk="WixToolset.Sdk">
+﻿<Project Sdk="WixToolset.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <LibBindFiles>true</LibBindFiles>
     <BindFiles>true</BindFiles>
-    <PreBuildEvent>"$(MSBuildBinPath)\MSBuild.exe" "$(MSBuildThisFileDirectory)..\PswManagedCA\PswManagedCA.csproj" /restore "/p:Platform=x64;Configuration=$(Configuration);SolutionDir=$(SolutionDir)\"</PreBuildEvent>
-    <PreBuildEvent>$(PreBuildEvent) &amp;&amp; "$(MSBuildBinPath)\MSBuild.exe" "$(MSBuildThisFileDirectory)..\PswManagedCA\PswManagedCA.csproj" /restore "/p:Platform=x86;Configuration=$(Configuration);SolutionDir=$(SolutionDir)\"</PreBuildEvent>
-    <PreBuildEvent>$(PreBuildEvent) &amp;&amp; "$(MSBuildBinPath)\MSBuild.exe" "$(MSBuildThisFileDirectory)..\Dism\Dism.vcxproj" "/p:Platform=Win32;Configuration=$(Configuration);SolutionDir=$(SolutionDir)\"</PreBuildEvent>
-    <PreBuildEvent>$(PreBuildEvent) &amp;&amp; "$(MSBuildBinPath)\MSBuild.exe" "$(MSBuildThisFileDirectory)..\Dism\Dism.vcxproj" "/p:Platform=x64;Configuration=$(Configuration);SolutionDir=$(SolutionDir)\"</PreBuildEvent>
+    <CaPlatform Condition="'$(CaPlatform)' == ''">Win32</CaPlatform>
+    <BuildFolder>$(BaseBuildFolder)$(CaPlatform)</BuildFolder>
+    <OutputPath>$(OutputPath)$(CaPlatform)\</OutputPath>
+    <OutDir>$(OutputPath)</OutDir>
+    <OutputDirectory>$(OutputPath)</OutputDirectory>
+    <IntermediateOutputPath>$(IntermediateOutputPath)$(CaPlatform)\</IntermediateOutputPath>
+    <IntDir>$(IntermediateOutputPath)</IntDir>
+    <IntermediateDirectory>$(IntermediateOutputPath)</IntermediateDirectory>
+    <DefineConstants>CaPlatform=$(CaPlatform);$(DefineConstants)</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\PanelSwCustomActions\PanelSwCustomActions.vcxproj" />
+    <ProjectReference Include="..\PswManagedCA\PswManagedCA.csproj" Platforms="x86;x64" />
+    <ProjectReference Include="..\PanelSwCustomActions\PanelSwCustomActions.vcxproj" Platforms="$(CaPlatform)"/>
+    <ProjectReference Include="..\Dism\Dism.vcxproj" Platforms="Win32;x64" Condition="'$(CaPlatform)' == 'Win32'" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="WixToolset.Util.wixext" Version="4.0.0" />
-    <PackageReference Include="TidyBuild" Version="1.5.2" />
+    <PackageReference Include="WixToolset.Util.wixext" />
+    <PackageReference Include="TidyBuild" />
   </ItemGroup>
 </Project>

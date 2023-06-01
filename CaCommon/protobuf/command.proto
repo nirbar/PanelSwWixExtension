@@ -1,9 +1,0 @@
-syntax = "proto3";
-package com.panelsw.ca;
-option optimize_for = LITE_RUNTIME;
-
-message Command{
-    string handler = 1;
-	uint32 cost = 2;
-	bytes details = 3;
-}

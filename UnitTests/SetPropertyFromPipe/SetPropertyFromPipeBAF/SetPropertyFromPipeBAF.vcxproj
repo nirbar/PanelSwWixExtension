@@ -1,9 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\..\..\packages\WixToolset.BalUtil.4.0.0\build\WixToolset.BalUtil.props" Condition="Exists('..\..\..\packages\WixToolset.BalUtil.4.0.0\build\WixToolset.BalUtil.props')" />
-  <Import Project="..\..\..\packages\WixToolset.DUtil.4.0.0\build\WixToolset.DUtil.props" Condition="Exists('..\..\..\packages\WixToolset.DUtil.4.0.0\build\WixToolset.DUtil.props')" />
-  <Import Project="..\..\..\packages\WixToolset.BootstrapperCore.Native.4.0.0\build\WixToolset.BootstrapperCore.Native.props" Condition="Exists('..\..\..\packages\WixToolset.BootstrapperCore.Native.4.0.0\build\WixToolset.BootstrapperCore.Native.props')" />
-  <Import Project="..\..\..\packages\TidyBuild.1.5.2\build\TidyBuild.props" Condition="Exists('..\..\..\packages\TidyBuild.1.5.2\build\TidyBuild.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
@@ -17,12 +13,10 @@
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <ProjectName>SetPropertyFromPipeBAF</ProjectName>
-    <WindowsTargetPlatformVersion>8.1</WindowsTargetPlatformVersion>
+    <ResolveNuGetPackages>false</ResolveNuGetPackages>  
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <PlatformToolset>v141_xp</PlatformToolset>
-  </PropertyGroup>
+  <PropertyGroup Label="Configuration" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'"/>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
   </ImportGroup>
@@ -44,7 +38,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>$(SolutionDir)\protobuf\src;$(IntDir)\..\Protobuf;$(SolutionDir)\protobuf\src;$(IntDir)\..\Protobuf;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\..\..\protobuf\src;$(IntDir)\..\Protobuf;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>NDEBUG;WIN32;_WINDOWS;_USRDLL;EXAMPLECADLL_EXPORTS;FullVersion="$(FullVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -63,7 +57,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>libprotobuf-lite.lib;ProtoCaLib.lib;comctl32.lib;gdiplus.lib;shlwapi.lib;wininet.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(OutDir)\..\ProtoCaLib\;$(BuildFolder)\protobuf\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir)\..\ProtoCaLib\;$(BuildFolderCommon)$(Platform)\protobuf\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <ModuleDefinitionFile>bafunctions.def</ModuleDefinitionFile>
       <GenerateDebugInformation>false</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
@@ -74,20 +68,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="bafunctions.def" />
-    <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="TidyBuild" />
+    <PackageReference Include="WixToolset.BalUtil" />
+    <PackageReference Include="WixToolset.BootstrapperCore.Native" />
+    <PackageReference Include="WixToolset.DUtil" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\..\..\packages\TidyBuild.1.5.2\build\TidyBuild.targets" Condition="Exists('..\..\..\packages\TidyBuild.1.5.2\build\TidyBuild.targets')" />
-  </ImportGroup>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\..\..\packages\TidyBuild.1.5.2\build\TidyBuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\TidyBuild.1.5.2\build\TidyBuild.props'))" />
-    <Error Condition="!Exists('..\..\..\packages\TidyBuild.1.5.2\build\TidyBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\TidyBuild.1.5.2\build\TidyBuild.targets'))" />
-    <Error Condition="!Exists('..\..\..\packages\WixToolset.BootstrapperCore.Native.4.0.0\build\WixToolset.BootstrapperCore.Native.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\WixToolset.BootstrapperCore.Native.4.0.0\build\WixToolset.BootstrapperCore.Native.props'))" />
-    <Error Condition="!Exists('..\..\..\packages\WixToolset.DUtil.4.0.0\build\WixToolset.DUtil.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\WixToolset.DUtil.4.0.0\build\WixToolset.DUtil.props'))" />
-    <Error Condition="!Exists('..\..\..\packages\WixToolset.BalUtil.4.0.0\build\WixToolset.BalUtil.props')" Text="$([System.String]::Format('$(ErrorText)', '..\..\..\packages\WixToolset.BalUtil.4.0.0\build\WixToolset.BalUtil.props'))" />
-  </Target>
 </Project>

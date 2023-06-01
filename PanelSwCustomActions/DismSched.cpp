@@ -1,4 +1,5 @@
 #include "pch.h"
+#include "..\CaCommon\WixString.h"
 #include <list>
 #include <string>
 #include <Shlwapi.h>
@@ -121,11 +122,26 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 	// Since Dism API takes long, we only want to execute it if there's something to do. Conditioning the Dism deferred CA with the property existance will save us time.
 	if (WcaCountOfCustomActionDataRecords(szCustomActionData) > 1)
 	{
-		hr = WcaSetProperty(L"DismX86", szCustomActionData);
-		ExitOnFailure(hr, "Failed setting CustomActionData");
+		CWixString szVersionNT64;
 
-		hr = WcaSetProperty(L"DismX64", szCustomActionData);
-		ExitOnFailure(hr, "Failed setting CustomActionData");
+		hr = WcaGetProperty(L"VersionNT64", (LPWSTR*)szVersionNT64);
+		ExitOnFailure(hr, "Failed get VersionNT64 property");
+
+		if (szVersionNT64.IsNullOrEmpty())
+		{
+#if defined(_M_ARM64)
+			hr = ERROR_INSTALL_PLATFORM_UNSUPPORTED;
+			ExitOnFailure(hr, "PanelSwWixExtension doesn't support Dism on x86 emulator on ARM64 machines");
+#endif
+
+			hr = WcaSetProperty(L"DismX86", szCustomActionData);
+			ExitOnFailure(hr, "Failed setting CustomActionData");
+		}
+		else
+		{
+			hr = WcaSetProperty(L"DismX64", szCustomActionData);
+			ExitOnFailure(hr, "Failed setting CustomActionData");
+		}
 
 		if (nTotalCost)
 		{

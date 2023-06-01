@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\TidyBuild.1.5.2\build\TidyBuild.props" Condition="Exists('..\packages\TidyBuild.1.5.2\build\TidyBuild.props')" />
-  <Import Project="..\packages\WixToolset.WcaUtil.4.0.0\build\WixToolset.WcaUtil.props" Condition="Exists('..\packages\WixToolset.WcaUtil.4.0.0\build\WixToolset.WcaUtil.props')" />
-  <Import Project="..\packages\WixToolset.DUtil.4.0.0\build\WixToolset.DUtil.props" Condition="Exists('..\packages\WixToolset.DUtil.4.0.0\build\WixToolset.DUtil.props')" />
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
@@ -13,36 +10,23 @@
     <ProjectGuid>{0C3A56AA-8073-44E1-8DE4-C257D581BFF0}</ProjectGuid>
     <RootNamespace>PanelSwCustomActions</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-  </PropertyGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup>
-    <_ProjectFileVersion>11.0.50727.1</_ProjectFileVersion>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfAtl>Static</UseOfAtl>
+    <LinkIncremental Condition="'$(Configuration)'=='Release'">false</LinkIncremental>
+    <ResolveNuGetPackages>false</ResolveNuGetPackages>  
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
   <ImportGroup Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <PropertyGroup Label="UserMacros" />
-  <PropertyGroup>
-    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</LinkIncremental>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-  </PropertyGroup>
-  <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
-  <ImportGroup Label="Shared">
-  </ImportGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(SolutionDir)\CaCommon;$(SolutionDir)\poco\Zip\include;$(SolutionDir)\poco\Foundation\include;..\protobuf\src;$(IntDir)\..\Protobuf;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\CaCommon;$(MSBuildThisFileDirectory)..\poco\Zip\include;$(MSBuildThisFileDirectory)..\poco\Foundation\include;$(MSBuildThisFileDirectory)..\protobuf\src;$(IntDir)\..\Protobuf;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;EXAMPLECADLL_EXPORTS;FullVersion="$(FullVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
@@ -50,12 +34,12 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>CaCommon.lib;libprotobuf-lite.lib;ProtoCaLib.lib;msi.lib;Version.lib;Shell32.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(OutDir)\..\CaCommon\;$(OutDir)\..\ProtoCaLib;$(BuildFolder)\poco\lib\$(Configuration);$(BuildFolder)\protobuf\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(OutDir)\..\CaCommon\;$(OutDir)\..\ProtoCaLib;$(BuildFolderCommon)$(Platform)\poco\lib\$(Configuration);$(BuildFolderCommon)$(Platform)\protobuf\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
-      <TargetMachine>MachineX86</TargetMachine>
+      <TargetMachine Condition="'$(Platform)' == 'x86'">MachineX86</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -111,7 +95,7 @@
     <ClCompile Include="SqlSearch.cpp" />
     <ClCompile Include="StringOperations.cpp" />
     <ClCompile Include="pch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
+      <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="TaskScheduler.cpp" />
     <ClCompile Include="Telemetry.cpp" />
@@ -183,25 +167,17 @@
     <ClInclude Include="XslTransform.h" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <PackageReference Include="TidyBuild"/>
+    <PackageReference Include="WixToolset.DUtil"/>
+    <PackageReference Include="WixToolset.WcaUtil"/>
+  </ItemGroup>
+  <ItemGroup>
     <None Include="PanelSwCustomActions.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <Target Name="BuildPoco" BeforeTargets="PrepareForBuild" Condition="!Exists('$(BuildFolder)\poco\lib\$(Configuration)\PocoZipmt.lib')">
-    <MakeDir Directories="$(BuildFolder)\poco;$(IntDir)\..\poco" />
-    <MakeDir Directories="" />
-    <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; -G &quot;$(CMakeVsVersion)&quot; -T $(PlatformToolset),host=x86 -A Win32 -DPOCO_STATIC=ON -DPOCO_MT=ON ..\..\poco" WorkingDirectory="$(BuildFolder)\poco" />
-    <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; --build . --config $(Configuration)" WorkingDirectory="$(BuildFolder)\poco" />
-  </Target>
-  <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\TidyBuild.1.5.2\build\TidyBuild.targets" Condition="Exists('..\packages\TidyBuild.1.5.2\build\TidyBuild.targets')" />
-  </ImportGroup>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\TidyBuild.1.5.2\build\TidyBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.5.2\build\TidyBuild.targets'))" />
-    <Error Condition="!Exists('..\packages\WixToolset.DUtil.4.0.0\build\WixToolset.DUtil.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WixToolset.DUtil.4.0.0\build\WixToolset.DUtil.props'))" />
-    <Error Condition="!Exists('..\packages\WixToolset.WcaUtil.4.0.0\build\WixToolset.WcaUtil.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\WixToolset.WcaUtil.4.0.0\build\WixToolset.WcaUtil.props'))" />
+  <Target Name="BuildPoco" BeforeTargets="PrepareForBuild" Condition="!Exists('$(BuildFolderCommon)$(Platform)\poco\lib\$(Configuration)\PocoZipmt.lib')">
+    <MakeDir Directories="$(BuildFolderCommon)$(Platform)\poco" />
+    <Exec Command="&quot;$(CMakeDir)cmake.exe&quot; -G &quot;$(CMakeVsVersion)&quot; -T $(PlatformToolset),host=x86 -A $(Platform) -DPOCO_STATIC=ON -DPOCO_MT=ON &quot;$(MSBuildThisFileDirectory)..\poco&quot;" WorkingDirectory="$(BuildFolderCommon)$(Platform)\poco" />
+    <Exec Command="&quot;$(CMakeDir)cmake.exe&quot; --build . --config $(Configuration)" WorkingDirectory="$(BuildFolderCommon)$(Platform)\poco" />
   </Target>
 </Project>

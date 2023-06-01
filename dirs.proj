@@ -1,0 +1,54 @@
+<Project Sdk="Microsoft.Build.Traversal">
+  <PropertyGroup>
+    <TraversalGlobalProperties>SolutionDir=$(MSBuildThisFileDirectory);Configuration=Release;BuildProjectReferences=false</TraversalGlobalProperties>
+    <CustomBeforeTraversalProps>$(MSBuildThisFileDirectory)Directory.Build.props</CustomBeforeTraversalProps>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- x86 -->
+    <ProjectReference Include="ProtoCaLib\ProtoCaLib.vcxproj" Properties="Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="CaCommon\CaCommon.vcxproj" Properties="Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="Dism\Dism.vcxproj" Properties="Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="PanelSwCustomActions\PanelSwCustomActions.vcxproj" Properties="Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="PswManagedCA\PswManagedCA.csproj" Properties="Platform=x86" Targets="Restore;Build" BuildInParallel="false"/>
+
+    <!-- x64 -->
+    <ProjectReference Include="Dism\Dism.vcxproj" Properties="Platform=x64" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="PswManagedCA\PswManagedCA.csproj" Properties="Platform=x64" Targets="Restore;Build" BuildInParallel="false"/>
+
+    <!-- WiX -->
+    <ProjectReference Include="wixlib\PanelSwWixLib.wixproj" Properties="CaPlatform=Win32;Platform=x86" Targets="Restore;Build" BuildInParallel="false" />
+    <ProjectReference Include="PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.csproj" Properties="Platform=AnyCPU" Targets="Restore;Build" BuildInParallel="false" />
+    <ProjectReference Include="PanelSwWixExtension\PanelSwWixExtension.csproj" Properties="Platform=AnyCPU" Targets="Restore;Build" BuildInParallel="false" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="TidyBuild" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <AllMyProjects Include="@(ProjectReference->Distinct())" />
+    <AllMyProjects Include="UnitTests\**\*.*proj" />
+  </ItemGroup>
+  
+  <Target Name="WixtoolsetToPanelSwWix4" Inputs="%(AllMyProjects.FullPath)" Outputs="%(AllMyProjects.FullPath).never">
+    <PropertyGroup>
+      <JsonFileContents>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)global.json'))</JsonFileContents>
+      <JsonFileContents>$([System.Text.RegularExpressions.Regex]::Replace('$(JsonFileContents)', '.*WixToolset.*', '"PanelSwWix4.Sdk": "$(PanelSwWix4Version)",'))</JsonFileContents>
+    </PropertyGroup>
+
+    <WriteLinesToFile File="$(MSBuildThisFileDirectory)global.json"
+                      Lines="$(JsonFileContents)"
+                      Overwrite="true"/>
+
+    <PropertyGroup>
+      <ProjectFileContents>$([System.IO.File]::ReadAllText('%(AllMyProjects.FullPath)'))</ProjectFileContents>
+      <ProjectFileContents>$(ProjectFileContents.Replace('WixToolset.', 'PanelSwWix4.'))</ProjectFileContents>
+    </PropertyGroup>
+
+    <WriteLinesToFile File="%(AllMyProjects.FullPath)"
+                      Lines="$(ProjectFileContents)"
+                      Overwrite="true" 
+                      WriteOnlyWhenDifferent="true" />
+  </Target>
+  
+</Project>

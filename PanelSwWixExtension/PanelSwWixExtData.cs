@@ -9,6 +9,12 @@ namespace PanelSw.Wix.Extensions
     {
         public override string DefaultCulture => "en-US";
 
+        private readonly PanelSwWixPreprocessor _preprocessor;
+        public PanelSwWixExtData(PanelSwWixPreprocessor preprocessor)
+        {
+            _preprocessor = preprocessor;
+        }
+
         public override bool TryGetSymbolDefinitionByName(string name, out IntermediateSymbolDefinition symbolDefinition)
         {
             switch (name)
@@ -168,7 +174,7 @@ namespace PanelSw.Wix.Extensions
         public override Intermediate GetLibrary(ISymbolDefinitionCreator symbolDefinitions)
         {
             Assembly me = Assembly.GetExecutingAssembly();
-            return Intermediate.Load(me, "PanelSwWixLib.wixlib", symbolDefinitions);
+            return Intermediate.Load(me, "PanelSwWixLib.Win32.wixlib", symbolDefinitions);
         }
     }
 }

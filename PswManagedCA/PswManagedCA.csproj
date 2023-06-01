@@ -9,11 +9,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="TidyBuild" Version="1.5.2" />
-    <PackageReference Include="WixToolset.Dtf.CustomAction" Version="4.0.0" />
-    <PackageReference Include="WixToolset.Dtf.WindowsInstaller" Version="4.0.0" />
-    <PackageReference Include="Microsoft.Web.Administration" Version="11.1.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
+    <PackageReference Include="TidyBuild"/>
+    <PackageReference Include="WixToolset.Dtf.CustomAction" />
+    <PackageReference Include="WixToolset.Dtf.WindowsInstaller"/>
+    <PackageReference Include="Microsoft.Web.Administration"/>
+    <PackageReference Include="Newtonsoft.Json"/>
   </ItemGroup>
 
   <ItemGroup>

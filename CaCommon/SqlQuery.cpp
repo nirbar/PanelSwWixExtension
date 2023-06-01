@@ -16,7 +16,7 @@ HRESULT CSqlQuery::ExecuteQuery(const CSqlConnection &sqlConn, LPCWSTR szQuery, 
     HRESULT hr = S_OK;
     SQLRETURN sr = SQL_SUCCESS;
     SQLSMALLINT nColumns = 0;
-    SQLINTEGER nRows = 0;
+	SQLLEN nRows = 0;
     LPWSTR szQueryTemp = nullptr;
     SQLLEN nDataSize = 0;
     CWixString szResult;

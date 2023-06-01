@@ -2,17 +2,17 @@
 
   <!-- PanelSwCustomActions.dll binary -->
   <Fragment>
-    <Binary Id="PanelSwCustomActions.dll" SuppressModularization="yes" SourceFile="$(var.PanelSwCustomActions.TargetPath)"></Binary>
+    <Binary Id="PanelSwCustomActions.dll" SuppressModularization="yes" SourceFile="!(bindpath.PanelSwCustomActions.$(var.CaPlatform))\PanelSwCustomActions.dll"></Binary>
   </Fragment>
   <!-- PswManagedCA.CA.dll binary -->
   <Fragment>
-    <Binary Id="PswManagedCA.X64.dll" SuppressModularization="yes" SourceFile="$(var.TargetDir)..\PswManagedCA\x64\PswManagedCA.CA.dll"></Binary>
-    <Binary Id="PswManagedCA.X86.dll" SuppressModularization="yes" SourceFile="$(var.TargetDir)..\PswManagedCA\x86\PswManagedCA.CA.dll"></Binary>
+    <Binary Id="PswManagedCA.X64.dll" SuppressModularization="yes" SourceFile="!(bindpath.PswManagedCA.x64)\PswManagedCA.CA.dll"></Binary>
+    <Binary Id="PswManagedCA.X86.dll" SuppressModularization="yes" SourceFile="!(bindpath.PswManagedCA.x86)\PswManagedCA.CA.dll"></Binary>
   </Fragment>
   <!-- DismX64.dll binary -->
   <Fragment>
-    <Binary Id="DismX64.dll" SuppressModularization="yes" SourceFile="$(var.TargetDir)..\Dism\x64\Dism.dll"></Binary>
-    <Binary Id="DismX86.dll" SuppressModularization="yes" SourceFile="$(var.TargetDir)..\Dism\Win32\Dism.dll"></Binary>
+    <Binary Id="Dism.X64.dll" SuppressModularization="yes" SourceFile="!(bindpath.Dism.x64)\Dism.dll"></Binary>
+    <Binary Id="Dism.X86.dll" SuppressModularization="yes" SourceFile="!(bindpath.Dism.Win32)\Dism.dll"></Binary>
   </Fragment>
 
   <!-- ShellExecute -->
@@ -363,21 +363,21 @@
   <!-- DISM -->
   <Fragment>
     <CustomAction Id="DismSched" SuppressModularization="yes" DllEntry="DismSched" Execute="immediate" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="DismX86" SuppressModularization="yes" DllEntry="Dism" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="DismX86.dll" />
-    <CustomAction Id="DismX64" SuppressModularization="yes" DllEntry="Dism" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="DismX64.dll" />
+    <CustomAction Id="DismX64" SuppressModularization="yes" DllEntry="Dism" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="Dism.X64.dll" />
+    <CustomAction Id="DismX86" SuppressModularization="yes" DllEntry="Dism" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="Dism.X86.dll" />
     <CustomActionRef Id="PSW_CheckRebootRequired" />
 
     <InstallExecuteSequence>
       <Custom Action="DismSched" Before="StopServices" Overridable="yes" Condition="(VersionNT &gt; 601)" />
-      <Custom Action="DismX86" After="DismSched" Overridable="yes" Condition="DismX86 And (VersionNT &gt; 601) And Not VersionNT64" />
-      <Custom Action="DismX64" After="DismSched" Overridable="yes" Condition="DismX64 And (VersionNT64 &gt; 601)" />
+      <Custom Action="DismX64" After="DismSched" Overridable="yes" Condition="DismX64" />
+      <Custom Action="DismX86" After="DismSched" Overridable="yes" Condition="DismX86" />
     </InstallExecuteSequence>
     <UI>
       <Error Id="27003" Message="!(loc.DismPackageFailure)" />
       <Error Id="27004" Message="!(loc.DismFeatureFailure)" />
       <ProgressText Action="DismSched" Message="!(loc.Dism)" />
-      <ProgressText Action="DismX86" Template="!(loc.DismTemplate)" Message="!(loc.Dism)" />
       <ProgressText Action="DismX64" Template="!(loc.DismTemplate)" Message="!(loc.Dism)" />
+      <ProgressText Action="DismX86" Template="!(loc.DismTemplate)" Message="!(loc.Dism)" />
     </UI>
   </Fragment>
 

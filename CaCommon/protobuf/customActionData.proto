@@ -1,9 +1,0 @@
-syntax = "proto3";
-package com.panelsw.ca;
-option optimize_for = LITE_RUNTIME;
-
-import "command.proto";
-
-message CustomActionData{
-    repeated Command commands = 1;
-}

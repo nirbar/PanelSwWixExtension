@@ -1,6 +1,5 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\TidyBuild.1.5.2\build\TidyBuild.props" Condition="Exists('..\packages\TidyBuild.1.5.2\build\TidyBuild.props')" />
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
@@ -11,25 +10,19 @@
     <ProjectGuid>{46D02BC4-720A-4B33-AA27-4103E7349F02}</ProjectGuid>
     <RootNamespace>ProtoCaLib</RootNamespace>
     <Keyword>Win32Proj</Keyword>
-  </PropertyGroup>
-  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-  <PropertyGroup Label="Configuration">
-    <_ProjectFileVersion>11.0.50727.1</_ProjectFileVersion>
-    <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</WholeProgramOptimization>
+    <WholeProgramOptimization Condition="'$(Configuration)'=='Release'">true</WholeProgramOptimization>
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <UseOfAtl>Static</UseOfAtl>
+    <LinkIncremental>true</LinkIncremental>
+    <TargetExt>.lib</TargetExt>
+    <ResolveNuGetPackages>false</ResolveNuGetPackages>  
   </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
-  <ImportGroup Label="ExtensionSettings">
-  </ImportGroup>
   <ImportGroup>
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-  <PropertyGroup>
-    <LinkIncremental>true</LinkIncremental>
-    <TargetExt>.lib</TargetExt>
-  </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
       <AdditionalIncludeDirectories>..\protobuf\src;$(IntDir)\..\Protobuf;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -38,14 +31,13 @@
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>libprotobuf-lite.lib;Version.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(BuildFolder)\protobuf\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>Version.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Windows</SubSystem>
-      <TargetMachine>MachineX86</TargetMachine>
+      <TargetMachine Condition="'$(Platform)' == 'x86'">MachineX86</TargetMachine>
     </Link>
   </ItemDefinitionGroup>
-  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
       <Optimization>MinSpace</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
@@ -190,7 +182,6 @@
     <None Include="fileOperationsDetails.proto" />
     <None Include="fileRegexDetails.proto" />
     <None Include="obfuscatedString.proto" />
-    <None Include="packages.config" />
     <None Include="restartLocalResourcesDetails.proto" />
     <None Include="servciceConfigDetails.proto" />
     <None Include="setPropertyFromPipeDetails.proto" />
@@ -203,28 +194,20 @@
     <None Include="zipDetails.proto" />
     <None Include="xslTransformDetails.proto" />
   </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="TidyBuild"/>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <ImportGroup Label="ExtensionTargets">
-    <Import Project="..\packages\TidyBuild.1.5.2\build\TidyBuild.targets" Condition="Exists('..\packages\TidyBuild.1.5.2\build\TidyBuild.targets')" />
-  </ImportGroup>
-  <Target Name="BuildProtobuf" BeforeTargets="ProtoBuffCompile" Condition="!Exists('$(BuildFolder)\protobuf\$(Configuration)\protoc.exe')">
-    <MakeDir Directories="$(BuildFolder)\protobuf" />
-    <MakeDir Directories="$(IntDir)\..\protobuf" />
-    <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; -G &quot;$(CMakeVsVersion)&quot; -A Win32 -T $(PlatformToolset),host=x86 ..\..\protobuf -Dprotobuf_BUILD_TESTS=OFF" WorkingDirectory="$(BuildFolder)\protobuf" />
-    <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; --build . --config $(Configuration)" WorkingDirectory="$(BuildFolder)\protobuf" />
-  </Target>
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
-    <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
-    </PropertyGroup>
-    <Error Condition="!Exists('..\packages\TidyBuild.1.5.2\build\TidyBuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.5.2\build\TidyBuild.props'))" />
-    <Error Condition="!Exists('..\packages\TidyBuild.1.5.2\build\TidyBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.5.2\build\TidyBuild.targets'))" />
+  <Target Name="BuildProtoc" BeforeTargets="ProtoBuffCompile" Condition="!Exists('$(BuildFolderCommon)Win32\protobuf\$(Configuration)\protoc.exe')">
+    <MakeDir Directories="$(BuildFolderCommon)Win32\protobuf;$(IntDir)..\protobuf" />
+    <Exec Command="&quot;$(CMakeDir)cmake.exe&quot; -G &quot;$(CMakeVsVersion)&quot; -A Win32 -T $(PlatformToolset),host=x86 &quot;$(MSBuildThisFileDirectory)..\protobuf&quot; -Dprotobuf_BUILD_TESTS=OFF" WorkingDirectory="$(BuildFolderCommon)Win32\protobuf" />
+    <Exec Command="&quot;$(CMakeDir)cmake.exe&quot; --build . --config $(Configuration)" WorkingDirectory="$(BuildFolderCommon)Win32\protobuf" />
   </Target>
   <ItemGroup>
     <ProtoFiles Include="*.proto" />
   </ItemGroup>
   <Target Name="ProtoBuffCompile" BeforeTargets="PrepareForBuild" Inputs="@(ProtoFiles)" Outputs="$(IntDir)\..\Protobuf\%(ProtoFiles.FileName).pb.h;$(IntDir)\..\Protobuf\%(ProtoFiles.FileName).pb.cc">
     <MakeDir Directories="$(IntDir)\..\protobuf" />
-    <Exec Command="&quot;$(BuildFolder)\protobuf\$(Configuration)\protoc.exe&quot; &quot;--proto_path=$(MSBuildProjectDirectory)&quot; &quot;--proto_path=$(SolutionDir)\protobuf\src&quot; &quot;--cpp_out=$(IntDir)\..\Protobuf&quot; @(ProtoFiles, ' ')" />
+    <Exec Command="&quot;$(BuildFolderCommon)Win32\protobuf\$(Configuration)\protoc.exe&quot; &quot;--proto_path=$(MSBuildProjectDirectory)&quot; &quot;--proto_path=$(MSBuildThisFileDirectory)..\protobuf\src&quot; &quot;--cpp_out=$(IntDir)\..\Protobuf&quot; @(ProtoFiles, ' ')" />
   </Target>
 </Project>

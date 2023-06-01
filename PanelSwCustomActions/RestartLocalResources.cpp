@@ -330,7 +330,7 @@ BOOL CALLBACK CRestartLocalResources::KillWindowsProc(HWND hwnd, LPARAM lParam)
     if (dwMyProcId == dwOtherProcId)
     {
         BOOL bRes = TRUE;
-        DWORD dwRes = 0;
+        DWORD_PTR dwRes = 0;
         HRESULT hr = S_OK;
 
         LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Closing window belonging to process %u", dwMyProcId);

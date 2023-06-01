@@ -13,6 +13,6 @@ bin/
 *.ipch
 /packages/
 /build/
-/build-v142/
+/build-common/
 *.user.*
 *.log

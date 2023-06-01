@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using WixToolset.Data;
+using WixToolset.Extensibility.Data;
 using WixToolset.Extensibility.Services;
 
 namespace PanelSw.Wix.Extensions
@@ -12,6 +13,8 @@ namespace PanelSw.Wix.Extensions
         {
             Prefixes = new string[] { "psw" };
         }
+
+        internal IPreprocessContext PreprocessorContext => Context;
 
         public override string EvaluateFunction(string prefix, string function, string[] args)
         {

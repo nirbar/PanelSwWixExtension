@@ -1,0 +1,35 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <Wix4Version Condition=" '$(Wix4Version)' == '' ">4.0.0</Wix4Version>
+    <PanelSwWix4Version Condition=" '$(PanelSwWix4Version)' == '' ">5.0.0-psw-wix.0113-3</PanelSwWix4Version>
+  </PropertyGroup>
+  
+  <ItemGroup>
+    <PackageVersion Include="WixToolset.DUtil" version="$(Wix4Version)"/>
+    <PackageVersion Include="WixToolset.WcaUtil" version="$(Wix4Version)"/>  
+    <PackageVersion Include="WixToolset.Extensibility" Version="$(Wix4Version)" />
+    <PackageVersion Include="WixToolset.Heat" Version="$(Wix4Version)" />
+    <PackageVersion Include="WixToolset.Dtf.CustomAction" Version="$(Wix4Version)" />
+    <PackageVersion Include="WixToolset.Dtf.WindowsInstaller" Version="$(Wix4Version)" />
+    <PackageVersion Include="WixToolset.Util.wixext" Version="$(Wix4Version)" />
+    <PackageVersion Include="WixToolset.Bal.wixext" Version="$(Wix4Version)" />
+    <PackageVersion Include="WixToolset.BalUtil" Version="$(Wix4Version)" />
+    <PackageVersion Include="WixToolset.BootstrapperCore.Native" Version="$(Wix4Version)" />
+
+    <PackageVersion Include="PanelSwWix4.DUtil" version="$(PanelSwWix4Version)"/>
+    <PackageVersion Include="PanelSwWix4.WcaUtil" version="$(PanelSwWix4Version)"/>  
+    <PackageVersion Include="PanelSwWix4.Extensibility" Version="$(PanelSwWix4Version)" />
+    <PackageVersion Include="PanelSwWix4.Heat" Version="$(PanelSwWix4Version)" />
+    <PackageVersion Include="PanelSwWix4.Dtf.CustomAction" Version="$(PanelSwWix4Version)" />
+    <PackageVersion Include="PanelSwWix4.Dtf.WindowsInstaller" Version="$(PanelSwWix4Version)" />
+    <PackageVersion Include="PanelSwWix4.Util.wixext" Version="$(PanelSwWix4Version)" />
+    <PackageVersion Include="PanelSwWix4.Bal.wixext" Version="$(PanelSwWix4Version)" />
+    <PackageVersion Include="PanelSwWix4.BalUtil" Version="$(PanelSwWix4Version)" />
+    <PackageVersion Include="PanelSwWix4.BootstrapperCore.Native" Version="$(PanelSwWix4Version)" />
+    
+    <PackageVersion Include="TidyBuild" version="1.5.2"/>
+    <PackageVersion Include="Microsoft.Web.Administration" Version="11.1.0" />
+    <PackageVersion Include="Newtonsoft.Json" Version="13.0.2" />
+  </ItemGroup>
+</Project>
