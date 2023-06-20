@@ -18,6 +18,8 @@
     <PlatformToolset Condition="'$(PlatformToolset)'==''">v142</PlatformToolset>
     <XPDeprecationWarning>false</XPDeprecationWarning>
 
+    <WindowsKitSharedDir Condition="'$(WindowsKitSharedDir)'=='' And Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\')">C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\</WindowsKitSharedDir>
+    <WindowsKitSharedDir Condition="'$(WindowsKitSharedDir)'=='' And Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.22000.0\shared\')">C:\Program Files (x86)\Windows Kits\10\Include\10.0.22000.0\shared\</WindowsKitSharedDir>
     <WindowsKitSharedDir Condition="'$(WindowsKitSharedDir)'=='' And Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\shared\')">C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\shared\</WindowsKitSharedDir>
     <WindowsKitSharedDir Condition="'$(WindowsKitSharedDir)'=='' And Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\')">C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\</WindowsKitSharedDir>
     <WindowsKitSharedDir Condition="'$(WindowsKitSharedDir)'=='' And Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\shared\')">C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\shared\</WindowsKitSharedDir>
