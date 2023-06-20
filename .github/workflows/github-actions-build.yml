@@ -10,7 +10,7 @@ on:
       psw_wix_version:
         description: 'PanelSwWix4 version'
         required: true
-        default: 5.0.0-psw-wix.0113-3
+        default: 5.0.0-psw-wix.0135-14
         type: string
 
 jobs:

@@ -150,12 +150,13 @@ PanelSwWixExtension require the following prerequisites to build:
 - ADK installed. Specifically, Dism API should be installed. Set DismApi folder path in 'DismApiDir' property in 'TidyBuild.custom.props'
 - Update git submodules
 
-To build the extension download the code, open the solution PanelSwWixExtension.sln in Visual Studio 2017 and build it.
+To build the extension execute:
+~~~
+msbuild dirs.proj -restore "-p:SolutionDir=%CD%\"
+~~~
 
 Unit-test WiX are available in the solution folder 'UnitTests'.
-After building a unit test project, you'll need to shutdown Visual Studio before you can build PanelSwWixExtension project again. 
-This is due to the unfortunate habit of Visual Studio to hold the extension file in use.
-You may find it convenient to build unit test projects from a command prompt to workaround this limitation
+To build a unit test project execute:
 ~~~~~~~~~~~~
 MSBuild UnitTests\ForceVersionUT\ForceVersionUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
 ~~~~~~~~~~~~
