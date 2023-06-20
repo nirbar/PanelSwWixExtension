@@ -1,5 +1,6 @@
 name: PanelSwWixExtension-WiX4
 on:
+  pull_request:
   workflow_dispatch:
     inputs:
       publish_nuget:
@@ -52,7 +53,7 @@ jobs:
           path: nuget-out\*.nupkg
 
       - name: Publish nuget packages to github and nuget.org
-        if: ${{ github.event.inputs.publish_nuget == 'true' }}
+        if: ${{ github.event.inputs.publish_nuget == 'true' && github.ref == 'refs/heads/master4' }}
         env:
           GITHUB_TOKEN: ${{ secrets.MY_GITHUB_PAT }}
         run: |
