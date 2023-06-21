@@ -51,7 +51,7 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 	ExitOnFailure(hr, "Failed adding log path to CustomActionData");
 
 	// Execute view
-	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `EnableFeatures`, `ExcludeFeatures`, `PackagePath`, `Cost`, `ErrorHandling` FROM `PSW_Dism`", &hView);
+	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `EnableFeatures`, `ExcludeFeatures`, `PackagePath`, `Cost`, `ErrorHandling`, `EnableAll`, `Order` FROM `PSW_Dism` ORDER BY `Order`", &hView);
 	ExitOnFailure(hr, "Failed to execute SQL query");
 
 	// Iterate records
@@ -61,7 +61,7 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 
 		// Get fields
 		CWixString id, exclude, include, package, component;
-		int nCost = 0, nErrorHandling = 0;
+		int nCost = 0, nErrorHandling = 0, nEnableAll = -1, nOrder = 0;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)id);
@@ -78,6 +78,10 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to get Cost.");
 		hr = WcaGetRecordInteger(hRecord, 7, &nErrorHandling);
 		ExitOnFailure(hr, "Failed to get ErrorHandling.");
+		hr = WcaGetRecordInteger(hRecord, 8, &nEnableAll);
+		ExitOnFailure(hr, "Failed to get EnableAll.");
+		hr = WcaGetRecordInteger(hRecord, 9, &nOrder);
+		ExitOnFailure(hr, "Failed to get Order.");
 
 		compAction = WcaGetComponentToDo((LPCWSTR)component);
 		switch (compAction)
@@ -103,19 +107,25 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 		nTotalCost += nCost;
 
 		hr = WcaWriteStringToCaData((LPCWSTR)include, &szCustomActionData);
-		ExitOnFailure(hr, "Failed appending field to CustomActionData");
+		ExitOnFailure(hr, "Failed appending EnableFeatures field to CustomActionData");
 
 		hr = WcaWriteStringToCaData((LPCWSTR)exclude, &szCustomActionData);
-		ExitOnFailure(hr, "Failed appending field to CustomActionData");
+		ExitOnFailure(hr, "Failed appending ExcludeFeatures field to CustomActionData");
 
 		hr = WcaWriteStringToCaData((LPCWSTR)package, &szCustomActionData);
-		ExitOnFailure(hr, "Failed appending field to CustomActionData");
+		ExitOnFailure(hr, "Failed appending PackagePath field to CustomActionData");
 
 		hr = WcaWriteIntegerToCaData(nCost, &szCustomActionData);
-		ExitOnFailure(hr, "Failed appending field to CustomActionData");
+		ExitOnFailure(hr, "Failed appending Cost field to CustomActionData");
 
 		hr = WcaWriteIntegerToCaData(nErrorHandling, &szCustomActionData);
-		ExitOnFailure(hr, "Failed appending field to CustomActionData");
+		ExitOnFailure(hr, "Failed appending ErrorHandling field to CustomActionData");
+
+		hr = WcaWriteIntegerToCaData(nEnableAll, &szCustomActionData);
+		ExitOnFailure(hr, "Failed appending EnableAll field to CustomActionData");
+
+		hr = WcaWriteIntegerToCaData(nOrder, &szCustomActionData);
+		ExitOnFailure(hr, "Failed appending Order field to CustomActionData");
 	}
 	hr = S_OK; // We're only getting here on hr = E_NOMOREITEMS.
 

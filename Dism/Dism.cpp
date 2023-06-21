@@ -38,7 +38,9 @@ struct ProgressReportState
 	LPWSTR szPackage = nullptr;
 	int nMsiCost = 0;
 	ErrorHandling eErrorHandling = ErrorHandling::fail;
-	
+	int bEnableAll = -1;
+	int nOrder = 0;
+
 	// Features resolved to be enabled
 	DismFeature **pFeatures = nullptr;
 	DWORD dwFeatureNum = 0;
@@ -83,21 +85,27 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 	// Parse CAD
 	while ((hr = WcaReadStringFromCaData(&szCAD, &currState.szInclude)) != E_NOMOREITEMS)
 	{
-		ExitOnFailure(hr, "Failed getting CustomActionData field");
+		ExitOnFailure(hr, "Failed getting EnableFeatures CustomActionData field");
 
 		hr = WcaReadStringFromCaData(&szCAD, &currState.szExclude);
-		ExitOnFailure(hr, "Failed getting CustomActionData field");
+		ExitOnFailure(hr, "Failed getting ExcludeFeatures CustomActionData field");
 
 		hr = WcaReadStringFromCaData(&szCAD, &currState.szPackage);
-		ExitOnFailure(hr, "Failed getting CustomActionData field");
+		ExitOnFailure(hr, "Failed getting PackagePath CustomActionData field");
 
 		hr = WcaReadIntegerFromCaData(&szCAD, &currState.nMsiCost);
-		ExitOnFailure(hr, "Failed getting CustomActionData field");
+		ExitOnFailure(hr, "Failed getting Cost CustomActionData field");
 
 		hr = WcaReadIntegerFromCaData(&szCAD, (int*)&currState.eErrorHandling);
-		ExitOnFailure(hr, "Failed getting CustomActionData field");
+		ExitOnFailure(hr, "Failed getting ErrorHandling CustomActionData field");
 
-		hr = MemInsertIntoArray((void**)&pStates, 0, 1, dwStateNum, sizeof(ProgressReportState), 1);
+		hr = WcaReadIntegerFromCaData(&szCAD, (int*)&currState.bEnableAll);
+		ExitOnFailure(hr, "Failed getting EnableAll CustomActionData field");
+
+		hr = WcaReadIntegerFromCaData(&szCAD, (int*)&currState.nOrder);
+		ExitOnFailure(hr, "Failed getting Order CustomActionData field");
+
+		hr = MemInsertIntoArray((LPVOID*)&pStates, 0, 1, dwStateNum, sizeof(ProgressReportState), 1);
 		ExitOnFailure(hr, "Failed inserting state to array");
 
 		err = ::memcpy_s(pStates, sizeof(ProgressReportState), &currState, sizeof(currState));
@@ -193,7 +201,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 					}
 				}
 
-				hr = MemInsertIntoArray((void**)&pStates[j].pFeatures, 0, 1, pStates[j].dwFeatureNum, sizeof(DismFeature*), 1);
+				hr = MemInsertIntoArray((LPVOID*)&pStates[j].pFeatures, 0, 1, pStates[j].dwFeatureNum, sizeof(DismFeature*), 1);
 				ExitOnFailure(hr, "Failed adding feature to array");
 
 				pStates[j].pFeatures[0] = pFeatures + i;
@@ -217,7 +225,8 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 		}
 	}
 
-	for (DWORD i = 0; i < dwStateNum; ++i)
+	// add packages in reverse order, as MemInsertIntoArray reveresed the order of items that were queried in the correct order
+	for (INT i = dwStateNum - 1; i >= 0; --i)
 	{
 		if (pStates[i].dwFeatureNum == 0)
 		{
@@ -278,7 +287,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 				WcaProcessMessage(INSTALLMESSAGE::INSTALLMESSAGE_ACTIONDATA, hActionData);
 			}
 
-			hr = ::DismEnableFeature(hSession, pStates[i].pFeatures[j]->FeatureName, nullptr, DismPackageNone, FALSE, nullptr, 0, TRUE, hCancel_, _pfProgressCallback, &pStates[i]);
+			hr = ::DismEnableFeature(hSession, pStates[i].pFeatures[j]->FeatureName, nullptr, DismPackageNone, FALSE, nullptr, 0, pStates[i].bEnableAll != FALSE, hCancel_, _pfProgressCallback, &pStates[i]);
 			if (HRESULT_CODE(hr) == ERROR_SUCCESS_REBOOT_REQUIRED)
 			{
 				hr = S_OK;

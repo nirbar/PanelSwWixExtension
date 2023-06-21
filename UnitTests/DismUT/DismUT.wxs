@@ -15,9 +15,10 @@
         <File Source="$(sys.SOURCEFILEPATH)" />
         <PanelSW:Dism EnableFeature="IIS" ErrorHandling="prompt" Cost="1000000" ExcludeFeatures="^Microsoft" PackagePath="[OriginalDatabase]" />
         <PanelSW:Dism EnableFeature=".HTTP" ErrorHandling="prompt" Cost="1000000" />
+        <PanelSW:Dism EnableFeature="^IIS-WebServerRole$" ErrorHandling="prompt" Cost="50000" EnableAll="no" Order="1"/>
       </Component>
     </ComponentGroup>
-  
+
       <StandardDirectory Id="ProgramFiles6432Folder">
         <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
       </StandardDirectory>

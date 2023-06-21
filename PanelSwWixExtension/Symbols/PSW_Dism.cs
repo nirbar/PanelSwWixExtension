@@ -26,6 +26,8 @@ namespace PanelSw.Wix.Extensions.Symbols
                     new ColumnDefinition(nameof(PackagePath), ColumnType.Localized, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
                     new ColumnDefinition(nameof(Cost), ColumnType.Number, 4, false, false, ColumnCategory.Integer, minValue: 0, maxValue: int.MaxValue),
                     new ColumnDefinition(nameof(ErrorHandling), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 2),
+                    new ColumnDefinition(nameof(EnableAll), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: -1, maxValue: 1),
+                    new ColumnDefinition(nameof(Order), ColumnType.Number, 4, false, false, ColumnCategory.Integer, minValue: 0, maxValue: int.MaxValue),
                 };
             }
         }
@@ -70,6 +72,18 @@ namespace PanelSw.Wix.Extensions.Symbols
         {
             get => Fields[5].AsNumber();
             set => this.Set(5, value);
+        }
+
+        public int EnableAll
+        {
+            get => Fields[6].AsNumber();
+            set => this.Set(6, value);
+        }
+
+        public int Order
+        {
+            get => Fields[7].AsNumber();
+            set => this.Set(7, value);
         }
     }
 }

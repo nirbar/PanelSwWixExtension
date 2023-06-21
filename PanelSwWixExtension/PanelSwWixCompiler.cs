@@ -2523,6 +2523,8 @@ namespace PanelSw.Wix.Extensions
             string package = null;
             ErrorHandling promptOnError = ErrorHandling.fail;
             int cost = 20971520; // 20 MB.
+            int enableAll = -1;
+            int order = 1000000000 + sourceLineNumbers.LineNumber ?? 0;
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -2548,6 +2550,18 @@ namespace PanelSw.Wix.Extensions
 
                         case "ErrorHandling":
                             TryParseEnumAttribute(sourceLineNumbers, element, attrib, out promptOnError);
+                            break;
+
+                        case "EnableAll":
+                            enableAll = (int)ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                            break;
+
+                        case "Order":
+                            order = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                            if (order < 0)
+                            {
+                                order += int.MaxValue;
+                            }
                             break;
 
                         default:
@@ -2576,6 +2590,8 @@ namespace PanelSw.Wix.Extensions
                 row.PackagePath = package;
                 row.Cost = cost;
                 row.ErrorHandling = (int)promptOnError;
+                row.EnableAll = enableAll;
+                row.Order = order;
             }
         }
 
