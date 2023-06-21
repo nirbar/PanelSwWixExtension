@@ -158,5 +158,5 @@ msbuild dirs.proj -restore "-p:SolutionDir=%CD%\"
 Unit-test WiX are available in the solution folder 'UnitTests'.
 To build a unit test project execute:
 ~~~~~~~~~~~~
-MSBuild UnitTests\ForceVersionUT\ForceVersionUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
+msbuild UnitTests\ForceVersionUT\ForceVersionUT.wixproj -restore /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
 ~~~~~~~~~~~~
