@@ -28,7 +28,7 @@ extern "C" UINT __stdcall ExtractPayload(MSIHANDLE hInstall)
 	ExitOnFailure(hr, "Failed to set PayloadFolder");
 
 	// Best effort to delete on rollback/commit
-	if (SUCCEEDED(rollbackCAD.AddDeleteFile(szPayloadFolder)))
+	if (SUCCEEDED(rollbackCAD.AddDeleteFile(szPayloadFolder, CFileOperations::FileOperationsAttributes::AllowReboot | CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath)))
 	{
 		CWixString szCAD;	
 		if (SUCCEEDED(rollbackCAD.GetCustomActionData((LPWSTR*)szCAD)))

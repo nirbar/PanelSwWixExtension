@@ -16,3 +16,4 @@ bin/
 /build-v142/
 *.user.*
 *.log
+/build-common/

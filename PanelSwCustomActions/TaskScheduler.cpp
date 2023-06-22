@@ -227,7 +227,7 @@ HRESULT CTaskScheduler::AddRollbackTask(LPCWSTR szTaskName, CTaskScheduler* pRol
 		hr = pRollback->AddRestoreTask(szTaskName, szBackupFile);
 		ExitOnFailure(hr, "Failed setting rollback action data");
 
-		hr = pCommit->AddDeleteFile(szBackupFile);
+		hr = pCommit->AddDeleteFile(szBackupFile, CFileOperations::FileOperationsAttributes::AllowReboot | CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath);
 		ExitOnFailure(hr, "Failed setting commit action data");
 
 		ExitFunction();
