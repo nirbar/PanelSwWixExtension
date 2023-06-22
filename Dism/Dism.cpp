@@ -39,7 +39,6 @@ struct ProgressReportState
 	int nMsiCost = 0;
 	ErrorHandling eErrorHandling = ErrorHandling::fail;
 	int bEnableAll = -1;
-	int nOrder = 0;
 
 	// Features resolved to be enabled
 	DismFeature **pFeatures = nullptr;
@@ -54,6 +53,7 @@ struct ProgressReportState
 	- Package
 	- Cost
 	- Error handling
+	- EnableAll flag
 */
 extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 {
@@ -101,9 +101,6 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 
 		hr = WcaReadIntegerFromCaData(&szCAD, (int*)&currState.bEnableAll);
 		ExitOnFailure(hr, "Failed getting EnableAll CustomActionData field");
-
-		hr = WcaReadIntegerFromCaData(&szCAD, (int*)&currState.nOrder);
-		ExitOnFailure(hr, "Failed getting Order CustomActionData field");
 
 		hr = MemInsertIntoArray((LPVOID*)&pStates, 0, 1, dwStateNum, sizeof(ProgressReportState), 1);
 		ExitOnFailure(hr, "Failed inserting state to array");
