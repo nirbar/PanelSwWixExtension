@@ -32,6 +32,7 @@
   <String Overridable="yes" Id="DismTemplate" Value="Enabling [1]" />
   <String Overridable="yes" Id="DismPackageFailure" Value="Failed adding a Windows Feature package [2]:&#xA;[3]" />
   <String Overridable="yes" Id="DismFeatureFailure" Value="Failed enabling Windows Feature [2]:&#xA;[3]" />
+  <String Overridable="yes" Id="DismUnwantedFeatureFailure" Value="Failed disabling Windows Feature [2]:&#xA;[3]" />
   <String Overridable="yes" Id="JsonJpath" Value="Editing Json files" />
   <String Overridable="yes" Id="JsonJpathTemplate" Value="Editing [1]" />
   <String Overridable="yes" Id="JsonJpathSearch" Value="Searching in Json files" />

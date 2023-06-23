@@ -27,6 +27,8 @@ namespace PanelSw.Wix.Extensions.Symbols
                     new ColumnDefinition(nameof(Cost), ColumnType.Number, 4, false, false, ColumnCategory.Integer, minValue: 0, maxValue: int.MaxValue),
                     new ColumnDefinition(nameof(ErrorHandling), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 2),
                     new ColumnDefinition(nameof(EnableAll), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: -1, maxValue: 1),
+                    new ColumnDefinition(nameof(RemoveFeatures), ColumnType.Localized, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(ForceRemove), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: -1, maxValue: 1),
                     new ColumnDefinition(nameof(Order), ColumnType.Number, 4, false, false, ColumnCategory.Integer, minValue: 0, maxValue: int.MaxValue),
                 };
             }
@@ -80,10 +82,22 @@ namespace PanelSw.Wix.Extensions.Symbols
             set => this.Set(6, value);
         }
 
+        public string RemoveFeatures
+        {
+            get => Fields[7].AsString();
+            set => this.Set(7, value);
+        }
+
+        public int ForceRemove
+        {
+            get => Fields[8].AsNumber();
+            set => this.Set(8, value);
+        }
+
         public int Order
         {
-            get => Fields[7].AsNumber();
-            set => this.Set(7, value);
+            get => Fields[9].AsNumber();
+            set => this.Set(9, value);
         }
     }
 }

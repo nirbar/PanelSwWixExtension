@@ -51,7 +51,7 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 	ExitOnFailure(hr, "Failed adding log path to CustomActionData");
 
 	// Execute view
-	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `EnableFeatures`, `ExcludeFeatures`, `PackagePath`, `Cost`, `ErrorHandling`, `EnableAll` FROM `PSW_Dism` ORDER BY `Order`", &hView);
+	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `EnableFeatures`, `ExcludeFeatures`, `PackagePath`, `Cost`, `ErrorHandling`, `EnableAll`, `RemoveFeatures`, `ForceRemove` FROM `PSW_Dism` ORDER BY `Order`", &hView);
 	ExitOnFailure(hr, "Failed to execute SQL query");
 
 	// Iterate records
@@ -60,8 +60,8 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		CWixString id, exclude, include, package, component;
-		int nCost = 0, nErrorHandling = 0, nEnableAll = -1;
+		CWixString id, exclude, include, package, component, unwanted;
+		int nCost = 0, nErrorHandling = 0, nEnableAll = -1, nForceRemove = -1;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)id);
@@ -80,13 +80,17 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to get ErrorHandling.");
 		hr = WcaGetRecordInteger(hRecord, 8, &nEnableAll);
 		ExitOnFailure(hr, "Failed to get EnableAll.");
+		hr = WcaGetRecordFormattedString(hRecord, 9, (LPWSTR*)unwanted);
+		ExitOnFailure(hr, "Failed to get RemoveFeatures.");
+		hr = WcaGetRecordInteger(hRecord, 10, &nForceRemove);
+		ExitOnFailure(hr, "Failed to get ForceRemove.");
 
 		compAction = WcaGetComponentToDo((LPCWSTR)component);
 		switch (compAction)
 		{
 		case WCA_TODO::WCA_TODO_INSTALL:
 		case WCA_TODO::WCA_TODO_REINSTALL:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will enable features matching pattern '%ls', excluding pattern '%ls' on component '%ls'", (LPCWSTR)include, (LPCWSTR)exclude, (LPCWSTR)component);
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will enable features matching pattern '%ls', excluding pattern '%ls', remove pattern '%ls' on component '%ls'", (LPCWSTR)include, (LPCWSTR)exclude, (LPCWSTR)unwanted, (LPCWSTR)component);
 			break;
 
 		case WCA_TODO::WCA_TODO_UNINSTALL:
@@ -121,6 +125,12 @@ extern "C" UINT __stdcall DismSched(MSIHANDLE hInstall)
 
 		hr = WcaWriteIntegerToCaData(nEnableAll, &szCustomActionData);
 		ExitOnFailure(hr, "Failed appending EnableAll field to CustomActionData");
+
+		hr = WcaWriteStringToCaData((LPCWSTR)unwanted, &szCustomActionData);
+		ExitOnFailure(hr, "Failed appending RemoveFeatures field to CustomActionData");
+
+		hr = WcaWriteIntegerToCaData(nForceRemove, &szCustomActionData);
+		ExitOnFailure(hr, "Failed appending ForceRemove field to CustomActionData");
 	}
 	hr = S_OK; // We're only getting here on hr = E_NOMOREITEMS.
 
