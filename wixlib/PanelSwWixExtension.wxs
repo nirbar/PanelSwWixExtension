@@ -836,7 +836,7 @@
     <CustomAction Id="ExtractPayloadRollback" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" SuppressModularization="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="ExtractPayloadCommit" DllEntry="CommonDeferred" Execute="commit" Return="ignore" Impersonate="no" SuppressModularization="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <InstallExecuteSequence>
-      <Custom Action="ExtractPayload" After="InstallInitialize" />
+      <Custom Action="ExtractPayload" Before="ProcessComponents" />
       <Custom Action="ExtractPayloadCommit" Before="InstallFinalize" />
     </InstallExecuteSequence>
     <UI>
