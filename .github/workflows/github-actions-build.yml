@@ -63,8 +63,9 @@ jobs:
       - name: Publish nuget packages to github and nuget.org
         if: ${{ github.event.inputs.publish_nuget == 'true' && github.ref == 'refs/heads/master4' }}
         env:
-          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_PAT }}
+          GITHUB_TOKEN: ${{ secrets.TAGGER_PAT }}
         run: |
           dotnet nuget push nuget-out\PanelSwWixExtension4.*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source github
-          git v${{ env.FULL_VERSION }}
+          dotnet nuget push nuget-out\PanelSwWixExtension4.*.nupkg --api-key ${{ secrets.NUGET_TOKEN }} --source https://api.nuget.org/v3/index.json
+          git tag "wix4-v${{ env.FULL_VERSION }}"
           git push --tags
