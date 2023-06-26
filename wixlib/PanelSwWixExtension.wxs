@@ -311,7 +311,7 @@
     <CustomActionRef Id="PSW_CheckRebootRequired" />
 
     <InstallExecuteSequence>
-      <Custom Action="ExecOnComponent" Before="InstallInitialize" Overridable="yes" />
+      <Custom Action="ExecOnComponent" Before="ExecOnComponentRollback" Overridable="yes" />
       <Custom Action="ExecOnComponentRollback" Before="ProcessComponents" Overridable="yes" />
       <Custom Action="ExecOnComponentCommit" Before="InstallFinalize" Overridable="yes" />
       <Custom Action="ExecOnComponent_BeforeStop_rollback" Before="ExecOnComponent_BeforeStop_deferred" Overridable="yes" />
@@ -808,8 +808,8 @@
     <CustomAction Id="RestartLocalResources" DllEntry="RestartLocalResources" Execute="immediate" SuppressModularization="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="RestartLocalResourcesExec" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" Return="ignore" SuppressModularization="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <InstallExecuteSequence>
-      <Custom Action="RestartLocalResources" Before="InstallValidate" />
-      <Custom Action="RestartLocalResourcesExec" Before="RemoveFiles" />
+      <Custom Action="RestartLocalResources" Before="InstallValidate" Overridable="yes" />
+      <Custom Action="RestartLocalResourcesExec" Before="RemoveFiles" Overridable="yes" />
     </InstallExecuteSequence>
     <UI>
       <ProgressText Action="RestartLocalResources" Message="!(loc.RestartLocalResources)" />
@@ -822,7 +822,7 @@
     <CustomAction Id="ConcatFiles" DllEntry="ConcatFiles" Execute="immediate" SuppressModularization="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="ConcatFilesExec" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" SuppressModularization="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <InstallExecuteSequence>
-      <Custom Action="ConcatFiles" After="InstallFiles" />
+      <Custom Action="ConcatFiles" After="InstallFiles" Overridable="yes" />
     </InstallExecuteSequence>
     <UI>
       <ProgressText Action="ConcatFiles" Message="!(loc.ConcatFiles)" />
@@ -836,8 +836,8 @@
     <CustomAction Id="ExtractPayloadRollback" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" SuppressModularization="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="ExtractPayloadCommit" DllEntry="CommonDeferred" Execute="commit" Return="ignore" Impersonate="no" SuppressModularization="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <InstallExecuteSequence>
-      <Custom Action="ExtractPayload" Before="ProcessComponents" />
-      <Custom Action="ExtractPayloadCommit" Before="InstallFinalize" />
+      <Custom Action="ExtractPayload" Before="ProcessComponents" Overridable="yes" />
+      <Custom Action="ExtractPayloadCommit" Before="InstallFinalize" Overridable="yes" />
     </InstallExecuteSequence>
     <UI>
       <ProgressText Action="ExtractPayload" Message="!(loc.ExtractPayload)" />
