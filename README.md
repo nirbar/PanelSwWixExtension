@@ -38,7 +38,7 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
   - *XslTransform*: Apply a XSL transform on an installed XML file
   - *WebsiteConfig*: currently, can only stop a website
   - *JsonJPath*: Set values in JSON-formatted file.
-  - *Dism*: Enable Windows Feature using DISM API. Features will be installed when the parent component is being installed or repaired.
+  - *Dism*: Enable or disable Windows Features using DISM API. Features will be modified when the parent component is being installed or repaired.
   - *ZipFile*: Creates a ZIP archive from selected files.
   - *Unzip*: Extract a ZIP archive to selected folder.
   - *CustomUninstallKey*: Overwrite registry values in the product's [Uninstall](http://msdn.microsoft.com/en-us/library/aa372105%28v=vs.85%29.aspx) registry key
@@ -86,6 +86,7 @@ PanelSwWixExtension uses error codes in Error table:
 - 27007: WebsiteConfig error template for prompting user on errors.
 - 27008: SqlSearch error template for prompting user on errors.
 - 27009: JsonJpath error template for prompting user on errors.
+- 27010: Dism error template for prompting user on failures to remove a Windows feature package.
 
 ## Properties
 
