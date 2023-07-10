@@ -1,4 +1,4 @@
-﻿<WixLocalization Culture="he-il" xmlns="http://wixtoolset.org/schemas/v4/wxl">
+<WixLocalization Culture="he-il" xmlns="http://wixtoolset.org/schemas/v4/wxl">
   <String Overridable="yes" Id="CustomUninstallKey" Value="כתיבת ערכים ל- Registry" />
   <String Overridable="yes" Id="RemoveRegistryValue" Value="מחיקת ערכים מה- Registry" />
   <String Overridable="yes" Id="Telemetry" Value="שליחת מידע טלמטרי" />
@@ -7,6 +7,7 @@
   <String Overridable="yes" Id="ExecOnComponent" Value="הרצת פקודות" />
   <String Overridable="yes" Id="ExecOnComponentTemplate" Value="מריץ [1]" />
   <String Overridable="yes" Id="ExecOnFailure" Value="כשלון בהרצת פקודה [2]" />
+  <String Overridable="yes" Id="ExecOnPromptAlways" Value="בוצעה פקודה [2]:&#xA;[3]" />
   <String Overridable="yes" Id="ExecOnConsoleFailure" Value="פקודה [2] החזירה שגיאה&#xA;[3]" />  
   <String Overridable="yes" Id="ServiceConfig" Value="הגדרת שירותי מערכת" />
   <String Overridable="yes" Id="ServiceConfigFailure" Value="כשלון בהגדרת שירותי מערכת [2]" />

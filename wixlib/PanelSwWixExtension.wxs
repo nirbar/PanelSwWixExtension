@@ -19,8 +19,8 @@
   <Fragment>
     <CustomAction Id="ShellExecute_Immediate" SuppressModularization="yes" DllEntry="PSW_ShellExecute" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="ShellExecute_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Return="check" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="ShellExecute_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="check" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="ShellExecute_commit" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="commit" Return="check" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ShellExecute_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ShellExecute_commit" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="commit" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
 
     <InstallExecuteSequence>
       <Custom Action="ShellExecute_Immediate" Before="ProcessComponents" Overridable="yes" />
@@ -36,7 +36,7 @@
   <Fragment>
     <CustomAction Id="CustomUninstallKey_Immediate" SuppressModularization="yes" DllEntry="CustomUninstallKey_Immediate" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="CustomUninstallKey_deferred" SuppressModularization="yes" DllEntry="CustomUninstallKey_deferred" Execute="deferred" Return="check" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="CustomUninstallKey_rollback" SuppressModularization="yes" DllEntry="CustomUninstallKey_deferred" Execute="rollback" Return="check" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="CustomUninstallKey_rollback" SuppressModularization="yes" DllEntry="CustomUninstallKey_deferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
 
     <InstallExecuteSequence>
       <Custom Action="CustomUninstallKey_Immediate" Before="PublishProduct" Overridable="yes" />
@@ -52,7 +52,7 @@
   <Fragment>
     <CustomAction Id="RemoveRegistryValue_Immediate" SuppressModularization="yes" DllEntry="RemoveRegistryValue_Immediate" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="RemoveRegistryValue_deferred" SuppressModularization="yes" DllEntry="RemoveRegistryValue_Deferred" Execute="deferred" Return="check" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="RemoveRegistryValue_rollback" SuppressModularization="yes" DllEntry="RemoveRegistryValue_Deferred" Execute="rollback" Return="check" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="RemoveRegistryValue_rollback" SuppressModularization="yes" DllEntry="RemoveRegistryValue_Deferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
 
     <InstallExecuteSequence>
       <Custom Action="RemoveRegistryValue_Immediate" After="RemoveRegistryValues" Overridable="yes" />
@@ -151,7 +151,7 @@
   <!-- FileRegex -->
   <Fragment>
     <CustomAction Id="FileRegex_Immediate" SuppressModularization="yes" DllEntry="FileRegex" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="FileRegex_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="check" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="FileRegex_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="FileRegex_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Return="check" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="FileRegex_commit" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="commit" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
 
@@ -274,7 +274,7 @@
   <Fragment>
     <CustomAction Id="TaskScheduler" SuppressModularization="yes" DllEntry="TaskScheduler" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="TaskScheduler_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="TaskScheduler_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="TaskScheduler_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="TaskScheduler_commit" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="commit" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
 
     <InstallExecuteSequence>
@@ -292,26 +292,26 @@
     <CustomAction Id="ExecOnComponent" SuppressModularization="yes" DllEntry="ExecOnComponent" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="ExecOnComponentRollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="ExecOnComponentCommit" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="commit" Return="ignore" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="ExecOnComponent_BeforeStop_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_BeforeStop_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="ExecOnComponent_BeforeStop_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="ExecOnComponent_AfterStop_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_AfterStop_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="ExecOnComponent_AfterStop_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="ExecOnComponent_BeforeStart_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_BeforeStart_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="ExecOnComponent_BeforeStart_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="ExecOnComponent_AfterStart_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_AfterStart_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="ExecOnComponent_AfterStart_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="ExecOnComponent_Imp_BeforeStop_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_Imp_BeforeStop_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="ExecOnComponent_Imp_BeforeStop_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="ExecOnComponent_Imp_AfterStop_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_Imp_AfterStop_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="ExecOnComponent_Imp_AfterStop_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="ExecOnComponent_Imp_BeforeStart_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_Imp_BeforeStart_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="ExecOnComponent_Imp_BeforeStart_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="ExecOnComponent_Imp_AfterStart_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_Imp_AfterStart_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="ExecOnComponent_Imp_AfterStart_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomActionRef Id="PSW_CheckRebootRequired" />
 
     <InstallExecuteSequence>
-      <Custom Action="ExecOnComponent" Before="InstallInitialize" Overridable="yes" />
+      <Custom Action="ExecOnComponent" Before="ExecOnComponentRollback" Overridable="yes" />
       <Custom Action="ExecOnComponentRollback" Before="ProcessComponents" Overridable="yes" />
       <Custom Action="ExecOnComponentCommit" Before="InstallFinalize" Overridable="yes" />
       <Custom Action="ExecOnComponent_BeforeStop_rollback" Before="ExecOnComponent_BeforeStop_deferred" Overridable="yes" />
@@ -337,6 +337,7 @@
 
     <UI>
       <Error Id="27001" Message="!(loc.ExecOnFailure)" />
+      <Error Id="27011" Message="!(loc.ExecOnPromptAlways)" />
       <Error Id="27006" Message="!(loc.ExecOnConsoleFailure)" />
       <ProgressText Action="ExecOnComponent" Message="!(loc.ExecOnComponent)" />
       <ProgressText Action="ExecOnComponentRollback" Message="!(loc.ExecOnComponent)" />
@@ -413,7 +414,7 @@
   <!-- Unzip -->
   <Fragment>
     <CustomAction Id="UnzipSched" SuppressModularization="yes" DllEntry="Unzip" Execute="immediate" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="UnzipRollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="UnzipRollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="UnzipExec" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomActionRef Id="PSW_CheckRebootRequired" />
 
@@ -429,7 +430,7 @@
   <!-- ServiceConfig (account only for now) -->
   <Fragment>
     <CustomAction Id="PSW_ServiceConfig" SuppressModularization="yes" DllEntry="ServiceConfig" Execute="immediate" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="PSW_ServiceConfigRlbk" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="PSW_ServiceConfigRlbk" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="PSW_ServiceConfigExec" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomActionRef Id="PSW_CheckRebootRequired" />
 
@@ -461,13 +462,13 @@
   <Fragment>
     <CustomAction Id="PSW_InstallUtilSched" SuppressModularization="yes" DllEntry="InstallUtilSched" Execute="immediate" BinaryRef="PswManagedCA.X86.dll" />
     <CustomAction Id="PSW_InstallUtil_InstallExec_x86" SuppressModularization="yes" DllEntry="InstallUtilExec" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PswManagedCA.X86.dll" />
-    <CustomAction Id="PSW_InstallUtil_InstallRollback_x86" SuppressModularization="yes" DllEntry="InstallUtilExec" Execute="rollback" Impersonate="no" HideTarget="yes" BinaryRef="PswManagedCA.X86.dll" />
+    <CustomAction Id="PSW_InstallUtil_InstallRollback_x86" SuppressModularization="yes" DllEntry="InstallUtilExec" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PswManagedCA.X86.dll" />
     <CustomAction Id="PSW_InstallUtil_UninstallExec_x86" SuppressModularization="yes" DllEntry="InstallUtilExec" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PswManagedCA.X86.dll" />
-    <CustomAction Id="PSW_InstallUtil_UninstallRollback_x86" SuppressModularization="yes" DllEntry="InstallUtilExec" Execute="rollback" Impersonate="no" HideTarget="yes" BinaryRef="PswManagedCA.X86.dll" />
+    <CustomAction Id="PSW_InstallUtil_UninstallRollback_x86" SuppressModularization="yes" DllEntry="InstallUtilExec" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PswManagedCA.X86.dll" />
     <CustomAction Id="PSW_InstallUtil_InstallExec_x64" SuppressModularization="yes" DllEntry="InstallUtilExec" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PswManagedCA.X64.dll" />
-    <CustomAction Id="PSW_InstallUtil_InstallRollback_x64" SuppressModularization="yes" DllEntry="InstallUtilExec" Execute="rollback" Impersonate="no" HideTarget="yes" BinaryRef="PswManagedCA.X64.dll" />
+    <CustomAction Id="PSW_InstallUtil_InstallRollback_x64" SuppressModularization="yes" DllEntry="InstallUtilExec" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PswManagedCA.X64.dll" />
     <CustomAction Id="PSW_InstallUtil_UninstallExec_x64" SuppressModularization="yes" DllEntry="InstallUtilExec" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PswManagedCA.X64.dll" />
-    <CustomAction Id="PSW_InstallUtil_UninstallRollback_x64" SuppressModularization="yes" DllEntry="InstallUtilExec" Execute="rollback" Impersonate="no" HideTarget="yes" BinaryRef="PswManagedCA.X64.dll" />
+    <CustomAction Id="PSW_InstallUtil_UninstallRollback_x64" SuppressModularization="yes" DllEntry="InstallUtilExec" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PswManagedCA.X64.dll" />
 
     <InstallExecuteSequence>
       <Custom Action="PSW_InstallUtilSched" Before="ProcessComponents" Overridable="yes" />
@@ -525,7 +526,7 @@
   <!-- SqlScript -->
   <Fragment>
     <CustomAction Id="PSW_SqlScript" DllEntry="SqlScript" Execute="immediate" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="PSW_SqlScriptRollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Impersonate="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="PSW_SqlScriptRollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="PSW_SqlScriptExec" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <InstallExecuteSequence>
       <Custom Action="PSW_SqlScript" After="DuplicateFiles" Overridable="yes" />
@@ -541,7 +542,7 @@
   <!-- BackupAndRestore -->
   <Fragment>
     <CustomAction Id="BackupAndRestore" SuppressModularization="yes" DllEntry="BackupAndRestore" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="BackupAndRestore_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="BackupAndRestore_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="BackupAndRestore_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="BackupAndRestore_commit" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="commit" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
 
@@ -583,9 +584,9 @@
   <!-- TopShelf service -->
   <Fragment>
     <CustomAction Id="TopShelf" SuppressModularization="yes" DllEntry="TopShelf" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="TopShelfService_InstallRollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="TopShelfService_InstallRollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="TopShelfService_Install" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="TopShelfService_UninstallRollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="TopShelfService_UninstallRollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="TopShelfService_Uninstall" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
 
     <InstallExecuteSequence>
@@ -609,7 +610,7 @@
   <!-- CreateSelfSignCertificate -->
   <Fragment>
     <CustomAction Id="CreateSelfSignCertificate" SuppressModularization="yes" DllEntry="CreateSelfSignCertificate" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="CreateSelfSignCertificate_commit" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="commit" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="CreateSelfSignCertificate_commit" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="commit" Return="ignore" BinaryRef="PanelSwCustomActions.dll" />
     <InstallExecuteSequence>
       <Custom Action="CreateSelfSignCertificate" Before="InstallInitialize" Overridable="yes" />
       <Custom Action="CreateSelfSignCertificate_commit" Before="InstallFinalize" Overridable="yes" />
@@ -808,8 +809,8 @@
     <CustomAction Id="RestartLocalResources" DllEntry="RestartLocalResources" Execute="immediate" SuppressModularization="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="RestartLocalResourcesExec" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" Return="ignore" SuppressModularization="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <InstallExecuteSequence>
-      <Custom Action="RestartLocalResources" Before="InstallValidate" />
-      <Custom Action="RestartLocalResourcesExec" Before="RemoveFiles" />
+      <Custom Action="RestartLocalResources" Before="InstallValidate" Overridable="yes" />
+      <Custom Action="RestartLocalResourcesExec" Before="RemoveFiles" Overridable="yes" />
     </InstallExecuteSequence>
     <UI>
       <ProgressText Action="RestartLocalResources" Message="!(loc.RestartLocalResources)" />
@@ -822,7 +823,7 @@
     <CustomAction Id="ConcatFiles" DllEntry="ConcatFiles" Execute="immediate" SuppressModularization="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="ConcatFilesExec" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" SuppressModularization="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <InstallExecuteSequence>
-      <Custom Action="ConcatFiles" After="InstallFiles" />
+      <Custom Action="ConcatFiles" After="InstallFiles" Overridable="yes" />
     </InstallExecuteSequence>
     <UI>
       <ProgressText Action="ConcatFiles" Message="!(loc.ConcatFiles)" />
@@ -833,11 +834,11 @@
   <!-- ExtractPayload -->
   <Fragment>
     <CustomAction Id="ExtractPayload" DllEntry="ExtractPayload" Execute="immediate" SuppressModularization="yes" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="ExtractPayloadRollback" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" SuppressModularization="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="ExtractPayloadCommit" DllEntry="CommonDeferred" Execute="commit" Impersonate="no" SuppressModularization="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExtractPayloadRollback" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" SuppressModularization="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExtractPayloadCommit" DllEntry="CommonDeferred" Execute="commit" Return="ignore" Impersonate="no" SuppressModularization="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <InstallExecuteSequence>
-      <Custom Action="ExtractPayload" After="InstallInitialize" />
-      <Custom Action="ExtractPayloadCommit" Before="InstallFinalize" />
+      <Custom Action="ExtractPayload" Before="ProcessComponents" Overridable="yes" />
+      <Custom Action="ExtractPayloadCommit" Before="InstallFinalize" Overridable="yes" />
     </InstallExecuteSequence>
     <UI>
       <ProgressText Action="ExtractPayload" Message="!(loc.ExtractPayload)" />

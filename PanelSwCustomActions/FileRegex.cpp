@@ -117,13 +117,13 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 			hr = CFileOperations::MakeTemporaryName(szFilePath, L"RGX%05i.tmp", false, (LPWSTR*)tempFile);
 			ExitOnFailure(hr, "Failed getting temporary path for '%ls'", (LPCWSTR)szFilePath);
 
-			hr = rollbackCAD.AddMoveFile((LPCWSTR)tempFile, szFilePath);
+			hr = rollbackCAD.AddMoveFile((LPCWSTR)tempFile, szFilePath, CFileOperations::FileOperationsAttributes::AllowReboot | CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath);
 			ExitOnFailure(hr, "Failed creating custom action data for rollback action.");
 
 			hr = deferredFileCAD.AddCopyFile(szFilePath, (LPCWSTR)tempFile);
 			ExitOnFailure(hr, "Failed creating custom action data for deferred file action.");
 
-			hr = commitCAD.AddDeleteFile((LPCWSTR)tempFile);
+			hr = commitCAD.AddDeleteFile((LPCWSTR)tempFile, CFileOperations::FileOperationsAttributes::AllowReboot | CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath);
 			ExitOnFailure(hr, "Failed creating custom action data for commit action.");
 
 			hr = DictAddKey(hPrevFiles, szFilePath);

@@ -1,0 +1,69 @@
+name: Publish a Build of PanelSwWixExtension / PanelSwWixExtension4
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'Build ID'
+        required: true
+        type: string
+
+jobs:
+  build:
+    name: Publish
+    runs-on: windows-latest
+    steps:
+      - name: Resolve build commit
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: | 
+          $buildSha = (gh run view "${{ github.event.inputs.run_id }}" --json headSha --jq ".headSha" --repo "${{ github.repositoryUrl }}") | Out-String
+          Write-Host ("Build SHA is " + $buildSha)
+          if ($buildSha -notmatch '[0-9a-fA-F]{40}') {
+            exit 1
+          }          
+          Add-Content -Path ${{ github.env }} -Value ("BUILD_SHA=" + $buildSha)
+
+      - name: Checkout code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+          ref: ${{ env.BUILD_SHA }}
+
+      - name: Download build artifact
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: | 
+          gh run download "${{ github.event.inputs.run_id }}" --name nuget
+
+      - name: Resolve build version
+        run: |
+          $sdkFileName = Get-Childitem –Path "PanelSwWixExtension4.*.nupkg" -Exclude "*-psw-wix*" -Name
+          if ($sdkFileName) {
+            Add-Content -Path ${{ github.env }} -Value ("WIX_VERSION=wix4")
+            $sdkFileName = $sdkFileName.Replace("PanelSwWixExtension4.", "");
+          } 
+          else {
+            $sdkFileName = Get-Childitem –Path "PanelSwWixExtension.*.nupkg" -Exclude "*-psw-wix*" -Name
+            if ($sdkFileName) {
+              Add-Content -Path ${{ github.env }} -Value ("WIX_VERSION=wix3")
+              $sdkFileName = $sdkFileName.Replace("PanelSwWixExtension.", "");
+            } 
+            else {
+              Write-Host "Failed to resolve WiX Toolset version"
+              exit 1            
+            }
+          }
+          $sdkFileName = $sdkFileName.Replace(".nupkg", "");
+          Add-Content -Path ${{ github.env }} -Value ("NUGET_VERSION=" + $sdkFileName)
+
+      - name: Publish nuget packages to github
+        if: ${{ env.NUGET_VERSION != '' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_PAT }}
+        run: |
+          dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
+          dotnet nuget push "PanelSwWixExtension*.${{ env.NUGET_VERSION }}*.nupkg" --api-key ${{ secrets.GITHUB_TOKEN }} --source github --skip-duplicate
+          dotnet nuget push "PanelSwWixExtension*.${{ env.NUGET_VERSION }}*.nupkg" --api-key ${{ secrets.NUGET_TOKEN }} --source https://api.nuget.org/v3/index.json --skip-duplicate
+          git tag "${{ env.WIX_VERSION }}-v${{ env.NUGET_VERSION }}"
+          git push --tags
