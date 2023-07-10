@@ -2310,6 +2310,13 @@ Remove registry values.
       <xs:enumeration value="fail"></xs:enumeration>
       <xs:enumeration value="ignore"></xs:enumeration>
       <xs:enumeration value="prompt"></xs:enumeration>
+      <xs:enumeration value="promptAlways">
+        <xs:annotation>
+          <xs:documentation>
+            <![CDATA[Prompt even if exit code and stdout were ok. Currently supported with ExecOn]]>
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
 

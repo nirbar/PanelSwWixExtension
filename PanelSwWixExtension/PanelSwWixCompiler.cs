@@ -1720,7 +1720,8 @@ namespace PanelSw.Wix.Extensions
         {
             fail = 0,
             ignore = 1,
-            prompt = 2
+            prompt = 2,
+            promptAlways = 3, // Prompt even if exit code and stdout were ok
         }
 
         private void ParseTopShelfElement(XmlNode node, string file)

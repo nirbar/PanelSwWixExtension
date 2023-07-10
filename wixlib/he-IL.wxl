@@ -10,6 +10,8 @@
   <String Overridable="yes" Id="ExecOnFailure"><![CDATA[כשלון בהרצת פקודה [2]]]></String>
   <String Overridable="yes" Id="ExecOnConsoleFailure"><![CDATA[פקודה [2] החזירה שגיאה
 [3]]]></String>  
+  <String Overridable="yes" Id="ExecOnPromptAlways" Value="בוצעה פקודה [2]:
+[3]" />
   <String Overridable="yes" Id="ServiceConfig"><![CDATA[הגדרת שירותי מערכת]]></String>
   <String Overridable="yes" Id="ServiceConfigFailure"><![CDATA[כשלון בהגדרת שירותי מערכת [2]]]></String>
   <String Overridable="yes" Id="InstallUtil"><![CDATA[מתקין שירותי מערכת .NET]]></String>
