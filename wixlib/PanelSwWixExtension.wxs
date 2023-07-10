@@ -337,6 +337,7 @@
 
     <UI>
       <Error Id="27001" Message="!(loc.ExecOnFailure)" />
+      <Error Id="27011" Message="!(loc.ExecOnPromptAlways)" />
       <Error Id="27006" Message="!(loc.ExecOnConsoleFailure)" />
       <ProgressText Action="ExecOnComponent" Message="!(loc.ExecOnComponent)" />
       <ProgressText Action="ExecOnComponentRollback" Message="!(loc.ExecOnComponent)" />
