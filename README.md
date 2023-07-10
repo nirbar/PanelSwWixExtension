@@ -87,6 +87,7 @@ PanelSwWixExtension uses error codes in Error table:
 - 27008: SqlSearch error template for prompting user on errors.
 - 27009: JsonJpath error template for prompting user on errors.
 - 27010: Dism error template for prompting user on failures to remove a Windows feature package.
+- 27011: ExecOn message template for prompting user on success with promptAlways.
 
 ## Properties
 

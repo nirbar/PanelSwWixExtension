@@ -5,5 +5,5 @@
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'==''">$(BaseBuildFolder)obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
     <MSBuildProjectExtensionsPath Condition="'$(MSBuildProjectExtensionsPath )'==''">$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>
     <RestoreProjectStyle>PackageReference</RestoreProjectStyle>
-    </PropertyGroup>
+  </PropertyGroup>
 </Project>

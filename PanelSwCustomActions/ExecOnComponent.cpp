@@ -656,6 +656,7 @@ HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command)
 
 	// Sync
 LRetry:
+	szLog.Release();
 	if (hStdOut && (hStdOut != INVALID_HANDLE_VALUE))
 	{
 		ReleaseHandle(hStdOut);
@@ -697,7 +698,7 @@ LRetry:
 
 	if (SUCCEEDED(hr))
 	{
-		LogProcessOutput(hProc, hStdOut, ((details.consoleouputremap_size() > 0) ? (LPWSTR*)szLog : nullptr));
+		LogProcessOutput(hProc, hStdOut, ((details.consoleouputremap_size() > 0) || (details.errorhandling() == ErrorHandling::promptAlways)) ? (LPWSTR*)szLog : nullptr);
 
 		hr = ProcWaitForCompletion(hProc, INFINITE, &exitCode);
 		if (SUCCEEDED(hr))
@@ -758,58 +759,83 @@ LRetry:
 		break;
 	}
 
-	if (FAILED(hr))
+	switch (details.errorhandling())
 	{
-		switch (details.errorhandling())
-		{
-		case ErrorHandling::fail:
-		default:
-			// Will fail downstairs.
-			break;
+	case ErrorHandling::fail:
+	default:
+		// Will fail downstairs.
+		break;
 
-		case ErrorHandling::ignore:
+	case ErrorHandling::ignore:
+		if (FAILED(hr))
+		{
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Ignoring command failure 0x%08X", hr);
 			hr = S_OK;
-			break;
+		}
+		break;
 
-		case ErrorHandling::prompt:
+	case ErrorHandling::prompt:
+	case ErrorHandling::promptAlways:
+	{
+		HRESULT hrOp = hr;
+		PMSIHANDLE hRec;
+		UINT promptResult = IDABORT;
+		INSTALLMESSAGE errLevel;
+
+		hRec = ::MsiCreateRecord(3);
+		ExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
+
+		if (FAILED(hrOp) && (details.errorhandling() == ErrorHandling::prompt))
 		{
-			HRESULT hrOp = hr;
-			PMSIHANDLE hRec;
-			UINT promptResult = IDABORT;
-
-			hRec = ::MsiCreateRecord(2);
-			ExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
+			errLevel = (INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_ERROR | MB_ABORTRETRYIGNORE | MB_DEFBUTTON1 | MB_ICONERROR);
 
 			hr = WcaSetRecordInteger(hRec, 1, 27001);
 			ExitOnFailure(hr, "Failed setting record integer");
-
 			hr = WcaSetRecordString(hRec, 2, szObfuscatedCommand);
 			ExitOnFailure(hr, "Failed setting record string");
+		}
+		else
+		{
+			errLevel = (INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_USER | MB_OKCANCEL | MB_DEFBUTTON1 | MB_ICONINFORMATION);
 
-			promptResult = WcaProcessMessage((INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_ERROR | MB_ABORTRETRYIGNORE | MB_DEFBUTTON1 | MB_ICONERROR), hRec);
-			switch (promptResult)
+			hr = WcaSetRecordInteger(hRec, 1, 27011);
+			ExitOnFailure(hr, "Failed setting record integer");
+			hr = WcaSetRecordString(hRec, 2, szObfuscatedCommand);
+			ExitOnFailure(hr, "Failed setting record string");
+			hr = WcaSetRecordString(hRec, 3, szLog.IsNullOrEmpty()  ? L"" : (LPCWSTR)szLog);
+			ExitOnFailure(hr, "Failed setting record string");
+		}
+
+		promptResult = WcaProcessMessage(errLevel, hRec);
+		switch (promptResult)
+		{
+		case IDABORT:
+		case IDCANCEL:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User aborted on command failure (error code 0x%08X)", hrOp);
+			hr = hrOp;
+			break;
+
+		default: // Probably silent (result 0)
+			if (FAILED(hrOp))
 			{
-			case IDABORT:
-			case IDCANCEL:
-			default: // Probably silent (result 0)
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User aborted on command failure (error code 0x%08X)", hrOp);
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Aborting on command failure (error code 0x%08X)", hrOp);
 				hr = hrOp;
-				break;
-
-			case IDRETRY:
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose to retry on command failure (error code 0x%08X)", hrOp);
-				hr = S_OK;
-				goto LRetry;
-
-			case IDIGNORE:
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User ignored command failure (error code 0x%08X)", hrOp);
-				hr = S_OK;
-				break;
 			}
 			break;
+
+		case IDRETRY:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose to retry on command failure (error code 0x%08X)", hrOp);
+			hr = S_OK;
+			goto LRetry;
+
+		case IDOK:
+		case IDIGNORE:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User elected to continue");
+			hr = S_OK;
+			break;
 		}
-		}
+		break;
+	}
 	}
 	ExitOnFailure(hr, "Failed to execute command '%ls'", szObfuscatedCommand);
 

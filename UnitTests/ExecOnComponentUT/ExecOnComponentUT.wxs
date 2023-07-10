@@ -10,7 +10,7 @@
     <Property Id="GOOGLE" Hidden="yes" Value="www.google.com" />
     <Property Id="PACKETS" Hidden="yes" Value="Packets" />
 
-    <Binary Id="TestBinary.exe" SourceFile="..\..\build\protobuf\$(var.Configuration)\protoc.exe" />
+    <Binary Id="TestBinary.exe" SourceFile="..\..\build-common\Win32\protobuf\Release\protoc.exe" />
 
     <Property Id="MY_PASSWORD" Hidden="yes" />
     <util:User Domain="[MY_DOMAIN]" Name="[MY_NAME]" Password="[MY_PASSWORD]" Id="me" />
@@ -32,7 +32,7 @@
         <PanelSW:ExecOn Command="CMD /C &quot;TYPE &quot;{*non_printable.txt}&quot;&quot;" BinaryKey="non_printable.txt" BeforeStopServices="yes" OnInstall="yes" ErrorHandling="prompt" />
 
         <PanelSW:ExecOn BinaryKey="TestBinary.exe" Command='"{*TestBinary.exe}" --version' BeforeStartServices="yes" OnInstall="yes" />
-        <PanelSW:ExecOn Impersonate="no" User="me" BeforeStartServices="yes" OnInstall="yes" Command="&quot;notepad.exe&quot;" ErrorHandling="prompt" />
+        <PanelSW:ExecOn Impersonate="no" User="me" BeforeStartServices="yes" OnInstall="yes" Command="&quot;notepad.exe&quot;" ErrorHandling="promptAlways" />
       </Component>
     </ComponentGroup>
 

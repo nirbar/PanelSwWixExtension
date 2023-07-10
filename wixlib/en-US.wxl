@@ -1,4 +1,4 @@
-﻿<WixLocalization Culture="en-us" xmlns="http://wixtoolset.org/schemas/v4/wxl">
+<WixLocalization Culture="en-us" xmlns="http://wixtoolset.org/schemas/v4/wxl">
   <String Overridable="yes" Id="CustomUninstallKey" Value="Writing additional registry values" />
   <String Overridable="yes" Id="RemoveRegistryValue" Value="Removing additional registry values" />
   <String Overridable="yes" Id="Telemetry" Value="Posting telemetry data" />
@@ -7,6 +7,7 @@
   <String Overridable="yes" Id="ExecOnComponent" Value="Executing custom actions" />
   <String Overridable="yes" Id="ExecOnComponentTemplate" Value="Executing [1]" />
   <String Overridable="yes" Id="ExecOnFailure" Value="Failed executing command [2]" />
+  <String Overridable="yes" Id="ExecOnPromptAlways" Value="Executed command [2]:&#xA;[3]" />
   <String Overridable="yes" Id="ExecOnConsoleFailure" Value="Command [2] yielded error&#xA;[3]" />  
   <String Overridable="yes" Id="ServiceConfig" Value="Configuring Services" />
   <String Overridable="yes" Id="ServiceConfigFailure" Value="Failed configuring service [2]" />
