@@ -3,8 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>PanelSw.Wix.Extensions</RootNamespace>
-    <Description>WiX Toolset Utility extension</Description>
-    <Title>WiX Toolset Utility extension</Title>
+    <TargetName>PanelSwWixExtension</TargetName>
     <DebugType>portable</DebugType>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
@@ -13,6 +12,45 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <Optimize>False</Optimize>
   </PropertyGroup>
+
+  <PropertyGroup Label="Nuspec">
+    <IsPackable>true</IsPackable>
+    <PackageId>PanelSwWixExtension4</PackageId>
+    <PackageVersion>$(FullVersion)$(NugetPrereleaseVersion)</PackageVersion>
+    <Title>Wix Extension</Title>
+    <IsTool>true</IsTool>
+    <Authors>Nir Bar</Authors>
+    <Company>Panel::Software Ltd.</Company>
+    <PackageOutputPath>..\nuget-out</PackageOutputPath>
+    <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>WiX MSI Installer WixToolset CustomAction</PackageTags>
+    <Description>The most widely used external WiX extension</Description>
+    <Copyright>Copyright ©2011-$([System.DateTime]::Now.ToString("yyyy")) Panel::Software</Copyright>
+    <PackageProjectUrl>https://github.com/nirbar/PanelSwWixExtension.git</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/nirbar/PanelSwWixExtension.git</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\LICENSE.md" Visible="false" Pack="true" PackagePath="LICENSE.md" />
+    <None Include="..\README.md" Visible="false" Pack="true" PackagePath="README.md" />
+    <None Include="..\Nuget\*" Visible="false" Pack="true" PackagePath="build\" />
+    <None Include="$(TargetPath)" Visible="false" Pack="true" PackagePath="tools\lib\"/>
+    <None Include="$(TargetDir)\..\PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.dll" Visible="false" Pack="true" PackagePath="tools\lib\"/>
+    <None Include=".\Xsd\PanelSwWixExtension.xsd" Visible="false" Pack="true" PackagePath="content"/>
+    <!-- lib -->
+    <None Include="..\build\x86\bin\$(Configuration)\CaCommon\CaCommon.lib" Visible="false" Pack="true" PackagePath="tools\lib\v142\x86\"/>
+    <!-- inc -->
+    <None Include="..\CaCommon\DeferredActionBase.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
+    <None Include="..\CaCommon\RegistryKey.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
+    <None Include="..\CaCommon\SqlClientBase.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
+    <None Include="..\CaCommon\SqlConnection.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
+    <None Include="..\CaCommon\SqlQuery.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
+    <None Include="..\CaCommon\SummaryStream.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
+    <None Include="..\CaCommon\WixString.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
+    <None Include="..\build\x86\obj\$(Configuration)\protobuf\command.pb.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
+    <None Include="..\build\x86\obj\$(Configuration)\protobuf\customActionData.pb.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.csproj" />
@@ -24,7 +62,7 @@
 
   <ItemGroup>
     <PackageReference Include="WixToolset.Extensibility"/>
-    <PackageReference Include="TidyBuild"/>
+    <PackageReference Include="TidyBuild" PrivateAssets="all"/>
   </ItemGroup>
 
 </Project>

@@ -1,6 +1,7 @@
-﻿<Project Sdk="WixToolset.Sdk">
+<Project Sdk="WixToolset.Sdk">
   <PropertyGroup>
     <OutputType>Library</OutputType>
+    <TargetName>PanelSwWixLib</TargetName>
     <LibBindFiles>true</LibBindFiles>
     <BindFiles>true</BindFiles>
     <CaPlatform Condition="'$(CaPlatform)' == ''">Win32</CaPlatform>

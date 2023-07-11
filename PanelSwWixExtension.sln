@@ -53,6 +53,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		dirs.proj = dirs.proj
 		.github\workflows\github-actions-build.yml = .github\workflows\github-actions-build.yml
 		global.json = global.json
+		LICENSE.md = LICENSE.md
 		nuget.config = nuget.config
 		Nuget\PanelSwWixExtension4.props = Nuget\PanelSwWixExtension4.props
 		Nuget\PanelSwWixExtension4.targets = Nuget\PanelSwWixExtension4.targets

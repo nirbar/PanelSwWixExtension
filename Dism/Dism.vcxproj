@@ -16,6 +16,7 @@
     <Keyword>Win32Proj</Keyword>
     <ProjectGuid>{e08bd5f2-b8de-4eee-a77f-fd82678664ac}</ProjectGuid>
     <RootNamespace>Dism</RootNamespace>
+    <TargetName>Dism</TargetName>
     <ConfigurationType>DynamicLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>

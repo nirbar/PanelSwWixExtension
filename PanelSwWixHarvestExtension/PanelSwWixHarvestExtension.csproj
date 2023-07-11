@@ -1,8 +1,9 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
     <RootNamespace>PanelSw.Wix.HarvestExtension</RootNamespace>
+    <TargetName>PanelSwWixHarvestExtension</TargetName>
     <Description>WiX Toolset Harvest extension</Description>
     <Title>WiX Toolset Harvest extension</Title>
     <DebugType>portable</DebugType>

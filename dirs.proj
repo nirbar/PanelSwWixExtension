@@ -18,7 +18,7 @@
     <!-- WiX -->
     <ProjectReference Include="wixlib\PanelSwWixLib.wixproj" Properties="CaPlatform=Win32;Platform=x86" Targets="Restore;Build" BuildInParallel="false" />
     <ProjectReference Include="PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.csproj" Properties="Platform=AnyCPU" Targets="Restore;Build" BuildInParallel="false" />
-    <ProjectReference Include="PanelSwWixExtension\PanelSwWixExtension.csproj" Properties="Platform=AnyCPU" Targets="Restore;Build" BuildInParallel="false" />
+    <ProjectReference Include="PanelSwWixExtension\PanelSwWixExtension.csproj" Properties="Platform=AnyCPU;NugetPrereleaseVersion=$(NugetPrereleaseVersion)" Targets="Restore;Build;Pack" BuildInParallel="false" />
   </ItemGroup>
 
   <ItemGroup>
@@ -33,7 +33,7 @@
   <Target Name="WixtoolsetToPanelSwWix4" Inputs="%(AllMyProjects.FullPath)" Outputs="%(AllMyProjects.FullPath).never">
     <PropertyGroup>
       <JsonFileContents>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)global.json'))</JsonFileContents>
-      <JsonFileContents>$([System.Text.RegularExpressions.Regex]::Replace('$(JsonFileContents)', '.*WixToolset.*', '"PanelSwWix4.Sdk": "$(PanelSwWix4Version)",'))</JsonFileContents>
+      <JsonFileContents>$([System.Text.RegularExpressions.Regex]::Replace('$(JsonFileContents)', '"PanelSwWix4.Sdk".*', '"PanelSwWix4.Sdk": "$(PanelSwWix4Version)",'))</JsonFileContents>
     </PropertyGroup>
 
     <WriteLinesToFile File="$(MSBuildThisFileDirectory)global.json"

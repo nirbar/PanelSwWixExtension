@@ -11,7 +11,7 @@ on:
       psw_wix_version:
         description: 'PanelSwWix4 version'
         required: true
-        default: 5.0.0-psw-wix.0135-14
+        default: 5.0.0-psw-wix.0142-17
         type: string
 
 jobs:
@@ -37,7 +37,7 @@ jobs:
             Add-Content -Path ${{ github.env }} -Value "PSW_WIX_VERSION=${{ env.DEFAULT_PSW_WIX_VERSION }}"
           }
         env:
-          DEFAULT_PSW_WIX_VERSION: '5.0.0-psw-wix.0135-14'
+          DEFAULT_PSW_WIX_VERSION: '5.0.0-psw-wix.0142-17'
 
       - name: Prepare for build
         run: |
@@ -46,14 +46,14 @@ jobs:
           nuget restore
 
       - name: Build PanelSwWixExtension
-        run: msbuild dirs.proj -restore -p:NugetDir="" -p:FullVersion=${{ env.FULL_VERSION }} "-p:SolutionDir=${{ github.workspace }}\"
+        run: msbuild dirs.proj -restore -p:NugetDir="" -p:FullVersion=${{ env.FULL_VERSION }}
 
       - name: Build PanelSwWixExtension with PanelSwWix4
         run: |
           msbuild dirs.proj -t:WixtoolsetToPanelSwWix4 "-p:PanelSwWix4Version=${{ env.PSW_WIX_VERSION }}"
           Remove-Item ("${{ github.workspace }}" + "\build") -Recurse -Force
           dotnet restore dirs.proj "-p:PanelSwWix4Version=${{ env.PSW_WIX_VERSION }}"
-          msbuild dirs.proj -restore -p:NugetDir="" -p:FullVersion=${{ env.FULL_VERSION }} "-p:PanelSwWix4Version=${{ env.PSW_WIX_VERSION }}" "-p:NugetPrereleaseVersion=-psw-wix" "-p:SolutionDir=${{ github.workspace }}\"
+          msbuild dirs.proj -restore -p:NugetDir="" -p:FullVersion=${{ env.FULL_VERSION }} "-p:PanelSwWix4Version=${{ env.PSW_WIX_VERSION }}" "-p:NugetPrereleaseVersion=-psw-wix"
 
       - uses: actions/upload-artifact@v3.1.2
         with:

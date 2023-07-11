@@ -11,6 +11,7 @@
     <NuGetTargetMoniker Condition="'$(NuGetTargetMoniker)' == ''">native,Version=v0.0</NuGetTargetMoniker>
     <ProjectGuid>{7C6B230A-9186-4C1E-B61D-E803CC36A347}</ProjectGuid>
     <RootNamespace>CaCommon</RootNamespace>
+    <TargetName>CaCommon</TargetName>
     <Keyword>Win32Proj</Keyword>
     <WholeProgramOptimization Condition="'$(Configuration)'=='Release'">true</WholeProgramOptimization>
     <ConfigurationType>StaticLibrary</ConfigurationType>

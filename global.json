@@ -1,6 +1,7 @@
 {
   "msbuild-sdks": {
     "WixToolset.Sdk": "4.0.1",
+    "PanelSwWix4.Sdk": "5.0.0-psw-wix.0142-17",
     "Microsoft.Build.Traversal": "4.0.0"
   },
   "sdk": {

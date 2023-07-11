@@ -9,7 +9,7 @@
     <Manufacturer>Panel::Software</Manufacturer>
 
     <!--
-    <NugetPrereleaseVersion>-rc.3</NugetPrereleaseVersion>
+    <NugetPrereleaseVersion>-psw-wix</NugetPrereleaseVersion>
     -->
 
     <!-- CMake -->
@@ -28,6 +28,7 @@
 
     <DefineConstants Condition="'$(MSBuildProjectExtension)' != '.csproj'">JetVersion=$(FullVersion);JetProductName=$(ProductName);JetManufacturer=$(Manufacturer);$(DefineConstants)</DefineConstants>
 
+    <IsPackable>false</IsPackable>
     <SuppressPdbOutput>true</SuppressPdbOutput>
     <SignAssembly Condition="Exists('$(AssemblyOriginatorKeyFile)')">true</SignAssembly>
 

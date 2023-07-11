@@ -11,6 +11,7 @@
     <NuGetTargetMoniker Condition="'$(NuGetTargetMoniker)' == ''">native,Version=v0.0</NuGetTargetMoniker>
     <ProjectGuid>{46D02BC4-720A-4B33-AA27-4103E7349F02}</ProjectGuid>
     <RootNamespace>ProtoCaLib</RootNamespace>
+    <TargetName>ProtoCaLib</TargetName>
     <Keyword>Win32Proj</Keyword>
     <WholeProgramOptimization Condition="'$(Configuration)'=='Release'">true</WholeProgramOptimization>
     <ConfigurationType>StaticLibrary</ConfigurationType>
