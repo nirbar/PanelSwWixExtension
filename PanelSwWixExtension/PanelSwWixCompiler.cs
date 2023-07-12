@@ -2525,9 +2525,9 @@ namespace PanelSw.Wix.Extensions
             string unwanted = null;
             ErrorHandling promptOnError = ErrorHandling.fail;
             int cost = 20971520; // 20 MB.
-            int enableAll = -1;
+            bool enableAll = true;
             int order = 1000000000 + sourceLineNumbers.LineNumber ?? 0;
-            int forceRemove = -1;
+            bool forceRemove = false;
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -2556,7 +2556,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         case "EnableAll":
-                            enableAll = (int)ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                            enableAll = ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) != YesNoType.No;
                             break;
 
                         case "RemoveFeature":
@@ -2564,7 +2564,7 @@ namespace PanelSw.Wix.Extensions
                             break;
 
                         case "ForceRemove":
-                            forceRemove = (int)ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib);
+                            forceRemove = ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes;
                             break;
 
                         case "Order":
@@ -2602,8 +2602,8 @@ namespace PanelSw.Wix.Extensions
                 row.PackagePath = package;
                 row.Cost = cost;
                 row.ErrorHandling = (int)promptOnError;
-                row.EnableAll = enableAll;
-                row.ForceRemove = forceRemove;
+                row.EnableAll = enableAll ? 1 : 0;
+                row.ForceRemove = forceRemove ? 1 : 0;
                 row.Order = order;
             }
         }
