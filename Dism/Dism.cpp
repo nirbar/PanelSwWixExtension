@@ -331,15 +331,13 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 		for (DWORD j = 0; j < pStates[i].dwFeatureNum; ++j)
 		{
 		LRetryFtr:
-			PMSIHANDLE hActionData;
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Enabling feature '%ls'", pStates[i].pResolvedFeatures[j]->FeatureName);
 
-			hActionData = ::MsiCreateRecord(1);
+			PMSIHANDLE hActionData = ::MsiCreateRecord(1);
 			if (hActionData && SUCCEEDED(WcaSetRecordString(hActionData, 1, pStates[i].pResolvedFeatures[j]->FeatureName)))
 			{
 				WcaProcessMessage(INSTALLMESSAGE::INSTALLMESSAGE_ACTIONDATA, hActionData);
 			}
-			::MsiCloseHandle(hActionData);
 
 			hr = ::DismEnableFeature(hSession, pStates[i].pResolvedFeatures[j]->FeatureName, nullptr, DismPackageNone, FALSE, nullptr, 0, pStates[i].bEnableAll != FALSE, hCancel_, _pfProgressCallback, &pStates[i]);
 			if (HRESULT_CODE(hr) == ERROR_SUCCESS_REBOOT_REQUIRED)
@@ -392,15 +390,13 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 			if (disableFeature)
 			{
 			LRetryUnwanted:
-				PMSIHANDLE hActionData;
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Disabling feature '%ls'", pStates[i].pUnwantedFeatures[u]->FeatureName);
 
-				hActionData = ::MsiCreateRecord(1);
+				PMSIHANDLE hActionData = ::MsiCreateRecord(1);
 				if (hActionData && SUCCEEDED(WcaSetRecordString(hActionData, 1, pStates[i].pUnwantedFeatures[u]->FeatureName)))
 				{
 					WcaProcessMessage(INSTALLMESSAGE::INSTALLMESSAGE_ACTIONDATA, hActionData);
 				}
-				::MsiCloseHandle(hActionData);
 
 				hr = ::DismDisableFeature(hSession, pStates[i].pUnwantedFeatures[u]->FeatureName, nullptr, FALSE, hCancel_, _pfProgressCallback, &pStates[i]);
 
@@ -594,8 +590,6 @@ static HRESULT HandleError(ErrorHandling nErrorHandling, UINT nErrorId, LPCWSTR 
 			break;
 		}
 		break;
-
-		::MsiCloseHandle(hRec);
 	}
 	}
 
