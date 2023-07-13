@@ -2860,8 +2860,12 @@ namespace PanelSw.Wix.Extensions
             string features = null;
             string exclude = null;
             string package = null;
+            string unwanted = null;
             ErrorHandling promptOnError = ErrorHandling.fail;
             int cost = 20971520; // 20 MB.
+            bool enableAll = true;
+            int order = 1000000000 + GetLineNumber(sourceLineNumbers);
+            bool forceRemove = false;
 
             foreach (XmlAttribute attrib in element.Attributes)
             {
@@ -2906,6 +2910,26 @@ namespace PanelSw.Wix.Extensions
                         }
                         break;
 
+                        case "EnableAll":
+                            enableAll = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) != YesNoType.No;
+                            break;
+
+                        case "RemoveFeature":
+                            unwanted = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        case "ForceRemove":
+                            forceRemove = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes;
+                            break;
+
+                        case "Order":
+                            order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                            if (order < 0)
+                            {
+                                order += int.MaxValue;
+                            }
+                            break;
+
                     default:
                         Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                         break;
@@ -2942,6 +2966,10 @@ namespace PanelSw.Wix.Extensions
                 row[4] = package;
                 row[5] = cost;
                 row[6] = (int)promptOnError;
+                row[7] = enableAll ? 1 : 0;
+                row[8] = forceRemove ? 1 : 0;
+                row[9] = order;
+                row[10] = unwanted;
             }
         }
 

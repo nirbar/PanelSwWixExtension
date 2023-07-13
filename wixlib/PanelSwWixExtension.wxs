@@ -377,6 +377,7 @@
     <UI>
       <Error Id="27003">!(loc.DismPackageFailure)</Error>
       <Error Id="27004">!(loc.DismFeatureFailure)</Error>
+      <Error Id="27010">!(loc.DismUnwantedFeatureFailure)</Error>
       <ProgressText Action="DismSched">!(loc.Dism)</ProgressText>
       <ProgressText Action="DismX86" Template="!(loc.DismTemplate)">!(loc.Dism)</ProgressText>
       <ProgressText Action="DismX64" Template="!(loc.DismTemplate)">!(loc.Dism)</ProgressText>

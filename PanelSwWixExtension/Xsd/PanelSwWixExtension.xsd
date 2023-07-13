@@ -1076,6 +1076,26 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
               <xs:documentation><![CDATA[Cost in ticks. The default is 20971520, AKA 20MB]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="EnableAll" type="wix:YesNoType" use="optional" default="yes">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Enable all dependencies of the regex matched features. If a specified feature or any one of its dependencies cannot be enabled, none of them will be changed from their existing state. Defaults to 'True']]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="RemoveFeature" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Feature Regex pattern. Windows Features matching this regular expression will be disabled after the EnableFeature stage of the CA has been processed. By default, the unwanted Windows Feature will be disabled only if it was not enabled before the EnableFeature stage. 'ForceRemove' flag can be used if the unwanted Windows Feature was enabled before running this CA.]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="ForceRemove" type="wix:YesNoType" use="optional" default="yes">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Disable the unwanted regex matched features even when they were installed before this deployment took place. Defaults to 'False']]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Order" use="optional" type="xs:int" default="0">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Order of execution, defaults to line number. Expressions with explicit order field will be executed before expressions with implicit order. Negative Order values will be executed last in increasing order. For example, Order="-1" will be executed last, after Order="-2"]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>

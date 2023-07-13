@@ -20,6 +20,7 @@ enum ErrorHandling
 
 #define ERROR_ID_PACKAGE	27003
 #define ERROR_ID_FEATURE	27004
+#define ERROR_ID_UNWANTED   27010
 
 static LPCWSTR DismStateString(DismPackageFeatureState state);
 static void ProgressCallback(UINT Current, UINT Total, PVOID UserData);
@@ -40,12 +41,19 @@ struct ProgressReportState
 	LPWSTR szInclude = nullptr;
 	LPWSTR szExclude = nullptr;
 	LPWSTR szPackage = nullptr;
+	LPWSTR szRemove = nullptr;
 	int nMsiCost = 0;
 	ErrorHandling eErrorHandling = ErrorHandling::fail;
-	
+	BOOL bEnableAll = 0;
+	BOOL bForceRemove = 0;
+
 	// Features resolved to be enabled
-	DismFeature **pFeatures = nullptr;
+	DismFeature **pResolvedFeatures = nullptr;
 	DWORD dwFeatureNum = 0;
+
+	// Features resolved to be disabled
+	DismFeature** pUnwantedFeatures = nullptr;
+	DWORD dwUnwantedNum = 0;
 };
 
 /* CustomActionData fields:
@@ -56,6 +64,9 @@ struct ProgressReportState
 	- Package
 	- Cost
 	- Error handling
+	- EnableAll flag
+	- Remove regex
+	- ForceRemove flag
 */
 extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 {
@@ -65,6 +76,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 	UINT uFeatureNum = 0;
 	DismFeature* pFeatures = nullptr;
 	DismString* pErrorString = nullptr;
+	DismFeatureInfo* pFeatureInfo = nullptr;
 	BOOL bDismInit = FALSE;
 	BOOL bRes = TRUE;
 	LPWSTR szCAD = nullptr;
@@ -87,21 +99,30 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 	// Parse CAD
 	while ((hr = WcaReadStringFromCaData(&szCAD, &currState.szInclude)) != E_NOMOREITEMS)
 	{
-		ExitOnFailure(hr, "Failed getting CustomActionData field");
+		ExitOnFailure(hr, "Failed getting EnableFeatures CustomActionData field");
 
 		hr = WcaReadStringFromCaData(&szCAD, &currState.szExclude);
-		ExitOnFailure(hr, "Failed getting CustomActionData field");
+		ExitOnFailure(hr, "Failed getting ExcludeFeatures CustomActionData field");
 
 		hr = WcaReadStringFromCaData(&szCAD, &currState.szPackage);
-		ExitOnFailure(hr, "Failed getting CustomActionData field");
+		ExitOnFailure(hr, "Failed getting PackagePath CustomActionData field");
 
 		hr = WcaReadIntegerFromCaData(&szCAD, &currState.nMsiCost);
-		ExitOnFailure(hr, "Failed getting CustomActionData field");
+		ExitOnFailure(hr, "Failed getting Cost CustomActionData field");
 
 		hr = WcaReadIntegerFromCaData(&szCAD, (int*)&currState.eErrorHandling);
-		ExitOnFailure(hr, "Failed getting CustomActionData field");
+		ExitOnFailure(hr, "Failed getting ErrorHandling CustomActionData field");
 
-		hr = MemInsertIntoArray((void**)&pStates, 0, 1, dwStateNum, sizeof(ProgressReportState), 1);
+		hr = WcaReadIntegerFromCaData(&szCAD, &currState.bEnableAll);
+		ExitOnFailure(hr, "Failed getting EnableAll CustomActionData field");
+
+		hr = WcaReadStringFromCaData(&szCAD, &currState.szRemove);
+		ExitOnFailure(hr, "Failed getting RemoveFeatures CustomActionData field");
+
+		hr = WcaReadIntegerFromCaData(&szCAD, &currState.bForceRemove);
+		ExitOnFailure(hr, "Failed getting ForceRemove CustomActionData field");
+
+		hr = MemInsertIntoArray((LPVOID*)&pStates, 0, 1, dwStateNum, sizeof(ProgressReportState), 1);
 		ExitOnFailure(hr, "Failed inserting state to array");
 
 		err = ::memcpy_s(pStates, sizeof(ProgressReportState), &currState, sizeof(currState));
@@ -165,7 +186,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 					{
 						hr = E_FAIL;
 					}
-					ExitOnFailure(hr, "Failed evaluating regular expression. %s", ex.what());
+					ExitOnFailure(hr, "Failed evaluating EnableFeatures regular expression. %s", ex.what());
 				}
 
 				if (!bRes || (results.length() <= 0))
@@ -187,7 +208,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 						{
 							hr = E_FAIL;
 						}
-						ExitOnFailure(hr, "Failed evaluating regular expression. %s", ex.what());
+						ExitOnFailure(hr, "Failed evaluating ExcludeFeatures regular expression. %s", ex.what());
 					}
 
 					if (bRes && (results.length() > 0))
@@ -197,10 +218,10 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 					}
 				}
 
-				hr = MemInsertIntoArray((void**)&pStates[j].pFeatures, 0, 1, pStates[j].dwFeatureNum, sizeof(DismFeature*), 1);
-				ExitOnFailure(hr, "Failed adding feature to array");
+				hr = MemInsertIntoArray((LPVOID*)&pStates[j].pResolvedFeatures, 0, 1, pStates[j].dwFeatureNum, sizeof(DismFeature*), 1);
+				ExitOnFailure(hr, "Failed adding feature to resolved array");
 
-				pStates[j].pFeatures[0] = pFeatures + i;
+				pStates[j].pResolvedFeatures[0] = pFeatures + i;
 				++pStates[j].dwFeatureNum;
 
 				break;
@@ -219,11 +240,57 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 			ExitOnFailure(hr, "Illegal feature state %i for '%ls'", pFeatures[i].State, pFeatures[i].FeatureName);
 			break;
 		}
+
+		bool bSkipUnwanted = pFeatures[i].State == DismPackageFeatureState::DismStateInstalled
+			|| pFeatures[i].State == DismPackageFeatureState::DismStateInstallPending
+			|| pFeatures[i].State == DismPackageFeatureState::DismStatePartiallyInstalled;
+
+		for (DWORD k = 0; k < dwStateNum ; ++k)
+		{
+			if (pStates[k].szRemove == nullptr || !*pStates[k].szRemove)
+				continue;
+
+			match_results<LPCWSTR> results;
+			try
+			{
+				wregex rxUnwanted(pStates[k].szRemove);
+				bRes = regex_search(pFeatures[i].FeatureName, results, rxUnwanted);
+			}
+			catch (std::regex_error ex)
+			{
+				hr = HRESULT_FROM_WIN32(ex.code());
+				if (SUCCEEDED(hr))
+				{
+					hr = E_FAIL;
+				}
+				ExitOnFailure(hr, "Failed evaluating RemoveFeatures regular expression. %s", ex.what());
+			}
+
+			if (!bRes || (results.length() <= 0))
+			{
+				continue;
+			}
+
+			if (bSkipUnwanted && !pStates[k].bForceRemove)
+			{
+				WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Skipping removal of unwanted feature '%ls' with state '%ls'", pFeatures[i].FeatureName, DismStateString(pFeatures[i].State));
+				continue;
+			}
+
+			hr = MemInsertIntoArray((LPVOID*)&pStates[k].pUnwantedFeatures, 0, 1, pStates[k].dwUnwantedNum, sizeof(DismFeature*), 1);
+			ExitOnFailure(hr, "Failed adding feature to unwanted features array");
+
+			pStates[k].pUnwantedFeatures[0] = pFeatures + i;
+			++pStates[k].dwUnwantedNum;
+
+			break;
+		}
 	}
 
-	for (DWORD i = 0; i < dwStateNum; ++i)
+	// add packages in reverse order, as MemInsertIntoArray reveresed the order of items that were queried in the correct order
+	for (INT i = dwStateNum - 1; i >= 0; --i)
 	{
-		if (pStates[i].dwFeatureNum == 0)
+		if (pStates[i].dwFeatureNum == 0 && pStates[i].dwUnwantedNum == 0)
 		{
 			if (pStates[i].nMsiCost) // Report cost for features that were preinstalled.
 			{
@@ -273,35 +340,89 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 		for (DWORD j = 0; j < pStates[i].dwFeatureNum; ++j)
 		{
 		LRetryFtr:
-			PMSIHANDLE hActionData;
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Enabling feature '%ls'", pStates[i].pFeatures[j]->FeatureName);
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Enabling feature '%ls'", pStates[i].pResolvedFeatures[j]->FeatureName);
 
-			hActionData = ::MsiCreateRecord(1);
-			if (hActionData && SUCCEEDED(WcaSetRecordString(hActionData, 1, pStates[i].pFeatures[j]->FeatureName)))
+			PMSIHANDLE hActionData = ::MsiCreateRecord(1);
+			if (hActionData && SUCCEEDED(WcaSetRecordString(hActionData, 1, pStates[i].pResolvedFeatures[j]->FeatureName)))
 			{
 				WcaProcessMessage(INSTALLMESSAGE::INSTALLMESSAGE_ACTIONDATA, hActionData);
 			}
 
-			hr = ::DismEnableFeature(hSession, pStates[i].pFeatures[j]->FeatureName, nullptr, DismPackageNone, FALSE, nullptr, 0, TRUE, hCancel_, _pfProgressCallback, &pStates[i]);
+			hr = ::DismEnableFeature(hSession, pStates[i].pResolvedFeatures[j]->FeatureName, nullptr, DismPackageNone, FALSE, nullptr, 0, pStates[i].bEnableAll != FALSE, hCancel_, _pfProgressCallback, &pStates[i]);
 			if (HRESULT_CODE(hr) == ERROR_SUCCESS_REBOOT_REQUIRED)
 			{
 				hr = S_OK;
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Enabled feature '%ls'. However, it requires reboot to complete", pStates[i].pFeatures[j]->FeatureName);
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Enabled feature '%ls'. However, it requires reboot to complete", pStates[i].pResolvedFeatures[j]->FeatureName);
 				WcaDeferredActionRequiresReboot();
 			}
 
 			if (FAILED(hr))
 			{
 				::DismGetLastErrorMessage(&pErrorString);
-				WcaLogError(hr, "Failed enabling feature '%ls'. %ls", pStates[i].pFeatures[j]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+				WcaLogError(hr, "Failed enabling feature '%ls'. %ls", pStates[i].pResolvedFeatures[j]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 
-				hr = HandleError(pStates[i].eErrorHandling, ERROR_ID_FEATURE, pStates[i].pFeatures[j]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+				hr = HandleError(pStates[i].eErrorHandling, ERROR_ID_FEATURE, pStates[i].pResolvedFeatures[j]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 				if (hr == E_RETRY)
 				{
 					hr = S_OK;
 					goto LRetryFtr;
 				}
 				ExitOnFailure(hr, "Failed enabling feature");
+			}
+
+			// Cancelled?
+			if (::WaitForSingleObject(hCancel_, 0) == WAIT_OBJECT_0)
+			{
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Seems like DISM was canceled.");
+				hr = S_FALSE;
+				ExitFunction();
+			}
+		}
+
+		for (DWORD u = 0; u < pStates[i].dwUnwantedNum; ++u)
+		{
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Getting feature info '%ls'", pStates[i].pUnwantedFeatures[u]->FeatureName);
+			hr = ::DismGetFeatureInfo(hSession, pStates[i].pUnwantedFeatures[u]->FeatureName, nullptr, DismPackageNone, &pFeatureInfo);
+
+			if (FAILED(hr))
+			{
+				::DismGetLastErrorMessage(&pErrorString);
+				ExitOnFailure(hr, "Failed getting feature info. %ls", (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+			}
+
+			bool disableFeature = pFeatureInfo->FeatureState == DismPackageFeatureState::DismStateInstalled
+				|| pFeatureInfo->FeatureState == DismPackageFeatureState::DismStatePartiallyInstalled
+				|| pFeatureInfo->FeatureState == DismPackageFeatureState::DismStateInstallPending;
+
+			::DismDelete(pFeatureInfo);
+			pFeatureInfo = nullptr;
+
+			if (disableFeature)
+			{
+			LRetryUnwanted:
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Disabling feature '%ls'", pStates[i].pUnwantedFeatures[u]->FeatureName);
+
+				PMSIHANDLE hActionData = ::MsiCreateRecord(1);
+				if (hActionData && SUCCEEDED(WcaSetRecordString(hActionData, 1, pStates[i].pUnwantedFeatures[u]->FeatureName)))
+				{
+					WcaProcessMessage(INSTALLMESSAGE::INSTALLMESSAGE_ACTIONDATA, hActionData);
+				}
+
+				hr = ::DismDisableFeature(hSession, pStates[i].pUnwantedFeatures[u]->FeatureName, nullptr, FALSE, hCancel_, _pfProgressCallback, &pStates[i]);
+
+				if (FAILED(hr))
+				{
+					::DismGetLastErrorMessage(&pErrorString);
+					WcaLogError(hr, "Failed disabling feature '%ls'. %ls", pStates[i].pUnwantedFeatures[u]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+
+					hr = HandleError(pStates[i].eErrorHandling, ERROR_ID_UNWANTED, pStates[i].pUnwantedFeatures[u]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+					if (hr == E_RETRY)
+					{
+						hr = S_OK;
+						goto LRetryUnwanted;
+					}
+					ExitOnFailure(hr, "Failed disabling feature");
+				}
 			}
 
 			// Cancelled?
@@ -322,7 +443,8 @@ LExit:
 		ReleaseNullStr(pStates[i].szExclude);
 		ReleaseNullStr(pStates[i].szInclude);
 		ReleaseNullStr(pStates[i].szPackage);
-		ReleaseNullMem(pStates[i].pFeatures);
+		ReleaseNullMem(pStates[i].pResolvedFeatures);
+		ReleaseNullMem(pStates[i].pUnwantedFeatures);
 	}
 
 	// Report any left-over ticks.
@@ -346,6 +468,10 @@ LExit:
 	if (pErrorString)
 	{
 		::DismDelete(pErrorString);
+	}
+	if (pFeatureInfo)
+	{
+		::DismDelete(pFeatureInfo);
 	}
 	if (hSession != DISM_SESSION_DEFAULT)
 	{
@@ -399,10 +525,9 @@ static LPCWSTR DismStateString(DismPackageFeatureState state)
 static void ProgressCallback(UINT Current, UINT Total, PVOID UserData)
 {
 	HRESULT hr = S_OK;
-	PMSIHANDLE hRec;
 	ProgressReportState* state = (ProgressReportState*)UserData;
 
-	double ftrCnt = state->dwFeatureNum;
+	double ftrCnt = state->dwFeatureNum + state->dwUnwantedNum;
 	if (state->szPackage && *state->szPackage)
 	{
 		++ftrCnt;

@@ -10,8 +10,8 @@
   <String Overridable="yes" Id="ExecOnFailure"><![CDATA[כשלון בהרצת פקודה [2]]]></String>
   <String Overridable="yes" Id="ExecOnConsoleFailure"><![CDATA[פקודה [2] החזירה שגיאה
 [3]]]></String>  
-  <String Overridable="yes" Id="ExecOnPromptAlways" Value="בוצעה פקודה [2]:
-[3]" />
+  <String Overridable="yes" Id="ExecOnPromptAlways"><![CDATA[בוצעה פקודה [2]:
+[3]"]]></String>
   <String Overridable="yes" Id="ServiceConfig"><![CDATA[הגדרת שירותי מערכת]]></String>
   <String Overridable="yes" Id="ServiceConfigFailure"><![CDATA[כשלון בהגדרת שירותי מערכת [2]]]></String>
   <String Overridable="yes" Id="InstallUtil"><![CDATA[מתקין שירותי מערכת .NET]]></String>
@@ -39,6 +39,8 @@
   <String Overridable="yes" Id="DismPackageFailure"><![CDATA[כשלון בהוספת חבילת מאפייני מערכת [2]:
 [3]]]></String>
   <String Overridable="yes" Id="DismFeatureFailure"><![CDATA[כשלון בהתקנת מאפייני מערכת [2]:
+[3]]]></String>
+  <String Overridable="yes" Id="DismUnwantedFeatureFailure"><![CDATA[כשלון בהסרת מאפייני מערכת [2]:
 [3]]]></String>
   <String Overridable="yes" Id="JsonJpath"><![CDATA[עריכת קבצי JSON]]></String>
   <String Overridable="yes" Id="JsonJpathTemplate"><![CDATA[עורך את [1]]]></String>

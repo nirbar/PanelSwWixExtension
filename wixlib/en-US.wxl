@@ -10,8 +10,8 @@
   <String Overridable="yes" Id="ExecOnFailure"><![CDATA[Failed executing command [2]]]></String>
   <String Overridable="yes" Id="ExecOnConsoleFailure"><![CDATA[Command [2] yielded error
 [3]]]></String>  
-  <String Overridable="yes" Id="ExecOnPromptAlways" Value="Executed command [2]:
-[3]" />
+  <String Overridable="yes" Id="ExecOnPromptAlways"><![CDATA[Executed command [2]:
+[3]]]></String>
   <String Overridable="yes" Id="ServiceConfig"><![CDATA[Configuring Services]]></String>
   <String Overridable="yes" Id="ServiceConfigFailure"><![CDATA[Failed configuring service [2]]]></String>
   <String Overridable="yes" Id="InstallUtil"><![CDATA[Installing .NET service assemblies]]></String>
@@ -39,6 +39,8 @@
   <String Overridable="yes" Id="DismPackageFailure"><![CDATA[Failed adding a Windows Feature package [2]:
 [3]]]></String>
   <String Overridable="yes" Id="DismFeatureFailure"><![CDATA[Failed enabling Windows Feature [2]:
+[3]]]></String>
+  <String Overridable="yes" Id="DismUnwantedFeatureFailure"><![CDATA[Failed disabling Windows Feature [2]:
 [3]]]></String>
   <String Overridable="yes" Id="JsonJpath"><![CDATA[Editing Json files]]></String>
   <String Overridable="yes" Id="JsonJpathTemplate"><![CDATA[Editing [1]]]></String>
