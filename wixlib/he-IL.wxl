@@ -33,6 +33,7 @@
   <String Overridable="yes" Id="DismTemplate" Value="מפעיל את [1]" />
   <String Overridable="yes" Id="DismPackageFailure" Value="כשלון בהוספת חבילת מאפייני מערכת [2]:&#xA;[3]" />
   <String Overridable="yes" Id="DismFeatureFailure" Value="כשלון בהתקנת מאפייני מערכת [2]:&#xA;[3]" />
+  <String Overridable="yes" Id="DismUnwantedFeatureFailure" Value="כשלון בהסרת מאפייני מערכת [2]:&#xA;[3]" />
   <String Overridable="yes" Id="JsonJpath" Value="עריכת קבצי JSON" />
   <String Overridable="yes" Id="JsonJpathTemplate" Value="עורך את [1]" />
   <String Overridable="yes" Id="JsonJpathSearch" Value="חיפוש בקבצי JSON" />

@@ -15,9 +15,13 @@
         <File Source="$(sys.SOURCEFILEPATH)" />
         <PanelSW:Dism EnableFeature="IIS" ErrorHandling="prompt" Cost="1000000" ExcludeFeatures="^Microsoft" PackagePath="[OriginalDatabase]" />
         <PanelSW:Dism EnableFeature=".HTTP" ErrorHandling="prompt" Cost="1000000" />
+
+        <!--Enable IIS-FTPExtensibility and dependencies only -->
+        <PanelSW:Dism EnableFeature="^IIS-FTPExtensibility$" Cost="100000000" RemoveFeature="^IIS-(?!(?:WebServerRole|FTPServer|FTPSvc|FTPExtensibility)$)\w+$" />
+        <!--Enable FTPExtensibility and dependencies only -->
       </Component>
     </ComponentGroup>
-  
+
       <StandardDirectory Id="ProgramFiles6432Folder">
         <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
       </StandardDirectory>

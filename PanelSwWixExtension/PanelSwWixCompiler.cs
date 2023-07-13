@@ -2522,8 +2522,12 @@ namespace PanelSw.Wix.Extensions
             string features = null;
             string exclude = null;
             string package = null;
+            string unwanted = null;
             ErrorHandling promptOnError = ErrorHandling.fail;
             int cost = 20971520; // 20 MB.
+            bool enableAll = true;
+            int order = 1000000000 + sourceLineNumbers.LineNumber ?? 0;
+            bool forceRemove = false;
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -2551,6 +2555,26 @@ namespace PanelSw.Wix.Extensions
                             TryParseEnumAttribute(sourceLineNumbers, element, attrib, out promptOnError);
                             break;
 
+                        case "EnableAll":
+                            enableAll = ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) != YesNoType.No;
+                            break;
+
+                        case "RemoveFeature":
+                            unwanted = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        case "ForceRemove":
+                            forceRemove = ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes;
+                            break;
+
+                        case "Order":
+                            order = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                            if (order < 0)
+                            {
+                                order += int.MaxValue;
+                            }
+                            break;
+
                         default:
                             ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
@@ -2574,9 +2598,13 @@ namespace PanelSw.Wix.Extensions
                 row.Component_ = component;
                 row.EnableFeatures = features;
                 row.ExcludeFeatures = exclude;
+                row.RemoveFeatures = unwanted;
                 row.PackagePath = package;
                 row.Cost = cost;
                 row.ErrorHandling = (int)promptOnError;
+                row.EnableAll = enableAll ? 1 : 0;
+                row.ForceRemove = forceRemove ? 1 : 0;
+                row.Order = order;
             }
         }
 
