@@ -160,7 +160,6 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 		// Print feature state
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Feature '%ls', state=%ls", pFeatures[i].FeatureName, DismStateString(pFeatures[i].State));
 
-		BOOL bProcessUnwanted = TRUE;
 		switch (pFeatures[i].State)
 		{
 		case DismPackageFeatureState::DismStateNotPresent:
@@ -225,11 +224,10 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 			}
 			break;
 
-		case DismPackageFeatureState::DismStateInstalled:
-		case DismPackageFeatureState::DismStateInstallPending:
-			bProcessUnwanted = FALSE;
 		case DismPackageFeatureState::DismStateUninstallPending:
 		case DismPackageFeatureState::DismStateSuperseded:
+		case DismPackageFeatureState::DismStateInstalled:
+		case DismPackageFeatureState::DismStateInstallPending:
 			WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Skipping feature '%ls' with state '%ls'", pFeatures[i].FeatureName, DismStateString(pFeatures[i].State));
 			break;
 
@@ -239,11 +237,12 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 			break;
 		}
 
+		bool bSkipUnwanted = pFeatures[i].State == DismPackageFeatureState::DismStateInstalled
+			|| pFeatures[i].State == DismPackageFeatureState::DismStateInstallPending
+			|| pFeatures[i].State == DismPackageFeatureState::DismStatePartiallyInstalled;
+
 		for (DWORD k = 0; k < dwStateNum ; ++k)
 		{
-			if (!bProcessUnwanted && !pStates[k].bForceRemove)
-				continue;
-
 			if (pStates[k].szRemove == nullptr || !*pStates[k].szRemove)
 				continue;
 
@@ -265,6 +264,12 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 
 			if (!bRes || (results.length() <= 0))
 			{
+				continue;
+			}
+
+			if (bSkipUnwanted && !pStates[k].bForceRemove)
+			{
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping removal of unwanted feature '%ls' with state '%ls'", pFeatures[i].FeatureName, DismStateString(pFeatures[i].State));
 				continue;
 			}
 
@@ -381,7 +386,8 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 				ExitOnFailure(hr, "Failed getting feature info. %ls", (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 			}
 
-			BOOL disableFeature = pFeatureInfo->FeatureState == DismPackageFeatureState::DismStateInstalled
+			bool disableFeature = pFeatureInfo->FeatureState == DismPackageFeatureState::DismStateInstalled
+				|| pFeatureInfo->FeatureState == DismPackageFeatureState::DismStatePartiallyInstalled
 				|| pFeatureInfo->FeatureState == DismPackageFeatureState::DismStateInstallPending;
 
 			::DismDelete(pFeatureInfo);

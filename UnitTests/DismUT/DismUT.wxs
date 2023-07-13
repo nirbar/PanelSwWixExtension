@@ -17,10 +17,7 @@
         <PanelSW:Dism EnableFeature=".HTTP" ErrorHandling="prompt" Cost="1000000" />
 
         <!--Enable IIS-FTPExtensibility and dependencies only -->
-        <PanelSW:Dism EnableFeature="^IIS-WebServerRole$" EnableAll="no" />
-        <PanelSW:Dism EnableFeature="^IIS-FTPServer$" EnableAll="no" />
-        <PanelSW:Dism EnableFeature="^IIS-FTPSvc$" EnableAll="no" />
-        <PanelSW:Dism EnableFeature="^IIS-FTPExtensibility$" EnableAll="no" Cost="100000000" RemoveFeature="^IIS-(?!(?:WebServerRole|FTPServer|FTPSvc|FTPExtensibility)$)\w+$" />
+        <PanelSW:Dism EnableFeature="^IIS-FTPExtensibility$" Cost="100000000" RemoveFeature="^IIS-(?!(?:WebServerRole|FTPServer|FTPSvc|FTPExtensibility)$)\w+$" />
         <!--Enable FTPExtensibility and dependencies only -->
       </Component>
     </ComponentGroup>
