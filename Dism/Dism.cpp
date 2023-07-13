@@ -269,7 +269,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 
 			if (bSkipUnwanted && !pStates[k].bForceRemove)
 			{
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping removal of unwanted feature '%ls' with state '%ls'", pFeatures[i].FeatureName, DismStateString(pFeatures[i].State));
+				WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Skipping removal of unwanted feature '%ls' with state '%ls'", pFeatures[i].FeatureName, DismStateString(pFeatures[i].State));
 				continue;
 			}
 
