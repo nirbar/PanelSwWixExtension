@@ -791,7 +791,7 @@ LRetry:
 		hRec = ::MsiCreateRecord(3);
 		ExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
 
-		if (FAILED(hrOp) && (details.errorhandling() == ErrorHandling::prompt))
+		if (FAILED(hrOp))
 		{
 			errLevel = (INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_ERROR | MB_ABORTRETRYIGNORE | MB_DEFBUTTON1 | MB_ICONERROR);
 
@@ -800,7 +800,7 @@ LRetry:
 			hr = WcaSetRecordString(hRec, 2, szObfuscatedCommand);
 			ExitOnFailure(hr, "Failed setting record string");
 		}
-		else
+		else if (details.errorhandling() == ErrorHandling::promptAlways)
 		{
 			errLevel = (INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_USER | MB_OKCANCEL | MB_DEFBUTTON1 | MB_ICONINFORMATION);
 
@@ -810,6 +810,11 @@ LRetry:
 			ExitOnFailure(hr, "Failed setting record string");
 			hr = WcaSetRecordString(hRec, 3, szLog.IsNullOrEmpty()  ? L"" : (LPCWSTR)szLog);
 			ExitOnFailure(hr, "Failed setting record string");
+		}
+		else
+		{
+			hr = hrOp;
+			break;
 		}
 
 		promptResult = WcaProcessMessage(errLevel, hRec);
