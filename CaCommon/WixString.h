@@ -155,7 +155,7 @@ public:
 		return hr;
 	}
 
-	HRESULT Copy(LPCWSTR pS, DWORD dwMax = INFINITE - 1)
+	HRESULT Copy(LPCWSTR pS, DWORD dwMax = INFINITE)
 	{
 		DWORD dwSize = 0;
 		HRESULT hr = S_OK;
@@ -199,6 +199,23 @@ public:
 		ExitOnFailure(hr, "Failed to replace in string");
 
 	LExit:
+		return hr;
+	}
+
+	HRESULT Substring(DWORD dwStart, DWORD dwLength = INFINITE)
+	{
+		HRESULT hr = S_OK;
+		LPWSTR szOld = nullptr;
+
+		ExitOnNull((dwStart < StrLen()), hr, E_INVALIDSTATE, "Substring start index is out of range");
+
+		szOld = Detach();
+		
+		hr = Copy(szOld + dwStart, dwLength);
+		ExitOnFailure(hr, "Failed to copy string");
+
+	LExit:
+		ReleaseStr(szOld);
 		return hr;
 	}
 

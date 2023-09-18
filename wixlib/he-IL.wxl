@@ -69,4 +69,5 @@
   <String Overridable="yes" Id="Md5Hash"><![CDATA[מחשב פונקציית MD5]]></String>
   <String Overridable="yes" Id="ConcatFiles"><![CDATA[מאחד קבצים]]></String>
   <String Overridable="yes" Id="ExtractPayload"><![CDATA[פורס קבצים זמניים]]></String>
+  <String Overridable="yes" Id="PromptFileDowngrades"><![CDATA[סך של [2] קבצים ישונמוכו בפעולה זו.[3]]]></String>
 </WixLocalization>

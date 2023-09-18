@@ -67,4 +67,5 @@
   <String Overridable="yes" Id="Md5Hash"><![CDATA[Computing MD5 hash]]></String>
   <String Overridable="yes" Id="ConcatFiles"><![CDATA[Reconstructing files]]></String>
   <String Overridable="yes" Id="ExtractPayload"><![CDATA[Extracting temporary files]]></String>
+  <String Overridable="yes" Id="PromptFileDowngrades"><![CDATA[A total of [2] file(s) will be downgraded during the operation.[3]]]></String>
 </WixLocalization>
