@@ -1,0 +1,49 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension">
+  <Package Name="$(var.ProjectName)" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{8DC7207F-59B4-45E6-90B0-75769F8040B8}" InstallerVersion="200" ProductCode="{769C11E5-D811-4CE3-BE79-CC23725E6B38}">
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+    <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+
+    <Property Id="MSIFASTINSTALL" Value="1"></Property>
+
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component>
+        <!--Downgrade-->
+        <File Source="C:\Program Files\Git\git-bash.exe" Name="unins000.exe"/>
+      </Component>
+      <Component>
+        <!--Same version-->
+        <File Source="C:\Program Files\Git\git-bash.exe" Id="git_bash.exe"/>
+      </Component>
+      <Component Guid="{07628A98-CC11-45CD-A182-00777A72F0D7}" Id="naversion">
+        <!--Not a version-->
+        <File Source="$(sys.SOURCEFILEPATH)" CompanionFile="git_bash.exe"/>
+      </Component>
+      <Component>
+        <!-- Source has no version -->
+        <File Source="$(sys.SOURCEFILEPATH)" Name="git-cmd.exe"/>
+      </Component>
+      <Component>
+        <!-- Target has no version -->
+        <File Source="C:\Program Files\Git\git-bash.exe" Name="ReleaseNotes.html"/>
+      </Component>
+      <Component>
+        <!-- No target file -->
+        <File Source="C:\Program Files\Git\git-bash.exe" Name="git-bash-1.exe"/>
+      </Component>
+    </ComponentGroup>
+
+    <CustomActionRef Id="TerminateSuccessfully_Immediate"/>
+    <CustomActionRef Id="PromptFileDowngrades"/>
+    <InstallExecuteSequence>
+      <Custom Action="TerminateSuccessfully_Immediate" After="PromptFileDowngrades"></Custom>
+    </InstallExecuteSequence>
+
+
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="INSTALLFOLDER" Name="Git"/>
+    </StandardDirectory>
+  </Package>
+</Wix>

@@ -55,4 +55,5 @@
   <String Overridable="yes" Id="Md5Hash" Value="Computing MD5 hash" />
   <String Overridable="yes" Id="ConcatFiles" Value="Reconstructing files" />
   <String Overridable="yes" Id="ExtractPayload" Value="Extracting temporary files" />
+  <String Overridable="yes" Id="PromptFileDowngrades" Value="A total of [2] file(s) will be downgraded during the operation. Inspect the log for details" />
 </WixLocalization>

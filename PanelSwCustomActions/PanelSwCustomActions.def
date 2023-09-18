@@ -54,3 +54,4 @@ EXPORTS
 	ExtractPayload
 	PromptCancel
 	FolderPaths
+	PromptFileDowngrades

@@ -1,0 +1,21 @@
+<Project Sdk="WixToolset.Sdk">
+  <PropertyGroup>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x64</Platform>
+    <ProductVersion>3.8</ProductVersion>
+    <OutputName>$(MSBuildProjectName)</OutputName>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="PromptFileDowngrades.wxs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="TidyBuild" />
+    <WixExtension Include="PanelSwWixExtension">
+      <HintPath>$(BaseBuildFolder)AnyCPU\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</HintPath>
+      <Name>PanelSwWixExtension</Name>
+    </WixExtension>
+  </ItemGroup>
+</Project>

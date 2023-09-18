@@ -33,6 +33,7 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
   - *ToLowerCase*: Convert property value to lowercase.
   - *CustomPatchRef* Support referencing custom table rows in a patch
   - *Payload* Support extracting files from Binary table temporarilty during MSI execution
+  - *PromptFileDowngrades* Log each file that will be downgraded during the (re)install, and prompt the total downgrade count if larger than 0.
 - Deferred Actions:
   - *RestartLocalResources*: Register processes with the Restart Manager if they reside in the specified folder
   - *XslTransform*: Apply a XSL transform on an installed XML file
@@ -88,6 +89,7 @@ PanelSwWixExtension uses error codes in Error table:
 - 27009: JsonJpath error template for prompting user on errors.
 - 27010: Dism error template for prompting user on failures to remove a Windows feature package.
 - 27011: ExecOn message template for prompting user on success with promptAlways.
+- 27012: Prompt on file downgrades
 
 ## Properties
 

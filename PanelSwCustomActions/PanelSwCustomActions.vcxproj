@@ -17,7 +17,7 @@
     <CharacterSet>Unicode</CharacterSet>
     <UseOfAtl>Static</UseOfAtl>
     <LinkIncremental Condition="'$(Configuration)'=='Release'">false</LinkIncremental>
-    <ResolveNuGetPackages>false</ResolveNuGetPackages>  
+    <ResolveNuGetPackages>false</ResolveNuGetPackages>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
@@ -79,6 +79,7 @@
     <ClCompile Include="FileRegex.cpp" />
     <ClCompile Include="Md5Hash.cpp" />
     <ClCompile Include="ExtractPayload.cpp" />
+    <ClCompile Include="PromptFileDowngrades.cpp" />
     <ClCompile Include="RestartLocalResources.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="MsiSqlQuery.cpp" />
@@ -170,9 +171,9 @@
     <ClInclude Include="XslTransform.h" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="TidyBuild"/>
-    <PackageReference Include="WixToolset.DUtil"/>
-    <PackageReference Include="WixToolset.WcaUtil"/>
+    <PackageReference Include="TidyBuild" />
+    <PackageReference Include="WixToolset.DUtil" />
+    <PackageReference Include="WixToolset.WcaUtil" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PanelSwCustomActions.def" />

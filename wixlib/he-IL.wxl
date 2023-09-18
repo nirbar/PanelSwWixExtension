@@ -55,4 +55,5 @@
   <String Overridable="yes" Id="Md5Hash" Value="מחשב פונקציית MD5" />
   <String Overridable="yes" Id="ConcatFiles" Value="מאחד קבצים" />
   <String Overridable="yes" Id="ExtractPayload" Value="פורס קבצים זמניים" />
+  <String Overridable="yes" Id="PromptFileDowngrades" Value="סך של [2] קבצים ישונמוכו בפעולה זו. בדוק את קובץ הלוג לפרטים" />
 </WixLocalization>
