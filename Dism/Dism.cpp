@@ -14,10 +14,6 @@ enum ErrorHandling
 	prompt = 2
 };
 
-#define ERROR_ID_PACKAGE	27003
-#define ERROR_ID_FEATURE	27004
-#define ERROR_ID_UNWANTED   27010
-
 static LPCWSTR DismStateString(DismPackageFeatureState state);
 static void ProgressCallback(UINT Current, UINT Total, PVOID UserData);
 static HRESULT HandleError(ErrorHandling nErrorHandling, UINT nErrorId, LPCWSTR szFeature, LPCWSTR szErrorMsg);
@@ -315,7 +311,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 				::DismGetLastErrorMessage(&pErrorString);
 				WcaLogError(hr, "Failed adding DISM package '%ls'. %ls", pStates[i].szPackage, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 
-				hr = HandleError(pStates[i].eErrorHandling, ERROR_ID_PACKAGE, pStates[i].szPackage, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+				hr = HandleError(pStates[i].eErrorHandling, PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_DISMPACKAGEFAILURE, pStates[i].szPackage, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 				if (hr == E_RETRY)
 				{
 					hr = S_OK;
@@ -357,7 +353,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 				::DismGetLastErrorMessage(&pErrorString);
 				WcaLogError(hr, "Failed enabling feature '%ls'. %ls", pStates[i].pResolvedFeatures[j]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 
-				hr = HandleError(pStates[i].eErrorHandling, ERROR_ID_FEATURE, pStates[i].pResolvedFeatures[j]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+				hr = HandleError(pStates[i].eErrorHandling, PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_DISMFEATUREFAILURE, pStates[i].pResolvedFeatures[j]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 				if (hr == E_RETRY)
 				{
 					hr = S_OK;
@@ -411,7 +407,7 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 					::DismGetLastErrorMessage(&pErrorString);
 					WcaLogError(hr, "Failed disabling feature '%ls'. %ls", pStates[i].pUnwantedFeatures[u]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 
-					hr = HandleError(pStates[i].eErrorHandling, ERROR_ID_UNWANTED, pStates[i].pUnwantedFeatures[u]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+					hr = HandleError(pStates[i].eErrorHandling, PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_DISMUNWANTEDFEATUREFAILURE, pStates[i].pUnwantedFeatures[u]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 					if (hr == E_RETRY)
 					{
 						hr = S_OK;

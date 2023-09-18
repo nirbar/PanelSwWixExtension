@@ -10,6 +10,23 @@ namespace PswManagedCA.Util
         prompt = 2
     }
 
+    public enum PswErrorMessages
+    {
+        TopShelfFailure = 27000,
+        ExecOnFailure = 27001,
+        ServiceConfigFailure = 27002,
+        DismPackageFailure = 27003,
+        DismFeatureFailure = 27004,
+        SqlScriptFailure = 27005,
+        ExecOnConsoleFailure = 27006,
+        WebsiteConfigFailure = 27007,
+        SqlSearchFailure = 27008,
+        JsonJpathFailure = 27009,
+        DismUnwantedFeatureFailure = 27010,
+        ExecOnPromptAlways = 27011,
+        PromptFileDowngrades = 27012,
+    }
+
     static class SessionEx
     {
         public static ComponentInfo ComponentByFileId(this Session session, string fileId)

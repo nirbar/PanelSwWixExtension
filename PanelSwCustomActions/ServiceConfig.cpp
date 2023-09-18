@@ -467,7 +467,7 @@ HRESULT CServiceConfig::PromptError(LPCWSTR szServiceName, ::com::panelsw::ca::E
 		hRec = ::MsiCreateRecord(2);
 		ExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
 
-		hr = WcaSetRecordInteger(hRec, 1, 27002);
+		hr = WcaSetRecordInteger(hRec, 1, PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_SERVICECONFIGFAILURE);
 		ExitOnFailure(hr, "Failed setting record integer");
 
 		hr = WcaSetRecordString(hRec, 2, szServiceName);

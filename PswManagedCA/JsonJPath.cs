@@ -255,7 +255,7 @@ namespace PswManagedCA
                 catch (Exception ex)
                 {
                     session.LogUnformatted($"Failed setting JsonJpath '{ctlg.JPathObfuscated}' to '{ctlg.ValueObfuscated}' in file '{ctlg.FilePath}': {ex}");
-                    switch( session.HandleError(ctlg.ErrorHandling, 27009, ctlg.JPathObfuscated, ctlg.ValueObfuscated, ctlg.FilePath, ex.Message))
+                    switch( session.HandleError(ctlg.ErrorHandling, (int)PswErrorMessages.JsonJpathFailure, ctlg.JPathObfuscated, ctlg.ValueObfuscated, ctlg.FilePath, ex.Message))
                     {
                         case MessageResult.Abort:
                             session.Log("Aborted on failure");

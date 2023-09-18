@@ -276,7 +276,7 @@ LRetry:
 			hRec = ::MsiCreateRecord(2);
 			ExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
 
-			hr = WcaSetRecordInteger(hRec, 1, 27000);
+			hr = WcaSetRecordInteger(hRec, 1, PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_TOPSHELFFAILURE);
 			ExitOnFailure(hr, "Failed setting record integer");
 
 			hr = WcaSetRecordString(hRec, 2, fileName);

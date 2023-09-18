@@ -616,7 +616,7 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 				hRec = ::MsiCreateRecord(3);
 				ExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
 
-				hr = WcaSetRecordInteger(hRec, 1, 27005);
+				hr = WcaSetRecordInteger(hRec, 1, PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_PSW_SQLSCRIPTFAILURE);
 				ExitOnFailure(hr, "Failed setting record integer");
 
 				if (szError && *szError)

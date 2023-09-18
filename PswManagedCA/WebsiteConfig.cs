@@ -117,7 +117,7 @@ namespace PswManagedCA
                 }
                 catch (Exception ex)
                 {
-                    switch (session.HandleError(ctlg.ErrorHandling, 27007, ctlg.Website, ex.Message))
+                    switch (session.HandleError(ctlg.ErrorHandling, (int)PswErrorMessages.WebsiteConfigFailure, ctlg.Website, ex.Message))
                     {
                         default: // Silent / fail
                             session.Log($"User aborted on failure to configure website {ctlg.Website}. {ex.Message}");

@@ -789,7 +789,7 @@ LRetry:
 		{
 			errLevel = (INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_ERROR | MB_ABORTRETRYIGNORE | MB_DEFBUTTON1 | MB_ICONERROR);
 
-			hr = WcaSetRecordInteger(hRec, 1, 27001);
+			hr = WcaSetRecordInteger(hRec, 1, PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_EXECONFAILURE);
 			ExitOnFailure(hr, "Failed setting record integer");
 			hr = WcaSetRecordString(hRec, 2, szObfuscatedCommand);
 			ExitOnFailure(hr, "Failed setting record string");
@@ -798,7 +798,7 @@ LRetry:
 		{
 			errLevel = (INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_USER | MB_OKCANCEL | MB_DEFBUTTON1 | MB_ICONINFORMATION);
 
-			hr = WcaSetRecordInteger(hRec, 1, 27011);
+			hr = WcaSetRecordInteger(hRec, 1, PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_EXECONPROMPTALWAYS);
 			ExitOnFailure(hr, "Failed setting record integer");
 			hr = WcaSetRecordString(hRec, 2, szObfuscatedCommand);
 			ExitOnFailure(hr, "Failed setting record string");
@@ -1084,7 +1084,7 @@ HRESULT CExecOnComponent::SearchStdOut(LPCWSTR szStdOut, const ExecOnDetails& de
 			hRec = ::MsiCreateRecord(3);
 			ExitOnNull(hRec, localHr, E_FAIL, "Failed creating record");
 
-			localHr = WcaSetRecordInteger(hRec, 1, 27006);
+			localHr = WcaSetRecordInteger(hRec, 1, PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_EXECONCONSOLEFAILURE);
 			ExitOnFailure(localHr, "Failed setting record integer");
 
 			localHr = WcaSetRecordString(hRec, 2, (LPCWSTR)(LPVOID)details.command().obfuscated().data());
