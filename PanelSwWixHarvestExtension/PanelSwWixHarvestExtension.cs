@@ -14,6 +14,7 @@ namespace PanelSw.Wix.HarvestExtension
 
         public string ExcludePatterns { get; set; }
         public string IncludePatterns { get; set; }
+        public string PayloadRootFolder { get; set; }
 
         private List<File> _files = new List<File>();
         private List<Payload> _payloads = new List<Payload>();
@@ -70,6 +71,15 @@ namespace PanelSw.Wix.HarvestExtension
         {
             foreach (Payload payload in _payloads)
             {
+                if (!string.IsNullOrEmpty(PayloadRootFolder))
+                {
+                    if (string.IsNullOrEmpty(payload.Name))
+                    {
+                        payload.Name = System.IO.Path.GetFileName(payload.SourceFile);
+                    }
+                    payload.Name = System.IO.Path.Combine(PayloadRootFolder, payload.Name);
+                }
+
                 string fileName = System.IO.Path.GetFileName(payload.SourceFile);
                 if ((string.IsNullOrEmpty(IncludePatterns) || IsFilenameMatch(fileName, IncludePatterns))
                     && (string.IsNullOrEmpty(ExcludePatterns) || !IsFilenameMatch(fileName, ExcludePatterns)))
@@ -138,6 +148,7 @@ namespace PanelSw.Wix.HarvestExtension
             {
                 new HeatCommandLineOption("exc", "Semicolon seperated list of filename to exclude. Wildcards are accepted"),
                 new HeatCommandLineOption("inc", "Semicolon seperated list of filename to include. Wildcards are accepted. If specified, any file not matching the pattern will be excluded"),
+                new HeatCommandLineOption("prd", "Payload Root Folder. A prefix folder to add to all payloads"),
             };
 
         public override void ParseOptions(string type, string[] args)
@@ -171,10 +182,13 @@ namespace PanelSw.Wix.HarvestExtension
                     case "inc":
                         mutator.IncludePatterns = patt;
                         break;
+                    case "prd":
+                        mutator.PayloadRootFolder = patt;
+                        break;
                 }
             }
 
-            if (!string.IsNullOrEmpty(mutator.ExcludePatterns) || !string.IsNullOrEmpty(mutator.IncludePatterns))
+            if (!string.IsNullOrEmpty(mutator.ExcludePatterns) || !string.IsNullOrEmpty(mutator.IncludePatterns) || !string.IsNullOrEmpty(mutator.PayloadRootFolder))
             {
                 Core.Mutator.AddExtension(mutator);
             }

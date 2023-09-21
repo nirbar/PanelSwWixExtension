@@ -16,6 +16,7 @@
     <PackageVersion Include="WixToolset.Bal.wixext" Version="$(Wix4Version)" />
     <PackageVersion Include="WixToolset.BalUtil" Version="$(Wix4Version)" />
     <PackageVersion Include="WixToolset.BootstrapperCore.Native" Version="$(Wix4Version)" />
+    <PackageVersion Include="WixToolset.NetFx.wixext" Version="$(Wix4Version)" />
 
     <PackageVersion Include="PanelSwWix4.DUtil" version="$(PanelSwWix4Version)"/>
     <PackageVersion Include="PanelSwWix4.WcaUtil" version="$(PanelSwWix4Version)"/>  
@@ -27,7 +28,8 @@
     <PackageVersion Include="PanelSwWix4.Bal.wixext" Version="$(PanelSwWix4Version)" />
     <PackageVersion Include="PanelSwWix4.BalUtil" Version="$(PanelSwWix4Version)" />
     <PackageVersion Include="PanelSwWix4.BootstrapperCore.Native" Version="$(PanelSwWix4Version)" />
-    
+    <PackageVersion Include="PanelSwWix4.NetFx.wixext" Version="$(PanelSwWix4Version)" />
+
     <PackageVersion Include="TidyBuild" version="1.5.2"/>
     <PackageVersion Include="Microsoft.Web.Administration" Version="11.1.0" />
     <PackageVersion Include="Newtonsoft.Json" Version="13.0.2" />

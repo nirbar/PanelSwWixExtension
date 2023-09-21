@@ -1,0 +1,31 @@
+<Project Sdk="WixToolset.Sdk">
+  <PropertyGroup>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <OutputType>Bundle</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="HeatExtUT.wxs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="WixToolset.Bal.wixext"/>
+    <PackageReference Include="WixToolset.NetFx.wixext"/>
+    <PackageReference Include="WixToolset.Heat"/>
+    <PackageReference Include="TidyBuild" />
+  </ItemGroup>
+  
+  <!-- Heat -->
+  <PropertyGroup>
+    <PanelSwWixHarvestExtension>$(BuildFolder)..\AnyCPU\bin\$(Configuration)\PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.dll</PanelSwWixHarvestExtension>
+    <HarvestDirectoryAdditionalOptions>-ext "$(PanelSwWixHarvestExtension)" -inc "*.w*" -exc "*.*proj" -generate payloadgroup -prd MY_FOLDER\MY_SUBFOLDER</HarvestDirectoryAdditionalOptions>
+    <DefineConstants>$(DefineConstants);THISDIR=$(MSBuildThisFileDirectory)</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <HarvestDirectory Include="$(MSBuildThisFileDirectory)">
+      <DirectoryRefId>HeatExtUT</DirectoryRefId>
+      <PreprocessorVariable>var.THISDIR</PreprocessorVariable>
+    </HarvestDirectory>
+  </ItemGroup>
+</Project>

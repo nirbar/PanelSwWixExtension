@@ -20,7 +20,10 @@
     <ProjectReference Include="PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.csproj" Properties="Platform=AnyCPU" Targets="Restore;Build" BuildInParallel="false" />
     <ProjectReference Include="PanelSwWixExtension\PanelSwWixExtension.csproj" Properties="Platform=AnyCPU;NugetPrereleaseVersion=$(NugetPrereleaseVersion)" Targets="Restore;Build;Pack" BuildInParallel="false" />
   </ItemGroup>
-
+  <ItemGroup Condition="'$(UnitTest)' != ''">
+    <ProjectReference Include="UnitTests\$(UnitTest)\$(UnitTest).wixproj" Properties="Platform=x64" Targets="Restore;Build" BuildInParallel="false" />
+  </ItemGroup>
+  
   <ItemGroup>
     <PackageReference Include="TidyBuild" />
   </ItemGroup>

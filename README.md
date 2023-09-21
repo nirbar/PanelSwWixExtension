@@ -12,6 +12,7 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
 - Heat extension command line arguments:
   - *-inc*: Semicolon seperated list of filename to include. Wildcards are accepted. If specified, any file not matching the pattern will be excluded
   - *-exc*: Semicolon seperated list of filename to exclude. Wildcards are accepted. If specified, any file matching the pattern will be excluded
+  - *-prd*: Payload Root Folder. A prefix folder to add to all payloads
 - Immediate Actions:
   - *Md5Hash*: Computes MD5 hash.
   - *WmiSearch*: Execute a WMI query.
