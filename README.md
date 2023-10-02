@@ -9,6 +9,9 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
 
 - Bundle elements:
   - *ContainerTemplate*: A container template to which bundle payloads can be assigned
+  - *!(bindpath.PanelSwWixExtension)\x86\DeferredExePackage.exe* An executable that can execute arbitrary commands during chain execution
+	- Use InstallArguments='--skip-until-here "[SomeExecutable]" "arg1" "arg2"': Create a process with any arguments after the `--skip-until-here` part
+	- Use InstallArguments='--ignore-me': Ignore anything after the `--ignore-me` part
 - Heat extension command line arguments:
   - *-inc*: Semicolon seperated list of filename to include. Wildcards are accepted. If specified, any file not matching the pattern will be excluded
   - *-exc*: Semicolon seperated list of filename to exclude. Wildcards are accepted. If specified, any file matching the pattern will be excluded

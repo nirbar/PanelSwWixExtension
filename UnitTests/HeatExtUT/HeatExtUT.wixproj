@@ -28,4 +28,9 @@
       <PreprocessorVariable>var.THISDIR</PreprocessorVariable>
     </HarvestDirectory>
   </ItemGroup>
+  <ItemGroup>
+    <BindInputPaths Include="$(BuildFolder)\..\$(Platform)\bin\$(Configuration)\DeferredExePackage\">
+      <BindName>DeferredExePackage</BindName>
+    </BindInputPaths>
+  </ItemGroup>
 </Project>

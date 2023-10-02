@@ -5,8 +5,13 @@
       <PayloadGroupRef Id="HeatExtUT"/>
     </BootstrapperApplication>
 
+    <Variable Name="SOME_EXECUTABLE" Value="" Type="string" bal:Overridable="yes"/>
+
     <Chain ParallelCache="yes" DisableSystemRestore="yes">
-      <PackageGroupRef Id="NetFx462RedistAsPrereq"/>
+      <ExePackage SourceFile="!(bindpath.DeferredExePackage)DeferredExePackage.exe" Id="DeferredExePackage.exe"
+                  DetectCondition="SOME_EXECUTABLE"
+                  InstallArguments='--skip-until-here "[SOME_EXECUTABLE]"'
+                  UninstallArguments='--ignore-me'/>                  
     </Chain>
   </Bundle>
 </Wix>

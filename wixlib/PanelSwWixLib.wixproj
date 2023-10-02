@@ -16,8 +16,9 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\PswManagedCA\PswManagedCA.csproj" Platforms="x86;x64" />
-    <ProjectReference Include="..\PanelSwCustomActions\PanelSwCustomActions.vcxproj" Platforms="$(CaPlatform)"/>
+    <ProjectReference Include="..\PanelSwCustomActions\PanelSwCustomActions.vcxproj" Platforms="$(CaPlatform)" />
     <ProjectReference Include="..\Dism\Dism.vcxproj" Platforms="Win32;x64" Condition="'$(CaPlatform)' == 'Win32'" />
+    <ProjectReference Include="..\DeferredExePackage\DeferredExePackage.vcxproj" Platforms="Win32;x64" Condition="'$(CaPlatform)' == 'Win32'" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="WixToolset.Util.wixext" />

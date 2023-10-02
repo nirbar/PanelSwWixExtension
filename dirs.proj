@@ -10,9 +10,11 @@
     <ProjectReference Include="Dism\Dism.vcxproj" Properties="Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
     <ProjectReference Include="PanelSwCustomActions\PanelSwCustomActions.vcxproj" Properties="Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
     <ProjectReference Include="PswManagedCA\PswManagedCA.csproj" Properties="Platform=x86" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="DeferredExePackage\DeferredExePackage.vcxproj" Properties="Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
 
     <!-- x64 -->
     <ProjectReference Include="Dism\Dism.vcxproj" Properties="Platform=x64" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="DeferredExePackage\DeferredExePackage.vcxproj" Properties="Platform=x64" Targets="Restore;Build" BuildInParallel="false"/>
     <ProjectReference Include="PswManagedCA\PswManagedCA.csproj" Properties="Platform=x64" Targets="Restore;Build" BuildInParallel="false"/>
 
     <!-- WiX -->

@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.0</TargetFramework>
@@ -37,6 +37,8 @@
     <None Include="..\Nuget\*" Visible="false" Pack="true" PackagePath="build\" />
     <None Include="$(TargetPath)" Visible="false" Pack="true" PackagePath="tools\lib\"/>
     <None Include="$(TargetDir)\..\PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.dll" Visible="false" Pack="true" PackagePath="tools\lib\"/>
+    <None Include="..\build\x86\bin\$(Configuration)\DeferredExePackage\DeferredExePackage.exe" Visible="false" Pack="true" PackagePath="tools\lib\x86\"/>
+    <None Include="..\build\x64\bin\$(Configuration)\DeferredExePackage\DeferredExePackage.exe" Visible="false" Pack="true" PackagePath="tools\lib\x64\"/>
     <None Include=".\Xsd\PanelSwWixExtension.xsd" Visible="false" Pack="true" PackagePath="content"/>
     <!-- lib -->
     <None Include="..\build\x86\bin\$(Configuration)\CaCommon\CaCommon.lib" Visible="false" Pack="true" PackagePath="tools\lib\v142\x86\"/>
@@ -53,6 +55,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\DeferredExePackage\DeferredExePackage.vcxproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
     <ProjectReference Include="..\PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.csproj" />
     <ProjectReference Include="..\wixlib\PanelSwWixLib.wixproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
   </ItemGroup>
