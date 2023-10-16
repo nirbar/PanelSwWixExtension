@@ -41,7 +41,7 @@ jobs:
 
       - name: Prepare for build
         run: |
-          choco install windows-adk-all
+          choco install windows-adk-all --version=10.1.22621.1
           nuget restore
           cmake.exe -G "Visual Studio 16 2019" -T v142,host=x86 -A Win32 .\protobuf\cmake -Dprotobuf_BUILD_TESTS=OFF -B build-v142\protobuf
           cmake.exe --build build-v142\protobuf --config Release
