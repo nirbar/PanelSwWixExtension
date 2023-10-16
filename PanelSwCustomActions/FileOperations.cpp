@@ -537,31 +537,37 @@ HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRe
 		ExitOnFailure(hr, "Failed allocating string");
 
 		hFind = ::FindFirstFile(szFullPattern, &FindFileData);
-		ExitOnNullWithLastError((hFind != INVALID_HANDLE_VALUE), hr, "Failed searching files in '%ls'", szFullFolder);
-
-		do
+		if (hFind == INVALID_HANDLE_VALUE)
 		{
-			if ((::wcscmp(L".", FindFileData.cFileName) == 0) || (::wcscmp(L"..", FindFileData.cFileName) == 0))
+			DWORD dwErr = ::GetLastError();
+			ExitOnNullWithLastError((dwErr == ERROR_FILE_NOT_FOUND), hr, "Failed searching files in '%ls'", szFullFolder);
+		}
+		else 
+		{
+			do
 			{
-				continue;
-			}
+				if ((::wcscmp(L".", FindFileData.cFileName) == 0) || (::wcscmp(L"..", FindFileData.cFileName) == 0))
+				{
+					continue;
+				}
 
-			if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
-			{
-				ReleaseNullStr(szCurrFile);
+				if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
+				{
+					ReleaseNullStr(szCurrFile);
 
-				hr = StrAllocFormatted(&szCurrFile, L"%ls%ls", szFullFolder, FindFileData.cFileName);
-				ExitOnFailure(hr, "Failed allocating string");
+					hr = StrAllocFormatted(&szCurrFile, L"%ls%ls", szFullFolder, FindFileData.cFileName);
+					ExitOnFailure(hr, "Failed allocating string");
 
-				hr = ListFiles(szCurrFile, szPattern, bRecursive, pszFiles, pcFiles);
-				ExitOnFailure(hr, "Failed finding files");
-			}
+					hr = ListFiles(szCurrFile, szPattern, bRecursive, pszFiles, pcFiles);
+					ExitOnFailure(hr, "Failed finding files");
+				}
 
-		} while (::FindNextFile(hFind, &FindFileData));
-		ExitOnNullWithLastError((::GetLastError() == ERROR_NO_MORE_FILES), hr, "Failed searching files in '%ls'", szFullFolder);
+			} while (::FindNextFile(hFind, &FindFileData));
+			ExitOnNullWithLastError((::GetLastError() == ERROR_NO_MORE_FILES), hr, "Failed searching files in '%ls'", szFullFolder);
 
-		::FindClose(hFind);
-		hFind = INVALID_HANDLE_VALUE;
+			::FindClose(hFind);
+			hFind = INVALID_HANDLE_VALUE;
+		}
 	}
 
 	// Now look for files
@@ -578,25 +584,31 @@ HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRe
 	}
 
 	hFind = ::FindFirstFile(szFullPattern, &FindFileData);
-	ExitOnNullWithLastError((hFind != INVALID_HANDLE_VALUE), hr, "Failed searching files in '%ls'", szFullPattern);
-
-	do
+	if (hFind == INVALID_HANDLE_VALUE)
 	{
-		if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
+		DWORD dwErr = ::GetLastError();
+		ExitOnNullWithLastError((dwErr == ERROR_FILE_NOT_FOUND), hr, "Failed searching files in '%ls'", szFullPattern);
+	}
+	else 
+	{
+		do
 		{
-			continue;
-		}
+			if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
+			{
+				continue;
+			}
 
-		ReleaseNullStr(szCurrFile);
+			ReleaseNullStr(szCurrFile);
 
-		hr = StrAllocFormatted(&szCurrFile, L"%ls%ls", szFullFolder, FindFileData.cFileName);
-		ExitOnFailure(hr, "Failed allocating string");
+			hr = StrAllocFormatted(&szCurrFile, L"%ls%ls", szFullFolder, FindFileData.cFileName);
+			ExitOnFailure(hr, "Failed allocating string");
 
-		hr = StrArrayAllocString(pszFiles, pcFiles, szCurrFile, 0);
-		ExitOnFailure(hr, "Failed allocating string");
+			hr = StrArrayAllocString(pszFiles, pcFiles, szCurrFile, 0);
+			ExitOnFailure(hr, "Failed allocating string");
 
-	} while (::FindNextFile(hFind, &FindFileData));
-	ExitOnNullWithLastError((::GetLastError() == ERROR_NO_MORE_FILES), hr, "Failed searching files in '%ls'", szFullPattern);
+		} while (::FindNextFile(hFind, &FindFileData));
+		ExitOnNullWithLastError((::GetLastError() == ERROR_NO_MORE_FILES), hr, "Failed searching files in '%ls'", szFullPattern);
+	}
 
 LExit:
 
@@ -674,7 +686,12 @@ bool CFileOperations::IsSymbolicLinkOrMount(LPCWSTR szPath)
 	HRESULT hr = S_OK;
 
 	hFind = ::FindFirstFile(szPath, &wfaData);
-	ExitOnNullWithLastError((hFind && (hFind != INVALID_HANDLE_VALUE)), hr, "Path '%ls' can't be checked for reparse point tag");
+	if (hFind == INVALID_HANDLE_VALUE)
+	{
+		hr = S_FALSE;
+		DWORD dwErr = ::GetLastError();
+		ExitOnNullWithLastError((dwErr == ERROR_FILE_NOT_FOUND), hr, "Path '%ls' can't be checked for reparse point tag", szPath);
+	}
 
 LExit:
 	if (hFind && (hFind != INVALID_HANDLE_VALUE))
@@ -682,6 +699,6 @@ LExit:
 		::FindClose(hFind);
 	}
 
-	return SUCCEEDED(hr) ? (((wfaData.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT) 
+	return (hr == S_OK) ? (((wfaData.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT) 
 		&& ((wfaData.dwReserved0 == IO_REPARSE_TAG_SYMLINK) || (wfaData.dwReserved0 == IO_REPARSE_TAG_MOUNT_POINT))) : false;
 }
