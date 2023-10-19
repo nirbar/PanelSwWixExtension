@@ -189,8 +189,8 @@
   <Target Name="BuildPoco" BeforeTargets="PrepareForBuild" Condition="!Exists('$(BuildFolder)\poco\lib\$(Configuration)\PocoZipmt.lib')">
     <MakeDir Directories="$(BuildFolder)\poco;$(IntDir)\..\poco" />
     <MakeDir Directories="" />
-    <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; -G &quot;$(CMakeVsVersion)&quot; -T $(PlatformToolset),host=x86 -A Win32 -DPOCO_STATIC=ON -DPOCO_MT=ON ..\..\poco" WorkingDirectory="$(BuildFolder)\poco" />
-    <Exec Command="&quot;$(CMakeDir)bin\cmake.exe&quot; --build . --config $(Configuration)" WorkingDirectory="$(BuildFolder)\poco" />
+    <Exec Command="&quot;$(CMakeDir)\cmake.exe&quot; -G &quot;$(CMakeVsVersion)&quot; -T $(PlatformToolset),host=x86 -A Win32 -DPOCO_STATIC=ON -DPOCO_MT=ON ..\..\poco" WorkingDirectory="$(BuildFolder)\poco" />
+    <Exec Command="&quot;$(CMakeDir)\cmake.exe&quot; --build . --config $(Configuration)" WorkingDirectory="$(BuildFolder)\poco" />
   </Target>
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
