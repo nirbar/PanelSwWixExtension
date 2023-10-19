@@ -41,7 +41,6 @@
       <Custom Action="TerminateSuccessfully_Immediate" After="PromptFileDowngrades"></Custom>
     </InstallExecuteSequence>
 
-
     <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="Git"/>
     </StandardDirectory>

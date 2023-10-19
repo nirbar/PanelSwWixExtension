@@ -10,6 +10,7 @@ extern "C" UINT __stdcall PromptFileDowngrades(MSIHANDLE hInstall)
 	DWORD dwDowngrades = 0;
 	UINT promptResult = 0;
 	CErrorPrompter prompter(PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_PROMPTFILEDOWNGRADES, (INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_WARNING | MB_OKCANCEL | MB_DEFBUTTON1 | MB_ICONWARNING), S_OK, ErrorHandling::promptAlways);
+	CWixString szFiles;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
@@ -75,6 +76,9 @@ extern "C" UINT __stdcall PromptFileDowngrades(MSIHANDLE hInstall)
 
 		if (ullExistingVersion.QuadPart > ullMsiVersion.QuadPart)
 		{
+			hr = szFiles.AppnedFormat(L"\n%ls", (LPCWSTR)szFullPath);
+			ExitOnFailure(hr, "Failed to append-format string.");
+			
 			++dwDowngrades;
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File '%ls' might be downgraded from %u.%u.%u.%u to %ls, or deleted altogether", (LPCWSTR)szFullPath
 				, (0xFF & (ullExistingVersion.HighPart >> 16))
@@ -86,7 +90,7 @@ extern "C" UINT __stdcall PromptFileDowngrades(MSIHANDLE hInstall)
 		}
 		else
 		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File '%ls' has existing version %u.%u.%u.%u. Version %ls may be deployed", (LPCWSTR)szFullPath
+			WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "File '%ls' has existing version %u.%u.%u.%u. Version %ls may be deployed", (LPCWSTR)szFullPath
 				, (0xFF & (ullExistingVersion.HighPart >> 16))
 				, (0xFF & ullExistingVersion.HighPart)
 				, (0xFF & (ullExistingVersion.LowPart >> 16))
@@ -99,7 +103,7 @@ extern "C" UINT __stdcall PromptFileDowngrades(MSIHANDLE hInstall)
 
 	if (dwDowngrades > 0)
 	{
-		hr = prompter.Prompt(dwDowngrades);
+		hr = prompter.Prompt(dwDowngrades, (LPCWSTR)szFiles);
 		ExitOnFailure(hr, "Aboring on file downgrades")
 	}
 
