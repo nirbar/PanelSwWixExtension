@@ -856,7 +856,7 @@
   <Fragment>
     <CustomAction Id="PromptFileDowngrades" DllEntry="PromptFileDowngrades" Execute="immediate" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" />
     <InstallExecuteSequence>
-      <Custom Action="PromptFileDowngrades" After="InstallValidate" Overridable="yes" />
+      <Custom Action="PromptFileDowngrades" After="InstallValidate" Overridable="yes">Not Installed</Custom>
     </InstallExecuteSequence>
     <UI>
       <Error Id="27012">!(loc.PromptFileDowngrades)</Error>
