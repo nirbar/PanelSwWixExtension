@@ -14,6 +14,7 @@
   </PropertyGroup>
 
   <PropertyGroup Label="Nuspec">
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <IsPackable>true</IsPackable>
     <PackageId>PanelSwWixExtension4</PackageId>
     <PackageVersion>$(FullVersion)$(NugetPrereleaseVersion)</PackageVersion>
