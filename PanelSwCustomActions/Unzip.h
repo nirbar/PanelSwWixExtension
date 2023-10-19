@@ -10,11 +10,11 @@ class CUnzip :
 {
 public:
 
-	CUnzip(bool bZip) : CDeferredActionBase(bZip ? "Zip" : "Unzip"), isZip_(bZip) { }
+	CUnzip(bool bZip);
 
-	HRESULT AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, ::com::panelsw::ca::UnzipDetails_UnzipFlags flags);
+	HRESULT AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, ::com::panelsw::ca::UnzipDetails_UnzipFlags flags, com::panelsw::ca::ErrorHandling errorHandling);
 
-	HRESULT AddZip(LPCWSTR zipFile, LPCWSTR sourceFolder, LPCWSTR szPattern, bool bRecursive);
+	HRESULT AddZip(LPCWSTR zipFile, LPCWSTR sourceFolder, LPCWSTR szPattern, bool bRecursive, com::panelsw::ca::ErrorHandling errorHandling);
 
 protected:
 	HRESULT DeferredExecute(const ::std::string& command) override;
@@ -75,4 +75,8 @@ private:
 #pragma pack(pop)
 
 	HRESULT FindTimeInEntry(const std::string& extradField, FILETIME* createTime, FILETIME* accessTime, FILETIME* modifyTime);
+
+	CErrorPrompter _unzipPrompter;
+	CErrorPrompter _zipPrompter;
+	CErrorPrompter _zipOneFilePrompter;
 };

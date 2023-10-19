@@ -56,4 +56,7 @@
   <String Overridable="yes" Id="ConcatFiles" Value="מאחד קבצים" />
   <String Overridable="yes" Id="ExtractPayload" Value="פורס קבצים זמניים" />
   <String Overridable="yes" Id="PromptFileDowngrades" Value="סך של [2] קבצים ישונמוכו בפעולה זו. בדוק את קובץ הלוג לפרטים" />
+  <String Overridable="yes" Id="ZipFileError" Value="אירעה שגיאה בהוספת הקובץ [2] לארכיון [3].&#xA;[4]" />
+  <String Overridable="yes" Id="ZipArchiveError" Value="אירעה שגיאה ביצירת קובץ ארכיון [2].&#xA;[3]" />
+  <String Overridable="yes" Id="UnzipArchiveError" Value="אירעה שגיאה בחילוץ מקובץ ארכיון [2].&#xA;[3]" />
 </WixLocalization>

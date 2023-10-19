@@ -946,6 +946,11 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
               <xs:documentation><![CDATA[Whether or not to compress the zip]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="ErrorHandling" use="optional" type="ErrorHandlingType" default="fail">
+            <xs:annotation>
+              <xs:documentation><![CDATA[On error fail, ignore, or prompt user to abort, retry or ignore. Defaults to 'fail']]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>
@@ -1017,6 +1022,11 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
           <xs:attribute name="Condition" type="xs:string" use="optional">
             <xs:annotation>
               <xs:documentation><![CDATA[Whether or not to decompress the zip]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="ErrorHandling" use="optional" type="ErrorHandlingType" default="fail">
+            <xs:annotation>
+              <xs:documentation><![CDATA[On error fail, ignore, or prompt user to abort, retry or ignore. Defaults to 'fail']]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>

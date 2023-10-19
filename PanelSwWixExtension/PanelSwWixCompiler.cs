@@ -3995,6 +3995,7 @@ namespace PanelSw.Wix.Extensions
             string filePattern = "*.*";
             bool recursive = true;
             string condition = null;
+            ErrorHandling promptOnError = ErrorHandling.fail;
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -4016,6 +4017,9 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "Condition":
                             condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "ErrorHandling":
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out promptOnError);
                             break;
 
                         default:
@@ -4044,6 +4048,7 @@ namespace PanelSw.Wix.Extensions
                 row.FilePattern = filePattern;
                 row.Recursive = recursive ? 1 : 0;
                 row.Condition = condition;
+                row.ErrorHandling = (int)promptOnError;
             }
         }
 
@@ -4072,6 +4077,7 @@ namespace PanelSw.Wix.Extensions
             string dstDir = null;
             string condition = null;
             UnzipFlags flags = UnzipFlags.Unmodified | UnzipFlags.CreateRoot;
+            ErrorHandling promptOnError = ErrorHandling.fail;
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -4129,6 +4135,9 @@ namespace PanelSw.Wix.Extensions
                         case "Condition":
                             condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
+                        case nameof(ErrorHandling):
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out promptOnError);
+                            break;
 
                         default:
                             ParseHelper.UnexpectedAttribute(element, attrib);
@@ -4155,6 +4164,7 @@ namespace PanelSw.Wix.Extensions
                 row.TargetFolder = dstDir;
                 row.Flags = (int)flags;
                 row.Condition = condition;
+                row.ErrorHandling = (int)promptOnError;
             }
         }
 

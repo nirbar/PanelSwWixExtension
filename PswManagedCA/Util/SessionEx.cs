@@ -25,6 +25,9 @@ namespace PswManagedCA.Util
         DismUnwantedFeatureFailure = 27010,
         ExecOnPromptAlways = 27011,
         PromptFileDowngrades = 27012,
+        ZipFileError = 27013,
+        ZipArchiveError = 27014,
+        UnzipArchiveError = 27015,
     }
 
     static class SessionEx

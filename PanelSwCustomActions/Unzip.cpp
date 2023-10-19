@@ -44,7 +44,7 @@ extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall)
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_Unzip'. Have you authored 'PanelSw:Unzip' entries in WiX code?");
 
 	// Execute view
-	hr = WcaOpenExecuteView(L"SELECT `ZipFile`, `TargetFolder`, `Flags`, `Condition` FROM `PSW_Unzip`", &hView);
+	hr = WcaOpenExecuteView(L"SELECT `ZipFile`, `TargetFolder`, `Flags`, `Condition`, `ErrorHandling` FROM `PSW_Unzip`", &hView);
 	ExitOnFailure(hr, "Failed to execute SQL query");
 
 	// Iterate records
@@ -55,6 +55,7 @@ extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall)
 		// Get fields
 		CWixString zip, folder, condition;
 		int flags = 0;
+		int errorHandling = ErrorHandling::fail;
 
 		hr = WcaGetRecordFormattedString(hRecord, 1, (LPWSTR*)zip);
 		ExitOnFailure(hr, "Failed to get zip file.");
@@ -64,6 +65,8 @@ extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to get flags.");
 		hr = WcaGetRecordString(hRecord, 4, (LPWSTR*)condition);
 		ExitOnFailure(hr, "Failed to get condition.");
+		hr = WcaGetRecordInteger(hRecord, 5, &errorHandling);
+		ExitOnFailure(hr, "Failed to get ErrorHandling.");
 
 		MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, (LPCWSTR)condition);
 		switch (condRes)
@@ -86,12 +89,12 @@ extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall)
 
 		if ((flags & UnzipDetails_UnzipFlags::UnzipDetails_UnzipFlags_onRollback) == UnzipDetails_UnzipFlags::UnzipDetails_UnzipFlags_onRollback)
 		{
-			hr = rlbkCad.AddUnzip(zip, folder, (UnzipDetails_UnzipFlags)flags);
+			hr = rlbkCad.AddUnzip(zip, folder, (UnzipDetails_UnzipFlags)flags, (ErrorHandling)errorHandling);
 			ExitOnFailure(hr, "Failed scheduling zip file extraction");
 		}
 		else
 		{
-			hr = cad.AddUnzip(zip, folder, (UnzipDetails_UnzipFlags)flags);
+			hr = cad.AddUnzip(zip, folder, (UnzipDetails_UnzipFlags)flags, (ErrorHandling)errorHandling);
 			ExitOnFailure(hr, "Failed scheduling zip file extraction");
 		}
 	}
@@ -140,7 +143,7 @@ extern "C" UINT __stdcall ZipFileSched(MSIHANDLE hInstall)
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ZipFile'. Have you authored 'PanelSw:ZipFile' entries in WiX code?");
 
 	// Execute view
-	hr = WcaOpenExecuteView(L"SELECT `ZipFile`, `CompressFolder`, `FilePattern`, `Recursive`, `Condition` FROM `PSW_ZipFile`", &hView);
+	hr = WcaOpenExecuteView(L"SELECT `ZipFile`, `CompressFolder`, `FilePattern`, `Recursive`, `Condition`, `ErrorHandling` FROM `PSW_ZipFile`", &hView);
 	ExitOnFailure(hr, "Failed to execute SQL query");
 
 	// Iterate records
@@ -151,6 +154,7 @@ extern "C" UINT __stdcall ZipFileSched(MSIHANDLE hInstall)
 		// Get fields
 		CWixString zip, folder, pattern, condition;
 		int recursive = 0;
+		int errorHandling = ErrorHandling::fail;
 
 		hr = WcaGetRecordFormattedString(hRecord, 1, (LPWSTR*)zip);
 		ExitOnFailure(hr, "Failed to get ZipFile.");
@@ -162,6 +166,8 @@ extern "C" UINT __stdcall ZipFileSched(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to get Recursive.");
 		hr = WcaGetRecordString(hRecord, 5, (LPWSTR*)condition);
 		ExitOnFailure(hr, "Failed to get Condition.");
+		hr = WcaGetRecordInteger(hRecord, 6, &errorHandling);
+		ExitOnFailure(hr, "Failed to get ErrorHandling.");
 
 		MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, (LPCWSTR)condition);
 		switch (condRes)
@@ -188,7 +194,7 @@ extern "C" UINT __stdcall ZipFileSched(MSIHANDLE hInstall)
 			ExitOnFailure(hr, "Failed appending backslash");
 		}
 
-		hr = cad.AddZip(zip, folder, pattern, recursive);
+		hr = cad.AddZip(zip, folder, pattern, recursive, (ErrorHandling)errorHandling);
 		ExitOnFailure(hr, "Failed scheduling zip file compression");
 	}
 
@@ -203,7 +209,15 @@ LExit:
 	return WcaFinalize(er);
 }
 
-HRESULT CUnzip::AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, UnzipDetails_UnzipFlags flags)
+CUnzip::CUnzip(bool bZip)
+	: CDeferredActionBase(bZip ? "Zip" : "Unzip")
+	, isZip_(bZip)
+	, _unzipPrompter(PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_UNZIPARCHIVEERROR)
+	, _zipPrompter(PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_ZIPARCHIVEERROR)
+	, _zipOneFilePrompter(PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_ZIPFILEERROR)
+{ }
+
+HRESULT CUnzip::AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, UnzipDetails_UnzipFlags flags, ErrorHandling errorHandling)
 {
 	HRESULT hr = S_OK;
 	Command* pCmd = nullptr;
@@ -222,6 +236,7 @@ HRESULT CUnzip::AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, UnzipDetails_Unz
 	pDetails->set_zipfile(zipFile, WSTR_BYTE_SIZE(zipFile));
 	pDetails->set_targetfolder(targetFolder, WSTR_BYTE_SIZE(targetFolder));
 	pDetails->set_flags(flags);
+	pDetails->set_errorhandling(errorHandling);
 
 	pAny = pCmd->mutable_details();
 	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
@@ -233,7 +248,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CUnzip::AddZip(LPCWSTR zipFile, LPCWSTR sourceFolder, LPCWSTR szPattern, bool bRecursive)
+HRESULT CUnzip::AddZip(LPCWSTR zipFile, LPCWSTR sourceFolder, LPCWSTR szPattern, bool bRecursive, ErrorHandling errorHandling)
 {
 	HRESULT hr = S_OK;
 	Command* pCmd = nullptr;
@@ -253,6 +268,7 @@ HRESULT CUnzip::AddZip(LPCWSTR zipFile, LPCWSTR sourceFolder, LPCWSTR szPattern,
 	pDetails->set_srcfolder(sourceFolder, WSTR_BYTE_SIZE(sourceFolder));
 	pDetails->set_pattern(szPattern, WSTR_BYTE_SIZE(szPattern));
 	pDetails->set_recursive(bRecursive);
+	pDetails->set_errorhandling(errorHandling);
 
 	pAny = pCmd->mutable_details();
 	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
@@ -271,21 +287,23 @@ HRESULT CUnzip::DeferredExecute(const ::std::string& command)
 	UnzipDetails unzipDetails;
 	ZipDetails zipDetails;
 
-	if (!isZip_ && unzipDetails.ParseFromString(command))
+	do 
 	{
-		hr = ExecuteOneUnzip(&unzipDetails);
-		ExitOnFailure(hr, "Failed executing UnzipDetails");
-	}
-	else if (isZip_ && zipDetails.ParseFromString(command))
-	{
-		hr = ExecuteOneZip(&zipDetails);
-		ExitOnFailure(hr, "Failed executing ZipDetails");
-	}
-	else
-	{
-		hr = E_INVALIDARG;
-		ExitOnFailure(hr, "Failed unpacking command");
-	}
+		if (!isZip_ && unzipDetails.ParseFromString(command))
+		{
+			hr = ExecuteOneUnzip(&unzipDetails);
+		}
+		else if (isZip_ && zipDetails.ParseFromString(command))
+		{
+			hr = ExecuteOneZip(&zipDetails);
+		}
+		else
+		{
+			hr = E_INVALIDARG;
+			ExitOnFailure(hr, "Failed unpacking command");
+		}
+	} while (hr == E_RETRY);
+	ExitOnFailure(hr, "Failed executing zip");
 
 LExit:
 	return hr;
@@ -310,6 +328,8 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 	zipFileW = (LPCWSTR)(LPVOID)pDetails->zipfile().data();
 	srcFolderW = (LPCWSTR)(LPVOID)pDetails->srcfolder().data();
 	szPattern = (LPCWSTR)(LPVOID)pDetails->pattern().data();
+	_zipPrompter.SetErrorHandling(pDetails->errorhandling());
+	_zipOneFilePrompter.SetErrorHandling(pDetails->errorhandling());
 
 	try
 	{
@@ -356,9 +376,31 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 				ReleaseNullMem(szEntryName);
 
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Adding '%hs' as '%hs' to zip file '%hs'", file.getFileName().c_str(), fileName.getFileName().c_str(), zipFileA.c_str());
-				pZip->addFile(file, fileName);
+			LRetryFile:
+				try 
+				{
+					pZip->addFile(file, fileName);
+					//TODO Set extra time fields, once POCO support getting the entry of the added file.
+				}
+				catch (Poco::Exception ex)
+				{
+					hr = _zipOneFilePrompter.Prompt((LPCWSTR)pszFiles[i], zipFileW, ex.displayText().c_str());
+				}
+				catch (std::exception ex)
+				{
+					hr = _zipOneFilePrompter.Prompt((LPCWSTR)pszFiles[i], zipFileW, ex.what());
+				}
+				catch (...)
+				{
+					hr = _zipOneFilePrompter.Prompt(zipFileW, "unknown error");
+				}
 
-				//TODO Set extra time fields, once POCO support getting the entry of the added file.
+				if (hr == E_RETRY)
+				{
+					hr = S_OK;
+					goto LRetryFile;
+				}
+				ExitOnFailure(hr, "Failed to add '%ls' to zip '%ls'", pszFiles[i], zipFileW);
 			}
 
 			pZip->close();
@@ -367,23 +409,17 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 	}
 	catch (Poco::Exception ex)
 	{
-		hr = HRESULT_FROM_WIN32(ex.code());
-		if (SUCCEEDED(hr))
-		{
-			hr = E_FAIL;
-		}
-		ExitOnFailure(hr, "Failed zipping file. %hs", ex.displayText().c_str());
+		hr = _zipPrompter.Prompt(zipFileW, ex.displayText().c_str());
 	}
 	catch (std::exception ex)
 	{
-		hr = E_FAIL;
-		ExitOnFailure(hr, "Failed zipping file. %hs", ex.what());
+		hr = _zipPrompter.Prompt(zipFileW, ex.what());
 	}
 	catch (...)
 	{
-		hr = E_FAIL;
-		ExitOnFailure(hr, "Failed zipping file");
+		hr = _zipPrompter.Prompt(zipFileW, "unknown error");
 	}
+	ExitOnFailure(hr, "Failed creating zip file '%ls'", zipFileW);
 
 LExit:
 	ReleaseNullMem(szEntryName);
@@ -420,6 +456,7 @@ HRESULT CUnzip::ExecuteOneUnzip(::com::panelsw::ca::UnzipDetails* pDetails)
 
 	zipFileW = (LPCWSTR)(LPVOID)pDetails->zipfile().data();
 	targetFolderW = (LPCWSTR)(LPVOID)pDetails->targetfolder().data();
+	_unzipPrompter.SetErrorHandling(pDetails->errorhandling());
 
 	// ActionData: "Extracting from [1] to [2]"
 	hActionData = ::MsiCreateRecord(2);
@@ -564,23 +601,17 @@ HRESULT CUnzip::ExecuteOneUnzip(::com::panelsw::ca::UnzipDetails* pDetails)
 	}
 	catch (Poco::Exception ex)
 	{
-		hr = HRESULT_FROM_WIN32(ex.code());
-		if (SUCCEEDED(hr))
-		{
-			hr = E_FAIL;
-		}
-		ExitOnFailure(hr, "Failed unzipping file. %hs", ex.displayText().c_str());
+		hr = _unzipPrompter.Prompt(zipFileW, ex.displayText().c_str());
 	}
 	catch (std::exception ex)
 	{
-		hr = E_FAIL;
-		ExitOnFailure(hr, "Failed unzipping file. %hs", ex.what());
+		hr = _unzipPrompter.Prompt(zipFileW, ex.what());
 	}
 	catch (...)
 	{
-		hr = E_FAIL;
-		ExitOnFailure(hr, "Failed unzipping file");
+		hr = _unzipPrompter.Prompt(zipFileW, "unknown error");
 	}
+	ExitOnFailure(hr, "Failed unzip file");
 
 LExit:
 	if (archive)

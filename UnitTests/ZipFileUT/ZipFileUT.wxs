@@ -7,13 +7,18 @@
     </Feature>
 
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
+    <Property Id="ORIGINAL_DATABASE_DIR_">
+      <PanelSW:RegularExpression Input="[OriginalDatabase]" Expression="\\\w+.msi" Replacement=""/>
+    </Property>
 
     <PanelSW:ZipFile SourceFolder="[INSTALLFOLDER]" FilePattern="*.log" TargetZipFile="[INSTALLFOLDER]1.logs.zip" Condition="Not Installed"/>
     <PanelSW:ZipFile SourceFolder="[INSTALLFOLDER]" TargetZipFile="[INSTALLFOLDER]1.zip" Condition="Not Installed"/>
+    <PanelSW:ZipFile SourceFolder="[ORIGINAL_DATABASE_DIR_]" TargetZipFile="[OriginalDatabase].zip" Condition="Not Installed" ErrorHandling="prompt"/>
     <PanelSW:Unzip TargetFolder="[INSTALLFOLDER]" ZipFile="[INSTALLFOLDER]1.zip" OverwriteMode="Unmodified" Condition="Not Installed"/>
     <PanelSW:Unzip TargetFolder="[WindowsVolume]1\2\3" ZipFile="[INSTALLFOLDER]1.zip" Overwrite="yes" Condition="Not Installed"/>
     <PanelSW:Unzip TargetFolder="[WindowsVolume]1\2\4" ZipFile="[INSTALLFOLDER]1.zip" Overwrite="yes" DeleteZip="yes" CreateRootFolder="no" Condition="Not Installed"/>
     <PanelSW:Unzip TargetFolder="[INSTALLFOLDER]npp" ZipFile="[#iconsext.zip]" OverwriteMode="Always" Condition="&amp;ProductFeature &gt;= 3"/>
+    <PanelSW:Unzip TargetFolder="[INSTALLFOLDER]msi" ZipFile="[OriginalDatabase]" OverwriteMode="Always" Condition="&amp;ProductFeature &gt;= 3" ErrorHandling="prompt"/>
 
     <ComponentGroup Id="ProductComponents">
       <Component Directory="INSTALLFOLDER">

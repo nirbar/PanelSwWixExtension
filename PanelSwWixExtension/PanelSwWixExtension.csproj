@@ -39,7 +39,7 @@
     <None Include="$(TargetDir)\..\PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.dll" Visible="false" Pack="true" PackagePath="tools\lib\"/>
     <None Include="..\build\x86\bin\$(Configuration)\DeferredExePackage\DeferredExePackage.exe" Visible="false" Pack="true" PackagePath="tools\lib\x86\"/>
     <None Include="..\build\x64\bin\$(Configuration)\DeferredExePackage\DeferredExePackage.exe" Visible="false" Pack="true" PackagePath="tools\lib\x64\"/>
-    <None Include=".\Xsd\PanelSwWixExtension.xsd" Visible="false" Pack="true" PackagePath="content"/>
+    <None Include=".\Xsd\PanelSwWixExtension.xsd" Pack="true" PackagePath="content"/>
     <!-- lib -->
     <None Include="..\build\x86\bin\$(Configuration)\CaCommon\CaCommon.lib" Visible="false" Pack="true" PackagePath="tools\lib\v142\x86\"/>
     <!-- inc -->
@@ -52,6 +52,7 @@
     <None Include="..\CaCommon\WixString.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
     <None Include="..\build\x86\obj\$(Configuration)\protobuf\command.pb.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
     <None Include="..\build\x86\obj\$(Configuration)\protobuf\customActionData.pb.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
+    <None Include="..\build\x86\obj\$(Configuration)\protobuf\errorHandling.pb.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
   </ItemGroup>
 
   <ItemGroup>

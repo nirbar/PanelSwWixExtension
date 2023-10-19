@@ -25,6 +25,7 @@ namespace PanelSw.Wix.Extensions.Symbols
                     new ColumnDefinition(nameof(FilePattern), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
                     new ColumnDefinition(nameof(Recursive), ColumnType.Number, 1, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 1),
                     new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
+                    new ColumnDefinition(nameof(ErrorHandling), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 2),
                 };
             }
         }
@@ -63,6 +64,12 @@ namespace PanelSw.Wix.Extensions.Symbols
         {
             get => Fields[4].AsString();
             set => this.Set(4, value);
+        }
+
+        public int ErrorHandling
+        {
+            get => Fields[5].AsNumber();
+            set => this.Set(5, value);
         }
     }
 }

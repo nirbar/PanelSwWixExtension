@@ -94,6 +94,9 @@ PanelSwWixExtension uses error codes in Error table:
 - 27010: Dism error template for prompting user on failures to remove a Windows feature package.
 - 27011: ExecOn message template for prompting user on success with promptAlways.
 - 27012: Prompt on file downgrades
+- 27013: Prompt on failure to add a file to a ZIP archive
+- 27014: Prompt on failure to create a ZIP archive
+- 27015: Prompt on failure to unzip a ZIP archive
 
 ## Properties
 
