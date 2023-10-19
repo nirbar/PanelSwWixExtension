@@ -19,15 +19,13 @@
     <UseOfAtl>Static</UseOfAtl>
     <LinkIncremental>true</LinkIncremental>
     <TargetExt>.lib</TargetExt>
-    <ResolveNuGetPackages>false</ResolveNuGetPackages>  
+    <ResolveNuGetPackages>false</ResolveNuGetPackages>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
-
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup>
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
-
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
       <Optimization>MinSpace</Optimization>
@@ -70,6 +68,9 @@
     <ClCompile Include="SummaryStream.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\errorHandling.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\customActionData.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
@@ -77,6 +78,7 @@
       <AutoGen>True</AutoGen>
     </ClInclude>
     <ClInclude Include="DeferredActionBase.h" />
+    <ClInclude Include="ErrorPrompter.h" />
     <ClInclude Include="MsiBreak.h" />
     <ClInclude Include="RegistryKey.h" />
     <ClInclude Include="SqlClientBase.h" />
@@ -88,9 +90,9 @@
     <ClInclude Include="WixString.h" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="TidyBuild"/>
-    <PackageReference Include="WixToolset.DUtil"/>
-    <PackageReference Include="WixToolset.WcaUtil"/>
+    <PackageReference Include="TidyBuild" />
+    <PackageReference Include="WixToolset.DUtil" />
+    <PackageReference Include="WixToolset.WcaUtil" />
   </ItemGroup>
   <ItemGroup>
     <None Include="..\ProtoCaLib\command.proto">
@@ -98,6 +100,9 @@
     </None>
     <None Include="..\ProtoCaLib\customActionData.proto">
       <Link>protobuf\customActionData.proto</Link>
+    </None>
+    <None Include="..\ProtoCaLib\errorHandling.proto">
+      <Link>protobuf\errorHandling.proto</Link>
     </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

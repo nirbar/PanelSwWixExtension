@@ -283,6 +283,11 @@ LExit:
 	return WcaFinalize(dwRes);
 }
 
+CServiceConfig::CServiceConfig() 
+	: CDeferredActionBase("ServiceConfig")
+	, _errorPrompter(PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_SERVICECONFIGFAILURE) 
+{ }
+
 HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, LPCWSTR szLoadOrderGroup, const std::list<LPWSTR> &lstDependencies, ErrorHandling errorHandling, ServciceConfigDetails_DelayStart delayStart, DWORD dwServiceType)
 {
 	HRESULT hr = S_OK;
@@ -385,16 +390,15 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 		}
 	}
 
-LRetry:
-	hr = ExecuteOne(szServiceName, szCommandLine, szAccount, szPassword, details.start(), szLoadOrderGroup, szDependencies, details.delaystart(), details.servicetype());
-	if (FAILED(hr))
+	do
 	{
-		hr = PromptError(szServiceName, details.errorhandling());
-		if (hr == E_RETRY)
+		hr = ExecuteOne(szServiceName, szCommandLine, szAccount, szPassword, details.start(), szLoadOrderGroup, szDependencies, details.delaystart(), details.servicetype());
+		if (FAILED(hr))
 		{
-			goto LRetry;
+			_errorPrompter.SetErrorHandling(details.errorhandling());
+			hr = _errorPrompter.Prompt(szServiceName);
 		}
-	}
+	} while (hr == E_RETRY);
 	ExitOnFailure(hr, "Failed configuring service '%ls'", szServiceName);
 
 LExit:
@@ -441,69 +445,5 @@ LExit:
 
 	ReleaseServiceHandle(hService);
 	ReleaseServiceHandle(hManager);
-	return hr;
-}
-
-HRESULT CServiceConfig::PromptError(LPCWSTR szServiceName, ::com::panelsw::ca::ErrorHandling errorHandling)
-{
-	HRESULT hr = S_OK;
-
-	switch (errorHandling)
-	{
-	case ErrorHandling::fail:
-	default:
-		hr = E_FAIL;
-		break;
-
-	case ErrorHandling::ignore:
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Ignoring service configuration failure");
-		break;
-
-	case ErrorHandling::prompt:
-	{
-		PMSIHANDLE hRec;
-		UINT promptResult = IDOK;
-
-		hRec = ::MsiCreateRecord(2);
-		ExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
-
-		hr = WcaSetRecordInteger(hRec, 1, PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_SERVICECONFIGFAILURE);
-		ExitOnFailure(hr, "Failed setting record integer");
-
-		hr = WcaSetRecordString(hRec, 2, szServiceName);
-		ExitOnFailure(hr, "Failed setting record string");
-
-		promptResult = WcaProcessMessage((INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_ERROR | MB_ABORTRETRYIGNORE | MB_DEFBUTTON1 | MB_ICONERROR), hRec);
-		switch (promptResult)
-		{
-		case IDABORT:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User aborted on failure to configure '%ls' service", szServiceName);
-			hr = E_FAIL;
-			break;
-
-		case IDRETRY:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose to retry on failure to configure '%ls' service", szServiceName);
-			hr = E_RETRY;
-			break;
-
-		case IDIGNORE:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User ignored failure to configure '%ls' service", szServiceName);
-			break;
-
-		case IDCANCEL:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User canceled on failure to configure '%ls' service", szServiceName);
-			ExitOnWin32Error(ERROR_INSTALL_USEREXIT, hr, "Cancelling");
-			break;
-
-		default: // Probably silent (result 0)
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failure to configure '%ls' service. Prompt result is 0x%08X", szServiceName, promptResult);
-			hr = E_FAIL;
-			break;
-		}
-		break;
-	}
-	}
-
-LExit:
 	return hr;
 }

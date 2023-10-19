@@ -40,7 +40,7 @@
       <ConformanceMode>true</ConformanceMode>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
-      <AdditionalIncludeDirectories>$(DismApiDir)Include;$(WindowsKitSharedDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DismApiDir)Include;$(WindowsKitSharedDir);$(BuildFolderWin32)obj\$(Configuration)\Protobuf;..\protobuf\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
@@ -63,7 +63,7 @@
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
-      <AdditionalIncludeDirectories>$(DismApiDir)Include;$(WindowsKitSharedDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(DismApiDir)Include;$(WindowsKitSharedDir);$(BuildFolderWin32)obj\$(Configuration)\Protobuf;..\protobuf\src;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <AdditionalDependencies>legacy_stdio_definitions.lib;msi.lib;version.lib;%(AdditionalDependencies)</AdditionalDependencies>

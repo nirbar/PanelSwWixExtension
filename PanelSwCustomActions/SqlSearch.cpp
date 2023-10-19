@@ -107,6 +107,8 @@ static HRESULT ExecuteOne(LPCWSTR szConnectionString, LPCWSTR szServer, LPCWSTR 
 	CSqlQuery sqlQuery;
 	CWixString szResult;
 	CWixString szError;
+	CErrorPrompter errorPrompter(PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_PSW_SQLSEARCHFAILURE);
+	errorPrompter.SetErrorHandling(errorHandling);
 
 LRetry:
 	if (szConnectionString && *szConnectionString)
@@ -125,66 +127,11 @@ LRetry:
 	if (FAILED(hr))
 	{
 		WcaLogError(hr, "Failed executing SQL query: %ls", (LPCWSTR)szError);
-
-		switch (errorHandling)
+		hr = errorPrompter.Prompt(szQuery, (LPCWSTR)szError);
+		if (hr == E_RETRY)
 		{
-		case ErrorHandling::fail:
-		default:
-			// Will fail downstairs.
-			break;
-
-		case ErrorHandling::ignore:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Ignoring SQL query error");
-			hr = S_FALSE;
-			ExitFunction();
-
-		case ErrorHandling::prompt:
-		{
-			HRESULT hrOp = hr;
-			PMSIHANDLE hRec;
-			UINT promptResult = IDOK;
-
-			hRec = ::MsiCreateRecord(3);
-			ExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
-
-			hr = WcaSetRecordInteger(hRec, 1, PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_PSW_SQLSEARCHFAILURE);
-			ExitOnFailure(hr, "Failed setting record integer");
-
-			hr = WcaSetRecordString(hRec, 2, szQuery);
-			ExitOnFailure(hr, "Failed setting record string");
-
-			hr = WcaSetRecordString(hRec, 3, (LPCWSTR)szError);
-			ExitOnFailure(hr, "Failed setting record string");
-
-			promptResult = WcaProcessMessage((INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_ERROR | MB_ABORTRETRYIGNORE | MB_DEFBUTTON1 | MB_ICONERROR), hRec);
-			switch (promptResult)
-			{
-			case IDABORT:
-				CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"User aborted on failure to execute SQL query");
-				hr = hrOp;
-				break;
-
-			case IDRETRY:
-				CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"User chose to retry on failure to execute SQL query");
-				goto LRetry;
-
-			case IDIGNORE:
-				CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"User ignored failure to execute SQL query");
-				hr = S_FALSE;
-				ExitFunction();
-
-			case IDCANCEL:
-				CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"User canceled on failure to execute SQL query");
-				ExitOnWin32Error(ERROR_INSTALL_USEREXIT, hr, "Cancelling");
-				break;
-
-			default: // Probably silent (result 0)
-				CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Failure to execute SQL query. Prompt result is 0x%08X", promptResult);
-				hr = hrOp;
-				break;
-			}
-			break;
-		}
+			hr = S_OK;
+			goto LRetry;
 		}
 	}
 	ExitOnFailure(hr, "Failed excuting SQL search");

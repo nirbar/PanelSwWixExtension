@@ -155,6 +155,11 @@ LExit:
 	return WcaFinalize(er);
 }
 
+CTopShelfService::CTopShelfService() 
+	: CDeferredActionBase("TopShelf")
+	, _errorPrompter(PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_TOPSHELFFAILURE) 
+{ }
+
 HRESULT CTopShelfService::AddInstall(LPCWSTR file, LPCWSTR serviceName, LPCWSTR displayName, LPCWSTR description, LPCWSTR instance, LPCWSTR userName, LPCWSTR passowrd, TopShelfServiceDetails_HowToStart howToStart, TopShelfServiceDetails_ServiceAccount account, com::panelsw::ca::ErrorHandling promptOnError)
 {
 	HRESULT hr = S_OK;
@@ -233,6 +238,8 @@ HRESULT CTopShelfService::DeferredExecute(const ::std::string& command)
 	bRes = details.ParseFromString(command);
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking TopShelfServiceDetails");
 
+	_errorPrompter.SetErrorHandling(details.errorhandling());
+
 	hr = BuildCommandLine(&details, &commandLine);
 	ExitOnFailure(hr, "Failed to create TopShelf command line");
 
@@ -249,67 +256,11 @@ LRetry:
 	hr = QuietExec(commandLineCopy, INFINITE, FALSE, TRUE);
 	if (FAILED(hr) && isDeferred)
 	{
-		switch (details.errorhandling())
+		hr = _errorPrompter.Prompt(fileName);
+		if (hr == E_RETRY)
 		{
-		case ErrorHandling::fail:
-		default:
-			// Will fail downstairs.
-			break;
-
-		case ErrorHandling::ignore:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Ignoring TopShelf command failure 0x%08X", hr);
 			hr = S_OK;
-			break;
-
-		case ErrorHandling::prompt:
-		{
-			HRESULT hrOp = hr;
-			PMSIHANDLE hRec;
-			UINT promptResult = IDOK;
-
-			if (!fileName)
-			{
-				fileName = (LPCWSTR)(LPVOID)details.file().data();
-				fileName = ::PathFindFileName(fileName);
-			}
-
-			hRec = ::MsiCreateRecord(2);
-			ExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
-
-			hr = WcaSetRecordInteger(hRec, 1, PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_TOPSHELFFAILURE);
-			ExitOnFailure(hr, "Failed setting record integer");
-
-			hr = WcaSetRecordString(hRec, 2, fileName);
-			ExitOnFailure(hr, "Failed setting record string");
-
-			promptResult = WcaProcessMessage((INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_ERROR | MB_ABORTRETRYIGNORE | MB_DEFBUTTON1 | MB_ICONERROR), hRec);
-			switch (promptResult)
-			{
-			case IDABORT:
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User aborted on failure to install TopShelf '%ls' service", fileName);
-				hr = hrOp;
-				break;
-
-			case IDRETRY:
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose to retry on failure to install TopShelf '%ls' service", fileName);
-				goto LRetry;
-
-			case IDIGNORE:
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User ignored failure (error code 0x%08X) to install TopShelf '%ls' service", hrOp, fileName);
-				break;
-
-			case IDCANCEL:
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User canceled on failure to install TopShelf '%ls' service", fileName);
-				ExitOnWin32Error(ERROR_INSTALL_USEREXIT, hr, "Cancelling");
-				break;
-
-			default: // Probably silent (result 0)
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failure to install TopShelf '%ls' service. Prompt result is 0x%08X", fileName, promptResult);
-				hr = hrOp;
-				break;
-			}
-			break;
-		}
+			goto LRetry;
 		}
 	}
 	ExitOnFailure(hr, "TopShelf command failed");

@@ -114,7 +114,7 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		hr = WcaGetRecordInteger(hRecord, 7, &errorHandling);
 		ExitOnFailure(hr, "Failed to get ErrorHandling.");
 		hr = WcaGetRecordString(hRecord, 8, (LPWSTR*)userId);
-		ExitOnFailure(hr, "Failed to get ErrorHandling.");
+		ExitOnFailure(hr, "Failed to get User_.");
 
 		// Execute from binary
 		if (!szBinary.IsNullOrEmpty())
@@ -523,6 +523,13 @@ LExit:
 	return hr;
 }
 
+CExecOnComponent::CExecOnComponent() 
+	: CDeferredActionBase("ExecOn") 
+	, _errorPrompter((DWORD)PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_EXECONFAILURE)
+	, _alwaysPrompter((DWORD)PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_EXECONPROMPTALWAYS, (INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_USER | MB_OKCANCEL | MB_DEFBUTTON1 | MB_ICONINFORMATION), S_OK)
+	, _stdoutPrompter((DWORD)PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_EXECONCONSOLEFAILURE)
+{ }
+
 HRESULT CExecOnComponent::AddExec(const CWixString &szCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, ExitCodeMap* pExitCodeMap, vector<ConsoleOuputRemap>* pConsoleOuput, EnvironmentMap* pEnv, int nFlags, ErrorHandling errorHandling)
 {
 	HRESULT hr = S_OK;
@@ -583,9 +590,27 @@ LExit:
 HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command)
 {
 	HRESULT hr = S_OK;
-	DWORD exitCode = 0;
 	BOOL bRes = TRUE;
 	ExecOnDetails details;
+
+	bRes = details.ParseFromString(command);
+	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ExecOnDetails");
+
+	do
+	{
+		hr = ExecuteOne(details);
+	} while (hr == E_RETRY);
+	ExitOnFailure(hr, "Failed to execute command");
+
+LExit:
+	return hr;
+}
+
+HRESULT CExecOnComponent::ExecuteOne(const com::panelsw::ca::ExecOnDetails& details)
+{
+	HRESULT hr = S_OK;
+	DWORD exitCode = 0;
+	BOOL bRes = TRUE;
 	LPCWSTR szCommand = nullptr;
 	LPCWSTR szObfuscatedCommand = nullptr;
 	LPCWSTR szWorkingDirectory = nullptr;
@@ -600,15 +625,14 @@ HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command)
 	HANDLE hProc = NULL;
 	PMSIHANDLE hActionData;
 
-	bRes = details.ParseFromString(command);
-	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ExecOnDetails");
-
 	szCommand = (LPCWSTR)(LPVOID)details.command().plain().data();
 	szObfuscatedCommand = (LPCWSTR)(LPVOID)details.command().obfuscated().data();
 	szWorkingDirectory = (LPCWSTR)(LPVOID)details.workingdirectory().data();
 	szDomain = (LPCWSTR)(LPVOID)details.domain().data();
 	szUser = (LPCWSTR)(LPVOID)details.user().data();
 	szPassword = (LPCWSTR)(LPVOID)details.password().data();
+	_errorPrompter.SetErrorHandling(details.errorhandling());
+	_alwaysPrompter.SetErrorHandling(details.errorhandling());
 
 	hr = SetEnvironment(details.environment());
 	if (FAILED(hr))
@@ -654,8 +678,6 @@ HRESULT CExecOnComponent::DeferredExecute(const ::std::string& command)
 		ExitFunction();
 	}
 
-	// Sync
-LRetry:
 	szLog.Release();
 	if (hStdOut && (hStdOut != INVALID_HANDLE_VALUE))
 	{
@@ -718,27 +740,7 @@ LRetry:
 	}
 
 	hr = SearchStdOut((LPCWSTR)szLog, details);
-	switch (hr)
-	{
-	case E_RETRY:
-		hr = S_OK;
-		goto LRetry;
-
-	case S_OK:
-	case E_FAIL:
-		ExitFunction();
-
-	case S_FALSE:
-	default:
-		break;
-	}
-
-	if (FAILED(hr) && (exitCode == ERROR_SUCCESS))
-	{
-		// Shouldn't happen since SearchStdOut doesn't return any value not handled in switch above. However, keeping for sake of future changes.
-		exitCode = HRESULT_CODE(hr);
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Remapped exit code to %u after searching console output", exitCode);
-	}
+	ExitOnFailure(hr, "Command output hints at an error");
 
 	switch (exitCode)
 	{
@@ -759,88 +761,13 @@ LRetry:
 		break;
 	}
 
-	switch (details.errorhandling())
+	if (FAILED(hr))
 	{
-	case ErrorHandling::fail:
-	default:
-		// Will fail downstairs.
-		break;
-
-	case ErrorHandling::ignore:
-		if (FAILED(hr))
-		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Ignoring command failure 0x%08X", hr);
-			hr = S_OK;
-		}
-		break;
-
-	case ErrorHandling::prompt:
-	case ErrorHandling::promptAlways:
-	{
-		HRESULT hrOp = hr;
-		PMSIHANDLE hRec;
-		UINT promptResult = IDABORT;
-		INSTALLMESSAGE errLevel;
-
-		hRec = ::MsiCreateRecord(3);
-		ExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
-
-		if (FAILED(hrOp))
-		{
-			errLevel = (INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_ERROR | MB_ABORTRETRYIGNORE | MB_DEFBUTTON1 | MB_ICONERROR);
-
-			hr = WcaSetRecordInteger(hRec, 1, PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_EXECONFAILURE);
-			ExitOnFailure(hr, "Failed setting record integer");
-			hr = WcaSetRecordString(hRec, 2, szObfuscatedCommand);
-			ExitOnFailure(hr, "Failed setting record string");
-		}
-		else if (details.errorhandling() == ErrorHandling::promptAlways)
-		{
-			errLevel = (INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_USER | MB_OKCANCEL | MB_DEFBUTTON1 | MB_ICONINFORMATION);
-
-			hr = WcaSetRecordInteger(hRec, 1, PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_EXECONPROMPTALWAYS);
-			ExitOnFailure(hr, "Failed setting record integer");
-			hr = WcaSetRecordString(hRec, 2, szObfuscatedCommand);
-			ExitOnFailure(hr, "Failed setting record string");
-			hr = WcaSetRecordString(hRec, 3, szLog.IsNullOrEmpty()  ? L"" : (LPCWSTR)szLog);
-			ExitOnFailure(hr, "Failed setting record string");
-		}
-		else
-		{
-			hr = hrOp;
-			break;
-		}
-
-		promptResult = WcaProcessMessage(errLevel, hRec);
-		switch (promptResult)
-		{
-		case IDABORT:
-		case IDCANCEL:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User aborted on command failure (error code 0x%08X)", hrOp);
-			hr = hrOp;
-			break;
-
-		default: // Probably silent (result 0)
-			if (FAILED(hrOp))
-			{
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Aborting on command failure (error code 0x%08X)", hrOp);
-				hr = hrOp;
-			}
-			break;
-
-		case IDRETRY:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose to retry on command failure (error code 0x%08X)", hrOp);
-			hr = S_OK;
-			goto LRetry;
-
-		case IDOK:
-		case IDIGNORE:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User elected to continue");
-			hr = S_OK;
-			break;
-		}
-		break;
+		hr = _errorPrompter.Prompt(szObfuscatedCommand);
 	}
+	else if (details.errorhandling() == ErrorHandling::promptAlways)
+	{
+		hr = _alwaysPrompter.Prompt(szObfuscatedCommand, szLog.IsNullOrEmpty() ? L"" : (LPCWSTR)szLog);
 	}
 	ExitOnFailure(hr, "Failed to execute command '%ls'", szObfuscatedCommand);
 
@@ -1030,14 +957,9 @@ LExit:
 	return hr;
 }
 
-// S_FALSE: Had no matches, go on with error handling.
-// S_OK: Ignore errors and continue
-// E_RETRY: Retry
-// E_FAIL: Abort
 HRESULT CExecOnComponent::SearchStdOut(LPCWSTR szStdOut, const ExecOnDetails& details)
 {
 	HRESULT hr = S_FALSE;
-	HRESULT localHr = S_OK;
 
 	for (const ConsoleOuputRemap& console : details.consoleouputremap())
 	{
@@ -1064,64 +986,13 @@ HRESULT CExecOnComponent::SearchStdOut(LPCWSTR szStdOut, const ExecOnDetails& de
 			ExitOnFailure(hr, "Failed evaluating regular expression. %hs", ex.what());
 		}
 
-		switch (console.errorhandling())
-		{
-		case ErrorHandling::fail:
-			hr = E_FAIL;
-			ExitFunction();
-
-		case ErrorHandling::ignore:
-			if (hr == S_FALSE)
-			{
-				hr = S_OK;
-			}
-			continue;
-
-		case ErrorHandling::prompt:
-			PMSIHANDLE hRec;
-			UINT promptResult = IDABORT;
-
-			hRec = ::MsiCreateRecord(3);
-			ExitOnNull(hRec, localHr, E_FAIL, "Failed creating record");
-
-			localHr = WcaSetRecordInteger(hRec, 1, PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_EXECONCONSOLEFAILURE);
-			ExitOnFailure(localHr, "Failed setting record integer");
-
-			localHr = WcaSetRecordString(hRec, 2, (LPCWSTR)(LPVOID)details.command().obfuscated().data());
-			ExitOnFailure(localHr, "Failed setting record string");
-
-			localHr = WcaSetRecordString(hRec, 3, (LPCWSTR)(LPVOID)console.prompttext().data());
-			ExitOnFailure(localHr, "Failed setting record string");
-
-			promptResult = WcaProcessMessage((INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_ERROR | MB_ABORTRETRYIGNORE | MB_DEFBUTTON1 | MB_ICONERROR), hRec);
-			switch (promptResult)
-			{
-			case IDABORT:
-			case IDCANCEL:
-			default: // Probably silent (result 0)
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User aborted on command console output parsing");
-				hr = E_FAIL;
-				ExitFunction();
-
-			case IDRETRY:
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose to retry on command console output parsing");
-				hr = E_RETRY;
-				ExitFunction();
-
-			case IDIGNORE:
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User ignored command console output parsing");
-				if (hr == S_FALSE)
-				{
-					hr = S_OK;
-				}
-				break;
-			}
-			break;
-		}
+		_stdoutPrompter.SetErrorHandling(console.errorhandling());
+		hr = _stdoutPrompter.Prompt((LPCWSTR)(LPVOID)details.command().obfuscated().data(), (LPCWSTR)(LPVOID)console.prompttext().data());
+		ExitOnFailure(hr, "Console output hints at an error");
 	}
 
 LExit:
-	return (SUCCEEDED(localHr) ? hr : localHr);
+	return hr;
 }
 
 HRESULT CExecOnComponent::SetEnvironment(const ::google::protobuf::Map<std::string, com::panelsw::ca::ObfuscatedString>& customEnv)

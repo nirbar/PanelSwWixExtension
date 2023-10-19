@@ -1,4 +1,5 @@
 #include "pch.h"
+using namespace com::panelsw::ca;
 
 extern "C" UINT __stdcall PromptFileDowngrades(MSIHANDLE hInstall)
 {
@@ -8,6 +9,7 @@ extern "C" UINT __stdcall PromptFileDowngrades(MSIHANDLE hInstall)
 	PMSIHANDLE hRecord;
 	DWORD dwDowngrades = 0;
 	UINT promptResult = 0;
+	CErrorPrompter prompter(PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_PROMPTFILEDOWNGRADES, (INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_WARNING | MB_OKCANCEL | MB_DEFBUTTON1 | MB_ICONWARNING), S_OK, ErrorHandling::promptAlways);
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
@@ -95,36 +97,10 @@ extern "C" UINT __stdcall PromptFileDowngrades(MSIHANDLE hInstall)
 	}
 	hr = S_OK;
 
-	if (dwDowngrades == 0)
+	if (dwDowngrades > 0)
 	{
-		ExitFunction();
-	}
-
-	hRecord = ::MsiCreateRecord(2);
-	ExitOnNull(hRecord, hr, E_FAIL, "Failed creating record");
-
-	hr = WcaSetRecordInteger(hRecord, 1, PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_PROMPTFILEDOWNGRADES);
-	ExitOnFailure(hr, "Failed setting record integer");
-
-	hr = WcaSetRecordInteger(hRecord, 2, dwDowngrades);
-	ExitOnFailure(hr, "Failed setting record string");
-
-	promptResult = WcaProcessMessage((INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_WARNING | MB_OKCANCEL | MB_DEFBUTTON1 | MB_ICONWARNING), hRecord);
-	switch (promptResult)
-	{
-	case IDABORT:
-	case IDCANCEL:
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User aborted on file downgrade prompt");
-		ExitOnWin32Error(ERROR_INSTALL_USEREXIT, hr, "Cancelling");
-		break;
-
-	case IDOK:
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User approved file downgrades");
-		break;
-
-	default: // Probably silent (result 0)
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Prompt result is 0x%08X", promptResult);
-		break;
+		hr = prompter.Prompt(dwDowngrades);
+		ExitOnFailure(hr, "Aboring on file downgrades")
 	}
 
 LExit:

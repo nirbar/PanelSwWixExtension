@@ -1,22 +1,15 @@
 #include "pch.h"
+#include "..\CaCommon\ErrorPrompter.h"
 #include <shlwapi.h>
 #include <DismApi.h>
 #include <regex>
 #pragma comment (lib, "dismapi.lib")
 #pragma comment (lib, "Shlwapi.lib")
 using namespace std;
-
-#define E_RETRY		HRESULT_FROM_WIN32(ERROR_RETRY)
-enum ErrorHandling
-{
-	fail = 0,
-	ignore = 1,
-	prompt = 2
-};
+using namespace com::panelsw::ca;
 
 static LPCWSTR DismStateString(DismPackageFeatureState state);
 static void ProgressCallback(UINT Current, UINT Total, PVOID UserData);
-static HRESULT HandleError(ErrorHandling nErrorHandling, UINT nErrorId, LPCWSTR szFeature, LPCWSTR szErrorMsg);
 
 static ULONGLONG nMsiTicksReported_ = 0;
 static HANDLE hCancel_ = NULL;
@@ -77,6 +70,9 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 	ProgressReportState* pStates = nullptr;
 	ProgressReportState currState;
 	errno_t err = 0;
+	CErrorPrompter pkgErrorPrompter(PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_DISMPACKAGEFAILURE);
+	CErrorPrompter ftrErrorPrompter(PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_DISMFEATUREFAILURE);
+	CErrorPrompter unFtrErrorPrompter(PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_DISMUNWANTEDFEATUREFAILURE);
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
@@ -311,7 +307,8 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 				::DismGetLastErrorMessage(&pErrorString);
 				WcaLogError(hr, "Failed adding DISM package '%ls'. %ls", pStates[i].szPackage, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 
-				hr = HandleError(pStates[i].eErrorHandling, PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_DISMPACKAGEFAILURE, pStates[i].szPackage, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+				pkgErrorPrompter.SetErrorHandling(pStates[i].eErrorHandling);
+				hr = pkgErrorPrompter.Prompt(pStates[i].szPackage, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 				if (hr == E_RETRY)
 				{
 					hr = S_OK;
@@ -353,7 +350,8 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 				::DismGetLastErrorMessage(&pErrorString);
 				WcaLogError(hr, "Failed enabling feature '%ls'. %ls", pStates[i].pResolvedFeatures[j]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 
-				hr = HandleError(pStates[i].eErrorHandling, PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_DISMFEATUREFAILURE, pStates[i].pResolvedFeatures[j]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+				ftrErrorPrompter.SetErrorHandling(pStates[i].eErrorHandling);
+				hr = ftrErrorPrompter.Prompt(pStates[i].pResolvedFeatures[j]->FeatureName, pErrorString ? pErrorString->Value : L"");
 				if (hr == E_RETRY)
 				{
 					hr = S_OK;
@@ -407,7 +405,8 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 					::DismGetLastErrorMessage(&pErrorString);
 					WcaLogError(hr, "Failed disabling feature '%ls'. %ls", pStates[i].pUnwantedFeatures[u]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
 
-					hr = HandleError(pStates[i].eErrorHandling, PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_DISMUNWANTEDFEATUREFAILURE, pStates[i].pUnwantedFeatures[u]->FeatureName, (pErrorString && pErrorString->Value) ? pErrorString->Value : L"");
+					unFtrErrorPrompter.SetErrorHandling(pStates[i].eErrorHandling);
+					hr = unFtrErrorPrompter.Prompt(pStates[i].pUnwantedFeatures[u]->FeatureName, pErrorString ? pErrorString->Value : L"");
 					if (hr == E_RETRY)
 					{
 						hr = S_OK;
@@ -535,66 +534,4 @@ static void ProgressCallback(UINT Current, UINT Total, PVOID UserData)
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Cancelling DISM.");
 		::SetEvent(hCancel_);
 	}
-}
-
-static HRESULT HandleError(ErrorHandling nErrorHandling, UINT nErrorId, LPCWSTR szFeature, LPCWSTR szErrorMsg)
-{
-	HRESULT hr = S_OK;
-
-	switch (nErrorHandling)
-	{
-	case ErrorHandling::fail:
-	default:
-		hr = E_FAIL;
-		break;
-
-	case ErrorHandling::ignore:
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Ignoring Dism failure");
-		hr = S_OK;
-		break;
-
-	case ErrorHandling::prompt:
-	{
-		PMSIHANDLE hRec;
-		UINT promptResult = IDOK;
-
-		hRec = ::MsiCreateRecord(3);
-		ExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
-
-		hr = WcaSetRecordInteger(hRec, 1, nErrorId);
-		ExitOnFailure(hr, "Failed setting record integer");
-
-		hr = WcaSetRecordString(hRec, 2, szFeature);
-		ExitOnFailure(hr, "Failed setting record string");
-
-		hr = WcaSetRecordString(hRec, 3, szErrorMsg);
-		ExitOnFailure(hr, "Failed setting record string");
-
-		promptResult = WcaProcessMessage((INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_ERROR | MB_ABORTRETRYIGNORE | MB_DEFBUTTON2 | MB_ICONERROR), hRec);
-		switch (promptResult)
-		{
-		case IDABORT:
-		case IDCANCEL:
-		case 0: // Probably silent (result 0)
-		default:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User aborted on DISM failure.");
-			hr = E_FAIL;
-			break;
-
-		case IDRETRY:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose to retry on DISM failure.");
-			hr = E_RETRY;
-			break;
-
-		case IDIGNORE:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User ignored DISM failure.");
-			hr = S_OK;
-			break;
-		}
-		break;
-	}
-	}
-
-LExit:
-	return hr;
 }

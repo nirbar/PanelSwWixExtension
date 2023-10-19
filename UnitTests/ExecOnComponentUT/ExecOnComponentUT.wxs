@@ -17,7 +17,7 @@
 
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component>
-        <File Source="$(sys.SOURCEFILEPATH)" />
+        <File Source="$(sys.SOURCEFILEPATH)" Id="ExecOnComponentUT.wxs" />
         <PanelSW:ExecOn Command="&quot;ping.exe&quot; &quot;[GOOGLE]&quot;" OnInstall="yes" OnInstallRollback="yes" OnReinstall="yes" OnReinstallRollback="yes" OnUninstall="yes" OnUninstallRollback="yes" BeforeStopServices="yes" AfterStopServices="yes" BeforeStartServices="yes" AfterStartServices="yes" WorkingDirectory="[INSTALLFOLDER]">
           <PanelSW:ConsoleOutput Expression="\b[PACKETS]\b" Behavior="prompt" BehaviorOnMatch="yes" PromptText="Packets detected" />
           <PanelSW:ConsoleOutput Expression="\boogle\b" Behavior="prompt" BehaviorOnMatch="no" PromptText="We did not ping oogle" />
@@ -32,7 +32,7 @@
         <PanelSW:ExecOn Command="CMD /C &quot;TYPE &quot;{*non_printable.txt}&quot;&quot;" BinaryKey="non_printable.txt" BeforeStopServices="yes" OnInstall="yes" ErrorHandling="prompt" />
 
         <PanelSW:ExecOn BinaryKey="TestBinary.exe" Command='"{*TestBinary.exe}" --version' BeforeStartServices="yes" OnInstall="yes" />
-        <PanelSW:ExecOn Impersonate="no" User="me" BeforeStartServices="yes" OnInstall="yes" Command="&quot;notepad.exe&quot;" ErrorHandling="promptAlways" />
+        <PanelSW:ExecOn Impersonate="no" User="me" BeforeStartServices="yes" OnInstall="yes" Command="&quot;notepad.exe&quot; &quot;[#ExecOnComponentUT.wxs]&quot;" ErrorHandling="promptAlways" />
       </Component>
     </ComponentGroup>
 

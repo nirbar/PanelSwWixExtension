@@ -18,7 +18,7 @@
   
   <!-- Heat -->
   <PropertyGroup>
-    <PanelSwWixHarvestExtension>$(BuildFolder)..\AnyCPU\bin\$(Configuration)\PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.dll</PanelSwWixHarvestExtension>
+    <PanelSwWixHarvestExtension>$(BuildFolder)..\Any CPU\bin\$(Configuration)\PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.dll</PanelSwWixHarvestExtension>
     <HarvestDirectoryAdditionalOptions>-ext "$(PanelSwWixHarvestExtension)" -inc "*.w*" -exc "*.*proj" -generate payloadgroup -prd MY_FOLDER\MY_SUBFOLDER</HarvestDirectoryAdditionalOptions>
     <DefineConstants>$(DefineConstants);THISDIR=$(MSBuildThisFileDirectory)</DefineConstants>
   </PropertyGroup>

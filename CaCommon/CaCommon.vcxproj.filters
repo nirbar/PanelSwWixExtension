@@ -83,13 +83,21 @@
     <ClInclude Include="framework.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ErrorPrompter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\errorHandling.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="..\ProtoCaLib\customActionData.proto">
       <Filter>Protobuf</Filter>
     </None>
     <None Include="..\ProtoCaLib\command.proto">
+      <Filter>Protobuf</Filter>
+    </None>
+    <None Include="..\ProtoCaLib\errorHandling.proto">
       <Filter>Protobuf</Filter>
     </None>
   </ItemGroup>
