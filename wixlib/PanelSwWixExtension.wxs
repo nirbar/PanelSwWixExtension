@@ -410,6 +410,8 @@
     <UI>
       <ProgressText Action="ZipFileSched">!(loc.ZipFile)</ProgressText>
       <ProgressText Action="ZipFileExec" Template="!(loc.ZipFileTemplate)">!(loc.ZipFile)</ProgressText>
+      <Error Id="27013">!(loc.ZipFileError)</Error>
+      <Error Id="27014">!(loc.ZipArchiveError)</Error>
     </UI>
   </Fragment>
 
@@ -426,6 +428,7 @@
     <UI>
       <ProgressText Action="UnzipSched">!(loc.Unzip)</ProgressText>
       <ProgressText Action="UnzipExec" Template="!(loc.UnzipTemplate)">!(loc.Unzip)</ProgressText>
+      <Error Id="27015">!(loc.UnzipArchiveError)</Error>
     </UI>
   </Fragment>
 

@@ -1,5 +1,6 @@
 syntax = "proto3";
 package com.panelsw.ca;
+import "errorHandling.proto";
 option optimize_for = LITE_RUNTIME;
 
 message ZipDetails{
@@ -8,4 +9,5 @@ message ZipDetails{
     bytes srcFolder = 2;
     bytes pattern = 3;
 	bool recursive = 4;	
+	ErrorHandling errorHandling = 5;
 }

@@ -1,4 +1,4 @@
-﻿using Microsoft.Deployment.WindowsInstaller;
+using Microsoft.Deployment.WindowsInstaller;
 using System;
 
 namespace PswManagedCA.Util
@@ -8,6 +8,26 @@ namespace PswManagedCA.Util
         fail = 0,
         ignore = 1,
         prompt = 2
+    }
+
+    public enum PswErrorMessages
+    {
+        TopShelfFailure = 27000,
+        ExecOnFailure = 27001,
+        ServiceConfigFailure = 27002,
+        DismPackageFailure = 27003,
+        DismFeatureFailure = 27004,
+        SqlScriptFailure = 27005,
+        ExecOnConsoleFailure = 27006,
+        WebsiteConfigFailure = 27007,
+        SqlSearchFailure = 27008,
+        JsonJpathFailure = 27009,
+        DismUnwantedFeatureFailure = 27010,
+        ExecOnPromptAlways = 27011,
+        PromptFileDowngrades = 27012,
+        ZipFileError = 27013,
+        ZipArchiveError = 27014,
+        UnzipArchiveError = 27015,
     }
 
     static class SessionEx

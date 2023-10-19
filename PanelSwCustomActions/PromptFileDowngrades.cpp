@@ -92,7 +92,7 @@ extern "C" UINT __stdcall PromptFileDowngrades(MSIHANDLE hInstall)
 		}
 		else
 		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File '%ls' has existing version %u.%u.%u.%u. Version %ls may be deployed", (LPCWSTR)szFullPath
+			WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "File '%ls' has existing version %u.%u.%u.%u. Version %ls may be deployed", (LPCWSTR)szFullPath
 				, (0xFF & (ullExistingVersion.HighPart >> 16))
 				, (0xFF & ullExistingVersion.HighPart)
 				, (0xFF & (ullExistingVersion.LowPart >> 16))

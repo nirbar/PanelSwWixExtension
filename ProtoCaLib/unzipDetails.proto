@@ -1,5 +1,6 @@
 syntax = "proto3";
 package com.panelsw.ca;
+import "errorHandling.proto";
 option optimize_for = LITE_RUNTIME;
 
 message UnzipDetails{
@@ -18,4 +19,5 @@ message UnzipDetails{
     bytes zipFile = 1;
     bytes targetFolder = 2;
 	UnzipFlags flags = 3;
+	ErrorHandling errorHandling = 4;
 }

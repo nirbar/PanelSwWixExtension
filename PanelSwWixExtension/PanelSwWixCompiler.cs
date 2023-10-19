@@ -4955,6 +4955,7 @@ namespace PanelSw.Wix.Extensions
             string filePattern = "*.*";
             bool recursive = true;
             string condition = null;
+            ErrorHandling promptOnError = ErrorHandling.fail;
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -4976,6 +4977,19 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "Recursive":
                             recursive = (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes);
+                            break;
+                        case "ErrorHandling":
+                        {
+                            string a = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            try
+                            {
+                                promptOnError = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
+                            }
+                            catch
+                            {
+                                Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            }
+                        }
                             break;
 
                         default:
@@ -5033,6 +5047,7 @@ namespace PanelSw.Wix.Extensions
                 row[3] = filePattern;
                 row[4] = recursive ? 1 : 0;
                 row[5] = condition;
+                row[6] = (int)promptOnError;
             }
         }
 
@@ -5062,6 +5077,7 @@ namespace PanelSw.Wix.Extensions
             string dstDir = null;
             string condition = null;
             UnzipFlags flags = UnzipFlags.Unmodified | UnzipFlags.CreateRoot;
+            ErrorHandling promptOnError = ErrorHandling.fail;
 
             foreach (XmlAttribute attrib in node.Attributes)
             {
@@ -5125,6 +5141,19 @@ namespace PanelSw.Wix.Extensions
                                 Core.UnexpectedAttribute(sourceLineNumbers, attrib);
                             }
                             break;
+                        case nameof(ErrorHandling):
+                        {
+                            string a = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            try
+                            {
+                                promptOnError = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
+                            }
+                            catch
+                            {
+                                Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            }
+                        }
+                            break;
 
                         default:
                             Core.UnexpectedAttribute(sourceLineNumbers, attrib);
@@ -5180,6 +5209,7 @@ namespace PanelSw.Wix.Extensions
                 row[2] = dstDir;
                 row[3] = (int)flags;
                 row[4] = condition;
+                row[5] = (int)promptOnError;
             }
         }
     }

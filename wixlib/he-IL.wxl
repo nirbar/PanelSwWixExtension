@@ -70,4 +70,10 @@
   <String Overridable="yes" Id="ConcatFiles"><![CDATA[מאחד קבצים]]></String>
   <String Overridable="yes" Id="ExtractPayload"><![CDATA[פורס קבצים זמניים]]></String>
   <String Overridable="yes" Id="PromptFileDowngrades"><![CDATA[סך של [2] קבצים ישונמוכו בפעולה זו.[3]]]></String>
+  <String Overridable="yes" Id="ZipFileError"><![CDATA[אירעה שגיאה בהוספת הקובץ [2] לארכיון [3].&#xA;
+[4]]]></String>
+  <String Overridable="yes" Id="ZipArchiveError"><![CDATA[אירעה שגיאה ביצירת קובץ ארכיון [2].
+[3]]]></String>
+  <String Overridable="yes" Id="UnzipArchiveError"><![CDATA[אירעה שגיאה בחילוץ מקובץ ארכיון [2].
+[3]]]></String>
 </WixLocalization>

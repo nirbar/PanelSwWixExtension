@@ -68,4 +68,10 @@
   <String Overridable="yes" Id="ConcatFiles"><![CDATA[Reconstructing files]]></String>
   <String Overridable="yes" Id="ExtractPayload"><![CDATA[Extracting temporary files]]></String>
   <String Overridable="yes" Id="PromptFileDowngrades"><![CDATA[A total of [2] file(s) will be downgraded during the operation.[3]]]></String>
+  <String Overridable="yes" Id="ZipFileError"><![CDATA[An error ocurred when adding the file [2] to zip archive [3].
+[4]]]></String>
+  <String Overridable="yes" Id="ZipArchiveError"><![CDATA[An error ocurred when creating the zip archive [2].
+[3]]]></String>
+  <String Overridable="yes" Id="UnzipArchiveError"><![CDATA[An error ocurred when extracting the zip archive [2].
+[3]]]></String>
 </WixLocalization>
