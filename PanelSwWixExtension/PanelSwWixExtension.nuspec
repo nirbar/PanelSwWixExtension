@@ -35,8 +35,10 @@
     <file src="..\CaCommon\SqlQuery.h" target="tools\include"/>
     <file src="..\CaCommon\SummaryStream.h" target="tools\include"/>
     <file src="..\CaCommon\WixString.h" target="tools\include"/>
+    <file src="..\CaCommon\ErrorPrompter.h" target="tools\include"/>
     <file src="..\build\obj\Release\protobuf\command.pb.h" target="tools\include"/>
     <file src="..\build\obj\Release\protobuf\customActionData.pb.h" target="tools\include"/>
+    <file src="..\build\obj\Release\protobuf\errorHandling.pb.h" target="tools\include"/>
   </files>
 
 </package>

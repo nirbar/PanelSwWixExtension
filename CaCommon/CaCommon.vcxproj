@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" InitialTargets="EnsureWixToolsetInstalled" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\TidyBuild.1.4.1\build\TidyBuild.props" Condition="Exists('..\packages\TidyBuild.1.4.1\build\TidyBuild.props')" />
   <ItemGroup Label="ProjectConfigurations">
@@ -75,6 +75,9 @@
     <ClCompile Include="SummaryStream.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\errorHandling.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\customActionData.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
@@ -82,6 +85,7 @@
       <AutoGen>True</AutoGen>
     </ClInclude>
     <ClInclude Include="DeferredActionBase.h" />
+    <ClInclude Include="ErrorPrompter.h" />
     <ClInclude Include="MsiBreak.h" />
     <ClInclude Include="RegistryKey.h" />
     <ClInclude Include="SqlClientBase.h" />
@@ -96,6 +100,9 @@
     <None Include="packages.config" />
     <None Include="protobuf\command.proto" />
     <None Include="protobuf\customActionData.proto" />
+    <None Include="..\ProtoCaLib\errorHandling.proto">
+      <Link>protobuf\errorHandling.proto</Link>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(WixNativeCATargetsPath)" Condition=" '$(WixNativeCATargetsPath)' != '' " />

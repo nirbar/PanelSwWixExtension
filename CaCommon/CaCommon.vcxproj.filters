@@ -83,11 +83,20 @@
     <ClInclude Include="RegistryKey.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\errorHandling.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ErrorPrompter.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="protobuf\command.proto" />
     <None Include="protobuf\customActionData.proto" />
+    <None Include="..\ProtoCaLib\errorHandling.proto">
+      <Filter>Protobuf</Filter>
+    </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(IntDir)\Version.rc">

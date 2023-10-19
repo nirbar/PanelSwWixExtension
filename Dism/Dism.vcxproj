@@ -1,4 +1,4 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" InitialTargets="EnsureWixToolsetInstalled" ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="..\packages\TidyBuild.1.4.1\build\TidyBuild.props" Condition="Exists('..\packages\TidyBuild.1.4.1\build\TidyBuild.props')" />
   <ItemGroup Label="ProjectConfigurations">
@@ -59,7 +59,7 @@
     <ClCompile>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>$(WixSdkPath)\inc;$(WixSdkPath)\$(WixPlatformToolset)\inc;C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\shared;$(DismApiDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(BuildFolder)\obj\$(Configuration)\Protobuf;..\protobuf\src;$(WixSdkPath)\inc;$(WixSdkPath)\$(WixPlatformToolset)\inc;C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\shared;$(DismApiDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CUSTOMACTIONTEST_EXPORTS;FullVersion="$(FullVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
@@ -79,7 +79,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>$(WixSdkPath)\inc;$(WixSdkPath)\$(WixPlatformToolset)\inc;C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\shared;$(DismApiDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(BuildFolder)\obj\$(Configuration)\Protobuf;..\protobuf\src;$(WixSdkPath)\inc;$(WixSdkPath)\$(WixPlatformToolset)\inc;C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\shared;$(DismApiDir)Include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <Optimization>MaxSpeed</Optimization>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;_USRDLL;CUSTOMACTIONTEST_EXPORTS;FullVersion="$(FullVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>

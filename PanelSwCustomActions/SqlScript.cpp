@@ -500,6 +500,11 @@ LExit:
 	return hr;
 }
 
+CSqlScript::CSqlScript()
+	: CDeferredActionBase("SqlScript")
+	, _errorPrompter(PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_PSW_SQLSCRIPTFAILURE)
+{ }
+
 HRESULT CSqlScript::AddExec(LPCWSTR szConnectionString, LPCWSTR szDriver, LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, bool bEncrypted, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, com::panelsw::ca::ErrorHandling errorHandling)
 {
 	HRESULT hr = S_OK;
@@ -597,58 +602,12 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 
 		if (FAILED(hr))
 		{
-			switch (details.errorhandling())
+			_errorPrompter.SetErrorHandling(details.errorhandling());
+			hr = _errorPrompter.Prompt(szError);
+			if (hr == E_RETRY)
 			{
-			case ErrorHandling::fail:
-			default:
-				// Will fail downstairs.
-				break;
-
-			case ErrorHandling::ignore:
-				LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Ignoring SQL script failure 0x%08X", hr);
-				hr = S_FALSE;
-				break;
-
-			case ErrorHandling::prompt:
-			{
-				HRESULT hrOp = hr;
-				PMSIHANDLE hRec;
-				UINT promptResult = IDABORT;
-
-				hRec = ::MsiCreateRecord(3);
-				ExitOnNull(hRec, hr, E_FAIL, "Failed creating record");
-
-				hr = WcaSetRecordInteger(hRec, 1, 27005);
-				ExitOnFailure(hr, "Failed setting record integer");
-
-				if (szError && *szError)
-				{
-					hr = WcaSetRecordString(hRec, 2, szError);
-					ExitOnFailure(hr, "Failed setting record integer");
-				}
-
-				promptResult = WcaProcessMessage((INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_ERROR | MB_ABORTRETRYIGNORE | MB_DEFBUTTON1 | MB_ICONERROR), hRec);
-				switch (promptResult)
-				{
-				case IDABORT:
-				case IDCANCEL:
-				default: // Probably silent (result 0)
-					LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"User aborted on SQL failure (error code 0x%08X)", hrOp);
-					hr = hrOp;
-					break;
-
-				case IDRETRY:
-					LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"User chose to retry on SQL failure (error code 0x%08X)", hrOp);
-					hr = S_OK;
-					goto LRetry;
-
-				case IDIGNORE:
-					LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"User ignored SQL failure (error code 0x%08X)", hrOp);
-					hr = S_FALSE;
-					break;
-				}
-				break;
-			}
+				hr = S_OK;
+				goto LRetry;
 			}
 			ExitOnFailure(hr, "Failed to execute SQL query");
 		}

@@ -6,7 +6,6 @@
 #include "customActionData.pb.h"
 
 #define WSTR_BYTE_SIZE(sz)		((sz) ? (sizeof(WCHAR) * (1 + ::wcslen(sz))) : 0)
-#define E_RETRY					__HRESULT_FROM_WIN32(ERROR_RETRY)
 
 class CDeferredActionBase
 {
