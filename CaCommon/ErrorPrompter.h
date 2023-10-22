@@ -47,60 +47,83 @@ public:
 		_errorHandling = errorHandling;
 	}
 
-	HRESULT Prompt()
+	template<typename... ARGS>
+	HRESULT Prompt(ARGS ...args)
 	{
-		PMSIHANDLE hRec = ::MsiCreateRecord(1);
-		WcaSetRecordInteger(hRec, 1, _dwErrorId);
-		return PromptRecord(hRec);
-	}
+		HRESULT hr = S_OK;
+		PMSIHANDLE hRec = ::MsiCreateRecord(1 + sizeof...(ARGS));
+		ExitOnNull(hRec, hr, E_FAIL, "Failed to create record");
 
-	template<typename T>
-	HRESULT Prompt(T val)
-	{
-		PMSIHANDLE hRec = ::MsiCreateRecord(2);
-		WcaSetRecordInteger(hRec, 1, _dwErrorId);
-		SetRecordField<T>(hRec, 2, val);
-		return PromptRecord(hRec);
-	}
+		hr = WcaSetRecordInteger(hRec, 1, _dwErrorId);
+		ExitOnFailure(hr, "Failed to set record parameter #1");
 
-	template<typename T1, typename T2>
-	HRESULT Prompt(T1 val1, T2 val2)
-	{
-		PMSIHANDLE hRec = ::MsiCreateRecord(3);
-		WcaSetRecordInteger(hRec, 1, _dwErrorId);
-		SetRecordField<T1>(hRec, 2, val1);
-		SetRecordField<T2>(hRec, 3, val2);
-		return PromptRecord(hRec);
-	}
-
-	template<typename T1, typename T2, typename T3>
-	HRESULT Prompt(T1 val1, T2 val2, T3 val3)
-	{
-		PMSIHANDLE hRec = ::MsiCreateRecord(4);
-		WcaSetRecordInteger(hRec, 1, _dwErrorId);
-		SetRecordField<T1>(hRec, 2, val1);
-		SetRecordField<T2>(hRec, 3, val2);
-		SetRecordField<T3>(hRec, 4, val3);
-		return PromptRecord(hRec);
-	}
-
-	template<typename T1, typename T2, typename T3, typename T4>
-	HRESULT Prompt(T1 val1, T2 val2, T3 val3, T4 val4)
-	{
-		PMSIHANDLE hRec = ::MsiCreateRecord(4);
-		WcaSetRecordInteger(hRec, 1, _dwErrorId);
-		SetRecordField<T1>(hRec, 2, val1);
-		SetRecordField<T2>(hRec, 3, val2);
-		SetRecordField<T3>(hRec, 4, val3);
-		SetRecordField<T4>(hRec, 5, val4);
-		return PromptRecord(hRec);
+		hr = PromptRecord(hRec, 2, args...);
+	LExit:
+		return hr;
 	}
 
 private:
+
+	template<typename T1, typename... REST>
+	HRESULT PromptRecord(MSIHANDLE hRecord, DWORD dwField, T1 val1, REST ...args)
+	{
+		HRESULT hr = S_OK;
+
+		hr = SetRecordField(hRecord, dwField, val1);
+		ExitOnFailure(hr, "Failed to set record parameter #%u", dwField);
+
+		hr = PromptRecord(hRecord, ++dwField, args...);
+	LExit:
+		return hr;
+	}
+
+	HRESULT PromptRecord(MSIHANDLE hRecord, DWORD dwField)
+	{
+		if (_errorHandling == com::panelsw::ca::ErrorHandling::fail)
+		{
+			return E_FAIL;
+		}
+		if (_errorHandling == com::panelsw::ca::ErrorHandling::ignore)
+		{
+			return S_FALSE;
+		}
+
+		UINT promptResult = IDABORT;
+		promptResult = WcaProcessMessage(_flags, hRecord);
+		switch (promptResult)
+		{
+		case IDABORT:
+		case IDCANCEL:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User aborted");
+			return E_INSTALL_USEREXIT;
+
+		case IDTRYAGAIN:
+		case IDRETRY:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose to retry");
+			return E_RETRY;
+
+		case IDOK:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User approved");
+			return S_OK;
+
+		case IDIGNORE:
+		case IDCONTINUE:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User ignored");
+			return S_FALSE;
+
+		case 0: // Default, in silent mode
+			return _defaultHr;
+
+		default:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose unknown button %u", promptResult);
+			return __HRESULT_FROM_WIN32(promptResult);
+		}
+	}
+
 	template<typename T>
 	HRESULT SetRecordField(MSIHANDLE hRecord, DWORD dwField, T value)
 	{
-		WcaLogError(E_INVALIDARG, "CErrorPrompter::Prompt called with unsupported template type. Only LPSTR, LPCSTR, LPWSTR, LPCWSTR, and DWORD are supported");
+		WcaLogError(E_INVALIDARG, "CErrorPrompter::Prompt called with unsupported template type. Only LPSTR, LPCSTR, LPWSTR, LPCWSTR, CWixString, and DWORD are supported");
 		return E_INVALIDARG;
 	}
 
@@ -154,49 +177,6 @@ private:
 			return WcaSetRecordString(hRecord, dwField, (LPCWSTR)szValue);
 		}
 		return S_OK;
-	}
-
-	HRESULT PromptRecord(MSIHANDLE hRecord)
-	{
-		if (_errorHandling == com::panelsw::ca::ErrorHandling::fail)
-		{
-			return E_FAIL;
-		}
-		if (_errorHandling == com::panelsw::ca::ErrorHandling::ignore)
-		{
-			return S_FALSE;
-		}
-
-		UINT promptResult = IDABORT;
-		promptResult = WcaProcessMessage(_flags, hRecord);
-		switch (promptResult)
-		{
-		case IDABORT:
-		case IDCANCEL:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User aborted");
-			return E_INSTALL_USEREXIT;
-
-		case IDTRYAGAIN:
-		case IDRETRY:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose to retry");
-			return E_RETRY;
-
-		case IDOK:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User approved");
-			return S_OK;
-
-		case IDIGNORE:
-		case IDCONTINUE:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User ignored");
-			return S_FALSE;
-
-		case 0: // Default, in silent mode
-			return _defaultHr;
-
-		default:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose unknown button %u", promptResult);
-			return __HRESULT_FROM_WIN32(promptResult);
-		}
 	}
 
 	DWORD _dwErrorId;
