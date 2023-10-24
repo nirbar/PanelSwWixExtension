@@ -109,7 +109,7 @@ static HRESULT ExecuteOne(LPCWSTR szConnectionString, LPCWSTR szServer, LPCWSTR 
 	CSqlQuery sqlQuery;
 	CWixString szResult;
 	CWixString szError;
-	CErrorPrompter errorPrompter(PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_PSW_SQLSEARCHFAILURE);
+	CErrorPrompter errorPrompter(PSW_MSI_MESSAGES::PSW_MSI_MESSAGES_SQL_SEARCH_ERROR);
 	errorPrompter.SetErrorHandling(errorHandling);
 
 LRetry:

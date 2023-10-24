@@ -78,9 +78,9 @@ extern "C" UINT __stdcall Dism(MSIHANDLE hInstall)
 	ProgressReportState* pStates = nullptr;
 	ProgressReportState currState;
 	errno_t err = 0;
-	CErrorPrompter pkgErrorPrompter(PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_DISMPACKAGEFAILURE);
-	CErrorPrompter ftrErrorPrompter(PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_DISMFEATUREFAILURE);
-	CErrorPrompter unFtrErrorPrompter(PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_DISMUNWANTEDFEATUREFAILURE);
+	CErrorPrompter pkgErrorPrompter(PSW_MSI_MESSAGES::PSW_MSI_MESSAGES_DISM_PACKAGE_ERROR);
+	CErrorPrompter ftrErrorPrompter(PSW_MSI_MESSAGES::PSW_MSI_MESSAGES_DISM_FEATURE_ERROR);
+	CErrorPrompter unFtrErrorPrompter(PSW_MSI_MESSAGES::PSW_MSI_MESSAGES_DISM_UNWANTED_FEATURE_ERROR);
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");

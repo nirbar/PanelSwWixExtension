@@ -74,4 +74,5 @@
 [3]]]></String>
   <String Overridable="yes" Id="UnzipArchiveError"><![CDATA[An error ocurred when extracting the zip archive [2].
 [3]]]></String>
+  <String Overridable="yes" Id="UnzipFileError"><![CDATA[An error ocurred when extracting the file [2] from zip archive [3]]]></String>
 </WixLocalization>

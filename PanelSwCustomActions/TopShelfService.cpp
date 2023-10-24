@@ -157,7 +157,7 @@ LExit:
 
 CTopShelfService::CTopShelfService()
 	: CDeferredActionBase("TopShelf")
-	, _errorPrompter(PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_TOPSHELFFAILURE)
+	, _errorPrompter(PSW_MSI_MESSAGES::PSW_MSI_MESSAGES_TOPSHELF_ERROR) 
 { }
 
 HRESULT CTopShelfService::AddInstall(LPCWSTR file, LPCWSTR serviceName, LPCWSTR displayName, LPCWSTR description, LPCWSTR instance, LPCWSTR userName, LPCWSTR passowrd, TopShelfServiceDetails_HowToStart howToStart, TopShelfServiceDetails_ServiceAccount account, com::panelsw::ca::ErrorHandling promptOnError)
