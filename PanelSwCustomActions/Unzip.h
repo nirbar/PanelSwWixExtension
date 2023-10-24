@@ -3,6 +3,7 @@
 #include "..\poco\Zip\include\Poco\Zip\ZipLocalFileHeader.h"
 #include "unzipDetails.pb.h"
 #include "zipDetails.pb.h"
+#include "..\poco\Zip\include\Poco\Zip\ZipArchive.h"
 #include <string>
 
 class CUnzip :
@@ -27,6 +28,7 @@ private:
 
 	HRESULT ShouldOverwriteFile(LPCWSTR szFile, ::com::panelsw::ca::UnzipDetails_UnzipFlags flags);
 
+	HRESULT UnzipOneFile(std::istream* zipFileStream, const ::Poco::Zip::ZipLocalFileHeader& fileHeader, ::com::panelsw::ca::UnzipDetails::UnzipFlags flags, Poco::Path targetFolder);
 	HRESULT SetFileTimes(LPCSTR szFilePath, const std::string& extradField);
 
 #pragma pack(push, 1)
@@ -77,6 +79,7 @@ private:
 	HRESULT FindTimeInEntry(const std::string& extradField, FILETIME* createTime, FILETIME* accessTime, FILETIME* modifyTime);
 
 	CErrorPrompter _unzipPrompter;
+	CErrorPrompter _unzipOneFilePrompter;
 	CErrorPrompter _zipPrompter;
 	CErrorPrompter _zipOneFilePrompter;
 };

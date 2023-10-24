@@ -428,6 +428,7 @@
       <ProgressText Action="UnzipSched" Message="!(loc.Unzip)" />
       <ProgressText Action="UnzipExec" Template="!(loc.UnzipTemplate)" Message="!(loc.Unzip)" />
       <Error Id="27015" Message="!(loc.UnzipArchiveError)"/>
+      <Error Id="27016" Message="!(loc.UnzipFileError)"/>
     </UI>
   </Fragment>
 

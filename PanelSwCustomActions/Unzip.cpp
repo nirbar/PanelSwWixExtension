@@ -212,9 +212,10 @@ LExit:
 CUnzip::CUnzip(bool bZip)
 	: CDeferredActionBase(bZip ? "Zip" : "Unzip")
 	, isZip_(bZip)
-	, _unzipPrompter(PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_UNZIPARCHIVEERROR)
-	, _zipPrompter(PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_ZIPARCHIVEERROR)
-	, _zipOneFilePrompter(PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_ZIPFILEERROR)
+	, _unzipPrompter(PSW_MSI_MESSAGES::PSW_MSI_MESSAGES_UNZIP_ARCHIVE_ERROR)
+	, _zipPrompter(PSW_MSI_MESSAGES::PSW_MSI_MESSAGES_ZIP_ARCHIVE_ERROR)
+	, _zipOneFilePrompter(PSW_MSI_MESSAGES::PSW_MSI_MESSAGES_ZIP_FILE_ERROR)
+	, _unzipOneFilePrompter(PSW_MSI_MESSAGES::PSW_MSI_MESSAGES_UNZIP_FILE_ERROR)
 { }
 
 HRESULT CUnzip::AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, UnzipDetails_UnzipFlags flags, ErrorHandling errorHandling)
@@ -442,21 +443,18 @@ LExit:
 HRESULT CUnzip::ExecuteOneUnzip(::com::panelsw::ca::UnzipDetails* pDetails)
 {
 	HRESULT hr = S_OK;
-	bool bRes = true;
 	ZipArchive* archive = nullptr;
 	LPCWSTR zipFileW = nullptr;
 	LPCWSTR targetFolderW = nullptr;
 	std::string zipFileA;
 	std::string targetFolderA;
 	std::istream* zipFileStream = nullptr;
-	LPSTR szSrcFileA = nullptr;
-	LPWSTR szSrcFile = nullptr;
-	LPWSTR szDstFile = nullptr;
 	PMSIHANDLE hActionData;
 
 	zipFileW = (LPCWSTR)(LPVOID)pDetails->zipfile().data();
 	targetFolderW = (LPCWSTR)(LPVOID)pDetails->targetfolder().data();
 	_unzipPrompter.SetErrorHandling(pDetails->errorhandling());
+	_unzipOneFilePrompter.SetErrorHandling(pDetails->errorhandling());
 
 	// ActionData: "Extracting from [1] to [2]"
 	hActionData = ::MsiCreateRecord(2);
@@ -471,6 +469,7 @@ HRESULT CUnzip::ExecuteOneUnzip(::com::panelsw::ca::UnzipDetails* pDetails)
 	{
 		Poco::UnicodeConverter::toUTF8(targetFolderW, targetFolderA);
 		Poco::UnicodeConverter::toUTF8(zipFileW, zipFileA);
+		Poco::Path targetFolder(targetFolderA);
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Extracting zip file '%hs' to '%hs'", zipFileA.c_str(), targetFolderA.c_str());
 
 		zipFileStream = new std::ifstream(zipFileA, std::ios::binary);
@@ -481,109 +480,15 @@ HRESULT CUnzip::ExecuteOneUnzip(::com::panelsw::ca::UnzipDetails* pDetails)
 
 		for (ZipArchive::FileHeaders::const_iterator it = archive->headerBegin(), endIt = archive->headerEnd(); it != endIt; ++it)
 		{
-			std::string file = it->second.getFileName();
-			if ((pDetails->flags() & UnzipDetails::UnzipFlags::UnzipDetails_UnzipFlags_createRoot) == 0)
+			do
 			{
-				size_t i1 = file.find_first_of('/');
-				size_t i2 = file.find_first_of('\\');
-				if ((i1 > 0) && (i1 < file.length() - 1) && ((i1 < i2) || (i2 <= 0)))
+				hr = UnzipOneFile(zipFileStream, it->second, pDetails->flags(), targetFolder);
+				if (FAILED(hr))
 				{
-					file = file.substr(i1 + 1);
+					hr = _unzipOneFilePrompter.Prompt(it->second.getFileName().c_str(), zipFileW);
 				}
-				else if ((i2 > 0) && (i2 < file.length() - 1) && ((i2 < i1) || (i1 <= 0)))
-				{
-					file = file.substr(i2 + 1);
-				}
-				else
-				{
-					WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File '%hs' is directly in ZIP root so 'SkipRoot' does not apply to it", file.c_str());
-				}
-			}
-
-			Poco::Path path(targetFolderA);
-			path.append(file);
-			std::string pathA = path.toString(Poco::Path::Style::PATH_WINDOWS).c_str();
-
-			hr = StrAllocStringAnsi(&szDstFile, pathA.c_str(), 0, CP_UTF8);
-			ExitOnFailure(hr, "Failed converting ANSI string to wide");
-
-			// Create missing folders
-			while (!::PathIsDirectoryA(path.parent().toString(Poco::Path::Style::PATH_WINDOWS).c_str()))
-			{
-				// Find first missing folder.
-				Poco::Path dir = path.parent();
-				while (!::PathIsDirectoryA(dir.parent().toString(Poco::Path::Style::PATH_WINDOWS).c_str()) && !::PathIsRootA(dir.parent().toString(Poco::Path::Style::PATH_WINDOWS).c_str()))
-				{
-					dir = dir.parent();
-				}
-
-				std::string dirA = dir.toString(Poco::Path::Style::PATH_WINDOWS);
-				WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating sub-folder '%hs'", dirA.c_str());
-				bRes = ::CreateDirectoryA(dirA.c_str(), nullptr);
-				ExitOnNullWithLastError((bRes || (::GetLastError() == ERROR_ALREADY_EXISTS)), hr, "Failed creating folder '%hs'", dirA.c_str());
-			}
-
-			if (it->second.isDirectory())
-			{
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Creating folder '%hs'", pathA.c_str());
-				::CreateDirectoryA(pathA.c_str(), nullptr); // Ignore failure to create empty folders. Folders with files will fail when extracting the files.
-				continue;
-			}
-
-			if (FileExistsEx(szDstFile, nullptr))
-			{
-				hr = ShouldOverwriteFile(szDstFile, pDetails->flags());
-				ExitOnFailure(hr, "Failed determining whether or not to overwrite file '%hs'", pathA.c_str());
-
-				if (hr == S_FALSE)
-				{
-					continue;
-				}
-
-				bRes = ::SetFileAttributesA(pathA.c_str(), FILE_ATTRIBUTE_NORMAL);
-				ExitOnNullWithLastError(bRes, hr, "Failed clearing attributes of '%hs'", pathA.c_str());
-
-				bRes = ::DeleteFileA(pathA.c_str());
-				if (!bRes && ((::GetLastError() == ERROR_ACCESS_DENIED) || (::GetLastError() == ERROR_SHARING_VIOLATION) || (::GetLastError() == ERROR_LOCK_VIOLATION)))
-				{
-					WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Extraction of '%hs' requires reboot", pathA.c_str());
-					bRes = true;
-					
-					hr = CFileOperations::MakeTemporaryName(szDstFile, L"UZP%05i.tmp", false, &szSrcFile);
-					ExitOnFailure(hr, "Failed getting temporary path for '%hs'", pathA.c_str());
-
-					hr = StrAnsiAllocString(&szSrcFileA, szSrcFile, 0, CP_UTF8);
-					ExitOnFailure(hr, "Failed copying UTF-8 string");
-
-					pathA = szSrcFileA;
-
-					bRes = ::MoveFileExW(szSrcFile, szDstFile, MOVEFILE_DELAY_UNTIL_REBOOT | MOVEFILE_REPLACE_EXISTING);
-					ExitOnNullWithLastError(bRes, hr, "Failed deferring file copy to after reboot");
-
-					hr = WcaDeferredActionRequiresReboot();
-					ExitOnFailure(hr, "Failed requiring reboot");
-				}
-				ExitOnNullWithLastError(bRes, hr, "Failed deleting '%hs'", pathA.c_str());
-			}
-
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Extracting '%hs'", pathA.c_str());
-
-			{ // Scope ZipInputStream to release the file
-				ZipInputStream zipin(*zipFileStream, it->second);
-				std::ofstream out(pathA.c_str(), std::ios::binary);
-
-				std::streamsize bytes = Poco::StreamCopier::copyStream(zipin, out);
-				ExitOnNull((bytes == it->second.getUncompressedSize()), hr, E_FAIL, "Error extracting file '%hs' from zip '%ls': %i / %i bytes written", file.c_str(), zipFileW, bytes, it->second.getUncompressedSize());
-			}
-
-			// Set file times, ignore failures.
-			if (it->second.hasExtraField())
-			{
-				SetFileTimes(pathA.c_str(), it->second.getExtraField());
-			}
-			ReleaseNullStr(szDstFile);
-			ReleaseNullStr(szSrcFile);
-			ReleaseNullMem(szSrcFileA);
+			} while (hr == E_RETRY);
+			ExitOnFailure(hr, "Failed to extract file");
 		}
 
 		// Release stream so we can delete the zip file
@@ -622,8 +527,137 @@ LExit:
 	{
 		delete zipFileStream;
 	}
-	ReleaseStr(szSrcFile);
-	ReleaseStr(szDstFile);
+	
+	return hr;
+}
+
+HRESULT CUnzip::UnzipOneFile(std::istream* zipFileStream, const ::Poco::Zip::ZipLocalFileHeader& fileHeader, ::com::panelsw::ca::UnzipDetails::UnzipFlags flags, Poco::Path targetFolder)
+{
+	HRESULT hr = S_OK;
+	bool bRes = true;
+	LPWSTR szDstFile = nullptr;
+	LPWSTR szSrcFile = nullptr;
+	LPSTR szSrcFileA = nullptr;
+	std::string file = fileHeader.getFileName();
+
+	if ((flags & UnzipDetails::UnzipFlags::UnzipDetails_UnzipFlags_createRoot) == 0)
+	{
+		size_t i1 = file.find_first_of('/');
+		size_t i2 = file.find_first_of('\\');
+		if ((i1 > 0) && (i1 < file.length() - 1) && ((i1 < i2) || (i2 <= 0)))
+		{
+			file = file.substr(i1 + 1);
+		}
+		else if ((i2 > 0) && (i2 < file.length() - 1) && ((i2 < i1) || (i1 <= 0)))
+		{
+			file = file.substr(i2 + 1);
+		}
+		else
+		{
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "File '%hs' is directly in ZIP root so 'SkipRoot' does not apply to it", file.c_str());
+		}
+	}
+
+	Poco::Path path(targetFolder);
+	path.append(file);
+	std::string pathA = path.toString(Poco::Path::Style::PATH_WINDOWS).c_str();
+
+	hr = StrAllocStringAnsi(&szDstFile, pathA.c_str(), 0, CP_UTF8);
+	ExitOnFailure(hr, "Failed converting ANSI string to wide");
+
+	// Create missing folders
+	while (!::PathIsDirectoryA(path.parent().toString(Poco::Path::Style::PATH_WINDOWS).c_str()))
+	{
+		// Find first missing folder.
+		Poco::Path dir = path.parent();
+		while (!::PathIsDirectoryA(dir.parent().toString(Poco::Path::Style::PATH_WINDOWS).c_str()) && !::PathIsRootA(dir.parent().toString(Poco::Path::Style::PATH_WINDOWS).c_str()))
+		{
+			dir = dir.parent();
+		}
+
+		std::string dirA = dir.toString(Poco::Path::Style::PATH_WINDOWS);
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating sub-folder '%hs'", dirA.c_str());
+		bRes = ::CreateDirectoryA(dirA.c_str(), nullptr);
+		ExitOnNullWithLastError((bRes || (::GetLastError() == ERROR_ALREADY_EXISTS)), hr, "Failed creating folder '%hs'", dirA.c_str());
+	}
+
+	if (fileHeader.isDirectory())
+	{
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Creating folder '%hs'", pathA.c_str());
+		::CreateDirectoryA(pathA.c_str(), nullptr); // Ignore failure to create empty folders. Folders with files will fail when extracting the files.
+		ExitFunction();
+	}
+
+	if (FileExistsEx(szDstFile, nullptr))
+	{
+		hr = ShouldOverwriteFile(szDstFile, flags);
+		ExitOnFailure(hr, "Failed determining whether or not to overwrite file '%hs'", pathA.c_str());
+
+		if (hr == S_FALSE)
+		{
+			ExitFunction();
+		}
+
+		bRes = ::SetFileAttributesA(pathA.c_str(), FILE_ATTRIBUTE_NORMAL);
+		ExitOnNullWithLastError(bRes, hr, "Failed clearing attributes of '%hs'", pathA.c_str());
+
+		bRes = ::DeleteFileA(pathA.c_str());
+		if (!bRes && ((::GetLastError() == ERROR_ACCESS_DENIED) || (::GetLastError() == ERROR_SHARING_VIOLATION) || (::GetLastError() == ERROR_LOCK_VIOLATION)))
+		{
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Extraction of '%hs' requires reboot", pathA.c_str());
+			bRes = true;
+
+			hr = CFileOperations::MakeTemporaryName(szDstFile, L"UZP%05i.tmp", false, &szSrcFile);
+			ExitOnFailure(hr, "Failed getting temporary path for '%hs'", pathA.c_str());
+
+			hr = StrAnsiAllocString(&szSrcFileA, szSrcFile, 0, CP_UTF8);
+			ExitOnFailure(hr, "Failed copying UTF-8 string");
+
+			pathA = szSrcFileA;
+
+			bRes = ::MoveFileExW(szSrcFile, szDstFile, MOVEFILE_DELAY_UNTIL_REBOOT | MOVEFILE_REPLACE_EXISTING);
+			ExitOnNullWithLastError(bRes, hr, "Failed deferring file copy to after reboot");
+
+			hr = WcaDeferredActionRequiresReboot();
+			ExitOnFailure(hr, "Failed requiring reboot");
+		}
+		ExitOnNullWithLastError(bRes, hr, "Failed deleting '%hs'", pathA.c_str());
+	}
+
+	WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Extracting '%hs'", pathA.c_str());
+	try
+	{
+		ZipInputStream zipin(*zipFileStream, fileHeader);
+		std::ofstream out(pathA.c_str(), std::ios::binary);
+
+		std::streamsize bytes = Poco::StreamCopier::copyStream(zipin, out);
+		ExitOnNull((bytes == fileHeader.getUncompressedSize()), hr, E_FAIL, "Error extracting file '%hs': %I64i / %I64i bytes written", file.c_str(), bytes, fileHeader.getUncompressedSize());
+	}
+	catch (Poco::Exception ex)
+	{
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed to unzip '%hs'. %hs", file.c_str(), ex.displayText().c_str());
+		hr = (ex.code() == 0) ? E_FAIL : __HRESULT_FROM_WIN32(ex.code());
+	}
+	catch (std::exception ex)
+	{
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed to unzip '%hs'. %hs", file.c_str(), ex.what());
+		hr = E_FAIL;
+	}
+	catch (...)
+	{
+		hr = E_FAIL;
+	}
+	ExitOnFailure(hr, "Failed to unzip file '%hs'", file.c_str());
+
+	// Set file times, ignore failures.
+	if (fileHeader.hasExtraField())
+	{
+		SetFileTimes(pathA.c_str(), fileHeader.getExtraField());
+	}
+
+LExit:
+	ReleaseNullStr(szDstFile);
+	ReleaseNullStr(szSrcFile);
 	ReleaseNullMem(szSrcFileA);
 	
 	return hr;

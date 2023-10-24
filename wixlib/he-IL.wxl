@@ -59,4 +59,5 @@
   <String Overridable="yes" Id="ZipFileError" Value="אירעה שגיאה בהוספת הקובץ [2] לארכיון [3].&#xA;[4]" />
   <String Overridable="yes" Id="ZipArchiveError" Value="אירעה שגיאה ביצירת קובץ ארכיון [2].&#xA;[3]" />
   <String Overridable="yes" Id="UnzipArchiveError" Value="אירעה שגיאה בחילוץ מקובץ ארכיון [2].&#xA;[3]" />
+  <String Overridable="yes" Id="UnzipFileError" Value="אירעה שגיאה בחילוץ הקובץ [2] מארכיון [3]" />
 </WixLocalization>

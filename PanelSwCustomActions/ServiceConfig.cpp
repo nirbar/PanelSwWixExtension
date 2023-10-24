@@ -285,7 +285,7 @@ LExit:
 
 CServiceConfig::CServiceConfig() 
 	: CDeferredActionBase("ServiceConfig")
-	, _errorPrompter(PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_SERVICECONFIGFAILURE) 
+	, _errorPrompter(PSW_MSI_MESSAGES::PSW_MSI_MESSAGES_SERVICE_CONFIG_ERROR) 
 { }
 
 HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, LPCWSTR szLoadOrderGroup, const std::list<LPWSTR> &lstDependencies, ErrorHandling errorHandling, ServciceConfigDetails_DelayStart delayStart, DWORD dwServiceType)

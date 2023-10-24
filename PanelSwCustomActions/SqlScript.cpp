@@ -500,7 +500,7 @@ LExit:
 
 CSqlScript::CSqlScript() 
 	: CDeferredActionBase("SqlScript")
-	, _errorPrompter(PSW_ERROR_MESSAGES::PSW_ERROR_MESSAGES_PSW_SQLSCRIPTFAILURE) 
+	, _errorPrompter(PSW_MSI_MESSAGES::PSW_MSI_MESSAGES_SQL_SCRIPT_EROR) 
 { }
 
 HRESULT CSqlScript::AddExec(LPCWSTR szConnectionString, LPCWSTR szDriver, LPCWSTR szServer, LPCWSTR szInstance, USHORT nPort, bool bEncrypted, LPCWSTR szDatabase, LPCWSTR szUser, LPCWSTR szPassword, LPCWSTR szScript, com::panelsw::ca::ErrorHandling errorHandling)

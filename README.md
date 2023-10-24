@@ -97,6 +97,7 @@ PanelSwWixExtension uses error codes in Error table:
 - 27013: Prompt on failure to add a file to a ZIP archive
 - 27014: Prompt on failure to create a ZIP archive
 - 27015: Prompt on failure to unzip a ZIP archive
+- 27016: Prompt on failure to unzip a file from ZIP archive
 
 ## Properties
 
