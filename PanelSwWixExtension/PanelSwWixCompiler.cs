@@ -2967,9 +2967,9 @@ namespace PanelSw.Wix.Extensions
                 row[5] = cost;
                 row[6] = (int)promptOnError;
                 row[7] = enableAll ? 1 : 0;
-                row[8] = forceRemove ? 1 : 0;
-                row[9] = order;
-                row[10] = unwanted;
+                row[8] = unwanted;
+                row[9] = forceRemove ? 1 : 0;
+                row[10] = order;
             }
         }
 
