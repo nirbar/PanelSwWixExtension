@@ -72,6 +72,7 @@ extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
 			szFilePath[i] = NULL;
 		}
 
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will delete path '%ls'", (LPCWSTR)szFilePath);
 		hr = commitCAD.AddDeleteFile((LPCWSTR)szFilePath, flags);
 		ExitOnFailure(hr, "Failed creating custom action data for commit action.");
 	}
@@ -691,7 +692,7 @@ bool CFileOperations::IsSymbolicLinkOrMount(LPCWSTR szPath)
 	{
 		hr = S_FALSE;
 		DWORD dwErr = ::GetLastError();
-		ExitOnNullWithLastError((dwErr == ERROR_FILE_NOT_FOUND), hr, "Path '%ls' can't be checked for reparse point tag", szPath);
+		ExitOnNullWithLastError(((dwErr == ERROR_FILE_NOT_FOUND) || (dwErr == ERROR_PATH_NOT_FOUND)), hr, "Path '%ls' can't be checked for reparse point tag", szPath);
 	}
 
 LExit:
