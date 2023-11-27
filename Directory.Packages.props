@@ -1,8 +1,8 @@
 <Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <Wix4Version Condition=" '$(Wix4Version)' == '' ">4.0.2</Wix4Version>
-    <PanelSwWix4Version Condition=" '$(PanelSwWix4Version)' == '' ">5.0.0-psw-wix.0207-20</PanelSwWix4Version>
+    <Wix4Version Condition=" '$(Wix4Version)' == '' ">4.0.3</Wix4Version>
+    <PanelSwWix4Version Condition=" '$(PanelSwWix4Version)' == '' ">5.0.0-psw-wix.0211-28</PanelSwWix4Version>
   </PropertyGroup>
   
   <ItemGroup>
