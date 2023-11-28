@@ -12,7 +12,6 @@ extern "C" UINT __stdcall ConcatFiles(MSIHANDLE hInstall)
 	DWORD dwRes = ERROR_SUCCESS;
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
-	LPWSTR szCustomActionData = nullptr;
 	CConcatFiles oDeferred;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
@@ -73,14 +72,10 @@ extern "C" UINT __stdcall ConcatFiles(MSIHANDLE hInstall)
 	}
 
 	// Set CAD
-	hr = oDeferred.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data.");
-	hr = WcaDoDeferredAction(L"ConcatFilesExec", szCustomActionData, oDeferred.GetCost());
+	hr = oDeferred.DoDeferredAction(L"ConcatFilesExec");
 	ExitOnFailure(hr, "Failed setting action data.");
 
 LExit:
-	ReleaseStr(szCustomActionData);
-
 	dwRes = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(dwRes);
 }

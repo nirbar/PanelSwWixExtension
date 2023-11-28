@@ -38,7 +38,6 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall)
 	SYSTEMTIME startTime;
 	FILETIME startFileTime;
 	CFileOperations commitActions;
-	CWixString szCustomActionData;
 
 	::ZeroMemory(&nameBlob, sizeof(nameBlob));
 	::ZeroMemory(&keyInfo, sizeof(keyInfo));
@@ -235,9 +234,7 @@ extern "C" UINT __stdcall CreateSelfSignCertificate(MSIHANDLE hInstall)
 	}
 	hr = S_OK;
 
-	hr = commitActions.GetCustomActionData((LPWSTR*)szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
-	hr = WcaSetProperty(L"CreateSelfSignCertificate_commit", szCustomActionData);
+	hr = commitActions.SetCustomActionData(L"CreateSelfSignCertificate_commit");
 	ExitOnFailure(hr, "Failed setting property.");
 
 LExit:

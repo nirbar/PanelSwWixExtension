@@ -27,7 +27,6 @@ extern "C" UINT __stdcall PSW_ShellExecute(MSIHANDLE hInstall)
 	CShellExecute oDeferredShellExecute;
 	CShellExecute oRollbackShellExecute;
 	CShellExecute oCommitShellExecute;
-	LPWSTR szCustomActionData = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
@@ -108,25 +107,16 @@ extern "C" UINT __stdcall PSW_ShellExecute(MSIHANDLE hInstall)
 	}
 
 	// Schedule actions.
-	hr = oRollbackShellExecute.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for rollback action.");
-	hr = WcaDoDeferredAction(L"ShellExecute_rollback", szCustomActionData, oRollbackShellExecute.GetCost());
+	hr = oRollbackShellExecute.DoDeferredAction(L"ShellExecute_rollback");
 	ExitOnFailure(hr, "Failed scheduling rollback action.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = oDeferredShellExecute.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
-	hr = WcaDoDeferredAction(L"ShellExecute_deferred", szCustomActionData, oDeferredShellExecute.GetCost());
+	hr = oDeferredShellExecute.DoDeferredAction(L"ShellExecute_deferred");
 	ExitOnFailure(hr, "Failed scheduling deferred action.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = oCommitShellExecute.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for commit action.");
-	hr = WcaDoDeferredAction(L"ShellExecute_commit", szCustomActionData, oCommitShellExecute.GetCost());
+	hr = oCommitShellExecute.DoDeferredAction(L"ShellExecute_commit");
 	ExitOnFailure(hr, "Failed scheduling commit action.");
 
 LExit:
-	ReleaseStr(szCustomActionData);
 
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);

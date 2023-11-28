@@ -52,7 +52,6 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 	UINT er = ERROR_SUCCESS;
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
-	LPWSTR szCustomActionData = nullptr;
 	CExecOnComponent oDeferredBeforeStop, oDeferredAfterStop, oDeferredBeforeStart, oDeferredAfterStart;
 	CExecOnComponent oRollbackBeforeStop, oRollbackAfterStop, oRollbackBeforeStart, oRollbackAfterStart;
 	CExecOnComponent oDeferredBeforeStopImp, oDeferredAfterStopImp, oDeferredBeforeStartImp, oDeferredAfterStartImp;
@@ -345,119 +344,65 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 	}
 
 	// Rollback actions
-	hr = oRollbackBeforeStop.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for rollback.");
-	hr = WcaSetProperty(L"ExecOnComponent_BeforeStop_rollback", szCustomActionData);
+	hr = oRollbackBeforeStop.SetCustomActionData(L"ExecOnComponent_BeforeStop_rollback");
 	ExitOnFailure(hr, "Failed setting rollback action data.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = oRollbackAfterStop.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for rollback.");
-	hr = WcaSetProperty(L"ExecOnComponent_AfterStop_rollback", szCustomActionData);
+	hr = oRollbackAfterStop.SetCustomActionData(L"ExecOnComponent_AfterStop_rollback");
 	ExitOnFailure(hr, "Failed setting rollback action data.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = oRollbackBeforeStart.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for rollback.");
-	hr = WcaSetProperty(L"ExecOnComponent_BeforeStart_rollback", szCustomActionData);
+	hr = oRollbackBeforeStart.SetCustomActionData(L"ExecOnComponent_BeforeStart_rollback");
 	ExitOnFailure(hr, "Failed setting rollback action data.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = oRollbackAfterStart.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for rollback.");
-	hr = WcaSetProperty(L"ExecOnComponent_AfterStart_rollback", szCustomActionData);
+	hr = oRollbackAfterStart.SetCustomActionData(L"ExecOnComponent_AfterStart_rollback");
 	ExitOnFailure(hr, "Failed setting rollback action data.");
 
 	// Deferred actions
-	ReleaseNullStr(szCustomActionData);
-	hr = oDeferredBeforeStop.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred.");
-	hr = WcaSetProperty(L"ExecOnComponent_BeforeStop_deferred", szCustomActionData);
+	hr = oDeferredBeforeStop.SetCustomActionData(L"ExecOnComponent_BeforeStop_deferred");
 	ExitOnFailure(hr, "Failed setting deferred action data.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = oDeferredAfterStop.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred.");
-	hr = WcaSetProperty(L"ExecOnComponent_AfterStop_deferred", szCustomActionData);
+	hr = oDeferredAfterStop.SetCustomActionData(L"ExecOnComponent_AfterStop_deferred");
 	ExitOnFailure(hr, "Failed setting deferred action data.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = oDeferredBeforeStart.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred.");
-	hr = WcaSetProperty(L"ExecOnComponent_BeforeStart_deferred", szCustomActionData);
+	hr = oDeferredBeforeStart.SetCustomActionData(L"ExecOnComponent_BeforeStart_deferred");
 	ExitOnFailure(hr, "Failed setting deferred action data.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = oDeferredAfterStart.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred.");
-	hr = WcaSetProperty(L"ExecOnComponent_AfterStart_deferred", szCustomActionData);
+	hr = oDeferredAfterStart.SetCustomActionData(L"ExecOnComponent_AfterStart_deferred");
 	ExitOnFailure(hr, "Failed setting deferred action data.");
 
 	// Rollback actions, impersonated
-	ReleaseNullStr(szCustomActionData);
-	hr = oRollbackBeforeStopImp.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for rollback.");
-	hr = WcaSetProperty(L"ExecOnComponent_Imp_BeforeStop_rollback", szCustomActionData);
+	hr = oRollbackBeforeStopImp.SetCustomActionData(L"ExecOnComponent_Imp_BeforeStop_rollback");
 	ExitOnFailure(hr, "Failed setting rollback action data.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = oRollbackAfterStopImp.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for rollback.");
-	hr = WcaSetProperty(L"ExecOnComponent_Imp_AfterStop_rollback", szCustomActionData);
+	hr = oRollbackAfterStopImp.SetCustomActionData(L"ExecOnComponent_Imp_AfterStop_rollback");
 	ExitOnFailure(hr, "Failed setting rollback action data.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = oRollbackBeforeStartImp.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for rollback.");
-	hr = WcaSetProperty(L"ExecOnComponent_Imp_BeforeStart_rollback", szCustomActionData);
+	hr = oRollbackBeforeStartImp.SetCustomActionData(L"ExecOnComponent_Imp_BeforeStart_rollback");
 	ExitOnFailure(hr, "Failed setting rollback action data.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = oRollbackAfterStartImp.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for rollback.");
-	hr = WcaSetProperty(L"ExecOnComponent_Imp_AfterStart_rollback", szCustomActionData);
+	hr = oRollbackAfterStartImp.SetCustomActionData(L"ExecOnComponent_Imp_AfterStart_rollback");
 	ExitOnFailure(hr, "Failed setting rollback action data.");
 
 	// Deferred actions, impersonated
-	ReleaseNullStr(szCustomActionData);
-	hr = oDeferredBeforeStopImp.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred.");
-	hr = WcaSetProperty(L"ExecOnComponent_Imp_BeforeStop_deferred", szCustomActionData);
+	hr = oDeferredBeforeStopImp.SetCustomActionData(L"ExecOnComponent_Imp_BeforeStop_deferred");
 	ExitOnFailure(hr, "Failed setting deferred action data.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = oDeferredAfterStopImp.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred.");
-	hr = WcaSetProperty(L"ExecOnComponent_Imp_AfterStop_deferred", szCustomActionData);
+	hr = oDeferredAfterStopImp.SetCustomActionData(L"ExecOnComponent_Imp_AfterStop_deferred");
 	ExitOnFailure(hr, "Failed setting deferred action data.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = oDeferredBeforeStartImp.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred.");
-	hr = WcaSetProperty(L"ExecOnComponent_Imp_BeforeStart_deferred", szCustomActionData);
+	hr = oDeferredBeforeStartImp.SetCustomActionData(L"ExecOnComponent_Imp_BeforeStart_deferred");
 	ExitOnFailure(hr, "Failed setting deferred action data.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = oDeferredAfterStartImp.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred.");
-	hr = WcaSetProperty(L"ExecOnComponent_Imp_AfterStart_deferred", szCustomActionData);
+	hr = oDeferredAfterStartImp.SetCustomActionData(L"ExecOnComponent_Imp_AfterStart_deferred");
 	ExitOnFailure(hr, "Failed setting deferred action data.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = rollbackCAD.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for rollback.");
-	hr = WcaSetProperty(L"ExecOnComponentRollback", szCustomActionData);
+	hr = rollbackCAD.SetCustomActionData(L"ExecOnComponentRollback");
 	ExitOnFailure(hr, "Failed setting rollback action data.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = commitCAD.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for commit.");
-	hr = WcaSetProperty(L"ExecOnComponentCommit", szCustomActionData);
+	hr = commitCAD.SetCustomActionData(L"ExecOnComponentCommit");
 	ExitOnFailure(hr, "Failed setting commit action data.");
 
 LExit:
 	ReleaseMem(pbData);
-	ReleaseStr(szCustomActionData);
 	if ((hFile != INVALID_HANDLE_VALUE) && (hFile != NULL))
 	{
 		::FlushFileBuffers(hFile);

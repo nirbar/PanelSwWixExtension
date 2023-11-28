@@ -21,7 +21,6 @@ extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall)
 	CFileOperations deferredCAD;
 	CFileOperations commitCAD;
 	DWORD dwRes = 0;
-	LPWSTR szCustomActionData = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
@@ -109,27 +108,19 @@ extern "C" UINT __stdcall BackupAndRestore(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed creating custom action data for commit action.");
 	}
 
-	hr = rollbackCAD.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for rollback action.");
-	hr = WcaSetProperty(L"BackupAndRestore_rollback", szCustomActionData);
+	hr = rollbackCAD.SetCustomActionData(L"BackupAndRestore_rollback");
 	ExitOnFailure(hr, "Failed setting rollback action data.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = commitCAD.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for commit action.");
-	hr = WcaSetProperty(L"BackupAndRestore_commit", szCustomActionData);
+	hr = commitCAD.SetCustomActionData(L"BackupAndRestore_commit");
 	ExitOnFailure(hr, "Failed setting commit action data.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = deferredCAD.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
-	hr = WcaSetProperty(L"BackupAndRestore_deferred", szCustomActionData);
+	hr = deferredCAD.SetCustomActionData(L"BackupAndRestore_deferred");
 	ExitOnFailure(hr, "Failed setting deferred action data.");
+
 	hr = WcaProgressMessage(deferredCAD.GetCost(), TRUE);
 	ExitOnFailure(hr, "Failed extending progress bar.");
 
 LExit:
-	ReleaseStr(szCustomActionData);
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
 }

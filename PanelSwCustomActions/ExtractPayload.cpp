@@ -30,12 +30,8 @@ extern "C" UINT __stdcall ExtractPayload(MSIHANDLE hInstall)
 	// Best effort to delete on rollback/commit
 	if (SUCCEEDED(rollbackCAD.AddDeleteFile(szPayloadFolder, CFileOperations::FileOperationsAttributes::AllowReboot | CFileOperations::FileOperationsAttributes::IgnoreErrors | CFileOperations::FileOperationsAttributes::IgnoreMissingPath)))
 	{
-		CWixString szCAD;	
-		if (SUCCEEDED(rollbackCAD.GetCustomActionData((LPWSTR*)szCAD)))
-		{
-			WcaDoDeferredAction(L"ExtractPayloadRollback", szCAD, 0);
-			WcaSetProperty(L"ExtractPayloadCommit", szCAD);
-		}
+		rollbackCAD.DoDeferredAction(L"ExtractPayloadRollback");
+		rollbackCAD.SetCustomActionData(L"ExtractPayloadCommit");
 	}
 
 	// Ensure table PSW_Payload exists.

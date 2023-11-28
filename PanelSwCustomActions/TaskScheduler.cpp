@@ -13,7 +13,6 @@ extern "C" UINT __stdcall TaskScheduler(MSIHANDLE hInstall)
 	UINT er = ERROR_SUCCESS;
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
-	LPWSTR szCustomActionData = nullptr;
 	DWORD dwRes = 0;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
@@ -83,29 +82,19 @@ extern "C" UINT __stdcall TaskScheduler(MSIHANDLE hInstall)
 		}
 	}
 
-	ReleaseNullStr(szCustomActionData);
-	hr = oCommit.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for commit action.");
-	hr = WcaDoDeferredAction(L"TaskScheduler_commit", szCustomActionData, oCommit.GetCost());
+	hr = oCommit.DoDeferredAction(L"TaskScheduler_commit");
 	ExitOnFailure(hr, "Failed scheduling commit action.");
 
 	// Rollback deletes same files as commit does (after importing tasks).
 	hr = oCommit.Prepend(&oRollback);
 	ExitOnFailure(hr, "Failed pre-pending custom action data for deferred action.");
-	hr = oCommit.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for rollback action.");
-	hr = WcaDoDeferredAction(L"TaskScheduler_rollback", szCustomActionData, oCommit.GetCost());
+	hr = oCommit.DoDeferredAction(L"TaskScheduler_rollback");
 	ExitOnFailure(hr, "Failed scheduling rollback action.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = oDeferred.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
-	hr = WcaDoDeferredAction(L"TaskScheduler_deferred", szCustomActionData, oDeferred.GetCost());
+	hr = oDeferred.DoDeferredAction(L"TaskScheduler_deferred");
 	ExitOnFailure(hr, "Failed scheduling deferred action.");
 
 LExit:
-	ReleaseStr(szCustomActionData);
-
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
 }
