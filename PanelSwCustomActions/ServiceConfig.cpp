@@ -11,7 +11,6 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 	DWORD dwRes = ERROR_SUCCESS;
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
-	LPWSTR szCustomActionData = nullptr;
 	CServiceConfig oDeferred;
 	CServiceConfig oRollback;
 	SC_HANDLE hManager = NULL;
@@ -256,19 +255,13 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 	}
 
 	// Set CAD
-	hr = oRollback.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for rollback.");
-	hr = WcaDoDeferredAction(L"PSW_ServiceConfigRlbk", szCustomActionData, oRollback.GetCost());
+	hr = oRollback.DoDeferredAction(L"PSW_ServiceConfigRlbk");
 	ExitOnFailure(hr, "Failed setting rollback action data.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = oDeferred.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data.");
-	hr = WcaDoDeferredAction(L"PSW_ServiceConfigExec", szCustomActionData, oDeferred.GetCost());
+	hr = oDeferred.DoDeferredAction(L"PSW_ServiceConfigExec");
 	ExitOnFailure(hr, "Failed setting action data.");
 
 LExit:
-	ReleaseStr(szCustomActionData);
 	ReleaseStr(szDepGroup);
 	ReleaseStr(szDepService);
 	ReleaseNullMem(pServiceCfg);

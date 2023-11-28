@@ -28,7 +28,6 @@ extern "C" UINT __stdcall Telemetry(MSIHANDLE hInstall)
 	CTelemetry oRollbackTelemetry;
 	CTelemetry oCommitTelemetry;
 	CTelemetry oDeferredTelemetry;
-	LPWSTR szCustomActionData = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
@@ -111,26 +110,16 @@ extern "C" UINT __stdcall Telemetry(MSIHANDLE hInstall)
 	}
 
 	// Schedule actions.
-	hr = oRollbackTelemetry.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for rollback action.");
-	hr = WcaDoDeferredAction(L"Telemetry_rollback", szCustomActionData, oRollbackTelemetry.GetCost());
+	hr = oRollbackTelemetry.DoDeferredAction(L"Telemetry_rollback");
 	ExitOnFailure(hr, "Failed scheduling rollback action.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = oDeferredTelemetry.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
-	hr = WcaDoDeferredAction(L"Telemetry_deferred", szCustomActionData, oDeferredTelemetry.GetCost());
+	hr = oDeferredTelemetry.DoDeferredAction(L"Telemetry_deferred");
 	ExitOnFailure(hr, "Failed scheduling deferred action.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = oCommitTelemetry.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for commit action.");
-	hr = WcaDoDeferredAction(L"Telemetry_commit", szCustomActionData, oCommitTelemetry.GetCost());
+	hr = oCommitTelemetry.DoDeferredAction(L"Telemetry_commit");
 	ExitOnFailure(hr, "Failed scheduling commit action.");
 
 LExit:
-	ReleaseStr(szCustomActionData);
-
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
 }

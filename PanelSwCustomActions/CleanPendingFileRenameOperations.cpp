@@ -33,7 +33,7 @@ extern "C" UINT __stdcall CleanPendingFileRenameOperationsSched(MSIHANDLE hInsta
 	ExitOnFailure(hr, "Failed to open Session Manager registry key");
 
 	er = ::RegQueryValueEx(hKey, L"PendingFileRenameOperations", nullptr, nullptr, nullptr, &dwSize);
-	if (er == ERROR_FILE_NOT_FOUND)
+	if ((er == ERROR_FILE_NOT_FOUND) || (er == ERROR_PATH_NOT_FOUND))
 	{
 		WcaLog(LOGMSG_STANDARD, "No pending file rename operations.");
 		ExitFunction1(hr = S_OK);
@@ -175,7 +175,7 @@ extern "C" UINT __stdcall CleanPendingFileRenameOperations(MSIHANDLE hInstall)
 	ExitOnFailure(hr, "Failed to open Session Manager registry key");
 
 	er = ::RegQueryValueEx(hKey, L"PendingFileRenameOperations", nullptr, nullptr, nullptr, &dwSize);
-	if (er == ERROR_FILE_NOT_FOUND)
+	if ((er == ERROR_FILE_NOT_FOUND) || (er == ERROR_PATH_NOT_FOUND))
 	{
 		WcaLog(LOGMSG_STANDARD, "No pending file rename operations.");
 		ExitFunction1(hr = S_OK);

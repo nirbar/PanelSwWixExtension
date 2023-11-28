@@ -19,7 +19,6 @@ extern "C" UINT __stdcall TopShelf(MSIHANDLE hInstall)
 	PMSIHANDLE hRecord;
 	CTopShelfService installCAD, installRollbackCAD, uninstallCAD, uninstallRollbackCAD;
 	DWORD dwRes = 0;
-	LPWSTR szCustomActionData = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
@@ -126,31 +125,19 @@ extern "C" UINT __stdcall TopShelf(MSIHANDLE hInstall)
 		}
 	}
 
-	hr = installRollbackCAD.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
-	hr = WcaSetProperty(L"TopShelfService_InstallRollback", szCustomActionData);
+	hr = installRollbackCAD.SetCustomActionData(L"TopShelfService_InstallRollback");
 	ExitOnFailure(hr, "Failed setting property");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = installCAD.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
-	hr = WcaSetProperty(L"TopShelfService_Install", szCustomActionData);
+	hr = installCAD.SetCustomActionData(L"TopShelfService_Install");
 	ExitOnFailure(hr, "Failed setting property");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = uninstallRollbackCAD.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
-	hr = WcaSetProperty(L"TopShelfService_UninstallRollback", szCustomActionData);
+	hr = uninstallRollbackCAD.SetCustomActionData(L"TopShelfService_UninstallRollback");
 	ExitOnFailure(hr, "Failed setting property");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = uninstallCAD.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
-	hr = WcaSetProperty(L"TopShelfService_Uninstall", szCustomActionData);
+	hr = uninstallCAD.SetCustomActionData(L"TopShelfService_Uninstall");
 	ExitOnFailure(hr, "Failed setting property");
 
 LExit:
-	ReleaseStr(szCustomActionData);
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
 }

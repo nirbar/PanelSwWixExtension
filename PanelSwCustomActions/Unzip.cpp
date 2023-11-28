@@ -32,7 +32,6 @@ extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall)
 	CUnzip rlbkCad(false);
 	CUnzip cad(false);
 	DWORD dwRes = 0;
-	LPWSTR szCustomActionData = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
@@ -100,25 +99,13 @@ extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall)
 	}
 	hr = S_OK;
 
-	if (rlbkCad.HasActions())
-	{
-		hr = rlbkCad.GetCustomActionData(&szCustomActionData);
-		ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
-		hr = WcaDoDeferredAction(L"UnzipRollback", szCustomActionData, 0);
-		ExitOnFailure(hr, "Failed setting property");
-		ReleaseNullStr(szCustomActionData);
-	}
+	hr = rlbkCad.DoDeferredAction(L"UnzipRollback");
+	ExitOnFailure(hr, "Failed setting property");
 
-	if (cad.HasActions())
-	{
-		hr = cad.GetCustomActionData(&szCustomActionData);
-		ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
-		hr = WcaDoDeferredAction(L"UnzipExec", szCustomActionData, 0);
-		ExitOnFailure(hr, "Failed setting property");
-	}
+	hr = cad.DoDeferredAction(L"UnzipExec");
+	ExitOnFailure(hr, "Failed setting property");
 
 LExit:
-	ReleaseStr(szCustomActionData);
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
 }
@@ -131,7 +118,6 @@ extern "C" UINT __stdcall ZipFileSched(MSIHANDLE hInstall)
 	PMSIHANDLE hRecord;
 	CUnzip cad(true);
 	DWORD dwRes = 0;
-	LPWSTR szCustomActionData = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
@@ -198,13 +184,10 @@ extern "C" UINT __stdcall ZipFileSched(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed scheduling zip file compression");
 	}
 
-	hr = cad.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
-	hr = WcaDoDeferredAction(L"ZipFileExec", szCustomActionData, 0);
+	hr = cad.DoDeferredAction(L"ZipFileExec");
 	ExitOnFailure(hr, "Failed setting property");
 
 LExit:
-	ReleaseStr(szCustomActionData);
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
 }

@@ -30,7 +30,6 @@ extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall)
 	DWORD dwRes = 0;
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
-	LPWSTR szCustomActionData = nullptr;
 	CXslTransform deferredCA;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
@@ -132,18 +131,10 @@ extern "C" UINT __stdcall XslTransform(MSIHANDLE hInstall)
 	hr = S_OK;
 
 	// Deferred action
-	if (deferredCA.HasActions())
-	{
-		hr = deferredCA.GetCustomActionData(&szCustomActionData);
-		ExitOnFailure(hr, "Failed getting custom action data for rollback.");
-		hr = WcaDoDeferredAction(L"PSW_XslTransformExec", szCustomActionData, 1);
-		ExitOnFailure(hr, "Failed setting rollback action data.");
-		ReleaseNullStr(szCustomActionData);
-	}
+	hr = deferredCA.DoDeferredAction(L"PSW_XslTransformExec");
+	ExitOnFailure(hr, "Failed setting custom action data.");
 
 LExit:
-	ReleaseMem(szCustomActionData);
-
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
 }

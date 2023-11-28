@@ -20,7 +20,6 @@ extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall)
     CRestartLocalResources cad;
     CWixString szDevicePath;
     CWixString szCanoncanilzedPath;
-    CWixString szCustomActionData;
 
     hr = WcaInitialize(hInstall, __FUNCTION__);
     ExitOnFailure(hr, "Failed to initialize");
@@ -84,10 +83,7 @@ extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall)
     hr = cad.AddRestartLocalResources(lstFolders);
     ExitOnFailure(hr, "Failed to prepare custom action data");
 
-    hr = cad.GetCustomActionData((LPWSTR*)szCustomActionData);
-    ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
-
-    hr = WcaSetProperty(L"RestartLocalResourcesExec", (LPCWSTR)szCustomActionData);
+    hr = cad.SetCustomActionData(L"RestartLocalResourcesExec");
     ExitOnFailure(hr, "Failed to set property.");
 
     // Best effort to register the processes with restart manager

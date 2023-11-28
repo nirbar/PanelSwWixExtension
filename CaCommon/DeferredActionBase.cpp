@@ -169,6 +169,42 @@ CDeferredActionBase::~CDeferredActionBase()
 {
 }
 
+HRESULT CDeferredActionBase::DoDeferredAction(LPCWSTR szCustomActionName)
+{
+	HRESULT hr = S_OK;
+	CWixString szCustomActionData;
+
+	if (HasActions())
+	{
+		hr = GetCustomActionData((LPWSTR*)szCustomActionData);
+		ExitOnFailure(hr, "Failed getting custom action data for commit action.");
+
+		hr = WcaDoDeferredAction(szCustomActionName, (LPCWSTR)szCustomActionData, GetCost());
+		ExitOnFailure(hr, "Failed scheduling deferred action '%ls'.", szCustomActionName);
+	}
+
+LExit:
+	return hr;
+}
+
+HRESULT CDeferredActionBase::SetCustomActionData(LPCWSTR szPropertyName)
+{
+	HRESULT hr = S_OK;
+	CWixString szCustomActionData;
+
+	if (HasActions())
+	{
+		hr = GetCustomActionData((LPWSTR*)szCustomActionData);
+		ExitOnFailure(hr, "Failed getting custom action data for commit action.");
+
+		hr = WcaSetProperty(szPropertyName, (LPCWSTR)szCustomActionData);
+		ExitOnFailure(hr, "Failed setting CustomActionData to property '%ls'.", szPropertyName);
+	}
+
+LExit:
+	return hr;
+}
+
 UINT CDeferredActionBase::GetCost() const
 {
 	UINT cost = 0;

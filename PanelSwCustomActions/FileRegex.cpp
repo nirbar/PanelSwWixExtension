@@ -19,7 +19,6 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 	CFileOperations rollbackCAD;
 	CFileOperations deferredFileCAD;
 	CFileOperations commitCAD;
-	LPWSTR szCustomActionData = nullptr;
 	DWORD dwRes = 0;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
@@ -131,27 +130,18 @@ extern "C" UINT __stdcall FileRegex(MSIHANDLE hInstall)
 		}
 	}
 
-	hr = rollbackCAD.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
-	hr = WcaDoDeferredAction(L"FileRegex_rollback", szCustomActionData, rollbackCAD.GetCost());
+	hr = rollbackCAD.DoDeferredAction(L"FileRegex_rollback");
 	ExitOnFailure(hr, "Failed scheduling deferred action.");
 
-	ReleaseNullStr(szCustomActionData);
 	hr = oDeferredFileRegex.Prepend(&deferredFileCAD);
 	ExitOnFailure(hr, "Failed getting custom action data for deferred file actions.");
-	hr = oDeferredFileRegex.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
-	hr = WcaDoDeferredAction(L"FileRegex_deferred", szCustomActionData, oDeferredFileRegex.GetCost());
+	hr = oDeferredFileRegex.DoDeferredAction(L"FileRegex_deferred");
 	ExitOnFailure(hr, "Failed scheduling deferred action.");
 
-	ReleaseNullStr(szCustomActionData);
-	hr = commitCAD.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for deferred action.");
-	hr = WcaDoDeferredAction(L"FileRegex_commit", szCustomActionData, commitCAD.GetCost());
+	hr = commitCAD.DoDeferredAction(L"FileRegex_commit");
 	ExitOnFailure(hr, "Failed scheduling deferred action.");
 
 LExit:
-	ReleaseStr(szCustomActionData);
 	DictDestroy(hPrevFiles);
 
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;

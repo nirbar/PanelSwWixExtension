@@ -14,7 +14,6 @@ extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
 	PMSIHANDLE hRecord;
 	CFileOperations commitCAD;
 	DWORD dwRes = 0;
-	LPWSTR szCustomActionData = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
@@ -74,13 +73,13 @@ extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed creating custom action data for commit action.");
 	}
 
-	hr = commitCAD.GetCustomActionData(&szCustomActionData);
-	ExitOnFailure(hr, "Failed getting custom action data for commit action.");
-	hr = WcaDoDeferredAction(L"DeletePath_commit", szCustomActionData, commitCAD.GetCost());
-	ExitOnFailure(hr, "Failed scheduling deferred action.");
+	if (commitCAD.HasActions())
+	{
+		hr = commitCAD.DoDeferredAction(L"DeletePath_commit");
+		ExitOnFailure(hr, "Failed scheduling deferred action.");
+	}
 
 LExit:
-	ReleaseStr(szCustomActionData);
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
 }
@@ -541,7 +540,7 @@ HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRe
 		if (hFind == INVALID_HANDLE_VALUE)
 		{
 			DWORD dwErr = ::GetLastError();
-			ExitOnNullWithLastError((dwErr == ERROR_FILE_NOT_FOUND), hr, "Failed searching files in '%ls'", szFullFolder);
+			ExitOnNullWithLastError(((dwErr == ERROR_FILE_NOT_FOUND) || (dwErr == ERROR_PATH_NOT_FOUND)), hr, "Failed searching files in '%ls'", szFullFolder);
 		}
 		else 
 		{
@@ -588,7 +587,7 @@ HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRe
 	if (hFind == INVALID_HANDLE_VALUE)
 	{
 		DWORD dwErr = ::GetLastError();
-		ExitOnNullWithLastError((dwErr == ERROR_FILE_NOT_FOUND), hr, "Failed searching files in '%ls'", szFullPattern);
+		ExitOnNullWithLastError(((dwErr == ERROR_FILE_NOT_FOUND) || (dwErr == ERROR_PATH_NOT_FOUND)), hr, "Failed searching files in '%ls'", szFullPattern);
 	}
 	else 
 	{

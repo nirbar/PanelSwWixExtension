@@ -26,7 +26,6 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 	DWORD dwRes = 0;
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
-	LPWSTR szCustomActionData = nullptr;
 	CSqlScript deferredCA;
 	CSqlScript rollbackCA;
 
@@ -183,28 +182,14 @@ extern "C" UINT __stdcall SqlScript(MSIHANDLE hInstall)
 	hr = S_OK;
 
 	// Rollback actions
-	if (rollbackCA.HasActions())
-	{
-		hr = rollbackCA.GetCustomActionData(&szCustomActionData);
-		ExitOnFailure(hr, "Failed getting custom action data for rollback.");
-		hr = WcaDoDeferredAction(L"PSW_SqlScriptRollback", szCustomActionData, 1);
-		ExitOnFailure(hr, "Failed setting rollback action data.");
-		ReleaseNullStr(szCustomActionData);
-	}
+	hr = rollbackCA.DoDeferredAction(L"PSW_SqlScriptRollback");
+	ExitOnFailure(hr, "Failed setting rollback action data.");
 
 	// Deferred action
-	if (deferredCA.HasActions())
-	{
-		hr = deferredCA.GetCustomActionData(&szCustomActionData);
-		ExitOnFailure(hr, "Failed getting custom action data for rollback.");
-		hr = WcaDoDeferredAction(L"PSW_SqlScriptExec", szCustomActionData, 1);
-		ExitOnFailure(hr, "Failed setting rollback action data.");
-		ReleaseNullStr(szCustomActionData);
-	}
+	hr = deferredCA.DoDeferredAction(L"PSW_SqlScriptExec");
+	ExitOnFailure(hr, "Failed setting rollback action data.");
 
 LExit:
-	ReleaseMem(szCustomActionData);
-
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
 }

@@ -17,9 +17,11 @@ public:
 	typedef HRESULT(*ReceiverToExecutorFunc)(LPCSTR szReceiver, CDeferredActionBase** ppExecutor);
 	static HRESULT DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToExecutorFunc mapFunc);
 
-	UINT GetCost() const;
+	HRESULT DoDeferredAction(LPCWSTR szCustomActionName);
 
-	HRESULT GetCustomActionData(LPWSTR *pszCustomActionData);
+	HRESULT SetCustomActionData(LPCWSTR szPropertyName);
+	
+	UINT GetCost() const;
 
 	HRESULT Prepend(CDeferredActionBase* pOther);
 
@@ -33,6 +35,8 @@ protected:
 	virtual HRESULT DeferredExecute(const ::std::string& command) = 0;
 
 	HRESULT AddCommand(LPCSTR szHandler, ::com::panelsw::ca::Command **ppCommand);
+
+	HRESULT GetCustomActionData(LPWSTR* pszCustomActionData);
 
 private:
 	::com::panelsw::ca::CustomActionData _cad;
