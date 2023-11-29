@@ -25,8 +25,6 @@ public:
 
 	HRESULT Prepend(CDeferredActionBase* pOther);
 
-	bool HasActions() const;
-
 	static void LogUnformatted(LOGLEVEL level, bool bShowTime, LPCWSTR szFormat, ...);
 
 protected:
