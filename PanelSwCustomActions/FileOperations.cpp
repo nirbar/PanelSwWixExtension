@@ -76,11 +76,8 @@ extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed creating custom action data for commit action.");
 	}
 
-	if (commitCAD.HasActions())
-	{
-		hr = commitCAD.DoDeferredAction(L"DeletePath_commit");
-		ExitOnFailure(hr, "Failed scheduling deferred action.");
-	}
+	hr = commitCAD.DoDeferredAction(L"DeletePath_commit");
+	ExitOnFailure(hr, "Failed scheduling deferred action.");
 
 LExit:
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;

@@ -173,7 +173,7 @@ HRESULT CDeferredActionBase::DoDeferredAction(LPCWSTR szCustomActionName)
 	HRESULT hr = S_OK;
 	CWixString szCustomActionData;
 
-	if (HasActions())
+	if (_cad.commands_size() > 0)
 	{
 		hr = GetCustomActionData((LPWSTR*)szCustomActionData);
 		ExitOnFailure(hr, "Failed getting custom action data for commit action.");
@@ -191,7 +191,7 @@ HRESULT CDeferredActionBase::SetCustomActionData(LPCWSTR szPropertyName)
 	HRESULT hr = S_OK;
 	CWixString szCustomActionData;
 
-	if (HasActions())
+	if (_cad.commands_size() > 0)
 	{
 		hr = GetCustomActionData((LPWSTR*)szCustomActionData);
 		ExitOnFailure(hr, "Failed getting custom action data for commit action.");
@@ -232,11 +232,6 @@ HRESULT CDeferredActionBase::AddCommand(LPCSTR szHandler, Command** ppCommand)
 	}
 
 	return hr;
-}
-
-bool CDeferredActionBase::HasActions() const
-{
-	return (_cad.commands_size() > 0);
 }
 
 HRESULT CDeferredActionBase::GetCustomActionData(LPWSTR* pszCustomActionData)
