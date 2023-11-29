@@ -132,6 +132,28 @@
     </xs:complexType>
   </xs:element>
 
+  <xs:element name="IsWindowsVersionOrGreater">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Test whether Kernel32.dll's version is at least the given version. If yes, set the property to 1.]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Version" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Minimal version to test. The version is compared against Kernel32.dll's version. The property is set to 1 if Kernel32.dll's is at least the minimal version. Otherwise, the property is unmodified.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="ToLowerCase">
     <xs:annotation>
       <xs:appinfo>

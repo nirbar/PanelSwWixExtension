@@ -188,6 +188,10 @@ namespace PanelSw.Wix.Extensions
                             ParseMd5Hash(element);
                             break;
 
+                        case "IsWindowsVersionOrGreater":
+                            ParseIsWindowsVersionOrGreater(element);
+                            break;
+
                         default:
                             Core.UnexpectedElement(parentElement, element);
                             break;
@@ -762,6 +766,9 @@ namespace PanelSw.Wix.Extensions
                 case "PSW_Md5Hash":
                     customActions.Add("Md5Hash");
                     break;
+                case "PSW_IsWindowsVersionOrGreater":
+                    customActions.Add("IsWindowsVersionOrGreater");
+                    break;
                 case "PSW_ConcatFiles":
                     customActions.Add("ConcatFiles");
                     customActions.Add("ConcatFilesExec");
@@ -1035,6 +1042,72 @@ namespace PanelSw.Wix.Extensions
             row[5] = (autoStart == YesNoDefaultType.Yes) ? 1 : (autoStart == YesNoDefaultType.No) ? 0 : -1;
             row[6] = (int)promptOnError;
             row[7] = order;
+        }
+
+        private void ParseIsWindowsVersionOrGreater(XmlNode node)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
+            string property = null;
+            string version = null;
+
+            if (node.ParentNode.LocalName != "Property")
+            {
+                Core.UnexpectedElement(node.ParentNode, node);
+            }
+            property = node.ParentNode.Attributes["Id"].Value;
+            if (!property.ToUpper().Equals(property))
+            {
+                Core.OnMessage(WixErrors.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
+            }
+
+            foreach (XmlAttribute attrib in node.Attributes)
+            {
+                if (0 == attrib.NamespaceURI.Length || attrib.NamespaceURI == schema.TargetNamespace)
+                {
+                    switch (attrib.LocalName)
+                    {
+                        case "Version":
+                            version = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        default:
+                            Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            break;
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(property))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.LocalName, "Id"));
+            }
+            if (string.IsNullOrEmpty(version))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Version"));
+            }
+            if (!Version.TryParse(version, out Version v))
+            {
+                Core.OnMessage(WixErrors.IllegalVersionValue(sourceLineNumbers, node.LocalName, "Version", version));
+            }
+
+            // find unexpected child elements
+            foreach (XmlNode child in node.ChildNodes)
+            {
+                if (child.NamespaceURI == schema.TargetNamespace)
+                {
+                    Core.UnexpectedElement(node, child);
+                }
+            }
+
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "IsWindowsVersionOrGreater");
+
+            if (!Core.EncounteredError)
+            {
+                Row row = Core.CreateRow(sourceLineNumbers, "PSW_IsWindowsVersionOrGreater");
+                row[0] = "wmv" + Guid.NewGuid().ToString("N");
+                row[1] = property;
+                row[2] = version;
+            }
         }
 
         private void ParseMd5Hash(XmlNode node)
@@ -2910,25 +2983,25 @@ namespace PanelSw.Wix.Extensions
                         }
                         break;
 
-                        case "EnableAll":
-                            enableAll = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) != YesNoType.No;
-                            break;
+                    case "EnableAll":
+                        enableAll = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) != YesNoType.No;
+                        break;
 
-                        case "RemoveFeature":
-                            unwanted = Core.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
+                    case "RemoveFeature":
+                        unwanted = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
 
-                        case "ForceRemove":
-                            forceRemove = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes;
-                            break;
+                    case "ForceRemove":
+                        forceRemove = Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes;
+                        break;
 
-                        case "Order":
-                            order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
-                            if (order < 0)
-                            {
-                                order += int.MaxValue;
-                            }
-                            break;
+                    case "Order":
+                        order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                        if (order < 0)
+                        {
+                            order += int.MaxValue;
+                        }
+                        break;
 
                     default:
                         Core.UnexpectedAttribute(sourceLineNumbers, attrib);
@@ -4979,17 +5052,17 @@ namespace PanelSw.Wix.Extensions
                             recursive = (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes);
                             break;
                         case "ErrorHandling":
-                        {
-                            string a = Core.GetAttributeValue(sourceLineNumbers, attrib);
-                            try
                             {
-                                promptOnError = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
+                                string a = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                                try
+                                {
+                                    promptOnError = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
+                                }
+                                catch
+                                {
+                                    Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                                }
                             }
-                            catch
-                            {
-                                Core.UnexpectedAttribute(sourceLineNumbers, attrib);
-                            }
-                        }
                             break;
 
                         default:
@@ -5142,17 +5215,17 @@ namespace PanelSw.Wix.Extensions
                             }
                             break;
                         case nameof(ErrorHandling):
-                        {
-                            string a = Core.GetAttributeValue(sourceLineNumbers, attrib);
-                            try
                             {
-                                promptOnError = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
+                                string a = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                                try
+                                {
+                                    promptOnError = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
+                                }
+                                catch
+                                {
+                                    Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                                }
                             }
-                            catch
-                            {
-                                Core.UnexpectedAttribute(sourceLineNumbers, attrib);
-                            }
-                        }
                             break;
 
                         default:

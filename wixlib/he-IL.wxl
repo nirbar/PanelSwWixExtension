@@ -77,4 +77,5 @@
   <String Overridable="yes" Id="UnzipArchiveError"><![CDATA[אירעה שגיאה בחילוץ מקובץ ארכיון [2].
 [3]]]></String>
   <String Overridable="yes" Id="UnzipFileError"><![CDATA[אירעה שגיאה בחילוץ הקובץ [2] מארכיון [3]]]></String>
+  <String Overridable="yes" Id="IsWindowsVersionOrGreater"><![CDATA[בודק את גירסאת מערכת ההפעלה]]></String>
 </WixLocalization>

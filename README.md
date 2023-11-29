@@ -10,6 +10,7 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
 ## PanelSwWixExtension WiX Elements
 
 - Immediate Actions:
+  - *IsWindowsVersionOrGreater*: Test whether Kernel32.dll's version is at least the given version. If yes, set the property to 1.
   - *Md5Hash*: Computes MD5 hash.
   - *WmiSearch*: Execute a WMI query.
   - *PathSearch*: Search for a file on PATH environment variable folder list.

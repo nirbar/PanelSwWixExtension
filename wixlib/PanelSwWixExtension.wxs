@@ -863,4 +863,18 @@
       <Error Id="27012">!(loc.PromptFileDowngrades)</Error>
     </UI>
   </Fragment>
+
+  <!-- IsWindowsVersionOrGreater -->
+  <Fragment>
+    <CustomAction Id="IsWindowsVersionOrGreater" DllEntry="IsWindowsVersionOrGreater" Execute="firstSequence" BinaryKey="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="IsWindowsVersionOrGreater" Before="AppSearch" Overridable="yes" />
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="IsWindowsVersionOrGreater" Before="AppSearch" Overridable="yes" />
+    </InstallUISequence>
+    <UI>
+      <ProgressText Action="IsWindowsVersionOrGreater">!(loc.IsWindowsVersionOrGreater)"</ProgressText>
+    </UI>
+  </Fragment>
 </Wix>
