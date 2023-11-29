@@ -166,6 +166,9 @@
     <ClCompile Include="PromptFileDowngrades.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="IsWindowsVersionOrGreater.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\*.pb.*">
@@ -271,8 +274,5 @@
     <None Include="PanelSwCustomActions.def">
       <Filter>Source Files</Filter>
     </None>
-  </ItemGroup>
-  <ItemGroup>
-    <ResourceCompile Include="$(IntDir)\Version.rc" />
   </ItemGroup>
 </Project>

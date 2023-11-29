@@ -55,3 +55,4 @@ EXPORTS
 	PromptCancel
 	FolderPaths
 	PromptFileDowngrades
+	IsWindowsVersionOrGreater

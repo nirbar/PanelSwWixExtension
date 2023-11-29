@@ -1,0 +1,32 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
+  <Package Name="IsWindowsVersionOrGreater" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}" InstallerVersion="200" ProductCode="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}">
+    <MajorUpgrade DowngradeErrorMessage="A no older version of [ProductName] is already installed." />
+
+    <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
+      <Component Directory="INSTALLFOLDER">
+        <File Id="___sys.SOURCEFILEPATH_" Source="$(sys.SOURCEFILEPATH)" />
+      </Component>
+    </Feature>
+
+    <Property Id="MSIFASTINSTALL" Value="1"></Property>
+
+    <Property Id="TEST_5_0">
+      <PanelSW:IsWindowsVersionOrGreater Version="5.0" />
+    </Property>
+    <Property Id="TEST_10">
+      <PanelSW:IsWindowsVersionOrGreater Version="6.3.18362" />
+    </Property>
+    <Property Id="TEST_11">
+      <PanelSW:IsWindowsVersionOrGreater Version="6.3.22000" />
+    </Property>
+    <Launch Condition="Installed Or TEST_5_0" Message="Surely we're no older than Windows 5.0"/>
+    <Launch Condition="Installed Or TEST_10" Message="Surely we're no older than Windows 10.0"/>
+    <Launch Condition="Installed Or TEST_11" Message="Surely we're no older than Windows 11.0"/>
+
+    <CustomActionRef Id="TerminateSuccessfully_Immediate" />
+
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+    </StandardDirectory>
+  </Package>
+</Wix>

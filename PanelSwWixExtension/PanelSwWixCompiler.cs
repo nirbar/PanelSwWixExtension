@@ -186,6 +186,10 @@ namespace PanelSw.Wix.Extensions
                             ParseMd5Hash(section, element);
                             break;
 
+                        case "IsWindowsVersionOrGreater":
+                            ParseIsWindowsVersionOrGreater(section, element);
+                            break;
+
                         default:
                             ParseHelper.UnexpectedElement(parentElement, element);
                             break;
@@ -705,6 +709,9 @@ namespace PanelSw.Wix.Extensions
                 case "PSW_Md5Hash":
                     customActions.Add("Md5Hash");
                     break;
+                case nameof(PSW_IsWindowsVersionOrGreater):
+                    customActions.Add("IsWindowsVersionOrGreater");
+                    break;
                 case "PSW_ConcatFiles":
                     customActions.Add("ConcatFiles");
                     customActions.Add("ConcatFilesExec");
@@ -952,6 +959,62 @@ namespace PanelSw.Wix.Extensions
                 row.AutoStart = (autoStart == YesNoDefaultType.Yes) ? 1 : (autoStart == YesNoDefaultType.No) ? 0 : -1;
                 row.ErrorHandling = (int)promptOnError;
                 row.Order = order;
+            }
+        }
+
+        private void ParseIsWindowsVersionOrGreater(IntermediateSection section, XElement element)
+        {
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
+            string property = null;
+            string version = null;
+
+            if (element.Parent.Name.LocalName != "Property")
+            {
+                ParseHelper.UnexpectedElement(element.Parent, element);
+            }
+            property = element.Parent.Attribute("Id").Value;
+            if (!property.ToUpper().Equals(property))
+            {
+                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
+            }
+
+            foreach (XAttribute attrib in element.Attributes())
+            {
+                if (IsMyAttribute(element, attrib))
+                {
+                    switch (attrib.Name.LocalName)
+                    {
+                        case "Version":
+                            version = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+
+                        default:
+                            ParseHelper.UnexpectedAttribute(element, attrib);
+                            break;
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(property))
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
+            }
+            if (string.IsNullOrEmpty(version))
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Version"));
+            }
+            if (!Version.TryParse(version, out Version v))
+            {
+                Messaging.Write(ErrorMessages.IllegalVersionValue(sourceLineNumbers, element.Name.LocalName, "Version", version));
+            }
+
+            if (CheckNoCData(element) && !Messaging.EncounteredError)
+            {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "IsWindowsVersionOrGreater");
+
+                PSW_IsWindowsVersionOrGreater row = section.AddSymbol(new PSW_IsWindowsVersionOrGreater(sourceLineNumbers));
+                row.Property_ = property;
+                row.Version = v;
             }
         }
 

@@ -17,6 +17,7 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
   - *-exc*: Semicolon seperated list of filename to exclude. Wildcards are accepted. If specified, any file matching the pattern will be excluded
   - *-prd*: Payload Root Folder. A prefix folder to add to all payloads
 - Immediate Actions:
+  - *IsWindowsVersionOrGreater*: Test whether Kernel32.dll's version is at least the given version. If yes, set the property to 1.
   - *Md5Hash*: Computes MD5 hash.
   - *WmiSearch*: Execute a WMI query.
   - *PathSearch*: Search for a file on PATH environment variable folder list.

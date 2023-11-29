@@ -82,6 +82,9 @@ namespace PanelSw.Wix.Extensions
                 case "PSW_Md5Hash":
                     symbolDefinition = PSW_Md5Hash.SymbolDefinition;
                     break;
+                case nameof(PSW_IsWindowsVersionOrGreater):
+                    symbolDefinition = PSW_IsWindowsVersionOrGreater.SymbolDefinition;
+                    break;
                 case "PSW_MsiSqlQuery":
                     symbolDefinition = PSW_MsiSqlQuery.SymbolDefinition;
                     break;
