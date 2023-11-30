@@ -61,4 +61,5 @@
   <String Overridable="yes" Id="UnzipArchiveError" Value="אירעה שגיאה בחילוץ מקובץ ארכיון [2].&#xA;[3]" />
   <String Overridable="yes" Id="UnzipFileError" Value="אירעה שגיאה בחילוץ הקובץ [2] מארכיון [3]" />
   <String Overridable="yes" Id="IsWindowsVersionOrGreater" Value="בודק את גירסאת מערכת ההפעלה" />
+  <String Overridable="yes" Id="ListProcessorFeatures" Value="בודק זמינות תכונות של המעבד" />
 </WixLocalization>

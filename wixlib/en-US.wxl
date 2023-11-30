@@ -61,4 +61,5 @@
   <String Overridable="yes" Id="UnzipArchiveError" Value="An error ocurred when extracting the zip archive [2].&#xA;[3]" />
   <String Overridable="yes" Id="UnzipFileError" Value="An error ocurred when extracting the file [2] from zip archive [3]" />
   <String Overridable="yes" Id="IsWindowsVersionOrGreater" Value="Testing Windows version" />
+  <String Overridable="yes" Id="ListProcessorFeatures" Value="Detecting available processor features" />
 </WixLocalization>

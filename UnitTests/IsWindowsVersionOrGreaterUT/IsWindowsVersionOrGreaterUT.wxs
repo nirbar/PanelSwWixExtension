@@ -24,6 +24,12 @@
     <Launch Condition="Installed Or TEST_11" Message="Surely we're no older than Windows 11.0"/>
 
     <CustomActionRef Id="TerminateSuccessfully_Immediate" />
+    <InstallUISequence>
+      <Custom Action="TerminateSuccessfully_Immediate" After="LaunchConditions"></Custom>
+    </InstallUISequence>
+    <InstallExecuteSequence>
+      <Custom Action="TerminateSuccessfully_Immediate" After="LaunchConditions"></Custom>
+    </InstallExecuteSequence>
 
     <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
