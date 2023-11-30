@@ -33,7 +33,7 @@ jobs:
         nuget restore
 
     - name: Build without analysis
-      run: msbuild dirs.proj -restore -p:NugetDir="" -p:FullVersion=${{ env.FULL_VERSION }} "-p:SolutionDir=${{ github.workspace }}\"
+      run: msbuild dirs.proj -restore
 
     - name: Clean PanelSwWixExtension (keep extranal code build)
       run: |
@@ -46,8 +46,7 @@ jobs:
         languages: ${{ matrix.language }}
 
     - name: Build & scan
-      run: |
-        msbuild dirs.proj -restore -p:NugetDir="" -p:FullVersion=${{ env.FULL_VERSION }} "-p:SolutionDir=${{ github.workspace }}\" -p:DisableNuget=true
+      run: msbuild dirs.proj -restore -p:DisableNuget=true
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2

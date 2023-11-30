@@ -23,7 +23,6 @@
     <WindowsKitSharedDir Condition="'$(WindowsKitSharedDir)'=='' And Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\')">C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\</WindowsKitSharedDir>
     <WindowsKitSharedDir Condition="'$(WindowsKitSharedDir)'=='' And Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\shared\')">C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\shared\</WindowsKitSharedDir>
     <DismApiDir Condition="'$(DismApiDir)'==''">C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\</DismApiDir>
-    <NugetDir Condition="'$(NugetDir)'==''">$(MSBuildThisFileDirectory)..\..\Tools\</NugetDir>
 
     <DefineConstants Condition="'$(MSBuildProjectExtension)' != '.csproj'">JetVersion=$(FullVersion);JetProductName=$(ProductName);JetManufacturer=$(Manufacturer);$(DefineConstants)</DefineConstants>
 
