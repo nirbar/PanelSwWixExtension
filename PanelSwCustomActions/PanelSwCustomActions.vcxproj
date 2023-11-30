@@ -85,6 +85,7 @@
     <ClCompile Include="ExecOnComponent.cpp" />
     <ClCompile Include="FileOperations.cpp" />
     <ClCompile Include="FileRegex.cpp" />
+    <ClCompile Include="ListProcessorFeatures.cpp" />
     <ClCompile Include="IsWindowsVersionOrGreater.cpp" />
     <ClCompile Include="Md5Hash.cpp" />
     <ClCompile Include="ExtractPayload.cpp" />

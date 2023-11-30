@@ -877,4 +877,55 @@
       <ProgressText Action="IsWindowsVersionOrGreater">!(loc.IsWindowsVersionOrGreater)"</ProgressText>
     </UI>
   </Fragment>
+
+  <Fragment>
+    <Property Id="PF_ARM_64BIT_LOADSTORE_ATOMIC" Value="0"/>
+    <Property Id="PF_ARM_DIVIDE_INSTRUCTION_AVAILABLE" Value="0"/>
+    <Property Id="PF_ARM_EXTERNAL_CACHE_AVAILABLE" Value="0"/>
+    <Property Id="PF_ARM_FMAC_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_ARM_VFP_32_REGISTERS_AVAILABLE" Value="0"/>
+    <Property Id="PF_3DNOW_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_CHANNELS_ENABLED" Value="0"/>
+    <Property Id="PF_COMPARE_EXCHANGE_DOUBLE" Value="0"/>
+    <Property Id="PF_COMPARE_EXCHANGE128" Value="0"/>
+    <Property Id="PF_COMPARE64_EXCHANGE128" Value="0"/>
+    <Property Id="PF_FASTFAIL_AVAILABLE" Value="0"/>
+    <Property Id="PF_FLOATING_POINT_EMULATED" Value="0"/>
+    <Property Id="PF_FLOATING_POINT_PRECISION_ERRATA" Value="0"/>
+    <Property Id="PF_MMX_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_NX_ENABLED" Value="0"/>
+    <Property Id="PF_PAE_ENABLED" Value="0"/>
+    <Property Id="PF_RDTSC_INSTRUCTION_AVAILABLE" Value="0"/>
+    <Property Id="PF_RDWRFSGSBASE_AVAILABLE" Value="0"/>
+    <Property Id="PF_SECOND_LEVEL_ADDRESS_TRANSLATION" Value="0"/>
+    <Property Id="PF_SSE3_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_SSSE3_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_SSE4_1_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_SSE4_2_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_AVX_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_AVX2_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_AVX512F_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_VIRT_FIRMWARE_ENABLED" Value="0"/>
+    <Property Id="PF_XMMI_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_XMMI64_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_XSAVE_ENABLED" Value="0"/>
+    <Property Id="PF_ARM_V8_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_ARM_V8_CRYPTO_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_ARM_V8_CRC32_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_ARM_V81_ATOMIC_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_ARM_V83_JSCVT_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_ARM_V83_LRCPC_INSTRUCTIONS_AVAILABLE" Value="0"/>
+
+    <CustomAction Id="ListProcessorFeatures" DllEntry="ListProcessorFeatures" Execute="firstSequence" BinaryKey="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="ListProcessorFeatures" Before="AppSearch" Overridable="yes" />
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="ListProcessorFeatures" Before="AppSearch" Overridable="yes" />
+    </InstallUISequence>
+    <UI>
+      <ProgressText Action="ListProcessorFeatures">!(loc.ListProcessorFeatures)"</ProgressText>
+    </UI>
+  </Fragment>
 </Wix>

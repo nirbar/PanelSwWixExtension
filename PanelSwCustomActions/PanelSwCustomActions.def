@@ -56,3 +56,4 @@ EXPORTS
 	FolderPaths
 	PromptFileDowngrades
 	IsWindowsVersionOrGreater
+	ListProcessorFeatures
