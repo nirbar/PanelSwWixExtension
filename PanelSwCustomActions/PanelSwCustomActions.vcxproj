@@ -29,7 +29,7 @@
   </ImportGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\CaCommon;$(MSBuildThisFileDirectory)..\poco\Zip\include;$(MSBuildThisFileDirectory)..\poco\Foundation\include;$(MSBuildThisFileDirectory)..\protobuf\src;$(IntDir)\..\Protobuf;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\CaCommon;$(MSBuildThisFileDirectory)..\poco\Zip\include;$(MSBuildThisFileDirectory)..\poco\JSON\include;$(MSBuildThisFileDirectory)..\poco\Foundation\include;$(MSBuildThisFileDirectory)..\protobuf\src;$(IntDir)\..\Protobuf;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;EXAMPLECADLL_EXPORTS;FullVersion="$(FullVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>

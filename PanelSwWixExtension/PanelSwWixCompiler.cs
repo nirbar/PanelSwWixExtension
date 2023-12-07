@@ -1,8 +1,10 @@
+using Newtonsoft.Json.Linq;
 using PanelSw.Wix.Extensions.Symbols;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 using WixToolset.Data;
@@ -102,6 +104,10 @@ namespace PanelSw.Wix.Extensions
 
                         case "SetPropertyFromPipe":
                             ParseSetPropertyFromPipe(section, element);
+                            break;
+
+                        case "ExecuteCommand":
+                            ParseExecuteCommand(section, element);
                             break;
 
                         default:
@@ -885,6 +891,139 @@ namespace PanelSw.Wix.Extensions
                     ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", id);
                 }
             }
+        }
+
+        private void ParseExecuteCommand(IntermediateSection section, XElement element)
+        {
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
+            string id = "exc" + Guid.NewGuid().ToString("N");
+            ErrorHandling errorHandling = ErrorHandling.fail;
+            bool isAsync = false, impersonate = true;
+            string command = null, workingFolder = "", condition = null, before = null, after = null;
+            CustomActionExecutionType actionExecutionType = CustomActionExecutionType.Deferred;
+
+            foreach (XAttribute attrib in element.Attributes())
+            {
+                if (IsMyAttribute(element, attrib))
+                {
+                    switch (attrib.Name.LocalName)
+                    {
+                        case "Id":
+                            id = ParseHelper.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                            break;
+                        case "ErrorHandling":
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out errorHandling);
+                            break;
+                        case "Wait":
+                            isAsync = (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.No);
+                            break;
+                        case "Impersonate":
+                            impersonate = (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes);
+                            break;
+                        case "Command":
+                            command = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "WorkingDirectory":
+                            workingFolder = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Before":
+                            before = ParseHelper.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                            break;
+                        case "After":
+                            after = ParseHelper.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Condition":
+                            condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Execute":
+                            if (TryParseEnumAttribute(sourceLineNumbers, element, attrib, out actionExecutionType))
+                            {
+                                switch (actionExecutionType)
+                                {
+                                    case CustomActionExecutionType.Deferred:
+                                    case CustomActionExecutionType.Rollback:
+                                    case CustomActionExecutionType.Commit:
+                                        break;
+                                    default:
+                                        Messaging.Write(ErrorMessages.IllegalAttributeValueWithLegalList(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, actionExecutionType.ToString(), $"{CustomActionExecutionType.Deferred}, {CustomActionExecutionType.Rollback}, {CustomActionExecutionType.Commit}"));
+                                        break;
+                                }
+                            }
+                            break;
+
+                        default:
+                            ParseHelper.UnexpectedAttribute(element, attrib);
+                            break;
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(command))
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Command"));
+            }
+            if (string.IsNullOrEmpty(after) == string.IsNullOrEmpty(before))
+            {
+                Messaging.Write(ErrorMessages.NeedSequenceBeforeOrAfter(sourceLineNumbers, element.Name.LocalName));
+            }
+
+            if (Messaging.EncounteredError)
+            {
+                return;
+            }
+
+            // Create 3 custom actions:
+            // 1. Set PSW_ExecuteCommand property
+            // 2. Call PanelSwCustomActions::ExecuteCommand
+            // 3. PanelSwCustomActions::CommonDeferred
+
+            // 1. Set PSW_ExecuteCommand property
+            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "Binary", "PanelSwCustomActions.dll");
+            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "Property", "PSW_ExecuteCommand");
+            JObject json = JObject.FromObject(new { Id = id, Command = command, WorkingFolder = workingFolder, Async = isAsync, ErrorHandling = (int)errorHandling });
+            string cad = json.ToString();
+            cad = Regex.Replace(cad, "([\\[\\]\\{\\}])", "[\\$1]");
+
+            CustomActionSymbol prepareCA = section.AddSymbol(new CustomActionSymbol(sourceLineNumbers, new Identifier(AccessModifier.Global, $"Prepare{id}")));
+            prepareCA.ExecutionType = CustomActionExecutionType.Immediate;
+            prepareCA.Source = "PSW_ExecuteCommand";
+            prepareCA.SourceType = CustomActionSourceType.Property;
+            prepareCA.Target = cad;
+            prepareCA.TargetType = CustomActionTargetType.TextData;
+
+            WixActionSymbol setCadSched = section.AddSymbol(new WixActionSymbol(sourceLineNumbers, new Identifier(AccessModifier.Global, $"InstallExecuteSequence/{prepareCA.Id.Id}")));
+            setCadSched.Action = prepareCA.Id.Id;
+            setCadSched.SequenceTable = SequenceTable.InstallExecuteSequence;
+            setCadSched.Condition = condition;
+            setCadSched.Before = $"Sched{id}";
+            setCadSched.After = null;
+            setCadSched.Overridable = false;
+
+            // 2. Call PanelSwCustomActions::ExecuteCommand
+            CustomActionSymbol schedCAD = section.AddSymbol(new CustomActionSymbol(sourceLineNumbers, new Identifier(AccessModifier.Global, setCadSched.Before)));
+            schedCAD.ExecutionType = CustomActionExecutionType.Immediate;
+            schedCAD.Source = "PanelSwCustomActions.dll";
+            schedCAD.SourceType = CustomActionSourceType.Binary;
+            schedCAD.Target = "ExecuteCommand";
+            schedCAD.TargetType = CustomActionTargetType.Dll;
+
+            WixActionSymbol schedCadSched = section.AddSymbol(new WixActionSymbol(sourceLineNumbers, new Identifier(AccessModifier.Global, $"InstallExecuteSequence/{schedCAD.Id.Id}")));
+            schedCadSched.Action = schedCAD.Id.Id;
+            schedCadSched.SequenceTable = SequenceTable.InstallExecuteSequence;
+            schedCadSched.Condition = condition;
+            schedCadSched.Before = before;
+            schedCadSched.After = after;
+            schedCadSched.Overridable = false;
+
+            // 3. PanelSwCustomActions::CommonDeferred
+            CustomActionSymbol deferredCA = section.AddSymbol(new CustomActionSymbol(sourceLineNumbers, new Identifier(AccessModifier.Global, id)));
+            deferredCA.ExecutionType = actionExecutionType;
+            deferredCA.Source = "PanelSwCustomActions.dll";
+            deferredCA.SourceType = CustomActionSourceType.Binary;
+            deferredCA.Target = "CommonDeferred";
+            deferredCA.TargetType = CustomActionTargetType.Dll;
+            deferredCA.Impersonate = impersonate;
+            deferredCA.Hidden = true;
         }
 
         private void ParseWebsiteConfigElement(IntermediateSection section, XElement element, string component)

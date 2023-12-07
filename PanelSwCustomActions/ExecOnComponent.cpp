@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "ExecOnComponent.h"
 #include "../CaCommon/RegistryKey.h"
+#include <Poco/JSON/Parser.h>
 #include "FileOperations.h"
 #include <regex>
 #include <shlwapi.h>
@@ -8,8 +9,10 @@
 using namespace std;
 using namespace com::panelsw::ca;
 using namespace google::protobuf;
+using namespace Poco::JSON;
 #pragma comment (lib, "shlwapi.lib")
 #pragma comment (lib, "Rpcrt4.lib")
+#pragma comment (lib, "PocoJsonmt.lib")
 
 enum Flags
 {
@@ -39,6 +42,88 @@ enum Flags
 };
 
 static HRESULT ScheduleExecution(LPCWSTR szId, const CWixString& szCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, CExecOnComponent::ExitCodeMap *pExitCodeMap, std::vector<ConsoleOuputRemap> *pConsoleOuput, CExecOnComponent::EnvironmentMap *pEnv, int nFlags, int errorHandling, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart, CExecOnComponent* pBeforeStopImp, CExecOnComponent* pAfterStopImp, CExecOnComponent* pBeforeStartImp, CExecOnComponent* pAfterStartImp);
+
+extern "C" UINT __stdcall ExecuteCommand(MSIHANDLE hInstall)
+{
+	HRESULT hr = S_OK;
+	UINT er = ERROR_SUCCESS;
+	CWixString szExecuteCommand;
+	LPSTR szExecuteCommandAnsi = nullptr;
+	Parser parser;
+	Poco::Dynamic::Var jsonVar;
+	Object::Ptr jsonObject;
+	string command, workingFolder, id;
+	bool isAsync;
+	CWixString szCommandFormat, szCommand;
+	CWixString szWorkingFolderFormat, szWorkingFolder;
+	CWixString szId;
+	ErrorHandling errorHandling = ErrorHandling::fail;
+	CExecOnComponent cad;
+
+	hr = WcaInitialize(hInstall, __FUNCTION__);
+	ExitOnFailure(hr, "Failed to initialize");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
+
+	hr = WcaGetProperty(L"PSW_ExecuteCommand", (LPWSTR*)szExecuteCommand);
+	ExitOnFailure(hr, "Failed to get property");
+
+	hr = szExecuteCommand.ToAnsiString(&szExecuteCommandAnsi);
+	ExitOnFailure(hr, "Failed to get ANSI property");
+
+	try 
+	{
+		jsonVar = parser.parse(szExecuteCommandAnsi);
+		jsonObject = jsonVar.extract<Object::Ptr>();
+
+		id = jsonObject->getValue<string>("Id");
+		command = jsonObject->getValue<string>("Command");
+		workingFolder = jsonObject->getValue<string>("WorkingFolder");
+		isAsync = jsonObject->getValue<bool>("Async");
+		errorHandling = (ErrorHandling)jsonObject->getValue<int>("ErrorHandling");
+	}
+	catch (JSONException ex)
+	{
+		hr = HRESULT_FROM_WIN32(ex.code());
+		if (SUCCEEDED(hr))
+		{
+			hr = E_FAIL;
+		}
+		ExitOnFailure(hr, "Failed to parse json. %hs. %hs", ex.message().c_str(), ex.displayText().c_str())
+	}
+	catch (exception ex)
+	{
+		hr = E_FAIL;
+		ExitOnFailure(hr, "Failed to parse json. %hs", ex.what());
+	}
+
+	hr = szId.Format(L"%hs", id.c_str());
+	ExitOnFailure(hr, "Failed to format ID");
+
+	// Format command
+	hr = szCommandFormat.Format(L"%hs", command.c_str());
+	ExitOnFailure(hr, "Failed to format command");
+	hr = szCommand.MsiFormat((LPCWSTR)szCommandFormat);
+	ExitOnFailure(hr, "Failed to msi-format command");
+
+	// Format working folder
+	if (workingFolder.size())
+	{
+		hr = szWorkingFolderFormat.Format(L"%hs", workingFolder.c_str());
+		ExitOnFailure(hr, "Failed to format working folder");
+		hr = szWorkingFolder.MsiFormat((LPCWSTR)szWorkingFolderFormat);
+		ExitOnFailure(hr, "Failed to msi-format working folder");
+	}
+
+	hr = cad.AddExec(szCommand, (LPCWSTR)szWorkingFolder, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, isAsync ? Flags::ASync : 0, errorHandling);
+	ExitOnFailure(hr, "Failed to create command");
+
+	hr = cad.DoDeferredAction((LPCWSTR)szId);
+	ExitOnFailure(hr, "Failed to schedule deferred custom action");
+
+LExit:
+	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
+	return WcaFinalize(er);
+}
 
 extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 {
@@ -497,8 +582,17 @@ HRESULT CExecOnComponent::AddExec(const CWixString &szCommand, LPCWSTR szWorking
 	}
 	pDetails->set_async(nFlags & Flags::ASync);
 	pDetails->set_errorhandling(errorHandling);
-	pDetails->mutable_exitcoderemap()->insert(pExitCodeMap->begin(), pExitCodeMap->end());
-	pDetails->mutable_environment()->insert(pEnv->begin(), pEnv->end());
+	
+	if (pExitCodeMap)
+	{
+		pDetails->mutable_exitcoderemap()->insert(pExitCodeMap->begin(), pExitCodeMap->end());
+	}
+	
+	if (pEnv)
+	{
+		pDetails->mutable_environment()->insert(pEnv->begin(), pEnv->end());
+	}
+	
 	if (szUser && *szUser)
 	{
 		pDetails->set_user(szUser, WSTR_BYTE_SIZE(szUser));
@@ -512,14 +606,17 @@ HRESULT CExecOnComponent::AddExec(const CWixString &szCommand, LPCWSTR szWorking
 		}
 	}
 
-	for (size_t i = 0; i < pConsoleOuput->size(); ++i)
+	if (pConsoleOuput)
 	{
-		ConsoleOuputRemap* pConsole = pDetails->add_consoleouputremap();
-		pConsole->mutable_regex()->set_plain(pConsoleOuput->at(i).regex().plain());
-		pConsole->mutable_regex()->set_obfuscated(pConsoleOuput->at(i).regex().obfuscated());
-		pConsole->set_prompttext(pConsoleOuput->at(i).prompttext());
-		pConsole->set_onmatch(pConsoleOuput->at(i).onmatch());
-		pConsole->set_errorhandling(pConsoleOuput->at(i).errorhandling());
+		for (size_t i = 0; i < pConsoleOuput->size(); ++i)
+		{
+			ConsoleOuputRemap* pConsole = pDetails->add_consoleouputremap();
+			pConsole->mutable_regex()->set_plain(pConsoleOuput->at(i).regex().plain());
+			pConsole->mutable_regex()->set_obfuscated(pConsoleOuput->at(i).regex().obfuscated());
+			pConsole->set_prompttext(pConsoleOuput->at(i).prompttext());
+			pConsole->set_onmatch(pConsoleOuput->at(i).onmatch());
+			pConsole->set_errorhandling(pConsoleOuput->at(i).errorhandling());
+		}
 	}
 
 	pAny = pCmd->mutable_details();

@@ -57,3 +57,4 @@ EXPORTS
 	PromptFileDowngrades
 	IsWindowsVersionOrGreater
 	ListProcessorFeatures
+	ExecuteCommand

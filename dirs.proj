@@ -1,29 +1,29 @@
 <Project Sdk="Microsoft.Build.Traversal">
   <PropertyGroup>
-    <TraversalGlobalProperties>SolutionDir=$(MSBuildThisFileDirectory);Configuration=Release;BuildProjectReferences=false</TraversalGlobalProperties>
+    <TraversalGlobalProperties>SolutionDir=$(MSBuildThisFileDirectory);BuildProjectReferences=false</TraversalGlobalProperties>
     <CustomBeforeTraversalProps>$(MSBuildThisFileDirectory)Directory.Build.props</CustomBeforeTraversalProps>
   </PropertyGroup>
   <ItemGroup>
     <!-- x86 -->
-    <ProjectReference Include="ProtoCaLib\ProtoCaLib.vcxproj" Properties="Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
-    <ProjectReference Include="CaCommon\CaCommon.vcxproj" Properties="Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
-    <ProjectReference Include="Dism\Dism.vcxproj" Properties="Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
-    <ProjectReference Include="PanelSwCustomActions\PanelSwCustomActions.vcxproj" Properties="Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
-    <ProjectReference Include="PswManagedCA\PswManagedCA.csproj" Properties="Platform=x86" Targets="Restore;Build" BuildInParallel="false"/>
-    <ProjectReference Include="DeferredExePackage\DeferredExePackage.vcxproj" Properties="Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="ProtoCaLib\ProtoCaLib.vcxproj" Properties="Configuration=Release;Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="CaCommon\CaCommon.vcxproj" Properties="Configuration=Release;Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="Dism\Dism.vcxproj" Properties="Configuration=Release;Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="PanelSwCustomActions\PanelSwCustomActions.vcxproj" Properties="Configuration=Release;Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="PswManagedCA\PswManagedCA.csproj" Properties="Configuration=Release;Platform=x86" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="DeferredExePackage\DeferredExePackage.vcxproj" Properties="Configuration=Release;Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
 
     <!-- x64 -->
-    <ProjectReference Include="Dism\Dism.vcxproj" Properties="Platform=x64" Targets="Restore;Build" BuildInParallel="false"/>
-    <ProjectReference Include="DeferredExePackage\DeferredExePackage.vcxproj" Properties="Platform=x64" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="Dism\Dism.vcxproj" Properties="Configuration=Release;Platform=x64" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="DeferredExePackage\DeferredExePackage.vcxproj" Properties="Configuration=Release;Platform=x64" Targets="Restore;Build" BuildInParallel="false"/>
     <ProjectReference Include="PswManagedCA\PswManagedCA.csproj" Properties="Platform=x64" Targets="Restore;Build" BuildInParallel="false"/>
 
     <!-- WiX -->
-    <ProjectReference Include="wixlib\PanelSwWixLib.wixproj" Properties="CaPlatform=Win32;Platform=x86" Targets="Restore;Build" BuildInParallel="false" />
-    <ProjectReference Include="PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.csproj" Properties="Platform=Any CPU" Targets="Restore;Build" BuildInParallel="false" />
-    <ProjectReference Include="PanelSwWixExtension\PanelSwWixExtension.csproj" Properties="Platform=Any CPU;NugetPrereleaseVersion=$(NugetPrereleaseVersion)" Targets="Restore;Build" BuildInParallel="false" />
+    <ProjectReference Include="wixlib\PanelSwWixLib.wixproj" Properties="Configuration=Release;CaPlatform=Win32;Platform=x86" Targets="Restore;Build" BuildInParallel="false" />
+    <ProjectReference Include="PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.csproj" Properties="Configuration=$(Configuration);Platform=Any CPU" Targets="Restore;Build" BuildInParallel="false" />
+    <ProjectReference Include="PanelSwWixExtension\PanelSwWixExtension.csproj" Properties="Configuration=$(Configuration);Platform=Any CPU;NugetPrereleaseVersion=$(NugetPrereleaseVersion)" Targets="Restore;Build" BuildInParallel="false" />
   </ItemGroup>
   <ItemGroup Condition="'$(UnitTest)' != ''">
-    <ProjectReference Include="UnitTests\$(UnitTest)\$(UnitTest).wixproj" Properties="Platform=x64" Targets="Restore;Build" BuildInParallel="false" />
+    <ProjectReference Include="UnitTests\$(UnitTest)\$(UnitTest).wixproj" Properties="Configuration=$(Configuration);Platform=x64" Targets="Restore;Build" BuildInParallel="false" />
   </ItemGroup>
   
   <ItemGroup>

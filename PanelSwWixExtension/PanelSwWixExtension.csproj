@@ -15,7 +15,8 @@
 
   <PropertyGroup Label="Nuspec">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <IsPackable>true</IsPackable>
+    <IsPackable Condition="'$(Configuration)' == 'Release'">true</IsPackable>
+    <IsPackable Condition="'$(Configuration)' == 'Debug'">false</IsPackable>
     <PackageId>PanelSwWixExtension4</PackageId>
     <PackageVersion>$(FullVersion)$(NugetPrereleaseVersion)</PackageVersion>
     <Title>Wix Extension</Title>
@@ -68,6 +69,7 @@
 
   <ItemGroup>
     <PackageReference Include="WixToolset.Extensibility"/>
+    <PackageReference Include="Newtonsoft.Json"/>
     <PackageReference Include="TidyBuild" PrivateAssets="all"/>
   </ItemGroup>
 

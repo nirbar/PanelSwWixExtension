@@ -336,9 +336,7 @@
     </InstallExecuteSequence>
 
     <UI>
-      <Error Id="27001" Message="!(loc.ExecOnFailure)" />
-      <Error Id="27011" Message="!(loc.ExecOnPromptAlways)" />
-      <Error Id="27006" Message="!(loc.ExecOnConsoleFailure)" />
+      <UIRef Id="ExecOnErros"/>
       <ProgressText Action="ExecOnComponent" Message="!(loc.ExecOnComponent)" />
       <ProgressText Action="ExecOnComponentRollback" Message="!(loc.ExecOnComponent)" />
       <ProgressText Action="ExecOnComponentCommit" Message="!(loc.ExecOnComponent)" />
@@ -358,6 +356,14 @@
       <ProgressText Action="ExecOnComponent_AfterStart_deferred" Template="!(loc.ExecOnComponentTemplate)" Message="!(loc.ExecOnComponent)" />
       <ProgressText Action="ExecOnComponent_Imp_AfterStart_rollback" Template="!(loc.ExecOnComponentTemplate)" Message="!(loc.ExecOnComponent)" />
       <ProgressText Action="ExecOnComponent_Imp_AfterStart_deferred" Template="!(loc.ExecOnComponentTemplate)" Message="!(loc.ExecOnComponent)" />
+    </UI>
+  </Fragment>
+
+  <Fragment>
+    <UI Id="ExecOnErros">
+      <Error Id="27001" Message="!(loc.ExecOnFailure)" />
+      <Error Id="27011" Message="!(loc.ExecOnPromptAlways)" />
+      <Error Id="27006" Message="!(loc.ExecOnConsoleFailure)" />
     </UI>
   </Fragment>
 
@@ -926,5 +932,10 @@
     <UI>
       <ProgressText Action="ListProcessorFeatures" Message="!(loc.ListProcessorFeatures)" />
     </UI>
+  </Fragment>
+
+  <Fragment>
+    <Property Id="PSW_ExecuteCommand" Hidden="yes" />
+    <UIRef Id="ExecOnErros"/>
   </Fragment>
 </Wix>

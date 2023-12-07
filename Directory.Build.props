@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <PropertyGroup Label="Build folders">
+    <Configuration Condition="'$(Configuration)' == ''">Release</Configuration>
     <BaseBuildFolder Condition="'$(BaseBuildFolder)'==''">$(MSBuildThisFileDirectory)build\</BaseBuildFolder>
     <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'==''">$(BaseBuildFolder)obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
     <MSBuildProjectExtensionsPath Condition="'$(MSBuildProjectExtensionsPath )'==''">$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath>

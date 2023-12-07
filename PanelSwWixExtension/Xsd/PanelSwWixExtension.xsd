@@ -61,6 +61,75 @@
     </xs:complexType>
   </xs:element>
 
+  <xs:element name="ExecuteCommand">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Package" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Module" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Fragment" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Defines a deferred custom action that executes a command]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Id" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Custom action ID</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Command" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Full command to execute. The executable name is expected to be enclosed in quotes</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="WorkingDirectory" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Working directory for the command. This field is formatted.]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Condition" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Condition.]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Before" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Action scheduling. Exactly one of 'Before' and 'After' must be specified]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="After" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Action scheduling. Exactly one of 'Before' and 'After' must be specified]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Execute" type="ExecuteCommandType" use="optional" default="deferred">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Execution type.]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="ErrorHandling" use="optional" type="ErrorHandlingType" default="fail">
+            <xs:annotation>
+              <xs:documentation><![CDATA[On error fail, ignore, or prompt user to abort, retry or ignore. Defaults to 'fail'. When there are ConsoleOutput child elements, and they result in prompt, then prompt result will be used instead of prompt in this attribute.]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Wait" type="wix:YesNoType" default="yes">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Whether or not to wait for the command to terminate. Defaults to 'yes'.]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Impersonate" type="wix:YesNoType" default="yes">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Whether or not to impersonate. Defaults to 'yes'.]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="ContainerTemplate">
     <xs:annotation>
       <xs:appinfo>
@@ -2198,6 +2267,17 @@ Call ShellExecuteEx with parameters
           </xs:documentation>
         </xs:annotation>
       </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="ExecuteCommandType">
+    <xs:annotation>
+      <xs:documentation>Error handling behavior.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:NMTOKEN">
+      <xs:enumeration value="deferred"></xs:enumeration>
+      <xs:enumeration value="commit"></xs:enumeration>
+      <xs:enumeration value="rollback"></xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
 
