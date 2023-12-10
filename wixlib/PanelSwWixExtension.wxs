@@ -626,17 +626,26 @@
     </UI>
   </Fragment>
 
-  <!-- ForceVersion -->
+  <!-- ForceVersion
+  Called first before CostInitialize to ensure component costing uses the forced version when (dis)allowing component installation
+  Called again before InstallFiles maked the decisions on which files to replace
+  The double sequencing is required because CostInitialize is done in client context
+  Then the context is switched to server, database tables are reverted to original values
+  Then InstallFiles loads the File table again
+  -->
   <Fragment>
     <CustomAction Id="ForceVersion" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="ForceVersion" Execute="firstSequence"/>
+    <CustomAction Id="ForceVersionAgain" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="ForceVersion" Execute="immediate"/>
     <InstallExecuteSequence>
       <Custom Action="ForceVersion" Before="CostInitialize" Overridable="yes"/>
+      <Custom Action="ForceVersionAgain" Before="InstallFiles" Overridable="yes"/>
     </InstallExecuteSequence>
     <InstallUISequence>
       <Custom Action="ForceVersion" Before="CostInitialize" Overridable="yes"/>
     </InstallUISequence>
     <UI>
       <ProgressText Action="ForceVersion">!(loc.ForceVersion)</ProgressText>
+      <ProgressText Action="ForceVersionAgain">!(loc.ForceVersion)</ProgressText>
     </UI>
   </Fragment>
 
@@ -927,5 +936,10 @@
     <UI>
       <ProgressText Action="ListProcessorFeatures">!(loc.ListProcessorFeatures)"</ProgressText>
     </UI>
+  </Fragment>
+
+  <Fragment>
+    <Property Id="PSW_ExecuteCommand" Hidden="yes" />
+    <UIRef Id="ExecOnErros"/>
   </Fragment>
 </Wix>
