@@ -40,7 +40,7 @@
   </PropertyGroup>
   <ItemDefinitionGroup>
     <ClCompile>
-      <AdditionalIncludeDirectories>$(WixSdkPath)\inc;$(WixSdkPath)\$(WixPlatformToolset)\inc;$(SolutionDir)\CaCommon;$(SolutionDir)\poco\Zip\include;$(SolutionDir)\poco\Foundation\include;..\protobuf\src;$(IntDir)\..\Protobuf;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(WixSdkPath)\inc;$(WixSdkPath)\$(WixPlatformToolset)\inc;$(SolutionDir)\CaCommon;$(SolutionDir)\poco\Zip\include;$(SolutionDir)\poco\Foundation\include;$(SolutionDir)\poco\JSON\include;..\protobuf\src;$(IntDir)\..\Protobuf;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;CUSTOMACTIONTEST_EXPORTS;FullVersion="$(FullVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <WarningLevel>Level3</WarningLevel>
     </ClCompile>

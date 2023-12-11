@@ -337,9 +337,6 @@
     </InstallExecuteSequence>
 
     <UI>
-      <Error Id="27001">!(loc.ExecOnFailure)</Error>
-      <Error Id="27006">!(loc.ExecOnConsoleFailure)</Error>
-      <Error Id="27011">!(loc.ExecOnPromptAlways)</Error>
       <ProgressText Action="ExecOnComponent">!(loc.ExecOnComponent)</ProgressText>
       <ProgressText Action="ExecOnComponentRollback">!(loc.ExecOnComponent)</ProgressText>
       <ProgressText Action="ExecOnComponentCommit">!(loc.ExecOnComponent)</ProgressText>
@@ -359,6 +356,14 @@
       <ProgressText Action="ExecOnComponent_AfterStart_deferred" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
       <ProgressText Action="ExecOnComponent_Imp_AfterStart_rollback" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
       <ProgressText Action="ExecOnComponent_Imp_AfterStart_deferred" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
+    </UI>
+  </Fragment>
+
+  <Fragment>
+    <UI Id="ExecOnErros">
+      <Error Id="27001">!(loc.ExecOnFailure)</Error>
+      <Error Id="27011">!(loc.ExecOnPromptAlways)</Error>
+      <Error Id="27006">!(loc.ExecOnConsoleFailure)</Error>
     </UI>
   </Fragment>
 

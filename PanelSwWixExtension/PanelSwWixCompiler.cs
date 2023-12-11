@@ -1,8 +1,10 @@
 using Microsoft.Tools.WindowsInstallerXml;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Schema;
 
@@ -102,6 +104,10 @@ namespace PanelSw.Wix.Extensions
 
                         case "SetPropertyFromPipe":
                             ParseSetPropertyFromPipe(element);
+                            break;
+
+                        case "ExecuteCommand":
+                            ParseExecuteCommand(element);
                             break;
 
                         default:
@@ -952,6 +958,148 @@ namespace PanelSw.Wix.Extensions
                     row[2] = "";
                 }
             }
+        }
+
+        private void ParseExecuteCommand(XmlElement element)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
+            string id = "exc" + Guid.NewGuid().ToString("N");
+            ErrorHandling promptOnError = ErrorHandling.fail;
+            bool isAsync = false, impersonate = true;
+            string command = null, workingFolder = "", condition = null, before = null, after = null;
+            Microsoft.Tools.WindowsInstallerXml.Serialize.CustomAction.ExecuteType executeType = Microsoft.Tools.WindowsInstallerXml.Serialize.CustomAction.ExecuteType.deferred;
+
+            foreach (XmlAttribute attrib in element.Attributes)
+            {
+                if ((0 != attrib.NamespaceURI.Length) && (attrib.NamespaceURI != schema.TargetNamespace))
+                {
+                    continue;
+                }
+                switch (attrib.LocalName)
+                {
+                    case "Id":
+                        id = Core.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                        break;
+                    case "ErrorHandling":
+                        {
+                            string a = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            try
+                            {
+                                promptOnError = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
+                            }
+                            catch
+                            {
+                                Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            }
+                        }
+                        break;
+                    case "Wait":
+                        isAsync = (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.No);
+                        break;
+                    case "Impersonate":
+                        impersonate = (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes);
+                        break;
+                    case "Command":
+                        command = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+                    case "WorkingDirectory":
+                        workingFolder = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+                    case "Before":
+                        before = Core.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                        break;
+                    case "After":
+                        after = Core.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                        break;
+                    case "Condition":
+                        condition = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+                    case "Execute":
+                        string val = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        if (!Enum.TryParse(val, out executeType))
+                        {
+                            Core.OnMessage(WixErrors.IllegalAttributeValueWithIllegalList(sourceLineNumbers, element.LocalName, attrib.LocalName, val, "deferred, commit, rollback"));
+                            break;
+                        }
+                        switch (executeType)
+                        {
+                            case Microsoft.Tools.WindowsInstallerXml.Serialize.CustomAction.ExecuteType.deferred:
+                            case Microsoft.Tools.WindowsInstallerXml.Serialize.CustomAction.ExecuteType.rollback:
+                            case Microsoft.Tools.WindowsInstallerXml.Serialize.CustomAction.ExecuteType.commit:
+                                break;
+                            default:
+                                Core.OnMessage(WixErrors.IllegalAttributeValueWithIllegalList(sourceLineNumbers, element.LocalName, attrib.LocalName, val, "deferred, commit, rollback"));
+                                break;
+                        }
+                        break;
+
+                    default:
+                        Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                        break;
+                }
+            }
+
+            if (string.IsNullOrEmpty(command))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "Command"));
+            }
+            if (string.IsNullOrEmpty(after) == string.IsNullOrEmpty(before))
+            {
+                Core.OnMessage(WixErrors.NeedSequenceBeforeOrAfter(sourceLineNumbers, element.LocalName));
+            }
+
+            if (Core.EncounteredError)
+            {
+                return;
+            }
+
+            // Create 3 custom actions:
+            // 1. Set PSW_ExecuteCommand property
+            // 2. Call PanelSwCustomActions::ExecuteCommand
+            // 3. PanelSwCustomActions::CommonDeferred
+
+            // 1. Set PSW_ExecuteCommand property
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "Binary", "PanelSwCustomActions.dll");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "Property", "PSW_ExecuteCommand");
+            JObject json = JObject.FromObject(new { Id = id, Command = command, WorkingFolder = workingFolder, Async = isAsync, ErrorHandling = (int)promptOnError });
+            string cad = json.ToString();
+            cad = Regex.Replace(cad, @"([\[\]\{\}])", @"[\$1]");
+
+            Row prepareCA = Core.CreateRow(sourceLineNumbers, "CustomAction");
+            prepareCA[0] = $"Prepare{id}";
+            prepareCA[1] = 0x00000030 | 0x00000003; // Set formatted property
+            prepareCA[2] = "PSW_ExecuteCommand";
+            prepareCA[3] = cad;
+
+            Row setCadSched = Core.CreateRow(sourceLineNumbers, "WixAction");
+            setCadSched[0] = "InstallExecuteSequence";
+            setCadSched[1] = $"Prepare{id}";
+            setCadSched[2] = condition;
+            setCadSched[4] = $"Sched{id}"; // beforeAction
+            setCadSched[5] = null; // afterAction
+            setCadSched[6] = 0; // not overridable
+
+            // 2. Call PanelSwCustomActions::ExecuteCommand
+            Row schedCAD = Core.CreateRow(sourceLineNumbers, "CustomAction");
+            schedCAD[0] = $"Sched{id}";
+            schedCAD[1] = 0x00000001 | 0x00000000; // MsidbCustomActionTypeDll | MsidbCustomActionTypeBinaryData
+            schedCAD[2] = "PanelSwCustomActions.dll";
+            schedCAD[3] = "ExecuteCommand";
+
+            Row schedCadSched = Core.CreateRow(sourceLineNumbers, "WixAction");
+            schedCadSched[0] = "InstallExecuteSequence";
+            schedCadSched[1] = $"Sched{id}";
+            schedCadSched[2] = condition; // condition
+            schedCadSched[4] = before; // beforeAction
+            schedCadSched[5] = after; // afterAction
+            schedCadSched[6] = 0; // not overridable
+
+            // 3. PanelSwCustomActions::CommonDeferred
+            Row deferredCA = Core.CreateRow(sourceLineNumbers, "CustomAction");
+            deferredCA[0] = id;
+            deferredCA[1] = 0x00000001 | 0x00000000 | 0x00002000 | 0x00000400 | (impersonate ? 0 : 0x00000800) | (int)executeType; // MsidbCustomActionTypeDll | MsidbCustomActionTypeBinaryData | MsidbCustomActionTypeHideTarget | MsidbCustomActionTypeInScript | MsidbCustomActionTypeNoImpersonate(?) | deferred/rollback/commit
+            deferredCA[2] = "PanelSwCustomActions.dll";
+            deferredCA[3] = "CommonDeferred";
         }
 
         private void ParseWebsiteConfigElement(XmlElement element, string component)

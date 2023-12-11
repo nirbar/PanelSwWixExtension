@@ -33,6 +33,7 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
   - *Payload* Support extracting files from Binary table temporarilty during MSI execution
   - *PromptFileDowngrades* Log each file that will be downgraded during the (re)install, and prompt the total downgrade count if larger than 0.
 - Deferred Actions:
+  - *ExecuteCommand*: Launch a deferred command
   - *RestartLocalResources*: Register processes with the Restart Manager if they reside in the specified folder
   - *XslTransform*: Apply a XSL transform on an installed XML file
   - *WebsiteConfig*: currently, can only stop a website
