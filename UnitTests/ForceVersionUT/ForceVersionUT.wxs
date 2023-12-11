@@ -1,23 +1,15 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension">
-  <Package Name="AlwaysOverwriteFileUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}" InstallerVersion="200" ProductCode="{B7318C42-2252-44B9-A1E5-47CCD5163D9D}">
-    
-
-    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
-    
-
+  <Package Name="AlwaysOverwriteFileUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}" InstallerVersion="200">
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." AllowSameVersionUpgrades="yes" Schedule="afterInstallExecute"/>
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
-  </Package>
 
-  <Fragment><Property Id="MSIFASTINSTALL" Value="1"></Property>
-  
-      <StandardDirectory Id="ProgramFiles6432Folder">
-        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
-      </StandardDirectory>
-    </Fragment>
+    <Property Id="MSIFASTINSTALL" Value="1"/>
 
-  <Fragment>
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+    </StandardDirectory>
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component>
         <File Source="$(sys.SOURCEFILEPATH)">
@@ -25,10 +17,10 @@
         </File>
       </Component>
       <Component>
-        <File Id="PanelSwWixExtension.dll" Source="$(sys.SOURCEFILEDIR)..\..\build\AnyCPU\bin\$(var.Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll">
+        <File Id="PanelSwWixExtension.dll" Source="$(sys.SOURCEFILEDIR)..\..\build\Any CPU\bin\$(var.Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll">
           <PanelSW:ForceVersion />
         </File>
       </Component>
     </ComponentGroup>
-  </Fragment>
+  </Package>
 </Wix>

@@ -640,17 +640,18 @@
   -->
   <Fragment>
     <CustomAction Id="ForceVersion" SuppressModularization="yes" DllEntry="ForceVersion" Execute="firstSequence" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="ForceVersion1" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="ForceVersion" Execute="immediate"/>
+    <CustomAction Id="ForceVersionAgain" SuppressModularization="yes" DllEntry="ForceVersion" Execute="immediate" BinaryRef="PanelSwCustomActions.dll"/>
     <InstallExecuteSequence>
-      <Custom Action="ForceVersion1" Before="CostInitialize" Overridable="yes" />
-      <Custom Action="ForceVersion" Before="InstallFiles" Overridable="yes"/>
+      <Custom Action="ForceVersion" Before="CostInitialize" Overridable="yes" />
+      <Custom Action="ForceVersionAgain" Before="InstallFiles" Overridable="yes"/>
     </InstallExecuteSequence>
     <InstallUISequence>
       <Custom Action="ForceVersion" Before="CostInitialize" Overridable="yes"/>
     </InstallUISequence>
     <UI>
       <ProgressText Action="ForceVersion" Message="!(loc.ForceVersion)" />
-      <ProgressText Action="ForceVersion1" Message="!(loc.ForceVersion)" />    </UI>
+      <ProgressText Action="ForceVersionAgain" Message="!(loc.ForceVersion)" />
+    </UI>
   </Fragment>
 
   <!-- SetPropertyFromPipe -->
