@@ -947,4 +947,12 @@
     <Property Id="PSW_ExecuteCommand" Hidden="yes" />
     <UIRef Id="ExecOnErros"/>
   </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="PSW_DuplicateFile"/>
+    <InstallExecuteSequence>
+      <RemoveDuplicateFiles/>
+      <DuplicateFiles/>
+    </InstallExecuteSequence>
+  </Fragment>
 </Wix>

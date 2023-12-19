@@ -54,6 +54,10 @@ namespace PanelSw.Wix.Extensions
                             ParseCustomUninstallKeyElement(section, element);
                             break;
 
+                        case "DuplicateFolder":
+                            ParseDuplicateFolderElement(section, element);
+                            break;
+
                         case "Payload":
                             ParsePayload(section, element, null, null);
                             break;
@@ -751,8 +755,6 @@ namespace PanelSw.Wix.Extensions
 
         public override void ParseAttribute(Intermediate intermediate, IntermediateSection section, XElement parentElement, XAttribute attribute, IDictionary<string, string> context)
         {
-            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(parentElement);
-
             switch (parentElement.Name.LocalName)
             {
                 case "CustomAction":
@@ -891,6 +893,63 @@ namespace PanelSw.Wix.Extensions
                     ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", id);
                 }
             }
+        }
+
+        private void ParseDuplicateFolderElement(IntermediateSection section, XElement element)
+        {
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
+            string sourceDir = null;
+            string destDir = null;
+
+            foreach (XAttribute attrib in element.Attributes())
+            {
+                if (IsMyAttribute(element, attrib))
+                {
+                    switch (attrib.Name.LocalName)
+                    {
+                        case "SourceDir":
+                            sourceDir = ParseHelper.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                            break;
+                        case "DestinationDir":
+                            destDir = ParseHelper.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                            break;
+                        default:
+                            ParseHelper.UnexpectedAttribute(element, attrib);
+                            break;
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(sourceDir))
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "SourceDir"));
+            }
+            if (string.IsNullOrEmpty(destDir))
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "DestinationDir"));
+            }
+
+            if (Messaging.EncounteredError)
+            {
+                return;
+            }
+
+            // Dummy ComponentGroup to reference our PSW_DuplicateFile ComponentGroup to reference the InstallExecuteSequence with DuplicateFiles and RemoveDuplicateFiles actions.
+            WixGroupSymbol wixGroupSymbol = section.AddSymbol(new WixGroupSymbol(sourceLineNumbers, new Identifier(AccessModifier.Global, $"cg{Guid.NewGuid().ToString("N")}"))
+            {
+                ParentType = ComplexReferenceParentType.Unknown,
+                ParentId = section.CompilationId,
+                ChildType = ComplexReferenceChildType.ComponentGroup,
+                ChildId = section.CompilationId,
+            });
+            ParseHelper.CreateComplexReference(section, sourceLineNumbers, ComplexReferenceParentType.ComponentGroup, wixGroupSymbol.Id.Id, "WiX", ComplexReferenceChildType.ComponentGroup, "PSW_DuplicateFile", false);
+
+            ParseHelper.EnsureTable(section, sourceLineNumbers, "CreateFolder");
+            ParseHelper.EnsureTable(section, sourceLineNumbers, "DuplicateFile");
+
+            PSW_DuplicateFolder row = section.AddSymbol(new PSW_DuplicateFolder(sourceLineNumbers));
+            row.SourceDir_ = sourceDir;
+            row.DestinationDir_ = destDir;
         }
 
         private void ParseExecuteCommand(IntermediateSection section, XElement element)

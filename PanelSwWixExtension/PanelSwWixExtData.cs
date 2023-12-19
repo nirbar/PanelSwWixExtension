@@ -46,6 +46,9 @@ namespace PanelSw.Wix.Extensions
                 case "PSW_Dism":
                     symbolDefinition = PSW_Dism.SymbolDefinition;
                     break;
+                case nameof(PSW_DuplicateFolder):
+                    symbolDefinition = PSW_DuplicateFolder.SymbolDefinition;
+                    break;
                 case "PSW_EvaluateExpression":
                     symbolDefinition = PSW_EvaluateExpression.SymbolDefinition;
                     break;

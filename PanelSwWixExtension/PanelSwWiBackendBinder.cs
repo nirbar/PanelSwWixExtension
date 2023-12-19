@@ -479,6 +479,7 @@ namespace PanelSw.Wix.Extensions
                         new TableDefinition(nameof(PSW_DeletePath), PSW_DeletePath.SymbolDefinition, PSW_DeletePath.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_DiskSpace), PSW_DiskSpace.SymbolDefinition, PSW_DiskSpace.ColumnDefinitions, symbolIdIsPrimaryKey: false),
                         new TableDefinition(nameof(PSW_Dism), PSW_Dism.SymbolDefinition, PSW_Dism.ColumnDefinitions, symbolIdIsPrimaryKey: true),
+                        new TableDefinition(nameof(PSW_DuplicateFolder), PSW_DuplicateFolder.SymbolDefinition, PSW_DuplicateFolder.ColumnDefinitions, symbolIdIsPrimaryKey: true, unreal: true),
                         new TableDefinition(nameof(PSW_EvaluateExpression), PSW_EvaluateExpression.SymbolDefinition, PSW_EvaluateExpression.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_ExecOn_ConsoleOutput), PSW_ExecOn_ConsoleOutput.SymbolDefinition, PSW_ExecOn_ConsoleOutput.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_ExecOnComponent), PSW_ExecOnComponent.SymbolDefinition, PSW_ExecOnComponent.ColumnDefinitions, symbolIdIsPrimaryKey: true),
@@ -543,11 +544,114 @@ namespace PanelSw.Wix.Extensions
         public override void SymbolsFinalized(IntermediateSection section)
         {
             base.SymbolsFinalized(section);
-            GetSplitFiles(section);
-            ResolveTaskScheduler(section);
+            GetSplitFiles();
+            ResolveTaskScheduler();
+            DuplicateFolder(section);
         }
 
-        private void GetSplitFiles(IntermediateSection section)
+        private void DuplicateFolder(IntermediateSection section)
+        {
+            List<PSW_DuplicateFolder> duplicateFolders = new List<PSW_DuplicateFolder>();
+            List<DuplicateFileSymbol> duplicateFiles = new List<DuplicateFileSymbol>();
+            List<CreateFolderSymbol> createFolders = new List<CreateFolderSymbol>();
+            List<ComponentSymbol> components = new List<ComponentSymbol>();
+            List<FileSymbol> files = new List<FileSymbol>();
+            List<DirectorySymbol> directories = new List<DirectorySymbol>();
+            foreach (IntermediateSection intermediate in base.Context.IntermediateRepresentation.Sections)
+            {
+                foreach (IntermediateSymbol symbol in intermediate.Symbols)
+                {
+                    if (symbol is PSW_DuplicateFolder dup)
+                    {
+                        duplicateFolders.Add(dup);
+                    }
+                    if (symbol is DuplicateFileSymbol dupf)
+                    {
+                        duplicateFiles.Add(dupf);
+                    }
+                    else if (symbol is CreateFolderSymbol cf)
+                    {
+                        createFolders.Add(cf);
+                    }
+                    else if (symbol is ComponentSymbol c)
+                    {
+                        components.Add(c);
+                    }
+                    else if (symbol is FileSymbol f)
+                    {
+                        files.Add(f);
+                    }
+                    else if (symbol is DirectorySymbol d)
+                    {
+                        directories.Add(d);
+                    }
+                }
+            }
+
+            // Collect temporary file paths to later delete
+            foreach (PSW_DuplicateFolder dup in duplicateFolders)
+            {
+                DuplicateFolder(section, duplicateFiles, components, files, directories, createFolders, dup.SourceLineNumbers, dup.Id.Id, dup.SourceDir_, dup.DestinationDir_);
+            }
+        }
+
+        private void DuplicateFolder(IntermediateSection section, List<DuplicateFileSymbol> duplicateFiles, List<ComponentSymbol> components, List<FileSymbol> files, List<DirectorySymbol> directories, List<CreateFolderSymbol> createFolders, SourceLineNumber sourceLineNumber, string dupId, string sourceDir, string dstDir)
+        {
+            // Duplicate files in source dir
+            IEnumerable<ComponentSymbol> dirComponents = components.Where(c => c.DirectoryRef.Equals(sourceDir));
+            foreach (ComponentSymbol component in dirComponents)
+            {
+                IEnumerable<FileSymbol> compFiles = files.Where(f => f.ComponentRef.Equals(component.Id.Id));
+                foreach (FileSymbol file in compFiles)
+                {
+                    CreateFolderSymbol createFolder = createFolders.FirstOrDefault(s => s is CreateFolderSymbol cf && dstDir.Equals(cf.DirectoryRef) && cf.ComponentRef.Equals(component.Id.Id)) as CreateFolderSymbol;
+                    if (createFolder == null)
+                    {
+                        createFolder = section.AddSymbol(new CreateFolderSymbol(sourceLineNumber, new Identifier(AccessModifier.Global, this.BackendHelper.GenerateIdentifier("cf", dupId, file.Id.Id)))
+                        {
+                            ComponentRef = component.Id.Id,
+                            DirectoryRef = dstDir
+                        });
+                        createFolders.Add(createFolder);
+                    }
+
+                    DuplicateFileSymbol duplicateFileSymbol = duplicateFiles.FirstOrDefault(d => d.ComponentRef.Equals(component.Id.Id) && file.Id.Id.Equals(d.FileRef) && dstDir.Equals(d.DestinationFolder));
+                    if (duplicateFileSymbol == null)
+                    {
+                        duplicateFileSymbol = section.AddSymbol(new DuplicateFileSymbol(sourceLineNumber, new Identifier(AccessModifier.Global, this.BackendHelper.GenerateIdentifier("dup", dupId, file.Id.Id)))
+                        {
+                            DestinationFolder = dstDir,
+                            FileRef = file.Id.Id,
+                            ComponentRef = component.Id.Id,
+                        });
+                        duplicateFiles.Add(duplicateFileSymbol);
+                    }
+                }
+            }
+
+            // Duplicate sub folders
+            for (int i = 0; i < directories.Count; ++i)
+            {
+                DirectorySymbol dir = directories[i];
+                if (sourceDir.Equals(dir.ParentDirectoryRef))
+                {
+                    DirectorySymbol destChildDir = directories.FirstOrDefault(d => d.Name.Equals(dir.Name) && dstDir.Equals(d.ParentDirectoryRef));
+                    if (destChildDir == null)
+                    {
+                        destChildDir = section.AddSymbol(new DirectorySymbol(sourceLineNumber, new Identifier(AccessModifier.Global, this.BackendHelper.GenerateIdentifier("dup", dupId, dir.Id.Id)))
+                        {
+                            Name = dir.Name,
+                            ParentDirectoryRef = dstDir
+                        });
+                        directories.Add(destChildDir);
+                    }
+
+                    DuplicateFolder(section, duplicateFiles, components, files, directories, createFolders, sourceLineNumber, dupId, dir.Id.Id, destChildDir.Id.Id);
+                }
+            }
+        }
+
+        private void GetSplitFiles()
         {
             // This section is empty, need to iterate the other sections
             List<PSW_ConcatFiles> concatFiles = new List<PSW_ConcatFiles>();
@@ -585,7 +689,7 @@ namespace PanelSw.Wix.Extensions
 
         #endregion
 
-        private void ResolveTaskScheduler(IntermediateSection section)
+        private void ResolveTaskScheduler()
         {
             List<PSW_TaskScheduler> tasks = new List<PSW_TaskScheduler>();
             foreach (IntermediateSection intermediate in base.Context.IntermediateRepresentation.Sections)
