@@ -421,4 +421,9 @@
     <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
     <columnDefinition name="Size" type="number" length="4" minValue="0" maxValue="2147483647" />
   </tableDefinition>
+
+  <tableDefinition name="PSW_DuplicateFolder" unreal="yes">
+    <columnDefinition name="SourceDir_" type="string" length="72" modularize="column" category="identifier" keyTable="Directory" keyColumn="1" primaryKey="yes"/>
+    <columnDefinition name="DestinationDir_" type="string" length="72" modularize="column" category="identifier" keyTable="Directory" keyColumn="1" primaryKey="yes"/>
+  </tableDefinition>
 </tableDefinitions>

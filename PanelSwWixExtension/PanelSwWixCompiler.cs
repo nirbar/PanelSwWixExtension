@@ -54,6 +54,10 @@ namespace PanelSw.Wix.Extensions
                             ParseCustomUninstallKeyElement(element);
                             break;
 
+                        case "DuplicateFolder":
+                            ParseDuplicateFolderElement(element);
+                            break;
+
                         case "Payload":
                             ParsePayload(element, null, null);
                             break;
@@ -334,6 +338,61 @@ namespace PanelSw.Wix.Extensions
                     Core.UnexpectedElement(parentElement, element);
                     break;
             }
+        }
+
+        private void ParseDuplicateFolderElement(XmlElement element)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
+            string sourceDir = null;
+            string destDir = null;
+
+            foreach (XmlAttribute attrib in element.Attributes)
+            {
+                if ((0 != attrib.NamespaceURI.Length) && (attrib.NamespaceURI != schema.TargetNamespace))
+                {
+                    continue;
+                }
+
+                switch (attrib.LocalName)
+                {
+                    case "SourceDir":
+                        sourceDir = Core.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                        break;
+                    case "DestinationDir":
+                        destDir = Core.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                        break;
+                    default:
+                        Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                        break;
+                }
+            }
+
+            if (string.IsNullOrEmpty(sourceDir))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "SourceDir"));
+            }
+            if (string.IsNullOrEmpty(destDir))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "DestinationDir"));
+            }
+
+            if (Core.EncounteredError)
+            {
+                return;
+            }
+
+            Row myComponentGroupRow = Core.CreateRow(sourceLineNumbers, "WixComponentGroup");
+            myComponentGroupRow[0] = $"cg{Guid.NewGuid().ToString("N")}";
+
+            Core.CreateWixGroupRow(sourceLineNumbers, ComplexReferenceParentType.Unknown, null, ComplexReferenceChildType.ComponentGroup, myComponentGroupRow[0].ToString());
+            Core.CreateComplexReference(sourceLineNumbers, ComplexReferenceParentType.ComponentGroup, myComponentGroupRow[0].ToString(), "WiX", ComplexReferenceChildType.ComponentGroup, "PSW_DuplicateFile", false);
+
+            Core.EnsureTable(sourceLineNumbers, "CreateFolder");
+            Core.EnsureTable(sourceLineNumbers, "DuplicateFile");
+
+            Row dupRow = Core.CreateRow(sourceLineNumbers, "PSW_DuplicateFolder");
+            dupRow[0] = sourceDir;
+            dupRow[1] = destDir;
         }
 
         private void ParsePayload(XmlElement element, object p1, object p2)

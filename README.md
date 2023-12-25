@@ -10,6 +10,7 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
 ## PanelSwWixExtension WiX Elements
 
 - Immediate Actions:
+  - *DuplicateFolder*: Duplicate an entire folder hierarchy. Processed at build time by adding entries to Directory, CreateFolder and DuplicateFile tables.
   - *IsWindowsVersionOrGreater*: Test whether Kernel32.dll's version is at least the given version. If yes, set the property to 1.
   - *Md5Hash*: Computes MD5 hash.
   - *WmiSearch*: Execute a WMI query.
@@ -206,5 +207,5 @@ After building a unit test project, you'll need to shutdown Visual Studio before
 This is due to the unfortunate habit of Visual Studio to hold the extension file in use.
 You may find it convenient to build unit test projects from a command prompt to workaround this limitation
 ~~~~~~~~~~~~
-MSBuild UnitTests\PromptFileDowngradesUT\PromptFileDowngradesUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
+MSBuild UnitTests\DuplicateFolderUT\DuplicateFolderUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
 ~~~~~~~~~~~~

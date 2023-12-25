@@ -1,4 +1,4 @@
-﻿using Microsoft.Tools.WindowsInstallerXml;
+using Microsoft.Tools.WindowsInstallerXml;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -137,12 +137,109 @@ namespace PanelSw.Wix.Extensions
             return null;
         }
 
+        private IEnumerable<Row> Select(Table table, Func<Row, bool> predicate)
+        {
+            List<Row> results = new List<Row>();
+            foreach (Row r in table.Rows)
+            {
+                if (predicate(r))
+                {
+                    results.Add(r);
+                }
+            }
+            return results;
+        }
+
+        private Row FindOne(Table table, Func<Row, bool> predicate)
+        {
+            foreach (Row r in table.Rows)
+            {
+                if (predicate(r))
+                {
+                    return r;
+                }
+            }
+            return null;
+        }
 
         public override void DatabaseAfterResolvedFields(Output output)
         {
             base.DatabaseAfterResolvedFields(output);
 
             ResolveTaskScheduler(output);
+            DuplicateFolder(output);
+        }
+
+        private void DuplicateFolder(Output output)
+        {
+            Table duplicateFolders = output.Tables["PSW_DuplicateFolder"];
+            if ((duplicateFolders == null) || (duplicateFolders.Rows.Count <= 0))
+            {
+                return;
+            }
+
+            Table duplicateFiles = output.Tables["DuplicateFile"];
+            Table createFolders = output.Tables["CreateFolder"];
+            Table components = output.Tables["Component"];
+            Table files = output.Tables["File"];
+            Table directories = output.Tables["Directory"];
+
+            // Collect temporary file paths to later delete
+            foreach (Row dup in duplicateFolders.Rows)
+            {
+                DuplicateFolder(duplicateFiles, components, files, directories, createFolders, dup.SourceLineNumbers, dup[0].ToString(), dup[1].ToString());
+            }
+        }
+
+        private void DuplicateFolder(Table duplicateFiles, Table components, Table files, Table directories, Table createFolders, SourceLineNumberCollection sourceLineNumber, string sourceDir, string dstDir)
+        {
+            // Duplicate files in source dir
+            IEnumerable<Row> dirComponents = Select( components, c => c[2].Equals(sourceDir));
+            foreach (Row component in dirComponents)
+            {
+                IEnumerable<Row> compFiles =  Select(files, f => f[1].Equals(component[0]));
+                foreach (Row file in compFiles)
+                {
+                    Row createFolder = Find(createFolders, dstDir, component[0]);
+                    if (createFolder == null)
+                    {
+                        createFolder = new Row(sourceLineNumber, createFolders);
+                        createFolder[0] = dstDir;
+                        createFolder[1] = component[0];
+                        createFolders.Rows.Add(createFolder);
+                    }
+
+                    Row duplicateFile = FindOne(duplicateFiles,  d => d[1].Equals(component[0]) && file[0].Equals(d[2]) && dstDir.Equals(d[4]));
+                    if (duplicateFile == null)
+                    {
+                        duplicateFile = new Row(sourceLineNumber, duplicateFiles);
+                        duplicateFile[0] = Core.GenerateIdentifier("dpf", component[0].ToString(), file[0].ToString(), dstDir);
+                        duplicateFile[1] = component[0];
+                        duplicateFile[2] = file[0];
+                        duplicateFile[4] = dstDir;
+
+                        duplicateFiles.Rows.Add(duplicateFile);
+                    }
+                }
+            }
+
+            // Duplicate sub folders
+            IEnumerable<Row> subdirs = Select(directories, d => sourceDir.Equals(d[1]));
+            foreach (Row dir in subdirs)
+            {
+                Row destChildDir = FindOne(directories, d => d[2].Equals(dir[2]) && dstDir.Equals(d[1]));
+                if (destChildDir == null)
+                {
+                    destChildDir = new Row(sourceLineNumber, directories);
+                    destChildDir[0] = Core.GenerateIdentifier("dpd", dstDir, dir[0].ToString());
+                    destChildDir[1] = dstDir;
+                    destChildDir[2] = dir[2];
+                    
+                    directories.Rows.Add(destChildDir);
+                }
+
+                DuplicateFolder(duplicateFiles, components, files, directories, createFolders, sourceLineNumber, dir[0].ToString(), destChildDir[0].ToString());
+            }
         }
 
         private void ResolveTaskScheduler(Output output)

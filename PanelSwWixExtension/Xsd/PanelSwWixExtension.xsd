@@ -32,6 +32,35 @@
     </xs:annotation>
   </xs:attribute>
 
+  <xs:element name="DuplicateFolder">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Product" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Module" />
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Fragment" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Adds an entire folder hierarchy to DuplicateFile table. Adds corresponding entries to Directory and CreateFolder tables. Only files in the File table are duplicated]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="SourceDir" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Directory Id of the source folder</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="DestinationDir" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Directory Id of the target folder</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="Payload">
     <xs:annotation>
       <xs:appinfo>
