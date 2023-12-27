@@ -426,4 +426,8 @@
     <columnDefinition name="SourceDir_" type="string" length="72" modularize="column" category="identifier" keyTable="Directory" keyColumn="1" primaryKey="yes"/>
     <columnDefinition name="DestinationDir_" type="string" length="72" modularize="column" category="identifier" keyTable="Directory" keyColumn="1" primaryKey="yes"/>
   </tableDefinition>
+
+  <tableDefinition name="PSW_ExecuteCommand" unreal="yes">
+    <columnDefinition name="Id" type="string" length="72" modularize="column" category="identifier" keyTable="Directory" keyColumn="1" primaryKey="yes"/>
+  </tableDefinition>
 </tableDefinitions>

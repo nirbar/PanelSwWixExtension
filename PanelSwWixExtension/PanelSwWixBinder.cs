@@ -168,6 +168,41 @@ namespace PanelSw.Wix.Extensions
 
             ResolveTaskScheduler(output);
             DuplicateFolder(output);
+            CheckExecuteCommandSequences(output);
+        }
+
+        private void CheckExecuteCommandSequences(Output output)
+        {
+            Table executeCommands = output.Tables["PSW_ExecuteCommand"];
+            if ((executeCommands == null) || (executeCommands.Rows.Count <= 0))
+            {
+                return;
+            }
+
+            Table wixActions = output.Tables["WixAction"];
+            foreach (Row executeCommand in executeCommands.Rows)
+            {
+                string id = executeCommand[0].ToString();
+                string prepareId = $"Prepare{id}";
+                string schedId = $"Sched{id}";
+
+                // Actions rows:
+                // field 0: Sequence
+                // field 1: Id
+                // field 4: Before
+                // field 5: After
+
+                IEnumerable<Row> actionRows = Select(wixActions, r => "InstallExecuteSequence".Equals(r[0]) && (
+                (id.Equals(r[4]) && !schedId.Equals(r[1])) // Actions that might be sequnced before PSW_ExecuteCommand
+                || (schedId.Equals(r[4]) && !prepareId.Equals(r[1])) // Before Sched, but not Prepare
+                || (schedId.Equals(r[5]) && !id.Equals(r[1])) // After Sched, but not PSW_ExecuteCommand
+                || (prepareId.Equals(r[5]) && !schedId.Equals(r[1])) // After Prepare, but not Sched
+                ));
+                foreach (Row action in actionRows)
+                {
+                    Core.OnMessage(PanelSwWixErrorMessages.ExecuteCommandSequence(action.SourceLineNumbers, id, action[1].ToString()));
+                }
+            }
         }
 
         private void DuplicateFolder(Output output)

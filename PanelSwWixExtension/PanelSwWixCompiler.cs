@@ -1124,6 +1124,9 @@ namespace PanelSw.Wix.Extensions
             string cad = json.ToString();
             cad = Regex.Replace(cad, @"([\[\]\{\}])", @"[\$1]");
 
+            Row PSW_ExecuteCommand = Core.CreateRow(sourceLineNumbers, "PSW_ExecuteCommand");
+            PSW_ExecuteCommand[0] = id;
+
             Row prepareCA = Core.CreateRow(sourceLineNumbers, "CustomAction");
             prepareCA[0] = $"Prepare{id}";
             prepareCA[1] = 0x00000030 | 0x00000003; // Set formatted property
@@ -1149,8 +1152,8 @@ namespace PanelSw.Wix.Extensions
             schedCadSched[0] = "InstallExecuteSequence";
             schedCadSched[1] = $"Sched{id}";
             schedCadSched[2] = condition; // condition
-            schedCadSched[4] = before; // beforeAction
-            schedCadSched[5] = after; // afterAction
+            schedCadSched[4] = id; // beforeAction
+            schedCadSched[5] = null; // afterAction
             schedCadSched[6] = 0; // not overridable
 
             // 3. PanelSwCustomActions::CommonDeferred
@@ -1159,6 +1162,14 @@ namespace PanelSw.Wix.Extensions
             deferredCA[1] = 0x00000001 | 0x00000000 | 0x00002000 | 0x00000400 | (impersonate ? 0 : 0x00000800) | (int)executeType; // MsidbCustomActionTypeDll | MsidbCustomActionTypeBinaryData | MsidbCustomActionTypeHideTarget | MsidbCustomActionTypeInScript | MsidbCustomActionTypeNoImpersonate(?) | deferred/rollback/commit
             deferredCA[2] = "PanelSwCustomActions.dll";
             deferredCA[3] = "CommonDeferred";
+
+            Row deferredCASched = Core.CreateRow(sourceLineNumbers, "WixAction");
+            deferredCASched[0] = "InstallExecuteSequence";
+            deferredCASched[1] = id;
+            deferredCASched[2] = condition;
+            deferredCASched[4] = before;
+            deferredCASched[5] = after;
+            deferredCASched[6] = 0; // not overridable
         }
 
         private void ParseWebsiteConfigElement(XmlElement element, string component)

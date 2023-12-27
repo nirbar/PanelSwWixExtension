@@ -124,8 +124,8 @@ extern "C" UINT __stdcall ExecuteCommand(MSIHANDLE hInstall)
 	hr = cad.AddExec(szCommand, (LPCWSTR)szWorkingFolder, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, isAsync ? Flags::ASync : 0, errorHandling);
 	ExitOnFailure(hr, "Failed to create command");
 
-	hr = cad.DoDeferredAction((LPCWSTR)szId);
-	ExitOnFailure(hr, "Failed to schedule deferred custom action");
+	hr = cad.SetCustomActionData((LPCWSTR)szId);
+	ExitOnFailure(hr, "Failed to set CustomActionData");
 
 LExit:
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;

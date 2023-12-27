@@ -43,11 +43,17 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="PanelSwWixExtensionMessage.cs" />
     <Compile Include="PanelSwWixPreprocessor.cs" />
     <Compile Include="PanelSwWixUnbinder.cs" />
     <Compile Include="PanelSwWixBinder.cs" />
     <Compile Include="PanelSwWixCompiler.cs" />
     <Compile Include="PanelSwWixExtension.cs" />
+    <Compile Include="MessageResources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>MessageResources.resx</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Data\tables.xml">
       <LogicalName>$(RootNamespace).Data.tables.xml</LogicalName>
       <SubType>Designer</SubType>
@@ -55,6 +61,10 @@
     <MsgGenSource Include="Data\messages.xml">
       <ResourcesLogicalName>$(RootNamespace).Data.Messages.resources</ResourcesLogicalName>
     </MsgGenSource>
+    <EmbeddedResource Include="MessageResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MessageResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
     <EmbeddedResource Include="Xsd\PanelSwWixExtension.xsd">
       <LogicalName>$(RootNamespace).Xsd.PanelSwWixExtension.xsd</LogicalName>
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

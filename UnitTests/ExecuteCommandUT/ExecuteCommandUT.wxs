@@ -21,6 +21,7 @@
     <Property Id="HIDDEN_ME" Hidden="yes"/>
     <SetProperty Id="HIDDEN_ME" Value="[#me.wxs]" Sequence="execute" Before="InstallInitialize"/>
     <PanelSW:ExecuteCommand After="DuplicateFiles" Command='"C:\Program Files\Notepad++\notepad++.exe" "[HIDDEN_ME]"' Condition='Not Installed' ErrorHandling='prompt' Impersonate='no' Id='openNotepad' Execute='commit' Wait='no'/>
+    <PanelSW:ExecuteCommand After="openNotepad" Command='"C:\Program Files\Notepad++\notepad++.exe" "[HIDDEN_ME]"' Condition='Not Installed' ErrorHandling='prompt' Impersonate='no' Id='openNotepad2' Execute='commit' Wait='no'/>
     <PanelSW:ExecuteCommand Before="RemoveFiles" Command='"C:\Program Files\Notepad++\notepad++.exe" "ExecuteCommandUT.wxs"' WorkingDirectory='[INSTALLFOLDER]' Condition='Installed' ErrorHandling='prompt'/>
 
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
