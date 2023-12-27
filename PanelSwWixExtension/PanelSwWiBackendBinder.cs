@@ -485,6 +485,7 @@ namespace PanelSw.Wix.Extensions
                         new TableDefinition(nameof(PSW_ExecOnComponent), PSW_ExecOnComponent.SymbolDefinition, PSW_ExecOnComponent.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_ExecOnComponent_Environment), PSW_ExecOnComponent_Environment.SymbolDefinition, PSW_ExecOnComponent_Environment.ColumnDefinitions, symbolIdIsPrimaryKey: false),
                         new TableDefinition(nameof(PSW_ExecOnComponent_ExitCode), PSW_ExecOnComponent_ExitCode.SymbolDefinition, PSW_ExecOnComponent_ExitCode.ColumnDefinitions, symbolIdIsPrimaryKey: false),
+                        new TableDefinition(nameof(PSW_ExecuteCommand), PSW_ExecuteCommand.SymbolDefinition, PSW_ExecuteCommand.ColumnDefinitions, symbolIdIsPrimaryKey: true, unreal: true),
                         new TableDefinition(nameof(PSW_FileRegex), PSW_FileRegex.SymbolDefinition, PSW_FileRegex.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_ForceVersion), PSW_ForceVersion.SymbolDefinition, PSW_ForceVersion.ColumnDefinitions, symbolIdIsPrimaryKey: false),
                         new TableDefinition(nameof(PSW_InstallUtil), PSW_InstallUtil.SymbolDefinition, PSW_InstallUtil.ColumnDefinitions, symbolIdIsPrimaryKey: false),
@@ -547,8 +548,49 @@ namespace PanelSw.Wix.Extensions
             GetSplitFiles();
             ResolveTaskScheduler();
             DuplicateFolder(section);
+            CheckExecuteCommandSequences();
         }
 
+        private void CheckExecuteCommandSequences()
+        {
+            List<PSW_ExecuteCommand> executeCommands = new List<PSW_ExecuteCommand>();
+            List<WixActionSymbol> wixActions = new List<WixActionSymbol>();
+            foreach (IntermediateSection intermediate in base.Context.IntermediateRepresentation.Sections)
+            {
+                foreach (IntermediateSymbol symbol in intermediate.Symbols)
+                {
+                    if (symbol is PSW_ExecuteCommand exc)
+                    {
+                        executeCommands.Add(exc);
+                    }
+                    if (symbol is WixActionSymbol act)
+                    {
+                        wixActions.Add(act);
+                    }
+                }
+            }
+
+            foreach (PSW_ExecuteCommand executeCommand in executeCommands)
+            {
+                string prepareId = $"Prepare{executeCommand.Id.Id}";
+                string schedId = $"Sched{executeCommand.Id.Id}";
+                string prepareFullId = $"InstallExecuteSequence/{prepareId}";
+                string schedFullId = $"InstallExecuteSequence/{schedId}";
+
+                IEnumerable<WixActionSymbol> actionRows = wixActions.Where(action => action.SequenceTable.Equals(SequenceTable.InstallExecuteSequence) && (
+                executeCommand.Id.Id.Equals(action.Before) && !schedFullId.Equals(action.Id.Id)) /* Actions that might be sequnced before PSW_ExecuteCommand */
+                || (schedId.Equals(action.Before) && !prepareFullId.Equals(action.Id.Id)) /* Before Sched, but not Prepare*/
+                || (schedId.Equals(action.After) && !executeCommand.Id.Id.Equals(action.Id.Id)) /* After Sched, but not PSW_ExecuteCommand*/
+                || (prepareId.Equals(action.After) && !schedFullId.Equals(action.Id.Id)) /* After Prepare, but not Sched*/
+                );
+                foreach (WixActionSymbol action in actionRows)
+                {
+                    string otherId = action.Id.Id.Remove(0, "InstallExecuteSequence/".Length);
+                    Messaging.Write(PanelSwWixErrorMessages.ExecuteCommandSequence(action.SourceLineNumbers, executeCommand.Id.Id, otherId));
+                }
+            }
+        }
+        
         private void DuplicateFolder(IntermediateSection section)
         {
             List<PSW_DuplicateFolder> duplicateFolders = new List<PSW_DuplicateFolder>();

@@ -1043,6 +1043,8 @@ namespace PanelSw.Wix.Extensions
             string cad = json.ToString();
             cad = Regex.Replace(cad, "([\\[\\]\\{\\}])", "[\\$1]");
 
+            section.AddSymbol(new PSW_ExecuteCommand(sourceLineNumbers, new Identifier(AccessModifier.Global, id)));
+
             CustomActionSymbol prepareCA = section.AddSymbol(new CustomActionSymbol(sourceLineNumbers, new Identifier(AccessModifier.Global, $"Prepare{id}")));
             prepareCA.ExecutionType = CustomActionExecutionType.Immediate;
             prepareCA.Source = "PSW_ExecuteCommand";
@@ -1070,8 +1072,8 @@ namespace PanelSw.Wix.Extensions
             schedCadSched.Action = schedCAD.Id.Id;
             schedCadSched.SequenceTable = SequenceTable.InstallExecuteSequence;
             schedCadSched.Condition = condition;
-            schedCadSched.Before = before;
-            schedCadSched.After = after;
+            schedCadSched.Before = id;
+            schedCadSched.After = null;
             schedCadSched.Overridable = false;
 
             // 3. PanelSwCustomActions::CommonDeferred
@@ -1083,6 +1085,14 @@ namespace PanelSw.Wix.Extensions
             deferredCA.TargetType = CustomActionTargetType.Dll;
             deferredCA.Impersonate = impersonate;
             deferredCA.Hidden = true;
+
+            WixActionSymbol deferredCASched = section.AddSymbol(new WixActionSymbol(sourceLineNumbers, new Identifier(AccessModifier.Global, $"InstallExecuteSequence/{id}")));
+            deferredCASched.Action = deferredCA.Id.Id;
+            deferredCASched.SequenceTable = SequenceTable.InstallExecuteSequence;
+            deferredCASched.Condition = condition;
+            deferredCASched.Before = before;
+            deferredCASched.After = after;
+            deferredCASched.Overridable = false;
         }
 
         private void ParseWebsiteConfigElement(IntermediateSection section, XElement element, string component)

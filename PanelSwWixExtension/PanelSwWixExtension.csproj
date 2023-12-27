@@ -37,25 +37,25 @@
     <None Include="..\LICENSE.md" Visible="false" Pack="true" PackagePath="LICENSE.md" />
     <None Include="..\README.md" Visible="false" Pack="true" PackagePath="README.md" />
     <None Include="..\Nuget\*" Visible="false" Pack="true" PackagePath="build\" />
-    <None Include="$(TargetPath)" Visible="false" Pack="true" PackagePath="tools\lib\"/>
-    <None Include="$(TargetDir)\..\PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.dll" Visible="false" Pack="true" PackagePath="tools\lib\"/>
-    <None Include="..\build\x86\bin\$(Configuration)\DeferredExePackage\DeferredExePackage.exe" Visible="false" Pack="true" PackagePath="tools\lib\x86\"/>
-    <None Include="..\build\x64\bin\$(Configuration)\DeferredExePackage\DeferredExePackage.exe" Visible="false" Pack="true" PackagePath="tools\lib\x64\"/>
-    <None Include=".\Xsd\PanelSwWixExtension.xsd" Pack="true" PackagePath="content"/>
+    <None Include="$(TargetPath)" Visible="false" Pack="true" PackagePath="tools\lib\" />
+    <None Include="$(TargetDir)\..\PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.dll" Visible="false" Pack="true" PackagePath="tools\lib\" />
+    <None Include="..\build\x86\bin\$(Configuration)\DeferredExePackage\DeferredExePackage.exe" Visible="false" Pack="true" PackagePath="tools\lib\x86\" />
+    <None Include="..\build\x64\bin\$(Configuration)\DeferredExePackage\DeferredExePackage.exe" Visible="false" Pack="true" PackagePath="tools\lib\x64\" />
+    <None Include=".\Xsd\PanelSwWixExtension.xsd" Pack="true" PackagePath="content" />
     <!-- lib -->
-    <None Include="..\build\x86\bin\$(Configuration)\CaCommon\CaCommon.lib" Visible="false" Pack="true" PackagePath="tools\lib\v142\x86\"/>
+    <None Include="..\build\x86\bin\$(Configuration)\CaCommon\CaCommon.lib" Visible="false" Pack="true" PackagePath="tools\lib\v142\x86\" />
     <!-- inc -->
-    <None Include="..\CaCommon\DeferredActionBase.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
-    <None Include="..\CaCommon\RegistryKey.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
-    <None Include="..\CaCommon\SqlClientBase.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
-    <None Include="..\CaCommon\SqlConnection.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
-    <None Include="..\CaCommon\SqlQuery.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
-    <None Include="..\CaCommon\SummaryStream.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
-    <None Include="..\CaCommon\WixString.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
-    <None Include="..\CaCommon\ErrorPrompter.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
-    <None Include="..\build\x86\obj\$(Configuration)\protobuf\command.pb.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
-    <None Include="..\build\x86\obj\$(Configuration)\protobuf\customActionData.pb.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
-    <None Include="..\build\x86\obj\$(Configuration)\protobuf\errorHandling.pb.h" Visible="false" Pack="true" PackagePath="tools\include\"/>
+    <None Include="..\CaCommon\DeferredActionBase.h" Visible="false" Pack="true" PackagePath="tools\include\" />
+    <None Include="..\CaCommon\RegistryKey.h" Visible="false" Pack="true" PackagePath="tools\include\" />
+    <None Include="..\CaCommon\SqlClientBase.h" Visible="false" Pack="true" PackagePath="tools\include\" />
+    <None Include="..\CaCommon\SqlConnection.h" Visible="false" Pack="true" PackagePath="tools\include\" />
+    <None Include="..\CaCommon\SqlQuery.h" Visible="false" Pack="true" PackagePath="tools\include\" />
+    <None Include="..\CaCommon\SummaryStream.h" Visible="false" Pack="true" PackagePath="tools\include\" />
+    <None Include="..\CaCommon\WixString.h" Visible="false" Pack="true" PackagePath="tools\include\" />
+    <None Include="..\CaCommon\ErrorPrompter.h" Visible="false" Pack="true" PackagePath="tools\include\" />
+    <None Include="..\build\x86\obj\$(Configuration)\protobuf\command.pb.h" Visible="false" Pack="true" PackagePath="tools\include\" />
+    <None Include="..\build\x86\obj\$(Configuration)\protobuf\customActionData.pb.h" Visible="false" Pack="true" PackagePath="tools\include\" />
+    <None Include="..\build\x86\obj\$(Configuration)\protobuf\errorHandling.pb.h" Visible="false" Pack="true" PackagePath="tools\include\" />
   </ItemGroup>
 
   <ItemGroup>
@@ -68,9 +68,24 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="WixToolset.Extensibility"/>
-    <PackageReference Include="Newtonsoft.Json"/>
-    <PackageReference Include="TidyBuild" PrivateAssets="all"/>
+    <PackageReference Include="WixToolset.Extensibility" />
+    <PackageReference Include="Newtonsoft.Json" />
+    <PackageReference Include="TidyBuild" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="MessageResources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>MessageResources.resx</DependentUpon>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="MessageResources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>MessageResources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>
