@@ -19,154 +19,154 @@ namespace PanelSw.Wix.Extensions
         {
             switch (name)
             {
-                case "PSW_AccountSidSearch":
+                case nameof(PSW_AccountSidSearch):
                     symbolDefinition = PSW_AccountSidSearch.SymbolDefinition;
                     break;
-                case "PSW_BackupAndRestore":
+                case nameof(PSW_BackupAndRestore):
                     symbolDefinition = PSW_BackupAndRestore.SymbolDefinition;
                     break;
-                case "PSW_CertificateHashSearch":
+                case nameof(PSW_CertificateHashSearch):
                     symbolDefinition = PSW_CertificateHashSearch.SymbolDefinition;
                     break;
-                case "PSW_ConcatFiles":
+                case nameof(PSW_ConcatFiles):
                     symbolDefinition = PSW_ConcatFiles.SymbolDefinition;
                     break;
-                case "PSW_ContainerTemplate":
+                case nameof(PSW_ContainerTemplate):
                     symbolDefinition = PSW_ContainerTemplate.SymbolDefinition;
                     break;
-                case "PSW_CustomUninstallKey":
+                case nameof(PSW_CustomUninstallKey):
                     symbolDefinition = PSW_CustomUninstallKey.SymbolDefinition;
                     break;
-                case "PSW_DeletePath":
+                case nameof(PSW_DeletePath):
                     symbolDefinition = PSW_DeletePath.SymbolDefinition;
                     break;
-                case "PSW_DiskSpace":
+                case nameof(PSW_DiskSpace):
                     symbolDefinition = PSW_DiskSpace.SymbolDefinition;
                     break;
-                case "PSW_Dism":
+                case nameof(PSW_Dism):
                     symbolDefinition = PSW_Dism.SymbolDefinition;
                     break;
                 case nameof(PSW_DuplicateFolder):
                     symbolDefinition = PSW_DuplicateFolder.SymbolDefinition;
                     break;
-                case "PSW_EvaluateExpression":
+                case nameof(PSW_EvaluateExpression):
                     symbolDefinition = PSW_EvaluateExpression.SymbolDefinition;
                     break;
-                case "PSW_ExecOn_ConsoleOutput":
+                case nameof(PSW_ExecOn_ConsoleOutput):
                     symbolDefinition = PSW_ExecOn_ConsoleOutput.SymbolDefinition;
                     break;
-                case "PSW_ExecOnComponent":
+                case nameof(PSW_ExecOnComponent):
                     symbolDefinition = PSW_ExecOnComponent.SymbolDefinition;
                     break;
-                case "PSW_ExecOnComponent_Environment":
+                case nameof(PSW_ExecOnComponent_Environment):
                     symbolDefinition = PSW_ExecOnComponent_Environment.SymbolDefinition;
                     break;
-                case "PSW_ExecOnComponent_ExitCode":
+                case nameof(PSW_ExecOnComponent_ExitCode):
                     symbolDefinition = PSW_ExecOnComponent_ExitCode.SymbolDefinition;
                     break;
-                case "PSW_FileRegex":
+                case nameof(PSW_FileRegex):
                     symbolDefinition = PSW_FileRegex.SymbolDefinition;
                     break;
-                case "PSW_ForceVersion":
+                case nameof(PSW_ForceVersion):
                     symbolDefinition = PSW_ForceVersion.SymbolDefinition;
                     break;
-                case "PSW_InstallUtil":
+                case nameof(PSW_InstallUtil):
                     symbolDefinition = PSW_InstallUtil.SymbolDefinition;
                     break;
-                case "PSW_InstallUtil_Arg":
+                case nameof(PSW_InstallUtil_Arg):
                     symbolDefinition = PSW_InstallUtil_Arg.SymbolDefinition;
                     break;
-                case "PSW_JsonJPath":
+                case nameof(PSW_JsonJPath):
                     symbolDefinition = PSW_JsonJPath.SymbolDefinition;
                     break;
-                case "PSW_JsonJpathSearch":
+                case nameof(PSW_JsonJpathSearch):
                     symbolDefinition = PSW_JsonJpathSearch.SymbolDefinition;
                     break;
-                case "PSW_Md5Hash":
+                case nameof(PSW_Md5Hash):
                     symbolDefinition = PSW_Md5Hash.SymbolDefinition;
                     break;
                 case nameof(PSW_IsWindowsVersionOrGreater):
                     symbolDefinition = PSW_IsWindowsVersionOrGreater.SymbolDefinition;
                     break;
-                case "PSW_MsiSqlQuery":
+                case nameof(PSW_MsiSqlQuery):
                     symbolDefinition = PSW_MsiSqlQuery.SymbolDefinition;
                     break;
-                case "PSW_PathSearch":
+                case nameof(PSW_PathSearch):
                     symbolDefinition = PSW_PathSearch.SymbolDefinition;
                     break;
-                case "PSW_Payload":
+                case nameof(PSW_Payload):
                     symbolDefinition = PSW_Payload.SymbolDefinition;
                     break;
-                case "PSW_ReadIniValues":
+                case nameof(PSW_ReadIniValues):
                     symbolDefinition = PSW_ReadIniValues.SymbolDefinition;
                     break;
-                case "PSW_RegularExpression":
+                case nameof(PSW_RegularExpression):
                     symbolDefinition = PSW_RegularExpression.SymbolDefinition;
                     break;
-                case "PSW_RemoveRegistryValue":
+                case nameof(PSW_RemoveRegistryValue):
                     symbolDefinition = PSW_RemoveRegistryValue.SymbolDefinition;
                     break;
-                case "PSW_RestartLocalResources":
+                case nameof(PSW_RestartLocalResources):
                     symbolDefinition = PSW_RestartLocalResources.SymbolDefinition;
                     break;
-                case "PSW_SelfSignCertificate":
+                case nameof(PSW_SelfSignCertificate):
                     symbolDefinition = PSW_SelfSignCertificate.SymbolDefinition;
                     break;
-                case "PSW_ServiceConfig":
+                case nameof(PSW_ServiceConfig):
                     symbolDefinition = PSW_ServiceConfig.SymbolDefinition;
                     break;
-                case "PSW_ServiceConfig_Dependency":
+                case nameof(PSW_ServiceConfig_Dependency):
                     symbolDefinition = PSW_ServiceConfig_Dependency.SymbolDefinition;
                     break;
-                case "PSW_SetPropertyFromPipe":
+                case nameof(PSW_SetPropertyFromPipe):
                     symbolDefinition = PSW_SetPropertyFromPipe.SymbolDefinition;
                     break;
-                case "PSW_ShellExecute":
+                case nameof(PSW_ShellExecute):
                     symbolDefinition = PSW_ShellExecute.SymbolDefinition;
                     break;
-                case "PSW_SqlScript":
+                case nameof(PSW_SqlScript):
                     symbolDefinition = PSW_SqlScript.SymbolDefinition;
                     break;
-                case "PSW_SqlScript_Replacements":
+                case nameof(PSW_SqlScript_Replacements):
                     symbolDefinition = PSW_SqlScript_Replacements.SymbolDefinition;
                     break;
-                case "PSW_SqlSearch":
+                case nameof(PSW_SqlSearch):
                     symbolDefinition = PSW_SqlSearch.SymbolDefinition;
                     break;
-                case "PSW_TaskScheduler":
+                case nameof(PSW_TaskScheduler):
                     symbolDefinition = PSW_TaskScheduler.SymbolDefinition;
                     break;
-                case "PSW_Telemetry":
+                case nameof(PSW_Telemetry):
                     symbolDefinition = PSW_Telemetry.SymbolDefinition;
                     break;
-                case "PSW_ToLowerCase":
+                case nameof(PSW_ToLowerCase):
                     symbolDefinition = PSW_ToLowerCase.SymbolDefinition;
                     break;
-                case "PSW_TopShelf":
+                case nameof(PSW_TopShelf):
                     symbolDefinition = PSW_TopShelf.SymbolDefinition;
                     break;
-                case "PSW_Unzip":
+                case nameof(PSW_Unzip):
                     symbolDefinition = PSW_Unzip.SymbolDefinition;
                     break;
-                case "PSW_VersionCompare":
+                case nameof(PSW_VersionCompare):
                     symbolDefinition = PSW_VersionCompare.SymbolDefinition;
                     break;
-                case "PSW_WebsiteConfig":
+                case nameof(PSW_WebsiteConfig):
                     symbolDefinition = PSW_WebsiteConfig.SymbolDefinition;
                     break;
-                case "PSW_WmiSearch":
+                case nameof(PSW_WmiSearch):
                     symbolDefinition = PSW_WmiSearch.SymbolDefinition;
                     break;
-                case "PSW_XmlSearch":
+                case nameof(PSW_XmlSearch):
                     symbolDefinition = PSW_XmlSearch.SymbolDefinition;
                     break;
-                case "PSW_XslTransform":
+                case nameof(PSW_XslTransform):
                     symbolDefinition = PSW_XslTransform.SymbolDefinition;
                     break;
-                case "PSW_XslTransform_Replacements":
+                case nameof(PSW_XslTransform_Replacements):
                     symbolDefinition = PSW_XslTransform_Replacements.SymbolDefinition;
                     break;
-                case "PSW_ZipFile":
+                case nameof(PSW_ZipFile):
                     symbolDefinition = PSW_ZipFile.SymbolDefinition;
                     break;
                 default:

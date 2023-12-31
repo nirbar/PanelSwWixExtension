@@ -585,7 +585,7 @@ HRESULT CSqlScript::DeferredExecute(const ::std::string& command)
 
 		if (FAILED(hr))
 		{
-			_errorPrompter.SetErrorHandling(details.errorhandling());
+			_errorPrompter.SetErrorHandling((PSW_ERROR_HANDLING)details.errorhandling());
 			hr = _errorPrompter.Prompt(szError);
 			if (hr == E_RETRY)
 			{

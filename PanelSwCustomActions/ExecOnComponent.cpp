@@ -673,8 +673,8 @@ HRESULT CExecOnComponent::ExecuteOne(const com::panelsw::ca::ExecOnDetails& deta
 	szDomain = (LPCWSTR)(LPVOID)details.domain().data();
 	szUser = (LPCWSTR)(LPVOID)details.user().data();
 	szPassword = (LPCWSTR)(LPVOID)details.password().data();
-	_errorPrompter.SetErrorHandling(details.errorhandling());
-	_alwaysPrompter.SetErrorHandling(details.errorhandling());
+	_errorPrompter.SetErrorHandling((PSW_ERROR_HANDLING)details.errorhandling());
+	_alwaysPrompter.SetErrorHandling((PSW_ERROR_HANDLING)details.errorhandling());
 
 	hr = SetEnvironment(details.environment());
 	if (FAILED(hr))
@@ -1028,7 +1028,7 @@ HRESULT CExecOnComponent::SearchStdOut(LPCWSTR szStdOut, const ExecOnDetails& de
 			ExitOnFailure(hr, "Failed evaluating regular expression. %hs", ex.what());
 		}
 
-		_stdoutPrompter.SetErrorHandling(console.errorhandling());
+		_stdoutPrompter.SetErrorHandling((PSW_ERROR_HANDLING)console.errorhandling());
 		hr = _stdoutPrompter.Prompt((LPCWSTR)(LPVOID)details.command().obfuscated().data(), (LPCWSTR)(LPVOID)console.prompttext().data());
 		ExitOnFailure(hr, "Console output hints at an error");
 	}

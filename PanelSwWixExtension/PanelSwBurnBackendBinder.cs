@@ -155,7 +155,7 @@ namespace PanelSw.Wix.Extensions
 
                     if (payload.FileSize.HasValue && (payload.FileSize.Value > containerTemplate.MaximumUncompressedContainerSize))
                     {
-                        Messaging.Write(new Message(payload.SourceLineNumbers, MessageLevel.Warning, 0, "Payload {0} is larger than the maximal size set in ContainerTemplate, {1}", payload.Id.Id, containerTemplate.MaximumUncompressedContainerSize));
+                        Messaging.Write(PanelSwWixErrorMessages.PayloadExceedsSize(payload.SourceLineNumbers, payload.Id.Id, containerTemplate.MaximumUncompressedContainerSize));
                     }
                 }
 

@@ -101,9 +101,6 @@
     <None Include="..\ProtoCaLib\customActionData.proto">
       <Link>protobuf\customActionData.proto</Link>
     </None>
-    <None Include="..\ProtoCaLib\errorHandling.proto">
-      <Link>protobuf\errorHandling.proto</Link>
-    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Target Name="BuildProtobuf" BeforeTargets="PrepareForBuild" Condition="!Exists('$(BuildFolderCommon)$(Platform)\protobuf\$(Configuration)\libprotobuf-lite.lib')">

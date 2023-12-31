@@ -2,6 +2,7 @@ syntax = "proto3";
 package com.panelsw.ca;
 option optimize_for = LITE_RUNTIME;
 
+// These values must match PSW_ERROR_HANDLING
 enum ErrorHandling {
 	fail = 0;
 	ignore = 1;

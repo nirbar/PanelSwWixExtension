@@ -388,7 +388,7 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 		hr = ExecuteOne(szServiceName, szCommandLine, szAccount, szPassword, details.start(), szLoadOrderGroup, szDependencies, details.delaystart(), details.servicetype());
 		if (FAILED(hr))
 		{
-			_errorPrompter.SetErrorHandling(details.errorhandling());
+			_errorPrompter.SetErrorHandling((PSW_ERROR_HANDLING)details.errorhandling());
 			hr = _errorPrompter.Prompt(szServiceName);
 		}
 	} while (hr == E_RETRY);

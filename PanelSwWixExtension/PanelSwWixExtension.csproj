@@ -55,7 +55,6 @@
     <None Include="..\CaCommon\ErrorPrompter.h" Visible="false" Pack="true" PackagePath="tools\include\" />
     <None Include="..\build\x86\obj\$(Configuration)\protobuf\command.pb.h" Visible="false" Pack="true" PackagePath="tools\include\" />
     <None Include="..\build\x86\obj\$(Configuration)\protobuf\customActionData.pb.h" Visible="false" Pack="true" PackagePath="tools\include\" />
-    <None Include="..\build\x86\obj\$(Configuration)\protobuf\errorHandling.pb.h" Visible="false" Pack="true" PackagePath="tools\include\" />
   </ItemGroup>
 
   <ItemGroup>

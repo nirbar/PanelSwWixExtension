@@ -225,7 +225,7 @@ HRESULT CTopShelfService::DeferredExecute(const ::std::string& command)
 	bRes = details.ParseFromString(command);
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking TopShelfServiceDetails");
 
-	_errorPrompter.SetErrorHandling(details.errorhandling());
+	_errorPrompter.SetErrorHandling((PSW_ERROR_HANDLING)details.errorhandling());
 
 	hr = BuildCommandLine(&details, &commandLine);
 	ExitOnFailure(hr, "Failed to create TopShelf command line");

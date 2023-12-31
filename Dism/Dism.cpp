@@ -6,7 +6,6 @@
 #pragma comment (lib, "dismapi.lib")
 #pragma comment (lib, "Shlwapi.lib")
 using namespace std;
-using namespace com::panelsw::ca;
 
 static LPCWSTR DismStateString(DismPackageFeatureState state);
 static void ProgressCallback(UINT Current, UINT Total, PVOID UserData);
@@ -28,7 +27,7 @@ struct ProgressReportState
 	LPWSTR szPackage = nullptr;
 	LPWSTR szRemove = nullptr;
 	int nMsiCost = 0;
-	ErrorHandling eErrorHandling = ErrorHandling::fail;
+	PSW_ERROR_HANDLING eErrorHandling = PSW_ERROR_HANDLING_FAIL;
 	BOOL bEnableAll = 0;
 	BOOL bForceRemove = 0;
 

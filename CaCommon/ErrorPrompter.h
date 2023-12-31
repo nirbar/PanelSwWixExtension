@@ -1,10 +1,11 @@
 #pragma once
 #include "pch.h"
 #include "WixString.h"
-#include "errorHandling.pb.h"
 
 #define E_RETRY					__HRESULT_FROM_WIN32(ERROR_RETRY)
 #define E_INSTALL_USEREXIT		__HRESULT_FROM_WIN32(ERROR_INSTALL_USEREXIT)
+#define S_YES					((HRESULT)2L)
+#define S_NO					((HRESULT)3L)
 
 // Must match with ..\PanelSwCustomActions\pch.h
 enum PSW_MSI_MESSAGES
@@ -28,13 +29,26 @@ enum PSW_MSI_MESSAGES
 	PSW_MSI_MESSAGES_UNZIP_FILE_ERROR = 27016,
 };
 
+// These values must match errorHandling.proto
+enum PSW_ERROR_HANDLING
+{
+	// Fail without prompting
+	PSW_ERROR_HANDLING_FAIL = 0,
+	// Ignore error and continue
+	PSW_ERROR_HANDLING_IGNORE = 1,
+	// Prompt and let the user decide
+	PSW_ERROR_HANDLING_PROMPT = 2,
+	// Prompt even if exit code and stdout were ok
+	PSW_ERROR_HANDLING_PROMPT_ALWAYS = 3,
+};
+
 class CErrorPrompter
 {
 public:
 	CErrorPrompter(DWORD dwErrorId
 		, INSTALLMESSAGE flags = (INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_ERROR | MB_ABORTRETRYIGNORE | MB_DEFBUTTON1 | MB_ICONERROR)
 		, HRESULT defaultHr = E_FAIL
-		, com::panelsw::ca::ErrorHandling errorHandling = com::panelsw::ca::ErrorHandling::fail
+		, PSW_ERROR_HANDLING errorHandling = PSW_ERROR_HANDLING::PSW_ERROR_HANDLING_FAIL
 	)
 		: _dwErrorId(dwErrorId)
 		, _errorHandling(errorHandling)
@@ -43,7 +57,7 @@ public:
 	{
 	}
 
-	void SetErrorHandling(com::panelsw::ca::ErrorHandling errorHandling)
+	void SetErrorHandling(PSW_ERROR_HANDLING errorHandling)
 	{
 		_errorHandling = errorHandling;
 	}
@@ -52,7 +66,18 @@ public:
 	HRESULT Prompt(ARGS ...args)
 	{
 		HRESULT hr = S_OK;
-		PMSIHANDLE hRec = ::MsiCreateRecord(1 + sizeof...(ARGS));
+		PMSIHANDLE hRec;
+
+		if (_errorHandling == PSW_ERROR_HANDLING::PSW_ERROR_HANDLING_FAIL)
+		{
+			return E_FAIL;
+		}
+		if (_errorHandling == PSW_ERROR_HANDLING::PSW_ERROR_HANDLING_IGNORE)
+		{
+			return S_FALSE;
+		}
+
+		hRec = ::MsiCreateRecord(1 + sizeof...(ARGS));
 		ExitOnNull(hRec, hr, E_FAIL, "Failed to create record");
 
 		hr = WcaSetRecordInteger(hRec, 1, _dwErrorId);
@@ -80,15 +105,6 @@ private:
 
 	HRESULT PromptRecord(MSIHANDLE hRecord, DWORD dwField)
 	{
-		if (_errorHandling == com::panelsw::ca::ErrorHandling::fail)
-		{
-			return E_FAIL;
-		}
-		if (_errorHandling == com::panelsw::ca::ErrorHandling::ignore)
-		{
-			return S_FALSE;
-		}
-
 		UINT promptResult = IDABORT;
 		promptResult = WcaProcessMessage(_flags, hRecord);
 		switch (promptResult)
@@ -100,12 +116,20 @@ private:
 
 		case IDTRYAGAIN:
 		case IDRETRY:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose to retry");
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose Retry");
 			return E_RETRY;
 
 		case IDOK:
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User approved");
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose OK");
 			return S_OK;
+
+		case IDYES:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose Yes");
+			return S_YES;
+
+		case IDNO:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose No");
+			return S_NO;
 
 		case IDIGNORE:
 		case IDCONTINUE:
@@ -181,7 +205,7 @@ private:
 	}
 
 	DWORD _dwErrorId;
-	com::panelsw::ca::ErrorHandling _errorHandling;
+	PSW_ERROR_HANDLING _errorHandling;
 	INSTALLMESSAGE _flags;
 	HRESULT _defaultHr;
 };

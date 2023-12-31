@@ -120,4 +120,7 @@
   <data name="ExecuteCommandSequence" xml:space="preserve">
     <value>The InstallExecuteSequence table contains action '{1}' in between actions required for ExecuteCommand action '{0}'. Please schedule commands to execute after '{0}' or before 'Prepare{0}'</value>
   </data>
+  <data name="PayloadExceedsSize" xml:space="preserve">
+    <value>Payload '{0}' is larger than the maximal size set in ContainerTemplate, {1}</value>
+  </data>
 </root>

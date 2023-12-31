@@ -312,8 +312,8 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 	zipFileW = (LPCWSTR)(LPVOID)pDetails->zipfile().data();
 	srcFolderW = (LPCWSTR)(LPVOID)pDetails->srcfolder().data();
 	szPattern = (LPCWSTR)(LPVOID)pDetails->pattern().data();
-	_zipPrompter.SetErrorHandling(pDetails->errorhandling());
-	_zipOneFilePrompter.SetErrorHandling(pDetails->errorhandling());
+	_zipPrompter.SetErrorHandling((PSW_ERROR_HANDLING)pDetails->errorhandling());
+	_zipOneFilePrompter.SetErrorHandling((PSW_ERROR_HANDLING)pDetails->errorhandling());
 
 	try
 	{
@@ -436,8 +436,8 @@ HRESULT CUnzip::ExecuteOneUnzip(::com::panelsw::ca::UnzipDetails* pDetails)
 
 	zipFileW = (LPCWSTR)(LPVOID)pDetails->zipfile().data();
 	targetFolderW = (LPCWSTR)(LPVOID)pDetails->targetfolder().data();
-	_unzipPrompter.SetErrorHandling(pDetails->errorhandling());
-	_unzipOneFilePrompter.SetErrorHandling(pDetails->errorhandling());
+	_unzipPrompter.SetErrorHandling((PSW_ERROR_HANDLING)pDetails->errorhandling());
+	_unzipOneFilePrompter.SetErrorHandling((PSW_ERROR_HANDLING)pDetails->errorhandling());
 
 	// ActionData: "Extracting from [1] to [2]"
 	hActionData = ::MsiCreateRecord(2);

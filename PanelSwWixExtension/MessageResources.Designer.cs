@@ -68,5 +68,14 @@ namespace PanelSw.Wix.Extensions {
                 return ResourceManager.GetString("ExecuteCommandSequence", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Payload &apos;{0}&apos; is larger than the maximal size set in ContainerTemplate, {1}.
+        /// </summary>
+        internal static string PayloadExceedsSize {
+            get {
+                return ResourceManager.GetString("PayloadExceedsSize", resourceCulture);
+            }
+        }
     }
 }

@@ -8,10 +8,15 @@ namespace PanelSw.Wix.Extensions
         {
             return new Message(sourceLineNumber, MessageLevel.Error, (int)PswErrorId.ExecuteCommandSequence, MessageResources.ExecuteCommandSequence, executeCommandId, otherActionId);
         }
+        public static Message PayloadExceedsSize(SourceLineNumber sourceLineNumber, string payloadId, long maxSize)
+        {
+            return new Message(sourceLineNumber, MessageLevel.Warning, (int)PswErrorId.PayloadExceedsSize, MessageResources.PayloadExceedsSize, payloadId, maxSize);
+        }
     }
 
-    public enum PswErrorId
+    public enum PswErrorId : int
     {
         ExecuteCommandSequence = 9000,
+        PayloadExceedsSize,
     }
 }

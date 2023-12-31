@@ -97,9 +97,6 @@
     <None Include="..\ProtoCaLib\command.proto">
       <Filter>Protobuf</Filter>
     </None>
-    <None Include="..\ProtoCaLib\errorHandling.proto">
-      <Filter>Protobuf</Filter>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(IntDir)\Version.rc">

@@ -1,5 +1,4 @@
 #include "pch.h"
-using namespace com::panelsw::ca;
 
 extern "C" UINT __stdcall PromptFileDowngrades(MSIHANDLE hInstall)
 {
@@ -9,7 +8,7 @@ extern "C" UINT __stdcall PromptFileDowngrades(MSIHANDLE hInstall)
 	PMSIHANDLE hRecord;
 	DWORD dwDowngrades = 0;
 	UINT promptResult = 0;
-	CErrorPrompter prompter(PSW_MSI_MESSAGES::PSW_MSI_MESSAGES_FILE_DOWNGRADE, (INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_WARNING | MB_OKCANCEL | MB_DEFBUTTON1 | MB_ICONWARNING), S_OK, ErrorHandling::promptAlways);
+	CErrorPrompter prompter(PSW_MSI_MESSAGES::PSW_MSI_MESSAGES_FILE_DOWNGRADE, (INSTALLMESSAGE)(INSTALLMESSAGE::INSTALLMESSAGE_WARNING | MB_OKCANCEL | MB_DEFBUTTON1 | MB_ICONWARNING), S_OK, PSW_ERROR_HANDLING::PSW_ERROR_HANDLING_PROMPT_ALWAYS);
 	CWixString szFiles;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);

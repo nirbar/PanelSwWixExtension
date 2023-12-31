@@ -108,7 +108,7 @@ static HRESULT ExecuteOne(LPCWSTR szConnectionString, LPCWSTR szServer, LPCWSTR 
 	CWixString szResult;
 	CWixString szError;
 	CErrorPrompter errorPrompter(PSW_MSI_MESSAGES::PSW_MSI_MESSAGES_SQL_SEARCH_ERROR);
-	errorPrompter.SetErrorHandling(errorHandling);
+	errorPrompter.SetErrorHandling((PSW_ERROR_HANDLING)errorHandling);
 
 LRetry:
 	if (szConnectionString && *szConnectionString)
