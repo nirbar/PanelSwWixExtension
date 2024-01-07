@@ -117,10 +117,16 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="ContainerError" xml:space="preserve">
+    <value>Failed to create container '{0}'. {1}</value>
+  </data>
   <data name="ExecuteCommandSequence" xml:space="preserve">
     <value>The InstallExecuteSequence table contains action '{1}' in between actions required for ExecuteCommand action '{0}'. Please schedule commands to execute after '{0}' or before 'Prepare{0}'</value>
   </data>
   <data name="PayloadExceedsSize" xml:space="preserve">
     <value>Payload '{0}' is larger than the maximal size set in ContainerTemplate, {1}</value>
+  </data>
+  <data name="PswWixAttribute" xml:space="preserve">
+    <value>Attribute '{0}' of element '{1}' is only supported when using PanelSwWix4.Sdk. Replace all 'WixToolset.*' package references with 'PanelSwWix4.*'</value>
   </data>
 </root>

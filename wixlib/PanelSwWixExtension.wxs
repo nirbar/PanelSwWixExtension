@@ -2,7 +2,7 @@
 
   <!-- PanelSwCustomActions.dll binary -->
   <Fragment>
-    <Binary Id="PanelSwCustomActions.dll" SuppressModularization="yes" SourceFile="!(bindpath.PanelSwCustomActions.$(var.CaPlatform))\PanelSwCustomActions.dll"></Binary>
+    <Binary Id="PanelSwCustomActions.dll" SuppressModularization="yes" SourceFile="!(bindpath.PanelSwCustomActions)\PanelSwCustomActions.dll"></Binary>
   </Fragment>
   <!-- PswManagedCA.CA.dll binary -->
   <Fragment>
@@ -14,6 +14,13 @@
     <Binary Id="Dism.X64.dll" SuppressModularization="yes" SourceFile="!(bindpath.Dism.x64)\Dism.dll"></Binary>
     <Binary Id="Dism.X86.dll" SuppressModularization="yes" SourceFile="!(bindpath.Dism.Win32)\Dism.dll"></Binary>
   </Fragment>
+
+  <!-- PanelSwBackendExtension.dll payload -->
+  <?ifdef EnableZipContainer?>
+  <Fragment>
+    <BundleExtension Id="PanelSwWixContainer" SourceFile="!(bindpath.PanelSwBackendExtension)\PanelSwBackendExtension.dll"/>
+  </Fragment>
+  <?endif?>
 
   <!-- ShellExecute -->
   <Fragment>

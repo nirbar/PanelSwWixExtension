@@ -1,0 +1,5 @@
+LIBRARY      "PanelSwBackendExtension"
+
+EXPORTS
+    BundleExtensionCreate
+    BundleExtensionDestroy

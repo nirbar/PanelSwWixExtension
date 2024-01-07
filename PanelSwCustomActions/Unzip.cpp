@@ -459,7 +459,7 @@ HRESULT CUnzip::ExecuteOneUnzip(::com::panelsw::ca::UnzipDetails* pDetails)
 		ExitOnNull(zipFileStream, hr, E_FAIL, "Failed allocating file stream");
 
 		archive = new ZipArchive(*zipFileStream);
-		ExitOnNull(zipFileStream, hr, E_FAIL, "Failed allocating ZIP archive");
+		ExitOnNull(archive, hr, E_FAIL, "Failed allocating ZIP archive");
 
 		for (ZipArchive::FileHeaders::const_iterator it = archive->headerBegin(), endIt = archive->headerEnd(); it != endIt; ++it)
 		{

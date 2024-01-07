@@ -12,11 +12,21 @@ namespace PanelSw.Wix.Extensions
         {
             return new Message(sourceLineNumber, MessageLevel.Warning, (int)PswErrorId.PayloadExceedsSize, MessageResources.PayloadExceedsSize, payloadId, maxSize);
         }
+        public static Message ContainerError(SourceLineNumber sourceLineNumber, string containerId, string error)
+        {
+            return new Message(sourceLineNumber, MessageLevel.Warning, (int)PswErrorId.ContainerError, MessageResources.ContainerError, containerId, error);
+        }
+        public static Message PswWixAttribute(SourceLineNumber sourceLineNumber, string attribute, string element)
+        {
+            return new Message(sourceLineNumber, MessageLevel.Error, (int)PswErrorId.PswWixAttribute, MessageResources.PswWixAttribute, attribute, element);
+        }
     }
 
     public enum PswErrorId : int
     {
         ExecuteCommandSequence = 9000,
         PayloadExceedsSize,
+        ContainerError,
+        PswWixAttribute,
     }
 }

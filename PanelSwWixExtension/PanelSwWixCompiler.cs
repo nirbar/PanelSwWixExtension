@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 using WixToolset.Data;
+using WixToolset.Data.Burn;
 using WixToolset.Data.Symbols;
 using WixToolset.Data.WindowsInstaller;
 using WixToolset.Extensibility;
@@ -331,6 +332,7 @@ namespace PanelSw.Wix.Extensions
             ContainerType defaultType = ContainerType.Attached;
             int maximumUncompressedContainerSize = Int32.MaxValue; // 2GB
             long maximumUncompressedExeSize = -1; // 4GB
+            PSW_ContainerTemplate.ContainerCompressionType compression = PSW_ContainerTemplate.ContainerCompressionType.Cab;
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -349,6 +351,9 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "MaximumUncompressedExeSize":
                             maximumUncompressedExeSize = ParseHelper.GetAttributeLongValue(sourceLineNumbers, attrib, 1, UInt32.MaxValue);
+                            break;
+                        case "Compression":
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out compression);
                             break;
                         default:
                             ParseHelper.UnexpectedAttribute(element, attrib);
@@ -369,6 +374,12 @@ namespace PanelSw.Wix.Extensions
             {
                 maximumUncompressedExeSize = UInt32.MaxValue; //4GB
             }
+#if !EnableZipContainer
+            if (compression != PSW_ContainerTemplate.ContainerCompressionType.Cab)
+            {
+                Messaging.Write(PanelSwWixErrorMessages.PswWixAttribute(sourceLineNumbers, element.Name.LocalName, "Compression"));
+            }
+#endif
 
             if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
@@ -377,6 +388,12 @@ namespace PanelSw.Wix.Extensions
                 symbol.DefaultType = defaultType;
                 symbol.MaximumUncompressedContainerSize = maximumUncompressedContainerSize;
                 symbol.MaximumUncompressedExeSize = maximumUncompressedExeSize;
+                symbol.Compression = compression;
+
+                if (compression == PSW_ContainerTemplate.ContainerCompressionType.Zip)
+                {
+                    ParseHelper.CreateSimpleReference(section, sourceLineNumbers, SymbolDefinitions.WixBundleExtension, "PanelSwWixContainer");
+                }
             }
         }
 

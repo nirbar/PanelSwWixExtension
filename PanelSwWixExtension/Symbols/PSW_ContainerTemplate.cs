@@ -1,3 +1,4 @@
+using System;
 using WixToolset.Data;
 using WixToolset.Data.Symbols;
 
@@ -5,6 +6,12 @@ namespace PanelSw.Wix.Extensions.Symbols
 {
     internal class PSW_ContainerTemplate : BaseSymbol
     {
+        public enum ContainerCompressionType
+        {
+            Zip,
+            Cab,
+        }
+
         public static IntermediateSymbolDefinition SymbolDefinition
         {
             get
@@ -16,6 +23,7 @@ namespace PanelSw.Wix.Extensions.Symbols
                         new IntermediateFieldDefinition(nameof(DefaultType), IntermediateFieldType.Number),
                         new IntermediateFieldDefinition(nameof(MaximumUncompressedContainerSize), IntermediateFieldType.LargeNumber),
                         new IntermediateFieldDefinition(nameof(MaximumUncompressedExeSize), IntermediateFieldType.LargeNumber),
+                        new IntermediateFieldDefinition(nameof(Compression), IntermediateFieldType.Number),
                     }
                     , typeof(PSW_ContainerTemplate));
             }
@@ -48,6 +56,16 @@ namespace PanelSw.Wix.Extensions.Symbols
         {
             get => this.Fields[3].AsLargeNumber();
             set => this.Set(3, value);
+        }
+
+        public ContainerCompressionType Compression
+        {
+            get
+            {
+                int v = this.Fields[4].AsNumber();
+                return (ContainerCompressionType)v;
+            }
+            set => this.Set(4, (int)value);
         }
     }
 }

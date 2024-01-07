@@ -5,20 +5,15 @@
     <LibBindFiles>true</LibBindFiles>
     <BindFiles>true</BindFiles>
     <CaPlatform Condition="'$(CaPlatform)' == ''">Win32</CaPlatform>
-    <BuildFolder>$(BaseBuildFolder)$(CaPlatform)</BuildFolder>
-    <OutputPath>$(OutputPath)$(CaPlatform)\</OutputPath>
-    <OutDir>$(OutputPath)</OutDir>
-    <OutputDirectory>$(OutputPath)</OutputDirectory>
-    <IntermediateOutputPath>$(IntermediateOutputPath)$(CaPlatform)\</IntermediateOutputPath>
-    <IntDir>$(IntermediateOutputPath)</IntDir>
-    <IntermediateDirectory>$(IntermediateOutputPath)</IntermediateDirectory>
     <DefineConstants>CaPlatform=$(CaPlatform);$(DefineConstants)</DefineConstants>
+    <DefineConstants Condition="$(EnableZipContainer)">EnableZipContainer=1;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\PswManagedCA\PswManagedCA.csproj" Platforms="x86;x64" Properties="Configuration=Release"/>
-    <ProjectReference Include="..\PanelSwCustomActions\PanelSwCustomActions.vcxproj" Platforms="$(CaPlatform)" Properties="Configuration=Release"/>
-    <ProjectReference Include="..\Dism\Dism.vcxproj" Platforms="Win32;x64" Condition="'$(CaPlatform)' == 'Win32'" Properties="Configuration=Release"/>
-    <ProjectReference Include="..\DeferredExePackage\DeferredExePackage.vcxproj" Platforms="Win32;x64" Condition="'$(CaPlatform)' == 'Win32'" Properties="Configuration=Release"/>
+    <ProjectReference Include="..\PanelSwCustomActions\PanelSwCustomActions.vcxproj" Properties="Configuration=Release"/>
+    <ProjectReference Include="..\Dism\Dism.vcxproj" Platforms="Win32;x64" Properties="Configuration=Release"/>
+    <ProjectReference Include="..\DeferredExePackage\DeferredExePackage.vcxproj" Properties="Configuration=Release"/>
+    <ProjectReference Include="..\PanelSwBackendExtension\PanelSwBackendExtension.vcxproj" Properties="Configuration=Release" Condition="$(EnableZipContainer)"/>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="WixToolset.Util.wixext" />

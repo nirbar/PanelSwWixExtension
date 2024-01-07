@@ -61,6 +61,15 @@ namespace PanelSw.Wix.Extensions {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Failed to create container &apos;{0}&apos;. {1}.
+        /// </summary>
+        internal static string ContainerError {
+            get {
+                return ResourceManager.GetString("ContainerError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to The InstallExecuteSequence table contains action &apos;{1}&apos; in between actions required for ExecuteCommand action &apos;{0}&apos;. Please schedule commands to execute after &apos;{0}&apos; or before &apos;Prepare{0}&apos;.
         /// </summary>
         internal static string ExecuteCommandSequence {
@@ -75,6 +84,15 @@ namespace PanelSw.Wix.Extensions {
         internal static string PayloadExceedsSize {
             get {
                 return ResourceManager.GetString("PayloadExceedsSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Attribute &apos;{0}&apos; of element &apos;{1}&apos; is only supported when using PanelSwWix4.Sdk. Replace all &apos;WixToolset.*&apos; package references with &apos;PanelSwWix4.*&apos;.
+        /// </summary>
+        internal static string PswWixAttribute {
+            get {
+                return ResourceManager.GetString("PswWixAttribute", resourceCulture);
             }
         }
     }

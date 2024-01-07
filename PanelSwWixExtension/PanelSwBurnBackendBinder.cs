@@ -118,6 +118,13 @@ namespace PanelSw.Wix.Extensions
 
             defaultContainer.Name = string.Format(containerTemplate.CabinetTemplate, 0);
             defaultContainer.Type = containerTemplate.DefaultType;
+#if EnableZipContainer
+            if (containerTemplate.Compression == PSW_ContainerTemplate.ContainerCompressionType.Zip)
+            {
+                defaultContainer.BundleExtensionRef = PanelSwWixExtension.CONTAINER_EXTENSION_ID;
+            }
+#endif
+
             WixBundleContainerSymbol prevContainer = null;
             WixBundlePayloadSymbol prevPayload = null;
             foreach (WixBundlePayloadSymbol payload in myPayloadSymbols)
@@ -151,6 +158,9 @@ namespace PanelSw.Wix.Extensions
                     container = section.AddSymbol(new WixBundleContainerSymbol(containerTemplate.SourceLineNumbers, new Identifier(AccessModifier.Global, containerSize.Count)));
                     container.Name = string.Format(containerTemplate.CabinetTemplate, containerSize.Count);
                     container.Type = containerTemplate.DefaultType;
+#if EnableZipContainer
+                    container.BundleExtensionRef = defaultContainer.BundleExtensionRef;
+#endif
                     containerSize[container] = 0;
 
                     if (payload.FileSize.HasValue && (payload.FileSize.Value > containerTemplate.MaximumUncompressedContainerSize))

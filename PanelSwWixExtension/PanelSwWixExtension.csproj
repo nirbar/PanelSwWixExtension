@@ -7,11 +7,16 @@
     <DebugType>portable</DebugType>
     <IncludeBuildOutput>false</IncludeBuildOutput>
     <SuppressDependenciesWhenPacking>true</SuppressDependenciesWhenPacking>
+    <DefineConstants Condition="$(EnableZipContainer)">EnableZipContainer;$(DefineConstants)</DefineConstants>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
     <Optimize>False</Optimize>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="PanelSwBurnContainer.cs" Condition="!$(EnableZipContainer)" />
+  </ItemGroup>
 
   <PropertyGroup Label="Nuspec">
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
@@ -63,7 +68,8 @@
     <ProjectReference Include="..\wixlib\PanelSwWixLib.wixproj" ReferenceOutputAssembly="false" SkipGetTargetFrameworkProperties="true" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="$(BaseBuildFolder)x86\bin\Release\PanelSwWixLib\Win32\PanelSwWixLib.wixlib" LogicalName="PanelSwWixLib.Win32.wixlib" />
+    <EmbeddedResource Include="$(BaseBuildFolder)x86\bin\Release\PanelSwWixLib\PanelSwWixLib.wixlib" LogicalName="PanelSwWixLib.Win32.wixlib" />
+    <EmbeddedResource Include="$(BaseBuildFolder)x64\bin\Release\PanelSwWixLib\PanelSwWixLib.wixlib" LogicalName="PanelSwWixLib.x64.wixlib" />
   </ItemGroup>
 
   <ItemGroup>

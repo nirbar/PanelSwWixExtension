@@ -191,6 +191,11 @@
               <xs:documentation>Maximal size of the payloads in the bundle executable. Allowed when DefaultType is attached</xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="Compression" type="ContainerCompressionType" use="optional" default="cab">
+            <xs:annotation>
+              <xs:documentation>Bundle container compression method. psw-wix only. Defaults to cab</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>
@@ -2330,6 +2335,16 @@ Call ShellExecuteEx with parameters
           <xs:documentation>Format the value as JSON true or false. If the value is true or false then it is used as is. Otherwise if the value evaluates to null, it is considered false. If the value evaluates to a numric 0, it is also considered false. Any other value is considered true</xs:documentation>
         </xs:annotation>
       </xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="ContainerCompressionType">
+    <xs:annotation>
+      <xs:documentation>Bundle container compression method. psw-wix only.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:NMTOKEN">
+      <xs:enumeration value="zip"></xs:enumeration>
+      <xs:enumeration value="cab"></xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

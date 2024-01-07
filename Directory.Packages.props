@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <Wix4Version Condition=" '$(Wix4Version)' == '' ">4.0.3</Wix4Version>
-    <PanelSwWix4Version Condition=" '$(PanelSwWix4Version)' == '' ">5.0.0-psw-wix.0244-33</PanelSwWix4Version>
+    <PanelSwWix4Version Condition=" '$(PanelSwWix4Version)' == '' ">5.0.0-psw-wix.0246-34</PanelSwWix4Version>
   </PropertyGroup>
   
   <ItemGroup>
@@ -17,6 +17,7 @@
     <PackageVersion Include="WixToolset.BalUtil" Version="$(Wix4Version)" />
     <PackageVersion Include="WixToolset.BootstrapperCore.Native" Version="$(Wix4Version)" />
     <PackageVersion Include="WixToolset.NetFx.wixext" Version="$(Wix4Version)" />
+    <PackageVersion Include="WixToolset.BextUtil" Version="$(Wix4Version)" />
 
     <PackageVersion Include="PanelSwWix4.DUtil" version="$(PanelSwWix4Version)"/>
     <PackageVersion Include="PanelSwWix4.WcaUtil" version="$(PanelSwWix4Version)"/>  
@@ -29,6 +30,7 @@
     <PackageVersion Include="PanelSwWix4.BalUtil" Version="$(PanelSwWix4Version)" />
     <PackageVersion Include="PanelSwWix4.BootstrapperCore.Native" Version="$(PanelSwWix4Version)" />
     <PackageVersion Include="PanelSwWix4.NetFx.wixext" Version="$(PanelSwWix4Version)" />
+    <PackageVersion Include="PanelSwWix4.BextUtil" Version="$(PanelSwWix4Version)" />
 
     <PackageVersion Include="TidyBuild" version="1.5.2"/>
     <PackageVersion Include="Microsoft.Web.Administration" Version="11.1.0" />

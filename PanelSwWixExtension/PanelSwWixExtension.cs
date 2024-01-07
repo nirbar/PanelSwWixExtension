@@ -21,7 +21,12 @@ namespace PanelSw.Wix.Extensions
             typeof(PanelSwWixCompiler),
             typeof(PanelSwWixExtData),
             typeof(PanelSwBurnBackendBinder),
+#if EnableZipContainer
+            typeof(PanelSwBurnContainer),
+#endif
         };
+
+        public static string CONTAINER_EXTENSION_ID = "PanelSwWixContainer";
 
         public override bool TryCreateExtension(Type extensionType, out object extension)
         {
