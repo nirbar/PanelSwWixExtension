@@ -10,6 +10,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\DeferredExePackage\DeferredExePackage.vcxproj"/>
     <PackageReference Include="WixToolset.Bal.wixext"/>
+    <PackageReference Include="WixToolset.Heat"/>
     <PackageReference Include="TidyBuild" />
   </ItemGroup>
   <ItemGroup>
@@ -17,5 +18,16 @@
       <HintPath>$(BuildFolder)..\Any CPU\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</HintPath>
       <Name>PanelSwWixExtension</Name>
     </WixExtension>
+  </ItemGroup>
+  <!-- Heat -->
+  <PropertyGroup>
+    <HarvestDirectoryAdditionalOptions>-generate payloadgroup</HarvestDirectoryAdditionalOptions>
+    <DefineConstants>$(DefineConstants);THISDIR=$(MSBuildThisFileDirectory)..\</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <HarvestDirectory Include="$(MSBuildThisFileDirectory)..\">
+      <DirectoryRefId>ContainerTemplateUT</DirectoryRefId>
+      <PreprocessorVariable>var.THISDIR</PreprocessorVariable>
+    </HarvestDirectory>
   </ItemGroup>
 </Project>

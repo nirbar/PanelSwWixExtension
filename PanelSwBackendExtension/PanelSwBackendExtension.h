@@ -27,7 +27,7 @@ public:
 
 private:
 
-	void Reset();
+	HRESULT Reset();
 
 	std::auto_ptr<std::istream> _zipStream;
 	std::auto_ptr<Poco::Zip::ZipArchive> _pArchive;

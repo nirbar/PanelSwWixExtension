@@ -328,9 +328,9 @@ namespace PanelSw.Wix.Extensions
         private void ParseContainerTemplateElement(IntermediateSection section, XElement element)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
-            string cabinetTemplate = "bundle-attached-{0}.cab";
+            string cabinetTemplate = null;
             ContainerType defaultType = ContainerType.Attached;
-            int maximumUncompressedContainerSize = Int32.MaxValue; // 2GB
+            long? maximumUncompressedContainerSize = null; // 2GB for cab, unlimited for zip
             long maximumUncompressedExeSize = -1; // 4GB
             PSW_ContainerTemplate.ContainerCompressionType compression = PSW_ContainerTemplate.ContainerCompressionType.Cab;
 
@@ -347,13 +347,19 @@ namespace PanelSw.Wix.Extensions
                             TryParseEnumAttribute(sourceLineNumbers, element, attrib, out defaultType);
                             break;
                         case "MaximumUncompressedContainerSize":
-                            maximumUncompressedContainerSize = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, 1, Int32.MaxValue);
+                            maximumUncompressedContainerSize = ParseHelper.GetAttributeLongValue(sourceLineNumbers, attrib, 1, long.MaxValue);
                             break;
                         case "MaximumUncompressedExeSize":
                             maximumUncompressedExeSize = ParseHelper.GetAttributeLongValue(sourceLineNumbers, attrib, 1, UInt32.MaxValue);
                             break;
                         case "Compression":
                             TryParseEnumAttribute(sourceLineNumbers, element, attrib, out compression);
+#if !EnableZipContainer
+                            if (compression != PSW_ContainerTemplate.ContainerCompressionType.Cab)
+                            {
+                                Messaging.Write(PanelSwWixErrorMessages.PswWixAttribute(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName));
+                            }
+#endif
                             break;
                         default:
                             ParseHelper.UnexpectedAttribute(element, attrib);
@@ -362,6 +368,19 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
+            if (maximumUncompressedContainerSize == null)
+            {
+                maximumUncompressedContainerSize = (compression == PSW_ContainerTemplate.ContainerCompressionType.Cab) ? Int32.MaxValue : Int64.MaxValue;
+            }
+            if ((maximumUncompressedContainerSize.Value > Int32.MaxValue) && (compression == PSW_ContainerTemplate.ContainerCompressionType.Cab))
+            {
+                Messaging.Write(ErrorMessages.MaximumUncompressedMediaSizeTooLarge(sourceLineNumbers, Int32.MaxValue));
+            }
+
+            if (string.IsNullOrEmpty(cabinetTemplate))
+            {
+                cabinetTemplate = "bundle-attached-{0}." + compression.ToString().ToLower();
+            }
             if (!cabinetTemplate.Contains("{0}"))
             {
                 Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, element.Name.LocalName, "CabinetTemplate", cabinetTemplate, "Must contain format string {0}"));
@@ -374,19 +393,13 @@ namespace PanelSw.Wix.Extensions
             {
                 maximumUncompressedExeSize = UInt32.MaxValue; //4GB
             }
-#if !EnableZipContainer
-            if (compression != PSW_ContainerTemplate.ContainerCompressionType.Cab)
-            {
-                Messaging.Write(PanelSwWixErrorMessages.PswWixAttribute(sourceLineNumbers, element.Name.LocalName, "Compression"));
-            }
-#endif
 
             if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
                 PSW_ContainerTemplate symbol = section.AddSymbol(new PSW_ContainerTemplate(sourceLineNumbers));
                 symbol.CabinetTemplate = cabinetTemplate;
                 symbol.DefaultType = defaultType;
-                symbol.MaximumUncompressedContainerSize = maximumUncompressedContainerSize;
+                symbol.MaximumUncompressedContainerSize = maximumUncompressedContainerSize.Value;
                 symbol.MaximumUncompressedExeSize = maximumUncompressedExeSize;
                 symbol.Compression = compression;
 

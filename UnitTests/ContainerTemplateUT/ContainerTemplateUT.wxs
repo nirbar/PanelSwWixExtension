@@ -6,7 +6,9 @@
     <PanelSW:ContainerTemplate DefaultType="detached" Compression="zip"/>
 
     <Chain ParallelCache="yes" DisableSystemRestore="yes">
-      <ExePackage SourceFile="$(DeferredExePackage.TargetPath)" DetectCondition="1=0" UninstallArguments="/u" InstallArguments="--ignore-me"/>
+      <ExePackage SourceFile="$(DeferredExePackage.TargetPath)" DetectCondition="1=0" UninstallArguments="/u" InstallArguments="--ignore-me">
+        <PayloadGroupRef Id="ContainerTemplateUT"/>
+      </ExePackage>
     </Chain>
   </Bundle>
 </Wix>

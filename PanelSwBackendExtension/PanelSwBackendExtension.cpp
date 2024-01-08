@@ -26,11 +26,33 @@ CPanelSwBundleExtension::~CPanelSwBundleExtension()
 	Reset();
 }
 
-void CPanelSwBundleExtension::Reset()
+HRESULT CPanelSwBundleExtension::Reset()
 {
-	_pArchive.reset();
-	_zipStream.reset();
-	_currFile.clear();
+	HRESULT hr = S_OK;
+	try
+	{
+		_pArchive.reset();
+		_zipStream.reset();
+		_currFile.clear();
+	}
+	catch (Poco::Exception ex)
+	{
+		hr = (ex.code() == 0) ? E_FAIL : __HRESULT_FROM_WIN32(ex.code());
+		BextExitOnFailure(hr, "Failed to close zip. %hs", ex.displayText().c_str());
+	}
+	catch (std::exception ex)
+	{
+		hr = E_FAIL;
+		BextExitOnFailure(hr, "Failed to close zip. %hs", ex.what());
+	}
+	catch (...)
+	{
+		hr = E_FAIL;
+		BextExitOnFailure(hr, "Failed to open archive");
+	}
+
+LExit:
+	return hr;
 }
 
 STDMETHODIMP CPanelSwBundleExtension::ContainerOpen(LPCWSTR wzContainerId, LPCWSTR wzFilePath, LPVOID* pContext)
@@ -184,8 +206,7 @@ STDMETHODIMP CPanelSwBundleExtension::ContainerSkipStream(LPVOID pContext)
 //TODO Release everything in the context
 STDMETHODIMP CPanelSwBundleExtension::ContainerClose(LPVOID pContext)
 {
-	Reset();
-	return S_OK;
+	return Reset();
 }
 
 extern "C" HRESULT WINAPI BundleExtensionCreate(
