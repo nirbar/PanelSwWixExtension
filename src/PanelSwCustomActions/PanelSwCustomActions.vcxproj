@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectCapability Include="PackageReferences" />
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <NuGetTargetMoniker Condition="'$(NuGetTargetMoniker)' == ''">native,Version=v0.0</NuGetTargetMoniker>
+    <ProjectGuid>{0C3A56AA-8073-44E1-8DE4-C257D581BFF0}</ProjectGuid>
+    <RootNamespace>PanelSwCustomActions</RootNamespace>
+    <TargetName>PanelSwCustomActions</TargetName>
+    <Keyword>Win32Proj</Keyword>
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <UseOfAtl>Static</UseOfAtl>
+    <LinkIncremental Condition="'$(Configuration)'=='Release'">false</LinkIncremental>
+    <ResolveNuGetPackages>false</ResolveNuGetPackages>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)'=='Release'" Label="Configuration">
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ItemDefinitionGroup>
+    <ClCompile>
+      <AdditionalIncludeDirectories>$(MSBuildThisFileDirectory)..\CaCommon;$(MSBuildThisFileDirectory)..\poco\Zip\include;$(MSBuildThisFileDirectory)..\poco\JSON\include;$(MSBuildThisFileDirectory)..\poco\Foundation\include;$(MSBuildThisFileDirectory)..\protobuf\src;$(IntDir)\..\Protobuf;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;EXAMPLECADLL_EXPORTS;FullVersion="$(FullVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <WarningLevel>Level3</WarningLevel>
+    </ClCompile>
+    <Link>
+      <AdditionalDependencies>CaCommon.lib;libprotobuf-lite.lib;ProtoCaLib.lib;msi.lib;Version.lib;Shell32.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(OutDir)\..\CaCommon\;$(OutDir)\..\ProtoCaLib;$(BuildFolderCommon)$(Platform)\poco\lib\$(Configuration);$(BuildFolderCommon)$(Platform)\protobuf\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <SubSystem>Windows</SubSystem>
+      <TargetMachine Condition="'$(Platform)' == 'x86'">MachineX86</TargetMachine>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
+    <ClCompile>
+      <Optimization>MaxSpeed</Optimization>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <OptimizeReferences>true</OptimizeReferences>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <ModuleDefinitionFile>PanelSwCustomActions.def</ModuleDefinitionFile>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="AccountNames.cpp" />
+    <ClCompile Include="CheckRebootRequired.cpp" />
+    <ClCompile Include="ConcatFiles.cpp" />
+    <ClCompile Include="DllMain.cpp" />
+    <ClCompile Include="FolderPaths.cpp" />
+    <ClCompile Include="ForceVersion.cpp" />
+    <ClCompile Include="AccountSidSearch.cpp" />
+    <ClCompile Include="BackupAndRestore.cpp" />
+    <ClCompile Include="CertificateHashSearch.cpp" />
+    <ClCompile Include="CleanPendingFileRenameOperations.cpp" />
+    <ClCompile Include="CommonDeferred.cpp" />
+    <ClCompile Include="CreateSelfSignCertificate.cpp" />
+    <ClCompile Include="DiskSpace.cpp" />
+    <ClCompile Include="DismSched.cpp" />
+    <ClCompile Include="EvaluateExpression.cpp" />
+    <ClCompile Include="ExecOnComponent.cpp" />
+    <ClCompile Include="FileOperations.cpp" />
+    <ClCompile Include="FileRegex.cpp" />
+    <ClCompile Include="ListProcessorFeatures.cpp" />
+    <ClCompile Include="IsWindowsVersionOrGreater.cpp" />
+    <ClCompile Include="Md5Hash.cpp" />
+    <ClCompile Include="ExtractPayload.cpp" />
+    <ClCompile Include="PromptFileDowngrades.cpp" />
+    <ClCompile Include="RestartLocalResources.cpp" />
+    <ClCompile Include="Log.cpp" />
+    <ClCompile Include="MsiSqlQuery.cpp" />
+    <ClCompile Include="PathSearch.cpp" />
+    <ClCompile Include="RegDataSerializer.cpp" />
+    <ClCompile Include="CustomUninstallKey.cpp" />
+    <ClCompile Include="ReadIniValues.cpp" />
+    <ClCompile Include="RegistryXmlParser.cpp" />
+    <ClCompile Include="RegularExpression.cpp" />
+    <ClCompile Include="RemoveRegistryValue.cpp" />
+    <ClCompile Include="Rollback.cpp" />
+    <ClCompile Include="ServiceConfig.cpp" />
+    <ClCompile Include="SetPropertyFromPipe.cpp" />
+    <ClCompile Include="ShellExecute.cpp" />
+    <ClCompile Include="PathOperations.cpp" />
+    <ClCompile Include="SqlScript.cpp" />
+    <ClCompile Include="SqlSearch.cpp" />
+    <ClCompile Include="StringOperations.cpp" />
+    <ClCompile Include="pch.cpp">
+      <PrecompiledHeader>Create</PrecompiledHeader>
+    </ClCompile>
+    <ClCompile Include="TaskScheduler.cpp" />
+    <ClCompile Include="Telemetry.cpp" />
+    <ClCompile Include="TerminateSuccessfully.cpp" />
+    <ClCompile Include="TopShelfService.cpp" />
+    <ClCompile Include="Unzip.cpp" />
+    <ClCompile Include="VersionCompare.cpp" />
+    <ClCompile Include="WmiSearch.cpp" />
+    <ClCompile Include="XmlSearch.cpp" />
+    <ClCompile Include="XslTransform.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ConcatFiles.h" />
+    <ClInclude Include="ExecOnComponent.h" />
+    <ClInclude Include="FileOperations.h" />
+    <ClInclude Include="FileRegex.h" />
+    <ClInclude Include="RegDataSerializer.h" />
+    <ClInclude Include="CustomUninstallKey.h" />
+    <ClInclude Include="RegistryXmlParser.h" />
+    <ClInclude Include="RestartLocalResources.h" />
+    <ClInclude Include="ServiceConfig.h" />
+    <ClInclude Include="ShellExecute.h" />
+    <ClInclude Include="SqlScript.h" />
+    <ClInclude Include="framework.h" />
+    <ClInclude Include="pch.h" />
+    <ClInclude Include="TaskScheduler.h" />
+    <ClInclude Include="Telemetry.h" />
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\concatFilesDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\execOnDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\fileOperationsDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\fileRegexDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\servciceConfigDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\shellExecDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\taskSchedulerDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\telemetryDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\topShelfServiceDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\setPropertyFromPipeDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\unzipDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\registryValueDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\obfuscatedString.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
+    <ClInclude Include="TopShelfService.h" />
+    <ClInclude Include="Unzip.h" />
+    <ClInclude Include="XslTransform.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="TidyBuild" />
+    <PackageReference Include="WixToolset.DUtil" />
+    <PackageReference Include="WixToolset.WcaUtil" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="PanelSwCustomActions.def" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <Target Name="BuildPoco" BeforeTargets="PrepareForBuild" Condition="!Exists('$(BuildFolderCommon)$(Platform)\poco\lib\$(Configuration)\PocoZipmt.lib')">
+    <MakeDir Directories="$(BuildFolderCommon)$(Platform)\poco" />
+    <Exec Command="&quot;$(CMakeDir)cmake.exe&quot; -G &quot;$(CMakeVsVersion)&quot; -T $(PlatformToolset),host=x86 -A $(Platform) -DPOCO_STATIC=ON -DPOCO_MT=ON &quot;$(MSBuildThisFileDirectory)..\poco&quot;" WorkingDirectory="$(BuildFolderCommon)$(Platform)\poco" />
+    <Exec Command="&quot;$(CMakeDir)cmake.exe&quot; --build . --config $(Configuration)" WorkingDirectory="$(BuildFolderCommon)$(Platform)\poco" />
+  </Target>
+</Project>

@@ -1,5 +1,4 @@
 Debug
-/
 obj/
 bin/
 *.sdf
@@ -11,7 +10,7 @@ bin/
 /nuget-out
 .vs/
 *.ipch
-/packages/
+packages/
 /build/
 /build-common/
 *.user.*

@@ -38,7 +38,7 @@ jobs:
     - name: Clean PanelSwWixExtension (keep extranal code build)
       run: |
         Remove-Item ("${{ github.workspace }}" + "\build") -Recurse -Force
-        nuget restore
+        nuget restore src/dirs.proj
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v2
@@ -46,7 +46,7 @@ jobs:
         languages: ${{ matrix.language }}
 
     - name: Build & scan
-      run: msbuild dirs.proj -restore -p:DisableNuget=true
+      run: msbuild src/dirs.proj -restore -p:DisableNuget=true
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2

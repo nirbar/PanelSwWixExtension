@@ -1,0 +1,21 @@
+<Project Sdk="WixToolset.Sdk">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetName>PanelSwWixLib</TargetName>
+    <LibBindFiles>true</LibBindFiles>
+    <BindFiles>true</BindFiles>
+    <DefineConstants>BaseBuildFolder=$(BaseBuildFolder);$(DefineConstants)</DefineConstants>
+    <DefineConstants Condition="$(EnableZipContainer)">EnableZipContainer=1;$(DefineConstants)</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\PswManagedCA\PswManagedCA.csproj" Platforms="x86;x64" Properties="Configuration=Release"/>
+    <ProjectReference Include="..\PanelSwCustomActions\PanelSwCustomActions.vcxproj" Properties="Configuration=Release"/>
+    <ProjectReference Include="..\Dism\Dism.vcxproj" Platforms="Win32;x64" Properties="Configuration=Release"/>
+    <ProjectReference Include="..\DeferredExePackage\DeferredExePackage.vcxproj" Properties="Configuration=Release"/>
+    <ProjectReference Include="..\PanelSwBackendExtension\PanelSwBackendExtension.vcxproj" Properties="Configuration=Release" Condition="$(EnableZipContainer)"/>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="WixToolset.Util.wixext" />
+    <PackageReference Include="TidyBuild" />
+  </ItemGroup>
+</Project>

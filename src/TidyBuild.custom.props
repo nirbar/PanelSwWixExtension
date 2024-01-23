@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="16.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildThisFileDirectory)TidyBuild.user.props" Condition="Exists('$(MSBuildThisFileDirectory)TidyBuild.user.props')"/>
+  <PropertyGroup>
+    <FullVersion>3.17.0</FullVersion>
+    <FullVersion Condition=" '$(GITHUB_RUN_NUMBER)'!='' ">$(FullVersion).$(GITHUB_RUN_NUMBER)</FullVersion>
+    <ProductName>PanelSwWixExtension</ProductName>
+    <Manufacturer>Panel::Software</Manufacturer>
+
+    <NugetPrereleaseVersion>-psw-wix</NugetPrereleaseVersion>
+    <EnableZipContainer>true</EnableZipContainer>
+
+    <!-- CMake -->
+    <CMakeDir Condition="'$(CMakeDir)' == ''"></CMakeDir>
+    <CMakeVsVersion Condition="'$(CMakeVsVersion)'==''">Visual Studio 17 2022</CMakeVsVersion>
+    <PlatformToolset Condition="'$(PlatformToolset)'==''">v142</PlatformToolset>
+    <XPDeprecationWarning>false</XPDeprecationWarning>
+
+    <WindowsKitSharedDir Condition="'$(WindowsKitSharedDir)'=='' And Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\')">C:\Program Files (x86)\Windows Kits\10\Include\10.0.22621.0\shared\</WindowsKitSharedDir>
+    <WindowsKitSharedDir Condition="'$(WindowsKitSharedDir)'=='' And Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.22000.0\shared\')">C:\Program Files (x86)\Windows Kits\10\Include\10.0.22000.0\shared\</WindowsKitSharedDir>
+    <WindowsKitSharedDir Condition="'$(WindowsKitSharedDir)'=='' And Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\shared\')">C:\Program Files (x86)\Windows Kits\10\Include\10.0.19041.0\shared\</WindowsKitSharedDir>
+    <WindowsKitSharedDir Condition="'$(WindowsKitSharedDir)'=='' And Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\')">C:\Program Files (x86)\Windows Kits\10\Include\10.0.18362.0\shared\</WindowsKitSharedDir>
+    <WindowsKitSharedDir Condition="'$(WindowsKitSharedDir)'=='' And Exists('C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\shared\')">C:\Program Files (x86)\Windows Kits\10\Include\10.0.17134.0\shared\</WindowsKitSharedDir>
+    <DismApiDir Condition="'$(DismApiDir)'==''">C:\Program Files (x86)\Windows Kits\10\Assessment and Deployment Kit\Deployment Tools\SDKs\DismApi\</DismApiDir>
+
+    <DefineConstants Condition="'$(MSBuildProjectExtension)' != '.csproj'">JetVersion=$(FullVersion);JetProductName=$(ProductName);JetManufacturer=$(Manufacturer);$(DefineConstants)</DefineConstants>
+
+    <IsPackable>false</IsPackable>
+    <SuppressPdbOutput>true</SuppressPdbOutput>
+    <SignAssembly Condition="Exists('$(AssemblyOriginatorKeyFile)')">true</SignAssembly>
+
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Build folders">
+    <BaseBuildFolder Condition="'$(BaseBuildFolder)'==''">$(MSBuildThisFileDirectory)..\build\</BaseBuildFolder>
+    <BaseIntermediateOutputPath Condition="'$(BaseIntermediateOutputPath)'==''">$(BaseBuildFolder)obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath Condition="'$(MSBuildProjectExtensionsPath )'==''">$(BaseIntermediateOutputPath)</MSBuildProjectExtensionsPath >
+
+    <BuildFolderCommon Condition="'$(BuildFolderCommon)'==''">$([System.IO.Path]::GetFullPath('$(BaseBuildFolder)..\build-common\'))</BuildFolderCommon>
+    <BuildFolderWin32 Condition="'$(BuildFolderWin32)'==''">$(BaseBuildFolder)x86\</BuildFolderWin32>
+    <BuildFolder Condition="'$(BuildFolder)'=='' And ('$(Platform)' == 'Win32' Or '$(Platform)' == 'x86')">$(BuildFolderWin32)</BuildFolder>
+    <BuildFolder Condition="'$(BuildFolder)'==''">$(BaseBuildFolder)$(Platform)\</BuildFolder>
+
+    <OutputPath Condition="'$(OutputPath)'==''">$(BuildFolder)bin\$(Configuration)\$(MSBuildProjectName)\</OutputPath>
+    <OutDirLib Condition="'$(OutDirLib)'==''">$(BuildFolder)lib\$(Configuration)\</OutDirLib>
+    <IntermediateOutputPath Condition="'$(IntermediateOutputPath)'==''">$(BuildFolder)obj\$(Configuration)\$(MSBuildProjectName)\</IntermediateOutputPath>
+
+    <OutDir Condition="'$(OutDir)'==''">$(OutputPath)</OutDir>
+    <IntDir Condition="'$(IntDir)'==''">$(IntermediateOutputPath)</IntDir>
+    <OutputDirectory Condition="'$(OutputDirectory)'==''">$(OutputPath)</OutputDirectory>
+    <IntermediateDirectory Condition="'$(IntermediateDirectory)'==''">$(IntermediateOutputPath)</IntermediateDirectory>
+
+    <GenerateAssemblyInformationalVersionAttribute>false</GenerateAssemblyInformationalVersionAttribute>
+    <GenerateAssemblyVersionAttribute>false</GenerateAssemblyVersionAttribute>
+    <GenerateAssemblyFileVersionAttribute>false</GenerateAssemblyFileVersionAttribute>
+  </PropertyGroup>
+
+  <!--TODO Future changes:
+  - Remember property (store by HKMU\Software\ProductCode)
+  - Progress on Unzip
+  -->
+</Project>

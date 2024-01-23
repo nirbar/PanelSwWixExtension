@@ -1,10 +1,10 @@
 [submodule "protobuf"]
-	path = protobuf
+	path = src/protobuf
 	url = https://github.com/google/protobuf.git
 	branch = 3.5.1.1
 [submodule "exprtk"]
-	path = exprtk
+	path = src/exprtk
 	url = https://github.com/ArashPartow/exprtk.git
 [submodule "poco"]
-	path = poco
+	path = src/poco
 	url = https://github.com/pocoproject/poco.git

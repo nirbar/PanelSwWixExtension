@@ -11,7 +11,7 @@ on:
       psw_wix_version:
         description: 'PanelSwWix4 version'
         required: true
-        default: 5.0.0-psw-wix.0246-34
+        default: 5.0.0-psw-wix.0248-35
         type: string
 
 jobs:
@@ -26,7 +26,7 @@ jobs:
       - name: Resolve build version
         run: |
           $xmlDoc = New-Object System.Xml.XmlDocument
-          $file = [System.IO.Path]::Combine("${{ github.workspace }}", "TidyBuild.custom.props")
+          $file = [System.IO.Path]::Combine("${{ github.workspace }}", "src", "TidyBuild.custom.props")
           [xml]$xmlDoc = Get-Content $file
           $node = $xmlDoc.SelectSingleNode('//*[local-name(.)="FullVersion"]')
           Add-Content -Path ${{ github.env }} -Value ("FULL_VERSION=" + $node.InnerText + ".${{ github.run_number }}")
@@ -37,27 +37,28 @@ jobs:
             Add-Content -Path ${{ github.env }} -Value "PSW_WIX_VERSION=${{ env.DEFAULT_PSW_WIX_VERSION }}"
           }
         env:
-          DEFAULT_PSW_WIX_VERSION: '5.0.0-psw-wix.0246-34'
+          DEFAULT_PSW_WIX_VERSION: '5.0.0-psw-wix.0248-35'
 
       - name: Prepare for build
         run: |
           choco install windows-adk-all
           dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
-          nuget restore
+          nuget restore src/dirs.proj
 
       - name: Build PanelSwWixExtension
-        run: msbuild dirs.proj -restore -p:FullVersion=${{ env.FULL_VERSION }}
+        run: msbuild src/dirs.proj -restore -p:FullVersion=${{ env.FULL_VERSION }}
 
       - name: Build PanelSwWixExtension with PanelSwWix4
         run: |
-          msbuild dirs.proj -t:WixtoolsetToPanelSwWix4 "-p:PanelSwWix4Version=${{ env.PSW_WIX_VERSION }}" -p:NugetPrereleaseVersion=-psw-wix
+          msbuild src/dirs.proj -t:WixtoolsetToPanelSwWix4 "-p:PanelSwWix4Version=${{ env.PSW_WIX_VERSION }}" -p:NugetPrereleaseVersion=-psw-wix
           Remove-Item ("${{ github.workspace }}" + "\build") -Recurse -Force
-          msbuild dirs.proj -restore -p:FullVersion=${{ env.FULL_VERSION }} "-p:PanelSwWix4Version=${{ env.PSW_WIX_VERSION }}" -p:NugetPrereleaseVersion=-psw-wix
+          msbuild src/dirs.proj -restore -p:FullVersion=${{ env.FULL_VERSION }} "-p:PanelSwWix4Version=${{ env.PSW_WIX_VERSION }}" -p:NugetPrereleaseVersion=-psw-wix -p:EnableZipContainer=true
 
       - uses: actions/upload-artifact@v3.1.2
         with:
           name: nuget
           path: nuget-out\*.nupkg
+          if-no-files-found: error
 
       - name: Publish nuget packages to github and nuget.org
         if: ${{ github.event.inputs.publish_nuget == 'true' && github.ref == 'refs/heads/master4' }}

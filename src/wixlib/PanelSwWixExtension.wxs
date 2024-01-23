@@ -1,0 +1,965 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs">
+
+  <!-- PanelSwCustomActions.dll binary -->
+  <Fragment>
+    <Binary Id="PanelSwCustomActions.dll" SuppressModularization="yes" SourceFile="$(BaseBuildFolder)\$(sys.BUILDARCH)\bin\$(Configuration)\PanelSwCustomActions\PanelSwCustomActions.dll"></Binary>
+  </Fragment>
+  <!-- PswManagedCA.CA.dll binary -->
+  <Fragment>
+    <Binary Id="PswManagedCA.X64.dll" SuppressModularization="yes" SourceFile="$(BaseBuildFolder)\x64\bin\$(Configuration)\PswManagedCA\PswManagedCA.CA.dll"></Binary>
+    <Binary Id="PswManagedCA.X86.dll" SuppressModularization="yes" SourceFile="$(BaseBuildFolder)\x86\bin\$(Configuration)\PswManagedCA\PswManagedCA.CA.dll"></Binary>
+  </Fragment>
+  <!-- DismX64.dll binary -->
+  <Fragment>
+    <Binary Id="Dism.X64.dll" SuppressModularization="yes" SourceFile="$(BaseBuildFolder)\x64\bin\$(Configuration)\Dism\Dism.dll"></Binary>
+    <Binary Id="Dism.X86.dll" SuppressModularization="yes" SourceFile="$(BaseBuildFolder)\x86\bin\$(Configuration)\Dism\Dism.dll"></Binary>
+  </Fragment>
+
+  <!-- PanelSwBackendExtension.dll payload -->
+  <?ifdef EnableZipContainer?>
+  <Fragment>
+    <BundleExtension Id="PanelSwWixContainer" SourceFile="!(bindpath.PanelSwBackendExtension)\PanelSwBackendExtension.dll"/>
+  </Fragment>
+  <?endif?>
+
+  <!-- ShellExecute -->
+  <Fragment>
+    <CustomAction Id="ShellExecute_Immediate" SuppressModularization="yes" DllEntry="PSW_ShellExecute" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ShellExecute_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Return="check" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ShellExecute_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ShellExecute_commit" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="commit" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+
+    <InstallExecuteSequence>
+      <Custom Action="ShellExecute_Immediate" Before="ProcessComponents" Overridable="yes" />
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="ShellExecute_deferred" Message="Executing commands" />
+      <ProgressText Action="ShellExecute_rollback" Message="Executing commands" />
+      <ProgressText Action="ShellExecute_commit" Message="Executing commands" />
+    </UI>
+  </Fragment>
+
+  <!-- CustomUninstallKey -->
+  <Fragment>
+    <CustomAction Id="CustomUninstallKey_Immediate" SuppressModularization="yes" DllEntry="CustomUninstallKey_Immediate" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="CustomUninstallKey_deferred" SuppressModularization="yes" DllEntry="CustomUninstallKey_deferred" Execute="deferred" Return="check" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="CustomUninstallKey_rollback" SuppressModularization="yes" DllEntry="CustomUninstallKey_deferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+
+    <InstallExecuteSequence>
+      <Custom Action="CustomUninstallKey_Immediate" Before="PublishProduct" Overridable="yes" />
+    </InstallExecuteSequence>
+
+    <UI>
+      <ProgressText Action="CustomUninstallKey_deferred" Message="!(loc.CustomUninstallKey)" />
+      <ProgressText Action="CustomUninstallKey_rollback" Message="!(loc.CustomUninstallKey)" />
+    </UI>
+  </Fragment>
+
+  <!-- RemoveRegistryValue -->
+  <Fragment>
+    <CustomAction Id="RemoveRegistryValue_Immediate" SuppressModularization="yes" DllEntry="RemoveRegistryValue_Immediate" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="RemoveRegistryValue_deferred" SuppressModularization="yes" DllEntry="RemoveRegistryValue_Deferred" Execute="deferred" Return="check" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="RemoveRegistryValue_rollback" SuppressModularization="yes" DllEntry="RemoveRegistryValue_Deferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+
+    <InstallExecuteSequence>
+      <Custom Action="RemoveRegistryValue_Immediate" After="RemoveRegistryValues" Overridable="yes" />
+    </InstallExecuteSequence>
+
+    <UI>
+      <ProgressText Action="RemoveRegistryValue_deferred" Message="!(loc.RemoveRegistryValue)" />
+      <ProgressText Action="RemoveRegistryValue_rollback" Message="!(loc.RemoveRegistryValue)" />
+    </UI>
+  </Fragment>
+
+  <!-- ReadIniValues -->
+  <Fragment>
+    <CustomAction Id="ReadIniValues" SuppressModularization="yes" DllEntry="ReadIniValues" Execute="firstSequence" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="ReadIniValues" After="AppSearch" Overridable="yes" />
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="ReadIniValues" After="AppSearch" Overridable="yes" />
+    </InstallUISequence>
+  </Fragment>
+
+  <!-- XmlSearch -->
+  <Fragment>
+    <CustomAction Id="XmlSearch" SuppressModularization="yes" DllEntry="XmlSearch" Execute="firstSequence" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="XmlSearch" After="AppSearch" Overridable="yes" />
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="XmlSearch" After="AppSearch" Overridable="yes" />
+    </InstallUISequence>
+  </Fragment>
+
+  <!-- Telemetry -->
+  <Fragment>
+    <CustomAction Id="Telemetry" SuppressModularization="yes" DllEntry="Telemetry" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="Telemetry_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="Telemetry_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="Telemetry_commit" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="commit" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+
+    <InstallExecuteSequence>
+      <Custom Action="Telemetry" Before="ProcessComponents" Overridable="yes" />
+    </InstallExecuteSequence>
+
+    <UI>
+      <ProgressText Action="Telemetry_deferred" Message="!(loc.Telemetry)" />
+      <ProgressText Action="Telemetry_rollback" Message="!(loc.Telemetry)" />
+      <ProgressText Action="Telemetry_commit" Message="!(loc.Telemetry)" />
+    </UI>
+  </Fragment>
+
+  <!-- TerminateSuccessfully -->
+  <Fragment>
+    <CustomAction Id="TerminateSuccessfully_Immediate" SuppressModularization="yes" DllEntry="TerminateSuccessfully" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="TerminateSuccessfully_Deferred" SuppressModularization="yes" DllEntry="TerminateSuccessfully" Execute="deferred" Return="check" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+  </Fragment>
+
+  <!-- SplitPath -->
+  <Fragment>
+    <CustomAction Id="SplitPath" SuppressModularization="yes" DllEntry="SplitPath" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+
+    <InstallExecuteSequence>
+      <Custom Action="SplitPath" After="CostFinalize" Overridable="yes" />
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="SplitPath" After="CostFinalize" Overridable="yes" />
+    </InstallUISequence>
+  </Fragment>
+
+  <!-- PathExists -->
+  <Fragment>
+    <CustomAction Id="PathExists" SuppressModularization="yes" DllEntry="SplitString" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+  </Fragment>
+
+  <!-- SplitString -->
+  <Fragment>
+    <CustomAction Id="SplitString" SuppressModularization="yes" DllEntry="SplitString" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+  </Fragment>
+
+  <!-- TrimString -->
+  <Fragment>
+    <CustomAction Id="TrimString" SuppressModularization="yes" DllEntry="TrimString" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+  </Fragment>
+
+  <!-- RegularExpression -->
+  <Fragment>
+    <CustomAction Id="RegularExpression" SuppressModularization="yes" DllEntry="RegularExpression" Execute="firstSequence" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallUISequence>
+      <Custom Action="RegularExpression" After="CostFinalize" Overridable="yes" />
+    </InstallUISequence>
+    <InstallExecuteSequence>
+      <Custom Action="RegularExpression" After="CostFinalize" Overridable="yes" />
+    </InstallExecuteSequence>
+  </Fragment>
+
+  <!-- FileRegex -->
+  <Fragment>
+    <CustomAction Id="FileRegex_Immediate" SuppressModularization="yes" DllEntry="FileRegex" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="FileRegex_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="FileRegex_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Return="check" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="FileRegex_commit" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="commit" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+
+    <InstallExecuteSequence>
+      <Custom Action="FileRegex_Immediate" After="DuplicateFiles" Overridable="yes" />
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="FileRegex_Immediate" Message="!(loc.FileRegex)" />
+      <ProgressText Action="FileRegex_rollback" Message="!(loc.FileRegex)" />
+      <ProgressText Action="FileRegex_deferred" Template="!(loc.FileRegexTemplate)" Message="!(loc.FileRegex)" />
+      <ProgressText Action="FileRegex_commit" Message="!(loc.FileRegex)" />
+    </UI>
+  </Fragment>
+
+  <!-- DeletePath -->
+  <Fragment>
+    <CustomAction Id="DeletePath" SuppressModularization="yes" DllEntry="DeletePath" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="DeletePath_commit" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="commit" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+
+    <InstallExecuteSequence>
+      <Custom Action="DeletePath" Before="InstallFinalize" Overridable="yes" />
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="DeletePath_commit" Message="Deleting files and folders" />
+    </UI>
+  </Fragment>
+
+  <Fragment>
+    <Property Id="DOMAIN_ADMINISTRATORS" Value="N/A" />
+    <Property Id="DOMAIN_GUESTS" Value="N/A" />
+    <Property Id="DOMAIN_USERS" Value="N/A" />
+    <Property Id="ENTERPRISE_DOMAIN_CONTROLLERS" Value="N/A" />
+    <Property Id="DOMAIN_DOMAIN_CONTROLLERS" Value="N/A" />
+    <Property Id="DOMAIN_COMPUTERS" Value="N/A" />
+    <Property Id="BUILTIN_ADMINISTRATORS" Value="N/A" />
+    <Property Id="BUILTIN_GUESTS" Value="N/A" />
+    <Property Id="BUILTIN_USERS" Value="N/A" />
+    <Property Id="LOCAL_ADMIN" Value="N/A" />
+    <Property Id="LOCAL_GUEST" Value="N/A" />
+    <Property Id="ACCOUNT_OPERATORS" Value="N/A" />
+    <Property Id="BACKUP_OPERATORS" Value="N/A" />
+    <Property Id="PRINTER_OPERATORS" Value="N/A" />
+    <Property Id="SERVER_OPERATORS" Value="N/A" />
+    <Property Id="AUTHENTICATED_USERS" Value="N/A" />
+    <Property Id="PERSONAL_SELF" Value="N/A" />
+    <Property Id="CREATOR_OWNER" Value="N/A" />
+    <Property Id="CREATOR_GROUP" Value="N/A" />
+    <Property Id="LOCAL_SYSTEM" Value="N/A" />
+    <Property Id="POWER_USERS" Value="N/A" />
+    <Property Id="EVERYONE" Value="N/A" />
+    <Property Id="REPLICATOR" Value="N/A" />
+    <Property Id="INTERACTIVE" Value="N/A" />
+    <Property Id="NETWORK" Value="N/A" />
+    <Property Id="SERVICE" Value="N/A" />
+    <Property Id="RESTRICTED_CODE" Value="N/A" />
+    <Property Id="WRITE_RESTRICTED_CODE" Value="N/A" />
+    <Property Id="ANONYMOUS" Value="N/A" />
+    <Property Id="SCHEMA_ADMINISTRATORS" Value="N/A" />
+    <Property Id="CERT_SERV_ADMINISTRATORS" Value="N/A" />
+    <Property Id="RAS_SERVERS" Value="N/A" />
+    <Property Id="ENTERPRISE_ADMINS" Value="N/A" />
+    <Property Id="GROUP_POLICY_ADMINS" Value="N/A" />
+    <Property Id="ALIAS_PREW2KCOMPACC" Value="N/A" />
+    <Property Id="LOCAL_SERVICE" Value="N/A" />
+    <Property Id="NETWORK_SERVICE" Value="N/A" />
+    <Property Id="REMOTE_DESKTOP" Value="N/A" />
+    <Property Id="NETWORK_CONFIGURATION_OPS" Value="N/A" />
+    <Property Id="PERFMON_USERS" Value="N/A" />
+    <Property Id="PERFLOG_USERS" Value="N/A" />
+    <Property Id="IIS_USERS" Value="N/A" />
+    <Property Id="CRYPTO_OPERATORS" Value="N/A" />
+    <Property Id="OWNER_RIGHTS" Value="N/A" />
+    <Property Id="EVENT_LOG_READERS" Value="N/A" />
+    <Property Id="ENTERPRISE_RO_DCs" Value="N/A" />
+    <Property Id="CERTSVC_DCOM_ACCESS" Value="N/A" />
+
+    <CustomAction Id="AccountNames" DllEntry="AccountNames" Execute="firstSequence" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallUISequence>
+      <Custom Action="AccountNames" Before="AppSearch" Overridable="yes" />
+    </InstallUISequence>
+    <InstallExecuteSequence>
+      <Custom Action="AccountNames" Before="AppSearch" Overridable="yes" />
+    </InstallExecuteSequence>
+  </Fragment>
+
+  <Fragment>
+    <Property Id="UserDesktopFolder" Value="N/A" />
+
+    <CustomAction Id="FolderPaths" DllEntry="FolderPaths" Execute="firstSequence" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallUISequence>
+      <Custom Action="FolderPaths" Before="AppSearch" Overridable="yes" />
+    </InstallUISequence>
+    <InstallExecuteSequence>
+      <Custom Action="FolderPaths" Before="AppSearch" Overridable="yes" />
+    </InstallExecuteSequence>
+  </Fragment>
+
+  <!-- MsiSqlQuery -->
+  <Fragment>
+    <CustomAction Id="MsiSqlQuery" SuppressModularization="yes" DllEntry="MsiSqlQuery" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+
+    <InstallExecuteSequence>
+      <Custom Action="MsiSqlQuery" After="CostFinalize" Overridable="yes" />
+    </InstallExecuteSequence>
+  </Fragment>
+
+  <!-- Rollback -->
+  <Fragment>
+    <CustomAction Id="Rollback_Immediate" SuppressModularization="yes" DllEntry="Rollback" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="Rollback_Deferred" SuppressModularization="yes" DllEntry="Rollback" Execute="deferred" Return="check" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+  </Fragment>
+
+  <!-- PromptCancel -->
+  <Fragment>
+    <CustomAction Id="PromptCancel_Immediate" SuppressModularization="yes" DllEntry="PromptCancel" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="PromptCancel_Deferred" SuppressModularization="yes" DllEntry="PromptCancel" Execute="deferred" Return="check" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+  </Fragment>
+
+  <!-- TaskScheduler -->
+  <Fragment>
+    <CustomAction Id="TaskScheduler" SuppressModularization="yes" DllEntry="TaskScheduler" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="TaskScheduler_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="TaskScheduler_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="TaskScheduler_commit" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="commit" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+
+    <InstallExecuteSequence>
+      <Custom Action="TaskScheduler" After="StartServices" Overridable="yes" />
+    </InstallExecuteSequence>
+
+    <UI>
+      <ProgressText Action="TaskScheduler_deferred" Message="!(loc.TaskScheduler)" />
+      <ProgressText Action="TaskScheduler_rollback" Message="!(loc.TaskScheduler)" />
+    </UI>
+  </Fragment>
+
+  <!-- ExecOnComponent -->
+  <Fragment>
+    <CustomAction Id="ExecOnComponent" SuppressModularization="yes" DllEntry="ExecOnComponent" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponentRollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponentCommit" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="commit" Return="ignore" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_BeforeStop_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_BeforeStop_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_AfterStop_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_AfterStop_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_BeforeStart_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_BeforeStart_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_AfterStart_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_AfterStart_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_Imp_BeforeStop_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_Imp_BeforeStop_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_Imp_AfterStop_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_Imp_AfterStop_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_Imp_BeforeStart_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_Imp_BeforeStart_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_Imp_AfterStart_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExecOnComponent_Imp_AfterStart_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomActionRef Id="PSW_CheckRebootRequired" />
+
+    <InstallExecuteSequence>
+      <Custom Action="ExecOnComponent" Before="ExecOnComponentRollback" Overridable="yes" />
+      <Custom Action="ExecOnComponentRollback" Before="ProcessComponents" Overridable="yes" />
+      <Custom Action="ExecOnComponentCommit" Before="InstallFinalize" Overridable="yes" />
+      <Custom Action="ExecOnComponent_BeforeStop_rollback" Before="ExecOnComponent_BeforeStop_deferred" Overridable="yes" />
+      <Custom Action="ExecOnComponent_BeforeStop_deferred" Before="StopServices" Overridable="yes" />
+      <Custom Action="ExecOnComponent_Imp_BeforeStop_rollback" Before="ExecOnComponent_Imp_BeforeStop_deferred" Overridable="yes" />
+      <Custom Action="ExecOnComponent_Imp_BeforeStop_deferred" Before="StopServices" Overridable="yes" />
+
+      <Custom Action="ExecOnComponent_AfterStop_rollback" Before="ExecOnComponent_AfterStop_deferred" Overridable="yes" />
+      <Custom Action="ExecOnComponent_AfterStop_deferred" After="StopServices" Overridable="yes" />
+      <Custom Action="ExecOnComponent_Imp_AfterStop_rollback" Before="ExecOnComponent_Imp_AfterStop_deferred" Overridable="yes" />
+      <Custom Action="ExecOnComponent_Imp_AfterStop_deferred" After="StopServices" Overridable="yes" />
+
+      <Custom Action="ExecOnComponent_BeforeStart_rollback" Before="ExecOnComponent_BeforeStart_deferred" Overridable="yes" />
+      <Custom Action="ExecOnComponent_BeforeStart_deferred" Before="StartServices" Overridable="yes" />
+      <Custom Action="ExecOnComponent_Imp_BeforeStart_rollback" Before="ExecOnComponent_Imp_BeforeStart_deferred" Overridable="yes" />
+      <Custom Action="ExecOnComponent_Imp_BeforeStart_deferred" Before="StartServices" Overridable="yes" />
+
+      <Custom Action="ExecOnComponent_AfterStart_rollback" Before="ExecOnComponent_AfterStart_deferred" Overridable="yes" />
+      <Custom Action="ExecOnComponent_AfterStart_deferred" After="StartServices" Overridable="yes" />
+      <Custom Action="ExecOnComponent_Imp_AfterStart_rollback" Before="ExecOnComponent_Imp_AfterStart_deferred" Overridable="yes" />
+      <Custom Action="ExecOnComponent_Imp_AfterStart_deferred" After="StartServices" Overridable="yes" />
+    </InstallExecuteSequence>
+
+    <UI>
+      <UIRef Id="ExecOnErros"/>
+      <ProgressText Action="ExecOnComponent" Message="!(loc.ExecOnComponent)" />
+      <ProgressText Action="ExecOnComponentRollback" Message="!(loc.ExecOnComponent)" />
+      <ProgressText Action="ExecOnComponentCommit" Message="!(loc.ExecOnComponent)" />
+      <ProgressText Action="ExecOnComponent_BeforeStop_rollback" Template="!(loc.ExecOnComponentTemplate)" Message="!(loc.ExecOnComponent)" />
+      <ProgressText Action="ExecOnComponent_BeforeStop_deferred" Template="!(loc.ExecOnComponentTemplate)" Message="!(loc.ExecOnComponent)" />
+      <ProgressText Action="ExecOnComponent_Imp_BeforeStop_rollback" Template="!(loc.ExecOnComponentTemplate)" Message="!(loc.ExecOnComponent)" />
+      <ProgressText Action="ExecOnComponent_Imp_BeforeStop_deferred" Template="!(loc.ExecOnComponentTemplate)" Message="!(loc.ExecOnComponent)" />
+      <ProgressText Action="ExecOnComponent_AfterStop_rollback" Template="!(loc.ExecOnComponentTemplate)" Message="!(loc.ExecOnComponent)" />
+      <ProgressText Action="ExecOnComponent_AfterStop_deferred" Template="!(loc.ExecOnComponentTemplate)" Message="!(loc.ExecOnComponent)" />
+      <ProgressText Action="ExecOnComponent_Imp_AfterStop_rollback" Template="!(loc.ExecOnComponentTemplate)" Message="!(loc.ExecOnComponent)" />
+      <ProgressText Action="ExecOnComponent_Imp_AfterStop_deferred" Template="!(loc.ExecOnComponentTemplate)" Message="!(loc.ExecOnComponent)" />
+      <ProgressText Action="ExecOnComponent_BeforeStart_rollback" Template="!(loc.ExecOnComponentTemplate)" Message="!(loc.ExecOnComponent)" />
+      <ProgressText Action="ExecOnComponent_BeforeStart_deferred" Template="!(loc.ExecOnComponentTemplate)" Message="!(loc.ExecOnComponent)" />
+      <ProgressText Action="ExecOnComponent_Imp_BeforeStart_rollback" Template="!(loc.ExecOnComponentTemplate)" Message="!(loc.ExecOnComponent)" />
+      <ProgressText Action="ExecOnComponent_Imp_BeforeStart_deferred" Template="!(loc.ExecOnComponentTemplate)" Message="!(loc.ExecOnComponent)" />
+      <ProgressText Action="ExecOnComponent_AfterStart_rollback" Template="!(loc.ExecOnComponentTemplate)" Message="!(loc.ExecOnComponent)" />
+      <ProgressText Action="ExecOnComponent_AfterStart_deferred" Template="!(loc.ExecOnComponentTemplate)" Message="!(loc.ExecOnComponent)" />
+      <ProgressText Action="ExecOnComponent_Imp_AfterStart_rollback" Template="!(loc.ExecOnComponentTemplate)" Message="!(loc.ExecOnComponent)" />
+      <ProgressText Action="ExecOnComponent_Imp_AfterStart_deferred" Template="!(loc.ExecOnComponentTemplate)" Message="!(loc.ExecOnComponent)" />
+    </UI>
+  </Fragment>
+
+  <Fragment>
+    <UI Id="ExecOnErros">
+      <Error Id="27001" Message="!(loc.ExecOnFailure)" />
+      <Error Id="27011" Message="!(loc.ExecOnPromptAlways)" />
+      <Error Id="27006" Message="!(loc.ExecOnConsoleFailure)" />
+    </UI>
+  </Fragment>
+
+  <!-- DISM -->
+  <Fragment>
+    <CustomAction Id="DismSched" SuppressModularization="yes" DllEntry="DismSched" Execute="immediate" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="DismX64" SuppressModularization="yes" DllEntry="Dism" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="Dism.X64.dll" />
+    <CustomAction Id="DismX86" SuppressModularization="yes" DllEntry="Dism" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="Dism.X86.dll" />
+    <CustomActionRef Id="PSW_CheckRebootRequired" />
+
+    <InstallExecuteSequence>
+      <Custom Action="DismSched" Before="StopServices" Overridable="yes" Condition="(VersionNT &gt; 601)" />
+      <Custom Action="DismX64" After="DismSched" Overridable="yes" Condition="DismX64" />
+      <Custom Action="DismX86" After="DismSched" Overridable="yes" Condition="DismX86" />
+    </InstallExecuteSequence>
+    <UI>
+      <Error Id="27003" Message="!(loc.DismPackageFailure)" />
+      <Error Id="27004" Message="!(loc.DismFeatureFailure)" />
+      <Error Id="27010" Message="!(loc.DismUnwantedFeatureFailure)" />
+      <ProgressText Action="DismSched" Message="!(loc.Dism)" />
+      <ProgressText Action="DismX64" Template="!(loc.DismTemplate)" Message="!(loc.Dism)" />
+      <ProgressText Action="DismX86" Template="!(loc.DismTemplate)" Message="!(loc.Dism)" />
+    </UI>
+  </Fragment>
+
+  <!-- WebsiteConfigSched -->
+  <Fragment>
+    <CustomAction Id="PSW_WebsiteConfigSched" SuppressModularization="yes" DllEntry="WebsiteConfigSched" Execute="immediate" BinaryRef="PswManagedCA.X86.dll" />
+    <CustomAction Id="PSW_WebsiteConfigExec" SuppressModularization="yes" DllEntry="WebsiteConfigExec" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PswManagedCA.X86.dll" />
+
+    <InstallExecuteSequence>
+      <Custom Action="PSW_WebsiteConfigSched" After="StartServices" Overridable="yes" />
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="PSW_WebsiteConfigSched" Message="!(loc.PSW_WebsiteConfig)" />
+      <ProgressText Action="PSW_WebsiteConfigExec" Message="!(loc.PSW_WebsiteConfig)" />
+      <Error Id="27007" Message="!(loc.WebsiteConfigFailure)" />
+    </UI>
+  </Fragment>
+
+  <!-- ZipFile -->
+  <Fragment>
+    <CustomAction Id="ZipFileSched" SuppressModularization="yes" DllEntry="ZipFileSched" Execute="immediate" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ZipFileExec" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+
+    <InstallExecuteSequence>
+      <Custom Action="ZipFileSched" After="DuplicateFiles" Overridable="yes" />
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="ZipFileSched" Message="!(loc.ZipFile)" />
+      <ProgressText Action="ZipFileExec" Template="!(loc.ZipFileTemplate)" Message="!(loc.ZipFile)" />
+      <Error Id="27013" Message="!(loc.ZipFileError)"/>
+      <Error Id="27014" Message="!(loc.ZipArchiveError)"/>
+    </UI>
+  </Fragment>
+
+  <!-- Unzip -->
+  <Fragment>
+    <CustomAction Id="UnzipSched" SuppressModularization="yes" DllEntry="Unzip" Execute="immediate" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="UnzipRollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="UnzipExec" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomActionRef Id="PSW_CheckRebootRequired" />
+
+    <InstallExecuteSequence>
+      <Custom Action="UnzipSched" After="DuplicateFiles" Overridable="yes" />
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="UnzipSched" Message="!(loc.Unzip)" />
+      <ProgressText Action="UnzipExec" Template="!(loc.UnzipTemplate)" Message="!(loc.Unzip)" />
+      <Error Id="27015" Message="!(loc.UnzipArchiveError)"/>
+      <Error Id="27016" Message="!(loc.UnzipFileError)"/>
+    </UI>
+  </Fragment>
+
+  <!-- ServiceConfig (account only for now) -->
+  <Fragment>
+    <CustomAction Id="PSW_ServiceConfig" SuppressModularization="yes" DllEntry="ServiceConfig" Execute="immediate" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="PSW_ServiceConfigRlbk" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="PSW_ServiceConfigExec" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomActionRef Id="PSW_CheckRebootRequired" />
+
+    <InstallExecuteSequence>
+      <Custom Action="PSW_ServiceConfig" After="InstallServices" Overridable="yes" />
+    </InstallExecuteSequence>
+    <UI>
+      <Error Id="27002" Message="!(loc.ServiceConfigFailure)" />
+      <ProgressText Action="PSW_ServiceConfig" Message="!(loc.ServiceConfig)" />
+      <ProgressText Action="PSW_ServiceConfigRlbk" Message="!(loc.ServiceConfig)" />
+      <ProgressText Action="PSW_ServiceConfigExec" Message="!(loc.ServiceConfig)" />
+    </UI>
+  </Fragment>
+
+  <!-- CleanPendingFileRenameOperations
+         - Remove 'delete' entries from registry key HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Session Manager\PendingFileRenameOperations that schedule creation and deletion of the same file.
+         - Remove 'delete' entries of files that are scheduled to install based on their component action
+  -->
+  <Fragment>
+    <CustomAction Id="CleanPendingFileRenameOperationsSched" SuppressModularization="yes" DllEntry="CleanPendingFileRenameOperationsSched" Execute="immediate" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="CleanPendingFileRenameOperations" SuppressModularization="yes" DllEntry="CleanPendingFileRenameOperations" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="CleanPendingFileRenameOperationsSched" Before="CleanPendingFileRenameOperations" Overridable="yes" />
+      <Custom Action="CleanPendingFileRenameOperations" Before="InstallFinalize" Overridable="yes" />
+    </InstallExecuteSequence>
+  </Fragment>
+
+  <!-- InstallUtil -->
+  <Fragment>
+    <CustomAction Id="PSW_InstallUtilSched" SuppressModularization="yes" DllEntry="InstallUtilSched" Execute="immediate" BinaryRef="PswManagedCA.X86.dll" />
+    <CustomAction Id="PSW_InstallUtil_InstallExec_x86" SuppressModularization="yes" DllEntry="InstallUtilExec" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PswManagedCA.X86.dll" />
+    <CustomAction Id="PSW_InstallUtil_InstallRollback_x86" SuppressModularization="yes" DllEntry="InstallUtilExec" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PswManagedCA.X86.dll" />
+    <CustomAction Id="PSW_InstallUtil_UninstallExec_x86" SuppressModularization="yes" DllEntry="InstallUtilExec" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PswManagedCA.X86.dll" />
+    <CustomAction Id="PSW_InstallUtil_UninstallRollback_x86" SuppressModularization="yes" DllEntry="InstallUtilExec" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PswManagedCA.X86.dll" />
+    <CustomAction Id="PSW_InstallUtil_InstallExec_x64" SuppressModularization="yes" DllEntry="InstallUtilExec" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PswManagedCA.X64.dll" />
+    <CustomAction Id="PSW_InstallUtil_InstallRollback_x64" SuppressModularization="yes" DllEntry="InstallUtilExec" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PswManagedCA.X64.dll" />
+    <CustomAction Id="PSW_InstallUtil_UninstallExec_x64" SuppressModularization="yes" DllEntry="InstallUtilExec" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PswManagedCA.X64.dll" />
+    <CustomAction Id="PSW_InstallUtil_UninstallRollback_x64" SuppressModularization="yes" DllEntry="InstallUtilExec" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PswManagedCA.X64.dll" />
+
+    <InstallExecuteSequence>
+      <Custom Action="PSW_InstallUtilSched" Before="ProcessComponents" Overridable="yes" />
+
+      <Custom Action="PSW_InstallUtil_InstallRollback_x64" Before="PSW_InstallUtil_InstallExec_x64" Overridable="yes" Condition="VersionNT64" />
+      <Custom Action="PSW_InstallUtil_InstallExec_x64" Before="InstallServices" Overridable="yes" Condition="VersionNT64" />
+      <Custom Action="PSW_InstallUtil_InstallRollback_x86" Before="PSW_InstallUtil_InstallExec_x86" Overridable="yes" />
+      <Custom Action="PSW_InstallUtil_InstallExec_x86" Before="InstallServices" Overridable="yes" />
+
+      <Custom Action="PSW_InstallUtil_UninstallRollback_x86" Before="PSW_InstallUtil_UninstallExec_x86" Overridable="yes" />
+      <Custom Action="PSW_InstallUtil_UninstallExec_x86" Before="DeleteServices" Overridable="yes" />
+      <Custom Action="PSW_InstallUtil_UninstallRollback_x64" Before="PSW_InstallUtil_UninstallExec_x64" Overridable="yes" Condition="VersionNT64" />
+      <Custom Action="PSW_InstallUtil_UninstallExec_x64" Before="DeleteServices" Overridable="yes" Condition="VersionNT64" />
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="PSW_InstallUtil_InstallExec_x86" Message="!(loc.InstallUtil)" />
+      <ProgressText Action="PSW_InstallUtil_InstallRollback_x86" Message="!(loc.InstallUtil)" />
+      <ProgressText Action="PSW_InstallUtil_UninstallExec_x86" Message="!(loc.InstallUtil)" />
+      <ProgressText Action="PSW_InstallUtil_UninstallRollback_x86" Message="!(loc.InstallUtil)" />
+      <ProgressText Action="PSW_InstallUtil_InstallExec_x64" Message="!(loc.InstallUtil)" />
+      <ProgressText Action="PSW_InstallUtil_InstallRollback_x64" Message="!(loc.InstallUtil)" />
+      <ProgressText Action="PSW_InstallUtil_UninstallExec_x64" Message="!(loc.InstallUtil)" />
+      <ProgressText Action="PSW_InstallUtil_UninstallRollback_x64" Message="!(loc.InstallUtil)" />
+    </UI>
+  </Fragment>
+
+  <!-- SqlSearch -->
+  <Fragment>
+    <CustomAction Id="SqlSearch" DllEntry="SqlSearch" Execute="firstSequence" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="SqlSearch" After="AppSearch" Overridable="yes" />
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="SqlSearch" After="AppSearch" Overridable="yes" />
+    </InstallUISequence>
+    <UI>
+      <Error Id="27008" Message="!(loc.PSW_SqlSearchFailure)" />
+      <ProgressText Action="SqlSearch" Message="!(loc.SqlSearch)" />
+    </UI>
+  </Fragment>
+
+  <!-- XslTransform -->
+  <Fragment>
+    <CustomAction Id="PSW_XslTransform" DllEntry="XslTransform" Execute="immediate" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="PSW_XslTransformExec" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="PSW_XslTransform" After="DuplicateFiles" Overridable="yes" />
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="PSW_XslTransform" Message="!(loc.PSW_XslTransform)" />
+      <ProgressText Action="PSW_XslTransformExec" Message="!(loc.PSW_XslTransform)" />
+    </UI>
+  </Fragment>
+
+  <!-- SqlScript -->
+  <Fragment>
+    <CustomAction Id="PSW_SqlScript" DllEntry="SqlScript" Execute="immediate" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="PSW_SqlScriptRollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="PSW_SqlScriptExec" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="PSW_SqlScript" After="DuplicateFiles" Overridable="yes" />
+    </InstallExecuteSequence>
+    <UI>
+      <Error Id="27005" Message="!(loc.PSW_SqlScriptFailure)" />
+      <ProgressText Action="PSW_SqlScript" Message="!(loc.PSW_SqlScript)" />
+      <ProgressText Action="PSW_SqlScriptRollback" Template="!(loc.PSW_SqlScriptTemplate)" Message="!(loc.PSW_SqlScript)" />
+      <ProgressText Action="PSW_SqlScriptExec" Template="!(loc.PSW_SqlScriptTemplate)" Message="!(loc.PSW_SqlScript)" />
+    </UI>
+  </Fragment>
+
+  <!-- BackupAndRestore -->
+  <Fragment>
+    <CustomAction Id="BackupAndRestore" SuppressModularization="yes" DllEntry="BackupAndRestore" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="BackupAndRestore_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="BackupAndRestore_deferred" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="BackupAndRestore_commit" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="commit" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+
+    <InstallExecuteSequence>
+      <Custom Action="BackupAndRestore" Before="RemoveExistingProducts" Overridable="yes" />
+      <Custom Action="BackupAndRestore_rollback" Before="ProcessComponents" Overridable="yes" />
+      <Custom Action="BackupAndRestore_commit" Before="InstallFinalize" Overridable="yes" />
+    </InstallExecuteSequence>
+
+    <UI>
+      <ProgressText Action="BackupAndRestore" Message="!(loc.BackupAndRestore)" />
+      <ProgressText Action="BackupAndRestore_rollback" Message="!(loc.BackupAndRestore)" />
+      <ProgressText Action="BackupAndRestore_deferred" Message="!(loc.BackupAndRestore)" />
+      <ProgressText Action="BackupAndRestore_commit" Message="!(loc.BackupAndRestore)" />
+    </UI>
+  </Fragment>
+
+  <Fragment>
+    <Property Id="BackupAndRestore_deferred_After_DuplicateFiles" Hidden="yes" />
+    <InstallExecuteSequence>
+      <Custom Action="BackupAndRestore_deferred" After="DuplicateFiles" Overridable="yes" />
+    </InstallExecuteSequence>
+  </Fragment>
+
+  <Fragment>
+    <Property Id="BackupAndRestore_deferred_Before_InstallFiles" Hidden="yes" />
+    <InstallExecuteSequence>
+      <Custom Action="BackupAndRestore_deferred" Before="InstallFiles" Overridable="yes" />
+    </InstallExecuteSequence>
+  </Fragment>
+
+  <Fragment>
+    <Property Id="BackupAndRestore_deferred_After_RemoveExistingProducts" Hidden="yes" />
+    <InstallExecuteSequence>
+      <Custom Action="BackupAndRestore_deferred" After="RemoveExistingProducts" Overridable="yes" />
+    </InstallExecuteSequence>
+  </Fragment>
+
+  <!-- TopShelf service -->
+  <Fragment>
+    <CustomAction Id="TopShelf" SuppressModularization="yes" DllEntry="TopShelf" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="TopShelfService_InstallRollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="TopShelfService_Install" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="TopShelfService_UninstallRollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="TopShelfService_Uninstall" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+
+    <InstallExecuteSequence>
+      <Custom Action="TopShelf" Before="TopShelfService_UninstallRollback" Overridable="yes" />
+      <Custom Action="TopShelfService_InstallRollback" Before="TopShelfService_Install" Overridable="yes" />
+      <Custom Action="TopShelfService_Install" Before="InstallServices" Overridable="yes" />
+      <Custom Action="TopShelfService_UninstallRollback" Before="TopShelfService_Uninstall" Overridable="yes" />
+      <Custom Action="TopShelfService_Uninstall" Before="DeleteServices" Overridable="yes" />
+    </InstallExecuteSequence>
+
+    <UI>
+      <Error Id="27000" Message="!(loc.TopShelfFailure)" />
+      <ProgressText Action="TopShelf" Message="!(loc.TopShelf)" />
+      <ProgressText Action="TopShelfService_InstallRollback" Message="!(loc.TopShelf)" />
+      <ProgressText Action="TopShelfService_Install" Message="!(loc.TopShelf)" />
+      <ProgressText Action="TopShelfService_UninstallRollback" Message="!(loc.TopShelf)" />
+      <ProgressText Action="TopShelfService_Uninstall" Message="!(loc.TopShelf)" />
+    </UI>
+  </Fragment>
+
+  <!-- CreateSelfSignCertificate -->
+  <Fragment>
+    <CustomAction Id="CreateSelfSignCertificate" SuppressModularization="yes" DllEntry="CreateSelfSignCertificate" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="CreateSelfSignCertificate_commit" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="commit" Return="ignore" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="CreateSelfSignCertificate" Before="InstallInitialize" Overridable="yes" />
+      <Custom Action="CreateSelfSignCertificate_commit" Before="InstallFinalize" Overridable="yes" />
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="CreateSelfSignCertificate" Message="!(loc.CreateSelfSignCertificate)" />
+    </UI>
+  </Fragment>
+
+  <!-- ForceVersion
+  Called first before CostInitialize to ensure component costing uses the forced version when (dis)allowing component installation
+  Called again before InstallFiles maked the decisions on which files to replace
+  The double sequencing is required because CostInitialize is done in client context
+  Then the context is switched to server, database tables are reverted to original values
+  Then InstallFiles loads the File table again
+  -->
+  <Fragment>
+    <CustomAction Id="ForceVersion" SuppressModularization="yes" DllEntry="ForceVersion" Execute="firstSequence" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ForceVersionAgain" SuppressModularization="yes" DllEntry="ForceVersion" Execute="immediate" BinaryRef="PanelSwCustomActions.dll"/>
+    <InstallExecuteSequence>
+      <Custom Action="ForceVersion" Before="CostInitialize" Overridable="yes" />
+      <Custom Action="ForceVersionAgain" Before="InstallFiles" Overridable="yes"/>
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="ForceVersion" Before="CostInitialize" Overridable="yes"/>
+    </InstallUISequence>
+    <UI>
+      <ProgressText Action="ForceVersion" Message="!(loc.ForceVersion)" />
+      <ProgressText Action="ForceVersionAgain" Message="!(loc.ForceVersion)" />
+    </UI>
+  </Fragment>
+
+  <!-- SetPropertyFromPipe -->
+  <Fragment>
+    <CustomAction Id="SetPropertyFromPipe" SuppressModularization="yes" DllEntry="SetPropertyFromPipe" Execute="immediate" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="SetPropertyFromPipe" Before="InstallInitialize" Overridable="yes" />
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="SetPropertyFromPipe" Message="!(loc.SetPropertyFromPipe)" />
+    </UI>
+  </Fragment>
+
+  <!-- EvaluateExpression -->
+  <Fragment>
+    <CustomAction Id="EvaluateExpression" SuppressModularization="yes" DllEntry="EvaluateExpression" Execute="immediate" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="EvaluateExpression" Before="InstallInitialize" Overridable="yes" />
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="EvaluateExpression" Message="!(loc.EvaluateExpression)" />
+    </UI>
+  </Fragment>
+
+  <!-- CertificateHashSearch -->
+  <Fragment>
+    <CustomAction Id="CertificateHashSearch" SuppressModularization="yes" DllEntry="CertificateHashSearch" Execute="firstSequence" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="CertificateHashSearch" Before="LaunchConditions" Overridable="yes" />
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="CertificateHashSearch" Before="LaunchConditions" Overridable="yes" />
+    </InstallUISequence>
+    <UI>
+      <ProgressText Action="CertificateHashSearch" Message="!(loc.CertificateHashSearch)" />
+    </UI>
+  </Fragment>
+
+  <!-- DiskSpace -->
+  <Fragment>
+    <CustomAction Id="DiskSpace" SuppressModularization="yes" DllEntry="DiskSpace" Execute="immediate" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="DiskSpace" After="CostFinalize" Overridable="yes" />
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="DiskSpace" Message="!(loc.DiskSpace)" />
+    </UI>
+  </Fragment>
+
+  <!-- JsonJpath -->
+  <Fragment>
+    <CustomAction Id="JsonJpathSched" SuppressModularization="yes" DllEntry="JsonJpathSched" Execute="immediate" BinaryRef="PswManagedCA.X86.dll" />
+    <CustomAction Id="JsonJpathExec" SuppressModularization="yes" DllEntry="JsonJpathExec" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PswManagedCA.X86.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="JsonJpathSched" After="DuplicateFiles" Overridable="yes" />
+    </InstallExecuteSequence>
+    <UI>
+      <Error Id="27009" Message="!(loc.JsonJpathFailure)" />
+      <ProgressText Action="JsonJpathSched" Message="!(loc.JsonJpath)" />
+      <ProgressText Action="JsonJpathExec" Template="!(loc.JsonJpathTemplate)" Message="!(loc.JsonJpath)" />
+    </UI>
+  </Fragment>
+
+  <!-- JsonJpathSearch -->
+  <Fragment>
+    <CustomAction Id="JsonJpathSearch" SuppressModularization="yes" DllEntry="JsonJpathSearch" Execute="firstSequence" BinaryRef="PswManagedCA.X86.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="JsonJpathSearch" After="AppSearch" Overridable="yes" />
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="JsonJpathSearch" After="AppSearch" Overridable="yes" />
+    </InstallUISequence>
+    <UI>
+      <ProgressText Action="JsonJpathSearch" Message="!(loc.JsonJpathSearch)" />
+    </UI>
+  </Fragment>
+
+  <!-- AccountSidSearch -->
+  <Fragment>
+    <CustomAction Id="AccountSidSearch" SuppressModularization="yes" DllEntry="AccountSidSearch" Execute="firstSequence" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="AccountSidSearch" After="AppSearch" Overridable="yes" />
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="AccountSidSearch" After="AppSearch" Overridable="yes" />
+    </InstallUISequence>
+    <UI>
+      <ProgressText Action="AccountSidSearch" Message="!(loc.AccountSidSearch)" />
+    </UI>
+  </Fragment>
+
+  <!-- VersionCompare -->
+  <Fragment>
+    <CustomAction Id="PSW_VersionCompare" SuppressModularization="yes" DllEntry="VersionCompare" Execute="firstSequence" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="PSW_VersionCompare" After="AppSearch" Overridable="yes" />
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="PSW_VersionCompare" After="AppSearch" Overridable="yes" />
+    </InstallUISequence>
+    <UI>
+      <ProgressText Action="PSW_VersionCompare" Message="!(loc.PSW_VersionCompare)" />
+    </UI>
+  </Fragment>
+
+  <!-- PathSearch -->
+  <Fragment>
+    <CustomAction Id="PSW_PathSearch" SuppressModularization="yes" DllEntry="PathSearch" Execute="firstSequence" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="PSW_PathSearch" After="AppSearch" Overridable="yes" />
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="PSW_PathSearch" After="AppSearch" Overridable="yes" />
+    </InstallUISequence>
+    <UI>
+      <ProgressText Action="PSW_PathSearch" Message="!(loc.PSW_PathSearch)" />
+    </UI>
+  </Fragment>
+
+  <!-- ToLowerCase -->
+  <Fragment>
+    <CustomAction Id="PSW_ToLowerCase" SuppressModularization="yes" DllEntry="ToLowerCase" Execute="firstSequence" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallUISequence>
+      <Custom Action="PSW_ToLowerCase" After="AppSearch" Overridable="yes" />
+    </InstallUISequence>
+    <InstallExecuteSequence>
+      <Custom Action="PSW_ToLowerCase" After="AppSearch" Overridable="yes" />
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="PSW_ToLowerCase" Message="!(loc.PSW_ToLowerCase)" />
+    </UI>
+  </Fragment>
+
+  <Fragment>
+    <CustomAction Id="PSW_CheckRebootRequired" DllEntry="CheckRebootRequired" Execute="immediate" Return="ignore" SuppressModularization="yes" BinaryRef="PanelSwCustomActions.dll" />
+
+    <InstallExecuteSequence>
+      <Custom Action="PSW_CheckRebootRequired" After="InstallFinalize" Overridable="yes" Condition="VersionNT &gt; 400" />
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="PSW_CheckRebootRequired" Message="!(loc.PSW_CheckRebootRequired)" />
+    </UI>
+  </Fragment>
+
+  <!-- WmiSearch -->
+  <Fragment>
+    <CustomAction Id="WmiSearch" DllEntry="WmiSearch" Execute="firstSequence" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="WmiSearch" After="AppSearch" Overridable="yes" />
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="WmiSearch" After="AppSearch" Overridable="yes" />
+    </InstallUISequence>
+    <UI>
+      <ProgressText Action="WmiSearch" Message="!(loc.WmiSearch)" />
+    </UI>
+  </Fragment>
+
+  <!-- Md5Hash -->
+  <Fragment>
+    <CustomAction Id="Md5Hash" DllEntry="Md5Hash" Execute="firstSequence" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="Md5Hash" After="AppSearch" Overridable="yes" />
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="Md5Hash" After="AppSearch" Overridable="yes" />
+    </InstallUISequence>
+    <UI>
+      <ProgressText Action="Md5Hash" Message="!(loc.Md5Hash)" />
+    </UI>
+  </Fragment>
+
+  <!-- RestartLocalResources -->
+  <Fragment>
+    <CustomAction Id="RestartLocalResources" DllEntry="RestartLocalResources" Execute="immediate" SuppressModularization="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="RestartLocalResourcesExec" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" Return="ignore" SuppressModularization="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="RestartLocalResources" Before="InstallValidate" Overridable="yes" />
+      <Custom Action="RestartLocalResourcesExec" Before="RemoveFiles" Overridable="yes" />
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="RestartLocalResources" Message="!(loc.RestartLocalResources)" />
+      <ProgressText Action="RestartLocalResourcesExec" Template="!(loc.RestartLocalResourcesTemplate)" Message="!(loc.RestartLocalResources)" />
+    </UI>
+  </Fragment>
+
+  <!-- ConcatFiles -->
+  <Fragment>
+    <CustomAction Id="ConcatFiles" DllEntry="ConcatFiles" Execute="immediate" SuppressModularization="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ConcatFilesExec" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" SuppressModularization="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="ConcatFiles" After="InstallFiles" Overridable="yes" />
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="ConcatFiles" Message="!(loc.ConcatFiles)" />
+      <ProgressText Action="ConcatFilesExec" Message="!(loc.ConcatFiles)" />
+    </UI>
+  </Fragment>
+
+  <!-- ExtractPayload -->
+  <Fragment>
+    <CustomAction Id="ExtractPayload" DllEntry="ExtractPayload" Execute="immediate" SuppressModularization="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExtractPayloadRollback" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" SuppressModularization="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="ExtractPayloadCommit" DllEntry="CommonDeferred" Execute="commit" Return="ignore" Impersonate="no" SuppressModularization="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="ExtractPayload" Before="ProcessComponents" Overridable="yes" />
+      <Custom Action="ExtractPayloadCommit" Before="InstallFinalize" Overridable="yes" />
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="ExtractPayload" Message="!(loc.ExtractPayload)" />
+      <ProgressText Action="ExtractPayloadRollback" Message="!(loc.ExtractPayload)" />
+      <ProgressText Action="ExtractPayloadCommit" Message="!(loc.ExtractPayload)" />
+    </UI>
+  </Fragment>
+
+  <!-- PromptFileDowngrades -->
+  <Fragment>
+    <CustomAction Id="PromptFileDowngrades" DllEntry="PromptFileDowngrades" Execute="immediate" SuppressModularization="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="PromptFileDowngrades" After="InstallValidate" Overridable="yes" Condition="Not Installed"/>
+    </InstallExecuteSequence>
+    <UI>
+      <Error Id="27012" Message="!(loc.PromptFileDowngrades)" />
+    </UI>
+  </Fragment>
+
+  <!-- IsWindowsVersionOrGreater -->
+  <Fragment>
+    <CustomAction Id="IsWindowsVersionOrGreater" DllEntry="IsWindowsVersionOrGreater" Execute="firstSequence" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="IsWindowsVersionOrGreater" Before="AppSearch" Overridable="yes" />
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="IsWindowsVersionOrGreater" Before="AppSearch" Overridable="yes" />
+    </InstallUISequence>
+    <UI>
+      <ProgressText Action="IsWindowsVersionOrGreater" Message="!(loc.IsWindowsVersionOrGreater)" />
+    </UI>
+  </Fragment>
+
+  <Fragment>
+    <Property Id="PF_ARM_64BIT_LOADSTORE_ATOMIC" Value="0"/>
+    <Property Id="PF_ARM_DIVIDE_INSTRUCTION_AVAILABLE" Value="0"/>
+    <Property Id="PF_ARM_EXTERNAL_CACHE_AVAILABLE" Value="0"/>
+    <Property Id="PF_ARM_FMAC_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_ARM_VFP_32_REGISTERS_AVAILABLE" Value="0"/>
+    <Property Id="PF_3DNOW_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_CHANNELS_ENABLED" Value="0"/>
+    <Property Id="PF_COMPARE_EXCHANGE_DOUBLE" Value="0"/>
+    <Property Id="PF_COMPARE_EXCHANGE128" Value="0"/>
+    <Property Id="PF_COMPARE64_EXCHANGE128" Value="0"/>
+    <Property Id="PF_FASTFAIL_AVAILABLE" Value="0"/>
+    <Property Id="PF_FLOATING_POINT_EMULATED" Value="0"/>
+    <Property Id="PF_FLOATING_POINT_PRECISION_ERRATA" Value="0"/>
+    <Property Id="PF_MMX_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_NX_ENABLED" Value="0"/>
+    <Property Id="PF_PAE_ENABLED" Value="0"/>
+    <Property Id="PF_RDTSC_INSTRUCTION_AVAILABLE" Value="0"/>
+    <Property Id="PF_RDWRFSGSBASE_AVAILABLE" Value="0"/>
+    <Property Id="PF_SECOND_LEVEL_ADDRESS_TRANSLATION" Value="0"/>
+    <Property Id="PF_SSE3_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_SSSE3_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_SSE4_1_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_SSE4_2_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_AVX_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_AVX2_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_AVX512F_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_VIRT_FIRMWARE_ENABLED" Value="0"/>
+    <Property Id="PF_XMMI_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_XMMI64_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_XSAVE_ENABLED" Value="0"/>
+    <Property Id="PF_ARM_V8_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_ARM_V8_CRYPTO_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_ARM_V8_CRC32_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_ARM_V81_ATOMIC_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_ARM_V82_DP_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_ARM_V83_JSCVT_INSTRUCTIONS_AVAILABLE" Value="0"/>
+    <Property Id="PF_ARM_V83_LRCPC_INSTRUCTIONS_AVAILABLE" Value="0"/>
+
+    <CustomAction Id="ListProcessorFeatures" DllEntry="ListProcessorFeatures" Execute="firstSequence" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="ListProcessorFeatures" Before="AppSearch" Overridable="yes" />
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="ListProcessorFeatures" Before="AppSearch" Overridable="yes" />
+    </InstallUISequence>
+    <UI>
+      <ProgressText Action="ListProcessorFeatures" Message="!(loc.ListProcessorFeatures)" />
+    </UI>
+  </Fragment>
+
+  <Fragment>
+    <Property Id="PSW_ExecuteCommand" Hidden="yes" />
+    <UIRef Id="ExecOnErros"/>
+  </Fragment>
+
+  <Fragment>
+    <ComponentGroup Id="PSW_DuplicateFile"/>
+    <InstallExecuteSequence>
+      <RemoveDuplicateFiles/>
+      <DuplicateFiles/>
+    </InstallExecuteSequence>
+  </Fragment>
+</Wix>
