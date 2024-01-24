@@ -89,7 +89,7 @@ namespace PanelSw.Wix.Extensions
                 p => new SevenZap.SevenZap.FileEntry()
                 {
                     EntryName = p.EmbeddedId,
-                    FullPath = Path.GetFullPath(p.SourceFile.Path)
+                    FullPath = p.SourceFile.Path
                 }));
             SevenZap.SevenZap.UpdateArchive(container.WorkingPath, entries);
         }
