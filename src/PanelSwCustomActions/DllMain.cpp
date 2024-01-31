@@ -11,8 +11,9 @@ extern "C" BOOL WINAPI DllMain(HINSTANCE hInst, ULONG ulReason, LPVOID)
 	{
 	case DLL_PROCESS_ATTACH:
 		WcaGlobalInitialize(hInst);
-
 		_gFsRedirect.fDisabled = FALSE;
+
+#if !defined(_WIN64)
 		hProc = ::GetCurrentProcess();
 		hr = ProcWow64(hProc, &bWow64);
 		if (SUCCEEDED(hr) && bWow64)
@@ -23,7 +24,7 @@ extern "C" BOOL WINAPI DllMain(HINSTANCE hInst, ULONG ulReason, LPVOID)
 				_gFsRedirect.fDisabled = FALSE;
 			}
 		}
-
+#endif
 		break;
 
 	case DLL_PROCESS_DETACH:
