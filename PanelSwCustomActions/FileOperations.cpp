@@ -328,6 +328,10 @@ HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bI
 	opInfo.fFlags = FOF_NO_UI;
 
 	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Deleting '%ls'", szFrom);
+	if (!::PathIsDirectory(szFrom))
+	{
+		::SetFileAttributes(szFrom, FILE_ATTRIBUTE_NORMAL);
+	}
 	nRes = ::SHFileOperation(&opInfo);
 	if (bIgnoreMissing && (nRes == ERROR_FILE_NOT_FOUND) || (nRes == ERROR_PATH_NOT_FOUND))
 	{
@@ -342,13 +346,22 @@ HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bI
 			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Failed deleting '%ls' due to a lock on file(s), so reboot will be required", szFromNull);
 
 			// MoveFileEx can delete empty folder only, so we must explictly delete files first
-			ReleaseStrArray(pszFiles, nFiles);
-			hr = ListFiles(szFrom, L"*", true, &pszFiles, &nFiles);
-			ExitOnFailure(hr, "Failed listing files in folder '%ls'", szFrom);
-
-			for (UINT i = 0; i < nFiles; ++i)
+			if (::PathIsDirectory(szFrom))
 			{
-				::MoveFileEx(pszFiles[i], nullptr, MOVEFILE_DELAY_UNTIL_REBOOT);
+				if (pszFiles)
+				{
+					ReleaseStrArray(pszFiles, nFiles);
+					pszFiles = nullptr;
+					nFiles = 0;
+				}
+
+				hr = ListFiles(szFrom, L"*", true, &pszFiles, &nFiles);
+				ExitOnFailure(hr, "Failed listing files in folder '%ls'", szFrom);
+
+				for (UINT i = 0; i < nFiles; ++i)
+				{
+					DeletePath(pszFiles[i], bIgnoreMissing, bIgnoreErrors, bOnlyIfEmpty, bAllowReboot);
+				}
 			}
 
 			::MoveFileEx(szFromNull, nullptr, MOVEFILE_DELAY_UNTIL_REBOOT);
@@ -518,7 +531,7 @@ HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRe
 
 	if (IsSymbolicLinkOrMount(szFolder))
 	{
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Folder '%ls' is a symbolic link or a mount point, so not enumerating its files");
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Folder '%ls' is a symbolic link or a mount point, so not enumerating its files", szFolder);
 		ExitFunction();
 	}
 
