@@ -74,6 +74,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToEx
 	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
+#if !defined(_WIN64)
 	bIsWow64Initialized = (WcaInitializeWow64() == S_OK);
 	if (bIsWow64Initialized)
 	{
@@ -85,6 +86,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToEx
 			hr = S_OK;
 		}
 	}
+#endif
 
 	// During rollback we don't exit on failure before completing cleanup.
 	bIsRollback = ::MsiGetMode(WcaGetInstallHandle(), MSIRUNMODE::MSIRUNMODE_ROLLBACK);

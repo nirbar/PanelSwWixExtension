@@ -4,7 +4,7 @@
       <WixStandardBootstrapperApplication Theme="rtfLicense" LicenseUrl="www.google.com" xmlns="http://wixtoolset.org/schemas/v4/wxs/bal"/>
     </BootstrapperApplication>
     <?if $(EnableZipContainer) ~= true?>
-    <PanelSW:ContainerTemplate DefaultType="attached" Compression="SevenZip"/>
+    <PanelSW:ContainerTemplate DefaultType="attached" Compression="SevenZip" NameTemplate="$(TargetName).7z"/>
     <?else?>
     <PanelSW:ContainerTemplate DefaultType="detached"/>
     <?endif?>

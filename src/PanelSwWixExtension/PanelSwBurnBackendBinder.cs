@@ -117,7 +117,6 @@ namespace PanelSw.Wix.Extensions
             // Order payloads by package and layout-groups
             myPayloadSymbols.Sort((p1, p2) => SortPayloads(p1, p2, groupSymbols));
 
-            defaultContainer.Name = string.Format(containerTemplate.CabinetTemplate, 0);
             defaultContainer.Type = containerTemplate.DefaultType;
 #if EnableZipContainer
             if (containerTemplate.Compression != PSW_ContainerTemplate.ContainerCompressionType.Cab)
@@ -130,6 +129,20 @@ namespace PanelSw.Wix.Extensions
                 });
             }
 #endif
+            // For too-large attached container, grab payloads for the default container
+            if ((defaultContainer.Type == ContainerType.Attached) && (containerTemplate.MaximumUncompressedContainerSize > containerTemplate.MaximumUncompressedExeSize))
+            {
+                for (int i = myPayloadSymbols.Count - 1; i >= 0; --i)
+                {
+                    WixBundlePayloadSymbol payload = myPayloadSymbols[i];
+                    if (!payload.FileSize.HasValue || (containerSize[defaultContainer] + payload.FileSize.Value) < containerTemplate.MaximumUncompressedExeSize)
+                    {
+                        containerSize[defaultContainer] += payload.FileSize ?? 0;
+                        payload.ContainerRef = defaultContainer.Id.Id;
+                        myPayloadSymbols.RemoveAt(i);
+                    }
+                }
+            }
 
             WixBundleContainerSymbol prevContainer = null;
             WixBundlePayloadSymbol prevPayload = null;
@@ -138,11 +151,16 @@ namespace PanelSw.Wix.Extensions
                 WixBundleContainerSymbol container = null;
 
                 // Prefer the previous container if belongs to the same package/layout
-                if ((prevContainer != null) && (prevPayload != null)
-                    && ((!payload.FileSize.HasValue || (containerSize[prevContainer] + payload.FileSize.Value) < containerTemplate.MaximumUncompressedContainerSize)) // Previous container has enough capacity
-                    && (SortPayloads(payload, prevPayload, groupSymbols) == 0)) // This payload and the previous one belong to the same package/layout
+                if ((prevContainer != null) && (prevPayload != null) && (SortPayloads(payload, prevPayload, groupSymbols) == 0))
                 {
-                    container = prevContainer;
+                    long maxContainerSize = ((prevContainer == defaultContainer) && (defaultContainer.Type == ContainerType.Attached) && (containerTemplate.MaximumUncompressedContainerSize > containerTemplate.MaximumUncompressedExeSize))
+                        ? containerTemplate.MaximumUncompressedExeSize : containerTemplate.MaximumUncompressedContainerSize;
+
+                    // Previous container has enough capacity ?
+                    if (!payload.FileSize.HasValue || ((containerSize[prevContainer] + payload.FileSize.Value) < maxContainerSize))
+                    {
+                        container = prevContainer;
+                    }
                 }
 
                 // Find the first container with sufficient size
@@ -150,6 +168,12 @@ namespace PanelSw.Wix.Extensions
                 {
                     foreach (WixBundleContainerSymbol containerSymbol in containerSize.Keys)
                     {
+                        // Skip the default container if it is attached and would oversize the exe size
+                        if ((containerSymbol == defaultContainer) && (containerSymbol.Type == ContainerType.Attached) && (containerTemplate.MaximumUncompressedExeSize < containerTemplate.MaximumUncompressedContainerSize))
+                        {
+                            continue;
+                        }
+
                         if (!payload.FileSize.HasValue || (containerSize[containerSymbol] + payload.FileSize.Value) < containerTemplate.MaximumUncompressedContainerSize)
                         {
                             container = containerSymbol;
@@ -162,7 +186,6 @@ namespace PanelSw.Wix.Extensions
                 if (container == null)
                 {
                     container = section.AddSymbol(new WixBundleContainerSymbol(containerTemplate.SourceLineNumbers, new Identifier(AccessModifier.Global, containerSize.Count)));
-                    container.Name = string.Format(containerTemplate.CabinetTemplate, containerSize.Count);
                     container.Type = containerTemplate.DefaultType;
 #if EnableZipContainer
                     container.BundleExtensionRef = defaultContainer.BundleExtensionRef;
@@ -190,23 +213,20 @@ namespace PanelSw.Wix.Extensions
                 prevPayload = payload;
             }
 
-            // Assign attached/detached
-            if (containerTemplate.DefaultType == ContainerType.Attached)
+            // Assign attached/detached and container names
+            int detachedCount = 0; // Only detached containers have meaningful names
+            foreach (WixBundleContainerSymbol containerSymbol in containerSize.Keys)
             {
-                int detachedCount = 0; // Only detached containers have meaningful names
-                foreach (WixBundleContainerSymbol containerSymbol in containerSize.Keys)
+                if ((containerTemplate.DefaultType == ContainerType.Attached) && ((containerSize[containerSymbol] + exeSize) <= containerTemplate.MaximumUncompressedExeSize))
                 {
-                    if ((containerSize[containerSymbol] + exeSize) < containerTemplate.MaximumUncompressedExeSize)
-                    {
-                        containerSymbol.Name = $"cab{Guid.NewGuid().ToString("N")}.cab";
-                        containerSymbol.Type = ContainerType.Attached;
-                        exeSize += containerSize[containerSymbol];
-                    }
-                    else
-                    {
-                        containerSymbol.Name = string.Format(containerTemplate.CabinetTemplate, detachedCount++);
-                        containerSymbol.Type = ContainerType.Detached;
-                    }
+                    containerSymbol.Name = $"ctn{Guid.NewGuid().ToString("N")}.dat";
+                    containerSymbol.Type = ContainerType.Attached;
+                    exeSize += containerSize[containerSymbol];
+                }
+                else
+                {
+                    containerSymbol.Name = containerTemplate.CabinetTemplate.Contains("{0}") ? string.Format(containerTemplate.CabinetTemplate, detachedCount++) : containerTemplate.CabinetTemplate;
+                    containerSymbol.Type = ContainerType.Detached;
                 }
             }
         }

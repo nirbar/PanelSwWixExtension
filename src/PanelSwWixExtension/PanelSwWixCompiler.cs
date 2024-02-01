@@ -341,6 +341,15 @@ namespace PanelSw.Wix.Extensions
                     switch (attrib.Name.LocalName)
                     {
                         case "CabinetTemplate":
+                        case "NameTemplate":
+                            if (attrib.Name.LocalName.Equals("CabinetTemplate"))
+                            {
+                                Messaging.Write(WarningMessages.DeprecatedAttribute(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName));
+                            }
+                            if (!string.IsNullOrEmpty(cabinetTemplate))
+                            {
+                                Messaging.Write(ErrorMessages.IllegalAttributeWithOtherAttribute(sourceLineNumbers, element.Name.LocalName, "CabinetTemplate", "NameTemplate"));
+                            }
                             cabinetTemplate = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "DefaultType":
@@ -370,9 +379,9 @@ namespace PanelSw.Wix.Extensions
 
             if (maximumUncompressedContainerSize == null)
             {
-                maximumUncompressedContainerSize = (compression == PSW_ContainerTemplate.ContainerCompressionType.Cab) ? Int32.MaxValue : Int64.MaxValue;
+                maximumUncompressedContainerSize = (compression == PSW_ContainerTemplate.ContainerCompressionType.Cab) ? int.MaxValue : long.MaxValue;
             }
-            if ((maximumUncompressedContainerSize.Value > Int32.MaxValue) && (compression == PSW_ContainerTemplate.ContainerCompressionType.Cab))
+            if ((maximumUncompressedContainerSize.Value > int.MaxValue) && (compression == PSW_ContainerTemplate.ContainerCompressionType.Cab))
             {
                 Messaging.Write(ErrorMessages.MaximumUncompressedMediaSizeTooLarge(sourceLineNumbers, Int32.MaxValue));
             }
@@ -380,9 +389,9 @@ namespace PanelSw.Wix.Extensions
             if (string.IsNullOrEmpty(cabinetTemplate))
             {
                 string ext = (compression == PSW_ContainerTemplate.ContainerCompressionType.SevenZip) ? "7z" : compression.ToString().ToLower();
-                cabinetTemplate = "bundle-attached-{0}." + ext;
+                cabinetTemplate = "bundle-data-{0}." + ext;
             }
-            if (!cabinetTemplate.Contains("{0}"))
+            if ((maximumUncompressedContainerSize < long.MaxValue) && !cabinetTemplate.Contains("{0}"))
             {
                 Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, element.Name.LocalName, "CabinetTemplate", cabinetTemplate, "Must contain format string {0}"));
             }

@@ -171,9 +171,14 @@
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="CabinetTemplate" type="xs:string" use="optional" default="bundle-attached-{0}.cab">
+          <xs:attribute name="NameTemplate" type="xs:string" use="optional" default="bundle-data-{0}.cab">
             <xs:annotation>
-              <xs:documentation>Cabinet name format. Must contain '{0}' to use when formatting the name</xs:documentation>
+              <xs:documentation>Container name format. If the container has a limited size, such as for cab containers, then the name template must contain '{0}' to use when formatting the name</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="CabinetTemplate" type="xs:string" use="optional" default="bundle-data-{0}.cab">
+            <xs:annotation>
+              <xs:documentation>Deprecated. Use NameTemplate instead</xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="DefaultType" type="wix:BurnContainerType" use="optional" default="attached">
