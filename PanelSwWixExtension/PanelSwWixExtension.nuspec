@@ -19,6 +19,7 @@
   <files>
     <file src="..\Nuget\*" target="build" />
     <file src="..\build\bin\Release\PanelSwWixExtension\PanelSwWixExtension.dll" target="tools\lib"/>
+    <file src="..\build\bin\Release\PanelSwWixExtension\Newtonsoft.Json.dll" target="tools\lib"/>
     <file src="..\build\bin\Release\DeferredExePackage\DeferredExePackage.exe" target="tools\lib"/>
     <file src=".\Xsd\PanelSwWixExtension.xsd" target="content"/>
     <file src="..\LICENSE" target="LICENSE" />
