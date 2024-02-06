@@ -12,6 +12,8 @@
     <Chain ParallelCache="yes" DisableSystemRestore="yes">
       <ExePackage SourceFile="$(DeferredExePackagePath)" DetectCondition="1=0" UninstallArguments="/u" InstallArguments="--ignore-me">
         <PayloadGroupRef Id="ContainerTemplateUT"/>
+        <Payload SourceFile="$(sys.SOURCEFILEPATH)"/>
+        <Payload SourceFile="$(sys.SOURCEFILEPATH)" Name="otherfile" Id="_2"/>
       </ExePackage>
     </Chain>
   </Bundle>

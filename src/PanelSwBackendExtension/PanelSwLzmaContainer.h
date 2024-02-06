@@ -31,6 +31,10 @@ private:
 
 	HRESULT Reset();
 
+	HRESULT LoadMappings();
+	HRESULT ReadFileMappings(LPCWSTR szEntryName);
+	HRESULT GetNextMapping(BSTR* psczStreamName);
+
 	std::auto_ptr<CFileInStream> _archiveStream;
 	std::auto_ptr<CLookToRead2> _lookStream;
 	std::auto_ptr<CSzArEx> _db;
@@ -42,4 +46,9 @@ private:
 	const size_t _kInputBufSize = ((size_t)1 << 18);
 	const ISzAlloc _alloc = { SzAlloc, SzFree };
 	const ISzAlloc _allocTemp = { SzAllocTemp, SzFreeTemp };
+
+	CComPtr<IXMLDOMDocument> _pxMappingsDoc;
+	CComPtr<IXMLDOMNodeList> _pxCurrFileMappings;
+	size_t _nCurrMappingIndex = -1;
+	const LPCWSTR MAPPINGS_FILE_NAME = L"PanelSwWixContainer";
 };

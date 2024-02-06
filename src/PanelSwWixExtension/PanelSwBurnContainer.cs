@@ -1,7 +1,6 @@
 using PanelSw.Wix.Extensions.Symbols;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.IO.Compression;
 using System.Linq;
@@ -85,13 +84,59 @@ namespace PanelSw.Wix.Extensions
 
         private void CreateContainerLzma(WixBundleContainerSymbol container, IEnumerable<WixBundlePayloadSymbol> containerPayloads)
         {
-            List<SevenZap.SevenZap.FileEntry> entries = new List<SevenZap.SevenZap.FileEntry>(containerPayloads.Select(
+            string xmlFile = null;
+            XmlDocument xmlDocument = null;
+            List<WixBundlePayloadSymbol> filteredPayloads = new List<WixBundlePayloadSymbol>(containerPayloads);
+
+            IEnumerable<IGrouping<string, WixBundlePayloadSymbol>> payloadsBySourcePath = containerPayloads.GroupBy(pld => Path.GetFullPath(pld.SourceFile.Path));
+            foreach (var pldGrp in payloadsBySourcePath)
+            {
+                if (pldGrp.Count() > 1)
+                {
+                    if (string.IsNullOrEmpty(xmlFile))
+                    {
+                        xmlFile = Path.GetTempFileName();
+                        xmlDocument = new XmlDocument();
+                        XmlElement root = xmlDocument.CreateElement("Root");
+                        xmlDocument.AppendChild(root);
+
+                        XmlDeclaration xmlDeclaration = xmlDocument.CreateXmlDeclaration("1.0", "UTF-8", null);
+                        xmlDocument.InsertBefore(xmlDeclaration, root);
+                    }
+
+                    WixBundlePayloadSymbol srcPld = pldGrp.ElementAt(0);
+                    for (int i = pldGrp.Count() - 1; i > 0; --i)
+                    {
+                        WixBundlePayloadSymbol pld = pldGrp.ElementAt(i);
+                        filteredPayloads.Remove(pld);
+
+                        XmlElement mapping = xmlDocument.CreateElement("Mapping");
+                        mapping.SetAttribute("Source", srcPld.EmbeddedId);
+                        mapping.SetAttribute("Target", pld.EmbeddedId);
+                        xmlDocument.DocumentElement.AppendChild(mapping);
+                    }
+                    xmlDocument.Save(xmlFile);
+                }
+            }
+
+            List<SevenZap.SevenZap.FileEntry> entries = new List<SevenZap.SevenZap.FileEntry>(filteredPayloads.Select(
                 p => new SevenZap.SevenZap.FileEntry()
                 {
                     EntryName = p.EmbeddedId,
                     FullPath = p.SourceFile.Path
                 }));
+
+            if (!string.IsNullOrEmpty(xmlFile))
+            {
+                entries.Add(new SevenZap.SevenZap.FileEntry { EntryName = PanelSwWixExtension.CONTAINER_EXTENSION_ID, FullPath = xmlFile });
+            }
+
             SevenZap.SevenZap.UpdateArchive(container.WorkingPath, entries);
+
+            if (!string.IsNullOrEmpty(xmlFile))
+            {
+                File.Delete(xmlFile);
+            }
         }
 
         public override void ExtractContainer(string containerPath, string outputFolder, string containerId, XmlElement extensionDataNode)
@@ -126,6 +171,25 @@ namespace PanelSw.Wix.Extensions
         private void ExtractContainerLzma(string containerPath, string outputFolder)
         {
             SevenZap.SevenZap.Extract(containerPath, outputFolder);
+
+            string xmlFile = Path.Combine(outputFolder, PanelSwWixExtension.CONTAINER_EXTENSION_ID);
+            if (File.Exists(xmlFile))
+            {
+                XmlDocument xmlDocument = new XmlDocument();
+                xmlDocument.Load(xmlFile);
+                XmlNodeList mappings = xmlDocument.SelectNodes("/Root/Mapping");
+                foreach (XmlNode mappingsNode in mappings)
+                {
+                    XmlElement mapping = (XmlElement)mappingsNode;
+                    string srcFile = Path.Combine(outputFolder, mapping.GetAttribute("Source"));
+                    string dstFile = Path.Combine(outputFolder, mapping.GetAttribute("Target"));
+                    if (File.Exists(srcFile))
+                    {
+                        File.Copy(srcFile, dstFile, true);
+                    }
+                }
+                File.Delete(xmlFile);
+            }
         }
     }
 }

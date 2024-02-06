@@ -37,6 +37,10 @@ HRESULT CPanelSwLzmaContainer::Reset()
 	_blockIndex = ~0;
 	_outBufferSize = 0;
 
+	_nCurrMappingIndex = -1;
+	_pxCurrFileMappings.Release();
+	_pxMappingsDoc.Release();
+
 	return S_OK;
 }
 
@@ -78,6 +82,9 @@ HRESULT CPanelSwLzmaContainer::ContainerOpen(LPCWSTR wzContainerId, LPCWSTR wzFi
 	sRes = SzArEx_Open(_db.get(), &_lookStream->vt, &_alloc, &_allocTemp);
 	BextExitOnNull((sRes == SZ_OK), hr, sRes, "Failed to open 7zip database");
 
+	hr = LoadMappings();
+	BextExitOnFailure(hr, "Failed to read mappings");
+
 	BextLog(BUNDLE_EXTENSION_LOG_LEVEL_STANDARD, "Openned 7Z container '%ls'", wzFilePath);
 
 LExit:
@@ -95,6 +102,17 @@ HRESULT CPanelSwLzmaContainer::ContainerNextStream(BSTR* psczStreamName)
 		::SysFreeString(*psczStreamName);
 		*psczStreamName = nullptr;
 	}
+
+	hr = GetNextMapping(psczStreamName);
+	if (SUCCEEDED(hr) && psczStreamName && *psczStreamName)
+	{
+		ExitFunction();
+	}
+	if (hr == E_NOMOREITEMS)
+	{
+		hr = S_OK;
+	}
+	BextExitOnFailure(hr, "Failed to get next entry mapping");
 
 	// Skip folder entries
 	do
@@ -115,6 +133,9 @@ HRESULT CPanelSwLzmaContainer::ContainerNextStream(BSTR* psczStreamName)
 
 	SzArEx_GetFileNameUtf16(_db.get(), _fileIndex, (UInt16*)szCurrFile);
 	BextExitOnNull((szCurrFile && *szCurrFile), hr, E_FAIL, "Failed to get file name");
+
+	hr = ReadFileMappings(szCurrFile);
+	BextExitOnFailure(hr, "Failed to read mappings for entry '%ls'", szCurrFile);
 
 	if (psczStreamName)
 	{
@@ -160,4 +181,107 @@ HRESULT CPanelSwLzmaContainer::ContainerSkipStream()
 HRESULT CPanelSwLzmaContainer::ContainerClose()
 {
 	return Reset();
+}
+
+HRESULT CPanelSwLzmaContainer::LoadMappings()
+{
+	HRESULT hr = S_OK;
+	LPWSTR szXmlFile = nullptr;
+	CComBSTR szEntryName;
+
+	while ((hr = ContainerNextStream(&szEntryName)) != E_NOMOREITEMS)
+	{
+		BextExitOnFailure(hr, "Failed to get next entry");
+
+		if (::wcscmp((BSTR)szEntryName, MAPPINGS_FILE_NAME) == 0)
+		{
+			break;
+		}
+	}
+	if (hr == E_NOMOREITEMS)
+	{
+		hr = S_FALSE;
+		ExitFunction();
+	}
+
+	hr = FileCreateTemp(L"CNTNR", L"xml", &szXmlFile, nullptr);
+	BextExitOnFailure(hr, "Failed to load mappings");
+
+	hr = ContainerStreamToFile(szXmlFile);
+	BextExitOnFailure(hr, "Failed to load mappings from file '%ls'", szXmlFile);
+
+	hr = XmlLoadDocumentFromFile(szXmlFile, &_pxMappingsDoc);
+	BextExitOnFailure(hr, "Failed to load mappings from file '%ls'", szXmlFile);
+
+LExit:
+	if (szXmlFile && *szXmlFile)
+	{
+		FileEnsureDelete(szXmlFile);
+		ReleaseStr(szXmlFile);
+	}
+	_fileIndex = -1;
+
+	return hr;
+}
+
+HRESULT CPanelSwLzmaContainer::ReadFileMappings(LPCWSTR szEntryName)
+{
+	HRESULT hr = S_OK;
+	LPWSTR szXpath = nullptr;
+
+	if (!_pxMappingsDoc)
+	{
+		ExitFunction();
+	}
+
+	hr = StrAllocFormatted(&szXpath, L"/Root/Mapping[./@Source='%ls']/@Target", szEntryName);
+	BextExitOnFailure(hr, "Failed to allocate string");
+
+	hr = _pxMappingsDoc->selectNodes(CComBSTR(szXpath), &_pxCurrFileMappings);
+	BextExitOnFailure(hr, "Failed to read mappings for file '%ls'", szEntryName);
+
+LExit:
+	ReleaseStr(szXpath);
+	_nCurrMappingIndex = -1;
+
+	return hr;
+}
+
+HRESULT CPanelSwLzmaContainer::GetNextMapping(BSTR* psczStreamName)
+{
+	HRESULT hr = S_OK;
+	long lNodeCount = -1;
+	CComPtr<IXMLDOMNode> pNode;
+	CComVariant nodeValue;
+	CComBSTR result(L"");
+
+	if (!_pxMappingsDoc || !_pxCurrFileMappings)
+	{
+		ExitFunction();
+	}
+
+	hr = _pxCurrFileMappings->get_length(&lNodeCount);
+	BextExitOnFailure(hr, "Failed to get mappings count");
+
+	++_nCurrMappingIndex;
+	if (_nCurrMappingIndex >= lNodeCount)
+	{
+		hr = E_NOMOREITEMS;
+		ExitFunction();
+	}
+
+	hr = _pxCurrFileMappings->get_item(_nCurrMappingIndex, &pNode);
+	BextExitOnFailure(hr, "Failed to get next mapping");
+
+	hr = pNode->get_nodeValue(&nodeValue);
+	ExitOnFailure(hr, "Failed to get mapping value.");
+
+	hr = nodeValue.ChangeType(VT_BSTR);
+	ExitOnFailure(hr, "Failed to get mapping value as string.");
+
+	result = nodeValue.bstrVal;
+	*psczStreamName = result.Detach();
+
+LExit:
+	return hr;
 }
