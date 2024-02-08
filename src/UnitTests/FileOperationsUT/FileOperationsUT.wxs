@@ -6,6 +6,7 @@
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
 
+    <PanelSW:DeletePath Path="[TEST_DELETE_DIR]" Condition="TEST_DELETE_DIR"/>
     <PanelSW:DeletePath Path="[EmptyDir]" OnlyIfEmpty="yes" Condition="Not Installed"/>
     <PanelSW:DeletePath Path="[DeleteMeDir]FileOperationsUT.wxs" Condition="Not Installed"/>
     <PanelSW:DeletePath Path="[EmptyDir]" OnlyIfEmpty="yes" AllowReboot="no" Condition="Not Installed"/>
