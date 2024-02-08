@@ -25,6 +25,7 @@ public:
 
 	static ::com::panelsw::ca::FileRegexDetails::FileEncoding DetectEncoding(const void* pFileContent, DWORD dwSize);
 	static HRESULT PathToDevicePath(LPCWSTR szPath, LPWSTR* pszDevicePath);
+	static HRESULT ListSubFolders(LPCWSTR szBaseFolder, LPWSTR** pszFolders, UINT* pcFolder);
 	static HRESULT ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRecursive, LPWSTR** pszFiles, UINT* pcFiles);
 	static HRESULT MakeTemporaryName(LPCWSTR szBackupOf, LPCWSTR szPrefix, bool bIsFolder, LPWSTR* pszTempName);
 	static bool IsSymbolicLinkOrMount(LPCWSTR szPath);

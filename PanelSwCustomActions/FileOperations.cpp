@@ -350,13 +350,14 @@ HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bI
 			{
 				if (pszFiles)
 				{
-					ReleaseStrArray(pszFiles, nFiles);
-					pszFiles = nullptr;
-					nFiles = 0;
+					ReleaseNullStrArray(pszFiles, nFiles);
 				}
 
 				hr = ListFiles(szFrom, L"*", true, &pszFiles, &nFiles);
 				ExitOnFailure(hr, "Failed listing files in folder '%ls'", szFrom);
+
+				hr = ListSubFolders(szFrom, &pszFiles, &nFiles);
+				ExitOnFailure(hr, "Failed listing subfolders of '%ls'", szFrom);
 
 				for (UINT i = 0; i < nFiles; ++i)
 				{
@@ -516,6 +517,78 @@ HRESULT CFileOperations::PathToDevicePath(LPCWSTR szPath, LPWSTR* pszDevicePath)
 	*pszDevicePath = szDevicePath.Detach();
 
 LExit:
+	return hr;
+}
+
+// static 
+HRESULT CFileOperations::ListSubFolders(LPCWSTR szBaseFolder, LPWSTR** pszFolders, UINT* pcFolder)
+{
+	HRESULT hr = S_OK;
+	LPWSTR szFullPattern = nullptr;
+	LPWSTR szFullFolder = nullptr;
+	LPWSTR szCurrFile = nullptr;
+	WIN32_FIND_DATA FindFileData;
+	HANDLE hFind = INVALID_HANDLE_VALUE;
+
+	if (IsSymbolicLinkOrMount(szBaseFolder))
+	{
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Folder '%ls' is a symbolic link or a mount point, so not enumerating its files", szBaseFolder);
+		ExitFunction();
+	}
+	if (!DirExists(szBaseFolder, nullptr))
+	{
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Folder '%ls' doesn't exist", szBaseFolder);
+		ExitFunction();
+	}
+
+	hr = StrAllocString(&szFullFolder, szBaseFolder, 0);
+	ExitOnFailure(hr, "Failed allocating string");
+
+	hr = PathBackslashTerminate(&szFullFolder);
+	ExitOnFailure(hr, "Failed allocating string");
+
+	hr = StrAllocFormatted(&szFullPattern, L"%ls*", szFullFolder);
+	ExitOnFailure(hr, "Failed allocating string");
+
+	hFind = ::FindFirstFile(szFullPattern, &FindFileData);
+	ExitOnNullWithLastError((hFind != INVALID_HANDLE_VALUE), hr, "Failed searching files in '%ls'", szFullFolder);
+
+	do
+	{
+		if ((::wcscmp(L".", FindFileData.cFileName) == 0) || (::wcscmp(L"..", FindFileData.cFileName) == 0))
+		{
+			continue;
+		}
+
+		if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
+		{
+			ReleaseNullStr(szCurrFile);
+
+			hr = StrAllocFormatted(&szCurrFile, L"%ls%ls", szFullFolder, FindFileData.cFileName);
+			ExitOnFailure(hr, "Failed allocating string");
+
+			hr = StrArrayAllocString(pszFolders, pcFolder, szCurrFile, 0);
+			ExitOnFailure(hr, "Failed allocating string");
+
+			hr = ListSubFolders(szCurrFile, pszFolders, pcFolder);
+			ExitOnFailure(hr, "Failed finding files");
+		}
+
+	} while (::FindNextFile(hFind, &FindFileData));
+	ExitOnNullWithLastError((::GetLastError() == ERROR_NO_MORE_FILES), hr, "Failed searching files in '%ls'", szFullFolder);
+
+	::FindClose(hFind);
+	hFind = INVALID_HANDLE_VALUE;
+
+LExit:
+
+	ReleaseStr(szFullPattern);
+	ReleaseStr(szCurrFile);
+	if (hFind && (hFind != INVALID_HANDLE_VALUE))
+	{
+		::FindClose(hFind);
+	}
+
 	return hr;
 }
 
