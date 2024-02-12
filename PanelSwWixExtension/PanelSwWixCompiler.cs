@@ -1027,6 +1027,7 @@ namespace PanelSw.Wix.Extensions
             bool isAsync = false, impersonate = true;
             string command = null, workingFolder = "", condition = null, before = null, after = null;
             Microsoft.Tools.WindowsInstallerXml.Serialize.CustomAction.ExecuteType executeType = Microsoft.Tools.WindowsInstallerXml.Serialize.CustomAction.ExecuteType.deferred;
+            int executeTypeVal = 0x0;
 
             foreach (XmlAttribute attrib in element.Attributes)
             {
@@ -1083,8 +1084,13 @@ namespace PanelSw.Wix.Extensions
                         switch (executeType)
                         {
                             case Microsoft.Tools.WindowsInstallerXml.Serialize.CustomAction.ExecuteType.deferred:
+                                executeTypeVal = 0x00000400;
+                                break;
                             case Microsoft.Tools.WindowsInstallerXml.Serialize.CustomAction.ExecuteType.rollback:
+                                executeTypeVal = 0x00000400 | 0x00000100;
+                                break;
                             case Microsoft.Tools.WindowsInstallerXml.Serialize.CustomAction.ExecuteType.commit:
+                                executeTypeVal = 0x00000400 | 0x00000200;
                                 break;
                             default:
                                 Core.OnMessage(WixErrors.IllegalAttributeValueWithIllegalList(sourceLineNumbers, element.LocalName, attrib.LocalName, val, "deferred, commit, rollback"));
@@ -1159,7 +1165,7 @@ namespace PanelSw.Wix.Extensions
             // 3. PanelSwCustomActions::CommonDeferred
             Row deferredCA = Core.CreateRow(sourceLineNumbers, "CustomAction");
             deferredCA[0] = id;
-            deferredCA[1] = 0x00000001 | 0x00000000 | 0x00002000 | 0x00000400 | (impersonate ? 0 : 0x00000800) | (int)executeType; // MsidbCustomActionTypeDll | MsidbCustomActionTypeBinaryData | MsidbCustomActionTypeHideTarget | MsidbCustomActionTypeInScript | MsidbCustomActionTypeNoImpersonate(?) | deferred/rollback/commit
+            deferredCA[1] = 0x00000001/*Dll*/ | 0x00002000 /*Hidden*/ | (impersonate ? 0 : 0x00000800) | executeTypeVal;
             deferredCA[2] = "PanelSwCustomActions.dll";
             deferredCA[3] = "CommonDeferred";
 
