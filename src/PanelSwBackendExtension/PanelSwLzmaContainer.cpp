@@ -33,6 +33,22 @@ HRESULT CPanelSwLzmaContainer::Reset()
 		_outBuffer = nullptr;
 	}
 
+	if (!_extractQueue.empty())
+	{
+		BextLogError(E_INVALIDSTATE, "Extraction thread has terminated before finishing extraction");
+		while (!_extractQueue.empty())
+		{
+			const ExtractFileContext& one = _extractQueue.back();
+			ReleaseStr(one._szTargetPath);
+			_extractQueue.pop_back();
+		}
+	}
+	ReleaseHandle(_hExtractSemaphore);
+	ReleaseHandle(_hEndExtract);
+	ReleaseHandle(_hExtractThread);
+	_csExtractQueue.Term();
+	_csExtract.Term();
+
 	_fileIndex = -1;
 	_blockIndex = ~0;
 	_outBufferSize = 0;
@@ -81,6 +97,21 @@ HRESULT CPanelSwLzmaContainer::ContainerOpen(LPCWSTR wzContainerId, LPCWSTR wzFi
 	
 	sRes = SzArEx_Open(_db.get(), &_lookStream->vt, &_alloc, &_allocTemp);
 	BextExitOnNull((sRes == SZ_OK), hr, sRes, "Failed to open 7zip database");
+
+	_hExtractSemaphore = ::CreateSemaphore(nullptr, 0, _db->NumFiles, nullptr);
+	BextExitOnNullWithLastError(_hExtractSemaphore, hr, "Failed to create semaphore");
+
+	_hEndExtract = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
+	BextExitOnNullWithLastError(_hEndExtract, hr, "Failed to create event");
+
+	hr = _csExtract.Init();
+	BextExitOnFailure(hr, "Failed to create critical section");
+
+	hr = _csExtractQueue.Init();
+	BextExitOnFailure(hr, "Failed to create critical section");
+
+	_hExtractThread = ::CreateThread(nullptr, 0, ExtractThreadProc, this, 0, nullptr);
+	BextExitOnNullWithLastError(_hExtractThread, hr, "Failed to create thread");
 
 	hr = LoadMappings();
 	BextExitOnFailure(hr, "Failed to read mappings");
@@ -151,15 +182,46 @@ LExit:
 HRESULT CPanelSwLzmaContainer::ContainerStreamToFile(LPCWSTR wzFileName)
 {
 	HRESULT hr = S_OK;
+	ExtractFileContext ctx;
+	BOOL bRes = TRUE;
+	HANDLE hFile = INVALID_HANDLE_VALUE;
+	CCritSecLock lock(_csExtractQueue.m_sec, false);
+
+	BextExitOnNull((_fileIndex < _db->NumFiles), hr, E_INVALIDSTATE, "7z container is exhausted, can't extract '%ls'", wzFileName);
+
+	hFile = ::CreateFile(wzFileName, FILE_ALL_ACCESS, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	BextExitOnNullWithLastError((hFile != INVALID_HANDLE_VALUE), hr, "Failed to create file '%ls'", wzFileName);
+
+	ctx._fileIndex = _fileIndex;
+	hr = StrAllocString(&ctx._szTargetPath, wzFileName, 0);
+	BextExitOnFailure(hr, "Failed to copy file name");
+
+	lock.Lock();
+	_extractQueue.push_back(ctx);
+	lock.Unlock();
+	
+	bRes = ::ReleaseSemaphore(_hExtractSemaphore, 1, nullptr);
+	BextExitOnNullWithLastError(bRes, hr, "Failed to release semaphore");
+
+LExit:
+	ReleaseFile(hFile);
+
+	return hr;
+}
+
+HRESULT CPanelSwLzmaContainer::ContainerStreamToFileCore(size_t nFileIndex, LPCWSTR wzFileName)
+{
+	HRESULT hr = S_OK;
 	SRes sRes = 0;
 	WRes wRes = ERROR_SUCCESS;
 	size_t offset = 0;
 	size_t outSizeProcessed = 0;
+	CCritSecLock lock(_csExtract.m_sec, true);
 
-	BextExitOnNull((_fileIndex < _db->NumFiles), hr, E_INVALIDSTATE, "7z container is exhausted, can't extract '%ls'", wzFileName);
+	BextExitOnNull((nFileIndex < _db->NumFiles), hr, E_INVALIDSTATE, "7z container is exhausted, can't extract '%ls'", wzFileName);
 
-	sRes = SzArEx_Extract(_db.get(), &_lookStream->vt, _fileIndex, &_blockIndex, &_outBuffer, &_outBufferSize, &offset, &outSizeProcessed, &_alloc, &_allocTemp);
-	BextExitOnNull((sRes == SZ_OK), hr, sRes, "Failed to open 7zip database");
+	sRes = SzArEx_Extract(_db.get(), &_lookStream->vt, nFileIndex, &_blockIndex, &_outBuffer, &_outBufferSize, &offset, &outSizeProcessed, &_alloc, &_allocTemp);
+	BextExitOnNull((sRes == SZ_OK), hr, sRes, "Failed to extract '%ls'", wzFileName);
 
 	hr = FileWrite(wzFileName, FILE_ATTRIBUTE_NORMAL, _outBuffer + offset, outSizeProcessed, nullptr);
 	BextExitOnFailure(hr, "Failed to write to file '%ls'", wzFileName);
@@ -170,7 +232,45 @@ LExit:
 
 HRESULT CPanelSwLzmaContainer::ContainerStreamToBuffer(BYTE** ppbBuffer, SIZE_T* pcbBuffer)
 {
-	return E_NOTIMPL;
+	HRESULT hr = S_OK;
+	SRes sRes = 0;
+	WRes wRes = ERROR_SUCCESS;
+	size_t offset = 0;
+	size_t outSizeProcessed = 0;
+
+	BextExitOnNull((_fileIndex < _db->NumFiles), hr, E_INVALIDSTATE, "7z container is exhausted, can't extract");
+	if (!ppbBuffer || !pcbBuffer)
+	{
+		ExitFunction1(hr = S_FALSE);
+	}
+
+	sRes = SzArEx_Extract(_db.get(), &_lookStream->vt, _fileIndex, &_blockIndex, &_outBuffer, &_outBufferSize, &offset, &outSizeProcessed, &_alloc, &_allocTemp);
+	BextExitOnNull((sRes == SZ_OK), hr, sRes, "Failed to open 7zip database");
+
+	if (!*ppbBuffer)
+	{
+		*ppbBuffer = (LPBYTE)::CoTaskMemAlloc(outSizeProcessed);
+		BextExitOnNull(*ppbBuffer, hr, E_OUTOFMEMORY, "Failed to allocate memory");
+	}
+	else if ((*pcbBuffer) < outSizeProcessed)
+	{
+		LPVOID pb = ::CoTaskMemRealloc(*ppbBuffer, outSizeProcessed);
+		if (!pb)
+		{
+			::CoTaskMemFree(*ppbBuffer);
+			*ppbBuffer = nullptr;
+			*pcbBuffer = 0;
+			hr = E_OUTOFMEMORY;
+			BextExitOnFailure(hr, "Failed to allocate memory");
+		}
+		*ppbBuffer = (LPBYTE)pb;
+	}
+
+	memcpy(*ppbBuffer, _outBuffer + offset, outSizeProcessed);
+	*pcbBuffer = outSizeProcessed;
+
+LExit:
+	return hr;
 }
 
 HRESULT CPanelSwLzmaContainer::ContainerSkipStream()
@@ -180,7 +280,19 @@ HRESULT CPanelSwLzmaContainer::ContainerSkipStream()
 
 HRESULT CPanelSwLzmaContainer::ContainerClose()
 {
-	return Reset();
+	HRESULT hr = S_OK;
+	BOOL bRes = TRUE;
+	DWORD dwWait = ERROR_SUCCESS;
+
+	bRes = ::SetEvent(_hEndExtract);
+	BextExitOnNullWithLastError(bRes, hr, "Failed to set event");
+
+	dwWait = ::WaitForSingleObject(_hExtractThread, INFINITE);
+	BextExitOnNullWithLastError((dwWait == WAIT_OBJECT_0), hr, "Failed to wait for extract thread to terminate");
+
+LExit:
+	Reset();
+	return hr;
 }
 
 HRESULT CPanelSwLzmaContainer::LoadMappings()
@@ -207,7 +319,7 @@ HRESULT CPanelSwLzmaContainer::LoadMappings()
 	hr = FileCreateTemp(L"CNTNR", L"xml", &szXmlFile, nullptr);
 	BextExitOnFailure(hr, "Failed to load mappings");
 
-	hr = ContainerStreamToFile(szXmlFile);
+	hr = ContainerStreamToFileCore(_fileIndex, szXmlFile);
 	BextExitOnFailure(hr, "Failed to load mappings from file '%ls'", szXmlFile);
 
 	hr = XmlLoadDocumentFromFile(szXmlFile, &_pxMappingsDoc);
@@ -284,4 +396,44 @@ HRESULT CPanelSwLzmaContainer::GetNextMapping(BSTR* psczStreamName)
 
 LExit:
 	return hr;
+}
+
+/*static*/ DWORD WINAPI CPanelSwLzmaContainer::ExtractThreadProc(LPVOID lpParameter)
+{
+	HRESULT hr = S_OK;
+	CPanelSwLzmaContainer* pThis = (CPanelSwLzmaContainer*)lpParameter;
+	HANDLE hWaits[2] = { pThis->_hExtractSemaphore, pThis->_hEndExtract };
+
+	while (true)
+	{
+		CCritSecLock lock(pThis->_csExtractQueue.m_sec, false);
+
+		// If both handles are set then the returned value is in index order (that is, 0). That ensures all files will be extracted before terminating.
+		DWORD dwWait = ::WaitForMultipleObjects(2, hWaits, FALSE, INFINITE);
+		switch (dwWait)
+		{
+		case WAIT_OBJECT_0:
+			BextExitOnNull(pThis->_extractQueue.size(), hr, E_INVALIDSTATE, "Nothing to extract, but extraction semaphore was signaled");
+			break;
+		case WAIT_OBJECT_0 + 1:
+			BextExitOnNull(pThis->_extractQueue.empty(), hr, E_INVALIDSTATE, "Quitting extraction prematurely");
+			ExitFunction();
+		default:
+			hr = E_INVALIDSTATE;
+			BextExitOnFailure(hr, "Unexpected wait result %u", dwWait);
+			break;
+		}
+
+		lock.Lock();
+		ExtractFileContext ctx = pThis->_extractQueue.front();
+		pThis->_extractQueue.pop_front();
+		lock.Unlock();
+
+		hr = pThis->ContainerStreamToFileCore(ctx._fileIndex, ctx._szTargetPath);
+		ReleaseStr(ctx._szTargetPath);
+		BextExitOnFailure(hr, "Failed to extract file");
+	}
+
+LExit:
+	return 0;
 }
