@@ -10,7 +10,7 @@
   <ItemGroup>
     <PackageReference Include="TidyBuild" />
     <WixExtension Include="PanelSwWixExtension">
-      <HintPath>$(BaseBuildFolder)Any CPU\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</HintPath>
+      <HintPath>$(BaseBuildFolder)AnyCPU\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</HintPath>
       <Name>PanelSwWixExtension</Name>
     </WixExtension>
   </ItemGroup>

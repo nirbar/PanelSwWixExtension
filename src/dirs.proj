@@ -25,8 +25,8 @@
     <!-- WiX -->
     <ProjectReference Include="wixlib\PanelSwWixLib.wixproj" Properties="Configuration=Release;Platform=x86" Targets="Restore;Build" BuildInParallel="false" />
     <ProjectReference Include="wixlib\PanelSwWixLib.wixproj" Properties="Configuration=Release;Platform=x64" Targets="Restore;Build" BuildInParallel="false" />
-    <ProjectReference Include="PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.csproj" Properties="Configuration=$(Configuration);Platform=Any CPU" Targets="Restore;Build" BuildInParallel="false" />
-    <ProjectReference Include="PanelSwWixExtension\PanelSwWixExtension.csproj" Properties="Configuration=$(Configuration);Platform=Any CPU;NugetPrereleaseVersion=$(NugetPrereleaseVersion)" Targets="Restore;Build" BuildInParallel="false" />
+    <ProjectReference Include="PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.csproj" Properties="Configuration=$(Configuration);Platform=AnyCPU" Targets="Restore;Build" BuildInParallel="false" />
+    <ProjectReference Include="PanelSwWixExtension\PanelSwWixExtension.csproj" Properties="Configuration=$(Configuration);Platform=AnyCPU;NugetPrereleaseVersion=$(NugetPrereleaseVersion)" Targets="Restore;Build" BuildInParallel="false" />
   </ItemGroup>
   <ItemGroup Condition="'$(UnitTest)' != ''">
     <ProjectReference Include="UnitTests\$(UnitTest)\$(UnitTest).wixproj" Properties="Configuration=$(Configuration);Platform=x86" Targets="Restore;Build" BuildInParallel="false" />

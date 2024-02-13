@@ -11,7 +11,7 @@
   </ItemGroup>
   <ItemGroup>
     <WixExtension Include="PanelSwWixExtension">
-      <HintPath>$(BuildFolder)..\Any CPU\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</HintPath>
+      <HintPath>$(BuildFolder)..\AnyCPU\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</HintPath>
       <Name>PanelSwWixExtension</Name>
     </WixExtension>
     <PackageReference Include="WixToolset.Util.wixext" />
