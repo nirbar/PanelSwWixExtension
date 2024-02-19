@@ -41,7 +41,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>Version.lib;Shell32.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>/WHOLEARCHIVE:7zrLib.lib;Version.lib;Shell32.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>$(SevenZapLibPath);$(BuildFolderCommon)$(Platform)\poco\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
       <TargetMachine Condition="'$(Platform)' == 'x86'">MachineX86</TargetMachine>
@@ -53,6 +53,8 @@
     <ClCompile Include="PanelSwBackendExtension.cpp" />
     <ClCompile Include="PanelSwZipContainer.cpp" />
     <ClCompile Include="PanelSwLzmaContainer.cpp" />
+    <ClCompile Include="PanelSwLzmaExtractCallback.cpp" />
+    <ClCompile Include="PanelSwLzmaInStream.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
@@ -63,6 +65,8 @@
     <ClInclude Include="PanelSwBackendExtension.h" />
     <ClInclude Include="PanelSwZipContainer.h" />
     <ClInclude Include="PanelSwLzmaContainer.h" />
+    <ClInclude Include="PanelSwLzmaExtractCallback.h" />
+    <ClInclude Include="PanelSwLzmaInStream.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>

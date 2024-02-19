@@ -12,6 +12,8 @@ public:
 
 	HRESULT ContainerOpen(LPCWSTR wzContainerId, LPCWSTR wzFilePath) override;
 
+	HRESULT ContainerOpenAttached(LPCWSTR wzContainerId, HANDLE hBundle, DWORD64 qwContainerStartPos, DWORD64 qwContainerSize) override;
+
 	HRESULT ContainerNextStream(BSTR* psczStreamName) override;
 
 	HRESULT ContainerStreamToFile(LPCWSTR wzFileName) override;

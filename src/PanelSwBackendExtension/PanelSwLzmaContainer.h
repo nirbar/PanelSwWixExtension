@@ -1,12 +1,7 @@
 #pragma once
 #include "pch.h"
-#include "7zC/CpuArch.h"
-#include "7zC/7z.h"
-#include "7zC/7zAlloc.h"
-#include "7zC/7zBuf.h"
-#include "7zC/7zCrc.h"
-#include "7zC/7zFile.h"
-#include "7zC/7zVersion.h"
+#include "lzma-sdk/CPP/7zip/UI/Common/LoadCodecs.h"
+#include "lzma-sdk/CPP/7zip/UI/Common/OpenArchive.h"
 #include <memory>
 #include <list>
 
@@ -17,6 +12,8 @@ public:
 	~CPanelSwLzmaContainer();
 
 	HRESULT ContainerOpen(LPCWSTR wzContainerId, LPCWSTR wzFilePath) override;
+
+	HRESULT ContainerOpenAttached(LPCWSTR wzContainerId, HANDLE hBundle, DWORD64 qwContainerStartPos, DWORD64 qwContainerSize) override;
 
 	HRESULT ContainerNextStream(BSTR* psczStreamName) override;
 
@@ -30,42 +27,30 @@ public:
 
 private:
 
+	HRESULT Init(LPCWSTR wzContainerId, HANDLE hBundle, DWORD64 qwContainerStartPos, DWORD64 qwContainerSize);
 	HRESULT Reset();
 
-	HRESULT LoadMappings();
+	HRESULT LoadMappings(LPDWORD pdwMappingCount);
 	HRESULT ReadFileMappings(LPCWSTR szEntryName);
 	HRESULT GetNextMapping(BSTR* psczStreamName);
 
-	HRESULT ContainerStreamToFileCore(size_t nFileIndex, LPCWSTR wzFileName);
+	HRESULT ContainerStreamToFileNow(UInt32 nFileIndex, LPCWSTR wzFileName);
 
-	std::auto_ptr<CFileInStream> _archiveStream;
-	std::auto_ptr<CLookToRead2> _lookStream;
-	std::auto_ptr<CSzArEx> _db;
-	size_t _fileIndex = -1;
-	UInt32 _blockIndex = ~0;
-	LPBYTE _outBuffer = nullptr;
-	size_t _outBufferSize = 0;
-
-	const size_t _kInputBufSize = ((size_t)1 << 18);
-	const ISzAlloc _alloc = { SzAlloc, SzFree };
-	const ISzAlloc _allocTemp = { SzAllocTemp, SzFreeTemp };
-
+	// Mappings (same compressed file has several target names)
 	CComPtr<IXMLDOMDocument> _pxMappingsDoc;
 	CComPtr<IXMLDOMNodeList> _pxCurrFileMappings;
 	size_t _nCurrMappingIndex = -1;
 	const LPCWSTR MAPPINGS_FILE_NAME = L"PanelSwWixContainer";
 
-	static DWORD WINAPI ExtractThreadProc(LPVOID lpParameter);
+	// LZMA
+	std::unique_ptr<CArc> _archive;
+	std::unique_ptr<CCodecs> _codecs;
+	CMyComPtr<IInStream> _inStream;
+	size_t _fileIndex = -1;
 
-	struct ExtractFileContext
-	{
-		size_t _fileIndex = -1;
-		LPWSTR _szTargetPath = nullptr;
-	};
-	HANDLE _hExtractSemaphore = NULL;
-	HANDLE _hEndExtract = NULL;
-	HANDLE _hExtractThread = NULL;
-	CComCriticalSection _csExtractQueue;
-	CComCriticalSection _csExtract;
-	std::list<ExtractFileContext> _extractQueue;
+	std::unique_ptr<UInt32[]> _extractIndices;
+	std::unique_ptr<FString[]> _extractPaths;
+	UInt32 _entryCount = 0; // 7z file count
+	UInt32 _fileCount = 0; // File count including mappings
+	UInt32 _extractCount = 0;
 };

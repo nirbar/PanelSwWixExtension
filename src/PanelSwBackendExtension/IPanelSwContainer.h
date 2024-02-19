@@ -7,6 +7,8 @@ class IPanelSwContainer
 public:
 	virtual HRESULT ContainerOpen(LPCWSTR wzContainerId, LPCWSTR wzFilePath) = 0;
 
+	virtual HRESULT ContainerOpenAttached(LPCWSTR wzContainerId, HANDLE hBundle, DWORD64 qwContainerStartPos, DWORD64 qwContainerSize) = 0;
+
 	virtual HRESULT ContainerNextStream(BSTR* psczStreamName) = 0;
 
 	virtual HRESULT ContainerStreamToFile(LPCWSTR wzFileName) = 0;

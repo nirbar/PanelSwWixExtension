@@ -83,6 +83,11 @@ LExit:
 	return hr;
 }
 
+HRESULT CPanelSwZipContainer::ContainerOpenAttached(LPCWSTR wzContainerId, HANDLE hBundle, DWORD64 qwContainerStartPos, DWORD64 qwContainerSize)
+{
+	return E_NOTIMPL;
+}
+
 HRESULT CPanelSwZipContainer::ContainerNextStream(BSTR* psczStreamName)
 {
 	HRESULT hr = S_OK;

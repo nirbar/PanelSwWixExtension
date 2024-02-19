@@ -31,7 +31,7 @@ HRESULT CPanelSwBundleExtension::Reset()
 	return S_OK;
 }
 
-STDMETHODIMP CPanelSwBundleExtension::ContainerOpen(LPCWSTR wzContainerId, LPCWSTR wzFilePath, LPVOID* pContext)
+HRESULT CPanelSwBundleExtension::CreateContainer(LPCWSTR wzContainerId, IPanelSwContainer** ppContainer)
 {
 	HRESULT hr = S_OK;
 	CComPtr<IXMLDOMDocument> pixdManifest;
@@ -72,15 +72,59 @@ STDMETHODIMP CPanelSwBundleExtension::ContainerOpen(LPCWSTR wzContainerId, LPCWS
 		BextExitOnFailure(hr, "Unsupported container compression '%ls'", compression.bstrVal);
 	}
 
-	hr = pContainer->ContainerOpen(wzContainerId, wzFilePath);
-	BextExitOnFailure(hr, "Failed to open container");
-
-	_containers.push_back(pContainer);
-	*pContext = pContainer;
+	*ppContainer = pContainer;
 	pContainer = nullptr;
 
 LExit:
 	ReleaseStr(szXPath);
+	if (pContainer)
+	{
+		delete pContainer;
+	}
+
+	return hr;
+}
+
+STDMETHODIMP CPanelSwBundleExtension::ContainerOpen(LPCWSTR wzContainerId, LPCWSTR wzFilePath, LPVOID* ppContext)
+{
+	HRESULT hr = S_OK;
+	IPanelSwContainer* pContainer = nullptr;
+
+	hr = CreateContainer(wzContainerId, &pContainer);
+	BextExitOnFailure(hr, "Failed to create container");
+
+	hr = pContainer->ContainerOpen(wzContainerId, wzFilePath);
+	BextExitOnFailure(hr, "Failed to open container");
+
+	_containers.push_back(pContainer);
+	*ppContext = pContainer;
+	pContainer = nullptr;
+
+LExit:
+	if (pContainer)
+	{
+		delete pContainer;
+	}
+
+	return hr;
+}
+
+STDMETHODIMP CPanelSwBundleExtension::ContainerOpenAttached(LPCWSTR wzContainerId, HANDLE hBundle, DWORD64 qwContainerStartPos, DWORD64 qwContainerSize, LPVOID* ppContext)
+{
+	HRESULT hr = S_OK;
+	IPanelSwContainer* pContainer = nullptr;
+
+	hr = CreateContainer(wzContainerId, &pContainer);
+	BextExitOnFailure(hr, "Failed to create container");
+
+	hr = pContainer->ContainerOpenAttached(wzContainerId, hBundle, qwContainerStartPos, qwContainerSize);
+	BextExitOnFailure(hr, "Failed to open attached container");
+
+	_containers.push_back(pContainer);
+	*ppContext = pContainer;
+	pContainer = nullptr;
+
+LExit:
 	if (pContainer)
 	{
 		delete pContainer;

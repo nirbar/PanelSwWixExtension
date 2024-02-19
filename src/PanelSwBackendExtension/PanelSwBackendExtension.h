@@ -12,6 +12,8 @@ public:
 
 	STDMETHOD(ContainerOpen)(LPCWSTR wzContainerId, LPCWSTR wzFilePath, LPVOID* pContext) override;
 
+	STDMETHOD(ContainerOpenAttached)(LPCWSTR wzContainerId, HANDLE hBundle, DWORD64 qwContainerStartPos, DWORD64 qwContainerSize, LPVOID* ppContext) override;
+
 	STDMETHOD(ContainerNextStream)(LPVOID pContext, LPWSTR* psczStreamName) override;
 
 	STDMETHOD(ContainerStreamToFile)(LPVOID pContext, LPCWSTR wzFileName) override;
@@ -25,6 +27,7 @@ public:
 
 private:
 
+	HRESULT CreateContainer(LPCWSTR wzContainerId, IPanelSwContainer** ppContainer);
 	HRESULT GetContainer(LPVOID pContext, IPanelSwContainer** ppContainer);
 	HRESULT ReleaseContainer(IPanelSwContainer* pContainer);
 	HRESULT Reset();
