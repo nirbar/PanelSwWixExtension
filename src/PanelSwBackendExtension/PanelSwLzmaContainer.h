@@ -53,4 +53,11 @@ private:
 	UInt32 _entryCount = 0; // 7z file count
 	UInt32 _fileCount = 0; // File count including mappings
 	UInt32 _extractCount = 0;
+
+	// Extraction thread
+	static DWORD WINAPI ExtractThreadProc(LPVOID lpParameter);
+
+	HANDLE _hExtractSemaphore = NULL;
+	HANDLE _hEndExtract = NULL;
+	HANDLE _hExtractThread = NULL;
 };

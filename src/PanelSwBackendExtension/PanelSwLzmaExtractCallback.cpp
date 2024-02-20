@@ -64,14 +64,17 @@ LExit:
 	{
 		delete os;
 	}
+	if (SUCCEEDED(hr) && _dwErrCount)
+	{
+		hr = E_FAIL;
+	}
 
 	return hr;
 }
 
 Z7_COM7F_IMF(CPanelSwLzmaExtractCallback::PrepareOperation(Int32 askExtractMode))
 {
-	HRESULT hr = S_OK;
-	return hr;
+	return _dwErrCount ? E_FAIL : S_OK;
 }
 
 Z7_COM7F_IMF(CPanelSwLzmaExtractCallback::SetOperationResult(Int32 opRes))
@@ -94,14 +97,12 @@ Z7_COM7F_IMF(CPanelSwLzmaExtractCallback::ReportExtractResult(UInt32 indexType, 
 
 Z7_COM7F_IMF(CPanelSwLzmaExtractCallback::SetCompleted(const UInt64* total))
 {
-	HRESULT hr = S_OK;
-	return hr;
+	return _dwErrCount ? E_FAIL : S_OK;
 }
 
 Z7_COM7F_IMF(CPanelSwLzmaExtractCallback::SetTotal(UInt64 total))
 {
-	HRESULT hr = S_OK;
-	return hr;
+	return _dwErrCount ? E_FAIL : S_OK;
 }
 
 BOOL CPanelSwLzmaExtractCallback::HasErrors() const

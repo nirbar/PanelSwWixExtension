@@ -31,6 +31,10 @@ HRESULT CPanelSwLzmaContainer::Reset()
 	_pxCurrFileMappings.Release();
 	_pxMappingsDoc.Release();
 
+	ReleaseHandle(_hExtractSemaphore);
+	ReleaseHandle(_hEndExtract);
+	ReleaseHandle(_hExtractThread);
+
 	return S_OK;
 }
 
@@ -79,6 +83,15 @@ HRESULT CPanelSwLzmaContainer::Init(LPCWSTR wzContainerId, HANDLE hBundle, DWORD
 	BextExitOnNull(_extractPaths.get(), hr, E_OUTOFMEMORY, "Failed to create file paths array");
 
 	_extractCount = 0;
+
+	_hExtractSemaphore = ::CreateSemaphore(nullptr, 0, _fileCount, nullptr);
+	BextExitOnNullWithLastError(_hExtractSemaphore, hr, "Failed to create semaphore");
+
+	_hEndExtract = ::CreateEvent(nullptr, FALSE, FALSE, nullptr);
+	BextExitOnNullWithLastError(_hEndExtract, hr, "Failed to create event");
+
+	_hExtractThread = ::CreateThread(nullptr, 0, ExtractThreadProc, this, 0, nullptr);
+	BextExitOnNullWithLastError(_hExtractThread, hr, "Failed to create thread");
 
 LExit:
 	return hr;
@@ -190,6 +203,9 @@ HRESULT CPanelSwLzmaContainer::ContainerStreamToFile(LPCWSTR wzFileName)
 	_extractIndices[_extractCount] = _fileIndex;
 	_extractPaths[_extractCount] = wzFileName;
 	++_extractCount;
+	
+	bRes = ::ReleaseSemaphore(_hExtractSemaphore, 1, nullptr);
+	BextExitOnNullWithLastError(bRes, hr, "Failed to release semaphore");
 
 LExit:
 	ReleaseFile(hFile);
@@ -204,16 +220,29 @@ HRESULT CPanelSwLzmaContainer::ContainerStreamToFileNow(UInt32 nFileIndex, LPCWS
 	std::unique_ptr<CPanelSwLzmaExtractCallback> extractClbk;
 
 	targetFile = wzFileName;
-	
-	extractClbk.reset(new CPanelSwLzmaExtractCallback());
-	BextExitOnNull(extractClbk.get(), hr, E_OUTOFMEMORY, "Failed to allocate extract callback object");
 
-	hr = extractClbk->Init(_archive->Archive, 1, &nFileIndex, &targetFile);
-	BextExitOnFailure(hr, "Failed to initialize extract callbck");
+	try
+	{
+		extractClbk.reset(new CPanelSwLzmaExtractCallback());
+		BextExitOnNull(extractClbk.get(), hr, E_OUTOFMEMORY, "Failed to allocate extract callback object");
 
-	hr = _archive->Archive->Extract(&nFileIndex, 1, 0, extractClbk.get());
-	BextExitOnFailure(hr, "Failed to extract file");
-	extractClbk.release();
+		hr = extractClbk->Init(_archive->Archive, 1, &nFileIndex, &targetFile);
+		BextExitOnFailure(hr, "Failed to initialize extract callbck");
+
+		hr = _archive->Archive->Extract(&nFileIndex, 1, 0, extractClbk.get());
+		BextExitOnFailure(hr, "Failed to extract file");
+		extractClbk.release();
+	}
+	catch (std::exception ex)
+	{
+		hr = E_FAIL;
+		BextExitOnFailure(hr, "Failed to extract files. %hs", ex.what());
+	}
+	catch (...)
+	{
+		hr = E_FAIL;
+		BextExitOnFailure(hr, "Failed to extract files");
+	}
 
 LExit:
 	return S_OK;
@@ -232,18 +261,14 @@ HRESULT CPanelSwLzmaContainer::ContainerSkipStream()
 HRESULT CPanelSwLzmaContainer::ContainerClose()
 {
 	HRESULT hr = S_OK;
-	FString targetFile;
-	std::unique_ptr<CPanelSwLzmaExtractCallback> extractClbk;
+	BOOL bRes = TRUE;
+	DWORD dwWait = ERROR_SUCCESS;
 
-	extractClbk.reset(new CPanelSwLzmaExtractCallback());
-	BextExitOnNull(extractClbk.get(), hr, E_OUTOFMEMORY, "Failed to allocate extract callback object");
+	bRes = ::SetEvent(_hEndExtract);
+	BextExitOnNullWithLastError(bRes, hr, "Failed to set event");
 
-	hr = extractClbk->Init(_archive->Archive, _extractCount, _extractIndices.get(), _extractPaths.get());
-	BextExitOnFailure(hr, "Failed to initialize extract callbck");
-
-	hr = _archive->Archive->Extract(_extractIndices.get(), _extractCount, 0, extractClbk.get());
-	BextExitOnFailure(hr, "Failed to extract file");
-	extractClbk.release();
+	dwWait = ::WaitForSingleObject(_hExtractThread, INFINITE);
+	BextExitOnNullWithLastError((dwWait == WAIT_OBJECT_0), hr, "Failed to wait for extract thread to terminate");
 
 LExit:
 	Reset();
@@ -361,4 +386,71 @@ HRESULT CPanelSwLzmaContainer::GetNextMapping(BSTR* psczStreamName)
 
 LExit:
 	return hr;
+}
+
+/*static*/ DWORD WINAPI CPanelSwLzmaContainer::ExtractThreadProc(LPVOID lpParameter)
+{
+	HRESULT hr = S_OK;
+	CPanelSwLzmaContainer* pThis = (CPanelSwLzmaContainer*)lpParameter;
+	HANDLE hWaits[2] = { pThis->_hExtractSemaphore, pThis->_hEndExtract };
+	DWORD dwStartPos = 0;
+
+	while (true)
+	{
+		DWORD dwExtractCount = 0;
+
+		// If both handles are set then the returned value is in index order (that is, 0). That ensures all files will be extracted before terminating.
+		DWORD dwWait = ::WaitForMultipleObjects(2, hWaits, FALSE, INFINITE);
+		switch (dwWait)
+		{
+		case WAIT_OBJECT_0: // Files are ready
+			// Determine the number of files that can be extracted
+			do
+			{
+				++dwExtractCount;
+			} while (::WaitForSingleObject(pThis->_hExtractSemaphore, 0) == WAIT_OBJECT_0);
+			break;
+		case WAIT_OBJECT_0 + 1: // Terminate
+			ExitFunction();
+		default:
+			hr = E_INVALIDSTATE;
+			BextExitOnFailure(hr, "Unexpected wait result %u", dwWait);
+			break;
+		}
+
+		if (dwExtractCount)
+		{
+			try
+			{
+				std::unique_ptr <CPanelSwLzmaExtractCallback> extractClbk;
+				UInt32* pIndices = pThis->_extractIndices.get() + dwStartPos;
+				FString* pPaths = pThis->_extractPaths.get() + dwStartPos;
+				dwStartPos += dwExtractCount;
+
+				extractClbk.reset(new CPanelSwLzmaExtractCallback());
+				BextExitOnNull(extractClbk, hr, E_OUTOFMEMORY, "Failed to allocate extract callback object");
+
+				hr = extractClbk->Init(pThis->_archive->Archive, dwExtractCount, pIndices, pPaths);
+				BextExitOnFailure(hr, "Failed to initialize extract callbck");
+
+				hr = pThis->_archive->Archive->Extract(pIndices, dwExtractCount, 0, extractClbk.get());
+				BextExitOnFailure(hr, "Failed to extract file");
+
+				extractClbk.release(); // At this stage the callback should have been deleted by the archive
+			}
+			catch (std::exception ex)
+			{
+				hr = E_FAIL;
+				BextExitOnFailure(hr, "Failed to extract files. %hs", ex.what());
+			}
+			catch (...)
+			{
+				hr = E_FAIL;
+				BextExitOnFailure(hr, "Failed to extract files");
+			}
+		}
+	}
+
+LExit:
+	return 0;
 }
