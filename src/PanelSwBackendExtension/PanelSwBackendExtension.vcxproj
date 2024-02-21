@@ -51,6 +51,7 @@
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="PanelSwBackendExtension.cpp" />
+    <ClCompile Include="PanelSwLzmaOutStream.cpp" />
     <ClCompile Include="PanelSwZipContainer.cpp" />
     <ClCompile Include="PanelSwLzmaContainer.cpp" />
     <ClCompile Include="PanelSwLzmaExtractCallback.cpp" />
@@ -63,6 +64,7 @@
     <ClInclude Include="framework.h" />
     <ClInclude Include="IPanelSwContainer.h" />
     <ClInclude Include="PanelSwBackendExtension.h" />
+    <ClInclude Include="PanelSwLzmaOutStream.h" />
     <ClInclude Include="PanelSwZipContainer.h" />
     <ClInclude Include="PanelSwLzmaContainer.h" />
     <ClInclude Include="PanelSwLzmaExtractCallback.h" />

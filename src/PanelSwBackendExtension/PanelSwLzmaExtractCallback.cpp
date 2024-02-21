@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "PanelSwLzmaExtractCallback.h"
+#include "PanelSwLzmaOutStream.h"
 #include "lzma-sdk/CPP/7zip/Common/FileStreams.h"
 #include "lzma-sdk/CPP/7zip/Archive/IArchive.h"
 
@@ -32,7 +33,7 @@ Z7_COM7F_IMF(CPanelSwLzmaExtractCallback::GetStream(UInt32 index, ISequentialOut
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
-	COutFileStream* os = nullptr;
+	CPanelSwLzmaOutStream* os = nullptr;
 	CMyComPtr<ISequentialOutStream> outOs;
 
 	if (outStream != nullptr)
@@ -45,11 +46,11 @@ Z7_COM7F_IMF(CPanelSwLzmaExtractCallback::GetStream(UInt32 index, ISequentialOut
 			{
 				if (_extractIndices[i] == index)
 				{
-					os = new COutFileStream();
+					os = new CPanelSwLzmaOutStream();
 					BextExitOnNull(os, hr, E_OUTOFMEMORY, "Failed to allocate file stream object");
 
-					bRes = os->File.CreateAlways(_extractPaths[i], FILE_ATTRIBUTE_NORMAL);
-					BextExitOnNullWithLastError(os, hr, "Failed to create file '%ls'", (const wchar_t*)_extractPaths[i]);
+					hr = os->Create(_extractPaths[i]);
+					BextExitOnFailure(hr, "Failed to create file '%ls'", (const wchar_t*)_extractPaths[i]);
 
 					outOs = os;
 					os = nullptr;

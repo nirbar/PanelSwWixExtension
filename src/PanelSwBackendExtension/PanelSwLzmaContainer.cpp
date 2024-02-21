@@ -231,8 +231,8 @@ HRESULT CPanelSwLzmaContainer::ContainerStreamToFileNow(UInt32 nFileIndex, LPCWS
 	BextExitOnFailure(hr, "Failed to initialize extract callbck");
 
 	hr = _archive->Archive->Extract(&nFileIndex, 1, 0, extractClbk);
-	BextExitOnFailure(hr, "Failed to extract file");
-	BextExitOnNull(!pExtractCallback->HasErrors(), hr, E_FAIL, "Failed to extract files");
+	BextExitOnFailure(hr, "Failed to extract '%ls'", wzFileName);
+	BextExitOnNull(!pExtractCallback->HasErrors(), hr, E_FAIL, "Failed to extract '%ls'", wzFileName);
 
 LExit:
 	return S_OK;
@@ -422,7 +422,7 @@ LExit:
 			BextExitOnFailure(hr, "Failed to initialize extract callbck");
 
 			hr = pThis->_archive->Archive->Extract(pIndices, dwExtractCount, 0, extractClbk);
-			BextExitOnFailure(hr, "Failed to extract file");
+			BextExitOnFailure(hr, "Failed to extract files");
 			BextExitOnNull(!pExtractCallback->HasErrors(), hr, E_FAIL, "Failed to extract files");
 
 			dwPrevExtractCount = dwOverallExtractCount;
