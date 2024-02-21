@@ -26,6 +26,8 @@ public:
 	BOOL HasErrors() const;
 
 private:
+	HRESULT OperationResultToString(Int32 opRes, LPWSTR *psz) const;
+
 	IInArchive* _archive = nullptr;
 	std::unique_ptr<UInt32[]> _extractIndices;
 	std::unique_ptr<FString[]> _extractPaths;

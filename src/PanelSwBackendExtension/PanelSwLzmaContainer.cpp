@@ -161,7 +161,7 @@ HRESULT CPanelSwLzmaContainer::ContainerNextStream(BSTR* psczStreamName)
 		BextExitOnFailure(hr, "Failed to get IsDir property for file %u", _fileIndex);
 
 		// File -> stop.
-		if (!pv.boolVal)
+		if ((pv.vt == VT_BOOL) && !pv.boolVal)
 		{
 			break;
 		}
@@ -174,6 +174,7 @@ HRESULT CPanelSwLzmaContainer::ContainerNextStream(BSTR* psczStreamName)
 
 	hr = _archive->Archive->GetProperty(_fileIndex, kpidPath, &pv);
 	BextExitOnFailure(hr, "Failed to get Path property for file %u", _fileIndex);
+	BextExitOnNull(((pv.vt == VT_BSTR) && pv.bstrVal && *pv.bstrVal), hr, E_INVALIDDATA, "Failed to get Path property for file %u. Property type is %u", _fileIndex, pv.vt);
 
 	hr = ReadFileMappings(pv.bstrVal);
 	BextExitOnFailure(hr, "Failed to read mappings for entry '%ls'", pv.bstrVal);

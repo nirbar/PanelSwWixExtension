@@ -255,6 +255,7 @@ extern "C" HRESULT WINAPI BundleExtensionCreate(
 
 	hr = BextInitializeFromCreateArgs(pArgs, &pEngine);
 	ExitOnFailure(hr, "Failed to initialize bext");
+	BextLog(BUNDLE_EXTENSION_LOG_LEVEL_STANDARD, "Loading Panel::Software bundle extension v" FullVersion);
 
 	pExtension = new CPanelSwBundleExtension(pEngine);
 	BextExitOnNull(pExtension, hr, E_OUTOFMEMORY, "Failed to create new CPanelSwBundleExtension.");

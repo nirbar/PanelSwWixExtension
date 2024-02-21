@@ -39,22 +39,25 @@ Z7_COM7F_IMF(CPanelSwLzmaExtractCallback::GetStream(UInt32 index, ISequentialOut
 	{
 		*outStream = nullptr;
 
-		for (UInt32 i = 0; i < _extractCount; ++i)
+		if (askExtractMode == NArchive::NExtract::NAskMode::kExtract)
 		{
-			if (_extractIndices[i] == index)
+			for (UInt32 i = 0; i < _extractCount; ++i)
 			{
-				os = new COutFileStream();
-				BextExitOnNull(os, hr, E_OUTOFMEMORY, "Failed to allocate file stream object");
+				if (_extractIndices[i] == index)
+				{
+					os = new COutFileStream();
+					BextExitOnNull(os, hr, E_OUTOFMEMORY, "Failed to allocate file stream object");
 
-				bRes = os->File.CreateAlways(_extractPaths[i], FILE_ATTRIBUTE_NORMAL);
-				BextExitOnNullWithLastError(os, hr, "Failed to create file '%ls'", (const wchar_t*)_extractPaths[i]);
+					bRes = os->File.CreateAlways(_extractPaths[i], FILE_ATTRIBUTE_NORMAL);
+					BextExitOnNullWithLastError(os, hr, "Failed to create file '%ls'", (const wchar_t*)_extractPaths[i]);
 
-				outOs = os;
-				os = nullptr;
-				*outStream = outOs.Detach();
+					outOs = os;
+					os = nullptr;
+					*outStream = outOs.Detach();
 
-				_extractIndices[i] = INFINITE; // Allow the same index to be extracted to different targets
-				break;
+					_extractIndices[i] = INFINITE; // Allow the same index to be extracted to different targets
+					break;
+				}
 			}
 		}
 	}
@@ -79,21 +82,110 @@ Z7_COM7F_IMF(CPanelSwLzmaExtractCallback::PrepareOperation(Int32 askExtractMode)
 
 Z7_COM7F_IMF(CPanelSwLzmaExtractCallback::SetOperationResult(Int32 opRes))
 {
+	HRESULT hr = S_OK;
+	LPWSTR szErr = nullptr;
+
 	if (opRes != NArchive::NExtract::NOperationResult::kOK)
 	{
 		++_dwErrCount;
+		hr = HRESULT_FROM_WIN32(opRes);
+
+		OperationResultToString(opRes, &szErr);
+		if (szErr && *szErr)
+		{
+			BextExitOnFailure(hr, "Failed to extract. %ls", szErr);
+		}
+		BextExitOnFailure(hr, "Failed to extract. Error code %i", opRes);
 	}
-	return _dwErrCount ? E_FAIL : S_OK;
+
+LExit:
+	ReleaseStr(szErr);
+
+	return FAILED(hr) ? hr : _dwErrCount ? E_FAIL : S_OK;
 }
 
 Z7_COM7F_IMF(CPanelSwLzmaExtractCallback::ReportExtractResult(UInt32 indexType, UInt32 index, Int32 opRes))
 {
+	HRESULT hr = S_OK;
+	LPWSTR szErr = nullptr;
+
 	if (opRes != NArchive::NExtract::NOperationResult::kOK)
 	{
 		++_dwErrCount;
+		hr = HRESULT_FROM_WIN32(opRes);
+
+		OperationResultToString(opRes, &szErr);
+
+		if ((indexType == NArchive::NEventIndexType::kInArcIndex) && (index != (UInt32)(Int32)-1))
+		{
+			PROPVARIANT pv = {};
+			if (SUCCEEDED(_archive->GetProperty(index, kpidPath, &pv)) &&  (pv.vt == VT_BSTR) && pv.bstrVal && *pv.bstrVal)
+			{
+				if (szErr && *szErr)
+				{
+					BextExitOnFailure(hr, "Failed to extract '%ls'. %ls", pv.bstrVal, szErr);
+				}
+				BextExitOnFailure(hr, "Failed to extract '%ls'. Error code %i", pv.bstrVal, opRes);
+			}
+		}
+		if (szErr && *szErr)
+		{
+			BextExitOnFailure(hr, "Failed to extract #%u-#%u. %ls", indexType, index, szErr);
+		}
+		BextExitOnFailure(hr, "Failed to extract #%u-#%u. Error code %i", indexType, index, opRes);
 	}
-	return _dwErrCount ? E_FAIL : S_OK;
+
+LExit:
+	ReleaseStr(szErr);
+	
+	return FAILED(hr) ? hr : _dwErrCount ? E_FAIL : S_OK;
 }
+
+HRESULT CPanelSwLzmaExtractCallback::OperationResultToString(Int32 opRes, LPWSTR* psz) const
+{
+	HRESULT hr = S_OK;
+
+	switch (opRes)
+	{
+	case NArchive::NExtract::NOperationResult::kOK:
+		hr = StrAllocString(psz, L"Succedded", 0);
+		break;
+	case NArchive::NExtract::NOperationResult::kUnsupportedMethod:
+		hr = StrAllocString(psz, L"Unsupported method", 0);
+		break;
+	case NArchive::NExtract::NOperationResult::kDataError:
+		hr = StrAllocString(psz, L"Data error", 0);
+		break;
+	case NArchive::NExtract::NOperationResult::kCRCError:
+		hr = StrAllocString(psz, L"CRC error", 0);
+		break;
+	case NArchive::NExtract::NOperationResult::kUnavailable:
+		hr = StrAllocString(psz, L"Unavailable", 0);
+		break;
+	case NArchive::NExtract::NOperationResult::kUnexpectedEnd:
+		hr = StrAllocString(psz, L"Unexpected end", 0);
+		break;
+	case NArchive::NExtract::NOperationResult::kDataAfterEnd:
+		hr = StrAllocString(psz, L"Data after end", 0);
+		break;
+	case NArchive::NExtract::NOperationResult::kIsNotArc:
+		hr = StrAllocString(psz, L"Not an archive", 0);
+		break;
+	case NArchive::NExtract::NOperationResult::kHeadersError:
+		hr = StrAllocString(psz, L"Headers error", 0);
+		break;
+	case NArchive::NExtract::NOperationResult::kWrongPassword:
+		hr = StrAllocString(psz, L"Wrong password", 0);
+		break;
+	default:
+		hr = StrAllocFormatted(psz, L"Unknown error code (%i)", opRes);
+		break;
+	}
+
+LExit:
+	return hr;
+}
+
 
 Z7_COM7F_IMF(CPanelSwLzmaExtractCallback::SetCompleted(const UInt64* total))
 {
