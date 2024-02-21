@@ -57,7 +57,7 @@ private:
 	// Extraction thread
 	static DWORD WINAPI ExtractThreadProc(LPVOID lpParameter);
 
-	HANDLE _hExtractSemaphore = NULL;
+	HANDLE _hExtract = NULL;
 	HANDLE _hEndExtract = NULL;
 	HANDLE _hExtractThread = NULL;
 };
