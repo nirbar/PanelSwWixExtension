@@ -10,6 +10,9 @@ public:
 
 	~CPanelSwBundleExtension();
 
+	STDMETHOD(Search)(LPCWSTR wzId, LPCWSTR wzVariable) override;
+
+#ifdef EnableZipContainer
 	STDMETHOD(ContainerOpen)(LPCWSTR wzContainerId, LPCWSTR wzFilePath, LPVOID* pContext) override;
 
 	STDMETHOD(ContainerOpenAttached)(LPCWSTR wzContainerId, HANDLE hBundle, DWORD64 qwContainerStartPos, DWORD64 qwContainerSize, LPVOID* ppContext) override;
@@ -24,6 +27,7 @@ public:
 
 	// Don't forget to release everything in the context
 	STDMETHOD(ContainerClose)(LPVOID pContext) override;
+#endif
 
 private:
 

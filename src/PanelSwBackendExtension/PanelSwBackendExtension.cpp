@@ -17,6 +17,28 @@ CPanelSwBundleExtension::~CPanelSwBundleExtension()
 	XmlUninitialize();
 }
 
+STDMETHODIMP CPanelSwBundleExtension::Search(LPCWSTR wzId, LPCWSTR wzVariable)
+{
+	HRESULT hr = S_OK;
+	CComPtr<IXMLDOMDocument> pixdManifest;
+	CComPtr<IXMLDOMNode> pixnBundleExtension;
+	CComBSTR bszXml;
+
+	hr = XmlLoadDocumentFromFile(m_sczBundleExtensionDataPath, &pixdManifest);
+	BextExitOnFailure(hr, "Failed to load bundle extension manifest from path: %ls", m_sczBundleExtensionDataPath);
+
+	hr = BextGetBundleExtensionDataNode(pixdManifest, PANELSW_BACKEND_EXTENSION_ID, &pixnBundleExtension);
+	BextExitOnFailure(hr, "Failed to get BundleExtensionData entry for '%ls'", PANELSW_BACKEND_EXTENSION_ID);
+
+	hr = pixnBundleExtension->get_xml(&bszXml);
+	BextExitOnFailure(hr, "Failed to get BundleExtensionData XML data for '%ls'", PANELSW_BACKEND_EXTENSION_ID);
+
+	BextLogError(E_NOTIMPL, __FUNCTION__ " actually doesn't supprort searching. XML data: '%ls'", (LPWSTR)bszXml);
+
+LExit:
+	return E_NOTIMPL;
+}
+
 HRESULT CPanelSwBundleExtension::Reset()
 {
 	ContainerIterator endIt = _containers.end();
@@ -84,6 +106,8 @@ LExit:
 
 	return hr;
 }
+
+#ifdef EnableZipContainer
 
 STDMETHODIMP CPanelSwBundleExtension::ContainerOpen(LPCWSTR wzContainerId, LPCWSTR wzFilePath, LPVOID* ppContext)
 {
@@ -205,6 +229,7 @@ STDMETHODIMP CPanelSwBundleExtension::ContainerClose(LPVOID pContext)
 LExit:
 	return hr;
 }
+#endif
 
 HRESULT CPanelSwBundleExtension::GetContainer(LPVOID pContext, IPanelSwContainer** ppContainer)
 {

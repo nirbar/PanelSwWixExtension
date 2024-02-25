@@ -1,0 +1,22 @@
+<Project Sdk="WixToolset.Sdk">
+  <PropertyGroup>
+    <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+    <DefineConstants>$(DefineConstants);PanelSwBundleExtension=$(BuildFolder)bin\Release\PanelSwBackendExtension\PanelSwBackendExtension.dll</DefineConstants>
+    <DefineConstants>$(DefineConstants);DeferredExePackagePath=$(BuildFolder)bin\Release\DeferredExePackage\DeferredExePackage.exe</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <OutputType>Bundle</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\DeferredExePackage\DeferredExePackage.vcxproj"/>
+    <PackageReference Include="WixToolset.Bal.wixext"/>
+    <PackageReference Include="TidyBuild" />
+  </ItemGroup>
+  <ItemGroup>
+    <WixExtension Include="PanelSwWixExtension">
+      <HintPath>$(BuildFolder)..\AnyCPU\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</HintPath>
+      <Name>PanelSwWixExtension</Name>
+    </WixExtension>
+  </ItemGroup>
+</Project>

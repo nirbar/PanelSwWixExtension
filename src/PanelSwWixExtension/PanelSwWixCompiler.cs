@@ -39,7 +39,9 @@ namespace PanelSw.Wix.Extensions
                         case "ContainerTemplate":
                             ParseContainerTemplateElement(section, element);
                             break;
-
+                        case "CustomSearch":
+                            ParseCustomSearchElement(section, element);
+                            break;
                         default:
                             ParseHelper.UnexpectedElement(parentElement, element);
                             break;
@@ -53,6 +55,10 @@ namespace PanelSw.Wix.Extensions
                     {
                         case "CustomUninstallKey":
                             ParseCustomUninstallKeyElement(section, element);
+                            break;
+
+                        case "CustomSearch":
+                            ParseCustomSearchElement(section, element);
                             break;
 
                         case "DuplicateFolder":
@@ -325,12 +331,66 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
+        private void ParseCustomSearchElement(IntermediateSection section, XElement element)
+        {
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
+            string bundleExtension = null;
+            string bundleExtensionData = null;
+            string variable = null;
+            string condition = null;
+            string after = null;
+            Identifier id = new Identifier(AccessModifier.Global, $"srch{Guid.NewGuid().ToString("N")}");
+
+            foreach (XAttribute attrib in element.Attributes())
+            {
+                if (IsMyAttribute(element, attrib))
+                {
+                    switch (attrib.Name.LocalName)
+                    {
+                        case "Id":
+                            id = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, attrib); 
+                            break;
+                        case "BundleExtensionRef":
+                            bundleExtension = ParseHelper.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Variable":
+                            variable = ParseHelper.GetAttributeBundleVariableNameValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Condition":
+                            condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "After":
+                            after = ParseHelper.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                            break;
+                        default:
+                            ParseHelper.UnexpectedAttribute(element, attrib);
+                            break;
+                    }
+                }
+            }
+            bundleExtensionData = element.Value;
+
+            if (string.IsNullOrEmpty(bundleExtension))
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "BundleExtensionRef"));
+            }
+
+            if (!Messaging.EncounteredError)
+            {
+                PSW_CustomSearch symbol = section.AddSymbol(new PSW_CustomSearch(sourceLineNumbers, id));
+                symbol.BundleExtensionRef = bundleExtension;
+                symbol.BundleExtensionData = bundleExtensionData;
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, SymbolDefinitions.WixBundleExtension, bundleExtension);
+                ParseHelper.CreateWixSearchSymbol(section, sourceLineNumbers, element.Name.LocalName, id, variable, condition, after, bundleExtension);
+            }
+        }
+
         private void ParseContainerTemplateElement(IntermediateSection section, XElement element)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string cabinetTemplate = null;
             ContainerType defaultType = ContainerType.Attached;
-            long? maximumUncompressedContainerSize = null; // 2GB for cab, unlimited for zip
+            long? maximumUncompressedContainerSize = null; // 2GB for cab, unlimited for (7)Zip
             long maximumUncompressedExeSize = -1; // 4GB
             PSW_ContainerTemplate.ContainerCompressionType compression = PSW_ContainerTemplate.ContainerCompressionType.Cab;
 

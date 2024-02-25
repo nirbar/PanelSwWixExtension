@@ -23,6 +23,7 @@ namespace PanelSw.Wix.Extensions
                     {
                         PSW_ContainerTemplate.SymbolDefinition,
                         PSW_ContainerExtensionData.SymbolDefinition,
+                        PSW_CustomSearch.SymbolDefinition,
                     };
                 }
                 return _intermediateSymbols;
@@ -31,7 +32,7 @@ namespace PanelSw.Wix.Extensions
 
         public override bool TryProcessSymbol(IntermediateSection section, IntermediateSymbol symbol)
         {
-            if (symbol is PSW_ContainerTemplate || symbol is PSW_ContainerExtensionData)
+            if (symbol is PSW_ContainerTemplate || symbol is PSW_ContainerExtensionData || symbol is PSW_CustomSearch)
             {
                 return true;
             }
