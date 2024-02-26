@@ -36,6 +36,7 @@
     <ClCompile>
       <AdditionalIncludeDirectories>$(SevenZapIncludePath);$(MSBuildThisFileDirectory)..\poco\Zip\include;$(MSBuildThisFileDirectory)..\poco\Foundation\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_USRDLL;EXAMPLECADLL_EXPORTS;FullVersion="$(FullVersion)";%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions Condition=" '$(EnableZipContainer)' == 'true' ">EnableZipContainer;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <WarningLevel>Level3</WarningLevel>
