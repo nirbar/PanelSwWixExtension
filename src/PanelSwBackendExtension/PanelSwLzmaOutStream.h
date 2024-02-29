@@ -15,11 +15,16 @@ public:
 
 	~CPanelSwLzmaOutStream();
 
-	HRESULT Create(LPCWSTR szPath);
+	HRESULT Create(LPCWSTR szPath, const FILETIME ftCreationTime, const FILETIME ftLastAccessTime, const FILETIME ftLastWriteTime);
 
 	HRESULT Close();
 
 	private:
-		NWindows::NFile::NIO::COutFile _file;
-		FString _filePath;
+		HANDLE _hFile = INVALID_HANDLE_VALUE;
+		LPWSTR _szPath = nullptr;
+		FILETIME _ftCreationTime = { 0,0 };
+		FILETIME _ftLastAccessTime = { 0,0 };
+		FILETIME _ftLastWriteTime = { 0,0 };
+		
+		static unsigned const MAX_RETRIES = 10;
 };
