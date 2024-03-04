@@ -15,16 +15,28 @@ public:
 
 	~CPanelSwLzmaOutStream();
 
-	HRESULT Create(LPCWSTR szPath, const FILETIME ftCreationTime, const FILETIME ftLastAccessTime, const FILETIME ftLastWriteTime);
+	HRESULT Create(LPCWSTR szPath, UInt64 ullSize, const FILETIME ftCreationTime, const FILETIME ftLastAccessTime, const FILETIME ftLastWriteTime);
 
 	HRESULT Close();
 
-	private:
-		HANDLE _hFile = INVALID_HANDLE_VALUE;
-		LPWSTR _szPath = nullptr;
-		FILETIME _ftCreationTime = { 0,0 };
-		FILETIME _ftLastAccessTime = { 0,0 };
-		FILETIME _ftLastWriteTime = { 0,0 };
-		
-		static unsigned const MAX_RETRIES = 10;
+  private:
+
+	  HRESULT WriteCore();
+
+	  HRESULT CompleteWrite();
+
+	  HANDLE _hFile = INVALID_HANDLE_VALUE;
+	  LPWSTR _szPath;
+	  FILETIME _ftCreationTime = { 0,0 };
+	  FILETIME _ftLastAccessTime = { 0,0 };
+	  FILETIME _ftLastWriteTime = { 0,0 };
+
+	  static unsigned const MAX_RETRIES = 10;
+
+	  DWORD _dwWriteAttempts = 0;
+	  UInt64 _ullWriteSize = 0;
+	  UInt64 _ullBufferSize = 0;
+	  unsigned char* _pWriteData = nullptr;
+	  OVERLAPPED _overlapped = {};
+	  ULARGE_INTEGER _ullNextWritePos = { 0,0 };
 };

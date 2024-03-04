@@ -50,30 +50,32 @@ Z7_COM7F_IMF(CPanelSwLzmaExtractCallback::GetStream(UInt32 index, ISequentialOut
 					FILETIME ftCreate = { 0,0 };
 					FILETIME ftAccess = { 0,0 };
 					FILETIME ftWrite = { 0,0 };
+					UInt64 ullSize = 0;
 
 					if (SUCCEEDED(_archive->GetProperty(index, kpidCTime, &pv)) && (pv.vt == VT_FILETIME))
 					{
-						BextLog(BUNDLE_EXTENSION_LOG_LEVEL_STANDARD, __FILE__ ":%u", __LINE__); //TODO Delete me
 						ftCreate.dwLowDateTime = pv.filetime.dwLowDateTime;
 						ftCreate.dwHighDateTime = pv.filetime.dwHighDateTime;
 					}
 					if (SUCCEEDED(_archive->GetProperty(index, kpidATime, &pv)) && (pv.vt == VT_FILETIME))
 					{
-						BextLog(BUNDLE_EXTENSION_LOG_LEVEL_STANDARD, __FILE__ ":%u", __LINE__); //TODO Delete me
 						ftAccess.dwLowDateTime = pv.filetime.dwLowDateTime;
 						ftAccess.dwHighDateTime = pv.filetime.dwHighDateTime;
 					}
 					if (SUCCEEDED(_archive->GetProperty(index, kpidMTime, &pv)) && (pv.vt == VT_FILETIME))
 					{
-						BextLog(BUNDLE_EXTENSION_LOG_LEVEL_STANDARD, __FILE__ ":%u", __LINE__); //TODO Delete me
 						ftWrite.dwLowDateTime = pv.filetime.dwLowDateTime;
 						ftWrite.dwHighDateTime = pv.filetime.dwHighDateTime;
+					}
+					if (SUCCEEDED(_archive->GetProperty(index, kpidSize, &pv)))
+					{
+						ullSize = (pv.vt == VT_UI8) ? pv.uhVal.QuadPart : (pv.vt == VT_I8) ? pv.hVal.QuadPart : (pv.vt == VT_UI4) ? pv.uintVal : (pv.vt == VT_I4) ? pv.intVal : 0;
 					}
 
 					os = new CPanelSwLzmaOutStream();
 					BextExitOnNull(os, hr, E_OUTOFMEMORY, "Failed to allocate file stream object");
 
-					hr = os->Create(_extractPaths[i], ftCreate, ftAccess, ftWrite);
+					hr = os->Create(_extractPaths[i], ullSize, ftCreate, ftAccess, ftWrite);
 					BextExitOnFailure(hr, "Failed to create file '%ls'", (const wchar_t*)_extractPaths[i]);
 
 					outOs = os;

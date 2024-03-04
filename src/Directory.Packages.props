@@ -2,7 +2,7 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <Wix4Version Condition=" '$(Wix4Version)' == '' ">4.0.4</Wix4Version>
-    <PanelSwWix4Version Condition=" '$(PanelSwWix4Version)' == '' ">5.0.0-psw-wix.0255-44</PanelSwWix4Version>
+    <PanelSwWix4Version Condition=" '$(PanelSwWix4Version)' == '' ">5.0.0-psw-wix.0256-45</PanelSwWix4Version>
     <SevenZapVersion Condition=" '$(SevenZapVersion)' == '' ">23.1.33</SevenZapVersion>
   </PropertyGroup>
   <ItemGroup>
