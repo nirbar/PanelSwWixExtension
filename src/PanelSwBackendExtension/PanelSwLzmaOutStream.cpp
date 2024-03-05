@@ -11,7 +11,7 @@ HRESULT CPanelSwLzmaOutStream::Close()
 	HRESULT hr = S_OK;
 
 	hr = CompleteWrite();
-	BextExitOnFailure(hr, "Failed to complete write");
+	BextExitOnFailure(hr, "Failed to complete previous write");
 
 	if (_hFile != INVALID_HANDLE_VALUE)
 	{
@@ -36,14 +36,15 @@ HRESULT CPanelSwLzmaOutStream::Close()
 			}
 			hr = S_OK; // Ignoring failure to set file time
 		}
+
+		BextLog(BUNDLE_EXTENSION_LOG_LEVEL_STANDARD, "Extracted '%ls'", _szPath);
 	}
 
 LExit:
+	ReleaseHandle(_hExtractStarted);
 	ReleaseNullStr(_szPath);
 	ReleaseFileHandle(_hFile);
 	ReleaseNullMem(_pWriteData);
-	ZeroMemory(&_overlapped, sizeof(_overlapped));
-	_dwWriteAttempts = 0;
 	_ullBufferSize = 0;
 	_ullWriteSize = 0;
 	_ullNextWritePos.QuadPart = 0;
@@ -68,9 +69,15 @@ HRESULT CPanelSwLzmaOutStream::Create(LPCWSTR szPath, UInt64 ullSize, const FILE
 	hr = StrAllocString(&_szPath, szPath, 0);
 	BextExitOnFailure(hr, "Failed to copy string");
 
+	_hExtractStarted = ::CreateEvent(nullptr, TRUE, FALSE, nullptr);
+	BextExitOnNullWithLastError(_hExtractStarted, hr, "Failed to create event");
+
 	for (unsigned i = 0; (_hFile == INVALID_HANDLE_VALUE) && (i < MAX_RETRIES); ++i)
 	{
-		_hFile = ::CreateFileW(_szPath, GENERIC_ALL, FILE_SHARE_READ, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL | FILE_FLAG_OVERLAPPED, NULL);
+		::SetFileAttributesW(_szPath, FILE_ATTRIBUTE_NORMAL);
+		::DeleteFileW(_szPath);
+
+		_hFile = ::CreateFileW(_szPath, GENERIC_ALL, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (_hFile == INVALID_HANDLE_VALUE)
 		{
 			hr = HRESULT_FROM_WIN32(::GetLastError());
@@ -83,9 +90,9 @@ HRESULT CPanelSwLzmaOutStream::Create(LPCWSTR szPath, UInt64 ullSize, const FILE
 	BextExitOnFailure(hr, "Failed to create file");
 
 	// Best effort to set file size
-	if (ullSize) 
+	if (ullSize)
 	{
-		SetSize(ullSize); 
+		SetSize(ullSize);
 	}
 
 LExit:
@@ -182,7 +189,7 @@ Z7_COM7F_IMF(CPanelSwLzmaOutStream::Write(const void* data, UInt32 size, UInt32*
 	BOOL bRes = TRUE;
 	HRESULT hr = S_OK;
 	ULARGE_INTEGER ullPos = { 0,0 };
-	DWORD i = 0;
+	DWORD dwRes = ERROR_SUCCESS;
 
 	hr = CompleteWrite();
 	BextExitOnFailure(hr, "Failed to complete previous write");
@@ -191,6 +198,7 @@ Z7_COM7F_IMF(CPanelSwLzmaOutStream::Write(const void* data, UInt32 size, UInt32*
 	if (_ullBufferSize < size)
 	{
 		ReleaseNullMem(_pWriteData);
+		_ullBufferSize = 0;
 
 		_pWriteData = (unsigned char*)MemAlloc(size, FALSE);
 		BextExitOnNull(_pWriteData, hr, E_OUTOFMEMORY, "Failed to allocate write buffer");
@@ -201,16 +209,16 @@ Z7_COM7F_IMF(CPanelSwLzmaOutStream::Write(const void* data, UInt32 size, UInt32*
 	_ullWriteSize = size;
 	memcpy(_pWriteData, data, size);
 
-	_overlapped.hEvent = ::CreateEvent(nullptr, TRUE, FALSE, nullptr);
-	BextExitOnNullWithLastError(_overlapped.hEvent, hr, "Failed to create event");
+	bRes = ::ResetEvent(_hExtractStarted);
+	BextExitOnNullWithLastError(bRes, hr, "Failed to reset event");
 
-	_overlapped.Offset = _ullNextWritePos.LowPart;
-	_overlapped.OffsetHigh = _ullNextWritePos.HighPart;
+	_hExtractThread = ::CreateThread(nullptr, 0, ExtractThreadProc, this, 0, nullptr);
+	BextExitOnNullWithLastError(_hExtractThread, hr, "Failed to create thread");
+
+	dwRes = ::WaitForSingleObject(_hExtractStarted, INFINITE);
+	BextExitOnNullWithLastError((dwRes != WAIT_FAILED), hr, "Failed to wait for extraction threadt to start");
+
 	_ullNextWritePos.QuadPart += size;
-	_dwWriteAttempts = 0;
-
-	hr = WriteCore();
-	BextExitOnFailure(hr, "Failed write to file");
 
 LExit:
 	if (processedSize)
@@ -225,87 +233,59 @@ HRESULT CPanelSwLzmaOutStream::CompleteWrite()
 {
 	HRESULT hr = S_OK;
 
-	if (_overlapped.hEvent)
+	if (_hExtractThread)
 	{
-		for (; _dwWriteAttempts < MAX_RETRIES; ++_dwWriteAttempts)
-		{
-			DWORD dwWritten = 0;
-			DWORD dwRes = ERROR_SUCCESS;
+		DWORD dwRes = ERROR_SUCCESS;
+		BOOL bRes = TRUE;
 
-			dwRes = ::WaitForSingleObject(_overlapped.hEvent, INFINITE);
-			if (dwRes == WAIT_FAILED) // Any other value is good in this case
-			{
-				hr = HRESULT_FROM_WIN32(::GetLastError());
-				BextLogError(hr, "Failed to wait for write to complete on attempt %u/%u", _dwWriteAttempts, MAX_RETRIES);
+		dwRes = ::WaitForSingleObject(_hExtractThread, INFINITE);
+		BextExitOnNullWithLastError((dwRes != WAIT_FAILED), hr, "Failed to wait for previous write to complete");
 
-				if (_dwWriteAttempts < (MAX_RETRIES - 1))
-				{
-					hr = WriteCore();
-				}
-				continue;
-			}
-
-			dwRes = ::GetOverlappedResult(_hFile, &_overlapped, &dwWritten, TRUE);
-			if (!dwRes)
-			{
-				hr = HRESULT_FROM_WIN32(::GetLastError());
-				BextLogError(hr, "Failed to get write status on attempt %u/%u", _dwWriteAttempts, MAX_RETRIES);
-
-				if (_dwWriteAttempts < (MAX_RETRIES - 1))
-				{
-					hr = WriteCore();
-				}
-				continue;
-			}
-
-			if (dwWritten < _ullWriteSize)
-			{
-				hr = HRESULT_FROM_WIN32(::GetLastError());
-				BextLogError(hr, "Failed to write all data to '%ls' on attempt %u/%u. %u/%I64u written", _szPath, _dwWriteAttempts, MAX_RETRIES, dwWritten, _ullWriteSize);
-
-				if (_dwWriteAttempts < (MAX_RETRIES - 1))
-				{
-					hr = WriteCore();
-				}
-				continue;
-			}
-
-			hr = S_OK;
-			break;
-		}
+		bRes = ::GetExitCodeThread(_hExtractThread, &dwRes);
+		BextExitOnNullWithLastError(bRes, hr, "Failed to get previous write end result");
+		BextExitOnWin32Error(dwRes, hr, "Previous write ended with an error");
 	}
 
 LExit:
-	ReleaseHandle(_overlapped.hEvent);
-	ZeroMemory(&_overlapped, sizeof(_overlapped));
+	ReleaseHandle(_hExtractThread);
 
 	return hr;
 }
 
-HRESULT CPanelSwLzmaOutStream::WriteCore()
+/*static*/ DWORD WINAPI CPanelSwLzmaOutStream::ExtractThreadProc(LPVOID lpParameter)
 {
 	HRESULT hr = S_OK;
+	CPanelSwLzmaOutStream* pThis = (CPanelSwLzmaOutStream*)lpParameter;
+	UInt64 ullWriteSize = pThis->_ullWriteSize;
+	UInt64 ullWritten = 0;
+	BOOL bRes = TRUE;
 
-	for (; _dwWriteAttempts < MAX_RETRIES; ++_dwWriteAttempts)
+	bRes = ::SetEvent(pThis->_hExtractStarted);
+	BextExitOnNullWithLastError(bRes, hr, "Failed to set event");
+
+	for (unsigned i = 0; (i < MAX_RETRIES) && (ullWritten < ullWriteSize); ++i)
 	{
-		_overlapped.Internal = 0;
-		_overlapped.InternalHigh = 0;
-		_overlapped.Pointer = 0;
-		::ResetEvent(_overlapped.hEvent);
+		DWORD dwRes = ERROR_SUCCESS;
+		DWORD dwWritten = 0;
 
-		BOOL bRes = ::WriteFile(_hFile, _pWriteData, _ullWriteSize, nullptr, &_overlapped);
-		if (!bRes && (::GetLastError() != ERROR_IO_PENDING))
+		bRes = ::WriteFile(pThis->_hFile, pThis->_pWriteData + ullWritten, ullWriteSize - ullWritten, &dwWritten, nullptr);
+		if (!bRes)
 		{
 			hr = HRESULT_FROM_WIN32(::GetLastError());
-			BextLogError(hr, "Failed write to file '%ls' on attempt %u/%u", _szPath, _dwWriteAttempts, MAX_RETRIES);
+			BextLogError(hr, "Failed write to file '%ls' on attempt %u/%u", pThis->_szPath, i, MAX_RETRIES);
 			continue;
 		}
 
-		hr = S_OK;
+		ullWritten += dwWritten;
+		if (ullWritten < ullWriteSize)
+		{
+			hr = HRESULT_FROM_WIN32(::GetLastError());
+			BextLogError(hr, "Failed to write all data to '%ls' on attempt %u/%u. %I64u/%I64u written", pThis->_szPath, i, MAX_RETRIES, ullWritten, ullWriteSize);
+			continue;
+		}
 		break;
 	}
 
 LExit:
-
-	return hr;
+	return HRESULT_CODE(hr);
 }

@@ -21,8 +21,6 @@ public:
 
   private:
 
-	  HRESULT WriteCore();
-
 	  HRESULT CompleteWrite();
 
 	  HANDLE _hFile = INVALID_HANDLE_VALUE;
@@ -33,10 +31,12 @@ public:
 
 	  static unsigned const MAX_RETRIES = 10;
 
-	  DWORD _dwWriteAttempts = 0;
+	  static DWORD WINAPI ExtractThreadProc(LPVOID lpParameter);
+
+	  HANDLE _hExtractThread = NULL;
+	  HANDLE _hExtractStarted = NULL;
 	  UInt64 _ullWriteSize = 0;
 	  UInt64 _ullBufferSize = 0;
 	  unsigned char* _pWriteData = nullptr;
-	  OVERLAPPED _overlapped = {};
 	  ULARGE_INTEGER _ullNextWritePos = { 0,0 };
 };
