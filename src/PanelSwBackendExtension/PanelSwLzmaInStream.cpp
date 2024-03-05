@@ -54,7 +54,7 @@ Z7_COM7F_IMF(CPanelSwLzmaInStream::Read(void* data, UInt32 size, UInt32* process
 	LARGE_INTEGER llPos;
 	LARGE_INTEGER llCurrPos;
 	LARGE_INTEGER llMaxRead;
-	DWORD dwActualRead = 0;
+	UInt32 uiRead = 0;
 	BOOL bRes = TRUE;
 
 	llPos.QuadPart = 0;
@@ -64,11 +64,7 @@ Z7_COM7F_IMF(CPanelSwLzmaInStream::Read(void* data, UInt32 size, UInt32* process
 	llMaxRead.QuadPart = _qwContainerStartPos + _qwContainerSize - llCurrPos.QuadPart;
 	if (llMaxRead.QuadPart <= 0)
 	{
-		if (processedSize)
-		{
-			*processedSize = 0;
-		}
-		goto LExit;
+		ExitFunction();
 	}
 
 	if (llMaxRead.QuadPart > size)
@@ -76,15 +72,37 @@ Z7_COM7F_IMF(CPanelSwLzmaInStream::Read(void* data, UInt32 size, UInt32* process
 		llMaxRead.QuadPart = size;
 	}
 
-	bRes = ::ReadFile(_hBundle, data, llMaxRead.LowPart, &dwActualRead, nullptr);
-	BextExitOnNullWithLastError(bRes, hr, "Failed to read from container");
-
-	if (processedSize)
+	for (unsigned i = 0; (uiRead < llMaxRead.QuadPart) && (i < MAX_RETRIES); ++i)
 	{
-		*processedSize = dwActualRead;
+		DWORD dwCurrRead = 0;
+		unsigned char* pData = (unsigned char*)data;
+
+		bRes = ::ReadFile(_hBundle, pData + uiRead, llMaxRead.LowPart - uiRead, &dwCurrRead, nullptr);
+		if (!bRes)
+		{
+			hr = HRESULT_FROM_WIN32(::GetLastError());
+			BextLogError(hr, "Failed to read on attempt %u/%u", i, MAX_RETRIES);
+			continue;
+		}
+		uiRead += dwCurrRead;
+		if (uiRead < llMaxRead.QuadPart)
+		{
+			hr = HRESULT_FROM_WIN32(ERROR_READ_FAULT);
+			BextLogError(hr, "Failed to read sufficient data on attempt %u/%u. Read %u/%I64u bytes", i, MAX_RETRIES, uiRead, llMaxRead.QuadPart);
+			continue;
+		}
+
+		hr = S_OK;
+		break;
 	}
+	BextExitOnFailure(hr, "Failed to read from container");
 
 LExit:
+	if (processedSize)
+	{
+		*processedSize = uiRead;
+	}
+
 	return hr;
 }
 

@@ -37,7 +37,7 @@ HRESULT CPanelSwLzmaOutStream::Close()
 			hr = S_OK; // Ignoring failure to set file time
 		}
 
-		BextLog(BUNDLE_EXTENSION_LOG_LEVEL_STANDARD, "Extracted '%ls'", _szPath);
+		BextLog(BUNDLE_EXTENSION_LOG_LEVEL_DEBUG, "Extracted '%ls'", _szPath);
 	}
 
 LExit:
@@ -105,6 +105,11 @@ LExit:
 
 Z7_COM7F_IMF(CPanelSwLzmaOutStream::Seek(Int64 offset, UInt32 seekOrigin, UInt64* newPosition))
 {
+	return Seek(offset, seekOrigin, newPosition, true);
+}
+
+HRESULT CPanelSwLzmaOutStream::Seek(Int64 offset, UInt32 seekOrigin, UInt64* newPosition, bool updateNextWritePos)
+{
 	BOOL bRes = FALSE;
 	HRESULT hr = S_OK;
 	LARGE_INTEGER liPos = { 0 };
@@ -139,12 +144,15 @@ Z7_COM7F_IMF(CPanelSwLzmaOutStream::Seek(Int64 offset, UInt32 seekOrigin, UInt64
 		break;
 	}
 	BextExitOnNullWithLastError(bRes, hr, "Failed to seek in file '%ls'", (LPCWSTR)_szPath);
-	
+
 	if (newPosition)
 	{
 		*newPosition = liNewPos.QuadPart;
 	}
-	_ullNextWritePos.QuadPart = liNewPos.QuadPart;
+	if (updateNextWritePos)
+	{
+		_ullNextWritePos.QuadPart = liNewPos.QuadPart;
+	}
 
 LExit:
 	return hr;
@@ -256,6 +264,7 @@ LExit:
 {
 	HRESULT hr = S_OK;
 	CPanelSwLzmaOutStream* pThis = (CPanelSwLzmaOutStream*)lpParameter;
+	ULARGE_INTEGER ullStartPos = pThis->_ullNextWritePos;
 	UInt64 ullWriteSize = pThis->_ullWriteSize;
 	UInt64 ullWritten = 0;
 	BOOL bRes = TRUE;
@@ -267,6 +276,12 @@ LExit:
 	{
 		DWORD dwRes = ERROR_SUCCESS;
 		DWORD dwWritten = 0;
+		ULARGE_INTEGER ullPos = { 0,0 };
+
+		ullPos.QuadPart = ullStartPos.QuadPart + ullWritten;
+
+		hr = pThis->Seek(ullPos.QuadPart, ESzSeek::SZ_SEEK_SET, nullptr, false);
+		BextExitOnFailure(hr, "Failed to seek to write position");
 
 		bRes = ::WriteFile(pThis->_hFile, pThis->_pWriteData + ullWritten, ullWriteSize - ullWritten, &dwWritten, nullptr);
 		if (!bRes)

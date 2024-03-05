@@ -29,6 +29,8 @@ public:
 private:
   void ReleaseContainer();
 
+  static unsigned const MAX_RETRIES = 10;
+
   HANDLE _hBundle = INVALID_HANDLE_VALUE;
   DWORD64 _qwContainerStartPos = 0;
   DWORD64 _qwContainerSize = 0;

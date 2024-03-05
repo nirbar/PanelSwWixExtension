@@ -21,6 +21,8 @@ public:
 
   private:
 
+	  HRESULT Seek(Int64 offset, UInt32 seekOrigin, UInt64* newPosition, bool updateNextWritePos);
+
 	  HRESULT CompleteWrite();
 
 	  HANDLE _hFile = INVALID_HANDLE_VALUE;
