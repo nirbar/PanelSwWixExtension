@@ -42,7 +42,6 @@ LExit:
 void CPanelSwLzmaInStream::ReleaseContainer()
 {
 	ReleaseFileHandle(_hBundle);
-	_hBundle = INVALID_HANDLE_VALUE;
 	_qwContainerStartPos = 0;
 	_qwContainerSize = 0;
 	_qwBundleSize = 0;

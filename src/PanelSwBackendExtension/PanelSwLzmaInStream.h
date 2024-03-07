@@ -20,10 +20,10 @@ public:
   Z7_IFACE_COM7_IMP(IStreamGetSize)
 
 public:
-  ~CPanelSwLzmaInStream();
+  virtual ~CPanelSwLzmaInStream();
 
   HRESULT InitContainer(HANDLE hBundle, DWORD64 qwContainerStartPos, DWORD64 qwContainerSize);
-
+  
   static const DWORD64 INFINITE_CONTAINER_SIZE = (~(DWORD64)0);
 
 private:

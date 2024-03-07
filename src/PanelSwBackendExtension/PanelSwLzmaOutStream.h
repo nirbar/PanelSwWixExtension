@@ -13,7 +13,7 @@ Z7_CLASS_IMP_COM_1(
 Z7_IFACE_COM7_IMP(ISequentialOutStream)
 public:
 
-	~CPanelSwLzmaOutStream();
+	virtual ~CPanelSwLzmaOutStream();
 
 	HRESULT Create(LPCWSTR szPath, UInt64 ullSize, const FILETIME ftCreationTime, const FILETIME ftLastAccessTime, const FILETIME ftLastWriteTime);
 

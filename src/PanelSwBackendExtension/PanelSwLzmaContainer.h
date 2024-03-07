@@ -9,7 +9,7 @@ class CPanelSwLzmaContainer : public IPanelSwContainer
 {
 public:
 
-	~CPanelSwLzmaContainer();
+	virtual ~CPanelSwLzmaContainer();
 
 	HRESULT ContainerOpen(LPCWSTR wzContainerId, LPCWSTR wzFilePath) override;
 

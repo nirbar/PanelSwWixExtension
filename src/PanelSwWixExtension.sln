@@ -42,7 +42,7 @@ Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "RegexUT", "UnitTests\RegexU
 EndProject
 Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "FileOperationsUT", "UnitTests\FileOperationsUT\FileOperationsUT.wixproj", "{2B87572F-9B38-4F39-A213-97C1AC64703E}"
 EndProject
-Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "TaskScheulerUT", "UnitTests\TaskScheulerUT\TaskScheulerUT.wixproj", "{31F20547-2522-4643-AE23-B5B4E25A8852}"
+Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "TaskSchedulerUT", "UnitTests\TaskSchedulerUT\TaskSchedulerUT.wixproj", "{31F20547-2522-4643-AE23-B5B4E25A8852}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{096EB3BA-5DCA-4121-8407-C93F31997339}"
 	ProjectSection(SolutionItems) = preProject

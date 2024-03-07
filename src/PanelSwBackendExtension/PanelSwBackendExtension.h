@@ -8,7 +8,7 @@ class CPanelSwBundleExtension : public CBextBaseBundleExtension
 public:
 	CPanelSwBundleExtension(IBundleExtensionEngine* pEngine);
 
-	~CPanelSwBundleExtension();
+	virtual ~CPanelSwBundleExtension();
 
 	STDMETHOD(Search)(LPCWSTR wzId, LPCWSTR wzVariable) override;
 

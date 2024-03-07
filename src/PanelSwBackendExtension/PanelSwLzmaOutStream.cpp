@@ -24,6 +24,8 @@ HRESULT CPanelSwLzmaOutStream::Close()
 			BOOL bRes = FALSE;
 			for (unsigned i = 0; !bRes && (i < MAX_RETRIES); ++i)
 			{
+				hr = S_OK;
+
 				bRes = ::SetFileTime(_hFile, pftCreate, pftAccess, pftWrite);
 				if (!bRes)
 				{
@@ -31,7 +33,6 @@ HRESULT CPanelSwLzmaOutStream::Close()
 					BextLogError(hr, "Failed to set file times for '%ls' on attempt %u/%u", _szPath, i, MAX_RETRIES);
 					continue;
 				}
-				hr = S_OK;
 				break;
 			}
 			hr = S_OK; // Ignoring failure to set file time
@@ -74,6 +75,8 @@ HRESULT CPanelSwLzmaOutStream::Create(LPCWSTR szPath, UInt64 ullSize, const FILE
 
 	for (unsigned i = 0; (_hFile == INVALID_HANDLE_VALUE) && (i < MAX_RETRIES); ++i)
 	{
+		hr = S_OK;
+
 		::SetFileAttributesW(_szPath, FILE_ATTRIBUTE_NORMAL);
 		::DeleteFileW(_szPath);
 
@@ -84,7 +87,6 @@ HRESULT CPanelSwLzmaOutStream::Create(LPCWSTR szPath, UInt64 ullSize, const FILE
 			BextLogError(hr, "Failed to create file '%ls' on attempt %u/%u", _szPath, i, MAX_RETRIES);
 			continue;
 		}
-		hr = S_OK;
 		break;
 	}
 	BextExitOnFailure(hr, "Failed to create file");
@@ -133,6 +135,8 @@ HRESULT CPanelSwLzmaOutStream::Seek(Int64 offset, UInt32 seekOrigin, UInt64* new
 	liPos.QuadPart = offset;
 	for (unsigned i = 0; !bRes && (i < MAX_RETRIES); ++i)
 	{
+		hr = S_OK;
+
 		bRes = ::SetFilePointerEx(_hFile, liPos, &liNewPos, seekOrigin);
 		if (!bRes)
 		{
@@ -140,7 +144,6 @@ HRESULT CPanelSwLzmaOutStream::Seek(Int64 offset, UInt32 seekOrigin, UInt64* new
 			BextLogError(hr, "Failed to seek in file '%ls' on attempt %u/%u", _szPath, i, MAX_RETRIES);
 			continue;
 		}
-		hr = S_OK;
 		break;
 	}
 	BextExitOnNullWithLastError(bRes, hr, "Failed to seek in file '%ls'", (LPCWSTR)_szPath);
@@ -164,15 +167,17 @@ Z7_COM7F_IMF(CPanelSwLzmaOutStream::SetSize(UInt64 newSize))
 	HRESULT hr = S_OK;
 	ULARGE_INTEGER liCurrPos = { 0 };
 
-	hr = Seek(0, ESzSeek::SZ_SEEK_CUR, &liCurrPos.QuadPart);
+	hr = Seek(0, ESzSeek::SZ_SEEK_CUR, &liCurrPos.QuadPart, false);
 	BextExitOnFailure(hr, "Failed to get current seek position in file '%ls'", _szPath);
 
-	hr = Seek(newSize, ESzSeek::SZ_SEEK_SET, nullptr);
+	hr = Seek(newSize, ESzSeek::SZ_SEEK_SET, nullptr, false);
 	BextExitOnFailure(hr, "Failed to set seek position in file '%ls' to %I64u", _szPath, newSize);
 
 	bRes = FALSE;
 	for (unsigned i = 0; !bRes && (i < MAX_RETRIES); ++i)
 	{
+		hr = S_OK;
+
 		bRes = ::SetEndOfFile(_hFile);
 		if (!bRes)
 		{
@@ -180,12 +185,11 @@ Z7_COM7F_IMF(CPanelSwLzmaOutStream::SetSize(UInt64 newSize))
 			BextLogError(HRESULT_FROM_WIN32(::GetLastError()), "Failed to set EOF in file '%ls' on attempt %u/%u", _szPath, i, MAX_RETRIES);
 			continue;
 		}
-		hr = S_OK;
 		break;
 	}
 	BextExitOnNullWithLastError(bRes, hr, "Failed to set EOF in file '%ls'", (LPCWSTR)_szPath);
 
-	hr = Seek(liCurrPos.QuadPart, ESzSeek::SZ_SEEK_SET, nullptr);
+	hr = Seek(liCurrPos.QuadPart, ESzSeek::SZ_SEEK_SET, nullptr, false);
 	BextExitOnFailure(hr, "Failed to set current seek position in file '%ls'", _szPath);
 
 LExit:
@@ -277,6 +281,7 @@ LExit:
 		DWORD dwRes = ERROR_SUCCESS;
 		DWORD dwWritten = 0;
 		ULARGE_INTEGER ullPos = { 0,0 };
+		hr = S_OK;
 
 		ullPos.QuadPart = ullStartPos.QuadPart + ullWritten;
 

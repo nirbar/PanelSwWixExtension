@@ -1,4 +1,4 @@
-﻿<Project Sdk="WixToolset.Sdk">
+<Project Sdk="WixToolset.Sdk">
   <PropertyGroup>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>

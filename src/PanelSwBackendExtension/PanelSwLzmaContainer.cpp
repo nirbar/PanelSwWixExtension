@@ -18,6 +18,7 @@ CPanelSwLzmaContainer::~CPanelSwLzmaContainer()
 
 HRESULT CPanelSwLzmaContainer::Reset()
 {
+	_archive.reset();
 	_codecs.reset();
 	_inStream.Release();
 	_extractIndices.reset();
@@ -107,7 +108,6 @@ HRESULT CPanelSwLzmaContainer::ContainerOpen(LPCWSTR wzContainerId, LPCWSTR wzFi
 
 	hr = Init(wzContainerId, hFile, 0, CPanelSwLzmaInStream::INFINITE_CONTAINER_SIZE);
 	BextExitOnFailure(hr, "Failed to open container '%ls'", wzFilePath);
-	hFile = INVALID_HANDLE_VALUE;
 
 	BextLog(BUNDLE_EXTENSION_LOG_LEVEL_STANDARD, "Openned 7Z container '%ls'", wzFilePath);
 
@@ -193,13 +193,8 @@ HRESULT CPanelSwLzmaContainer::ContainerStreamToFile(LPCWSTR wzFileName)
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
-	HANDLE hFile = INVALID_HANDLE_VALUE;
 
 	BextExitOnNull((_fileIndex < _entryCount), hr, E_INVALIDSTATE, "7z container is exhausted, can't extract '%ls'", wzFileName);
-
-	// Creating a file for placeholder
-	hFile = ::CreateFile(wzFileName, FILE_ALL_ACCESS, 0, nullptr, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-	BextExitOnNullWithLastError((hFile != INVALID_HANDLE_VALUE), hr, "Failed to create file '%ls'", wzFileName);
 
 	_extractIndices[_extractCount] = _fileIndex;
 	_extractPaths[_extractCount] = wzFileName;
@@ -209,8 +204,6 @@ HRESULT CPanelSwLzmaContainer::ContainerStreamToFile(LPCWSTR wzFileName)
 	BextExitOnNullWithLastError(bRes, hr, "Failed to set extract event");
 
 LExit:
-	ReleaseFile(hFile);
-
 	return hr;
 }
 

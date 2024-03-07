@@ -8,7 +8,7 @@ class CPanelSwZipContainer : public IPanelSwContainer
 {
 public:
 
-	~CPanelSwZipContainer();
+	virtual ~CPanelSwZipContainer();
 
 	HRESULT ContainerOpen(LPCWSTR wzContainerId, LPCWSTR wzFilePath) override;
 

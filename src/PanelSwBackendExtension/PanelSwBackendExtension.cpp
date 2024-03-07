@@ -256,7 +256,7 @@ HRESULT CPanelSwBundleExtension::ReleaseContainer(IPanelSwContainer* pContainer)
 	ContainerIterator endIt = _containers.end();
 	for (ContainerIterator it = _containers.begin(); it != endIt; ++it)
 	{
-		if (*it == pContainer)
+		if (*it == (IPanelSwContainer*)pContainer)
 		{
 			hr = S_OK;
 			_containers.remove(pContainer);
