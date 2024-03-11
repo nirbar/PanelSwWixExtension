@@ -21,7 +21,7 @@ class CPanelSwLzmaExtractCallback Z7_final :
 		Z7_IFACE_COM7_IMP(IArchiveExtractCallbackMessage2)
 
 public:
-	HRESULT Init(IInArchive* archive, UInt32 extractCount, UInt32* extractIndices, FString* extractPaths);
+	HRESULT Init(IInArchive* archive, UInt32 extractCount, const UInt32* extractIndices, const FString* extractPaths);
 
 	BOOL HasErrors() const;
 

@@ -54,6 +54,8 @@ private:
 	UInt32 _fileCount = 0; // File count including mappings
 	UInt32 _extractCount = 0;
 
+	static const unsigned MAX_RETRIES = 5;
+
 	// Extraction thread
 	static DWORD WINAPI ExtractThreadProc(LPVOID lpParameter);
 

@@ -4,7 +4,7 @@
 #include "lzma-sdk/CPP/7zip/Common/FileStreams.h"
 #include "lzma-sdk/CPP/7zip/Archive/IArchive.h"
 
-HRESULT CPanelSwLzmaExtractCallback::Init(IInArchive* archive, UInt32 extractCount, UInt32* extractIndices, FString* extractPaths)
+HRESULT CPanelSwLzmaExtractCallback::Init(IInArchive* archive, UInt32 extractCount, const UInt32* extractIndices, const FString* extractPaths)
 {
 	HRESULT hr = S_OK;
 

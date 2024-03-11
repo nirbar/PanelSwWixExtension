@@ -81,12 +81,12 @@ HRESULT CPanelSwBundleExtension::CreateContainer(LPCWSTR wzContainerId, IPanelSw
 	if (::wcsicmp(compression.bstrVal, L"Zip") == 0)
 	{
 		pContainer = new CPanelSwZipContainer();
-		BextExitOnNull(pContainer, hr, E_FAIL, "Failed to get allocate zip container");
+		BextExitOnNull(pContainer, hr, E_FAIL, "Failed to allocate zip container");
 	}
 	else if (::wcsicmp(compression.bstrVal, L"SevenZip") == 0)
 	{
 		pContainer = new CPanelSwLzmaContainer();
-		BextExitOnNull(pContainer, hr, E_FAIL, "Failed to get allocate 7z container");
+		BextExitOnNull(pContainer, hr, E_FAIL, "Failed to allocate 7z container");
 	}
 	else
 	{
@@ -117,19 +117,13 @@ STDMETHODIMP CPanelSwBundleExtension::ContainerOpen(LPCWSTR wzContainerId, LPCWS
 	hr = CreateContainer(wzContainerId, &pContainer);
 	BextExitOnFailure(hr, "Failed to create container");
 
+	_containers.push_back(pContainer);
+	*ppContext = pContainer;
+
 	hr = pContainer->ContainerOpen(wzContainerId, wzFilePath);
 	BextExitOnFailure(hr, "Failed to open container");
 
-	_containers.push_back(pContainer);
-	*ppContext = pContainer;
-	pContainer = nullptr;
-
 LExit:
-	if (pContainer)
-	{
-		delete pContainer;
-	}
-
 	return hr;
 }
 
@@ -141,19 +135,14 @@ STDMETHODIMP CPanelSwBundleExtension::ContainerOpenAttached(LPCWSTR wzContainerI
 	hr = CreateContainer(wzContainerId, &pContainer);
 	BextExitOnFailure(hr, "Failed to create container");
 
-	hr = pContainer->ContainerOpenAttached(wzContainerId, hBundle, qwContainerStartPos, qwContainerSize);
-	BextExitOnFailure(hr, "Failed to open attached container");
-
 	_containers.push_back(pContainer);
 	*ppContext = pContainer;
 	pContainer = nullptr;
 
-LExit:
-	if (pContainer)
-	{
-		delete pContainer;
-	}
+	hr = pContainer->ContainerOpenAttached(wzContainerId, hBundle, qwContainerStartPos, qwContainerSize);
+	BextExitOnFailure(hr, "Failed to open attached container");
 
+LExit:
 	return hr;
 }
 

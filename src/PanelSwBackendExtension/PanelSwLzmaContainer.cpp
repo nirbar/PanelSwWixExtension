@@ -58,15 +58,37 @@ HRESULT CPanelSwLzmaContainer::Init(LPCWSTR wzContainerId, HANDLE hBundle, DWORD
 	_inStream = inStream;
 	BextExitOnNull(!!_inStream, hr, E_OUTOFMEMORY, "Failed to allocate stream");
 
-	inStream->InitContainer(hBundle, qwContainerStartPos, qwContainerSize);
-	BextExitOnFailure(hr, "Failed to open container stream");
-
 	openOpts.codecs = _codecs.get();
 	openOpts.stream = _inStream;
 	openOpts.excludedFormats = new CIntVector();
 	openOpts.props = new CObjectVector<CProperty>();
-	
-	hr = _archive->OpenStream(openOpts);
+
+	for (unsigned i = 0; i < MAX_RETRIES; ++i)
+	{
+		hr = S_OK;
+
+		hr = inStream->InitContainer(hBundle, qwContainerStartPos, qwContainerSize);
+		if (FAILED(hr))
+		{
+			BextLogError(hr, "Failed to open container stream on attempt %u/%u", i, MAX_RETRIES);
+			continue;
+		}
+
+		hr = _archive->OpenStream(openOpts);
+		if (FAILED(hr))
+		{
+			BextLogError(hr, "Failed to open container on attempt %u/%u", i, MAX_RETRIES);
+			continue;
+		}
+		if (_archive->Archive == nullptr)
+		{
+			hr = E_FAIL;
+			BextLogError(hr, "Failed to initialize container on attempt %u/%u", i, MAX_RETRIES);
+			continue;
+		}
+
+		break;
+	}
 	BextExitOnFailure(hr, "Failed to open container");
 	BextExitOnNull(_archive->Archive, hr, E_FAIL, "Failed to initialize container");
 
@@ -220,12 +242,24 @@ HRESULT CPanelSwLzmaContainer::ContainerStreamToFileNow(UInt32 nFileIndex, LPCWS
 	BextExitOnNull(pExtractCallback, hr, E_OUTOFMEMORY, "Failed to allocate extract callback object");
 	extractClbk = pExtractCallback;
 
-	hr = pExtractCallback->Init(_archive->Archive, 1, &nFileIndex, &targetFile);
-	BextExitOnFailure(hr, "Failed to initialize extract callbck");
+	for (unsigned i = 0; i < MAX_RETRIES; ++i)
+	{
+		hr = S_OK;
 
-	hr = _archive->Archive->Extract(&nFileIndex, 1, 0, extractClbk);
-	BextExitOnFailure(hr, "Failed to extract '%ls'", wzFileName);
-	BextExitOnNull(!pExtractCallback->HasErrors(), hr, E_FAIL, "Failed to extract '%ls'", wzFileName);
+		hr = pExtractCallback->Init(_archive->Archive, 1, &nFileIndex, &targetFile);
+		BextExitOnFailure(hr, "Failed to initialize extract callbck");
+
+		hr = _archive->Archive->Extract(&nFileIndex, 1, 0, extractClbk);
+		if (FAILED(hr))
+		{
+			BextLogError(hr, "Failed to extract files on attempt %u/%u", i, MAX_RETRIES);
+			continue;
+		}
+
+		break;
+	}
+	BextExitOnFailure(hr, "Failed to extract files");
+	BextExitOnNull(!pExtractCallback->HasErrors(), hr, E_FAIL, "Failed to extract files");
 
 LExit:
 	return S_OK;
@@ -247,11 +281,14 @@ HRESULT CPanelSwLzmaContainer::ContainerClose()
 	BOOL bRes = TRUE;
 	DWORD dwWait = ERROR_SUCCESS;
 
-	bRes = ::SetEvent(_hEndExtract);
-	BextExitOnNullWithLastError(bRes, hr, "Failed to set event");
+	if (_hEndExtract && _hExtractThread)
+	{
+		bRes = ::SetEvent(_hEndExtract);
+		BextExitOnNullWithLastError(bRes, hr, "Failed to set event");
 
-	dwWait = ::WaitForSingleObject(_hExtractThread, INFINITE);
-	BextExitOnNullWithLastError((dwWait == WAIT_OBJECT_0), hr, "Failed to wait for extract thread to terminate");
+		dwWait = ::WaitForSingleObject(_hExtractThread, INFINITE);
+		BextExitOnNullWithLastError((dwWait == WAIT_OBJECT_0), hr, "Failed to wait for extract thread to terminate");
+	}
 
 LExit:
 	Reset();
@@ -411,14 +448,25 @@ LExit:
 			UInt32* pIndices = pThis->_extractIndices.get() + dwPrevExtractCount;
 			FString* pPaths = pThis->_extractPaths.get() + dwPrevExtractCount;
 
-			hr = pExtractCallback->Init(pThis->_archive->Archive, dwExtractCount, pIndices, pPaths);
-			BextExitOnFailure(hr, "Failed to initialize extract callbck");
+			for (unsigned i = 0; i < MAX_RETRIES; ++i)
+			{
+				hr = S_OK;
 
-			hr = pThis->_archive->Archive->Extract(pIndices, dwExtractCount, 0, extractClbk);
+				hr = pExtractCallback->Init(pThis->_archive->Archive, dwExtractCount, pIndices, pPaths);
+				BextExitOnFailure(hr, "Failed to initialize extract callbck");
+
+				hr = pThis->_archive->Archive->Extract(pIndices, dwExtractCount, 0, extractClbk);
+				if (FAILED(hr))
+				{
+					BextLogError(hr, "Failed to extract files on attempt %u/%u", i, MAX_RETRIES);
+					continue;
+				}
+
+				dwPrevExtractCount = dwOverallExtractCount;
+				break;
+			}
 			BextExitOnFailure(hr, "Failed to extract files");
 			BextExitOnNull(!pExtractCallback->HasErrors(), hr, E_FAIL, "Failed to extract files");
-
-			dwPrevExtractCount = dwOverallExtractCount;
 		}
 	}
 
