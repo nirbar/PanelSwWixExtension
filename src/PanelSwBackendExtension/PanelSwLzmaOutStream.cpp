@@ -38,7 +38,7 @@ HRESULT CPanelSwLzmaOutStream::Close()
 			hr = S_OK; // Ignoring failure to set file time
 		}
 
-		BextLog(BUNDLE_EXTENSION_LOG_LEVEL_DEBUG, "Extracted '%ls'", _szPath);
+		BextLog(BOOTSTRAPPER_EXTENSION_LOG_LEVEL_DEBUG, "Extracted '%ls'", _szPath);
 	}
 
 LExit:

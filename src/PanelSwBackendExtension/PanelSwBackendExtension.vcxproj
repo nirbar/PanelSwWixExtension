@@ -77,7 +77,7 @@
     <PackageReference Include="TidyBuild" />
     <PackageReference Include="7Zap" />
     <PackageReference Include="WixToolset.DUtil" />
-    <PackageReference Include="WixToolset.BextUtil" />
+    <PackageReference Include="WixToolset.BootstrapperExtensionApi" />
     <PackageReference Include="WixToolset.WcaUtil" />
   </ItemGroup>
   <ItemGroup>

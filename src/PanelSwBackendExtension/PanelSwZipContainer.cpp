@@ -77,7 +77,7 @@ HRESULT CPanelSwZipContainer::ContainerOpen(LPCWSTR wzContainerId, LPCWSTR wzFil
 		hr = E_FAIL;
 		BextExitOnFailure(hr, "Failed to open archive");
 	}
-	BextLog(BUNDLE_EXTENSION_LOG_LEVEL_STANDARD, "Openned ZIP container '%ls'", wzFilePath);
+	BextLog(BOOTSTRAPPER_EXTENSION_LOG_LEVEL_STANDARD, "Openned ZIP container '%ls'", wzFilePath);
 
 LExit:
 	return hr;

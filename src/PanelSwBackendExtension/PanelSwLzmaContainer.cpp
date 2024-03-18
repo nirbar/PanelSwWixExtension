@@ -131,7 +131,7 @@ HRESULT CPanelSwLzmaContainer::ContainerOpen(LPCWSTR wzContainerId, LPCWSTR wzFi
 	hr = Init(wzContainerId, hFile, 0, CPanelSwLzmaInStream::INFINITE_CONTAINER_SIZE);
 	BextExitOnFailure(hr, "Failed to open container '%ls'", wzFilePath);
 
-	BextLog(BUNDLE_EXTENSION_LOG_LEVEL_STANDARD, "Openned 7Z container '%ls'", wzFilePath);
+	BextLog(BOOTSTRAPPER_EXTENSION_LOG_LEVEL_STANDARD, "Openned 7Z container '%ls'", wzFilePath);
 
 LExit:
 	ReleaseFileHandle(hFile);
@@ -146,7 +146,7 @@ HRESULT CPanelSwLzmaContainer::ContainerOpenAttached(LPCWSTR wzContainerId, HAND
 	hr = Init(wzContainerId, hBundle, qwContainerStartPos, qwContainerSize);
 	BextExitOnFailure(hr, "Failed to open container '%ls'", wzContainerId);
 
-	BextLog(BUNDLE_EXTENSION_LOG_LEVEL_STANDARD, "Openned 7Z attached container '%ls'", wzContainerId);
+	BextLog(BOOTSTRAPPER_EXTENSION_LOG_LEVEL_STANDARD, "Openned 7Z attached container '%ls'", wzContainerId);
 
 LExit:
 	return hr;
