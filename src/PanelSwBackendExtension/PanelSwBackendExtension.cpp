@@ -2,11 +2,11 @@
 #include "PanelSwBackendExtension.h"
 #include "PanelSwZipContainer.h"
 #include "PanelSwLzmaContainer.h"
-#include <BextBaseBundleExtensionProc.h>
+#include <BextBaseBootstrapperExtensionProc.h>
 using namespace std;
 
-CPanelSwBundleExtension::CPanelSwBundleExtension(IBundleExtensionEngine* pEngine)
-	: CBextBaseBundleExtension(pEngine)
+CPanelSwBundleExtension::CPanelSwBundleExtension(IBootstrapperExtensionEngine* pEngine)
+	: CBextBaseBootstrapperExtension(pEngine)
 {
 	XmlInitialize();
 }
@@ -24,10 +24,10 @@ STDMETHODIMP CPanelSwBundleExtension::Search(LPCWSTR wzId, LPCWSTR wzVariable)
 	CComPtr<IXMLDOMNode> pixnBundleExtension;
 	CComBSTR bszXml;
 
-	hr = XmlLoadDocumentFromFile(m_sczBundleExtensionDataPath, &pixdManifest);
-	BextExitOnFailure(hr, "Failed to load bundle extension manifest from path: %ls", m_sczBundleExtensionDataPath);
+	hr = XmlLoadDocumentFromFile(m_sczBootstrapperExtensionDataPath, &pixdManifest);
+	BextExitOnFailure(hr, "Failed to load bundle extension manifest from path: %ls", m_sczBootstrapperExtensionDataPath);
 
-	hr = BextGetBundleExtensionDataNode(pixdManifest, PANELSW_BACKEND_EXTENSION_ID, &pixnBundleExtension);
+	hr = BextGetBootstrapperExtensionDataNode(pixdManifest, PANELSW_BACKEND_EXTENSION_ID, &pixnBundleExtension);
 	BextExitOnFailure(hr, "Failed to get BundleExtensionData entry for '%ls'", PANELSW_BACKEND_EXTENSION_ID);
 
 	hr = pixnBundleExtension->get_xml(&bszXml);
@@ -63,10 +63,10 @@ HRESULT CPanelSwBundleExtension::CreateContainer(LPCWSTR wzContainerId, IPanelSw
 	LPWSTR szXPath = nullptr;
 	IPanelSwContainer* pContainer = nullptr;
 
-	hr = XmlLoadDocumentFromFile(m_sczBundleExtensionDataPath, &pixdManifest);
-	BextExitOnFailure(hr, "Failed to load bundle extension manifest from path: %ls", m_sczBundleExtensionDataPath);
+	hr = XmlLoadDocumentFromFile(m_sczBootstrapperExtensionDataPath, &pixdManifest);
+	BextExitOnFailure(hr, "Failed to load bundle extension manifest from path: %ls", m_sczBootstrapperExtensionDataPath);
 
-	hr = BextGetBundleExtensionDataNode(pixdManifest, PANELSW_BACKEND_EXTENSION_ID, &pixnBundleExtension);
+	hr = BextGetBootstrapperExtensionDataNode(pixdManifest, PANELSW_BACKEND_EXTENSION_ID, &pixnBundleExtension);
 	BextExitOnFailure(hr, "Failed to get BundleExtension '%ls'", PANELSW_BACKEND_EXTENSION_ID);
 
 	hr = StrAllocFormatted(&szXPath, L"PSW_ContainerExtensionData[@ContainerId='%ls']/@Compression", wzContainerId);
@@ -152,7 +152,7 @@ STDMETHODIMP CPanelSwBundleExtension::ContainerNextStream(LPVOID pContext, BSTR*
 
 	hr = GetContainer(pContext, &pContainer);
 	BextExitOnFailure(hr, "Failed to get container");
-	
+
 	hr = pContainer->ContainerNextStream(psczStreamName);
 
 LExit:
@@ -257,18 +257,18 @@ LExit:
 	return hr;
 }
 
-extern "C" HRESULT WINAPI BundleExtensionCreate(
-	__in const BUNDLE_EXTENSION_CREATE_ARGS * pArgs,
-	__inout BUNDLE_EXTENSION_CREATE_RESULTS * pResults
+extern "C" HRESULT WINAPI BootstrapperExtensionCreate(
+	__in const BOOTSTRAPPER_EXTENSION_CREATE_ARGS* pArgs,
+	__inout BOOTSTRAPPER_EXTENSION_CREATE_RESULTS* pResults
 )
 {
 	HRESULT hr = S_OK;
-	IBundleExtensionEngine* pEngine = nullptr;
+	IBootstrapperExtensionEngine* pEngine = nullptr;
 	CPanelSwBundleExtension* pExtension = nullptr;
 
 	hr = BextInitializeFromCreateArgs(pArgs, &pEngine);
 	ExitOnFailure(hr, "Failed to initialize bext");
-	BextLog(BUNDLE_EXTENSION_LOG_LEVEL_STANDARD, "Loading Panel::Software bundle extension v" FullVersion);
+	BextLog(BOOTSTRAPPER_EXTENSION_LOG_LEVEL_STANDARD, "Loading Panel::Software bundle extension v" FullVersion);
 
 	pExtension = new CPanelSwBundleExtension(pEngine);
 	BextExitOnNull(pExtension, hr, E_OUTOFMEMORY, "Failed to create new CPanelSwBundleExtension.");
@@ -276,8 +276,8 @@ extern "C" HRESULT WINAPI BundleExtensionCreate(
 	hr = pExtension->Initialize(pArgs);
 	BextExitOnFailure(hr, "CPanelSwBundleExtension initialization failed.");
 
-	pResults->pfnBundleExtensionProc = BextBaseBundleExtensionProc;
-	pResults->pvBundleExtensionProcContext = pExtension;
+	pResults->pfnBootstrapperExtensionProc = BextBaseBootstrapperExtensionProc;
+	pResults->pvBootstrapperExtensionProcContext = pExtension;
 
 LExit:
 	ReleaseObject(pEngine);
@@ -285,7 +285,7 @@ LExit:
 	return hr;
 }
 
-extern "C" void WINAPI BundleExtensionDestroy()
+extern "C" void WINAPI BootstrapperExtensionDestroy()
 {
 	BextUninitialize();
 }

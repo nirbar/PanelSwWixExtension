@@ -122,8 +122,8 @@ namespace PanelSw.Wix.Extensions
 #if EnableZipContainer
             if (containerTemplate.Compression != PSW_ContainerTemplate.ContainerCompressionType.Cab)
             {
-                defaultContainer.BundleExtensionRef = PanelSwWixExtension.CONTAINER_EXTENSION_ID;
-                BackendHelper.AddBundleExtensionData(PanelSwWixExtension.CONTAINER_EXTENSION_ID, new PSW_ContainerExtensionData(defaultContainer.SourceLineNumbers)
+                defaultContainer.BootstrapperExtensionRef = PanelSwWixExtension.CONTAINER_EXTENSION_ID;
+                BackendHelper.AddBootstrapperExtensionData(PanelSwWixExtension.CONTAINER_EXTENSION_ID, new PSW_ContainerExtensionData(defaultContainer.SourceLineNumbers)
                 {
                     Compression = containerTemplate.Compression,
                     ContainerId = defaultContainer.Id.Id
@@ -189,10 +189,10 @@ namespace PanelSw.Wix.Extensions
                     container = section.AddSymbol(new WixBundleContainerSymbol(containerTemplate.SourceLineNumbers, new Identifier(AccessModifier.Global, containerSize.Count)));
                     container.Type = containerTemplate.DefaultType;
 #if EnableZipContainer
-                    container.BundleExtensionRef = defaultContainer.BundleExtensionRef;
+                    container.BootstrapperExtensionRef = defaultContainer.BootstrapperExtensionRef;
                     if (containerTemplate.Compression != PSW_ContainerTemplate.ContainerCompressionType.Cab)
                     {
-                        BackendHelper.AddBundleExtensionData(PanelSwWixExtension.CONTAINER_EXTENSION_ID, new PSW_ContainerExtensionData(container.SourceLineNumbers)
+                        BackendHelper.AddBootstrapperExtensionData(PanelSwWixExtension.CONTAINER_EXTENSION_ID, new PSW_ContainerExtensionData(container.SourceLineNumbers)
                         {
                             Compression = containerTemplate.Compression,
                             ContainerId = container.Id.Id

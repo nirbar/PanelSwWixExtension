@@ -11,7 +11,7 @@ on:
       psw_wix_version:
         description: 'PanelSwWix4 version'
         required: true
-        default: 5.0.0-psw-wix.0265-49
+        default: 6.0.0-psw-wix.0267-11
         type: string
 
 jobs:
@@ -37,7 +37,7 @@ jobs:
             Add-Content -Path ${{ github.env }} -Value "PSW_WIX_VERSION=${{ env.DEFAULT_PSW_WIX_VERSION }}"
           }
         env:
-          DEFAULT_PSW_WIX_VERSION: '5.0.0-psw-wix.0265-49'
+          DEFAULT_PSW_WIX_VERSION: '6.0.0-psw-wix.0267-11'
 
       - name: Prepare for build
         run: |
@@ -61,11 +61,11 @@ jobs:
           if-no-files-found: error
 
       - name: Publish nuget packages to github and nuget.org
-        if: ${{ github.event.inputs.publish_nuget == 'true' && github.ref == 'refs/heads/master4' }}
+        if: ${{ github.event.inputs.publish_nuget == 'true' && github.ref == 'refs/heads/master5' }}
         env:
           GITHUB_TOKEN: ${{ secrets.TAGGER_PAT }}
         run: |
           dotnet nuget push nuget-out\PanelSwWixExtension4.*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source github
           dotnet nuget push nuget-out\PanelSwWixExtension4.*.nupkg --api-key ${{ secrets.NUGET_TOKEN }} --source https://api.nuget.org/v3/index.json
-          git tag "wix4-v${{ env.FULL_VERSION }}"
+          git tag "wix5-v${{ env.FULL_VERSION }}"
           git push --tags

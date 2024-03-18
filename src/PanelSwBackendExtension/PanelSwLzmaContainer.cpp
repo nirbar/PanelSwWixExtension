@@ -63,33 +63,11 @@ HRESULT CPanelSwLzmaContainer::Init(LPCWSTR wzContainerId, HANDLE hBundle, DWORD
 	openOpts.excludedFormats = new CIntVector();
 	openOpts.props = new CObjectVector<CProperty>();
 
-	for (unsigned i = 0; i < MAX_RETRIES; ++i)
-	{
-		hr = S_OK;
-
-		hr = inStream->InitContainer(hBundle, qwContainerStartPos, qwContainerSize);
-		if (FAILED(hr))
-		{
-			BextLogError(hr, "Failed to open container stream on attempt %u/%u", i, MAX_RETRIES);
-			continue;
-		}
-
-		hr = _archive->OpenStream(openOpts);
-		if (FAILED(hr))
-		{
-			BextLogError(hr, "Failed to open container on attempt %u/%u", i, MAX_RETRIES);
-			continue;
-		}
-		if (_archive->Archive == nullptr)
-		{
-			hr = E_FAIL;
-			BextLogError(hr, "Failed to initialize container on attempt %u/%u", i, MAX_RETRIES);
-			continue;
-		}
-
-		break;
-	}
+	hr = inStream->InitContainer(hBundle, qwContainerStartPos, qwContainerSize);
 	BextExitOnFailure(hr, "Failed to open container");
+
+	hr = _archive->OpenStream(openOpts);
+	BextExitOnFailure(hr, "Failed to open container stream");
 	BextExitOnNull(_archive->Archive, hr, E_FAIL, "Failed to initialize container");
 
 	hr = _archive->Archive->GetNumberOfItems(&_entryCount);
@@ -131,7 +109,7 @@ HRESULT CPanelSwLzmaContainer::ContainerOpen(LPCWSTR wzContainerId, LPCWSTR wzFi
 	hr = Init(wzContainerId, hFile, 0, CPanelSwLzmaInStream::INFINITE_CONTAINER_SIZE);
 	BextExitOnFailure(hr, "Failed to open container '%ls'", wzFilePath);
 
-	BextLog(BUNDLE_EXTENSION_LOG_LEVEL_STANDARD, "Openned 7Z container '%ls'", wzFilePath);
+	BextLog(BOOTSTRAPPER_EXTENSION_LOG_LEVEL_STANDARD, "Openned 7Z container '%ls'", wzFilePath);
 
 LExit:
 	ReleaseFileHandle(hFile);
@@ -146,7 +124,7 @@ HRESULT CPanelSwLzmaContainer::ContainerOpenAttached(LPCWSTR wzContainerId, HAND
 	hr = Init(wzContainerId, hBundle, qwContainerStartPos, qwContainerSize);
 	BextExitOnFailure(hr, "Failed to open container '%ls'", wzContainerId);
 
-	BextLog(BUNDLE_EXTENSION_LOG_LEVEL_STANDARD, "Openned 7Z attached container '%ls'", wzContainerId);
+	BextLog(BOOTSTRAPPER_EXTENSION_LOG_LEVEL_STANDARD, "Openned 7Z attached container '%ls'", wzContainerId);
 
 LExit:
 	return hr;
@@ -242,24 +220,12 @@ HRESULT CPanelSwLzmaContainer::ContainerStreamToFileNow(UInt32 nFileIndex, LPCWS
 	BextExitOnNull(pExtractCallback, hr, E_OUTOFMEMORY, "Failed to allocate extract callback object");
 	extractClbk = pExtractCallback;
 
-	for (unsigned i = 0; i < MAX_RETRIES; ++i)
-	{
-		hr = S_OK;
+	hr = pExtractCallback->Init(_archive->Archive, 1, &nFileIndex, &targetFile);
+	BextExitOnFailure(hr, "Failed to initialize extract callbck");
 
-		hr = pExtractCallback->Init(_archive->Archive, 1, &nFileIndex, &targetFile);
-		BextExitOnFailure(hr, "Failed to initialize extract callbck");
-
-		hr = _archive->Archive->Extract(&nFileIndex, 1, 0, extractClbk);
-		if (FAILED(hr))
-		{
-			BextLogError(hr, "Failed to extract files on attempt %u/%u", i, MAX_RETRIES);
-			continue;
-		}
-
-		break;
-	}
-	BextExitOnFailure(hr, "Failed to extract files");
-	BextExitOnNull(!pExtractCallback->HasErrors(), hr, E_FAIL, "Failed to extract files");
+	hr = _archive->Archive->Extract(&nFileIndex, 1, 0, extractClbk);
+	BextExitOnFailure(hr, "Failed to extract '%ls'", wzFileName);
+	BextExitOnNull(!pExtractCallback->HasErrors(), hr, E_FAIL, "Failed to extract '%ls'", wzFileName);
 
 LExit:
 	return S_OK;

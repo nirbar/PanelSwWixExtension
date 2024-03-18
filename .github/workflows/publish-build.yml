@@ -40,7 +40,11 @@ jobs:
         run: |
           $sdkFileName = Get-Childitem –Path "PanelSwWixExtension4.*.nupkg" -Exclude "*-psw-wix*" -Name
           if ($sdkFileName) {
-            Add-Content -Path ${{ github.env }} -Value ("WIX_VERSION=wix4")
+            if ($sdkFileName.StartsWith("PanelSwWixExtension4.5")) {
+                Add-Content -Path ${{ github.env }} -Value ("WIX_VERSION=wix5")
+            } else {
+                Add-Content -Path ${{ github.env }} -Value ("WIX_VERSION=wix4")
+            }
             $sdkFileName = $sdkFileName.Replace("PanelSwWixExtension4.", "");
           } 
           else {

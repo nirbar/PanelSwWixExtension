@@ -31,14 +31,12 @@ public:
 	  FILETIME _ftLastAccessTime = { 0,0 };
 	  FILETIME _ftLastWriteTime = { 0,0 };
 
-	  static unsigned const MAX_RETRIES = 10;
-
-	  static DWORD WINAPI ExtractThreadProc(LPVOID lpParameter);
+	  static DWORD WINAPI WriteThreadProc(LPVOID lpParameter);
 
 	  HANDLE _hExtractThread = NULL;
 	  HANDLE _hExtractStarted = NULL;
-	  UInt64 _ullWriteSize = 0;
-	  UInt64 _ullBufferSize = 0;
+	  DWORD _dwWriteSize = 0;
+	  DWORD _dwBufferSize = 0;
 	  unsigned char* _pWriteData = nullptr;
 	  ULARGE_INTEGER _ullNextWritePos = { 0,0 };
 };

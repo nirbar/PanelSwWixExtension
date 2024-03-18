@@ -17,11 +17,11 @@
 #include <pathutil.h>
 #include <dirutil.h>
 #include <xmlutil.h>
-#include <BundleExtensionEngine.h>
-#include <BundleExtension.h>
+#include <BootstrapperExtensionEngineTypes.h>
+#include <BootstrapperExtensionTypes.h>
 
-#include <IBundleExtensionEngine.h>
-#include <IBundleExtension.h>
+#include <IBootstrapperExtensionEngine.h>
+#include <IBootstrapperExtension.h>
 #include <bextutil.h>
-#include <BextBundleExtensionEngine.h>
-#include <BextBaseBundleExtension.h>
+#include <BextBootstrapperExtensionEngine.h>
+#include <BextBaseBootstrapperExtension.h>

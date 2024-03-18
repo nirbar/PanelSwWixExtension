@@ -16,7 +16,7 @@ namespace PanelSw.Wix.Extensions.Symbols
                         new IntermediateFieldDefinition(nameof(BundleExtensionData), IntermediateFieldType.String),
                     }
                     , typeof(PSW_CustomSearch));
-                symbol.AddTag(BurnConstants.BundleExtensionSearchSymbolDefinitionTag);
+                symbol.AddTag(BurnConstants.BootstrapperExtensionSearchSymbolDefinitionTag);
                 return symbol;
             }
         }

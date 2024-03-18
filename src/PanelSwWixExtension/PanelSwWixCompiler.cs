@@ -380,7 +380,7 @@ namespace PanelSw.Wix.Extensions
                 PSW_CustomSearch symbol = section.AddSymbol(new PSW_CustomSearch(sourceLineNumbers, id));
                 symbol.BundleExtensionRef = bundleExtension;
                 symbol.BundleExtensionData = bundleExtensionData;
-                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, SymbolDefinitions.WixBundleExtension, bundleExtension);
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, SymbolDefinitions.WixBootstrapperExtension, bundleExtension);
                 ParseHelper.CreateWixSearchSymbol(section, sourceLineNumbers, element.Name.LocalName, id, variable, condition, after, bundleExtension);
             }
         }
@@ -475,7 +475,7 @@ namespace PanelSw.Wix.Extensions
 
                 if (compression != PSW_ContainerTemplate.ContainerCompressionType.Cab)
                 {
-                    ParseHelper.CreateSimpleReference(section, sourceLineNumbers, SymbolDefinitions.WixBundleExtension, "PanelSwWixContainer");
+                    ParseHelper.CreateSimpleReference(section, sourceLineNumbers, SymbolDefinitions.WixBootstrapperExtension, "PanelSwWixContainer");
                 }
             }
         }

@@ -3,10 +3,10 @@
 #include "pch.h"
 #include <list>
 
-class CPanelSwBundleExtension : public CBextBaseBundleExtension
+class CPanelSwBundleExtension : public CBextBaseBootstrapperExtension
 {
 public:
-	CPanelSwBundleExtension(IBundleExtensionEngine* pEngine);
+	CPanelSwBundleExtension(IBootstrapperExtensionEngine* pEngine);
 
 	virtual ~CPanelSwBundleExtension();
 
