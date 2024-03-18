@@ -142,7 +142,7 @@ namespace PanelSw.Wix.Extensions
         public override void ExtractContainer(string containerPath, string outputFolder, string containerId, XmlElement extensionDataNode)
         {
             XmlNamespaceManager nmspc = new XmlNamespaceManager(extensionDataNode.OwnerDocument.NameTable);
-            nmspc.AddNamespace("ext", BurnConstants.BundleExtensionDataNamespace);
+            nmspc.AddNamespace("ext", BurnConstants.BootstrapperExtensionDataNamespace);
 
             XmlNode compressionAttr = extensionDataNode.SelectSingleNode($"//ext:PSW_ContainerExtensionData[@ContainerId='{containerId}']/@Compression", nmspc);
             if ((compressionAttr == null) || !Enum.TryParse(compressionAttr.Value, out PSW_ContainerTemplate.ContainerCompressionType compression))

@@ -123,7 +123,7 @@ namespace PanelSw.Wix.Extensions
             if (containerTemplate.Compression != PSW_ContainerTemplate.ContainerCompressionType.Cab)
             {
                 defaultContainer.BundleExtensionRef = PanelSwWixExtension.CONTAINER_EXTENSION_ID;
-                BackendHelper.AddBundleExtensionData(PanelSwWixExtension.CONTAINER_EXTENSION_ID, new PSW_ContainerExtensionData(defaultContainer.SourceLineNumbers)
+                BackendHelper.AddBootstrapperExtensionData(PanelSwWixExtension.CONTAINER_EXTENSION_ID, new PSW_ContainerExtensionData(defaultContainer.SourceLineNumbers)
                 {
                     Compression = containerTemplate.Compression,
                     ContainerId = defaultContainer.Id.Id
@@ -192,7 +192,7 @@ namespace PanelSw.Wix.Extensions
                     container.BundleExtensionRef = defaultContainer.BundleExtensionRef;
                     if (containerTemplate.Compression != PSW_ContainerTemplate.ContainerCompressionType.Cab)
                     {
-                        BackendHelper.AddBundleExtensionData(PanelSwWixExtension.CONTAINER_EXTENSION_ID, new PSW_ContainerExtensionData(container.SourceLineNumbers)
+                        BackendHelper.AddBootstrapperExtensionData(PanelSwWixExtension.CONTAINER_EXTENSION_ID, new PSW_ContainerExtensionData(container.SourceLineNumbers)
                         {
                             Compression = containerTemplate.Compression,
                             ContainerId = container.Id.Id

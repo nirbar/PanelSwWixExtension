@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "PanelSwBackendExtension.h"
-#include "PanelSwZipContainer.h"
+//#include "PanelSwZipContainer.h"
 #include "PanelSwLzmaContainer.h"
 #include <BextBaseBootstrapperExtensionProc.h>
 using namespace std;
@@ -80,7 +80,7 @@ HRESULT CPanelSwBundleExtension::CreateContainer(LPCWSTR wzContainerId, IPanelSw
 
 	if (::wcsicmp(compression.bstrVal, L"Zip") == 0)
 	{
-		pContainer = new CPanelSwZipContainer();
+		//pContainer = new CPanelSwZipContainer();
 		BextExitOnNull(pContainer, hr, E_FAIL, "Failed to allocate zip container");
 	}
 	else if (::wcsicmp(compression.bstrVal, L"SevenZip") == 0)
@@ -137,7 +137,6 @@ STDMETHODIMP CPanelSwBundleExtension::ContainerOpenAttached(LPCWSTR wzContainerI
 
 	_containers.push_back(pContainer);
 	*ppContext = pContainer;
-	pContainer = nullptr;
 
 	hr = pContainer->ContainerOpenAttached(wzContainerId, hBundle, qwContainerStartPos, qwContainerSize);
 	BextExitOnFailure(hr, "Failed to open attached container");
@@ -146,57 +145,15 @@ LExit:
 	return hr;
 }
 
-STDMETHODIMP CPanelSwBundleExtension::ContainerNextStream(LPVOID pContext, BSTR* psczStreamName)
+STDMETHODIMP CPanelSwBundleExtension::ContainerExtractFiles(LPVOID pContext, DWORD cFiles, LPCWSTR* psczEmbeddedIds, LPCWSTR* psczTargetPaths)
 {
 	HRESULT hr = S_OK;
 	IPanelSwContainer* pContainer = nullptr;
 
 	hr = GetContainer(pContext, &pContainer);
 	BextExitOnFailure(hr, "Failed to get container");
-	
-	hr = pContainer->ContainerNextStream(psczStreamName);
 
-LExit:
-	return hr;
-}
-
-STDMETHODIMP CPanelSwBundleExtension::ContainerStreamToFile(LPVOID pContext, LPCWSTR wzFileName)
-{
-	HRESULT hr = S_OK;
-	IPanelSwContainer* pContainer = nullptr;
-
-	hr = GetContainer(pContext, &pContainer);
-	BextExitOnFailure(hr, "Failed to get container");
-	
-	hr = pContainer->ContainerStreamToFile(wzFileName);
-
-LExit:
-	return hr;
-}
-
-STDMETHODIMP CPanelSwBundleExtension::ContainerStreamToBuffer(LPVOID pContext, BYTE** ppbBuffer, SIZE_T* pcbBuffer)
-{
-	HRESULT hr = S_OK;
-	IPanelSwContainer* pContainer = nullptr;
-
-	hr = GetContainer(pContext, &pContainer);
-	BextExitOnFailure(hr, "Failed to get container");
-	
-	hr = pContainer->ContainerStreamToBuffer(ppbBuffer, pcbBuffer);
-
-LExit:
-	return hr;
-}
-
-STDMETHODIMP CPanelSwBundleExtension::ContainerSkipStream(LPVOID pContext)
-{
-	HRESULT hr = S_OK;
-	IPanelSwContainer* pContainer = nullptr;
-
-	hr = GetContainer(pContext, &pContainer);
-	BextExitOnFailure(hr, "Failed to get container");
-	
-	hr = pContainer->ContainerSkipStream();
+	hr = pContainer->ContainerExtractFiles(cFiles, psczEmbeddedIds, psczTargetPaths);
 
 LExit:
 	return hr;
@@ -258,7 +215,7 @@ LExit:
 	return hr;
 }
 
-extern "C" HRESULT WINAPI BundleExtensionCreate(
+extern "C" HRESULT WINAPI BootstrapperExtensionCreate(
 	__in const BOOTSTRAPPER_EXTENSION_CREATE_ARGS* pArgs,
 	__inout BOOTSTRAPPER_EXTENSION_CREATE_RESULTS* pResults
 )
@@ -286,7 +243,7 @@ LExit:
 	return hr;
 }
 
-extern "C" void WINAPI BundleExtensionDestroy()
+extern "C" void WINAPI BootstrapperExtensionDestroy()
 {
 	BextUninitialize();
 }

@@ -1,7 +1,7 @@
 <Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <Wix4Version Condition=" '$(Wix4Version)' == '' ">5.0.0-rc.1</Wix4Version>
+    <Wix4Version Condition=" '$(Wix4Version)' == '' ">5.0.0-rc.2-build.4</Wix4Version>
     <PanelSwWix4Version Condition=" '$(PanelSwWix4Version)' == '' ">5.0.0-psw-wix.0262-48</PanelSwWix4Version>
     <SevenZapVersion Condition=" '$(SevenZapVersion)' == '' ">23.1.33</SevenZapVersion>
   </PropertyGroup>

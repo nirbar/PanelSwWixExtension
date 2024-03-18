@@ -17,13 +17,7 @@ public:
 
 	STDMETHOD(ContainerOpenAttached)(LPCWSTR wzContainerId, HANDLE hBundle, DWORD64 qwContainerStartPos, DWORD64 qwContainerSize, LPVOID* ppContext) override;
 
-	STDMETHOD(ContainerNextStream)(LPVOID pContext, LPWSTR* psczStreamName) override;
-
-	STDMETHOD(ContainerStreamToFile)(LPVOID pContext, LPCWSTR wzFileName) override;
-
-	STDMETHOD(ContainerStreamToBuffer)(LPVOID pContext, BYTE** ppbBuffer, SIZE_T* pcbBuffer) override;
-
-	STDMETHOD(ContainerSkipStream)(LPVOID pContext) override;
+	STDMETHOD(ContainerExtractFiles)(LPVOID pContext, DWORD cFiles, LPCWSTR* psczEmbeddedIds, LPCWSTR* psczTargetPaths);
 
 	// Don't forget to release everything in the context
 	STDMETHOD(ContainerClose)(LPVOID pContext) override;

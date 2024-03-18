@@ -9,8 +9,8 @@
 
     <!--
     <NugetPrereleaseVersion>-psw-wix</NugetPrereleaseVersion>
-    <EnableZipContainer>true</EnableZipContainer>
     -->
+    <EnableZipContainer>true</EnableZipContainer>
 
     <!-- CMake -->
     <CMakeDir Condition="'$(CMakeDir)' == ''"></CMakeDir>

@@ -18,7 +18,7 @@
   <!-- PanelSwBackendExtension.dll payload -->
   <?ifdef EnableZipContainer?>
   <Fragment>
-    <BundleExtension Id="PanelSwWixContainer" SourceFile="!(bindpath.PanelSwBackendExtension)\PanelSwBackendExtension.dll"/>
+    <BootstrapperExtension Id="PanelSwWixContainer" SourceFile="!(bindpath.PanelSwBackendExtension)\PanelSwBackendExtension.dll"/>
   </Fragment>
   <?endif?>
 

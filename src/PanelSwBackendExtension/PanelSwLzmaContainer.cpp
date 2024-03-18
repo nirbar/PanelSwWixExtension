@@ -26,10 +26,7 @@ HRESULT CPanelSwLzmaContainer::Reset()
 	_entryCount = 0;
 	_fileCount = 0;
 	_extractCount = 0;
-	_fileIndex = -1;
 
-	_nCurrMappingIndex = -1;
-	_pxCurrFileMappings.Release();
 	_pxMappingsDoc.Release();
 
 	ReleaseHandle(_hExtract);
@@ -63,33 +60,11 @@ HRESULT CPanelSwLzmaContainer::Init(LPCWSTR wzContainerId, HANDLE hBundle, DWORD
 	openOpts.excludedFormats = new CIntVector();
 	openOpts.props = new CObjectVector<CProperty>();
 
-	for (unsigned i = 0; i < MAX_RETRIES; ++i)
-	{
-		hr = S_OK;
-
-		hr = inStream->InitContainer(hBundle, qwContainerStartPos, qwContainerSize);
-		if (FAILED(hr))
-		{
-			BextLogError(hr, "Failed to open container stream on attempt %u/%u", i, MAX_RETRIES);
-			continue;
-		}
-
-		hr = _archive->OpenStream(openOpts);
-		if (FAILED(hr))
-		{
-			BextLogError(hr, "Failed to open container on attempt %u/%u", i, MAX_RETRIES);
-			continue;
-		}
-		if (_archive->Archive == nullptr)
-		{
-			hr = E_FAIL;
-			BextLogError(hr, "Failed to initialize container on attempt %u/%u", i, MAX_RETRIES);
-			continue;
-		}
-
-		break;
-	}
+	hr = inStream->InitContainer(hBundle, qwContainerStartPos, qwContainerSize);
 	BextExitOnFailure(hr, "Failed to open container");
+
+	hr = _archive->OpenStream(openOpts);
+	BextExitOnFailure(hr, "Failed to open container stream");
 	BextExitOnNull(_archive->Archive, hr, E_FAIL, "Failed to initialize container");
 
 	hr = _archive->Archive->GetNumberOfItems(&_entryCount);
@@ -112,9 +87,6 @@ HRESULT CPanelSwLzmaContainer::Init(LPCWSTR wzContainerId, HANDLE hBundle, DWORD
 
 	_hEndExtract = ::CreateEvent(nullptr, TRUE, FALSE, nullptr);
 	BextExitOnNullWithLastError(_hEndExtract, hr, "Failed to create event");
-
-	_hExtractThread = ::CreateThread(nullptr, 0, ExtractThreadProc, this, 0, nullptr);
-	BextExitOnNullWithLastError(_hExtractThread, hr, "Failed to create thread");
 
 LExit:
 	return hr;
@@ -152,80 +124,95 @@ LExit:
 	return hr;
 }
 
-HRESULT CPanelSwLzmaContainer::ContainerNextStream(BSTR* psczStreamName)
-{
-	HRESULT hr = S_OK;
-	size_t cchName = 0;
-	PROPVARIANT pv = {};
-
-	if (psczStreamName && *psczStreamName)
-	{
-		::SysFreeString(*psczStreamName);
-		*psczStreamName = nullptr;
-	}
-
-	hr = GetNextMapping(psczStreamName);
-	if (SUCCEEDED(hr) && psczStreamName && *psczStreamName)
-	{
-		ExitFunction();
-	}
-	if (hr == E_NOMOREITEMS)
-	{
-		hr = S_OK;
-	}
-	BextExitOnFailure(hr, "Failed to get next entry mapping");
-
-	do
-	{
-		++_fileIndex;
-
-		hr = _archive->Archive->GetProperty(_fileIndex, kpidIsDir, &pv);
-		BextExitOnFailure(hr, "Failed to get IsDir property for file %u", _fileIndex);
-
-		// File -> stop.
-		if ((pv.vt == VT_BOOL) && !pv.boolVal)
-		{
-			break;
-		}
-	} while (_fileIndex < _entryCount);
-	if (_fileIndex >= _entryCount)
-	{
-		hr = E_NOMOREITEMS;
-		ExitFunction();
-	}
-
-	hr = _archive->Archive->GetProperty(_fileIndex, kpidPath, &pv);
-	BextExitOnFailure(hr, "Failed to get Path property for file %u", _fileIndex);
-	BextExitOnNull(((pv.vt == VT_BSTR) && pv.bstrVal && *pv.bstrVal), hr, E_INVALIDDATA, "Failed to get Path property for file %u. Property type is %u", _fileIndex, pv.vt);
-
-	hr = ReadFileMappings(pv.bstrVal);
-	BextExitOnFailure(hr, "Failed to read mappings for entry '%ls'", pv.bstrVal);
-
-	if (psczStreamName)
-	{
-		*psczStreamName = ::SysAllocString(pv.bstrVal);
-		BextExitOnNull(*psczStreamName, hr, E_FAIL, "Failed to allocate sys string");
-	}
-
-LExit:
-	return hr;
-}
-
-HRESULT CPanelSwLzmaContainer::ContainerStreamToFile(LPCWSTR wzFileName)
+HRESULT CPanelSwLzmaContainer::ContainerExtractFiles(DWORD cFiles, LPCWSTR* psczEmbeddedIds, LPCWSTR* psczTargetPaths)
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
+	LPWSTR szMappingXPath = nullptr;
+	DWORD dwWait = ERROR_SUCCESS;
 
-	BextExitOnNull((_fileIndex < _entryCount), hr, E_INVALIDSTATE, "7z container is exhausted, can't extract '%ls'", wzFileName);
+	BextExitOnNull((cFiles <= _fileCount), hr, E_INVALIDARG, "Too many files requested to be extracted. Requested %u, have only %u", cFiles, _fileCount);
 
-	_extractIndices[_extractCount] = _fileIndex;
-	_extractPaths[_extractCount] = wzFileName;
-	::InterlockedIncrement(&_extractCount);
-	
-	bRes = ::SetEvent(_hExtract);
-	BextExitOnNullWithLastError(bRes, hr, "Failed to set extract event");
+	_extractCount = 0;
+
+	bRes = ::ResetEvent(_hExtract);
+	BextExitOnNullWithLastError(bRes, hr, "Failed to reset event");
+
+	bRes = ::ResetEvent(_hEndExtract);
+	BextExitOnNullWithLastError(bRes, hr, "Failed to reset event");
+
+	_hExtractThread = ::CreateThread(nullptr, 0, ExtractThreadProc, this, 0, nullptr);
+	BextExitOnNullWithLastError(_hExtractThread, hr, "Failed to create thread");
+
+	for (UInt32 i = 0; i < _entryCount; ++i)
+	{
+		PROPVARIANT pv = {};
+
+		hr = _archive->Archive->GetProperty(i, kpidIsDir, &pv);
+		BextExitOnFailure(hr, "Failed to get IsDir property for file %u", i);
+
+		if ((pv.vt == VT_BOOL) && pv.boolVal)
+		{
+			continue;
+		}
+
+		hr = _archive->Archive->GetProperty(i, kpidPath, &pv);
+		BextExitOnFailure(hr, "Failed to get Path property for file %u", i);
+		BextExitOnNull(((pv.vt == VT_BSTR) && pv.bstrVal && *pv.bstrVal), hr, E_INVALIDDATA, "Failed to get Path property for file %u. Property type is %u", i, pv.vt);
+
+		for (DWORD j = 0; j < cFiles; ++j)
+		{
+			if (::wcsicmp(pv.bstrVal, psczEmbeddedIds[j]) == 0)
+			{
+				_extractIndices[_extractCount] = i;
+				_extractPaths[_extractCount] = psczTargetPaths[j];
+				InterlockedIncrement(&_extractCount);
+
+				bRes = ::SetEvent(_hExtract);
+				BextExitOnNullWithLastError(bRes, hr, "Failed to set extract event");
+
+				continue;
+			}
+
+			if (!!_pxMappingsDoc)
+			{
+				CComPtr<IXMLDOMNodeList> pxCurrFileMappings;
+				long lXpathMatches = 0;
+
+				hr = StrAllocFormatted(&szMappingXPath, L"/Root/Mapping[./@Source='%ls' and ./@Target='%ls']", pv.bstrVal, psczEmbeddedIds[j]);
+				BextExitOnFailure(hr, "Failed to allocate xpath string");
+
+				hr = _pxMappingsDoc->selectNodes(CComBSTR(szMappingXPath), &pxCurrFileMappings);
+				BextExitOnFailure(hr, "Failed to read mappings for file '%ls'", pv.bstrVal);
+
+				hr = pxCurrFileMappings->get_length(&lXpathMatches);
+				BextExitOnFailure(hr, "Failed to get mappings count for file '%ls'", pv.bstrVal);
+
+				if (lXpathMatches > 0)
+				{
+					_extractIndices[_extractCount] = i;
+					_extractPaths[_extractCount] = psczTargetPaths[j];
+					InterlockedIncrement(&_extractCount);
+
+					bRes = ::SetEvent(_hExtract);
+					BextExitOnNullWithLastError(bRes, hr, "Failed to set extract event");
+				}
+			}
+		}
+	}
+
+	bRes = ::SetEvent(_hEndExtract);
+	BextExitOnNullWithLastError(bRes, hr, "Failed to set event");
+
+	dwWait = ::WaitForSingleObject(_hExtractThread, INFINITE);
+	BextExitOnNullWithLastError((dwWait == WAIT_OBJECT_0), hr, "Failed to wait for extract thread to terminate");
+
+	BextExitOnNull((_extractCount == cFiles), hr, E_NOTFOUND, "Failed to find some files in container. Found %u/%u files", _extractCount, cFiles);
 
 LExit:
+	::SetEvent(_hEndExtract); // Just to make sure the thread will terminated if we had an errror
+	ReleaseStr(szMappingXPath);
+
 	return hr;
 }
 
@@ -242,36 +229,14 @@ HRESULT CPanelSwLzmaContainer::ContainerStreamToFileNow(UInt32 nFileIndex, LPCWS
 	BextExitOnNull(pExtractCallback, hr, E_OUTOFMEMORY, "Failed to allocate extract callback object");
 	extractClbk = pExtractCallback;
 
-	for (unsigned i = 0; i < MAX_RETRIES; ++i)
-	{
-		hr = S_OK;
+	hr = pExtractCallback->Init(_archive->Archive, 1, &nFileIndex, &targetFile);
+	BextExitOnFailure(hr, "Failed to initialize extract callbck");
 
-		hr = pExtractCallback->Init(_archive->Archive, 1, &nFileIndex, &targetFile);
-		BextExitOnFailure(hr, "Failed to initialize extract callbck");
-
-		hr = _archive->Archive->Extract(&nFileIndex, 1, 0, extractClbk);
-		if (FAILED(hr))
-		{
-			BextLogError(hr, "Failed to extract files on attempt %u/%u", i, MAX_RETRIES);
-			continue;
-		}
-
-		break;
-	}
-	BextExitOnFailure(hr, "Failed to extract files");
-	BextExitOnNull(!pExtractCallback->HasErrors(), hr, E_FAIL, "Failed to extract files");
+	hr = _archive->Archive->Extract(&nFileIndex, 1, 0, extractClbk);
+	BextExitOnFailure(hr, "Failed to extract '%ls'", wzFileName);
+	BextExitOnNull(!pExtractCallback->HasErrors(), hr, E_FAIL, "Failed to extract '%ls'", wzFileName);
 
 LExit:
-	return S_OK;
-}
-
-HRESULT CPanelSwLzmaContainer::ContainerStreamToBuffer(BYTE** ppbBuffer, SIZE_T* pcbBuffer)
-{
-	return E_NOTIMPL;
-}
-
-HRESULT CPanelSwLzmaContainer::ContainerSkipStream()
-{
 	return S_OK;
 }
 
@@ -299,21 +264,34 @@ HRESULT CPanelSwLzmaContainer::LoadMappings(LPDWORD pdwMappingCount)
 {
 	HRESULT hr = S_OK;
 	LPWSTR szXmlFile = nullptr;
-	CComBSTR szEntryName;
 	CComPtr<IXMLDOMNodeList> pxCurrFileMappings;
+	UInt32 uiMappingFile = _entryCount + 1;
 	long lMappingCount = 0;
 	*pdwMappingCount = 0;
 
-	while ((hr = ContainerNextStream(&szEntryName)) != E_NOMOREITEMS)
+	for (UInt32 i = 0; i < _entryCount; ++i)
 	{
-		BextExitOnFailure(hr, "Failed to get next entry");
+		PROPVARIANT pv = {};
 
-		if (::wcscmp((BSTR)szEntryName, MAPPINGS_FILE_NAME) == 0)
+		hr = _archive->Archive->GetProperty(i, kpidIsDir, &pv);
+		BextExitOnFailure(hr, "Failed to get IsDir property for file %u", i);
+
+		if ((pv.vt == VT_BOOL) && pv.boolVal)
 		{
+			continue;
+		}
+
+		hr = _archive->Archive->GetProperty(i, kpidPath, &pv);
+		BextExitOnFailure(hr, "Failed to get Path property for file %u", i);
+		BextExitOnNull(((pv.vt == VT_BSTR) && pv.bstrVal && *pv.bstrVal), hr, E_INVALIDDATA, "Failed to get Path property for file %u. Property type is %u", i, pv.vt);
+		
+		if (::wcsicmp(pv.bstrVal, MAPPINGS_FILE_NAME) == 0)
+		{
+			uiMappingFile = i;
 			break;
 		}
 	}
-	if (hr == E_NOMOREITEMS)
+	if (uiMappingFile >= _entryCount)
 	{
 		hr = S_FALSE;
 		ExitFunction();
@@ -322,7 +300,7 @@ HRESULT CPanelSwLzmaContainer::LoadMappings(LPDWORD pdwMappingCount)
 	hr = FileCreateTemp(L"CNTNR", L"xml", &szXmlFile, nullptr);
 	BextExitOnFailure(hr, "Failed to load mappings");
 
-	hr = ContainerStreamToFileNow(_fileIndex, szXmlFile);
+	hr = ContainerStreamToFileNow(uiMappingFile, szXmlFile);
 	BextExitOnFailure(hr, "Failed to extract mappings file '%ls'", szXmlFile);
 
 	hr = XmlLoadDocumentFromFile(szXmlFile, &_pxMappingsDoc);
@@ -341,70 +319,7 @@ LExit:
 		FileEnsureDelete(szXmlFile);
 		ReleaseStr(szXmlFile);
 	}
-	_fileIndex = -1;
 
-	return hr;
-}
-
-HRESULT CPanelSwLzmaContainer::ReadFileMappings(LPCWSTR szEntryName)
-{
-	HRESULT hr = S_OK;
-	LPWSTR szXpath = nullptr;
-
-	if (!_pxMappingsDoc)
-	{
-		ExitFunction();
-	}
-
-	hr = StrAllocFormatted(&szXpath, L"/Root/Mapping[./@Source='%ls']/@Target", szEntryName);
-	BextExitOnFailure(hr, "Failed to allocate string");
-
-	hr = _pxMappingsDoc->selectNodes(CComBSTR(szXpath), &_pxCurrFileMappings);
-	BextExitOnFailure(hr, "Failed to read mappings for file '%ls'", szEntryName);
-
-LExit:
-	ReleaseStr(szXpath);
-	_nCurrMappingIndex = -1;
-
-	return hr;
-}
-
-HRESULT CPanelSwLzmaContainer::GetNextMapping(BSTR* psczStreamName)
-{
-	HRESULT hr = S_OK;
-	long lNodeCount = -1;
-	CComPtr<IXMLDOMNode> pNode;
-	CComVariant nodeValue;
-	CComBSTR result(L"");
-
-	if (!_pxMappingsDoc || !_pxCurrFileMappings)
-	{
-		ExitFunction();
-	}
-
-	hr = _pxCurrFileMappings->get_length(&lNodeCount);
-	BextExitOnFailure(hr, "Failed to get mappings count");
-
-	++_nCurrMappingIndex;
-	if (_nCurrMappingIndex >= lNodeCount)
-	{
-		hr = E_NOMOREITEMS;
-		ExitFunction();
-	}
-
-	hr = _pxCurrFileMappings->get_item(_nCurrMappingIndex, &pNode);
-	BextExitOnFailure(hr, "Failed to get next mapping");
-
-	hr = pNode->get_nodeValue(&nodeValue);
-	ExitOnFailure(hr, "Failed to get mapping value.");
-
-	hr = nodeValue.ChangeType(VT_BSTR);
-	ExitOnFailure(hr, "Failed to get mapping value as string.");
-
-	result = nodeValue.bstrVal;
-	*psczStreamName = result.Detach();
-
-LExit:
 	return hr;
 }
 
@@ -445,28 +360,17 @@ LExit:
 
 		if (dwExtractCount)
 		{
-			UInt32* pIndices = pThis->_extractIndices.get() + dwPrevExtractCount;
-			FString* pPaths = pThis->_extractPaths.get() + dwPrevExtractCount;
+			const UInt32* pIndices = pThis->_extractIndices.get() + dwPrevExtractCount;
+			const FString* pPaths = pThis->_extractPaths.get() + dwPrevExtractCount;
 
-			for (unsigned i = 0; i < MAX_RETRIES; ++i)
-			{
-				hr = S_OK;
+			hr = pExtractCallback->Init(pThis->_archive->Archive, dwExtractCount, pIndices, pPaths);
+			BextExitOnFailure(hr, "Failed to initialize extract callbck");
 
-				hr = pExtractCallback->Init(pThis->_archive->Archive, dwExtractCount, pIndices, pPaths);
-				BextExitOnFailure(hr, "Failed to initialize extract callbck");
-
-				hr = pThis->_archive->Archive->Extract(pIndices, dwExtractCount, 0, extractClbk);
-				if (FAILED(hr))
-				{
-					BextLogError(hr, "Failed to extract files on attempt %u/%u", i, MAX_RETRIES);
-					continue;
-				}
-
-				dwPrevExtractCount = dwOverallExtractCount;
-				break;
-			}
+			hr = pThis->_archive->Archive->Extract(pIndices, dwExtractCount, 0, extractClbk);
 			BextExitOnFailure(hr, "Failed to extract files");
 			BextExitOnNull(!pExtractCallback->HasErrors(), hr, E_FAIL, "Failed to extract files");
+
+			dwPrevExtractCount = dwOverallExtractCount;
 		}
 	}
 
