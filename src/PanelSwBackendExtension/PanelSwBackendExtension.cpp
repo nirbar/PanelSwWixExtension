@@ -137,7 +137,6 @@ STDMETHODIMP CPanelSwBundleExtension::ContainerOpenAttached(LPCWSTR wzContainerI
 
 	_containers.push_back(pContainer);
 	*ppContext = pContainer;
-	pContainer = nullptr;
 
 	hr = pContainer->ContainerOpenAttached(wzContainerId, hBundle, qwContainerStartPos, qwContainerSize);
 	BextExitOnFailure(hr, "Failed to open attached container");
