@@ -28,17 +28,13 @@ jobs:
     - uses: microsoft/setup-msbuild@v1
 
     - name: Prepare for build
-      run: |
-        choco install windows-adk-all
-        nuget restore
+      run: choco install windows-adk-all
 
     - name: Build without analysis
-      run: msbuild dirs.proj -restore
+      run: msbuild src/dirs.proj -restore
 
     - name: Clean PanelSwWixExtension (keep extranal code build)
-      run: |
-        Remove-Item ("${{ github.workspace }}" + "\build") -Recurse -Force
-        nuget restore src/dirs.proj
+      run: Remove-Item ("${{ github.workspace }}" + "\build") -Recurse -Force
 
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v2
@@ -46,7 +42,7 @@ jobs:
         languages: ${{ matrix.language }}
 
     - name: Build & scan
-      run: msbuild src/dirs.proj -restore -p:DisableNuget=true
+      run: msbuild src/dirs.proj -restore
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
