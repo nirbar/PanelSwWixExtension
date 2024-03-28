@@ -26,8 +26,11 @@ message ExecOnDetails{
 
 	repeated ConsoleOuputRemap consoleOuputRemap = 7;
 
-	// Impersonate a user
+	// Impersonate another user
 	bytes domain = 9;
 	bytes user = 10;
 	bytes password = 11;
+
+	// Impersonate current user
+	uint32 sessionId = 12;
 }

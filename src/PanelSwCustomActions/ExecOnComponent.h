@@ -26,11 +26,13 @@ private:
 
 	HRESULT ExecuteOne(const com::panelsw::ca::ExecOnDetails &details);
 
-	HRESULT SetEnvironment(const ::google::protobuf::Map<std::string, com::panelsw::ca::ObfuscatedString> &customEnv);
+	HRESULT Impersonate(LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, DWORD dwSessionId, HANDLE* phUserToken, CWixString* pszEnvironmentMultiSz);
+
+	HRESULT SetEnvironment(CWixString *pszEnvironmentMultiSz, const ::google::protobuf::Map<std::string, com::panelsw::ca::ObfuscatedString> &customEnv);
 
 	HRESULT LogProcessOutput(HANDLE hProc, HANDLE hStdErrOut, LPWSTR *pszText);
 
-	HRESULT LaunchProcess(LPCWSTR szCommand, HANDLE* phProcess, HANDLE* phStdOut);
+	HRESULT LaunchProcess(LPWSTR szCommand, LPCWSTR szWorkingDirectory, LPCWSTR rgszEnvironment, HANDLE* phProcess, HANDLE* phStdOut);
 
 	// S_FALSE: Had no matches, go on with error handling.
 	// S_OK: Ignore errors and continue

@@ -701,14 +701,6 @@ namespace PanelSw.Wix.Extensions
                     customActions.Add("ExecOnComponent_BeforeStart_deferred");
                     customActions.Add("ExecOnComponent_AfterStart_rollback");
                     customActions.Add("ExecOnComponent_AfterStart_deferred");
-                    customActions.Add("ExecOnComponent_Imp_BeforeStop_rollback");
-                    customActions.Add("ExecOnComponent_Imp_BeforeStop_deferred");
-                    customActions.Add("ExecOnComponent_Imp_AfterStop_rollback");
-                    customActions.Add("ExecOnComponent_Imp_AfterStop_deferred");
-                    customActions.Add("ExecOnComponent_Imp_BeforeStart_rollback");
-                    customActions.Add("ExecOnComponent_Imp_BeforeStart_deferred");
-                    customActions.Add("ExecOnComponent_Imp_AfterStart_rollback");
-                    customActions.Add("ExecOnComponent_Imp_AfterStart_deferred");
                     break;
                 case "PSW_Dism":
                     customActions.Add("DismSched");
