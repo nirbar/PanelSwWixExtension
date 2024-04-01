@@ -343,7 +343,7 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 	LPCWSTR szAccount = nullptr;
 	LPCWSTR szPassword = nullptr;
 	LPCWSTR szLoadOrderGroup = nullptr;
-	LPWSTR szDependencies = nullptr;
+	CWixString szDependencies;
 	DWORD bRes = TRUE;
 	ServciceConfigDetails details;
 
@@ -375,16 +375,9 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 	{
 		LPCWSTR szDep = (LPCWSTR)(LPVOID)dep.data();
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Service '%ls' dependency '%ls'", szServiceName, szDep);
-		if (szDependencies)
-		{
-			hr = MultiSzPrepend(&szDependencies, nullptr, szDep);
-			ExitOnFailure(hr, "Failed to allocate string");
-		}
-		else
-		{
-			hr = StrAllocFormatted(&szDependencies, L"%ls%lc", szDep, L'\0');
-			ExitOnFailure(hr, "Failed to allocate string");
-		}
+
+		hr = szDependencies.MultiStringInsertString(szDep);
+		ExitOnFailure(hr, "Failed to insert string to array");
 	}
 
 	do
@@ -399,7 +392,6 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 	ExitOnFailure(hr, "Failed configuring service '%ls'", szServiceName);
 
 LExit:
-	ReleaseStr(szDependencies);
 	return hr;
 }
 

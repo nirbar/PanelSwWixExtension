@@ -35,7 +35,7 @@ public:
 		Copy((LPCWSTR)other);
 	}
 
-	CWixString(CWixString&& other)
+	CWixString(CWixString&& other) noexcept
 	{
 		_dwCapacity = other._dwCapacity;
 		_pTokenContext = other._pTokenContext;
@@ -43,7 +43,7 @@ public:
 		_pS = other.Detach();
 	}
 
-	CWixString& operator=(CWixString&& other)
+	CWixString& operator=(CWixString&& other) noexcept
 	{
 		_dwCapacity = other._dwCapacity;
 		_pTokenContext = other._pTokenContext;
@@ -558,6 +558,169 @@ public:
 
 		LPCWSTR szOtherFound = ::StrStrIW(_pS, szOther);
 		return szOtherFound ? (szOtherFound - szOther) : INFINITE;
+	}
+
+	HRESULT MultiStringInsertString(LPCWSTR sz, DWORD dwIndex = INFINITE)
+	{
+		HRESULT hr = S_OK;
+		DWORD i = 0;
+		DWORD dwPos = 0;
+		DWORD dwSzLen = 0;
+		DWORD dwOldTotalCapacity = 0;
+		DWORD dwNeededCapacity = 0;
+		LPWSTR szNew = nullptr;
+
+		if (!_pS)
+		{
+			hr = Format(L"%ls\0", sz);
+			ExitOnFailure(hr, "Failed to allocate string");
+			ExitFunction();
+		}
+
+		dwOldTotalCapacity = MultiStringTotalLen();
+		while ((i < dwIndex) && (dwPos < dwOldTotalCapacity) && _pS[dwPos])
+		{
+			LPCWSTR szCurr = _pS + dwPos;
+			DWORD dwLen = wcslen(szCurr);
+			dwPos += dwLen + 1;
+			++i;
+		}
+		if (dwPos > dwOldTotalCapacity)
+		{
+			dwPos = dwOldTotalCapacity;
+		}
+
+		dwSzLen = wcslen(sz) + 1;
+		dwNeededCapacity = dwOldTotalCapacity + dwSzLen;
+
+		if (dwNeededCapacity > _dwCapacity)
+		{
+			LPWSTR szTemp = _pS;
+			hr = StrAlloc(&szNew, dwNeededCapacity);
+			ExitOnFailure(hr, "Failed to allocate memory");
+
+			memcpy(szNew, _pS, dwOldTotalCapacity * sizeof(WCHAR));
+			_pS = szNew;
+			_dwCapacity = dwNeededCapacity;
+			szNew = szTemp;
+		}
+
+		// If we're inserting in the middle, make room
+		if (dwPos < dwOldTotalCapacity)
+		{
+			for (DWORD j = 0, dwMoveLen = dwOldTotalCapacity - dwPos; j < dwMoveLen; ++j)
+			{
+				_pS[dwNeededCapacity - j - 1] = _pS[dwOldTotalCapacity - j - 1];
+			}
+		}
+
+		memcpy(_pS + dwPos, sz, dwSzLen * sizeof(WCHAR));
+
+	LExit:
+		ReleaseStr(szNew);
+
+		return hr;
+	}
+
+	HRESULT MultiStringReplaceString(DWORD i, LPCWSTR sz)
+	{
+		HRESULT hr = S_OK;
+		LPCWSTR szOld = nullptr;
+		DWORD dwOldSzStart = 0;
+		DWORD dwOldSzEnd = 0;
+		DWORD dwOldSzLen = 0;
+		DWORD dwAfterOldSzLen = 0;
+		DWORD dwNewSzLen = 0;
+		DWORD dwTotalLen = 0;
+		DWORD dwNeededCapacity = 0;
+		LPWSTR szNew = nullptr;
+
+		hr = MultiStringGet(i, &szOld);
+		ExitOnNull(szOld, hr, E_INVALIDARG, "Multi string index %u is out of range", i);
+
+		dwOldSzStart = szOld - _pS;
+		dwOldSzLen = wcslen(szOld) + 1;
+		dwOldSzEnd = dwOldSzStart + dwOldSzLen;
+		dwNewSzLen = wcslen(sz) + 1;
+
+		dwTotalLen = MultiStringTotalLen();
+		dwNeededCapacity = dwTotalLen + dwNewSzLen - dwOldSzLen;
+		dwAfterOldSzLen = dwTotalLen - dwOldSzLen - dwOldSzStart;
+
+		if (dwNeededCapacity > _dwCapacity)
+		{
+			LPWSTR szTemp = _pS;
+			hr = StrAlloc(&szNew, dwNeededCapacity);
+			ExitOnFailure(hr, "Failed to allocate memory");
+
+			memcpy(szNew, _pS, dwTotalLen * sizeof(WCHAR));
+			_pS = szNew;
+			_dwCapacity = dwNeededCapacity;
+			szNew = szTemp;
+		}
+
+		// If we have sufficient space, just copy
+		if (dwOldSzLen >= dwNewSzLen)
+		{
+			memcpy(_pS + dwOldSzStart, sz, dwNewSzLen * sizeof(WCHAR));
+
+			for (DWORD j = 0; j < dwAfterOldSzLen; ++j)
+			{
+				DWORD dwNewPos = dwOldSzStart + dwNewSzLen + j;
+				DWORD dwOldPos = dwOldSzEnd + j;
+
+				_pS[dwNewPos] = _pS[dwOldPos];
+			}
+		}
+		// Insufficient space, need to use a double buffer
+		else
+		{
+			hr = StrAlloc(&szNew, dwAfterOldSzLen);
+			ExitOnFailure(hr, "Failed to allocate memory");
+
+			memcpy(szNew, _pS + dwOldSzEnd, dwAfterOldSzLen * sizeof(WCHAR));
+			memcpy(_pS + dwOldSzStart, sz, dwNewSzLen * sizeof(WCHAR));
+			memcpy(_pS + dwOldSzStart + dwNewSzLen, szNew, dwAfterOldSzLen * sizeof(WCHAR));
+		}
+
+	LExit:
+		ReleaseStr(szNew);
+
+		return hr;
+	}
+
+	// Get string number i, or the last one
+	HRESULT MultiStringGet(DWORD i, LPCWSTR* pSz)
+	{
+		HRESULT hr = S_OK;
+
+		LPCWSTR sz = _pS;
+		DWORD j = 0;
+		for (; (j < i) && sz && *sz; sz += 1 + wcslen(sz))
+		{
+			++j;
+		}
+		if ((j != i) || !sz || !*sz)
+		{
+			*pSz = nullptr;
+			hr = E_NOMOREITEMS;
+			ExitFunction();
+		}
+		*pSz = sz;
+
+	LExit:
+		return hr;
+	}
+
+	// Length, including the terminating double-null
+	DWORD MultiStringTotalLen()
+	{
+		LPCWSTR sz = nullptr;
+
+		for (sz = _pS; sz && *sz; sz += wcslen(sz) + 1)
+		{
+		}
+		return sz ? (sz - _pS) + 1 : 0;
 	}
 
 private:
