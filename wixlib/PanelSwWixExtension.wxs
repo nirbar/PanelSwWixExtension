@@ -301,14 +301,6 @@
     <CustomAction Id="ExecOnComponent_BeforeStart_deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" />
     <CustomAction Id="ExecOnComponent_AfterStart_rollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" />
     <CustomAction Id="ExecOnComponent_AfterStart_deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" />
-    <CustomAction Id="ExecOnComponent_Imp_BeforeStop_rollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" HideTarget="yes" />
-    <CustomAction Id="ExecOnComponent_Imp_BeforeStop_deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" HideTarget="yes" />
-    <CustomAction Id="ExecOnComponent_Imp_AfterStop_rollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" HideTarget="yes" />
-    <CustomAction Id="ExecOnComponent_Imp_AfterStop_deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" HideTarget="yes" />
-    <CustomAction Id="ExecOnComponent_Imp_BeforeStart_rollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" HideTarget="yes" />
-    <CustomAction Id="ExecOnComponent_Imp_BeforeStart_deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" HideTarget="yes" />
-    <CustomAction Id="ExecOnComponent_Imp_AfterStart_rollback" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" HideTarget="yes" />
-    <CustomAction Id="ExecOnComponent_Imp_AfterStart_deferred" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="CommonDeferred" Execute="deferred" HideTarget="yes" />
     <CustomActionRef Id="PSW_CheckRebootRequired"/>
 
     <InstallExecuteSequence>
@@ -317,23 +309,15 @@
       <Custom Action="ExecOnComponentCommit" Before="InstallFinalize" Overridable="yes"/>
       <Custom Action="ExecOnComponent_BeforeStop_rollback" Before="ExecOnComponent_BeforeStop_deferred" Overridable="yes"/>
       <Custom Action="ExecOnComponent_BeforeStop_deferred" Before="StopServices" Overridable="yes"/>
-      <Custom Action="ExecOnComponent_Imp_BeforeStop_rollback" Before="ExecOnComponent_Imp_BeforeStop_deferred" Overridable="yes"/>
-      <Custom Action="ExecOnComponent_Imp_BeforeStop_deferred" Before="StopServices" Overridable="yes"/>
 
       <Custom Action="ExecOnComponent_AfterStop_rollback" Before="ExecOnComponent_AfterStop_deferred" Overridable="yes"/>
       <Custom Action="ExecOnComponent_AfterStop_deferred" After="StopServices" Overridable="yes"/>
-      <Custom Action="ExecOnComponent_Imp_AfterStop_rollback" Before="ExecOnComponent_Imp_AfterStop_deferred" Overridable="yes"/>
-      <Custom Action="ExecOnComponent_Imp_AfterStop_deferred" After="StopServices" Overridable="yes"/>
 
       <Custom Action="ExecOnComponent_BeforeStart_rollback" Before="ExecOnComponent_BeforeStart_deferred" Overridable="yes"/>
       <Custom Action="ExecOnComponent_BeforeStart_deferred" Before="StartServices" Overridable="yes"/>
-      <Custom Action="ExecOnComponent_Imp_BeforeStart_rollback" Before="ExecOnComponent_Imp_BeforeStart_deferred" Overridable="yes"/>
-      <Custom Action="ExecOnComponent_Imp_BeforeStart_deferred" Before="StartServices" Overridable="yes"/>
 
       <Custom Action="ExecOnComponent_AfterStart_rollback" Before="ExecOnComponent_AfterStart_deferred" Overridable="yes"/>
       <Custom Action="ExecOnComponent_AfterStart_deferred" After="StartServices" Overridable="yes"/>
-      <Custom Action="ExecOnComponent_Imp_AfterStart_rollback" Before="ExecOnComponent_Imp_AfterStart_deferred" Overridable="yes"/>
-      <Custom Action="ExecOnComponent_Imp_AfterStart_deferred" After="StartServices" Overridable="yes"/>
     </InstallExecuteSequence>
 
     <UI>
@@ -342,20 +326,12 @@
       <ProgressText Action="ExecOnComponentCommit">!(loc.ExecOnComponent)</ProgressText>
       <ProgressText Action="ExecOnComponent_BeforeStop_rollback" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
       <ProgressText Action="ExecOnComponent_BeforeStop_deferred" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_Imp_BeforeStop_rollback" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_Imp_BeforeStop_deferred" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
       <ProgressText Action="ExecOnComponent_AfterStop_rollback" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
       <ProgressText Action="ExecOnComponent_AfterStop_deferred" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_Imp_AfterStop_rollback" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_Imp_AfterStop_deferred" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
       <ProgressText Action="ExecOnComponent_BeforeStart_rollback" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
       <ProgressText Action="ExecOnComponent_BeforeStart_deferred" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_Imp_BeforeStart_rollback" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_Imp_BeforeStart_deferred" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
       <ProgressText Action="ExecOnComponent_AfterStart_rollback" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
       <ProgressText Action="ExecOnComponent_AfterStart_deferred" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_Imp_AfterStart_rollback" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
-      <ProgressText Action="ExecOnComponent_Imp_AfterStart_deferred" Template="!(loc.ExecOnComponentTemplate)">!(loc.ExecOnComponent)</ProgressText>
     </UI>
   </Fragment>
 
