@@ -769,8 +769,8 @@ HRESULT CExecOnComponent::LogProcessOutput(HANDLE hProcess, HANDLE hStdErrOut, L
 	overlapped.hEvent = ::CreateEvent(nullptr, TRUE, FALSE, nullptr);
 	ExitOnNullWithLastError((overlapped.hEvent && (overlapped.hEvent != INVALID_HANDLE_VALUE)), hr, "Failed to create event");
 
-	rghHandles[0] = hProcess;
-	rghHandles[1] = overlapped.hEvent;
+	rghHandles[0] = overlapped.hEvent;
+	rghHandles[1] = hProcess;
 
 	bRes = ::ConnectNamedPipe(hStdErrOut, &overlapped);
 	if (!bRes)
@@ -807,12 +807,12 @@ HRESULT CExecOnComponent::LogProcessOutput(HANDLE hProcess, HANDLE hStdErrOut, L
 
 		dwRes = ::WaitForMultipleObjects(ARRAYSIZE(rghHandles), rghHandles, FALSE, INFINITE);
 		// Process terminated, or pipe abandoned
-		if ((dwRes == WAIT_OBJECT_0) || (dwRes == WAIT_ABANDONED_0) || (dwRes == (WAIT_ABANDONED_0 + 1)))
+		if ((dwRes == (WAIT_OBJECT_0 + 1)) || (dwRes == WAIT_ABANDONED_0) || (dwRes == (WAIT_ABANDONED_0 + 1)))
 		{
 			break;
 		}
 		ExitOnNullWithLastError((dwRes != WAIT_FAILED), hr, "Failed to wait for process to terminate or write to stdout");
-		if (dwRes != (WAIT_OBJECT_0 + 1))
+		if (dwRes != WAIT_OBJECT_0)
 		{
 			ExitOnWin32Error(dwRes, hr, "Failed to wait for process to terminate or write to stdout.");
 		}
