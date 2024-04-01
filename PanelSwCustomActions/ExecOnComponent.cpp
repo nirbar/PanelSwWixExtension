@@ -523,7 +523,7 @@ HRESULT CExecOnComponent::AddExec(const CWixString& szCommand, LPCWSTR szWorking
 	::com::panelsw::ca::Command* pCmd = nullptr;
 	ExecOnDetails* pDetails = nullptr;
 	::std::string* pAny = nullptr;
-	DWORD dwSessionId = 0;
+	DWORD dwSessionId = WTS_CURRENT_SESSION;
 	bool bRes = true;
 
 	hr = AddCommand("CExecOnComponent", &pCmd);
@@ -582,7 +582,7 @@ HRESULT CExecOnComponent::AddExec(const CWixString& szCommand, LPCWSTR szWorking
 		bRes = ::ProcessIdToSessionId(::GetCurrentProcessId(), &dwSessionId);
 		ExitOnNullWithLastError(bRes, hr, "Failed to get current user's session id");
 	}
-	pDetails->set_sessionid(dwSessionId); // Defaults to 0.
+	pDetails->set_sessionid(dwSessionId); // Defaults to WTS_CURRENT_SESSION (= -1).
 
 	pAny = pCmd->mutable_details();
 	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
@@ -1143,7 +1143,7 @@ HRESULT CExecOnComponent::Impersonate(LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR 
 	ZeroMemory(&profileInfo, sizeof(profileInfo));
 
 	// Impersonate current user?
-	if (dwSessionId)
+	if (dwSessionId != WTS_CURRENT_SESSION)
 	{
 		DWORD dwNameSize = 0;
 
