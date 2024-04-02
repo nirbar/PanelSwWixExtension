@@ -305,19 +305,19 @@
 
     <InstallExecuteSequence>
       <Custom Action="ExecOnComponent" Before="ExecOnComponentRollback" Overridable="yes" />
-      <Custom Action="ExecOnComponentRollback" Before="ProcessComponents" Overridable="yes"/>
-      <Custom Action="ExecOnComponentCommit" Before="InstallFinalize" Overridable="yes"/>
-      <Custom Action="ExecOnComponent_BeforeStop_rollback" Before="ExecOnComponent_BeforeStop_deferred" Overridable="yes"/>
-      <Custom Action="ExecOnComponent_BeforeStop_deferred" Before="StopServices" Overridable="yes"/>
+      <Custom Action="ExecOnComponentRollback" Before="ProcessComponents" Overridable="yes"><![CDATA[ExecOnComponentRollback]]></Custom>
+      <Custom Action="ExecOnComponentCommit" Before="InstallFinalize" Overridable="yes"><![CDATA[ExecOnComponentCommit]]></Custom>
+      <Custom Action="ExecOnComponent_BeforeStop_rollback" Before="ExecOnComponent_BeforeStop_deferred" Overridable="yes"><![CDATA[ExecOnComponent_BeforeStop_rollback]]></Custom>
+      <Custom Action="ExecOnComponent_BeforeStop_deferred" Before="StopServices" Overridable="yes"><![CDATA[ExecOnComponent_BeforeStop_deferred]]></Custom>
 
-      <Custom Action="ExecOnComponent_AfterStop_rollback" Before="ExecOnComponent_AfterStop_deferred" Overridable="yes"/>
-      <Custom Action="ExecOnComponent_AfterStop_deferred" After="StopServices" Overridable="yes"/>
+      <Custom Action="ExecOnComponent_AfterStop_rollback" Before="ExecOnComponent_AfterStop_deferred" Overridable="yes"><![CDATA[ExecOnComponent_AfterStop_rollback]]></Custom>
+      <Custom Action="ExecOnComponent_AfterStop_deferred" After="StopServices" Overridable="yes"><![CDATA[ExecOnComponent_AfterStop_deferred]]></Custom>
 
-      <Custom Action="ExecOnComponent_BeforeStart_rollback" Before="ExecOnComponent_BeforeStart_deferred" Overridable="yes"/>
-      <Custom Action="ExecOnComponent_BeforeStart_deferred" Before="StartServices" Overridable="yes"/>
+      <Custom Action="ExecOnComponent_BeforeStart_rollback" Before="ExecOnComponent_BeforeStart_deferred" Overridable="yes"><![CDATA[ExecOnComponent_BeforeStart_rollback]]></Custom>
+      <Custom Action="ExecOnComponent_BeforeStart_deferred" Before="StartServices" Overridable="yes"><![CDATA[ExecOnComponent_BeforeStart_deferred]]></Custom>
 
-      <Custom Action="ExecOnComponent_AfterStart_rollback" Before="ExecOnComponent_AfterStart_deferred" Overridable="yes"/>
-      <Custom Action="ExecOnComponent_AfterStart_deferred" After="StartServices" Overridable="yes"/>
+      <Custom Action="ExecOnComponent_AfterStart_rollback" Before="ExecOnComponent_AfterStart_deferred" Overridable="yes"><![CDATA[ExecOnComponent_AfterStart_rollback]]></Custom>
+      <Custom Action="ExecOnComponent_AfterStart_deferred" After="StartServices" Overridable="yes"><![CDATA[ExecOnComponent_AfterStart_deferred]]></Custom>
     </InstallExecuteSequence>
 
     <UI>
