@@ -41,7 +41,7 @@ private:
 
 	HRESULT LogProcessOutput(HANDLE hProc, HANDLE hStdErrOut, LPWSTR *pszText);
 
-	HRESULT LaunchProcess(LPWSTR szCommand, LPCWSTR szWorkingDirectory, LPCWSTR rgszEnvironment, HANDLE* phProcess, HANDLE* phStdOut);
+	HRESULT LaunchProcess(IMPERSONATION_CONTEXT* pctxImpersonation, LPWSTR szCommand, LPCWSTR szWorkingDirectory, LPCWSTR rgszEnvironment, HANDLE* phProcess, HANDLE* phStdOut);
 
 	// S_FALSE: Had no matches, go on with error handling.
 	// S_OK: Ignore errors and continue

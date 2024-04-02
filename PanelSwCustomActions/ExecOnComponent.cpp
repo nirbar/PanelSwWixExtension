@@ -662,7 +662,7 @@ HRESULT CExecOnComponent::ExecuteOne(const com::panelsw::ca::ExecOnDetails& deta
 	ExitOnFailure(hr, "Failed setting environment");
 
 	// By default, exitCode is what the process returned. If couldn't execute the process, use failure code is result.
-	hr = LaunchProcess((LPWSTR)szCommand, szWorkingDirectory, (LPCWSTR)szEnvironmentMultiSz, &hProc, &hStdOut);
+	hr = LaunchProcess(&ctxImpersonation, (LPWSTR)szCommand, szWorkingDirectory, (LPCWSTR)szEnvironmentMultiSz, &hProc, &hStdOut);
 
 	if (details.async())
 	{
@@ -1011,7 +1011,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CExecOnComponent::LaunchProcess(LPWSTR szCommand, LPCWSTR szWorkingDirectory, LPCWSTR rgszEnvironment, HANDLE* phProcess, HANDLE* phStdOut)
+HRESULT CExecOnComponent::LaunchProcess(IMPERSONATION_CONTEXT* pctxImpersonation, LPWSTR szCommand, LPCWSTR szWorkingDirectory, LPCWSTR rgszEnvironment, HANDLE* phProcess, HANDLE* phStdOut)
 {
 	HRESULT hr = S_OK;
 	SECURITY_ATTRIBUTES sa;
@@ -1087,8 +1087,16 @@ HRESULT CExecOnComponent::LaunchProcess(LPWSTR szCommand, LPCWSTR szWorkingDirec
 	si.hStdOutput = hOutWrite;
 	si.hStdError = hErrWrite;
 
-	bRes = ::CreateProcessW(nullptr, szCommand, nullptr, nullptr, TRUE, ::GetPriorityClass(::GetCurrentProcess()) | CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT, (LPVOID)rgszEnvironment, szWorkingDirectory, &si, &pi);
-	ExitOnNullWithLastError(bRes, hr, "Failed to create process");
+	if (pctxImpersonation->hUserToken)
+	{
+		bRes = ::CreateProcessAsUser(pctxImpersonation->hUserToken, nullptr, szCommand, nullptr, nullptr, TRUE, ::GetPriorityClass(::GetCurrentProcess()) | CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT, (LPVOID)rgszEnvironment, szWorkingDirectory, &si, &pi);
+		ExitOnNullWithLastError(bRes, hr, "Failed to create process");
+	}
+	else
+	{
+		bRes = ::CreateProcess(nullptr, szCommand, nullptr, nullptr, TRUE, ::GetPriorityClass(::GetCurrentProcess()) | CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT, (LPVOID)rgszEnvironment, szWorkingDirectory, &si, &pi);
+		ExitOnNullWithLastError(bRes, hr, "Failed to create process");
+	}
 	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Launched process '%ls'", szCommand);
 
 	if (phStdOut)
@@ -1181,13 +1189,6 @@ HRESULT CExecOnComponent::Impersonate(LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR 
 
 	bRes = ::CreateEnvironmentBlock(&pEnvironment, hUserToken, FALSE);
 	ExitOnNullWithLastError(bRes, hr, "Failed to get environment block");
-
-	if (hUserToken)
-	{
-		bRes = ::ImpersonateLoggedOnUser(hUserToken);
-		ExitOnNullWithLastError(bRes, hr, "Failed to impersonate user");
-		bImpersonated = TRUE;
-	}
 
 	for (LPCWSTR sz = (LPCWSTR)pEnvironment; sz && *sz; sz += 1 + wcslen(sz))
 	{
