@@ -24,9 +24,18 @@ protected:
 
 private:
 
+	struct IMPERSONATION_CONTEXT
+	{
+		HANDLE hUserToken = NULL;
+		BOOL bImpersonated = FALSE;
+		HANDLE hProfile = NULL;
+	};
+
 	HRESULT ExecuteOne(const com::panelsw::ca::ExecOnDetails &details);
 
-	HRESULT Impersonate(LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, DWORD dwSessionId, HANDLE* phUserToken, CWixString* pszEnvironmentMultiSz);
+	HRESULT Impersonate(LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, DWORD dwSessionId, CWixString* pszEnvironmentMultiSz, IMPERSONATION_CONTEXT* pctxImpersonation);
+
+	void Unimpersonate(IMPERSONATION_CONTEXT* pctxImpersonation);
 
 	HRESULT SetEnvironment(CWixString *pszEnvironmentMultiSz, const ::google::protobuf::Map<std::string, com::panelsw::ca::ObfuscatedString> &customEnv);
 
