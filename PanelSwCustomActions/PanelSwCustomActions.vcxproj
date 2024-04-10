@@ -50,6 +50,9 @@
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
+    <ResourceCompile>
+      <PreprocessorDefinitions>DeferredExePackage=$(OutputPath)..\DeferredExePackage\DeferredExePackage.exe;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -71,6 +74,7 @@
     <ClCompile Include="AccountNames.cpp" />
     <ClCompile Include="CheckRebootRequired.cpp" />
     <ClCompile Include="ConcatFiles.cpp" />
+    <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="FolderPaths.cpp" />
     <ClCompile Include="ForceVersion.cpp" />
     <ClCompile Include="AccountSidSearch.cpp" />
@@ -127,6 +131,7 @@
     <ClInclude Include="RegDataSerializer.h" />
     <ClInclude Include="CustomUninstallKey.h" />
     <ClInclude Include="RegistryXmlParser.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="RestartLocalResources.h" />
     <ClInclude Include="ServiceConfig.h" />
     <ClInclude Include="ShellExecute.h" />
@@ -181,6 +186,12 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="PanelSwCustomActions.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="DeferredExePackage.rc" />
+    <None Include="$(OutputPath)\DeferredExePackage\DeferredExePackage.exe">
+      <Link>Resources\DeferredExePackage.exe</Link>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(WixNativeCATargetsPath)" Condition=" '$(WixNativeCATargetsPath)' != '' " />

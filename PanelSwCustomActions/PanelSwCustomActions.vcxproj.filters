@@ -169,6 +169,9 @@
     <ClCompile Include="ListProcessorFeatures.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DllMain.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\*.pb.*">
@@ -269,11 +272,19 @@
     <ClInclude Include="ConcatFiles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="PanelSwCustomActions.def">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="$(OutputPath)\DeferredExePackage\DeferredExePackage.exe" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="$(IntDir)\Version.rc" />
+    <ResourceCompile Include="DeferredExePackage.rc" />
   </ItemGroup>
 </Project>

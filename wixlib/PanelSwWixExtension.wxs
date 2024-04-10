@@ -321,6 +321,7 @@
     </InstallExecuteSequence>
 
     <UI>
+      <UIRef Id="ExecOnErros"/>
       <ProgressText Action="ExecOnComponent">!(loc.ExecOnComponent)</ProgressText>
       <ProgressText Action="ExecOnComponentRollback">!(loc.ExecOnComponent)</ProgressText>
       <ProgressText Action="ExecOnComponentCommit">!(loc.ExecOnComponent)</ProgressText>

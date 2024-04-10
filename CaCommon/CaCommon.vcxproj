@@ -63,7 +63,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="DeferredActionBase.cpp" />
-    <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="MsiBreak.cpp" />
     <ClCompile Include="RegistryKey.cpp" />
     <ClCompile Include="SqlClientBase.cpp" />
