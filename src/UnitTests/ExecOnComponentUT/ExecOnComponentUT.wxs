@@ -6,17 +6,24 @@
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
 
+    <Property Id="TEST_COMMANDS" Value="1" />
+    <Property Id="TEST_IMPERSONATION" Value="1" />
+    <Property Id="TEST_FAILURE" Value="1" />
+
     <Property Id="MSIFASTINSTALL" Value="1" />
     <Property Id="GOOGLE" Hidden="yes" Value="www.google.com" />
     <Property Id="PACKETS" Hidden="yes" Value="Packets" />
 
-    <Binary Id="TestBinary.exe" SourceFile="..\..\build-common\Win32\protobuf\Release\protoc.exe" />
+    <Binary Id="TestBinary.exe" SourceFile="..\..\..\build-common\Win32\protobuf\Release\protoc.exe" />
 
-    <Property Id="MY_PASSWORD" Hidden="yes" />
+    <Property Id="MY_DOMAIN" Value="." />
+    <Property Id="MY_NAME" Value="test" />
+    <Property Id="MY_PASSWORD" Value="1qaz@WSX" Hidden="yes" />
+    <Property Id="MY_COMMAND" Value='"notepad.exe"' />
     <util:User Domain="[MY_DOMAIN]" Name="[MY_NAME]" Password="[MY_PASSWORD]" Id="me" />
 
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-      <Component>
+      <Component Condition="TEST_COMMANDS=1">
         <File Source="$(sys.SOURCEFILEPATH)" Id="ExecOnComponentUT.wxs" />
         <PanelSW:ExecOn Command="&quot;ping.exe&quot; &quot;[GOOGLE]&quot;" OnInstall="yes" OnInstallRollback="yes" OnReinstall="yes" OnReinstallRollback="yes" OnUninstall="yes" OnUninstallRollback="yes" BeforeStopServices="yes" AfterStopServices="yes" BeforeStartServices="yes" AfterStartServices="yes" WorkingDirectory="[INSTALLFOLDER]">
           <PanelSW:ConsoleOutput Expression="\b[PACKETS]\b" Behavior="prompt" BehaviorOnMatch="yes" PromptText="Packets detected" />
@@ -33,6 +40,22 @@
 
         <PanelSW:ExecOn BinaryKey="TestBinary.exe" Command='"{*TestBinary.exe}" --version' BeforeStartServices="yes" OnInstall="yes" />
         <PanelSW:ExecOn Impersonate="no" User="me" BeforeStartServices="yes" OnInstall="yes" Command="&quot;notepad.exe&quot; &quot;[#ExecOnComponentUT.wxs]&quot;" ErrorHandling="promptAlways" />
+      </Component>
+
+      <Component Condition="TEST_IMPERSONATION=1">
+        <File Source="$(sys.SOURCEFILEPATH)" Id="ExecOnComponentUT1.wxs" Name="ExecOnComponentUT1.wxs" />
+
+        <PanelSW:ExecOn BeforeStartServices="yes" OnInstall="yes" ErrorHandling="prompt" Command='"notepad"' Impersonate='no'/>
+        <PanelSW:ExecOn BeforeStartServices="yes" OnInstall="yes" ErrorHandling="prompt" Command='"notepad"' Impersonate='yes'/>
+        <PanelSW:ExecOn BeforeStartServices="yes" OnInstall="yes" ErrorHandling="prompt" Command='"notepad"' User='me'/>
+        <PanelSW:ExecOn BeforeStartServices="yes" OnInstall="yes" ErrorHandling="prompt" Command='"CMD" /C SET' User='me'/>
+
+      </Component>
+
+      <Component Condition="TEST_FAILURE=1">
+        <File Source="$(sys.SOURCEFILEPATH)" Id="ExecOnComponentUT2.wxs" Name="ExecOnComponentUT2.wxs" />
+
+        <PanelSW:ExecOn BeforeStartServices="yes" OnInstall="yes" ErrorHandling="prompt" Command='"CMD" /c "EXIT 1"' Impersonate='no'/>
       </Component>
     </ComponentGroup>
 

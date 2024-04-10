@@ -20,3 +20,4 @@
 #include <shelutil.h>
 #include <rmutil.h>
 #include <svcutil.h>
+#include <resrutil.h>

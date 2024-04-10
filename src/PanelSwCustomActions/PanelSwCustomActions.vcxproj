@@ -45,6 +45,9 @@
       <SubSystem>Windows</SubSystem>
       <TargetMachine Condition="'$(Platform)' == 'x86'">MachineX86</TargetMachine>
     </Link>
+    <ResourceCompile>
+      <PreprocessorDefinitions>DeferredExePackage=$(OutputPath)..\DeferredExePackage\DeferredExePackage.exe;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ResourceCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)'=='Release'">
     <ClCompile>
@@ -125,6 +128,7 @@
     <ClInclude Include="RegDataSerializer.h" />
     <ClInclude Include="CustomUninstallKey.h" />
     <ClInclude Include="RegistryXmlParser.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="RestartLocalResources.h" />
     <ClInclude Include="ServiceConfig.h" />
     <ClInclude Include="ShellExecute.h" />
@@ -183,6 +187,12 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="PanelSwCustomActions.def" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="DeferredExePackage.rc" />
+    <None Include="$(OutputPath)\DeferredExePackage\DeferredExePackage.exe">
+      <Link>Resources\DeferredExePackage.exe</Link>
+    </None>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Target Name="BuildPoco" BeforeTargets="PrepareForBuild" Condition="!Exists('$(BuildFolderCommon)$(Platform)\poco\lib\$(Configuration)\PocoZipmt.lib')">

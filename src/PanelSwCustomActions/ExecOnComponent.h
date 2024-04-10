@@ -29,12 +29,18 @@ private:
 		HANDLE hUserToken = NULL;
 		BOOL bImpersonated = FALSE;
 		HANDLE hProfile = NULL;
+		HWINSTA hWinStation = NULL;
+		HDESK hDesktop = NULL;
+
+		LPWSTR szExeWrapper = nullptr;
+		LPWSTR szDomain = nullptr;
+		LPWSTR szUser = nullptr;
+		LPWSTR szPassword = nullptr;
 	};
 
 	HRESULT ExecuteOne(const com::panelsw::ca::ExecOnDetails &details);
 
-	HRESULT Impersonate(LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, DWORD dwSessionId, CWixString* pszEnvironmentMultiSz, IMPERSONATION_CONTEXT* pctxImpersonation);
-
+	HRESULT Impersonate(BOOL bImpersonate, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, DWORD dwSessionId, CWixString* pszEnvironmentMultiSz, IMPERSONATION_CONTEXT* pctxImpersonation);
 	void Unimpersonate(IMPERSONATION_CONTEXT* pctxImpersonation);
 
 	HRESULT SetEnvironment(CWixString *pszEnvironmentMultiSz, const ::google::protobuf::Map<std::string, com::panelsw::ca::ObfuscatedString> &customEnv);

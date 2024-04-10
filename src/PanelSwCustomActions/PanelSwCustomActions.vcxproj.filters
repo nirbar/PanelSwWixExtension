@@ -272,10 +272,18 @@
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="PanelSwCustomActions.def">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="..\..\build\x86\bin\Release\DeferredExePackage\DeferredExePackage.exe" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="$(IntDir)\Version.rc" />
+    <ResourceCompile Include="DeferredExePackage.rc" />
   </ItemGroup>
 </Project>

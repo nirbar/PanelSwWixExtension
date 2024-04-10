@@ -6,20 +6,20 @@
   <ItemGroup>
     <!-- x86 -->
     <ProjectReference Include="PanelSwBackendExtension\PanelSwBackendExtension.vcxproj" Properties="Configuration=Release;Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="DeferredExePackage\DeferredExePackage.vcxproj" Properties="Configuration=Release;Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
     <ProjectReference Include="ProtoCaLib\ProtoCaLib.vcxproj" Properties="Configuration=Release;Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
     <ProjectReference Include="CaCommon\CaCommon.vcxproj" Properties="Configuration=Release;Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
     <ProjectReference Include="Dism\Dism.vcxproj" Properties="Configuration=Release;Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
     <ProjectReference Include="PanelSwCustomActions\PanelSwCustomActions.vcxproj" Properties="Configuration=Release;Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
     <ProjectReference Include="PswManagedCA\PswManagedCA.csproj" Properties="Configuration=Release;Platform=x86" Targets="Restore;Build" BuildInParallel="false"/>
-    <ProjectReference Include="DeferredExePackage\DeferredExePackage.vcxproj" Properties="Configuration=Release;Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
 
     <!-- x64 -->
     <ProjectReference Include="PanelSwBackendExtension\PanelSwBackendExtension.vcxproj" Properties="Configuration=Release;Platform=x64" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="DeferredExePackage\DeferredExePackage.vcxproj" Properties="Configuration=Release;Platform=x64" Targets="Restore;Build" BuildInParallel="false"/>
     <ProjectReference Include="ProtoCaLib\ProtoCaLib.vcxproj" Properties="Configuration=Release;Platform=x64" Targets="Restore;Build" BuildInParallel="false"/>
     <ProjectReference Include="CaCommon\CaCommon.vcxproj" Properties="Configuration=Release;Platform=x64" Targets="Restore;Build" BuildInParallel="false"/>
     <ProjectReference Include="Dism\Dism.vcxproj" Properties="Configuration=Release;Platform=x64" Targets="Restore;Build" BuildInParallel="false"/>
     <ProjectReference Include="PanelSwCustomActions\PanelSwCustomActions.vcxproj" Properties="Configuration=Release;Platform=x64" Targets="Restore;Build" BuildInParallel="false"/>
-    <ProjectReference Include="DeferredExePackage\DeferredExePackage.vcxproj" Properties="Configuration=Release;Platform=x64" Targets="Restore;Build" BuildInParallel="false"/>
     <ProjectReference Include="PswManagedCA\PswManagedCA.csproj" Properties="Configuration=Release;Platform=x64" Targets="Restore;Build" BuildInParallel="false"/>
 
     <!-- WiX -->

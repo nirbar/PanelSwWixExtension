@@ -32,5 +32,6 @@ message ExecOnDetails{
 	bytes password = 11;
 
 	// Impersonate current user
-	uint32 sessionId = 12;
+	bool impersonate = 12;
+	uint32 sessionId = 13;
 }

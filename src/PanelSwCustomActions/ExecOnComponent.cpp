@@ -47,6 +47,7 @@ enum Flags
 	Impersonate = 2 * ASync,
 };
 
+extern HMODULE g_hInstCADLL;
 static HRESULT ScheduleExecution(LPCWSTR szId, const CWixString& szCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, CExecOnComponent::ExitCodeMap *pExitCodeMap, std::vector<ConsoleOuputRemap> *pConsoleOuput, CExecOnComponent::EnvironmentMap *pEnv, int nFlags, int errorHandling, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart);
 
 extern "C" UINT __stdcall ExecuteCommand(MSIHANDLE hInstall)
@@ -532,6 +533,7 @@ HRESULT CExecOnComponent::AddExec(const CWixString &szCommand, LPCWSTR szWorking
 		pDetails->set_workingdirectory(szWorkingDirectory, WSTR_BYTE_SIZE(szWorkingDirectory));
 	}
 	pDetails->set_async(nFlags & Flags::ASync);
+	pDetails->set_impersonate(nFlags & Flags::Impersonate);
 	pDetails->set_errorhandling(errorHandling);
 	
 	if (pExitCodeMap)
@@ -570,11 +572,8 @@ HRESULT CExecOnComponent::AddExec(const CWixString &szCommand, LPCWSTR szWorking
 		}
 	}
 
-	if ((nFlags & Flags::Impersonate) == Flags::Impersonate)
-	{
-		bRes = ::ProcessIdToSessionId(::GetCurrentProcessId(), &dwSessionId);
-		ExitOnNullWithLastError(bRes, hr, "Failed to get current user's session id");
-	}
+	bRes = ::ProcessIdToSessionId(::GetCurrentProcessId(), &dwSessionId);
+	ExitOnNullWithLastError(bRes, hr, "Failed to get current user's session id");
 	pDetails->set_sessionid(dwSessionId); // Defaults to WTS_CURRENT_SESSION (= -1).
 
 	pAny = pCmd->mutable_details();
@@ -618,7 +617,7 @@ HRESULT CExecOnComponent::ExecuteOne(const com::panelsw::ca::ExecOnDetails& deta
 	LPCWSTR szUser = nullptr;
 	LPCWSTR szPassword = nullptr;
 	CWixString szLog;
-	HANDLE hStdOut = NULL;
+	HANDLE hStdOut = INVALID_HANDLE_VALUE;
 	HANDLE hProc = NULL;
 	PMSIHANDLE hActionData;
 	CWixString szEnvironmentMultiSz;
@@ -632,9 +631,18 @@ HRESULT CExecOnComponent::ExecuteOne(const com::panelsw::ca::ExecOnDetails& deta
 	{
 		szWorkingDirectory = (LPCWSTR)(LPVOID)details.workingdirectory().data();
 	}
-	szDomain = (LPCWSTR)(LPVOID)details.domain().data();
-	szUser = (LPCWSTR)(LPVOID)details.user().data();
-	szPassword = (LPCWSTR)(LPVOID)details.password().data();
+	if (details.domain().size() > 0)
+	{
+		szDomain = (LPCWSTR)(LPVOID)details.domain().data();
+	}
+	if (details.user().size() > 0)
+	{
+		szUser = (LPCWSTR)(LPVOID)details.user().data();
+	}
+	if (details.password().size() > 0)
+	{
+		szPassword = (LPCWSTR)(LPVOID)details.password().data();
+	}
 	_errorPrompter.SetErrorHandling((PSW_ERROR_HANDLING)details.errorhandling());
 	_alwaysPrompter.SetErrorHandling((PSW_ERROR_HANDLING)details.errorhandling());
 
@@ -648,7 +656,7 @@ HRESULT CExecOnComponent::ExecuteOne(const com::panelsw::ca::ExecOnDetails& deta
 	}
 
 	// We only impersonate for the duration of the process creation because I've encountered crashes when logging impersonated
-	hr = Impersonate(szDomain, szUser, szPassword, details.sessionid(), &szEnvironmentMultiSz, &ctxImpersonation);
+	hr = Impersonate(details.impersonate(), szDomain, szUser, szPassword, details.sessionid(), &szEnvironmentMultiSz, &ctxImpersonation);
 	ExitOnFailure(hr, "Failed to impersonate");
 
 	hr = SetEnvironment(&szEnvironmentMultiSz, details.environment());
@@ -662,8 +670,6 @@ HRESULT CExecOnComponent::ExecuteOne(const com::panelsw::ca::ExecOnDetails& deta
 		ExitOnFailure(hr, "Failed to launch command '%ls'", (LPCWSTR)szCommand);
 		ExitFunction();
 	}
-
-	Unimpersonate(&ctxImpersonation);
 
 	if (SUCCEEDED(hr))
 	{
@@ -720,14 +726,8 @@ HRESULT CExecOnComponent::ExecuteOne(const com::panelsw::ca::ExecOnDetails& deta
 
 LExit:
 	Unimpersonate(&ctxImpersonation);
-	if (hStdOut && (hStdOut != INVALID_HANDLE_VALUE))
-	{
-		ReleaseHandle(hStdOut);
-	}
-	if (hProc && (hProc != INVALID_HANDLE_VALUE))
-	{
-		ReleaseHandle(hProc);
-	}
+	ReleaseFileHandle(hStdOut);
+	ReleaseHandle(hProc);
 
 	return hr;
 }
@@ -1061,10 +1061,8 @@ HRESULT CExecOnComponent::LaunchProcess(IMPERSONATION_CONTEXT* pctxImpersonation
 
 	bRes = ::DuplicateHandle(::GetCurrentProcess(), hOutTemp, ::GetCurrentProcess(), &hOutRead, 0, FALSE, DUPLICATE_SAME_ACCESS);
 	ExitOnNullWithLastError((bRes && hOutRead && (hOutRead != INVALID_HANDLE_VALUE)), hr, "Failed to duplicate named pipe for stdout reader");
-	::CloseHandle(hOutTemp);
-	hOutTemp = INVALID_HANDLE_VALUE;
 
-	hInTemp = ::CreateNamedPipe(szStdInPipeName, PIPE_ACCESS_OUTBOUND, PIPE_TYPE_BYTE | PIPE_WAIT, 1, OUTPUT_BUFFER_SIZE, OUTPUT_BUFFER_SIZE, NMPWAIT_USE_DEFAULT_WAIT, &sa);
+	hInTemp = ::CreateNamedPipe(szStdInPipeName, PIPE_ACCESS_OUTBOUND, PIPE_TYPE_MESSAGE | PIPE_NOWAIT, 1, OUTPUT_BUFFER_SIZE, OUTPUT_BUFFER_SIZE, NMPWAIT_USE_DEFAULT_WAIT, &sa);
 	ExitOnNullWithLastError((hInTemp && (hInTemp != INVALID_HANDLE_VALUE)), hr, "Failed to create named pipe for stdin writer");
 
 	hInRead = ::CreateFile(szStdInPipeName, FILE_READ_DATA, 0, &sa, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
@@ -1072,8 +1070,6 @@ HRESULT CExecOnComponent::LaunchProcess(IMPERSONATION_CONTEXT* pctxImpersonation
 
 	bRes = ::DuplicateHandle(::GetCurrentProcess(), hInTemp, ::GetCurrentProcess(), &hInWrite, 0, FALSE, DUPLICATE_SAME_ACCESS);
 	ExitOnNullWithLastError((hInWrite && (hInWrite != INVALID_HANDLE_VALUE)), hr, "Failed to duplicate named pipe for stdin writer");
-	::CloseHandle(hInTemp);
-	hInTemp = INVALID_HANDLE_VALUE;
 
 	si.cb = sizeof(STARTUPINFOW);
 	si.dwFlags = STARTF_USESTDHANDLES;
@@ -1083,7 +1079,30 @@ HRESULT CExecOnComponent::LaunchProcess(IMPERSONATION_CONTEXT* pctxImpersonation
 
 	if (pctxImpersonation->hUserToken)
 	{
-		bRes = ::CreateProcessAsUser(pctxImpersonation->hUserToken, nullptr, szCommand, nullptr, nullptr, TRUE, ::GetPriorityClass(::GetCurrentProcess()) | CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT, (LPVOID)rgszEnvironment, szWorkingDirectory, &si, &pi);
+		if (pctxImpersonation->szExeWrapper && *pctxImpersonation->szExeWrapper)
+		{
+			DWORD dwPasswordSize = (pctxImpersonation->szPassword && *pctxImpersonation->szPassword) ? sizeof(WCHAR) * wcslen(pctxImpersonation->szPassword) : 0;
+			DWORD dwWritten = 0;
+
+			hr = szCmdLIne.Format(L"\"%ls\" --domain \"%ls\" --user \"%ls\" --skip-until-here %ls", pctxImpersonation->szExeWrapper, pctxImpersonation->szDomain ? pctxImpersonation->szDomain : L"", pctxImpersonation->szUser, szCommand);
+			ExitOnFailure(hr, "Failed to format string");
+
+			// Write password, even if there's no password (write zero bytes)
+			do 
+			{
+				DWORD dwCurrWritten = 0;
+
+				bRes = ::WriteFile(hInWrite, ((LPCBYTE)pctxImpersonation->szPassword) + dwWritten, dwPasswordSize - dwWritten, &dwCurrWritten, nullptr);
+				ExitOnNullWithLastError(bRes, hr, "Failed to write password to pipe");
+
+				dwWritten += dwCurrWritten;
+			} 
+			while (dwWritten < dwPasswordSize);
+
+			szCommand = (LPWSTR)szCmdLIne;
+		}
+
+		bRes = ::CreateProcessAsUserW(pctxImpersonation->hUserToken, nullptr, szCommand, nullptr, nullptr, TRUE, ::GetPriorityClass(::GetCurrentProcess()) | CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT, (LPVOID)rgszEnvironment, szWorkingDirectory, &si, &pi);
 		ExitOnNullWithLastError(bRes, hr, "Failed to create process");
 	}
 	else
@@ -1118,54 +1137,56 @@ LExit:
 	return hr;
 }
 
-HRESULT CExecOnComponent::Impersonate(LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, DWORD dwSessionId, CWixString* pszEnvironmentMultiSz, IMPERSONATION_CONTEXT *pctxImpersonate)
+HRESULT CExecOnComponent::Impersonate(BOOL bImpersonate, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, DWORD dwSessionId, CWixString* pszEnvironmentMultiSz, IMPERSONATION_CONTEXT *pctxImpersonate)
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
-	BOOL bImpersonated = FALSE;
-	HANDLE hUserToken = NULL;
 	PROFILEINFO profileInfo = {};
 	USER_INFO_4* pUserInfo4 = nullptr;
 	LPVOID pEnvironment = nullptr;
 	LPWSTR szSessionUserName = nullptr;
+	HANDLE hTempFile = INVALID_HANDLE_VALUE;
 	CWixString szTempUserName;
+	LPVOID pbDeferredExePackage = nullptr;
+	DWORD cbDeferredExePackage = 0;
 
 	ZeroMemory(&profileInfo, sizeof(profileInfo));
 	Unimpersonate(pctxImpersonate);
 
+	// Impersonate a user?
+	if (szUser && *szUser)
+	{
+		// This didn't work: https://learn.microsoft.com/en-us/previous-versions/aa379608(v=vs.85)
+		//  - It launches the process, which fails to execute with code 0xC00000142
+
+		// See https://learn.microsoft.com/en-us/archive/blogs/winsdk/launching-an-interactive-process-from-windows-service-in-windows-vista-and-later
+		//  - Launch DeferredExePackage.exe with user, domain, password (send on stdin, so it isn't visible on command line)
+		//  - DeferredExePackage.exe calls CreateProcessWithLogonW(...)
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Impersonating '%ls'", szUser);
+
+		hr = szTempUserName.Copy(szUser);
+		ExitOnFailure(hr, "Failed to copy user name");
+
+		bRes = ::LogonUser(szUser, szDomain, szPassword, LOGON32_LOGON_INTERACTIVE, LOGON32_PROVIDER_DEFAULT, &pctxImpersonate->hUserToken);
+		ExitOnNullWithLastError(bRes, hr, "Failed logging-in as user '%ls'", szUser);
+	}
 	// Impersonate current user?
-	if (dwSessionId != WTS_CURRENT_SESSION)
+	else if (bImpersonate)
 	{
 		DWORD dwNameSize = 0;
 
 		bRes = ::WTSQuerySessionInformation(NULL, dwSessionId, WTS_INFO_CLASS::WTSUserName, &szSessionUserName, &dwNameSize);
 		ExitOnNullWithLastError(bRes, hr, "Failed to get user name");
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Impersonating '%ls'", szSessionUserName);
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Impersonating '%ls'", szSessionUserName);
 
-		hr =  szTempUserName.Copy(szSessionUserName);
+		hr = szTempUserName.Copy(szSessionUserName);
 		ExitOnFailure(hr, "Failed to copy user name");
 
-		bRes = ::WTSQueryUserToken(dwSessionId, &hUserToken);
+		bRes = ::WTSQueryUserToken(dwSessionId, &pctxImpersonate->hUserToken);
 		ExitOnNullWithLastError(bRes, hr, "Failed to get user token");
 	}
-	// Imersonate another user?
-	else if (szUser && *szUser)
-	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Impersonating '%ls'", szUser);
 
-		hr = szTempUserName.Copy(szUser);
-		ExitOnFailure(hr, "Failed to copy user name");
-
-		bRes = ::LogonUser(szUser, szDomain, szPassword, LOGON32_LOGON_INTERACTIVE, LOGON32_PROVIDER_DEFAULT, &hUserToken);
-		ExitOnNullWithLastError(bRes, hr, "Failed logging-in as user");
-	}
-	// Not impersonating
-	else
-	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Running with no impersonation");
-	}
-
-	if (hUserToken)
+	if (pctxImpersonate->hUserToken)
 	{
 		profileInfo.dwSize = sizeof(profileInfo);
 		profileInfo.lpUserName = (LPWSTR)szTempUserName;
@@ -1175,13 +1196,15 @@ HRESULT CExecOnComponent::Impersonate(LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR 
 			profileInfo.lpProfilePath = pUserInfo4->usri4_profile;
 		}
 
-		if (!::LoadUserProfile(hUserToken, &profileInfo))
+		if (!::LoadUserProfile(pctxImpersonate->hUserToken, &profileInfo))
 		{
 			WcaLogError(HRESULT_FROM_WIN32(::GetLastError()), "Failed to load user profile, so running without it");
 		}
+		pctxImpersonate->hProfile = profileInfo.hProfile;
+		profileInfo.hProfile = NULL;
 	}
 
-	bRes = ::CreateEnvironmentBlock(&pEnvironment, hUserToken, FALSE);
+	bRes = ::CreateEnvironmentBlock(&pEnvironment, pctxImpersonate->hUserToken, FALSE);
 	ExitOnNullWithLastError(bRes, hr, "Failed to get environment block");
 
 	for (LPCWSTR sz = (LPCWSTR)pEnvironment; sz && *sz; sz += 1 + wcslen(sz))
@@ -1190,22 +1213,42 @@ HRESULT CExecOnComponent::Impersonate(LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR 
 		ExitOnFailure(hr, "Failed to insert string to array");
 	}
 
-	pctxImpersonate->bImpersonated = bImpersonated;
-	pctxImpersonate->hUserToken = hUserToken;
-	pctxImpersonate->hProfile = profileInfo.hProfile;
-	hUserToken = NULL;
-	profileInfo.hProfile = NULL;
+	if (szUser && *szUser)
+	{
+		ReleaseHandle(pctxImpersonate->hUserToken);
+
+		hr = StrAllocString(&pctxImpersonate->szUser, szUser, 0);
+		ExitOnFailure(hr, "Failed to copy string");
+		if (szPassword && *szPassword)
+		{
+			hr = StrAllocString(&pctxImpersonate->szPassword, szPassword, 0);
+			ExitOnFailure(hr, "Failed to copy string");
+		}
+		if (szDomain && *szDomain)
+		{
+			hr = StrAllocString(&pctxImpersonate->szDomain, szDomain, 0);
+			ExitOnFailure(hr, "Failed to copy string");
+		}
+
+		hr = PathCreateTempFile(nullptr, L"ExecOn%u.exe", INFINITE, L"Exec", FILE_ATTRIBUTE_NORMAL, &pctxImpersonate->szExeWrapper, &hTempFile);
+		ExitOnFailure(hr, "Failed to create temporary file");
+
+		hr = ResReadData(g_hInstCADLL, "DEFERREDEXEPACKAGE.EXE", &pbDeferredExePackage, &cbDeferredExePackage);
+		ExitOnFailure(hr, "Failed to load DeferredExePackage.exe resource");
+
+		hr = FileWriteHandle(hTempFile, (LPBYTE)pbDeferredExePackage, cbDeferredExePackage);
+		ExitOnFailure(hr, "Failed to write DeferredExePackage.exe");
+
+		bRes = ::WTSQueryUserToken(dwSessionId, &pctxImpersonate->hUserToken);
+		ExitOnNullWithLastError(bRes, hr, "Failed to get user token");
+	}
 
 LExit:
+	ReleaseFileHandle(hTempFile);
 	if (pEnvironment)
 	{
 		::DestroyEnvironmentBlock(pEnvironment);
 		pEnvironment = nullptr;
-	}
-	if (hUserToken && profileInfo.hProfile)
-	{
-		profileInfo.lpUserName = nullptr;
-		::UnloadUserProfile(hUserToken, profileInfo.hProfile);
 	}
 	if (szSessionUserName)
 	{
@@ -1217,11 +1260,16 @@ LExit:
 		::NetApiBufferFree(pUserInfo4);
 		pUserInfo4 = nullptr;
 	}
-	return SUCCEEDED(hr) ? bImpersonated ? S_OK : S_FALSE : hr;
+	return hr;
 }
 
 void CExecOnComponent::Unimpersonate(IMPERSONATION_CONTEXT* pctxImpersonate)
 {
+	if (pctxImpersonate->szExeWrapper && *pctxImpersonate->szExeWrapper)
+	{
+		FileEnsureDelete(pctxImpersonate->szExeWrapper);
+		ReleaseNullStr(pctxImpersonate->szExeWrapper);
+	}
 	if (pctxImpersonate->hUserToken && pctxImpersonate->hProfile)
 	{
 		::UnloadUserProfile(pctxImpersonate->hUserToken, pctxImpersonate->hProfile);
@@ -1233,5 +1281,13 @@ void CExecOnComponent::Unimpersonate(IMPERSONATION_CONTEXT* pctxImpersonate)
 		::RevertToSelf();
 		pctxImpersonate->bImpersonated = FALSE;
 	}
+	if (pctxImpersonate->hDesktop)
+	{
+		::CloseDesktop(pctxImpersonate->hDesktop);
+		pctxImpersonate->hDesktop = NULL;
+	}
 	ReleaseHandle(pctxImpersonate->hUserToken);
+	ReleaseNullStr(pctxImpersonate->szUser);
+	ReleaseNullStr(pctxImpersonate->szDomain);
+	ReleaseNullStrSecure(pctxImpersonate->szPassword);
 }
