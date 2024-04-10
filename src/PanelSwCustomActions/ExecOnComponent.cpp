@@ -1215,6 +1215,11 @@ HRESULT CExecOnComponent::Impersonate(BOOL bImpersonate, LPCWSTR szDomain, LPCWS
 
 	if (szUser && *szUser)
 	{
+		if (pctxImpersonate->hProfile)
+		{
+			::UnloadUserProfile(pctxImpersonate->hUserToken, pctxImpersonate->hProfile);
+			pctxImpersonate->hProfile = NULL;
+		}
 		ReleaseHandle(pctxImpersonate->hUserToken);
 
 		hr = StrAllocString(&pctxImpersonate->szUser, szUser, 0);
