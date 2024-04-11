@@ -1073,21 +1073,6 @@ namespace PanelSw.Wix.Extensions
                             Core.OnMessage(WixErrors.IllegalAttributeValueWithIllegalList(sourceLineNumbers, element.LocalName, attrib.LocalName, val, "deferred, commit, rollback"));
                             break;
                         }
-                        switch (executeType)
-                        {
-                            case Microsoft.Tools.WindowsInstallerXml.Serialize.CustomAction.ExecuteType.deferred:
-                                executeTypeVal = 0x00000400;
-                                break;
-                            case Microsoft.Tools.WindowsInstallerXml.Serialize.CustomAction.ExecuteType.rollback:
-                                executeTypeVal = 0x00000400 | 0x00000100;
-                                break;
-                            case Microsoft.Tools.WindowsInstallerXml.Serialize.CustomAction.ExecuteType.commit:
-                                executeTypeVal = 0x00000400 | 0x00000200;
-                                break;
-                            default:
-                                Core.OnMessage(WixErrors.IllegalAttributeValueWithIllegalList(sourceLineNumbers, element.LocalName, attrib.LocalName, val, "deferred, commit, rollback"));
-                                break;
-                        }
                         break;
 
                     default:
@@ -1103,6 +1088,21 @@ namespace PanelSw.Wix.Extensions
             if (string.IsNullOrEmpty(after) == string.IsNullOrEmpty(before))
             {
                 Core.OnMessage(WixErrors.NeedSequenceBeforeOrAfter(sourceLineNumbers, element.LocalName));
+            }
+            switch (executeType)
+            {
+                case Microsoft.Tools.WindowsInstallerXml.Serialize.CustomAction.ExecuteType.deferred:
+                    executeTypeVal = 0x00000400;
+                    break;
+                case Microsoft.Tools.WindowsInstallerXml.Serialize.CustomAction.ExecuteType.rollback:
+                    executeTypeVal = 0x00000400 | 0x00000100;
+                    break;
+                case Microsoft.Tools.WindowsInstallerXml.Serialize.CustomAction.ExecuteType.commit:
+                    executeTypeVal = 0x00000400 | 0x00000200;
+                    break;
+                default:
+                    Core.OnMessage(WixErrors.IllegalAttributeValueWithIllegalList(sourceLineNumbers, element.LocalName, "Execute", executeType.ToString(), "deferred, commit, rollback"));
+                    break;
             }
 
             if (Core.EncounteredError)
@@ -1168,6 +1168,12 @@ namespace PanelSw.Wix.Extensions
             deferredCASched[4] = before;
             deferredCASched[5] = after;
             deferredCASched[6] = 0; // not overridable
+
+            // UI message templates
+            Row actionTextRow = Core.CreateRow(sourceLineNumbers, "ActionText");
+            actionTextRow[0] = id;
+            actionTextRow[1] = "!(loc.ExecOnComponent)";
+            actionTextRow[2] = "!(loc.ExecOnComponentTemplate)";
         }
 
         private void ParseWebsiteConfigElement(XmlElement element, string component)
