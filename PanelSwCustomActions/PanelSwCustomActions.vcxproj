@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" InitialTargets="EnsureWixToolsetInstalled" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="..\packages\TidyBuild.1.4.1\build\TidyBuild.props" Condition="Exists('..\packages\TidyBuild.1.4.1\build\TidyBuild.props')" />
+  <Import Project="..\packages\TidyBuild.1.5.2\build\TidyBuild.props" Condition="Exists('..\packages\TidyBuild.1.5.2\build\TidyBuild.props')" />
   <ItemGroup Label="ProjectConfigurations">
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
@@ -193,6 +193,11 @@
       <Link>Resources\DeferredExePackage.exe</Link>
     </None>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DeferredExePackage\DeferredExePackage.vcxproj">
+      <Project>{b729fb3c-25cf-4216-940d-69ea78779cd7}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Import Project="$(WixNativeCATargetsPath)" Condition=" '$(WixNativeCATargetsPath)' != '' " />
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.NativeCA.targets" Condition=" '$(WixNativeCATargetsPath)' == '' AND Exists('$(MSBuildExtensionsPath32)\Microsoft\WiX\v3.x\Wix.NativeCA.targets') " />
@@ -207,14 +212,14 @@
   </Target>
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
-    <Import Project="..\packages\TidyBuild.1.4.1\build\TidyBuild.targets" Condition="Exists('..\packages\TidyBuild.1.4.1\build\TidyBuild.targets')" />
+    <Import Project="..\packages\TidyBuild.1.5.2\build\TidyBuild.targets" Condition="Exists('..\packages\TidyBuild.1.5.2\build\TidyBuild.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets'))" />
-    <Error Condition="!Exists('..\packages\TidyBuild.1.4.1\build\TidyBuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.4.1\build\TidyBuild.props'))" />
-    <Error Condition="!Exists('..\packages\TidyBuild.1.4.1\build\TidyBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.4.1\build\TidyBuild.targets'))" />
+    <Error Condition="!Exists('..\packages\TidyBuild.1.5.2\build\TidyBuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.5.2\build\TidyBuild.props'))" />
+    <Error Condition="!Exists('..\packages\TidyBuild.1.5.2\build\TidyBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.5.2\build\TidyBuild.targets'))" />
   </Target>
 </Project>

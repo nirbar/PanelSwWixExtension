@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
-  <Import Project="..\packages\TidyBuild.1.4.1\build\TidyBuild.props" Condition="Exists('..\packages\TidyBuild.1.4.1\build\TidyBuild.props')" />
+  <Import Project="..\packages\TidyBuild.1.5.2\build\TidyBuild.props" Condition="Exists('..\packages\TidyBuild.1.5.2\build\TidyBuild.props')" />
   <PropertyGroup>
     <ProjectGuid>{b6ac15a8-5ef9-4f89-accc-3f5c3fc04bce}</ProjectGuid>
     <OutputName>PanelSwWixExtension</OutputName>
@@ -95,8 +95,8 @@
       <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets'))" />
-    <Error Condition="!Exists('..\packages\TidyBuild.1.4.1\build\TidyBuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.4.1\build\TidyBuild.props'))" />
-    <Error Condition="!Exists('..\packages\TidyBuild.1.4.1\build\TidyBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.4.1\build\TidyBuild.targets'))" />
+    <Error Condition="!Exists('..\packages\TidyBuild.1.5.2\build\TidyBuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.5.2\build\TidyBuild.props'))" />
+    <Error Condition="!Exists('..\packages\TidyBuild.1.5.2\build\TidyBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.5.2\build\TidyBuild.targets'))" />
   </Target>
-  <Import Project="..\packages\TidyBuild.1.4.1\build\TidyBuild.targets" Condition="Exists('..\packages\TidyBuild.1.4.1\build\TidyBuild.targets')" />
+  <Import Project="..\packages\TidyBuild.1.5.2\build\TidyBuild.targets" Condition="Exists('..\packages\TidyBuild.1.5.2\build\TidyBuild.targets')" />
 </Project>
