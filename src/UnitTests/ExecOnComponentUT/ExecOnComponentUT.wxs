@@ -45,11 +45,10 @@
       <Component Condition="TEST_IMPERSONATION=1">
         <File Source="$(sys.SOURCEFILEPATH)" Id="ExecOnComponentUT1.wxs" Name="ExecOnComponentUT1.wxs" />
 
-        <PanelSW:ExecOn BeforeStartServices="yes" OnInstall="yes" ErrorHandling="prompt" Command='"notepad"' Impersonate='no'/>
-        <PanelSW:ExecOn BeforeStartServices="yes" OnInstall="yes" ErrorHandling="prompt" Command='"notepad"' Impersonate='yes'/>
-        <PanelSW:ExecOn BeforeStartServices="yes" OnInstall="yes" ErrorHandling="prompt" Command='"notepad"' User='me'/>
+        <PanelSW:ExecOn BeforeStartServices="yes" OnInstall="yes" ErrorHandling="prompt" Command='"CMD" /C SET' Impersonate='no'/>
+        <PanelSW:ExecOn BeforeStartServices="yes" OnInstall="yes" ErrorHandling="prompt" Command='"CMD" /C SET' Impersonate='yes'/>
         <PanelSW:ExecOn BeforeStartServices="yes" OnInstall="yes" ErrorHandling="prompt" Command='"CMD" /C SET' User='me'/>
-
+        <PanelSW:ExecOn BeforeStartServices="yes" OnInstall="yes" ErrorHandling="prompt" Command='"CMD" /C SET' User='me'/>
       </Component>
 
       <Component Condition="TEST_FAILURE=1">
