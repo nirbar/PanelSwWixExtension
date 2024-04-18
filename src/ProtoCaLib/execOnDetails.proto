@@ -33,5 +33,4 @@ message ExecOnDetails{
 
 	// Impersonate current user
 	bool impersonate = 12;
-	uint32 sessionId = 13;
 }

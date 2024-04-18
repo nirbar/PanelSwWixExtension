@@ -1,5 +1,5 @@
 <Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension">
-  <Package Name="AlwaysOverwriteFileUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}" InstallerVersion="200">
+  <Package Name="ForceVersionUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}" InstallerVersion="200">
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." AllowSameVersionUpgrades="yes" Schedule="afterInstallExecute"/>
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
@@ -17,7 +17,7 @@
         </File>
       </Component>
       <Component>
-        <File Id="PanelSwWixExtension.dll" Source="$(sys.SOURCEFILEDIR)..\..\build\Any CPU\bin\$(var.Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll">
+        <File Id="PanelSwWixExtension.dll" Source="$(sys.SOURCEFILEDIR)..\..\..\build\AnyCPU\bin\$(var.Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll">
           <PanelSW:ForceVersion />
         </File>
       </Component>
