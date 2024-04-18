@@ -525,7 +525,6 @@ HRESULT CExecOnComponent::AddExec(const CWixString& szCommand, LPCWSTR szWorking
 	::com::panelsw::ca::Command* pCmd = nullptr;
 	ExecOnDetails* pDetails = nullptr;
 	::std::string* pAny = nullptr;
-	DWORD dwSessionId = WTS_CURRENT_SESSION;
 	bool bRes = true;
 
 	hr = AddCommand("CExecOnComponent", &pCmd);
@@ -579,10 +578,6 @@ HRESULT CExecOnComponent::AddExec(const CWixString& szCommand, LPCWSTR szWorking
 			pConsole->set_errorhandling(pConsoleOuput->at(i).errorhandling());
 		}
 	}
-
-	bRes = ::ProcessIdToSessionId(::GetCurrentProcessId(), &dwSessionId);
-	ExitOnNullWithLastError(bRes, hr, "Failed to get current user's session id");
-	pDetails->set_sessionid(dwSessionId); // Defaults to WTS_CURRENT_SESSION (= -1).
 
 	pAny = pCmd->mutable_details();
 	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
@@ -664,7 +659,7 @@ HRESULT CExecOnComponent::ExecuteOne(const com::panelsw::ca::ExecOnDetails& deta
 	}
 
 	// We only impersonate for the duration of the process creation because I've encountered crashes when logging impersonated
-	hr = Impersonate(details.impersonate(), szDomain, szUser, szPassword, details.sessionid(), &szEnvironmentMultiSz, &ctxImpersonation);
+	hr = Impersonate(details.impersonate(), szDomain, szUser, szPassword, &szEnvironmentMultiSz, &ctxImpersonation);
 	ExitOnFailure(hr, "Failed to impersonate");
 
 	hr = SetEnvironment(&szEnvironmentMultiSz, details.environment());
@@ -1144,7 +1139,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CExecOnComponent::Impersonate(BOOL bImpersonate, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, DWORD dwSessionId, CWixString* pszEnvironmentMultiSz, IMPERSONATION_CONTEXT *pctxImpersonate)
+HRESULT CExecOnComponent::Impersonate(BOOL bImpersonate, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, CWixString* pszEnvironmentMultiSz, IMPERSONATION_CONTEXT *pctxImpersonate)
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -1182,14 +1177,19 @@ HRESULT CExecOnComponent::Impersonate(BOOL bImpersonate, LPCWSTR szDomain, LPCWS
 	{
 		DWORD dwNameSize = 0;
 
-		bRes = ::WTSQuerySessionInformation(NULL, dwSessionId, WTS_INFO_CLASS::WTSUserName, &szSessionUserName, &dwNameSize);
+		bRes = ::WTSQuerySessionInformation(WTS_CURRENT_SERVER_HANDLE, WTS_CURRENT_SESSION, WTS_INFO_CLASS::WTSUserName, &szSessionUserName, &dwNameSize);
 		ExitOnNullWithLastError(bRes, hr, "Failed to get user name");
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Impersonating '%ls'", szSessionUserName);
 
 		hr = szTempUserName.Copy(szSessionUserName);
 		ExitOnFailure(hr, "Failed to copy user name");
 
-		bRes = ::WTSQueryUserToken(dwSessionId, &pctxImpersonate->hUserToken);
+		bRes = ::WTSQueryUserToken(WTS_CURRENT_SESSION, &pctxImpersonate->hUserToken);
+		if (!bRes && (!szSessionUserName || !*szSessionUserName))
+		{
+			bRes = TRUE;
+			WcaLogError(HRESULT_FROM_WIN32(::GetLastError()), "Can't impersonate because we're running with no client logged on");
+		}
 		ExitOnNullWithLastError(bRes, hr, "Failed to get user token");
 	}
 
@@ -1251,7 +1251,7 @@ HRESULT CExecOnComponent::Impersonate(BOOL bImpersonate, LPCWSTR szDomain, LPCWS
 		hr = FileWriteHandle(hTempFile, (LPBYTE)pbDeferredExePackage, cbDeferredExePackage);
 		ExitOnFailure(hr, "Failed to write DeferredExePackage.exe");
 
-		bRes = ::WTSQueryUserToken(dwSessionId, &pctxImpersonate->hUserToken);
+		bRes = ::WTSQueryUserToken(WTS_CURRENT_SESSION, &pctxImpersonate->hUserToken);
 		ExitOnNullWithLastError(bRes, hr, "Failed to get user token");
 	}
 
