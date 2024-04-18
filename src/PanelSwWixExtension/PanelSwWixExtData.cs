@@ -1,4 +1,5 @@
 using PanelSw.Wix.Extensions.Symbols;
+using System;
 using System.Reflection;
 using WixToolset.Data;
 using WixToolset.Extensibility;
@@ -7,6 +8,7 @@ namespace PanelSw.Wix.Extensions
 {
     internal class PanelSwWixExtData : BaseExtensionData
     {
+        [Obsolete]
         public override string DefaultCulture => "en-US";
 
         private readonly PanelSwWixPreprocessor _preprocessor;

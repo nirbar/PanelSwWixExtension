@@ -1,4 +1,4 @@
-<WixLocalization Culture="en-us" xmlns="http://wixtoolset.org/schemas/v4/wxl">
+<WixLocalization Culture="en-us" ExtensionDefaultCulture="yes" xmlns="http://wixtoolset.org/schemas/v4/wxl">
   <String Overridable="yes" Id="CustomUninstallKey" Value="Writing additional registry values" />
   <String Overridable="yes" Id="RemoveRegistryValue" Value="Removing additional registry values" />
   <String Overridable="yes" Id="Telemetry" Value="Posting telemetry data" />
