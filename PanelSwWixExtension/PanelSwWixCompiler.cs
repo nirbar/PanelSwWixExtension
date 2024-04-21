@@ -1118,7 +1118,7 @@ namespace PanelSw.Wix.Extensions
             // 1. Set PSW_ExecuteCommand property
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "Binary", "PanelSwCustomActions.dll");
             Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "Property", "PSW_ExecuteCommand");
-            JObject json = JObject.FromObject(new { Id = id, Command = command, WorkingFolder = workingFolder, Async = isAsync, ErrorHandling = (int)promptOnError });
+            JObject json = JObject.FromObject(new { Id = id, Command = command, WorkingFolder = workingFolder, Async = isAsync, Impersonate = impersonate, ErrorHandling = (int)promptOnError });
             string cad = json.ToString();
             cad = Regex.Replace(cad, @"([\[\]\{\}])", @"[\$1]");
 
@@ -1157,7 +1157,7 @@ namespace PanelSw.Wix.Extensions
             // 3. PanelSwCustomActions::CommonDeferred
             Row deferredCA = Core.CreateRow(sourceLineNumbers, "CustomAction");
             deferredCA[0] = id;
-            deferredCA[1] = 0x00000001/*Dll*/ | 0x00002000 /*Hidden*/ | (impersonate ? 0 : 0x00000800) | executeTypeVal;
+            deferredCA[1] = 0x00000001/*Dll*/ | 0x00002000 /*Hidden*/ | 0x00000800 /* No-impersonate */ | executeTypeVal;
             deferredCA[2] = "PanelSwCustomActions.dll";
             deferredCA[3] = "CommonDeferred";
 
