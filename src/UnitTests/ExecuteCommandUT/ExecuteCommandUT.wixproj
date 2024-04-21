@@ -8,6 +8,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="TidyBuild"/>
+    <PackageReference Include="WixToolset.Util.wixext"/>
     
     <WixExtension Include="PanelSwWixExtension">
       <HintPath>$(BuildFolder)..\AnyCPU\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</HintPath>

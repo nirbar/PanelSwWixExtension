@@ -1131,7 +1131,7 @@ namespace PanelSw.Wix.Extensions
             // 1. Set PSW_ExecuteCommand property
             ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "Binary", "PanelSwCustomActions.dll");
             ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "Property", "PSW_ExecuteCommand");
-            JObject json = JObject.FromObject(new { Id = id, Command = command, WorkingFolder = workingFolder, Async = isAsync, ErrorHandling = (int)errorHandling });
+            JObject json = JObject.FromObject(new { Id = id, Command = command, WorkingFolder = workingFolder, Async = isAsync, Impersonate = impersonate, ErrorHandling = (int)errorHandling });
             string cad = json.ToString();
             cad = Regex.Replace(cad, "([\\[\\]\\{\\}])", "[\\$1]");
 
@@ -1175,7 +1175,7 @@ namespace PanelSw.Wix.Extensions
             deferredCA.SourceType = CustomActionSourceType.Binary;
             deferredCA.Target = "CommonDeferred";
             deferredCA.TargetType = CustomActionTargetType.Dll;
-            deferredCA.Impersonate = impersonate;
+            deferredCA.Impersonate = false;
             deferredCA.Hidden = true;
 
             WixActionSymbol deferredCASched = section.AddSymbol(new WixActionSymbol(sourceLineNumbers, new Identifier(AccessModifier.Global, $"InstallExecuteSequence/{id}")));

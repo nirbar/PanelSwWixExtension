@@ -8,6 +8,7 @@
 #include <userenv.h>
 #include <wtsapi32.h>
 #include <Lm.h>
+#include <sddl.h>
 #include "google\protobuf\any.h"
 using namespace std;
 using namespace com::panelsw::ca;
@@ -61,6 +62,8 @@ extern "C" UINT __stdcall ExecuteCommand(MSIHANDLE hInstall)
 	Object::Ptr jsonObject;
 	string command, workingFolder, id;
 	bool isAsync;
+	bool isImpersonate;
+	int flags = Flags::None;
 	CWixString szCommandFormat, szCommand;
 	CWixString szWorkingFolderFormat, szWorkingFolder;
 	CWixString szId;
@@ -86,6 +89,7 @@ extern "C" UINT __stdcall ExecuteCommand(MSIHANDLE hInstall)
 		command = jsonObject->getValue<string>("Command");
 		workingFolder = jsonObject->getValue<string>("WorkingFolder");
 		isAsync = jsonObject->getValue<bool>("Async");
+		isImpersonate = jsonObject->getValue<bool>("Impersonate");
 		errorHandling = (ErrorHandling)jsonObject->getValue<int>("ErrorHandling");
 	}
 	catch (JSONException ex)
@@ -112,6 +116,15 @@ extern "C" UINT __stdcall ExecuteCommand(MSIHANDLE hInstall)
 	hr = szCommand.MsiFormat((LPCWSTR)szCommandFormat);
 	ExitOnFailure(hr, "Failed to msi-format command");
 
+	if (isAsync)
+	{
+		flags |= Flags::ASync;
+	}
+	if (isImpersonate)
+	{
+		flags |= Flags::Impersonate;
+	}
+
 	// Format working folder
 	if (workingFolder.size())
 	{
@@ -121,7 +134,7 @@ extern "C" UINT __stdcall ExecuteCommand(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to msi-format working folder");
 	}
 
-	hr = cad.AddExec(szCommand, (LPCWSTR)szWorkingFolder, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, isAsync ? Flags::ASync : 0, errorHandling);
+	hr = cad.AddExec(szCommand, (LPCWSTR)szWorkingFolder, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, flags, errorHandling);
 	ExitOnFailure(hr, "Failed to create command");
 
 	hr = cad.SetCustomActionData((LPCWSTR)szId);
@@ -1178,10 +1191,16 @@ HRESULT CExecOnComponent::Impersonate(BOOL bImpersonate, LPCWSTR szDomain, LPCWS
 		ExitOnFailure(hr, "Failed to copy user name");
 
 		bRes = ::WTSQueryUserToken(WTS_CURRENT_SESSION, &pctxImpersonate->hUserToken);
-		if (!bRes && (!szSessionUserName || !*szSessionUserName))
+		if (!bRes && szTempUserName.IsNullOrEmpty())
 		{
 			bRes = TRUE;
-			WcaLogError(HRESULT_FROM_WIN32(::GetLastError()), "Can't impersonate because we're running with no client logged on");
+
+			hr = FindUserMsiexec(&pctxImpersonate->hUserToken, (LPWSTR*)szTempUserName);
+			if (FAILED(hr))
+			{
+				WcaLogError(hr, "Can't impersonate because we're running with no client logged on");
+				hr = S_OK;
+			}
 		}
 		ExitOnNullWithLastError(bRes, hr, "Failed to get user token");
 	}
@@ -1295,4 +1314,113 @@ void CExecOnComponent::Unimpersonate(IMPERSONATION_CONTEXT* pctxImpersonate)
 	ReleaseNullStr(pctxImpersonate->szUser);
 	ReleaseNullStr(pctxImpersonate->szDomain);
 	ReleaseNullStrSecure(pctxImpersonate->szPassword);
+}
+
+HRESULT CExecOnComponent::FindUserMsiexec(HANDLE* phUserToken, LPWSTR* pszUserName)
+{
+	HRESULT hr = S_OK;
+	BOOL bRes = TRUE;
+	DWORD* pdwProcessIds = nullptr;
+	DWORD cdwProcessIds = 0;
+	HANDLE hProc = NULL;
+	HANDLE hProcToken = NULL;
+	TOKEN_USER* pTokenUser = nullptr;
+	CWixString szUserSID;
+	PSID pUserSID = nullptr;
+	BOOL bFound = FALSE;
+	DWORD dwSize1 = 0;
+	DWORD dwSize2 = 0;
+	LPTSTR szUserName = nullptr;
+	LPTSTR szDomain = nullptr;
+	SID_NAME_USE sidName;
+
+	hr = WcaGetProperty(L"UserSID", (LPWSTR*)szUserSID);
+	ExitOnFailure(hr, "Failed to get property");
+
+	bRes = ::ConvertStringSidToSid((LPCWSTR)szUserSID, &pUserSID);
+	ExitOnNullWithLastError(bRes, hr, "Failed to convert SID from string");
+
+	hr = ProcFindAllIdsFromExeName(L"msiexec.exe", &pdwProcessIds, &cdwProcessIds);
+	ExitOnFailure(hr, "Failed to get msiexec processes");
+
+	for (DWORD i = 0; i < cdwProcessIds; ++i)
+	{
+		ReleaseHandle(hProc);
+		ReleaseHandle(hProcToken);
+		ReleaseNullMem(pTokenUser);
+		dwSize1 = 0;
+		dwSize2 = 0;
+
+		hProc = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, pdwProcessIds[i]);
+		ExitOnNullWithLastError(hProc, hr, "Failed to open process handle");
+
+		bRes = ::OpenProcessToken(hProc, TOKEN_ALL_ACCESS, &hProcToken);
+		ExitOnNullWithLastError(bRes, hr, "Failed to get process token");
+
+		bRes = ::GetTokenInformation(hProcToken, TOKEN_INFORMATION_CLASS::TokenUser, pTokenUser, dwSize1, &dwSize1);
+		if (dwSize1)
+		{
+			pTokenUser = (PTOKEN_USER)MemAlloc(dwSize1, TRUE);
+			ExitOnNull(pTokenUser, hr, E_OUTOFMEMORY, "Failed to get allocate memory");
+
+			bRes = ::GetTokenInformation(hProcToken, TOKEN_INFORMATION_CLASS::TokenUser, pTokenUser, dwSize1, &dwSize1);
+		}
+		ExitOnNullWithLastError(bRes, hr, "Failed to get token's user");
+
+		if (pTokenUser && ::EqualSid(pUserSID, pTokenUser->User.Sid))
+		{
+			*phUserToken = hProcToken;
+			hProcToken = NULL;
+			bFound = TRUE;
+			break;
+		}
+	}
+	ExitOnNull(bFound, hr, E_NOTFOUND, "Failed to find user token from msiexec.exe");
+
+	// Best effort to get user name
+	dwSize1 = 0;
+	dwSize2 = 0;
+	bRes = ::LookupAccountSid(nullptr, pTokenUser->User.Sid, szUserName, &dwSize1, szDomain, &dwSize2, &sidName);
+	if (dwSize1 || dwSize2)
+	{
+		if (dwSize1)
+		{
+			hr = StrAlloc(&szUserName, dwSize1);
+			ExitOnFailure(hr, "Failed to allocate memory");
+		}
+		if (dwSize2)
+		{
+			hr = StrAlloc(&szDomain, dwSize2);
+			ExitOnFailure(hr, "Failed to allocate memory");
+		}
+
+		bRes = ::LookupAccountSid(nullptr, pTokenUser->User.Sid, szUserName, &dwSize1, szDomain, &dwSize2, &sidName);
+		if (!bRes)
+		{
+			WcaLogError(HRESULT_FROM_WIN32(::GetLastError()), "Failed to get user name from SID");
+			ExitFunction();
+		}
+
+		hr = StrAllocFormatted(pszUserName, L"%ls\\%ls", szDomain, szUserName);
+		if (FAILED(hr))
+		{
+			WcaLogError(hr, "Failed to format user name");
+			hr = S_OK;
+			ExitFunction();
+		}
+	}
+
+LExit:
+	ReleaseMem(pdwProcessIds);
+	ReleaseHandle(hProc);
+	ReleaseHandle(hProcToken);
+	ReleaseMem(pTokenUser);
+	ReleaseStr(szUserName);
+	ReleaseStr(szDomain);
+	if (pUserSID)
+	{
+		::LocalFree(pUserSID);
+	}
+
+	return hr;
 }
