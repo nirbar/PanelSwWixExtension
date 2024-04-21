@@ -3,17 +3,20 @@
 #include <Rpc.h>
 #include <Objbase.h>
 #include <tchar.h>
+#include <sddl.h>
 #pragma comment (lib, "Rpcrt4.lib")
 #pragma comment (lib, "Ole32.lib")
 
+#define PRINT_INFO			    TEXT("--print-info")
 #define SKIP_UNTIL_HERE_FLAG    TEXT("--skip-until-here")
 #define IGNORE_ME_FLAG			TEXT("--ignore-me")
 #define USER_FLAG				TEXT("--user")
 #define DOMAIN_FLAG		        TEXT("--domain")
 #define OUTPUT_BUFFER_SIZE		1024
 
-#define ExitIf(cond, op, fmt, ...)	if (cond) {op; _tprintf(TEXT(fmt "\n"), __VA_ARGS__); goto LExit; }
+#define ExitIf(cond, op, fmt, ...)	if (cond) {op; _tprintf(TEXT(fmt) TEXT("\n"), __VA_ARGS__); goto LExit; }
 
+static void PrintDebugInfo();
 static DWORD CreatePipes(HANDLE* phStdOutRd, HANDLE* phStdOutWr, HANDLE* phStdErr, HANDLE* phStdIn);
 static DWORD LogProcessOutput(HANDLE hProcess, HANDLE hStdErrOut);
 
@@ -45,6 +48,15 @@ int _tmain(int argc, _TCHAR* argv[])
 		{
 			szDomain = argv[i];
 			continue;
+		}
+		if (_tcscmp(argv[i], PRINT_INFO) == 0)
+		{
+			PrintDebugInfo();
+			goto LExit;
+		}
+		if ((_tcscmp(argv[i], SKIP_UNTIL_HERE_FLAG) == 0) || (_tcscmp(argv[i], IGNORE_ME_FLAG) == 0))
+		{
+			break;
 		}
 	}
 	if (szUser && *szUser)
@@ -359,4 +371,102 @@ LExit:
 	}
 
 	return dwRes;
+}
+
+static void PrintDebugInfo()
+{
+	LPTSTR szEnvBlock = ::GetEnvironmentStrings();
+	BOOL bRes = TRUE;
+	HANDLE hProcessToken = NULL;
+	TOKEN_USER* pTokenUser = nullptr;
+	DWORD dwSize1 = 0;
+	DWORD dwSize2 = 0;
+	LPTSTR szUserName = nullptr;
+	LPTSTR szDomain = nullptr;
+	SID_NAME_USE sidName;
+	LPTSTR szSid = nullptr;
+
+	if (szEnvBlock)
+	{
+		_tprintf(TEXT("Environment:\n"));
+		for (LPCTSTR sz = szEnvBlock; sz && *sz; sz += 1 + _tcslen(sz))
+		{
+			_tprintf(TEXT("\t%s\n"), sz);
+		}
+	}
+
+	bRes = ::OpenProcessToken(::GetCurrentProcess(), TOKEN_QUERY | TOKEN_QUERY_SOURCE | TOKEN_READ, &hProcessToken);
+	ExitIf(!bRes, NULL, "Failed to get process token. Error %u", ::GetLastError());
+
+	dwSize1 = 0;
+	bRes = ::GetTokenInformation(hProcessToken, TOKEN_INFORMATION_CLASS::TokenUser, pTokenUser, dwSize1, &dwSize1);
+	if (dwSize1)
+	{
+		pTokenUser = (TOKEN_USER*)malloc(dwSize1);
+		ExitIf(!pTokenUser, NULL, "Failed to allocate %u bytes", dwSize1);
+
+		bRes = ::GetTokenInformation(hProcessToken, TOKEN_INFORMATION_CLASS::TokenUser, pTokenUser, dwSize1, &dwSize1);
+	}
+	ExitIf(!bRes, NULL, "Failed to get token's user. Error %u", ::GetLastError());
+
+	dwSize1 = 0;
+	dwSize2 = 0;
+	if (pTokenUser)
+	{
+		bRes = ::LookupAccountSid(nullptr, pTokenUser->User.Sid, szUserName, &dwSize1, szDomain, &dwSize2, &sidName);
+		if (dwSize1 || dwSize2)
+		{
+			if (dwSize1)
+			{
+				szUserName = (LPTSTR)malloc(dwSize1 * sizeof(TCHAR));
+				ExitIf(!szUserName, NULL, "Failed to allocate %u bytes", dwSize1);
+			}
+			if (dwSize2)
+			{
+				szDomain = (LPTSTR)malloc(dwSize2 * sizeof(TCHAR));
+				ExitIf(!szDomain, NULL, "Failed to allocate %u bytes", dwSize2);
+			}
+
+			bRes = ::LookupAccountSid(nullptr, pTokenUser->User.Sid, szUserName, &dwSize1, szDomain, &dwSize2, &sidName);
+		}
+		ExitIf(!bRes, NULL, "Failed to get user name. Error %u", ::GetLastError());
+		_tprintf(TEXT("User '%s\\%s', user type %u\n"), szDomain, szUserName, sidName);
+
+		bRes = ::ConvertSidToStringSid(pTokenUser->User.Sid, &szSid);
+		ExitIf(!bRes, NULL, "Failed to get user SID string. Error %u", ::GetLastError());
+		_tprintf(TEXT("User SID '%s'\n"), szSid);
+	}
+
+LExit:
+	if (szEnvBlock)
+	{
+		::FreeEnvironmentStrings(szEnvBlock);
+		szEnvBlock = nullptr;
+	}
+	if (hProcessToken)
+	{
+		::CloseHandle(hProcessToken);
+		hProcessToken = NULL;
+	}
+	if (pTokenUser)
+	{
+		free(pTokenUser);
+		pTokenUser = nullptr;
+	}
+	if (szUserName)
+	{
+		free(szUserName);
+		szUserName = nullptr;
+	}
+	if (szDomain)
+	{
+		free(szDomain);
+		szDomain = nullptr;
+	}
+	if (szSid)
+	{
+		::LocalFree(szSid);
+	}
+
+	return;
 }
