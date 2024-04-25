@@ -385,6 +385,7 @@ static void PrintDebugInfo()
 	LPTSTR szDomain = nullptr;
 	SID_NAME_USE sidName;
 	LPTSTR szSid = nullptr;
+	TOKEN_ELEVATION tokenElevated = { };
 
 	if (szEnvBlock)
 	{
@@ -436,6 +437,11 @@ static void PrintDebugInfo()
 		ExitIf(!bRes, NULL, "Failed to get user SID string. Error %u", ::GetLastError());
 		_tprintf(TEXT("User SID '%s'\n"), szSid);
 	}
+
+	dwSize1 = 0;
+	bRes = ::GetTokenInformation(hProcessToken, TOKEN_INFORMATION_CLASS::TokenElevation, &tokenElevated, sizeof(tokenElevated), &dwSize1);
+	ExitIf(!bRes, NULL, "Failed to get elevation. Error %u", ::GetLastError());
+	_tprintf(TEXT("Elevated: '%s'\n"), tokenElevated.TokenIsElevated ? TEXT("yes") : TEXT("no"));
 
 LExit:
 	if (szEnvBlock)
