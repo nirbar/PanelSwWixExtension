@@ -23,6 +23,10 @@
       <HintPath>$(WixToolPath)\WixBalExtension.dll</HintPath>
       <Name>WixBalExtension</Name>
     </WixExtension>
+    <WixExtension Include="WixDependencyExtension">
+      <HintPath>$(WixToolPath)\WixDependencyExtension.dll</HintPath>
+      <Name>WixDependencyExtension</Name>
+    </WixExtension>
     <WixExtension Include="PanelSwWixExtension">
       <HintPath>$(BuildFolder)\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</HintPath>
       <Name>PanelSwWixExtension</Name>

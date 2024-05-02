@@ -524,6 +524,48 @@ namespace PanelSw.Wix.Extensions
                     }
                 }
 
+                XmlNodeList provides = parentElement.GetElementsByTagName("Provides", "http://schemas.microsoft.com/wix/DependencyExtension");
+                if (provides != null)
+                {
+                    foreach (XmlNode prv in provides)
+                    {
+                        XmlElement uninstallProvider = element.OwnerDocument.CreateElement(prv.Name, prv.NamespaceURI);
+                        foreach (XmlAttribute attribute in prv.Attributes)
+                        {
+                            uninstallProvider.SetAttribute(attribute.Name, attribute.Value);
+                        }
+                        uninstallElement.AppendChild(uninstallProvider);
+                    }
+                }
+
+                XmlNodeList requires = parentElement.GetElementsByTagName("Requires", "http://schemas.microsoft.com/wix/DependencyExtension");
+                if (requires != null)
+                {
+                    foreach (XmlNode req in requires)
+                    {
+                        XmlElement uninstallRequiers = element.OwnerDocument.CreateElement(req.Name, req.NamespaceURI);
+                        foreach (XmlAttribute attribute in req.Attributes)
+                        {
+                            uninstallRequiers.SetAttribute(attribute.Name, attribute.Value);
+                        }
+                        uninstallElement.AppendChild(uninstallRequiers);
+                    }
+                }
+
+                requires = parentElement.GetElementsByTagName("RequiresRef", "http://schemas.microsoft.com/wix/DependencyExtension");
+                if (requires != null)
+                {
+                    foreach (XmlNode req in requires)
+                    {
+                        XmlElement uninstallRequiers = element.OwnerDocument.CreateElement(req.Name, req.NamespaceURI);
+                        foreach (XmlAttribute attribute in req.Attributes)
+                        {
+                            uninstallRequiers.SetAttribute(attribute.Name, attribute.Value);
+                        }
+                        uninstallElement.AppendChild(uninstallRequiers);
+                    }
+                }
+
                 parentElement.ParentNode.InsertAfter(uninstallElement, sourceLineElement);
             }
         }
