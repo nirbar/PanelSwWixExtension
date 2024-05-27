@@ -13,7 +13,7 @@ public:
 
 	CServiceConfig();
 
-	HRESULT AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, LPCWSTR szLoadOrderGroup, const std::list<LPWSTR> &lstDependencies, ::com::panelsw::ca::ErrorHandling errorHandling, ::com::panelsw::ca::ServciceConfigDetails_DelayStart delayStart, DWORD dwServiceType);
+	HRESULT AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szObfuscatedCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, LPCWSTR szLoadOrderGroup, const std::list<LPWSTR> &lstDependencies, ::com::panelsw::ca::ErrorHandling errorHandling, ::com::panelsw::ca::ServciceConfigDetails_DelayStart delayStart, DWORD dwServiceType);
 
 protected:
 	
