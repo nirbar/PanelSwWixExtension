@@ -89,7 +89,7 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 		if (compAction != WCA_TODO::WCA_TODO_INSTALL)
 		{
 			// In case of no-action, we just check if the service is marked for deletion to notify reboot is reqired.
-			oDeferred.AddServiceConfig(szServiceName, nullptr, nullptr, nullptr, ServciceConfigDetails::ServiceStart::ServciceConfigDetails_ServiceStart_unchanged, nullptr, lstDependencies, ErrorHandling::ignore, ServciceConfigDetails_DelayStart::ServciceConfigDetails_DelayStart_unchanged1, SERVICE_NO_CHANGE);
+			oDeferred.AddServiceConfig(szServiceName, nullptr, nullptr, nullptr, nullptr, ServciceConfigDetails::ServiceStart::ServciceConfigDetails_ServiceStart_unchanged, nullptr, lstDependencies, ErrorHandling::ignore, ServciceConfigDetails_DelayStart::ServciceConfigDetails_DelayStart_unchanged1, SERVICE_NO_CHANGE);
 
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping configuration of service '%ls' since component is not installed", (LPCWSTR)szServiceName);
 			continue;
@@ -243,14 +243,14 @@ extern "C" UINT __stdcall ServiceConfig(MSIHANDLE hInstall)
 				}
 			}
 
-			hr = oRollback.AddServiceConfig((LPCWSTR)szServiceName, pServiceCfg->lpBinaryPathName, pServiceCfg->lpServiceStartName, nullptr, pServiceCfg->dwStartType, pServiceCfg->lpLoadOrderGroup, lstRlbkDependencies, ErrorHandling::ignore, rlbkDelayStart, pServiceCfg->dwServiceType);
+			hr = oRollback.AddServiceConfig((LPCWSTR)szServiceName, pServiceCfg->lpBinaryPathName, pServiceCfg->lpBinaryPathName, pServiceCfg->lpServiceStartName, nullptr, pServiceCfg->dwStartType, pServiceCfg->lpLoadOrderGroup, lstRlbkDependencies, ErrorHandling::ignore, rlbkDelayStart, pServiceCfg->dwServiceType);
 			ExitOnFailure(hr, "Failed creating rollback CustomActionData");
 
 			ReleaseNullMem(pServiceCfg);
 			ReleaseServiceHandle(hService);
 		}
 
-		hr = oDeferred.AddServiceConfig(szServiceName, szCommand, szAccount, szPassword, start, szLoadOrderGroup, lstDependencies, (ErrorHandling)errorHandling, (ServciceConfigDetails_DelayStart)nDelayStart, dwServiceType);
+		hr = oDeferred.AddServiceConfig(szServiceName, (LPCWSTR)szCommand, szCommand.Obfuscated(), szAccount, szPassword, start, szLoadOrderGroup, lstDependencies, (ErrorHandling)errorHandling, (ServciceConfigDetails_DelayStart)nDelayStart, dwServiceType);
 		ExitOnFailure(hr, "Failed creating CustomActionData");
 	}
 
@@ -281,7 +281,7 @@ CServiceConfig::CServiceConfig()
 	, _errorPrompter(PSW_MSI_MESSAGES::PSW_MSI_MESSAGES_SERVICE_CONFIG_ERROR) 
 { }
 
-HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, LPCWSTR szLoadOrderGroup, const std::list<LPWSTR> &lstDependencies, ErrorHandling errorHandling, ServciceConfigDetails_DelayStart delayStart, DWORD dwServiceType)
+HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szCommandLine, LPCWSTR szObfuscatedCommandLine, LPCWSTR szAccount, LPCWSTR szPassword, int start, LPCWSTR szLoadOrderGroup, const std::list<LPWSTR>& lstDependencies, ErrorHandling errorHandling, ServciceConfigDetails_DelayStart delayStart, DWORD dwServiceType)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command* pCmd = nullptr;
@@ -306,7 +306,8 @@ HRESULT CServiceConfig::AddServiceConfig(LPCWSTR szServiceName, LPCWSTR szComman
 	}
 	if (szCommandLine && *szCommandLine)
 	{
-		pDetails->set_commandline(szCommandLine, WSTR_BYTE_SIZE(szCommandLine));
+		pDetails->mutable_commandline()->set_plain(szCommandLine, WSTR_BYTE_SIZE((LPCWSTR)szCommandLine));
+		pDetails->mutable_commandline()->set_obfuscated(szObfuscatedCommandLine, WSTR_BYTE_SIZE(szObfuscatedCommandLine));
 	}
 	if (szLoadOrderGroup) // May be empty
 	{
@@ -357,10 +358,10 @@ HRESULT CServiceConfig::DeferredExecute(const ::std::string& command)
 			szPassword = (LPCWSTR)(LPVOID)details.password().data();
 		}
 	}
-	if (details.commandline().size() > sizeof(WCHAR))
+	if (details.commandline().plain().size() > sizeof(WCHAR))
 	{
-		szCommandLine = (LPCWSTR)(LPVOID)details.commandline().data();
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Service '%ls' command line '%ls'", szServiceName, szCommandLine);
+		szCommandLine = (LPCWSTR)(LPVOID)details.commandline().plain().data();
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Service '%ls' command line '%ls'", szServiceName, (LPCWSTR)(LPVOID)details.commandline().obfuscated().data());
 	}
 	if (details.loadordergroup().size() > 0) // May be empty
 	{
