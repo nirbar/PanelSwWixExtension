@@ -16,7 +16,7 @@ public:
 
 	CExecOnComponent();
 
-	HRESULT AddExec(const CWixString &szCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, ExitCodeMap *pExitCodeMap, std::vector<com::panelsw::ca::ConsoleOuputRemap> *pConsoleOuput, EnvironmentMap *pEnv, int nFlags, com::panelsw::ca::ErrorHandling errorHandling);
+	HRESULT AddExec(const CWixString &szCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, ExitCodeMap *pExitCodeMap, std::vector<com::panelsw::ca::ConsoleOuputRemap> *pConsoleOuput, EnvironmentMap *pEnv, int nFlags, com::panelsw::ca::ErrorHandling errorHandling, LPCWSTR szObfuscateLog);
 
 protected:
 	
@@ -47,7 +47,7 @@ private:
 
 	HRESULT SetEnvironment(CWixString *pszEnvironmentMultiSz, const ::google::protobuf::Map<std::string, com::panelsw::ca::ObfuscatedString> &customEnv);
 
-	HRESULT LogProcessOutput(HANDLE hProc, HANDLE hStdErrOut, LPWSTR *pszText);
+	HRESULT LogProcessOutput(HANDLE hProc, HANDLE hStdErrOut, LPCWSTR szObfuscateLog, LPWSTR *pszText);
 
 	HRESULT LaunchProcess(IMPERSONATION_CONTEXT* pctxImpersonation, LPWSTR szCommand, LPCWSTR szWorkingDirectory, LPCWSTR rgszEnvironment, HANDLE* phProcess, HANDLE* phStdOut);
 

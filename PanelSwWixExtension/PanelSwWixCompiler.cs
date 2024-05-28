@@ -2635,6 +2635,7 @@ namespace PanelSw.Wix.Extensions
             string binary = null;
             string command = null;
             string workDir = null;
+            string obfuscateLog = null;
             ExecOnComponentFlags flags = ExecOnComponentFlags.None;
             ErrorHandling? errorHandling = null;
             int order = 1000000000 + GetLineNumber(sourceLineNumbers);
@@ -2670,6 +2671,10 @@ namespace PanelSw.Wix.Extensions
 
                     case "WorkingDirectory":
                         workDir = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "ObfuscateLog":
+                        obfuscateLog = Core.GetAttributeValue(sourceLineNumbers, attrib);
                         break;
 
                     case "Order":
@@ -3017,6 +3022,7 @@ namespace PanelSw.Wix.Extensions
                 row[6] = (int)(errorHandling ?? ErrorHandling.fail);
                 row[7] = order;
                 row[8] = user;
+                row[9] = obfuscateLog;
             }
         }
 
