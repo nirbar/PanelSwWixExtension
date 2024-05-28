@@ -1,4 +1,4 @@
-﻿Starting Chef Client, version 14.14.29[0m
+Starting Chef Client, version 14.14.29[0m
 resolving cookbooks for run list: ["aerobase"][0m
 Synchronizing Cookbooks:[0m
   - aerobase (2.9.0)[0m
@@ -98,3 +98,4 @@ Running handlers complete
 [0m[2022-04-19T18:24:17+03:00] ERROR: Exception handlers complete
 Chef Client failed. 10 resources updated in 11 minutes 02 seconds[0m
 אבדגהוזחט
+aerobase

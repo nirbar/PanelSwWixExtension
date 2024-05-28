@@ -33,4 +33,7 @@ message ExecOnDetails{
 
 	// Impersonate current user
 	bool impersonate = 12;
+
+	// Text to obfuscate in the log file
+	bytes obfuscateLog = 13;
 }
