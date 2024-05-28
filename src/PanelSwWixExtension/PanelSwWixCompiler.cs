@@ -2404,6 +2404,7 @@ namespace PanelSw.Wix.Extensions
             string binary = null;
             string command = null;
             string workDir = null;
+            string obfuscateLog = null;
             ExecOnComponentFlags flags = ExecOnComponentFlags.None;
             ErrorHandling errorHandling = ErrorHandling.fail;
             int order = 1000000000 + sourceLineNumbers.LineNumber ?? 0;
@@ -2424,6 +2425,10 @@ namespace PanelSw.Wix.Extensions
 
                     case "WorkingDirectory":
                         workDir = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+
+                    case "ObfuscateLog":
+                        obfuscateLog = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                         break;
 
                     case "Order":
@@ -2583,6 +2588,7 @@ namespace PanelSw.Wix.Extensions
                 row.ErrorHandling = (int)errorHandling;
                 row.Order = order;
                 row.User_ = user;
+                row.ObfuscateLog = obfuscateLog;
             }
 
             // ExitCode mapping

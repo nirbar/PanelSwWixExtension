@@ -1297,6 +1297,11 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
           <xs:documentation><![CDATA[Working directory for the command. This field is formatted.]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="ObfuscateLog" type="xs:string" use="optional">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Process stdout or stderr text that will be obfuscated in the log file. This field is formatted.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
 
       <!-- On Component Action -->
       <xs:attribute name="OnInstall" type="wix:YesNoType">

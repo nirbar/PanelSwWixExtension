@@ -49,7 +49,7 @@ enum Flags
 };
 
 extern HMODULE g_hInstCADLL;
-static HRESULT ScheduleExecution(LPCWSTR szId, const CWixString& szCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, CExecOnComponent::ExitCodeMap *pExitCodeMap, std::vector<ConsoleOuputRemap> *pConsoleOuput, CExecOnComponent::EnvironmentMap *pEnv, int nFlags, int errorHandling, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart);
+static HRESULT ScheduleExecution(LPCWSTR szId, const CWixString& szCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, CExecOnComponent::ExitCodeMap *pExitCodeMap, std::vector<ConsoleOuputRemap> *pConsoleOuput, CExecOnComponent::EnvironmentMap *pEnv, int nFlags, int errorHandling, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart, LPCWSTR szObfuscateLog);
 
 extern "C" UINT __stdcall ExecuteCommand(MSIHANDLE hInstall)
 {
@@ -134,7 +134,7 @@ extern "C" UINT __stdcall ExecuteCommand(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to msi-format working folder");
 	}
 
-	hr = cad.AddExec(szCommand, (LPCWSTR)szWorkingFolder, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, flags, errorHandling);
+	hr = cad.AddExec(szCommand, (LPCWSTR)szWorkingFolder, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, flags, errorHandling, nullptr);
 	ExitOnFailure(hr, "Failed to create command");
 
 	hr = cad.SetCustomActionData((LPCWSTR)szId);
@@ -179,7 +179,7 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ExecOn_ConsoleOutput'. Have you authored 'PanelSw:ExecOn' entries in WiX code?");
 
 	// Execute view
-	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `Binary_`, `Command`, `WorkingDirectory`, `Flags`, `ErrorHandling`, `User_` FROM `PSW_ExecOnComponent` ORDER BY `Order`", &hView);
+	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `Binary_`, `Command`, `WorkingDirectory`, `Flags`, `ErrorHandling`, `User_`, `ObfuscateLog` FROM `PSW_ExecOnComponent` ORDER BY `Order`", &hView);
 	ExitOnFailure(hr, "Failed to execute SQL query.");
 
 	// Iterate records
@@ -194,6 +194,7 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		CWixString userId, domain, user, password;
 		CWixString szSubQuery;
 		CWixString szTempFile;
+		CWixString szObfuscateLog;
 		int nFlags = 0;
 		int errorHandling = ErrorHandling::fail;
 		WCA_TODO compAction = WCA_TODO_UNKNOWN;
@@ -217,6 +218,8 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to get ErrorHandling.");
 		hr = WcaGetRecordString(hRecord, 8, (LPWSTR*)userId);
 		ExitOnFailure(hr, "Failed to get User_.");
+		hr = WcaGetRecordFormattedString(hRecord, 9, (LPWSTR*)szObfuscateLog);
+		ExitOnFailure(hr, "Failed to get ObfuscateLog.");
 
 		// Execute from binary
 		if (!szBinary.IsNullOrEmpty())
@@ -398,12 +401,12 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		case WCA_TODO::WCA_TODO_INSTALL:
 			if (nFlags & Flags::OnInstall)
 			{
-				hr = ScheduleExecution(szId, szCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart);
+				hr = ScheduleExecution(szId, szCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, (LPCWSTR)szObfuscateLog);
 				ExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			if (nFlags & Flags::OnInstallRollback)
 			{
-				hr = ScheduleExecution(szId, szCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart);
+				hr = ScheduleExecution(szId, szCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, (LPCWSTR)szObfuscateLog);
 				ExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			break;
@@ -411,12 +414,12 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		case WCA_TODO::WCA_TODO_REINSTALL:
 			if (nFlags & Flags::OnReinstall)
 			{
-				hr = ScheduleExecution(szId, szCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart);
+				hr = ScheduleExecution(szId, szCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, (LPCWSTR)szObfuscateLog);
 				ExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			if (nFlags & Flags::OnReinstallRollback)
 			{
-				hr = ScheduleExecution(szId, szCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart);
+				hr = ScheduleExecution(szId, szCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, (LPCWSTR)szObfuscateLog);
 				ExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			break;
@@ -424,12 +427,12 @@ extern "C" UINT __stdcall ExecOnComponent(MSIHANDLE hInstall)
 		case WCA_TODO::WCA_TODO_UNINSTALL:
 			if (nFlags & Flags::OnRemove)
 			{
-				hr = ScheduleExecution(szId, szCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart);
+				hr = ScheduleExecution(szId, szCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oDeferredBeforeStop, &oDeferredAfterStop, &oDeferredBeforeStart, &oDeferredAfterStart, (LPCWSTR)szObfuscateLog);
 				ExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			if (nFlags & Flags::OnRemoveRollback)
 			{
-				hr = ScheduleExecution(szId, szCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart);
+				hr = ScheduleExecution(szId, szCommand, workDir, domain, user, password, &exitCodeMap, &consoleOutput, &environment, nFlags, errorHandling, &oRollbackBeforeStop, &oRollbackAfterStop, &oRollbackBeforeStart, &oRollbackAfterStart, (LPCWSTR)szObfuscateLog);
 				ExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 			}
 			break;
@@ -484,32 +487,32 @@ LExit:
 	return WcaFinalize(er);
 }
 
-HRESULT ScheduleExecution(LPCWSTR szId, const CWixString &szCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, CExecOnComponent::ExitCodeMap* pExitCodeMap, std::vector<ConsoleOuputRemap>* pConsoleOuput, CExecOnComponent::EnvironmentMap* pEnv, int nFlags, int errorHandling, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart)
+HRESULT ScheduleExecution(LPCWSTR szId, const CWixString& szCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, CExecOnComponent::ExitCodeMap* pExitCodeMap, std::vector<ConsoleOuputRemap>* pConsoleOuput, CExecOnComponent::EnvironmentMap* pEnv, int nFlags, int errorHandling, CExecOnComponent* pBeforeStop, CExecOnComponent* pAfterStop, CExecOnComponent* pBeforeStart, CExecOnComponent* pAfterStart, LPCWSTR szObfuscateLog)
 {
 	HRESULT hr = S_OK;
 
 	if (nFlags & Flags::BeforeStopServices)
 	{
 		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Will execute command '%ls' before StopServices", szCommand.Obfuscated());
-		hr = pBeforeStop->AddExec(szCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
+		hr = pBeforeStop->AddExec(szCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling, szObfuscateLog);
 		ExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
 	if (nFlags & Flags::AfterStopServices)
 	{
 		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Will execute command '%ls' after StopServices", szCommand.Obfuscated());
-		hr = pAfterStop->AddExec(szCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
+		hr = pAfterStop->AddExec(szCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling, szObfuscateLog);
 		ExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
 	if (nFlags & Flags::BeforeStartServices)
 	{
 		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Will execute command '%ls' before StartServices", szCommand.Obfuscated());
-		hr = pBeforeStart->AddExec(szCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
+		hr = pBeforeStart->AddExec(szCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling, szObfuscateLog);
 		ExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
 	if (nFlags & Flags::AfterStartServices)
 	{
 		CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Will execute command '%ls' after StartServices", szCommand.Obfuscated());
-		hr = pAfterStart->AddExec(szCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling);
+		hr = pAfterStart->AddExec(szCommand, szWorkingDirectory, szDomain, szUser, szPassword, pExitCodeMap, pConsoleOuput, pEnv, nFlags, (ErrorHandling)errorHandling, szObfuscateLog);
 		ExitOnFailure(hr, "Failed scheduling '%ls'", (LPCWSTR)szId);
 	}
 
@@ -524,7 +527,7 @@ CExecOnComponent::CExecOnComponent()
 	, _stdoutPrompter((DWORD)PSW_MSI_MESSAGES::PSW_MSI_MESSAGES_EXEC_ON_CONSOLE_ERROR)
 { }
 
-HRESULT CExecOnComponent::AddExec(const CWixString &szCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, ExitCodeMap* pExitCodeMap, vector<ConsoleOuputRemap>* pConsoleOuput, EnvironmentMap* pEnv, int nFlags, ErrorHandling errorHandling)
+HRESULT CExecOnComponent::AddExec(const CWixString& szCommand, LPCWSTR szWorkingDirectory, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, ExitCodeMap* pExitCodeMap, vector<ConsoleOuputRemap>* pConsoleOuput, EnvironmentMap* pEnv, int nFlags, ErrorHandling errorHandling, LPCWSTR szObfuscateLog)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command* pCmd = nullptr;
@@ -543,6 +546,10 @@ HRESULT CExecOnComponent::AddExec(const CWixString &szCommand, LPCWSTR szWorking
 	if (szWorkingDirectory && *szWorkingDirectory)
 	{
 		pDetails->set_workingdirectory(szWorkingDirectory, WSTR_BYTE_SIZE(szWorkingDirectory));
+	}
+	if (szObfuscateLog && *szObfuscateLog)
+	{
+		pDetails->set_obfuscatelog(szObfuscateLog, WSTR_BYTE_SIZE(szObfuscateLog));
 	}
 	pDetails->set_async(nFlags & Flags::ASync);
 	pDetails->set_impersonate(nFlags & Flags::Impersonate);
@@ -624,6 +631,7 @@ HRESULT CExecOnComponent::ExecuteOne(const com::panelsw::ca::ExecOnDetails& deta
 	LPCWSTR szDomain = nullptr;
 	LPCWSTR szUser = nullptr;
 	LPCWSTR szPassword = nullptr;
+	LPCWSTR szObfuscateLog = nullptr;
 	CWixString szLog;
 	HANDLE hStdOut = INVALID_HANDLE_VALUE;
 	HANDLE hProc = NULL;
@@ -650,6 +658,10 @@ HRESULT CExecOnComponent::ExecuteOne(const com::panelsw::ca::ExecOnDetails& deta
 	if (details.password().size() > 0)
 	{
 		szPassword = (LPCWSTR)(LPVOID)details.password().data();
+	}
+	if (details.obfuscatelog().size() > 0)
+	{
+		szObfuscateLog = (LPCWSTR)(LPVOID)details.obfuscatelog().data();
 	}
 	_errorPrompter.SetErrorHandling((PSW_ERROR_HANDLING)details.errorhandling());
 	_alwaysPrompter.SetErrorHandling((PSW_ERROR_HANDLING)details.errorhandling());
@@ -681,7 +693,7 @@ HRESULT CExecOnComponent::ExecuteOne(const com::panelsw::ca::ExecOnDetails& deta
 
 	if (SUCCEEDED(hr))
 	{
-		LogProcessOutput(hProc, hStdOut, ((details.consoleouputremap_size() > 0) || (details.errorhandling() == ErrorHandling::promptAlways)) ? (LPWSTR*)szLog : nullptr);
+		LogProcessOutput(hProc, hStdOut, szObfuscateLog, ((details.consoleouputremap_size() > 0) || (details.errorhandling() == ErrorHandling::promptAlways)) ? (LPWSTR*)szLog : nullptr);
 
 		hr = ProcWaitForCompletion(hProc, INFINITE, &exitCode);
 		if (SUCCEEDED(hr))
@@ -740,7 +752,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CExecOnComponent::LogProcessOutput(HANDLE hProcess, HANDLE hStdErrOut, LPWSTR* pszText /* Need to detect whether this is unicode or multibyte */)
+HRESULT CExecOnComponent::LogProcessOutput(HANDLE hProcess, HANDLE hStdErrOut, LPCWSTR szObfuscateLog, LPWSTR* pszText /* Need to detect whether this is unicode or multibyte */)
 {
 	DWORD dwBufferSize = 0;
 	DWORD dwBytes = 0;
@@ -847,7 +859,18 @@ HRESULT CExecOnComponent::LogProcessOutput(HANDLE hProcess, HANDLE hStdErrOut, L
 		}
 		while (szLogEnd && *szLogEnd)
 		{
-			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"%.*ls", (szLogEnd - (szLog + dwLogStart)), szLog + dwLogStart);
+			CWixString szLogLine;
+
+			hr = szLogLine.Format(L"%.*ls", (szLogEnd - (szLog + dwLogStart)), szLog + dwLogStart);
+			ExitOnFailure(hr, "Failed to format log line");
+
+			if (szObfuscateLog && *szObfuscateLog && szLogLine.StrLen())
+			{
+				hr = szLogLine.ReplaceAll(szObfuscateLog, L"******");
+				ExitOnFailure(hr, "Failed to obfuscate log line");
+			}
+
+			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"%ls", (LPCWSTR)szLogLine);
 
 			// Go past \n or \r\n
 			if ((szLogEnd[0] == L'\r') && (szLogEnd[1] == L'\n'))
@@ -887,7 +910,15 @@ HRESULT CExecOnComponent::LogProcessOutput(HANDLE hProcess, HANDLE hStdErrOut, L
 	// Print any text that didn't end with a new line
 	if (szLog && (szLog[dwLogStart] != NULL))
 	{
-		LogUnformatted(LOGMSG_STANDARD, true, L"%ls", szLog + dwLogStart);
+		CWixString szLogLine(szLog + dwLogStart);
+
+		if (szObfuscateLog && *szObfuscateLog && szLogLine.StrLen())
+		{
+			hr = szLogLine.ReplaceAll(szObfuscateLog, L"******");
+			ExitOnFailure(hr, "Failed to obfuscate log line");
+		}
+
+		LogUnformatted(LOGMSG_STANDARD, true, L"%ls", (LPCWSTR)szLogLine);
 	}
 
 	// Return full log to the caller
@@ -1111,7 +1142,7 @@ HRESULT CExecOnComponent::LaunchProcess(IMPERSONATION_CONTEXT* pctxImpersonation
 		}
 
 		bRes = ::CreateProcessAsUserW(pctxImpersonation->hUserToken, nullptr, szCommand, nullptr, nullptr, TRUE, ::GetPriorityClass(::GetCurrentProcess()) | CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT, (LPVOID)rgszEnvironment, szWorkingDirectory, &si, &pi);
-		ExitOnNullWithLastError(bRes, hr, "Failed to create process");
+		ExitOnNullWithLastError(bRes, hr, "Failed to create impersonated process");
 	}
 	else
 	{
