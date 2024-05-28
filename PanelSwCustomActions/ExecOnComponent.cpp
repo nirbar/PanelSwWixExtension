@@ -872,7 +872,7 @@ HRESULT CExecOnComponent::LogProcessOutput(HANDLE hProcess, HANDLE hStdErrOut, L
 			hr = szLogLine.Format(L"%.*ls", (szLogEnd - (szLog + dwLogStart)), szLog + dwLogStart);
 			ExitOnFailure(hr, "Failed to format log line");
 
-			if (szObfuscateLog && *szObfuscateLog)
+			if (szObfuscateLog && *szObfuscateLog && szLogLine.StrLen())
 			{
 				hr = szLogLine.ReplaceAll(szObfuscateLog, L"******");
 				ExitOnFailure(hr, "Failed to obfuscate log line");
@@ -920,7 +920,7 @@ HRESULT CExecOnComponent::LogProcessOutput(HANDLE hProcess, HANDLE hStdErrOut, L
 	{
 		CWixString szLogLine(szLog + dwLogStart);
 
-		if (szObfuscateLog && *szObfuscateLog)
+		if (szObfuscateLog && *szObfuscateLog && szLogLine.StrLen())
 		{
 			hr = szLogLine.ReplaceAll(szObfuscateLog, L"******");
 			ExitOnFailure(hr, "Failed to obfuscate log line");
