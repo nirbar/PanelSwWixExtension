@@ -18,7 +18,7 @@
     <PanelSW:Unzip TargetFolder="[WindowsVolume]1\2\3" ZipFile="[INSTALLFOLDER]1.zip" Overwrite="yes" Condition="Not Installed"/>
     <PanelSW:Unzip TargetFolder="[WindowsVolume]1\2\4" ZipFile="[INSTALLFOLDER]1.zip" Overwrite="yes" DeleteZip="yes" CreateRootFolder="no" Condition="Not Installed"/>
     <PanelSW:Unzip TargetFolder="[INSTALLFOLDER]npp" ZipFile="[#iconsext.zip]" OverwriteMode="Always" Condition="&amp;ProductFeature &gt;= 3"/>
-    <PanelSW:Unzip TargetFolder="[INSTALLFOLDER]msi" ZipFile="[OriginalDatabase]" OverwriteMode="Always" Condition="&amp;ProductFeature &gt;= 3" ErrorHandling="prompt"/>
+    <PanelSW:Unzip TargetFolder="[INSTALLFOLDER]msi" ZipFile="[OriginalDatabase].zip" OverwriteMode="Always" Condition="&amp;ProductFeature &gt;= 3" ErrorHandling="prompt"/>
 
     <ComponentGroup Id="ProductComponents">
       <Component Directory="INSTALLFOLDER">

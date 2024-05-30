@@ -44,7 +44,8 @@
     <None Include="$(BaseBuildFolder)\x64\bin\$(Configuration)\DeferredExePackage\DeferredExePackage.exe" Visible="false" Pack="true" PackagePath="tools\lib\x64\" />
     <None Include=".\Xsd\PanelSwWixExtension.xsd" Pack="true" PackagePath="content" />
     <!-- lib -->
-    <None Include="$(BaseBuildFolder)\x86\bin\$(Configuration)\CaCommon\CaCommon.lib" Visible="false" Pack="true" PackagePath="tools\lib\v142\x86\" />
+    <None Include="$(BaseBuildFolder)\x86\bin\$(Configuration)\CaCommon\CaCommon.lib" Visible="false" Pack="true" PackagePath="tools\lib\v14\x86\" />
+    <None Include="$(BaseBuildFolder)\x64\bin\$(Configuration)\CaCommon\CaCommon.lib" Visible="false" Pack="true" PackagePath="tools\lib\v14\x64\" />
     <!-- inc -->
     <None Include="..\CaCommon\DeferredActionBase.h" Visible="false" Pack="true" PackagePath="tools\include\" />
     <None Include="..\CaCommon\RegistryKey.h" Visible="false" Pack="true" PackagePath="tools\include\" />
