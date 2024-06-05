@@ -11,7 +11,7 @@ on:
       psw_wix_version:
         description: 'PanelSwWix4 version'
         required: true
-        default: 6.0.0-psw-wix.0276-14
+        default: 6.0.0-psw-wix.0291-16
         type: string
 
 jobs:
@@ -37,7 +37,7 @@ jobs:
             Add-Content -Path ${{ github.env }} -Value "PSW_WIX_VERSION=${{ env.DEFAULT_PSW_WIX_VERSION }}"
           }
         env:
-          DEFAULT_PSW_WIX_VERSION: '6.0.0-psw-wix.0276-14'
+          DEFAULT_PSW_WIX_VERSION: '6.0.0-psw-wix.0291-16'
 
       - name: Prepare for build
         run: |
