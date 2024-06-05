@@ -5231,6 +5231,13 @@ namespace PanelSw.Wix.Extensions
                         case "Condition":
                             condition = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
+                        case "Order":
+                            order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                            if (order < 0)
+                            {
+                                order += int.MaxValue;
+                            }
+                            break;
 
                         default:
                             Core.UnexpectedAttribute(sourceLineNumbers, attrib);
