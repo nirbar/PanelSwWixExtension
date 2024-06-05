@@ -4327,6 +4327,13 @@ namespace PanelSw.Wix.Extensions
                         case "Condition":
                             condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
+                        case "Order":
+                            order = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                            if (order < 0)
+                            {
+                                order += int.MaxValue;
+                            }
+                            break;
 
                         default:
                             ParseHelper.UnexpectedAttribute(element, attrib);
