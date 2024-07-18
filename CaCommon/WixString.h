@@ -572,7 +572,7 @@ public:
 
 		if (!_pS)
 		{
-			hr = Format(L"%ls\0", sz);
+			hr = Format(L"%ls%lc", sz, L'\0');
 			ExitOnFailure(hr, "Failed to allocate string");
 			ExitFunction();
 		}
