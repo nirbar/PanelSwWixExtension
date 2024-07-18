@@ -997,7 +997,7 @@ HRESULT CExecOnComponent::SetEnvironment(CWixString* pszEnvironmentMultiSz, cons
 			BOOL bFound = FALSE;
 			for (LPCWSTR szCurr = nullptr; SUCCEEDED(pszEnvironmentMultiSz->MultiStringGet(i, &szCurr)); ++i)
 			{
-				LPCWSTR szEqual = wcschr(szCurr, L'=');;
+				LPCWSTR szEqual = wcschr(szCurr, L'=');
 				DWORD dwLen1 = szEqual - szCurr;
 				if (!dwLen1 || !szEqual)
 				{
@@ -1149,7 +1149,6 @@ HRESULT CExecOnComponent::LaunchProcess(IMPERSONATION_CONTEXT* pctxImpersonation
 		bRes = ::CreateProcess(nullptr, szCommand, nullptr, nullptr, TRUE, ::GetPriorityClass(::GetCurrentProcess()) | CREATE_NO_WINDOW | CREATE_UNICODE_ENVIRONMENT, (LPVOID)rgszEnvironment, szWorkingDirectory, &si, &pi);
 		ExitOnNullWithLastError(bRes, hr, "Failed to create process");
 	}
-	WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Launched process '%ls'", szCommand);
 
 	if (phStdOut)
 	{
