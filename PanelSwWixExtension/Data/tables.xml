@@ -365,6 +365,16 @@
     <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
   </tableDefinition>
 
+  <tableDefinition name="PSW_ApplicationPoolConfig">
+    <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
+    <columnDefinition name="Component_" type="string" length="72" modularize="column" keyTable="Component" keyColumn="1" category="identifier"/>
+    <columnDefinition name="ApplicationPool" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="Stop" type="number" length="2" minValue="0" maxValue="1" />
+    <columnDefinition name="Start" type="number" length="2" minValue="0" maxValue="1" />
+    <columnDefinition name="ErrorHandling" type="number" minValue="0" maxValue="2" length="2" />
+    <columnDefinition name="Order" type="number" length="4" minValue="0" maxValue="2147483647" />
+  </tableDefinition>
+
   <tableDefinition name="PSW_VersionCompare">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
     <columnDefinition name="Property_" type="string" length="0" modularize="property" category="identifier" />

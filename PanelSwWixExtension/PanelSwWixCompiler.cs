@@ -253,6 +253,10 @@ namespace PanelSw.Wix.Extensions
                                 ParseWebsiteConfigElement(element, componentId);
                                 break;
 
+                            case "ApplicationPoolConfig":
+                                ParseApplicationPoolConfigElement(element, componentId);
+                                break;
+
                             case "XslTransform":
                                 ParseXslTransform(element, componentId, null);
                                 break;
@@ -847,6 +851,10 @@ namespace PanelSw.Wix.Extensions
                     customActions.Add("PSW_WebsiteConfigSched");
                     customActions.Add("PSW_WebsiteConfigExec");
                     break;
+                case "PSW_ApplicationPoolConfig":
+                    customActions.Add("PSW_ApplicationPoolConfigSched");
+                    customActions.Add("PSW_ApplicationPoolConfigExec");
+                    break;
                 case "PSW_VersionCompare":
                     customActions.Add("PSW_VersionCompare");
                     break;
@@ -1306,6 +1314,85 @@ namespace PanelSw.Wix.Extensions
             row[5] = (autoStart == YesNoDefaultType.Yes) ? 1 : (autoStart == YesNoDefaultType.No) ? 0 : -1;
             row[6] = (int)promptOnError;
             row[7] = order;
+        }
+
+        private void ParseApplicationPoolConfigElement(XmlElement element, string component)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
+            string id = "wap" + Guid.NewGuid().ToString("N");
+            string appPool = null;
+            bool stop = false;
+            bool start = false;
+            ErrorHandling promptOnError = ErrorHandling.fail;
+            int order = 1000000000 + GetLineNumber(sourceLineNumbers);
+
+            foreach (XmlAttribute attrib in element.Attributes)
+            {
+                if ((0 != attrib.NamespaceURI.Length) && (attrib.NamespaceURI != schema.TargetNamespace))
+                {
+                    continue;
+                }
+
+                switch (attrib.LocalName)
+                {
+                    case "ApplicationPool":
+                        appPool = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        break;
+                    case "Stop":
+                        stop = (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes);
+                        break;
+                    case "Start":
+                        start = (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes);
+                        break;
+                    case "ErrorHandling":
+                        {
+                            string a = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            try
+                            {
+                                promptOnError = (ErrorHandling)Enum.Parse(typeof(ErrorHandling), a);
+                            }
+                            catch
+                            {
+                                Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                            }
+                        }
+                        break;
+                    case "Order":
+                        order = Core.GetAttributeIntegerValue(sourceLineNumbers, attrib, -1000000000, 1000000000);
+                        if (order < 0)
+                        {
+                            order += int.MaxValue;
+                        }
+                        break;
+                    default:
+                        Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                        break;
+                }
+            }
+
+            if (string.IsNullOrEmpty(component))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, "Component", "Id"));
+            }
+            if (string.IsNullOrEmpty(appPool))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "ApplicationPool"));
+            }
+
+            if (Core.EncounteredError)
+            {
+                return;
+            }
+
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "PSW_ApplicationPoolConfigSched");
+            Row row = Core.CreateRow(sourceLineNumbers, "PSW_ApplicationPoolConfig");
+            row[0] = id;
+            row[1] = component;
+            row[2] = appPool;
+            row[3] = stop ? 1 : 0;
+            row[4] = start ? 1 : 0;
+            row[5] = (int)promptOnError;
+            row[6] = order;
         }
 
         private void ParseIsWindowsVersionOrGreater(XmlNode node)

@@ -1041,6 +1041,46 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
     </xs:complexType>
   </xs:element>
 
+  <xs:element name="ApplicationPoolConfig">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Component" />
+      </xs:appinfo>
+      <xs:documentation><![CDATA[Configure an existing IIS application pool. Note that it may be useful to schedule this action after WiX iis extension's ConfigureIIs action.]]></xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="ApplicationPool" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Target application pool name. This field is formatted]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Stop" type="wix:YesNoType" use="optional" default="no">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Whether or not to stop the application pool. If both 'Stop' and 'Start' are set to 'yes' then the application pool will restart]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Start" type="wix:YesNoType" use="optional" default="no">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Whether or not to start the application pool. If both 'Stop' and 'Start' are set to 'yes' then the application pool will restart]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="ErrorHandling" use="optional" type="ErrorHandlingType" default="fail">
+            <xs:annotation>
+              <xs:documentation><![CDATA[On error fail, ignore, or prompt user to abort, retry or ignore. Defaults to 'fail']]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Order" use="optional" type="xs:int" default="0">
+            <xs:annotation>
+              <xs:documentation><![CDATA[Order of execution, defaults to line number. Expressions with explicit order field will be executed before expressions with implicit order. Negative Order values will be executed last in increasing order. For example, Order="-1" will be executed last, after Order="-2"]]></xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="ZipFile">
     <xs:annotation>
       <xs:appinfo>

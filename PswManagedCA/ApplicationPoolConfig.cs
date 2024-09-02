@@ -9,41 +9,38 @@ using PswManagedCA.Util;
 
 namespace PswManagedCA
 {
-    public class WebsiteConfig
+    public class ApplicationPoolConfig
     {
         [Serializable]
-        public class WebsiteConfigCatalog
+        public class ApplicationPoolConfigCatalog
         {
             public string Component { get; set; }
-            public string Website { get; set; }
+            public string ApplicationPool { get; set; }
             public bool Stop { get; set; } = false;
             public bool Start { get; set; } = false;
-            public bool? AutoStart { get; set; } = null;
             public ErrorHandling ErrorHandling { get; set; } = ErrorHandling.fail;
         }
 
         [CustomAction]
-        public static ActionResult WebsiteConfigSched(Session session)
+        public static ActionResult ApplicationPoolConfigSched(Session session)
         {
-            AssemblyName me = typeof(WebsiteConfig).Assembly.GetName();
+            AssemblyName me = typeof(ApplicationPoolConfig).Assembly.GetName();
             session.Log($"Initialized from {me.Name} v{me.Version}");
 
-            List<WebsiteConfigCatalog> catalogs = new List<WebsiteConfigCatalog>();
-            using (View view = session.Database.OpenView("SELECT `Component_`, `Website`, `Stop`, `Start`, `AutoStart`, `ErrorHandling` FROM `PSW_WebsiteConfig` ORDER BY `Order`"))
+            List<ApplicationPoolConfigCatalog> catalogs = new List<ApplicationPoolConfigCatalog>();
+            using (View view = session.Database.OpenView("SELECT `Component_`, `ApplicationPool`, `Stop`, `Start`, `ErrorHandling` FROM `PSW_ApplicationPoolConfig` ORDER BY `Order`"))
             {
                 view.Execute(null);
 
                 foreach (Record rec in view)
                 {
-                    WebsiteConfigCatalog cfg = new WebsiteConfigCatalog();
+                    ApplicationPoolConfigCatalog cfg = new ApplicationPoolConfigCatalog();
                     using (rec)
                     {
                         cfg.Component = rec.GetString("Component_");
-                        cfg.Website = session.Format(rec.GetString("Website"));
+                        cfg.ApplicationPool = session.Format(rec.GetString("ApplicationPool"));
                         cfg.Stop = (rec.GetInteger("Stop") != 0);
                         cfg.Start = (rec.GetInteger("Start") != 0);
-                        int autoStart = rec.GetInteger("AutoStart");
-                        cfg.AutoStart = (autoStart < 0) ? null : (autoStart == 0) ? (bool?)false : true;
                         cfg.ErrorHandling = (ErrorHandling)rec.GetInteger("ErrorHandling");
                     }
 
@@ -61,16 +58,16 @@ namespace PswManagedCA
                             break;
 
                         default:
-                            session.Log($"Component '{ci.Name}' action isn't install, or repair. Skipping WebsiteConfig for '{cfg.Website}'");
+                            session.Log($"Component '{ci.Name}' action isn't install, or repair. Skipping ApplicationPoolConfig for '{cfg.ApplicationPool}'");
                             continue;
                     }
 
-                    if (string.IsNullOrEmpty(cfg.Website))
+                    if (string.IsNullOrEmpty(cfg.ApplicationPool))
                     {
-                        session.Log($"Website name is empty for component '{ci.Name}'");
+                        session.Log($"ApplicationPool name is empty for component '{ci.Name}'");
                         return ActionResult.Failure;
                     }
-                    session.Log($"Will configure website '{cfg.Website}'");
+                    session.Log($"Will configure application pool '{cfg.ApplicationPool}'");
                     catalogs.Add(cfg);
                 }
             }
@@ -81,8 +78,8 @@ namespace PswManagedCA
                 using (StringWriter sw = new StringWriter())
                 {
                     srlz.Serialize(sw, catalogs);
-                    session["PSW_WebsiteConfigExec"] = sw.ToString();
-                    session.DoAction("PSW_WebsiteConfigExec");
+                    session["PSW_ApplicationPoolConfigExec"] = sw.ToString();
+                    session.DoAction("PSW_ApplicationPoolConfigExec");
                 }
             }
 
@@ -90,17 +87,17 @@ namespace PswManagedCA
         }
 
         [CustomAction]
-        public static ActionResult WebsiteConfigExec(Session session)
+        public static ActionResult ApplicationPoolConfigExec(Session session)
         {
-            AssemblyName me = typeof(WebsiteConfig).Assembly.GetName();
+            AssemblyName me = typeof(ApplicationPoolConfig).Assembly.GetName();
             session.Log($"Initialized from {me.Name} v{me.Version}");
 
-            List<WebsiteConfigCatalog> actions = new List<WebsiteConfigCatalog>();
+            List<ApplicationPoolConfigCatalog> actions = new List<ApplicationPoolConfigCatalog>();
             XmlSerializer srlz = new XmlSerializer(actions.GetType());
             string cad = session["CustomActionData"];
             using (StringReader sr = new StringReader(cad))
             {
-                IEnumerable<WebsiteConfigCatalog> ctlgs = srlz.Deserialize(sr) as IEnumerable<WebsiteConfigCatalog>;
+                IEnumerable<ApplicationPoolConfigCatalog> ctlgs = srlz.Deserialize(sr) as IEnumerable<ApplicationPoolConfigCatalog>;
                 if (ctlgs == null)
                 {
                     return ActionResult.Success;
@@ -108,27 +105,27 @@ namespace PswManagedCA
                 actions.AddRange(ctlgs);
             }
 
-            foreach (WebsiteConfigCatalog ctlg in actions)
+            foreach (ApplicationPoolConfigCatalog ctlg in actions)
             {
             LRetry:
                 try
                 {
-                    WebsiteConfigExec(session, ctlg);
+                    ApplicationPoolConfigExec(session, ctlg);
                 }
                 catch (Exception ex)
                 {
-                    switch (session.HandleError(ctlg.ErrorHandling, (int)PswErrorMessages.WebsiteConfigFailure, ctlg.Website, ex.Message))
+                    switch (session.HandleError(ctlg.ErrorHandling, (int)PswErrorMessages.ApplicationPoolConfigFailure, ctlg.ApplicationPool, ex.Message))
                     {
                         default: // Silent / fail
-                            session.Log($"User aborted on failure to configure website {ctlg.Website}. {ex.Message}");
+                            session.Log($"User aborted on failure to configure application pool {ctlg.ApplicationPool}. {ex.Message}");
                             return ActionResult.Failure;
 
                         case MessageResult.Ignore:
-                            session.Log($"User ignored failure to configure website {ctlg.Website}. {ex.Message}");
+                            session.Log($"User ignored failure to configure application pool {ctlg.ApplicationPool}. {ex.Message}");
                             continue;
 
                         case MessageResult.Retry:
-                            session.Log($"User retry on failure to configure website {ctlg.Website}. {ex.Message}");
+                            session.Log($"User retry on failure to configure application pool {ctlg.ApplicationPool}. {ex.Message}");
                             goto LRetry;
                     }
                 }
@@ -137,52 +134,46 @@ namespace PswManagedCA
             return ActionResult.Success;
         }
 
-        private static void WebsiteConfigExec(Session session, WebsiteConfigCatalog cfg)
+        private static void ApplicationPoolConfigExec(Session session, ApplicationPoolConfigCatalog cfg)
         {
             using (ServerManager manager = new ServerManager())
             {
-                Site site = manager.Sites[cfg.Website];
-                if (site == null)
+                ApplicationPool appPool = manager.ApplicationPools[cfg.ApplicationPool];
+                if (appPool == null)
                 {
-                    throw new Exception($"Could not find '{cfg.Website}' website");
+                    throw new Exception($"Could not find '{cfg.ApplicationPool}' application pool");
                 }
 
                 if (cfg.Stop)
                 {
-                    session.Log($"Stopping site '{cfg.Website}'");
-                    site.Stop();
+                    session.Log($"Stopping application pool '{cfg.ApplicationPool}'");
+                    appPool.Stop();
                     manager.CommitChanges();
 
-                    switch (site.State)
+                    switch (appPool.State)
                     {
                         case ObjectState.Stopped:
                         case ObjectState.Stopping:
                             break;
 
                         default:
-                            throw new Exception("Failed stopping website");
+                            throw new Exception("Failed stopping application pool");
                     }
-                }
-                if (cfg.AutoStart != null)
-                {
-                    session.Log($"Configuring site AutoStart to '{cfg.AutoStart}'");
-                    site.ServerAutoStart = (bool)cfg.AutoStart;
-                    manager.CommitChanges();
                 }
                 if (cfg.Start)
                 {
-                    session.Log($"Starting site '{cfg.Website}'");
-                    site.Start();
+                    session.Log($"Starting application pool '{cfg.ApplicationPool}'");
+                    appPool.Start();
                     manager.CommitChanges();
 
-                    switch (site.State)
+                    switch (appPool.State)
                     {
                         case ObjectState.Started:
                         case ObjectState.Starting:
                             break;
 
                         default:
-                            throw new Exception("Failed starting website");
+                            throw new Exception("Failed starting application pool");
                     }
                 }
             }

@@ -37,7 +37,8 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
   - *ExecuteCommand*: Launch a deferred command
   - *RestartLocalResources*: Register processes with the Restart Manager if they reside in the specified folder
   - *XslTransform*: Apply a XSL transform on an installed XML file
-  - *WebsiteConfig*: currently, can only stop a website
+  - *WebsiteConfig*: Start or stop a website
+  - *ApplicationPoolConfig*: Start or stop an IIS application pool
   - *JsonJPath*: Set values in JSON-formatted file.
   - *Dism*: Enable or disable Windows Features using DISM API. Features will be modified when the parent component is being installed or repaired.
   - *ZipFile*: Creates a ZIP archive from selected files.
@@ -96,6 +97,7 @@ PanelSwWixExtension uses error codes in Error table:
 - 27014: Prompt on failure to create a ZIP archive
 - 27015: Prompt on failure to unzip a ZIP archive
 - 27016: Prompt on failure to unzip a file from ZIP archive
+- 27017: ApplicationPoolConfig error template for prompting user on errors.
 
 ## Properties
 
@@ -207,5 +209,5 @@ After building a unit test project, you'll need to shutdown Visual Studio before
 This is due to the unfortunate habit of Visual Studio to hold the extension file in use.
 You may find it convenient to build unit test projects from a command prompt to workaround this limitation
 ~~~~~~~~~~~~
-MSBuild UnitTests\ExecOnComponentUT\ExecOnComponentUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
+MSBuild UnitTests\WebsiteConfigUT\WebsiteConfigUT.wixproj /p:Configuration=Release /p:Platform=x86 /t:Rebuild "/p:SolutionDir=%CD%\\"
 ~~~~~~~~~~~~

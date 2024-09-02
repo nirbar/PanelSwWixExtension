@@ -52,7 +52,10 @@
 [2]]]>
   </String>
   <String Overridable="yes" Id="PSW_WebsiteConfig"><![CDATA[עדכון אתרי IIS]]></String>
-  <String Overridable="yes" Id="WebsiteConfigFailure"><![CDATA[כשלון בעדכון אתרי IIS [2]
+  <String Overridable="yes" Id="WebsiteConfigFailure"><![CDATA[כשלון בעדכון אתר IIS [2]
+[3]]]></String>
+  <String Overridable="yes" Id="PSW_ApplicationPoolConfig"><![CDATA[עדכון מאגרי יישומים IIS]]></String>
+  <String Overridable="yes" Id="ApplicationPoolConfigFailure"><![CDATA[כשלון בעדכון מאגר יישומים IIS [2]
 [3]]]></String>
   <String Overridable="yes" Id="PSW_VersionCompare"><![CDATA[השוואת גרסאות]]></String>
   <String Overridable="yes" Id="PSW_PathSearch"><![CDATA[חיפוש קבצים במשתנה סביבה PATH]]></String>

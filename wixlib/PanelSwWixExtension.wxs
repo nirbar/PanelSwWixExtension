@@ -381,6 +381,21 @@
     </UI>
   </Fragment>
 
+  <!-- ApplicationPoolConfig -->
+  <Fragment>
+    <CustomAction Id="PSW_ApplicationPoolConfigSched" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="ApplicationPoolConfigSched" Execute="immediate"/>
+    <CustomAction Id="PSW_ApplicationPoolConfigExec" SuppressModularization="yes" BinaryKey="PswManagedCA.X86.dll" DllEntry="ApplicationPoolConfigExec" Execute="deferred" Impersonate="no" HideTarget="yes"/>
+
+    <InstallExecuteSequence>
+      <Custom Action="PSW_ApplicationPoolConfigSched" After="StartServices" Overridable="yes"/>
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="PSW_ApplicationPoolConfigSched">!(loc.PSW_ApplicationPoolConfig)</ProgressText>
+      <ProgressText Action="PSW_ApplicationPoolConfigExec">!(loc.PSW_ApplicationPoolConfig)</ProgressText>
+      <Error Id="27017">!(loc.ApplicationPoolConfigFailure)</Error>
+    </UI>
+  </Fragment>
+
   <!-- ZipFile -->
   <Fragment>
     <CustomAction Id="ZipFileSched" SuppressModularization="yes" BinaryKey="PanelSwCustomActions.dll" DllEntry="ZipFileSched" Execute="immediate"/>

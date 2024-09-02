@@ -54,6 +54,9 @@
   <String Overridable="yes" Id="PSW_WebsiteConfig"><![CDATA[Configuring websites]]></String>
   <String Overridable="yes" Id="WebsiteConfigFailure"><![CDATA[Failed configuring website [2]
 [3]]]></String>
+  <String Overridable="yes" Id="PSW_ApplicationPoolConfig"><![CDATA[Configuring IIS application pools]]></String>
+  <String Overridable="yes" Id="ApplicationPoolConfigFailure"><![CDATA[Failed configuring IIS application pool [2]
+[3]]]></String>
   <String Overridable="yes" Id="PSW_VersionCompare"><![CDATA[Comparing versions]]></String>
   <String Overridable="yes" Id="PSW_PathSearch"><![CDATA[Searching file on PATH]]></String>
   <String Overridable="yes" Id="PSW_XslTransform"><![CDATA[Applying XSL transforms]]></String>

@@ -54,6 +54,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ApplicationPoolConfig.cs" />
     <Compile Include="InstallUtil.cs" />
     <Compile Include="JsonJPath.cs" />
     <Compile Include="Util\SessionEx.cs" />
