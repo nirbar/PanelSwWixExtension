@@ -131,7 +131,7 @@ namespace PanelSw.Wix.Extensions
                 entries.Add(new SevenZap.SevenZap.FileEntry { EntryName = PanelSwWixExtension.CONTAINER_EXTENSION_ID, FullPath = xmlFile });
             }
 
-            SevenZap.SevenZap.UpdateArchive(container.WorkingPath, entries);
+            SevenZap.SevenZap.UpdateArchive(container.WorkingPath, entries, Context.CancellationToken);
 
             if (!string.IsNullOrEmpty(xmlFile))
             {

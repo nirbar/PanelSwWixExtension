@@ -567,13 +567,12 @@ namespace PanelSw.Wix.Extensions
 
             ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "ConcatFiles");
 
-            string tmpPath = Path.GetTempPath();
             int splitCnt = (int)Math.Ceiling(1m * fileInfo.Length / splitSize);
             for (int i = 1; i < splitCnt; ++i)
             {
                 XElement splitFileElement = new XElement(fileElement);
                 string splId = "spl" + Guid.NewGuid().ToString("N");
-                string splFile = Path.Combine(tmpPath, splId);
+                string splFile = Path.Combine(Context.IntermediateFolder, splId);
                 File.Create(splFile).Dispose();
 
                 splitFileElement.SetAttributeValue("KeyPath", "no");
@@ -4632,7 +4631,6 @@ namespace PanelSw.Wix.Extensions
 
             concatFiles.Sort(new ConcatFilesComparer());
 
-            string tmpPath = Path.GetTempPath();
             FileSymbol rootWixFile = null;
             int splitSize = Int32.MaxValue;
             FileStream rootFileStream = null;
@@ -4656,7 +4654,7 @@ namespace PanelSw.Wix.Extensions
                         rootFileStream = File.OpenRead(rootWixFile.Source.Path);
 
                         string splId = "spl" + Guid.NewGuid().ToString("N");
-                        rootWixFile.Source.Path = Path.Combine(tmpPath, splId);
+                        rootWixFile.Source.Path = Path.Combine(Context.IntermediateFolder, splId);
                         CopyFilePart(rootFileStream, rootWixFile.Source.Path, splitSize);
                     }
 

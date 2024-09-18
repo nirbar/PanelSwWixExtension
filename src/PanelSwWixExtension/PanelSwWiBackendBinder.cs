@@ -7,6 +7,7 @@ using WixToolset.Data;
 using WixToolset.Data.Symbols;
 using WixToolset.Data.WindowsInstaller;
 using WixToolset.Extensibility;
+using WixToolset.Extensibility.Data;
 
 namespace PanelSw.Wix.Extensions
 {
@@ -532,16 +533,6 @@ namespace PanelSw.Wix.Extensions
 
         #region Bind split files
 
-        private List<string> tempFiles_ = new List<string>();
-        ~PanelSwWiBackendBinder()
-        {
-            // Delete temporary files
-            foreach (string f in tempFiles_)
-            {
-                File.Delete(f);
-            }
-        }
-
         public override void SymbolsFinalized(IntermediateSection section)
         {
             base.SymbolsFinalized(section);
@@ -716,15 +707,19 @@ namespace PanelSw.Wix.Extensions
             // Collect temporary file paths to later delete
             foreach (PSW_ConcatFiles concat in concatFiles)
             {
-                FileSymbol fileSymbol = allFiles.FirstOrDefault(f => f.Id.Id.Equals(concat.RootFile_));
-                if ((fileSymbol != null) && !tempFiles_.Contains(fileSymbol.Source.Path))
+                FileSymbol fileSymbol = allFiles.FirstOrDefault(f => f.Id.Id.Equals(concat.MyFile_));
+                if (fileSymbol != null)
                 {
-                    tempFiles_.Add(fileSymbol.Source.Path);
+                    BackendHelper.TrackFile(fileSymbol.Source.Path, TrackedFileType.Temporary, fileSymbol.SourceLineNumbers);
                 }
-                fileSymbol = allFiles.FirstOrDefault(f => f.Id.Id.Equals(concat.MyFile_));
-                if ((fileSymbol != null) && !tempFiles_.Contains(fileSymbol.Source.Path))
+
+                if (concat.Order == 1)
                 {
-                    tempFiles_.Add(fileSymbol.Source.Path);
+                    fileSymbol = allFiles.FirstOrDefault(f => f.Id.Id.Equals(concat.RootFile_));
+                    if (fileSymbol != null)
+                    {
+                        BackendHelper.TrackFile(fileSymbol.Source.Path, TrackedFileType.Temporary, fileSymbol.SourceLineNumbers);
+                    }
                 }
             }
         }
