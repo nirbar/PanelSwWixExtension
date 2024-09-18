@@ -2,8 +2,8 @@
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <Wix4Version Condition=" '$(Wix4Version)' == '' ">5.0.0</Wix4Version>
-    <PanelSwWix4Version Condition=" '$(PanelSwWix4Version)' == '' ">6.0.0-psw-wix.0291-16</PanelSwWix4Version>
-    <SevenZapVersion Condition=" '$(SevenZapVersion)' == '' ">23.1.33</SevenZapVersion>
+    <PanelSwWix4Version Condition=" '$(PanelSwWix4Version)' == '' ">6.0.0-psw-wix.0298-20</PanelSwWix4Version>
+    <SevenZapVersion Condition=" '$(SevenZapVersion)' == '' ">23.1.37</SevenZapVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="WixToolset.DUtil" version="$(Wix4Version)" />

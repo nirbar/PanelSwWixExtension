@@ -11,17 +11,17 @@ on:
       psw_wix_version:
         description: 'PanelSwWix4 version'
         required: true
-        default: 6.0.0-psw-wix.0291-16
+        default: 6.0.0-psw-wix.0298-20
         type: string
 
 jobs:
   PanelSwWixExtension-Build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v3.3.0
+      - uses: actions/checkout@v4.1.7
         with:
           submodules: 'true'
-      - uses: microsoft/setup-msbuild@v1
+      - uses: microsoft/setup-msbuild@v2
 
       - name: Resolve build version
         run: |
@@ -37,7 +37,7 @@ jobs:
             Add-Content -Path ${{ github.env }} -Value "PSW_WIX_VERSION=${{ env.DEFAULT_PSW_WIX_VERSION }}"
           }
         env:
-          DEFAULT_PSW_WIX_VERSION: '6.0.0-psw-wix.0291-16'
+          DEFAULT_PSW_WIX_VERSION: '6.0.0-psw-wix.0298-20'
 
       - name: Prepare for build
         run: |
@@ -54,7 +54,7 @@ jobs:
           Remove-Item ("${{ github.workspace }}" + "\build") -Recurse -Force
           msbuild src/dirs.proj -restore -p:FullVersion=${{ env.FULL_VERSION }} "-p:PanelSwWix4Version=${{ env.PSW_WIX_VERSION }}" -p:NugetPrereleaseVersion=-psw-wix -p:EnableZipContainer=true
 
-      - uses: actions/upload-artifact@v3.1.2
+      - uses: actions/upload-artifact@v4.4.0
         with:
           name: nuget
           path: nuget-out\*.nupkg
