@@ -6,6 +6,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
     <OutputType>Bundle</OutputType>
+    <DefaultCompressionLevel>Low</DefaultCompressionLevel>
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\DeferredExePackage\DeferredExePackage.vcxproj"/>
