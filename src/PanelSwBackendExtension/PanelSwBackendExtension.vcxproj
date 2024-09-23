@@ -48,6 +48,7 @@
       <SubSystem>Windows</SubSystem>
       <TargetMachine Condition="'$(Platform)' == 'x86'">MachineX86</TargetMachine>
       <ModuleDefinitionFile>PanelSwBackendExtension.def</ModuleDefinitionFile>
+      <ImageHasSafeExceptionHandlers Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">false</ImageHasSafeExceptionHandlers>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

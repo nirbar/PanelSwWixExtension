@@ -16,7 +16,7 @@ namespace PanelSw.Wix.Extensions
     {
         public override IReadOnlyCollection<string> ContainerExtensionIds => new[] { PanelSwWixExtension.CONTAINER_EXTENSION_ID };
 
-        public override void CreateContainer(WixBundleContainerSymbol container, IEnumerable<WixBundlePayloadSymbol> containerPayloads, out string sha512, out long size)
+        public override void CreateContainer(WixBundleContainerSymbol container, IEnumerable<WixBundlePayloadSymbol> containerPayloads, WixToolset.Data.CompressionLevel? level, out string sha512, out long size)
         {
             sha512 = null;
             size = 0;
@@ -48,7 +48,7 @@ namespace PanelSw.Wix.Extensions
                         CreateContainerZip(container, containerPayloads);
                         break;
                     case PSW_ContainerTemplate.ContainerCompressionType.SevenZip:
-                        CreateContainerLzma(container, containerPayloads);
+                        CreateContainerLzma(container, containerPayloads, level);
                         break;
                 }
                 CalculateHashAndSize(container.WorkingPath, out sha512, out size);
@@ -82,7 +82,7 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void CreateContainerLzma(WixBundleContainerSymbol container, IEnumerable<WixBundlePayloadSymbol> containerPayloads)
+        private void CreateContainerLzma(WixBundleContainerSymbol container, IEnumerable<WixBundlePayloadSymbol> containerPayloads, WixToolset.Data.CompressionLevel? level)
         {
             string xmlFile = null;
             XmlDocument xmlDocument = null;
@@ -131,7 +131,23 @@ namespace PanelSw.Wix.Extensions
                 entries.Add(new SevenZap.SevenZap.FileEntry { EntryName = PanelSwWixExtension.CONTAINER_EXTENSION_ID, FullPath = xmlFile });
             }
 
-            SevenZap.SevenZap.UpdateArchive(container.WorkingPath, entries, Context.CancellationToken);
+            // Compression level
+            SevenZap.SevenZap.CompressionLevel level7z = SevenZap.SevenZap.CompressionLevel.X5_Medium;
+            switch (level)
+            {
+                case WixToolset.Data.CompressionLevel.None:
+                case WixToolset.Data.CompressionLevel.Low:
+                    level7z = SevenZap.SevenZap.CompressionLevel.X1_Fastest;
+                    break;
+                case WixToolset.Data.CompressionLevel.Medium:
+                    level7z = SevenZap.SevenZap.CompressionLevel.X5_Medium;
+                    break;
+                case WixToolset.Data.CompressionLevel.High:
+                    level7z = SevenZap.SevenZap.CompressionLevel.X9_Smallest;
+                    break;
+            }
+
+            SevenZap.SevenZap.UpdateArchive(container.WorkingPath, entries, Context.CancellationToken, level7z);
 
             if (!string.IsNullOrEmpty(xmlFile))
             {
