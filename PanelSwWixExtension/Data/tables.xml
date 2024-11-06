@@ -417,7 +417,8 @@
   <tableDefinition name="PSW_IsWindowsVersionOrGreater">
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
     <columnDefinition name="Property_" type="string" length="72" modularize="column" category="identifier" />
-    <columnDefinition name="Version" type="string" length="0" modularize="none" category="version" />
+    <columnDefinition name="MinVersion" type="string" length="0" modularize="none" category="version" />
+    <columnDefinition name="MaxVersion" type="string" length="0" modularize="none" category="version" nullable="yes" />
   </tableDefinition>
 
   <tableDefinition name="PSW_Payload">

@@ -1399,7 +1399,8 @@ namespace PanelSw.Wix.Extensions
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(node);
             string property = null;
-            string version = null;
+            string minVersion = null;
+            string maxVersion = null;
 
             if (node.ParentNode.LocalName != "Property")
             {
@@ -1418,7 +1419,23 @@ namespace PanelSw.Wix.Extensions
                     switch (attrib.LocalName)
                     {
                         case "Version":
-                            version = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            Core.OnMessage(WixWarnings.DeprecatedAttribute(sourceLineNumbers, node.LocalName, attrib.LocalName, "MinVersion"));
+                            if (minVersion != null)
+                            {
+                                Core.OnMessage(WixErrors.IllegalAttributeWithOtherAttribute(sourceLineNumbers, node.LocalName, attrib.LocalName, "MinVersion"));
+                                break;
+                            }
+                            minVersion = Core.GetAttributeVersionValue(sourceLineNumbers, attrib, true);
+                            break;
+                        case "MinVersion":
+                            if (minVersion != null)
+                            {
+                                Core.OnMessage(WixErrors.IllegalAttributeWithOtherAttribute(sourceLineNumbers, node.LocalName, attrib.LocalName, "Version"));
+                            }
+                            minVersion = Core.GetAttributeVersionValue(sourceLineNumbers, attrib, true);
+                            break;
+                        case "MaxVersion":
+                            maxVersion = Core.GetAttributeVersionValue(sourceLineNumbers, attrib, true);
                             break;
 
                         default:
@@ -1432,13 +1449,15 @@ namespace PanelSw.Wix.Extensions
             {
                 Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.ParentNode.LocalName, "Id"));
             }
-            if (string.IsNullOrEmpty(version))
+            if (string.IsNullOrEmpty(minVersion))
             {
-                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "Version"));
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, node.LocalName, "MinVersion"));
             }
-            if (!Version.TryParse(version, out Version v))
+            if (!string.IsNullOrEmpty(maxVersion) && Version.TryParse(maxVersion, out Version v))
             {
-                Core.OnMessage(WixErrors.IllegalVersionValue(sourceLineNumbers, node.LocalName, "Version", version));
+                int build = v.Build >= 0 ? v.Build : 0xFFFF;
+                int revision = v.Revision >= 0 ? v.Revision : 0xFFFF;
+                maxVersion = $"{v.Major}.{v.Minor}.{build}.{revision}";
             }
 
             // find unexpected child elements
@@ -1457,7 +1476,8 @@ namespace PanelSw.Wix.Extensions
                 Row row = Core.CreateRow(sourceLineNumbers, "PSW_IsWindowsVersionOrGreater");
                 row[0] = "wmv" + Guid.NewGuid().ToString("N");
                 row[1] = property;
-                row[2] = version;
+                row[2] = minVersion;
+                row[3] = maxVersion;
             }
         }
 

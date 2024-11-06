@@ -236,15 +236,25 @@
         <xse:parent namespace="http://schemas.microsoft.com/wix/2006/wi" ref="Property" />
       </xs:appinfo>
       <xs:documentation>
-        <![CDATA[Test whether Kernel32.dll's version is at least the given version. If yes, set the property to 1.]]>
+        <![CDATA[Test whether Kernel32.dll's product version is at least the given version. If yes, set the property to 1.]]>
       </xs:documentation>
     </xs:annotation>
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Version" type="xs:string" use="required">
+          <xs:attribute name="Version" type="xs:string" use="optional">
             <xs:annotation>
-              <xs:documentation>Minimal version to test. The version is compared against Kernel32.dll's version. The property is set to 1 if Kernel32.dll's is at least the minimal version. Otherwise, the property is unmodified.</xs:documentation>
+              <xs:documentation>Deperecated. Use MinVersion instead</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="MinVersion" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Minimal version to test. The version is compared against Kernel32.dll's product version. The property is set to 1 if Kernel32.dll's is at least the minimal version. Otherwise, the property is unmodified.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="MaxVersion" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Maximal version to test. The version is compared against Kernel32.dll's product version. The property is set to 1 if Kernel32.dll's is not greater than the maximal version. Otherwise, the property is unmodified.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>

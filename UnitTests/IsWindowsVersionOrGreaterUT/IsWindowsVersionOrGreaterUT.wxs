@@ -22,17 +22,17 @@
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
 
     <Property Id="TEST_5_0">
-      <PanelSW:IsWindowsVersionOrGreater Version="5.0" />
+      <PanelSW:IsWindowsVersionOrGreater MinVersion="5.0" />
     </Property>
     <Property Id="TEST_10">
-      <PanelSW:IsWindowsVersionOrGreater Version="6.3.18362" />
+      <PanelSW:IsWindowsVersionOrGreater MinVersion="10.0.18362" MaxVersion="10.0.21999" />
     </Property>
     <Property Id="TEST_11">
-      <PanelSW:IsWindowsVersionOrGreater Version="6.3.22000" />
+      <PanelSW:IsWindowsVersionOrGreater MinVersion="10.0.22000" />
     </Property>
 
     <Condition Message="Surely we're no older than Windows 5.0"><![CDATA[Installed Or TEST_5_0]]></Condition>
-    <Condition Message="Surely we're no older than Windows 10.0"><![CDATA[Installed Or TEST_10]]></Condition>
+    <Condition Message="Surely we're no older than Windows 10.0"><![CDATA[Installed Or TEST_11 Or TEST_10]]></Condition>
     <Condition Message="Surely we're no older than Windows 11.0"><![CDATA[Installed Or TEST_11]]></Condition>
     <CustomActionRef Id="TerminateSuccessfully_Immediate"/>
   </Product>
