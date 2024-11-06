@@ -8,7 +8,6 @@ using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 using WixToolset.Data;
-using WixToolset.Data.Burn;
 using WixToolset.Data.Symbols;
 using WixToolset.Data.WindowsInstaller;
 using WixToolset.Extensibility;
@@ -1265,7 +1264,8 @@ namespace PanelSw.Wix.Extensions
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string property = null;
-            string version = null;
+            string minVersion = null;
+            string maxVersion = null;
 
             if (element.Parent.Name.LocalName != "Property")
             {
@@ -1284,7 +1284,23 @@ namespace PanelSw.Wix.Extensions
                     switch (attrib.Name.LocalName)
                     {
                         case "Version":
-                            version = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            Messaging.Write(WarningMessages.DeprecatedAttribute(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, "MinVersion"));
+                            if (minVersion != null)
+                            {
+                                Messaging.Write(ErrorMessages.IllegalAttributeWithOtherAttribute(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, "MinVersion"));
+                                break;
+                            }
+                            minVersion = ParseHelper.GetAttributeVersionValue(sourceLineNumbers, attrib);
+                            break;
+                        case "MinVersion":
+                            if (minVersion != null)
+                            {
+                                Messaging.Write(ErrorMessages.IllegalAttributeWithOtherAttribute(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, "Version"));
+                            }
+                            minVersion = ParseHelper.GetAttributeVersionValue(sourceLineNumbers, attrib);
+                            break;
+                        case "MaxVersion":
+                            maxVersion = ParseHelper.GetAttributeVersionValue(sourceLineNumbers, attrib);
                             break;
 
                         default:
@@ -1298,13 +1314,9 @@ namespace PanelSw.Wix.Extensions
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Parent.Name.LocalName, "Id"));
             }
-            if (string.IsNullOrEmpty(version))
+            if (string.IsNullOrEmpty(minVersion))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Version"));
-            }
-            if (!Version.TryParse(version, out Version v))
-            {
-                Messaging.Write(ErrorMessages.IllegalVersionValue(sourceLineNumbers, element.Name.LocalName, "Version", version));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "MinVersion"));
             }
 
             if (CheckNoCData(element) && !Messaging.EncounteredError)
@@ -1313,7 +1325,13 @@ namespace PanelSw.Wix.Extensions
 
                 PSW_IsWindowsVersionOrGreater row = section.AddSymbol(new PSW_IsWindowsVersionOrGreater(sourceLineNumbers));
                 row.Property_ = property;
-                row.Version = v;
+                row.MinVersion = Version.Parse(minVersion);
+                if (!string.IsNullOrEmpty(maxVersion) && Version.TryParse(maxVersion, out Version v))
+                {
+                    int build = v.Build >= 0 ? v.Build : 0xFFFF;
+                    int revision = v.Revision >= 0 ? v.Revision : 0xFFFF;
+                    row.MaxVersion = new Version(v.Major, v.Minor, build, revision);
+                }
             }
         }
 
