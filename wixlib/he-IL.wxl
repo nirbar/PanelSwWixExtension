@@ -82,4 +82,6 @@
   <String Overridable="yes" Id="UnzipFileError"><![CDATA[אירעה שגיאה בחילוץ הקובץ [2] מארכיון [3]]]></String>
   <String Overridable="yes" Id="IsWindowsVersionOrGreater"><![CDATA[בודק את גירסאת מערכת ההפעלה]]></String>
   <String Overridable="yes" Id="ListProcessorFeatures"><![CDATA[בודק זמינות תכונות של המעבד ]]></String>
+  <String Overridable="yes" Id="PSW_RemoveFolderEx"><![CDATA[מסיר ספריות]]></String>
+  <String Overridable="yes" Id="RemoveReparseData"><![CDATA[מסיר ספריות]]></String>
 </WixLocalization>

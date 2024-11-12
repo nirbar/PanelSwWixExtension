@@ -36,6 +36,24 @@
           <CopyFile Id="DeleteMeDir" DestinationDirectory="DeleteMeDir"/>
         </File>
       </Component>
+
+      <Component>
+        <File Source="$(sys.SOURCEFILEDIR)\run-test.bat" Compressed="no"/>
+
+        <PanelSW:RemoveFolderEx Property="REMOVE_ON_INSTALL" On="install"/>
+        <PanelSW:RemoveFolderEx Property="REMOVE_ON_UNINSTALL" On="uninstall"/>
+        <PanelSW:RemoveFolderEx Property="REMOVE_ON_BOTH" On="both"/>
+
+        <RemoveFile Property="NEVER_REMOVED" Name="*-file.txt" On="both" Id="NEVER_REMOVED.file"/>
+        <RemoveFolder Property="NEVER_REMOVED" On="both" Id="NEVER_REMOVED.dir"/>
+      </Component>
+
+      <Component Transitive="yes">
+        <Condition><![CDATA[Installed]]></Condition>
+        <File Source="$(sys.SOURCEFILEDIR)\run-test.bat" Name="run-test-on-repair.bat"/>
+        <PanelSW:RemoveFolderEx Property="REMOVE_ON_REPAIR" On="install"/>
+      </Component>
+
     </ComponentGroup>
   </Product>
 </Wix>

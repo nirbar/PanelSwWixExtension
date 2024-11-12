@@ -261,6 +261,10 @@ namespace PanelSw.Wix.Extensions
                                 ParseXslTransform(element, componentId, null);
                                 break;
 
+                            case "RemoveFolderEx":
+                                ParseRemoveFolderEx(element, componentId);
+                                break;
+
                             default:
                                 Core.UnexpectedElement(parentElement, element);
                                 break;
@@ -342,6 +346,64 @@ namespace PanelSw.Wix.Extensions
                     Core.UnexpectedElement(parentElement, element);
                     break;
             }
+        }
+
+        enum RemoveFolderExInstallMode
+        {
+            Install = 1,
+            Uninstall = 2,
+            Both = 3,
+        }
+
+        private void ParseRemoveFolderEx(XmlElement element, string componentId)
+        {
+            SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
+            string property = null;
+            RemoveFolderExInstallMode on = RemoveFolderExInstallMode.Uninstall;
+
+            foreach (XmlAttribute attrib in element.Attributes)
+            {
+                if ((0 != attrib.NamespaceURI.Length) && (attrib.NamespaceURI != schema.TargetNamespace))
+                {
+                    continue;
+                }
+
+                switch (attrib.LocalName)
+                {
+                    case "Property":
+                        property = Core.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                        break;
+                    case "On":
+                        string onName = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        if (!Enum.TryParse(onName, true, out on))
+                        {
+                            Core.OnMessage(WixErrors.IllegalAttributeValueWithLegalList(sourceLineNumbers, element.LocalName, attrib.LocalName, onName, $"{nameof(RemoveFolderExInstallMode.Install)}, {nameof(RemoveFolderExInstallMode.Uninstall)}, {nameof(RemoveFolderExInstallMode.Both)}"));
+                        }
+                        break;
+                    default:
+                        Core.UnexpectedAttribute(sourceLineNumbers, attrib);
+                        break;
+                }
+            }
+
+            if (string.IsNullOrEmpty(property))
+            {
+                Core.OnMessage(WixErrors.ExpectedAttribute(sourceLineNumbers, element.LocalName, "Property"));
+            }
+
+            if (Core.EncounteredError)
+            {
+                return;
+            }
+
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "PSW_RemoveFolderEx");
+            Core.EnsureTable(sourceLineNumbers, "RemoveFile");            
+            
+            Row row = Core.CreateRow(sourceLineNumbers, "PSW_RemoveFolderEx");
+            row[0] = $"rmf{Guid.NewGuid().ToString("N")}";
+            row[1] = componentId;
+            row[2] = property;
+            row[3] = (int)on;
         }
 
         private void ParseDuplicateFolderElement(XmlElement element)

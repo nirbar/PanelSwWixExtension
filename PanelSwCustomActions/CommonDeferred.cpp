@@ -14,6 +14,7 @@
 #include "XslTransform.h"
 #include "RestartLocalResources.h"
 #include "ConcatFiles.h"
+#include "ReparsePoint.h"
 
 // ReceiverToExecutorFunc implementation.
 HRESULT ReceiverToExecutor(LPCSTR szReceiver, CDeferredActionBase** ppExecutor)
@@ -90,6 +91,11 @@ HRESULT ReceiverToExecutor(LPCSTR szReceiver, CDeferredActionBase** ppExecutor)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating ConcatFiles handler");
 		(*ppExecutor) = new CConcatFiles();
+	}
+	else if (0 == ::strcmp(szReceiver, "CReparsePoint"))
+	{
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating ReparsePoint handler");
+		(*ppExecutor) = new CReparsePoint();
 	}
 	else
 	{

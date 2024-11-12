@@ -121,6 +121,9 @@
     <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\restartLocalResourcesDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\reparsePointDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\customActionData.pb.h">
@@ -180,6 +183,9 @@
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\restartLocalResourcesDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\reparsePointDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="command.proto" />
@@ -191,6 +197,7 @@
     <None Include="fileRegexDetails.proto" />
     <None Include="obfuscatedString.proto" />
     <None Include="packages.config" />
+    <None Include="reparsePointDetails.proto" />
     <None Include="restartLocalResourcesDetails.proto" />
     <None Include="servciceConfigDetails.proto" />
     <None Include="setPropertyFromPipeDetails.proto" />

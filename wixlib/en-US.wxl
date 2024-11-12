@@ -80,4 +80,6 @@
   <String Overridable="yes" Id="UnzipFileError"><![CDATA[An error ocurred when extracting the file [2] from zip archive [3]]]></String>
   <String Overridable="yes" Id="IsWindowsVersionOrGreater"><![CDATA[Testing Windows version]]></String>
   <String Overridable="yes" Id="ListProcessorFeatures"><![CDATA[Detecting available processor features]]></String>
+  <String Overridable="yes" Id="PSW_RemoveFolderEx"><![CDATA[Removing folders]]></String>
+  <String Overridable="yes" Id="RemoveReparseData"><![CDATA[Removing reparse point data]]></String>
 </WixLocalization>

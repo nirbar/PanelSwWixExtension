@@ -21,6 +21,9 @@
     <Compile Include="FileOperationsUT.wxs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="run-test.bat" />
+  </ItemGroup>
+  <ItemGroup>
     <WixExtension Include="WixUtilExtension">
       <HintPath>$(WixToolPath)\WixUtilExtension.dll</HintPath>
       <Name>WixUtilExtension</Name>

@@ -221,9 +221,10 @@ static HRESULT ReadBinary(LPCWSTR szBinaryKey, LPCWSTR szQueryId, CWixString* ps
 
 	// Ensure null-termination. scoped for local use of pbData1
 	{
+		BYTE* pbData1 = (LPBYTE)::HeapReAlloc(::GetProcessHeap(), HEAP_ZERO_MEMORY, pbData, cbData + 2);
+		ExitOnNull(pbData1, hr, E_OUTOFMEMORY, "Failed reallocating memory");
+
 		cbData += 2;
-		BYTE* pbData1 = (LPBYTE)MemReAlloc(pbData, cbData, TRUE);
-		ExitOnNull(pbData1, hr, E_FAIL, "Failed reallocating memory");
 		pbData = pbData1;
 	}
 

@@ -440,6 +440,13 @@
   </tableDefinition>
 
   <tableDefinition name="PSW_ExecuteCommand" unreal="yes">
-    <columnDefinition name="Id" type="string" length="72" modularize="column" category="identifier" keyTable="Directory" keyColumn="1" primaryKey="yes"/>
+    <columnDefinition name="Id" type="string" length="72" modularize="column" category="identifier" primaryKey="yes"/>
+  </tableDefinition>
+
+  <tableDefinition name="PSW_RemoveFolderEx">
+    <columnDefinition name="Id" type="string" length="72" modularize="column" category="identifier" primaryKey="yes"/>
+    <columnDefinition name="Component_" type="string" length="72" modularize="column" category="identifier" keyTable="Component" keyColumn="1" />
+    <columnDefinition name="Property" type="string" length="72" modularize="column" category="identifier" />
+    <columnDefinition name="InstallMode" type="number" length="2" minValue="1" maxValue="3" description="1 == Remove only when the associated component is being installed (msiInstallStateLocal or msiInstallStateSource), 2 == Remove only when the associated component is being removed (msiInstallStateAbsent), 3 = Remove in either of the above cases."/>
   </tableDefinition>
 </tableDefinitions>

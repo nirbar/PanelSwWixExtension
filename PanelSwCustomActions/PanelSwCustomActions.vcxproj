@@ -104,6 +104,7 @@
     <ClCompile Include="RegistryXmlParser.cpp" />
     <ClCompile Include="RegularExpression.cpp" />
     <ClCompile Include="RemoveRegistryValue.cpp" />
+    <ClCompile Include="ReparsePoint.cpp" />
     <ClCompile Include="Rollback.cpp" />
     <ClCompile Include="ServiceConfig.cpp" />
     <ClCompile Include="SetPropertyFromPipe.cpp" />
@@ -129,6 +130,7 @@
     <ClInclude Include="FileOperations.h" />
     <ClInclude Include="FileRegex.h" />
     <ClInclude Include="RegDataSerializer.h" />
+    <ClInclude Include="ReparsePoint.h" />
     <ClInclude Include="CustomUninstallKey.h" />
     <ClInclude Include="RegistryXmlParser.h" />
     <ClInclude Include="resource.h" />
