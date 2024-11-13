@@ -384,6 +384,26 @@ public:
 		return hr;
 	}
 
+	// Remove characters from the left
+	void RemoveLeft(DWORD dwCount)
+	{
+		DWORD dwNewLen = 0;
+		DWORD i = 0;
+
+		if (dwCount >= StrLen())
+		{
+			Release();
+			return;
+		}
+
+		dwNewLen = StrLen() - dwCount;
+		for (i = 0; i < dwNewLen; ++i)
+		{
+			_pS[i] = _pS[i + dwCount];
+		}
+		_pS[i] = NULL;
+	}
+
 #pragma region Tokenize
 
 	HRESULT Tokenize(LPCWSTR delimiters, LPCWSTR* firstToken)

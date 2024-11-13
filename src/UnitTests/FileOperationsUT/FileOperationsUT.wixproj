@@ -10,6 +10,9 @@
     <Compile Include="FileOperationsUT.wxs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="run-test.bat" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="WixToolset.Util.wixext" />
     <PackageReference Include="TidyBuild" />
     <WixExtension Include="PanelSwWixExtension">

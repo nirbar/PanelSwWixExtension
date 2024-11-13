@@ -1,0 +1,463 @@
+#include "pch.h"
+#include "FileOperations.h"
+#include "ReparsePoint.h"
+#include <Shellapi.h>
+#include <Shlwapi.h>
+#include "reparsePointDetails.pb.h"
+using namespace ::com::panelsw::ca;
+using namespace google::protobuf;
+
+// Extract from WDK's ntifs.h
+#define FILE_DEVICE_FILE_SYSTEM         0x00000009
+#define METHOD_BUFFERED                 0
+#define FILE_ANY_ACCESS                 0
+#define FILE_SPECIAL_ACCESS    (FILE_ANY_ACCESS)
+#define CTL_CODE( DeviceType, Function, Method, Access ) (                 \
+    ((DeviceType) << 16) | ((Access) << 14) | ((Function) << 2) | (Method) \
+)
+#define FSCTL_SET_REPARSE_POINT         CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 41, METHOD_BUFFERED, FILE_SPECIAL_ACCESS) // REPARSE_DATA_BUFFER,
+#define FSCTL_GET_REPARSE_POINT         CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 42, METHOD_BUFFERED, FILE_ANY_ACCESS) // REPARSE_DATA_BUFFER
+#define FSCTL_DELETE_REPARSE_POINT      CTL_CODE(FILE_DEVICE_FILE_SYSTEM, 43, METHOD_BUFFERED, FILE_SPECIAL_ACCESS) // REPARSE_DATA_BUFFER,
+
+typedef struct _REPARSE_DATA_BUFFER {
+	ULONG  ReparseTag;
+	USHORT ReparseDataLength;
+	USHORT Reserved;
+
+	_Field_size_bytes_(ReparseDataLength)
+		union {
+		struct {
+			USHORT SubstituteNameOffset;
+			USHORT SubstituteNameLength;
+			USHORT PrintNameOffset;
+			USHORT PrintNameLength;
+			ULONG Flags;
+			WCHAR PathBuffer[1];
+		} SymbolicLinkReparseBuffer;
+		struct {
+			USHORT SubstituteNameOffset;
+			USHORT SubstituteNameLength;
+			USHORT PrintNameOffset;
+			USHORT PrintNameLength;
+			WCHAR PathBuffer[1];
+		} MountPointReparseBuffer;
+		struct {
+			UCHAR  DataBuffer[1];
+		} GenericReparseBuffer;
+	} DUMMYUNIONNAME;
+} REPARSE_DATA_BUFFER, * PREPARSE_DATA_BUFFER;
+
+#pragma warning(pop)
+#define REPARSE_DATA_BUFFER_HEADER_SIZE   UFIELD_OFFSET(REPARSE_DATA_BUFFER, GenericReparseBuffer)
+// End extract from WDK's ntifs.h
+
+typedef struct _REPARSE_DATA_COMMON_HEADER {
+	ULONG  ReparseTag;
+	USHORT ReparseDataLength;
+	USHORT Reserved;
+} REPARSE_DATA_COMMON_HEADER;
+
+enum RemoveFileInstallMode
+{
+	RemoveFileInstallMode_Unknown = 0,
+	RemoveFileInstallMode_Install = 1,
+	RemoveFileInstallMode_Uninstall = 2,
+	RemoveFileInstallMode_Both = 3,
+};
+
+extern "C" UINT __stdcall RemoveReparseDataSched(MSIHANDLE hInstall)
+{
+	HRESULT hr = S_OK;
+	UINT er = ERROR_SUCCESS;
+	DWORD dwRes = 0;
+	PMSIHANDLE hView;
+	PMSIHANDLE hRecord;
+	CFileOperations::FILE_ENTRY rootFileEntry;
+	LPWSTR* pszReparsePoints = nullptr;
+	UINT cReparsePoints = 0;
+	CReparsePoint execCAD;
+	CReparsePoint rollbackCAD;
+
+	hr = WcaInitialize(hInstall, __FUNCTION__);
+	ExitOnFailure(hr, "Failed to initialize");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
+
+	// Ensure table PSW_RemoveFolderEx exists.
+	hr = WcaTableExists(L"RemoveFile");
+	ExitOnFailure(hr, "Failed to check if table exists 'RemoveFile'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'RemoveFile'. Have you authored 'PanelSw:RemoveFolderEx' entries in WiX code?");
+
+	// Execute view
+	hr = WcaOpenExecuteView(L"SELECT `Component_`, `FileName`, `DirProperty`, `InstallMode` FROM `RemoveFile`", &hView);
+	ExitOnFailure(hr, "Failed to execute SQL query");
+
+	// Iterate records
+	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
+	{
+		ExitOnFailure(hr, "Failed to fetch record.");
+		CFileOperations::ReleaseFileEntries(&rootFileEntry);
+		ReleaseNullStrArray(pszReparsePoints, cReparsePoints);
+
+		// Get fields
+		CWixString szComponent, szFileName, szDirProperty;
+		RemoveFileInstallMode flags = RemoveFileInstallMode::RemoveFileInstallMode_Unknown;
+		WCA_TODO componentAction = WCA_TODO::WCA_TODO_UNKNOWN;
+
+		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szComponent);
+		ExitOnFailure(hr, "Failed to get Component_.");
+		hr = WcaGetRecordString(hRecord, 2, (LPWSTR*)szFileName);
+		ExitOnFailure(hr, "Failed to get FileName.");
+		hr = WcaGetRecordString(hRecord, 3, (LPWSTR*)szDirProperty);
+		ExitOnFailure(hr, "Failed to get DirProperty.");
+		hr = WcaGetRecordInteger(hRecord, 4, (int*)&flags);
+		ExitOnFailure(hr, "Failed to get InstallMode.");
+
+		// Workaround WiX bug in v4/5- Adds a short name to RemoveFile/@FileName.
+		if (!szFileName.IsNullOrEmpty())
+		{
+			DWORD longNameIdx = szFileName.Find(L'|');
+			if (longNameIdx < szFileName.StrLen())
+			{
+				CWixString szOrig(szFileName);
+				szFileName.RemoveLeft(longNameIdx + 1);
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "RemoveFile/@FileName column contains a short and long file names '%ls'. Ignoring the short name and using '%ls' only", (LPCWSTR)szOrig, (LPCWSTR)szFileName);
+			}
+		}
+
+		componentAction = WcaGetComponentToDo(szComponent);
+		if ((componentAction != WCA_TODO_INSTALL) && (componentAction != WCA_TODO_REINSTALL) && (componentAction != WCA_TODO_UNINSTALL))
+		{
+			CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Skipping RemoveReparseData for property '%ls' because component action isn't compatible", (LPCWSTR)szDirProperty);
+			continue;
+		}
+		if (((componentAction == WCA_TODO_INSTALL) || (componentAction == WCA_TODO_REINSTALL)) && !(flags & RemoveFileInstallMode_Install))
+		{
+			CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Skipping RemoveReparseData for property '%ls' because component action is (re)install", (LPCWSTR)szDirProperty);
+			continue;
+		}
+		if ((componentAction == WCA_TODO_UNINSTALL) && !(flags & RemoveFileInstallMode_Uninstall))
+		{
+			CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Skipping RemoveReparseData for property '%ls' because component action is uninstall", (LPCWSTR)szDirProperty);
+			continue;
+		}
+
+		hr = WcaGetProperty(szDirProperty, &rootFileEntry.szPath);
+		ExitOnFailure(hr, "Failed to get property");
+
+		if (!rootFileEntry.szPath || !*rootFileEntry.szPath)
+		{
+			CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Skipping RemoveReparseData for property '%ls' because it is empty", (LPCWSTR)szDirProperty);
+			continue;
+		}
+
+		rootFileEntry.dwAttributes = GetFileAttributesW(rootFileEntry.szPath);
+		if (rootFileEntry.dwAttributes == INVALID_FILE_ATTRIBUTES)
+		{
+			WcaLogError(HRESULT_FROM_WIN32(::GetLastError()), "Failed to get file attributes for '%ls' because it is empty. Skipping RemoveReparseData for it", rootFileEntry.szPath);
+			continue;
+		}
+		if ((rootFileEntry.dwAttributes & FILE_ATTRIBUTE_DIRECTORY) != FILE_ATTRIBUTE_DIRECTORY)
+		{
+			CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Skipping RemoveReparseData for property '%ls' because it is not a folder", rootFileEntry.szPath);
+			continue;
+		}
+
+		if (!szFileName.IsNullOrEmpty())
+		{
+			hr = CFileOperations::ListFileEntries(&rootFileEntry, szFileName, false);
+			ExitOnFailure(hr, "Failed to list file entries under '%ls'", rootFileEntry.szPath);
+		}
+
+		hr = CFileOperations::FilterFileEntries(&rootFileEntry, FILE_ATTRIBUTE_REPARSE_POINT, 0, &pszReparsePoints, &cReparsePoints);
+		ExitOnFailure(hr, "Failed to filter file entries with reparse points under '%ls'", rootFileEntry.szPath);
+
+		for (UINT i = 0; i < cReparsePoints; ++i)
+		{
+			hr = rollbackCAD.AddRestoreReparsePoint(pszReparsePoints[i]);
+			ExitOnFailure(hr, "Failed to get reparse point data for '%ls'", pszReparsePoints[i]);
+
+			hr = execCAD.AddDeleteReparsePoint(pszReparsePoints[i]);
+			ExitOnFailure(hr, "Failed to add exec data for reparse point of '%ls'", pszReparsePoints[i]);
+		}
+	}
+	hr = S_OK;
+
+	hr = rollbackCAD.DoDeferredAction(L"RemoveReparseDataRollback");
+	ExitOnFailure(hr, "Failed to do action");
+
+	hr = execCAD.DoDeferredAction(L"RemoveReparseDataExec");
+	ExitOnFailure(hr, "Failed to do action");
+
+LExit:
+	CFileOperations::ReleaseFileEntries(&rootFileEntry);
+	ReleaseNullStrArray(pszReparsePoints, cReparsePoints);
+
+	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
+	return WcaFinalize(er);
+}
+
+HRESULT CReparsePoint::AddRestoreReparsePoint(LPCWSTR szPath)
+{
+	HRESULT hr = S_OK;
+	::com::panelsw::ca::Command *pCmd = nullptr;
+	ReparsePointDetails *pDetails = nullptr;
+	::std::string *pAny = nullptr;
+	bool bRes = true;
+	void* pBuffer = nullptr;
+	DWORD dwSize = 0;
+
+	hr = AddCommand("CReparsePoint", &pCmd);
+	ExitOnFailure(hr, "Failed to add command");
+
+	pDetails = new ReparsePointDetails();
+	ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
+
+	hr = GetReparsePointData(szPath, &pBuffer, &dwSize);
+	ExitOnFailure(hr, "Failed to read reparse point data for '%ls'", szPath);
+
+	pDetails->set_action(::com::panelsw::ca::ReparsePointAction::restore);
+	pDetails->set_path(szPath, WSTR_BYTE_SIZE(szPath));
+	pDetails->set_reparsedata(pBuffer, dwSize);
+
+	pAny = pCmd->mutable_details();
+	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+
+	bRes = pDetails->SerializeToString(pAny);
+	ExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
+
+LExit:
+	ReleaseMem(pBuffer);
+
+	return hr;
+}
+
+HRESULT CReparsePoint::AddDeleteReparsePoint(LPCWSTR szPath)
+{
+	HRESULT hr = S_OK;
+	::com::panelsw::ca::Command* pCmd = nullptr;
+	ReparsePointDetails* pDetails = nullptr;
+	::std::string* pAny = nullptr;
+	bool bRes = true;
+	void* pBuffer = nullptr;
+	DWORD dwSize = 0;
+
+	hr = AddCommand("CReparsePoint", &pCmd);
+	ExitOnFailure(hr, "Failed to add command");
+
+	pDetails = new ReparsePointDetails();
+	ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
+
+	hr = GetReparsePointData(szPath, &pBuffer, &dwSize);
+	ExitOnFailure(hr, "Failed to read reparse point data for '%ls'", szPath);
+
+	pDetails->set_action(::com::panelsw::ca::ReparsePointAction::delete_);
+	pDetails->set_path(szPath, WSTR_BYTE_SIZE(szPath));
+	pDetails->set_reparsedata(pBuffer, dwSize);
+
+	pAny = pCmd->mutable_details();
+	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
+
+	bRes = pDetails->SerializeToString(pAny);
+	ExitOnNull(bRes, hr, E_FAIL, "Failed serializing command details");
+
+LExit:
+	ReleaseMem(pBuffer);
+
+	return hr;
+}
+
+HRESULT CReparsePoint::DeferredExecute(const ::std::string& command)
+{
+	HRESULT hr = S_OK;
+	BOOL bRes = TRUE;
+	ReparsePointDetails details;
+	LPCWSTR szPath = nullptr;
+	LPVOID pData = nullptr;
+	DWORD dwSize = 0;
+
+	bRes = details.ParseFromString(command);
+	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ReparsePointDetails");
+
+	szPath = (LPCWSTR)details.path().c_str();
+	pData = const_cast<char*>(details.reparsedata().data());
+	dwSize = details.reparsedata().size();
+
+	switch (details.action())
+	{
+	case ::com::panelsw::ca::ReparsePointAction::delete_:
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Removing reparse point data from '%ls'", szPath);
+		hr = DeleteReparsePoint(szPath, pData, dwSize);
+		ExitOnFailure(hr, "Failed to delete reparse point in '%ls'", szPath);
+		break;
+	case ::com::panelsw::ca::ReparsePointAction::restore:
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Restoring reparse point data to '%ls'", szPath);
+		hr = CreateReparsePoint(szPath, pData, dwSize);
+		ExitOnFailure(hr, "Failed to set reparse point in '%ls'", szPath);
+		break;
+	default:
+		hr = E_INVALIDDATA;
+		ExitOnFailure(hr, "Illega reparse point action %i requested for '%ls'", details.action(), (LPCWSTR)details.path().c_str());
+		break;
+	}
+
+LExit:
+	return hr;
+}
+
+/*static*/ bool CReparsePoint::IsSymbolicLinkOrMount(LPCWSTR szPath)
+{
+	HANDLE hFind = INVALID_HANDLE_VALUE;
+	WIN32_FIND_DATA wfaData;
+	HRESULT hr = S_OK;
+
+	hFind = ::FindFirstFile(szPath, &wfaData);
+	if (hFind == INVALID_HANDLE_VALUE)
+	{
+		hr = S_FALSE;
+		DWORD dwErr = ::GetLastError();
+		ExitOnNullWithLastError(((dwErr == ERROR_FILE_NOT_FOUND) || (dwErr == ERROR_PATH_NOT_FOUND)), hr, "Path '%ls' can't be checked for reparse point tag", szPath);
+	}
+
+LExit:
+	ReleaseFileFindHandle(hFind);
+
+	return (hr == S_OK) ? IsSymbolicLinkOrMount(&wfaData) : false;
+}
+
+/*static*/ bool CReparsePoint::IsSymbolicLinkOrMount(const WIN32_FIND_DATA* pFindFileData)
+{
+	return ((pFindFileData->dwFileAttributes != INVALID_FILE_ATTRIBUTES)
+		&& (((pFindFileData->dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT)
+			&& ((pFindFileData->dwReserved0 == IO_REPARSE_TAG_SYMLINK) || (pFindFileData->dwReserved0 == IO_REPARSE_TAG_MOUNT_POINT))));
+}
+
+HRESULT CReparsePoint::GetReparsePointData(LPCWSTR szPath, void** ppBuffer, DWORD* pdwSize)
+{
+	HRESULT hr = S_OK;
+	BOOL bRes = TRUE;
+	HANDLE hFile = INVALID_HANDLE_VALUE;
+	void* pBuffer = nullptr;
+	DWORD dwReparseDataSize = 0;
+	DWORD dwBufferSize = 0;
+	DWORD dwFlags = FILE_FLAG_OPEN_REPARSE_POINT;
+	REPARSE_DATA_COMMON_HEADER* pReparseCommon = nullptr;
+
+	if (::PathIsDirectory(szPath))
+	{
+		dwFlags |= FILE_FLAG_BACKUP_SEMANTICS;
+	}
+
+	hFile = ::CreateFile(szPath, GENERIC_READ, FILE_SHARE_WRITE | FILE_SHARE_READ | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, dwFlags, NULL);
+	ExitOnInvalidHandleWithLastError(hFile, hr, "Failed to open file '%ls'", szPath);
+
+	dwBufferSize = MAX_PATH;
+	do
+	{
+		ReleaseNullMem(pBuffer);
+		dwReparseDataSize = 0;
+
+		dwBufferSize *= 2;
+		pBuffer = MemAlloc(dwBufferSize, TRUE);
+		ExitOnNull(pBuffer, hr, E_OUTOFMEMORY, "Failed to allocate buffer");
+
+		bRes = ::DeviceIoControl(hFile, FSCTL_GET_REPARSE_POINT, nullptr, 0, pBuffer, dwBufferSize, &dwReparseDataSize, nullptr);
+
+	} while (!bRes && (::GetLastError() == ERROR_INSUFFICIENT_BUFFER));
+	ExitOnNullWithLastError(bRes, hr, "Failed to get reparse point data of '%ls'", szPath);
+
+	if (dwReparseDataSize)
+	{
+		ExitOnNull(dwReparseDataSize >= sizeof(REPARSE_DATA_COMMON_HEADER), hr, E_INVALIDDATA, "Reparse data size is lesser than header size");
+		REPARSE_DATA_COMMON_HEADER* pReparseCommon = (REPARSE_DATA_COMMON_HEADER*)pBuffer;
+
+		if (IsReparseTagMicrosoft(pReparseCommon->ReparseTag))
+		{
+			ExitOnNull((dwReparseDataSize >= REPARSE_DATA_BUFFER_HEADER_SIZE), hr, E_INVALIDDATA, "Reparse data size is lesser than MS header size");
+		}
+		else
+		{
+			ExitOnNull((dwReparseDataSize >= REPARSE_GUID_DATA_BUFFER_HEADER_SIZE), hr, E_INVALIDDATA, "Reparse data size is lesser than GUID header size");
+		}
+
+		*ppBuffer = pBuffer;
+		*pdwSize = dwReparseDataSize;
+		pBuffer = nullptr;
+	}
+
+LExit:
+	ReleaseFile(hFile);
+	ReleaseMem(pBuffer);
+
+	return hr;
+}
+
+HRESULT CReparsePoint::CreateReparsePoint(LPCWSTR szPath, LPVOID pBuffer, DWORD dwSize)
+{
+	HRESULT hr = S_OK;
+	BOOL bRes = TRUE;
+	HANDLE hFile = INVALID_HANDLE_VALUE;
+	DWORD dwFlags = FILE_FLAG_OPEN_REPARSE_POINT;
+
+	if (::PathIsDirectory(szPath))
+	{
+		dwFlags |= FILE_FLAG_BACKUP_SEMANTICS;
+	}
+
+	hFile = ::CreateFile(szPath, GENERIC_ALL, FILE_SHARE_READ, nullptr, OPEN_EXISTING, dwFlags, NULL);
+	ExitOnInvalidHandleWithLastError(hFile, hr, "Failed to open file '%ls'", szPath);
+
+	bRes = ::DeviceIoControl(hFile, FSCTL_SET_REPARSE_POINT, pBuffer, dwSize, nullptr, 0, nullptr, nullptr);
+	ExitOnNullWithLastError(bRes, hr, "Failed to set reparse point data of '%ls'", szPath);
+
+LExit:
+	ReleaseFile(hFile);
+
+	return hr;
+}
+
+HRESULT CReparsePoint::DeleteReparsePoint(LPCWSTR szPath, LPVOID pBuffer, DWORD dwSize)
+{
+	HRESULT hr = S_OK;
+	BOOL bRes = TRUE;
+	HANDLE hFile = INVALID_HANDLE_VALUE;
+	DWORD dwFlags = FILE_FLAG_OPEN_REPARSE_POINT;
+	REPARSE_DATA_COMMON_HEADER *pReparseCommon = nullptr;
+	void* pCurrReparseData = nullptr;
+	DWORD cCurrReparseData = 0;
+
+	// Check if reparse data was already deleted, as may happen if multiple RemoveFile entries match on the same file
+	GetReparsePointData(szPath, &pCurrReparseData, &cCurrReparseData);
+	if (cCurrReparseData == 0)
+	{
+		hr = S_FALSE;
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Reparse data for '%ls' already removed", szPath);
+		ExitFunction();
+	}
+
+	if (::PathIsDirectory(szPath))
+	{
+		dwFlags |= FILE_FLAG_BACKUP_SEMANTICS;
+	}
+
+	pReparseCommon = (REPARSE_DATA_COMMON_HEADER*)pBuffer;
+	pReparseCommon->ReparseDataLength = 0;
+	if (IsReparseTagMicrosoft(pReparseCommon->ReparseTag))
+	{
+		dwSize = REPARSE_DATA_BUFFER_HEADER_SIZE;
+	}
+	else
+	{
+		dwSize = REPARSE_GUID_DATA_BUFFER_HEADER_SIZE;
+	}
+
+	hFile = ::CreateFile(szPath, GENERIC_ALL, FILE_SHARE_READ, nullptr, OPEN_EXISTING, dwFlags, NULL);
+	ExitOnInvalidHandleWithLastError(hFile, hr, "Failed to open file '%ls'", szPath);
+
+	bRes = ::DeviceIoControl(hFile, FSCTL_DELETE_REPARSE_POINT, pBuffer, dwSize, nullptr, 0, nullptr, nullptr);
+	ExitOnNullWithLastError(bRes, hr, "Failed to delete reparse point data of '%ls'", szPath);
+
+LExit:
+	ReleaseFile(hFile);
+
+	return hr;
+}

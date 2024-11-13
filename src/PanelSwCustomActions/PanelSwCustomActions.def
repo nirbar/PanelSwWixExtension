@@ -58,3 +58,5 @@ EXPORTS
 	IsWindowsVersionOrGreater
 	ListProcessorFeatures
 	ExecuteCommand
+	RemoveFolderEx
+	RemoveReparseDataSched

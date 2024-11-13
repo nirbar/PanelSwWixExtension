@@ -263,6 +263,9 @@
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\obfuscatedString.pb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\reparsePointDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="ConcatFiles.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -280,7 +283,7 @@
     <None Include="PanelSwCustomActions.def">
       <Filter>Source Files</Filter>
     </None>
-    <None Include="..\..\build\x86\bin\Release\DeferredExePackage\DeferredExePackage.exe" />
+    <None Include="$(OutputPath)\DeferredExePackage\DeferredExePackage.exe" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="$(IntDir)\Version.rc" />

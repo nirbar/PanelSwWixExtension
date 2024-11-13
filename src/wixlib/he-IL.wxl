@@ -62,4 +62,6 @@
   <String Overridable="yes" Id="UnzipFileError" Value="אירעה שגיאה בחילוץ הקובץ [2] מארכיון [3]" />
   <String Overridable="yes" Id="IsWindowsVersionOrGreater" Value="בודק את גירסאת מערכת ההפעלה" />
   <String Overridable="yes" Id="ListProcessorFeatures" Value="בודק זמינות תכונות של המעבד" />
+  <String Overridable="yes" Id="PSW_RemoveFolderEx" Value="מסיר ספריות" />
+  <String Overridable="yes" Id="RemoveReparseData" Value="מסיר נתוני קישור" />
 </WixLocalization>
