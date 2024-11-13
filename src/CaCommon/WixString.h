@@ -134,7 +134,7 @@ public:
 		return pS;
 	}
 
-	HRESULT Copy(const CWixString &other)
+	HRESULT Copy(const CWixString& other)
 	{
 		HRESULT hr = S_OK;
 
@@ -208,7 +208,7 @@ public:
 		ExitOnNull((dwStart < StrLen()), hr, E_INVALIDSTATE, "Substring start index is out of range");
 
 		szOld = Detach();
-		
+
 		hr = Copy(szOld + dwStart, dwLength);
 		ExitOnFailure(hr, "Failed to copy string");
 
@@ -259,7 +259,7 @@ public:
 		LPWSTR szObfuscated = nullptr;
 		LPWSTR szMsiHiddenProperties = nullptr;
 		LPWSTR szHideMe = nullptr;
-		
+
 		Release();
 
 		hr = StrAllocString(&szStripped, szFormat, 0);
@@ -382,6 +382,26 @@ public:
 	{
 		HRESULT hr = StrAnsiAllocFormatted(pszStr, "%ls", _pS);
 		return hr;
+	}
+
+	// Remove characters from the left
+	void RemoveLeft(DWORD dwCount)
+	{
+		DWORD dwNewLen = 0;
+		DWORD i = 0;
+
+		if (dwCount >= StrLen())
+		{
+			Release();
+			return;
+		}
+
+		dwNewLen = StrLen() - dwCount;
+		for (i = 0; i < dwNewLen; ++i)
+		{
+			_pS[i] = _pS[i + dwCount];
+		}
+		_pS[i] = NULL;
 	}
 
 #pragma region Tokenize

@@ -89,6 +89,7 @@
     <ClCompile Include="Md5Hash.cpp" />
     <ClCompile Include="ExtractPayload.cpp" />
     <ClCompile Include="PromptFileDowngrades.cpp" />
+    <ClCompile Include="ReparsePoint.cpp" />
     <ClCompile Include="RestartLocalResources.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="MsiSqlQuery.cpp" />
@@ -128,6 +129,7 @@
     <ClInclude Include="RegDataSerializer.h" />
     <ClInclude Include="CustomUninstallKey.h" />
     <ClInclude Include="RegistryXmlParser.h" />
+    <ClInclude Include="ReparsePoint.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="RestartLocalResources.h" />
     <ClInclude Include="ServiceConfig.h" />

@@ -1,10 +1,139 @@
 #include "pch.h"
 #include "FileOperations.h"
+#include "ReparsePoint.h"
 #include <Shellapi.h>
 #include <Shlwapi.h>
 #include "fileOperationsDetails.pb.h"
 using namespace ::com::panelsw::ca;
 using namespace google::protobuf;
+
+extern "C" UINT __stdcall RemoveFolderEx(MSIHANDLE hInstall)
+{
+	HRESULT hr = S_OK;
+	UINT er = ERROR_SUCCESS;
+	PMSIHANDLE hView;
+	PMSIHANDLE hRecord;
+	MSIHANDLE hRemoveFileTable = NULL;
+	MSIHANDLE hRemoveFileColumns = NULL;
+	DWORD dwRes = 0;
+	CFileOperations::FILE_ENTRY rootFileEntry;
+	LPWSTR* pszFolders = nullptr;
+	UINT cFolders = 0;
+
+	hr = WcaInitialize(hInstall, __FUNCTION__);
+	ExitOnFailure(hr, "Failed to initialize");
+	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
+
+	// Ensure table PSW_RemoveFolderEx exists.
+	hr = WcaTableExists(L"PSW_RemoveFolderEx");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_RemoveFolderEx'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_RemoveFolderEx'. Have you authored 'PanelSw:RemoveFolderEx' entries in WiX code?");
+
+	// Execute view
+	hr = WcaOpenExecuteView(L"SELECT `Component_`, `Property`, `InstallMode` FROM `PSW_RemoveFolderEx`", &hView);
+	ExitOnFailure(hr, "Failed to execute SQL query");
+
+	// Iterate records
+	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
+	{
+		ExitOnFailure(hr, "Failed to fetch record.");
+		CFileOperations::ReleaseFileEntries(&rootFileEntry);
+		ReleaseNullStrArray(pszFolders, cFolders);
+
+		// Get fields
+		CWixString szComponent, szBaseProperty;
+		int flags = 0;
+
+		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szComponent);
+		ExitOnFailure(hr, "Failed to get Component_.");
+		hr = WcaGetRecordString(hRecord, 2, (LPWSTR*)szBaseProperty);
+		ExitOnFailure(hr, "Failed to get Property.");
+		hr = WcaGetRecordInteger(hRecord, 3, &flags);
+		ExitOnFailure(hr, "Failed to get Flags.");
+
+		hr = WcaGetProperty(szBaseProperty, &rootFileEntry.szPath);
+		ExitOnFailure(hr, "Failed to get property");
+
+		if (!rootFileEntry.szPath || !*rootFileEntry.szPath)
+		{
+			CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Skipping RemoveFolderEx for property '%ls' because it is empty", (LPCWSTR)szBaseProperty);
+			continue;
+		}
+
+		rootFileEntry.dwAttributes = ::GetFileAttributes(rootFileEntry.szPath);
+		if (rootFileEntry.dwAttributes == INVALID_FILE_ATTRIBUTES)
+		{
+			dwRes = ::GetLastError();
+			ExitOnNullWithLastError(((dwRes == ERROR_FILE_NOT_FOUND) || (dwRes == ERROR_PATH_NOT_FOUND)), hr, "Failed to get file attributes for path '%ls'", rootFileEntry.szPath);
+
+			CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Skipping RemoveFolderEx for property '%ls' because path '%ls' does not exist", (LPCWSTR)szBaseProperty, rootFileEntry.szPath);
+			continue;
+		}
+
+		if ((rootFileEntry.dwAttributes & FILE_ATTRIBUTE_DIRECTORY) != FILE_ATTRIBUTE_DIRECTORY)
+		{
+			CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Skipping RemoveFolderEx for property '%ls' because '%ls' is not a folder", (LPCWSTR)szBaseProperty, rootFileEntry.szPath);
+			continue;
+		}
+
+		hr = CFileOperations::ListFileEntries(&rootFileEntry, L"*", true);
+		ExitOnFailure(hr, "Failed to list file entries under '%ls'", rootFileEntry.szPath);
+
+		hr = WcaAddTempRecord(&hRemoveFileTable, &hRemoveFileColumns, L"RemoveFile", nullptr, 1, 5, L"RfxFolder", (LPCWSTR)szComponent, nullptr, (LPCWSTR)szBaseProperty, flags);
+		ExitOnFailure(hr, "Failed to add temporary row table");
+
+		if (CReparsePoint::IsSymbolicLinkOrMount(rootFileEntry.szPath))
+		{
+			CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Skipping RemoveFolderEx for files under '%ls' because it is a symbolic link or mount folder", rootFileEntry.szPath);
+			continue;
+		}
+
+		hr = WcaAddTempRecord(&hRemoveFileTable, &hRemoveFileColumns, L"RemoveFile", nullptr, 1, 5, L"RfxFiles", (LPCWSTR)szComponent, L"*", (LPCWSTR)szBaseProperty, flags);
+		ExitOnFailure(hr, "Failed to add temporary row table");
+
+		hr = CFileOperations::FilterFileEntries(&rootFileEntry, FILE_ATTRIBUTE_DIRECTORY, 0, &pszFolders, &cFolders);
+		ExitOnFailure(hr, "Failed to filters sub folders of '%ls'", rootFileEntry.szPath);
+
+		for (UINT i = 1/*Handled root above*/; i < cFolders; ++i)
+		{
+			CWixString szDirProperty;
+
+			hr = szDirProperty.Format(L"_DIR_%ls_%u", (LPCWSTR)szBaseProperty, i);
+			ExitOnFailure(hr, "Failed to format string");
+
+			hr = WcaSetProperty((LPCWSTR)szDirProperty, pszFolders[i]);
+			ExitOnFailure(hr, "Failed to set property");
+
+			hr = WcaAddTempRecord(&hRemoveFileTable, &hRemoveFileColumns, L"RemoveFile", nullptr, 1, 5, L"RfxFolder", (LPCWSTR)szComponent, nullptr, (LPCWSTR)szDirProperty, flags);
+			ExitOnFailure(hr, "Failed to add temporary row table");
+
+			if (CReparsePoint::IsSymbolicLinkOrMount(pszFolders[i]))
+			{
+				CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Skipping RemoveFolderEx for files under '%ls' because it is a symbolic link or mount folder", pszFolders[i]);
+				continue;
+			}
+
+			hr = WcaAddTempRecord(&hRemoveFileTable, &hRemoveFileColumns, L"RemoveFile", nullptr, 1, 5, L"RfxFiles", (LPCWSTR)szComponent, L"*", (LPCWSTR)szDirProperty, flags);
+			ExitOnFailure(hr, "Failed to add temporary row table");
+		}
+	}
+	hr = S_OK;
+
+LExit:
+	CFileOperations::ReleaseFileEntries(&rootFileEntry);
+	ReleaseStrArray(pszFolders, cFolders);
+	if (hRemoveFileTable)
+	{
+		::MsiCloseHandle(hRemoveFileTable);
+	}
+	if (hRemoveFileColumns)
+	{
+		::MsiCloseHandle(hRemoveFileColumns);
+	}
+
+	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
+	return WcaFinalize(er);
+}
 
 extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
 {
@@ -301,14 +430,21 @@ HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bI
 	SHFILEOPSTRUCT opInfo;
 	HRESULT hr = S_OK;
 	INT nRes = ERROR_SUCCESS;
+	CFileOperations::FILE_ENTRY rootFileEntry;
 	LPWSTR szFromNull = nullptr;
 	LPWSTR* pszFiles = nullptr;
 	UINT nFiles = 0;
 
 	if (bOnlyIfEmpty && ::PathIsDirectory(szFrom))
 	{
-		hr = ListFiles(szFrom, L"*", true, &pszFiles, &nFiles);
-		ExitOnFailure(hr, "Failed testing wether folder '%ls' is empty", szFrom);
+		hr = StrAllocString(&rootFileEntry.szPath, szFrom, 0);
+		ExitOnFailure(hr, "Failed to copy string");
+
+		hr = ListFileEntries(&rootFileEntry, L"*", true);
+		ExitOnFailure(hr, "Failed to enumerate file entries under '%ls'", szFrom);
+
+		hr = FilterFileEntries(&rootFileEntry, INVALID_FILE_ATTRIBUTES, FILE_ATTRIBUTE_DIRECTORY, &pszFiles, &nFiles);
+		ExitOnFailure(hr, "Failed to filter file entries under '%ls'", szFrom);
 
 		if (nFiles > 0)
 		{
@@ -347,18 +483,21 @@ HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bI
 			// MoveFileEx can delete empty folder only, so we must explictly delete files first
 			if (::PathIsDirectory(szFrom))
 			{
-				if (pszFiles)
+				ReleaseNullStrArray(pszFiles, nFiles);
+
+				if (!rootFileEntry.szPath || !*rootFileEntry.szPath)
 				{
-					ReleaseNullStrArray(pszFiles, nFiles);
+					hr = StrAllocString(&rootFileEntry.szPath, szFrom, 0);
+					ExitOnFailure(hr, "Failed to copy string");
+
+					hr = ListFileEntries(&rootFileEntry, L"*", true);
+					ExitOnFailure(hr, "Failed to enumerate file entries under '%ls'", szFrom);
 				}
 
-				hr = ListFiles(szFrom, L"*", true, &pszFiles, &nFiles);
-				ExitOnFailure(hr, "Failed listing files in folder '%ls'", szFrom);
+				hr = FilterFileEntries(&rootFileEntry, INVALID_FILE_ATTRIBUTES, 0, &pszFiles, &nFiles);
+				ExitOnFailure(hr, "Failed filtering files entries under '%ls'", szFrom);
 
-				hr = ListSubFolders(szFrom, &pszFiles, &nFiles);
-				ExitOnFailure(hr, "Failed listing subfolders of '%ls'", szFrom);
-
-				for (UINT i = 0; i < nFiles; ++i)
+				for (UINT i = 1 /*Skip self*/; i < nFiles; ++i)
 				{
 					DeletePath(pszFiles[i], bIgnoreMissing, bIgnoreErrors, bOnlyIfEmpty, bAllowReboot);
 				}
@@ -378,6 +517,7 @@ HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bI
 	ExitOnNull((!opInfo.fAnyOperationsAborted), hr, E_FAIL, "Failed deleting file (operation aborted)");
 
 LExit:
+	ReleaseFileEntries(&rootFileEntry);
 	ReleaseStrArray(pszFiles, nFiles);
 	ReleaseStr(szFromNull);
 
@@ -520,94 +660,122 @@ LExit:
 }
 
 // static 
-HRESULT CFileOperations::ListSubFolders(LPCWSTR szBaseFolder, LPWSTR** pszFolders, UINT* pcFolder)
+HRESULT CFileOperations::ListSubFolders(LPCWSTR szBaseFolder, LPWSTR** ppszFolders, UINT* pcFolder)
 {
 	HRESULT hr = S_OK;
-	LPWSTR szFullPattern = nullptr;
-	LPWSTR szFullFolder = nullptr;
-	LPWSTR szCurrFile = nullptr;
-	WIN32_FIND_DATA FindFileData;
-	HANDLE hFind = INVALID_HANDLE_VALUE;
+	CFileOperations::FILE_ENTRY rootFileEntry;
 
-	if (IsSymbolicLinkOrMount(szBaseFolder))
-	{
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Folder '%ls' is a symbolic link or a mount point, so not enumerating its files", szBaseFolder);
-		ExitFunction();
-	}
-	if (!DirExists(szBaseFolder, nullptr))
-	{
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Folder '%ls' doesn't exist", szBaseFolder);
-		ExitFunction();
-	}
+	hr = StrAllocString(&rootFileEntry.szPath, szBaseFolder, 0);
+	ExitOnFailure(hr, "Failed to copy string");
 
-	hr = StrAllocString(&szFullFolder, szBaseFolder, 0);
-	ExitOnFailure(hr, "Failed allocating string");
+	::PathRemoveBackslash(rootFileEntry.szPath);
 
-	hr = PathBackslashTerminate(&szFullFolder);
-	ExitOnFailure(hr, "Failed allocating string");
+	hr = ListFileEntries(&rootFileEntry, L"*", true);
+	ExitOnFailure(hr, "Failed to enumerate file entries under '%ls'", szBaseFolder);
 
-	hr = StrAllocFormatted(&szFullPattern, L"%ls*", szFullFolder);
-	ExitOnFailure(hr, "Failed allocating string");
-
-	hFind = ::FindFirstFile(szFullPattern, &FindFileData);
-	ExitOnNullWithLastError((hFind != INVALID_HANDLE_VALUE), hr, "Failed searching files in '%ls'", szFullFolder);
-
-	do
-	{
-		if ((::wcscmp(L".", FindFileData.cFileName) == 0) || (::wcscmp(L"..", FindFileData.cFileName) == 0))
-		{
-			continue;
-		}
-
-		if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
-		{
-			ReleaseNullStr(szCurrFile);
-
-			hr = StrAllocFormatted(&szCurrFile, L"%ls%ls", szFullFolder, FindFileData.cFileName);
-			ExitOnFailure(hr, "Failed allocating string");
-
-			hr = StrArrayAllocString(pszFolders, pcFolder, szCurrFile, 0);
-			ExitOnFailure(hr, "Failed allocating string");
-
-			hr = ListSubFolders(szCurrFile, pszFolders, pcFolder);
-			ExitOnFailure(hr, "Failed finding files");
-		}
-
-	} while (::FindNextFile(hFind, &FindFileData));
-	ExitOnNullWithLastError((::GetLastError() == ERROR_NO_MORE_FILES), hr, "Failed searching files in '%ls'", szFullFolder);
-
-	::FindClose(hFind);
-	hFind = INVALID_HANDLE_VALUE;
+	hr = FilterFileEntries(&rootFileEntry, FILE_ATTRIBUTE_DIRECTORY, FILE_ATTRIBUTE_REPARSE_POINT, ppszFolders, pcFolder);
+	ExitOnFailure(hr, "Failed to enumerate folders under '%ls'", szBaseFolder);
 
 LExit:
-
-	ReleaseStr(szFullPattern);
-	ReleaseStr(szCurrFile);
-	if (hFind && (hFind != INVALID_HANDLE_VALUE))
-	{
-		::FindClose(hFind);
-	}
+	ReleaseFileEntries(&rootFileEntry);
 
 	return hr;
 }
 
 // static 
-HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRecursive, LPWSTR** pszFiles, UINT* pcFiles)
+HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRecursive, LPWSTR** ppszFiles, UINT* pcFiles)
+{
+	HRESULT hr = S_OK;
+	CFileOperations::FILE_ENTRY rootFileEntry;
+
+	hr = StrAllocString(&rootFileEntry.szPath, szFolder, 0);
+	ExitOnFailure(hr, "Failed to copy string");
+
+	::PathRemoveBackslash(rootFileEntry.szPath);
+
+	hr = ListFileEntries(&rootFileEntry, szPattern, bRecursive);
+	ExitOnFailure(hr, "Failed to enumerate file entries under '%ls'", szFolder);
+
+	hr = FilterFileEntries(&rootFileEntry, ~FILE_ATTRIBUTE_DIRECTORY, 0, ppszFiles, pcFiles);
+	ExitOnFailure(hr, "Failed to enumerate folders under '%ls'", szFolder);
+
+LExit:
+	ReleaseFileEntries(&rootFileEntry);
+
+	return hr;
+}
+
+/*static*/ HRESULT CFileOperations::ListReparsePoints(LPCWSTR szFolder, LPWSTR** ppszReparsePoints, UINT* pcReparsePoints)
+{
+	HRESULT hr = S_OK;
+	CFileOperations::FILE_ENTRY rootFileEntry;
+
+	hr = StrAllocString(&rootFileEntry.szPath, szFolder, 0);
+	ExitOnFailure(hr, "Failed to copy string");
+
+	::PathRemoveBackslash(rootFileEntry.szPath);
+
+	hr = ListFileEntries(&rootFileEntry, L"*", true);
+	ExitOnFailure(hr, "Failed to enumerate file entries under '%ls'", szFolder);
+
+	hr = FilterFileEntries(&rootFileEntry, FILE_ATTRIBUTE_REPARSE_POINT, 0, ppszReparsePoints, pcReparsePoints);
+	ExitOnFailure(hr, "Failed to enumerate folders under '%ls'", szFolder);
+
+LExit:
+	ReleaseFileEntries(&rootFileEntry);
+
+	return hr;
+}
+
+/*static*/ HRESULT CFileOperations::FilterFileEntries(CFileOperations::FILE_ENTRY* pRootEntry, DWORD dwAttributesInclude, DWORD dwAttributesExclude, LPWSTR** pszFiltered, UINT* pcFiltered)
+{
+	HRESULT hr = S_OK;
+
+	// Callers expect to get the root entry first!
+	if ((pRootEntry->dwAttributes & dwAttributesInclude) && !(pRootEntry->dwAttributes & dwAttributesExclude))
+	{
+		hr = StrArrayAllocString(pszFiltered, pcFiltered, pRootEntry->szPath, 0);
+		ExitOnFailure(hr, "Failed to add entry '%ls' to string array", pRootEntry->szPath);
+	}
+
+	for (UINT i = 0; i < pRootEntry->cSubEntries; ++i)
+	{
+		hr = FilterFileEntries(&pRootEntry->pSubEntries[i], dwAttributesInclude, dwAttributesExclude, pszFiltered, pcFiltered);
+		ExitOnFailure(hr, "Failed to add subentry of '%ls' to string array", pRootEntry->szPath);
+	}
+
+LExit:
+	return hr;
+}
+
+/*static*/ HRESULT CFileOperations::ListFileEntries(CFileOperations::FILE_ENTRY* pRootFolder, LPCWSTR szPattern, bool bRecursive)
 {
 	HRESULT hr = S_OK;
 	LPWSTR szFullPattern = nullptr;
 	LPWSTR szFullFolder = nullptr;
-	LPWSTR szCurrFile = nullptr;
 	WIN32_FIND_DATA FindFileData;
 	HANDLE hFind = INVALID_HANDLE_VALUE;
 
-	if (IsSymbolicLinkOrMount(szFolder))
+	ExitOnNull((pRootFolder->szPath && *pRootFolder->szPath), hr, E_INVALIDARG, "Path is NULL or empty");
+
+	if (pRootFolder->dwAttributes == INVALID_FILE_ATTRIBUTES)
 	{
-		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Folder '%ls' is a symbolic link or a mount point, so not enumerating its files", szFolder);
+		pRootFolder->dwAttributes = ::GetFileAttributes(pRootFolder->szPath);
+		ExitOnNullWithLastError((pRootFolder->dwAttributes != INVALID_FILE_ATTRIBUTES), hr, "Failed getting file attributes for '%ls'", pRootFolder->szPath);
+	}	
+	if ((pRootFolder->dwAttributes & FILE_ATTRIBUTE_DIRECTORY) != FILE_ATTRIBUTE_DIRECTORY)
+	{
+		hr = S_FALSE;
+		ExitFunction();
+	}
+	if (CReparsePoint::IsSymbolicLinkOrMount(pRootFolder->szPath))
+	{
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Folder '%ls' is a symbolic link or a mount point, so not enumerating its files", pRootFolder->szPath);
+		hr = S_FALSE;
 		ExitFunction();
 	}
 
-	hr = StrAllocString(&szFullFolder, szFolder, 0);
+	hr = StrAllocString(&szFullFolder, pRootFolder->szPath, 0);
 	ExitOnFailure(hr, "Failed allocating string");
 
 	hr = PathBackslashTerminate(&szFullFolder);
@@ -625,7 +793,7 @@ HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRe
 			DWORD dwErr = ::GetLastError();
 			ExitOnNullWithLastError(((dwErr == ERROR_FILE_NOT_FOUND) || (dwErr == ERROR_PATH_NOT_FOUND)), hr, "Failed searching files in '%ls'", szFullFolder);
 		}
-		else 
+		else
 		{
 			do
 			{
@@ -634,22 +802,30 @@ HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRe
 					continue;
 				}
 
-				if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
+				if (((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY) && !CReparsePoint::IsSymbolicLinkOrMount(&FindFileData))
 				{
-					ReleaseNullStr(szCurrFile);
+					CFileOperations::FILE_ENTRY* pNewEntry = nullptr;
 
-					hr = StrAllocFormatted(&szCurrFile, L"%ls%ls", szFullFolder, FindFileData.cFileName);
+					hr = MemReAllocArray((void**)&pRootFolder->pSubEntries, pRootFolder->cSubEntries, sizeof(CFileOperations::FILE_ENTRY), 1);
+					ExitOnFailure(hr, "Failed reallocating array");
+
+					++pRootFolder->cSubEntries;
+					pNewEntry = &pRootFolder->pSubEntries[pRootFolder->cSubEntries - 1];
+					pNewEntry->dwAttributes = FindFileData.dwFileAttributes;
+					pNewEntry->cSubEntries = 0;
+					pNewEntry->pSubEntries = nullptr;
+
+					hr = StrAllocFormatted(&pNewEntry->szPath, L"%ls%ls", szFullFolder, FindFileData.cFileName);
 					ExitOnFailure(hr, "Failed allocating string");
 
-					hr = ListFiles(szCurrFile, szPattern, bRecursive, pszFiles, pcFiles);
-					ExitOnFailure(hr, "Failed finding files");
+					hr = ListFileEntries(pNewEntry, szPattern, bRecursive);
+					ExitOnFailure(hr, "Failed finding file entries under '%ls'", pNewEntry->szPath);
 				}
 
 			} while (::FindNextFile(hFind, &FindFileData));
 			ExitOnNullWithLastError((::GetLastError() == ERROR_NO_MORE_FILES), hr, "Failed searching files in '%ls'", szFullFolder);
 
-			::FindClose(hFind);
-			hFind = INVALID_HANDLE_VALUE;
+			ReleaseFileFindHandle(hFind);
 		}
 	}
 
@@ -672,21 +848,27 @@ HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRe
 		DWORD dwErr = ::GetLastError();
 		ExitOnNullWithLastError(((dwErr == ERROR_FILE_NOT_FOUND) || (dwErr == ERROR_PATH_NOT_FOUND)), hr, "Failed searching files in '%ls'", szFullPattern);
 	}
-	else 
+	else
 	{
 		do
 		{
-			if ((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY)
+			if (((FindFileData.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY) == FILE_ATTRIBUTE_DIRECTORY) && !CReparsePoint::IsSymbolicLinkOrMount(&FindFileData))
 			{
 				continue;
 			}
 
-			ReleaseNullStr(szCurrFile);
+			CFileOperations::FILE_ENTRY* pNewEntry = nullptr;
 
-			hr = StrAllocFormatted(&szCurrFile, L"%ls%ls", szFullFolder, FindFileData.cFileName);
-			ExitOnFailure(hr, "Failed allocating string");
+			hr = MemReAllocArray((void**)&pRootFolder->pSubEntries, pRootFolder->cSubEntries, sizeof(CFileOperations::FILE_ENTRY), 1);
+			ExitOnFailure(hr, "Failed reallocating array");
 
-			hr = StrArrayAllocString(pszFiles, pcFiles, szCurrFile, 0);
+			++pRootFolder->cSubEntries;
+			pNewEntry = &pRootFolder->pSubEntries[pRootFolder->cSubEntries - 1];
+			pNewEntry->dwAttributes = FindFileData.dwFileAttributes;
+			pNewEntry->cSubEntries = 0;
+			pNewEntry->pSubEntries = nullptr;
+
+			hr = StrAllocFormatted(&pNewEntry->szPath, L"%ls%ls", szFullFolder, FindFileData.cFileName);
 			ExitOnFailure(hr, "Failed allocating string");
 
 		} while (::FindNextFile(hFind, &FindFileData));
@@ -694,15 +876,24 @@ HRESULT CFileOperations::ListFiles(LPCWSTR szFolder, LPCWSTR szPattern, bool bRe
 	}
 
 LExit:
-
+	ReleaseStr(szFullFolder);
 	ReleaseStr(szFullPattern);
-	ReleaseStr(szCurrFile);
-	if (hFind && (hFind != INVALID_HANDLE_VALUE))
-	{
-		::FindClose(hFind);
-	}
+	ReleaseFileFindHandle(hFind);
 
 	return hr;
+}
+
+/*static*/ void CFileOperations::ReleaseFileEntries(CFileOperations::FILE_ENTRY* pRootFolder)
+{
+	for (; pRootFolder->cSubEntries; --pRootFolder->cSubEntries)
+	{
+		CFileOperations::FILE_ENTRY* pEntry = &pRootFolder->pSubEntries[pRootFolder->cSubEntries - 1];
+		ReleaseFileEntries(pEntry);
+	}
+
+	ReleaseNullMem(pRootFolder->pSubEntries);
+	ReleaseNullStr(pRootFolder->szPath);
+	pRootFolder->dwAttributes = INVALID_FILE_ATTRIBUTES;
 }
 
 //static 
@@ -760,28 +951,4 @@ LRetry:
 
 LExit:
 	return hr;
-}
-
-bool CFileOperations::IsSymbolicLinkOrMount(LPCWSTR szPath)
-{
-	HANDLE hFind = INVALID_HANDLE_VALUE;
-	WIN32_FIND_DATA wfaData;
-	HRESULT hr = S_OK;
-
-	hFind = ::FindFirstFile(szPath, &wfaData);
-	if (hFind == INVALID_HANDLE_VALUE)
-	{
-		hr = S_FALSE;
-		DWORD dwErr = ::GetLastError();
-		ExitOnNullWithLastError(((dwErr == ERROR_FILE_NOT_FOUND) || (dwErr == ERROR_PATH_NOT_FOUND)), hr, "Path '%ls' can't be checked for reparse point tag", szPath);
-	}
-
-LExit:
-	if (hFind && (hFind != INVALID_HANDLE_VALUE))
-	{
-		::FindClose(hFind);
-	}
-
-	return (hr == S_OK) ? (((wfaData.dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT) 
-		&& ((wfaData.dwReserved0 == IO_REPARSE_TAG_SYMLINK) || (wfaData.dwReserved0 == IO_REPARSE_TAG_MOUNT_POINT))) : false;
 }

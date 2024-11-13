@@ -23,7 +23,7 @@
     <UseOfAtl>Static</UseOfAtl>
     <LinkIncremental>true</LinkIncremental>
     <TargetExt>.lib</TargetExt>
-    <ResolveNuGetPackages>false</ResolveNuGetPackages>  
+    <ResolveNuGetPackages>false</ResolveNuGetPackages>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
@@ -120,6 +120,9 @@
     <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\restartLocalResourcesDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\reparsePointDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\customActionData.pb.h">
@@ -179,6 +182,9 @@
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\restartLocalResourcesDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\reparsePointDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="command.proto" />
@@ -189,6 +195,7 @@
     <None Include="fileOperationsDetails.proto" />
     <None Include="fileRegexDetails.proto" />
     <None Include="obfuscatedString.proto" />
+    <None Include="reparsePointDetails.proto" />
     <None Include="restartLocalResourcesDetails.proto" />
     <None Include="servciceConfigDetails.proto" />
     <None Include="setPropertyFromPipeDetails.proto" />
@@ -202,7 +209,7 @@
     <None Include="xslTransformDetails.proto" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="TidyBuild"/>
+    <PackageReference Include="TidyBuild" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <Target Name="BuildProtoc" BeforeTargets="ProtoBuffCompile" Condition="!Exists('$(BuildFolderCommon)Win32\protobuf\$(Configuration)\protoc.exe')">

@@ -20,6 +20,22 @@
         </File>
         <CreateFolder Directory="DeleteMeDir"/>
       </Component>
+
+      <Component>
+        <File Source="$(sys.SOURCEFILEDIR)\run-test.bat" Compressed="no"/>
+
+        <PanelSW:RemoveFolderEx Property="REMOVE_ON_INSTALL" On="install"/>
+        <PanelSW:RemoveFolderEx Property="REMOVE_ON_UNINSTALL" On="uninstall"/>
+        <PanelSW:RemoveFolderEx Property="REMOVE_ON_BOTH" On="both"/>
+
+        <RemoveFile Property="NEVER_REMOVED" Name="*-file.txt" On="both"/>
+        <RemoveFolder Property="NEVER_REMOVED" On="both"/>
+      </Component>
+
+      <Component Transitive="yes" Condition="Installed">
+        <File Source="$(sys.SOURCEFILEDIR)\run-test.bat" Name="run-test-on-repair.bat"/>
+        <PanelSW:RemoveFolderEx Property="REMOVE_ON_REPAIR" On="install"/>
+      </Component>
     </ComponentGroup>
 
     <StandardDirectory Id="ProgramFiles6432Folder">
@@ -29,5 +45,9 @@
         </Directory>
       </Directory>
     </StandardDirectory>
+
+    <InstallExecuteSequence>
+      <Custom Action="PromptCancel_Deferred" After="RemoveReparseDataSched" Condition="Not Installed"/>
+    </InstallExecuteSequence>
   </Package>
 </Wix>

@@ -938,4 +938,35 @@
       <DuplicateFiles/>
     </InstallExecuteSequence>
   </Fragment>
+
+  <!-- RemoveFolderEx -->
+  <Fragment>
+    <CustomAction Id="PSW_RemoveFolderEx" DllEntry="RemoveFolderEx" Execute="immediate" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomActionRef Id="RemoveReparseDataSched"/>
+    <InstallExecuteSequence>
+      <Custom Action="PSW_RemoveFolderEx" Before="CostInitialize" Overridable="yes" />
+    </InstallExecuteSequence>
+    <InstallUISequence>
+      <Custom Action="PSW_RemoveFolderEx" Before="CostInitialize" Overridable="yes" />
+    </InstallUISequence>
+    <UI>
+      <ProgressText Action="PSW_RemoveFolderEx" Message="!(loc.PSW_RemoveFolderEx)" />
+    </UI>
+  </Fragment>
+
+  <!-- RemoveReparseData -->
+  <Fragment>
+    <CustomAction Id="RemoveReparseDataSched" SuppressModularization="yes" DllEntry="RemoveReparseDataSched" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="RemoveReparseDataExec" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Return="check" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="RemoveReparseDataRollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+
+    <InstallExecuteSequence>
+      <Custom Action="RemoveReparseDataSched" Before="RemoveFiles" Overridable="yes" />
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="RemoveReparseDataSched" Message="!(loc.RemoveReparseData)" />
+      <ProgressText Action="RemoveReparseDataExec" Message="!(loc.RemoveReparseData)" />
+      <ProgressText Action="RemoveReparseDataRollback" Message="!(loc.RemoveReparseData)" />
+    </UI>
+  </Fragment>
 </Wix>

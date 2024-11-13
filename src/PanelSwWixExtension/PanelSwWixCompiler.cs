@@ -260,7 +260,9 @@ namespace PanelSw.Wix.Extensions
                             case "XslTransform":
                                 ParseXslTransform(section, element, componentId, null);
                                 break;
-
+                            case "RemoveFolderEx":
+                                ParseRemoveFolderEx(section, element, componentId);
+                                break;
                             default:
                                 ParseHelper.UnexpectedElement(parentElement, element);
                                 break;
@@ -327,6 +329,48 @@ namespace PanelSw.Wix.Extensions
                 default:
                     ParseHelper.UnexpectedElement(parentElement, element);
                     break;
+            }
+        }
+
+        private void ParseRemoveFolderEx(IntermediateSection section, XElement element, string componentId)
+        {
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
+            string property = null;
+            PSW_RemoveFolderEx.RemoveFolderExInstallMode on = PSW_RemoveFolderEx.RemoveFolderExInstallMode.Uninstall;
+
+            foreach (XAttribute attrib in element.Attributes())
+            {
+                if (IsMyAttribute(element, attrib))
+                {
+                    switch (attrib.Name.LocalName)
+                    {
+                        case "Property":
+                            property = ParseHelper.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                            break;
+                        case "On":
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out on);
+                            break;
+                        default:
+                            ParseHelper.UnexpectedAttribute(element, attrib);
+                            break;
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(property))
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Property"));
+            }
+
+            if (!Messaging.EncounteredError)
+            {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_RemoveFolderEx");
+                ParseHelper.EnsureTable(section, sourceLineNumbers, "RemoveFile");
+
+                PSW_RemoveFolderEx symbol = section.AddSymbol(new PSW_RemoveFolderEx(sourceLineNumbers));
+                symbol.Component_ = componentId;
+                symbol.Property = property;
+                symbol.InstallMode = on;
             }
         }
 

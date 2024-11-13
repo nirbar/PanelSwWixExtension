@@ -32,6 +32,38 @@
     </xs:annotation>
   </xs:attribute>
 
+  <xs:element name="RemoveFolderEx">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Component" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Remove a folder recursively]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Property" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Property that hold folder path to remove entirely. This field may be formatted, but is resolved before CostInitialize, so it may not be a Directory table key.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="On" type="wix:InstallUninstallType" use="optional">
+            <xs:annotation>
+              <xs:documentation>
+                This value determines the time at which the folder may be removed, based on the install/uninstall of the parent component.
+                For 'install', the folder will be removed only when the parent component is being installed (msiInstallStateLocal or
+                msiInstallStateSource); for 'uninstall', the folder will be removed only when the parent component
+                is being removed (msiInstallStateAbsent); for 'both', the folder will be removed in both cases.
+              </xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="Payload">
     <xs:annotation>
       <xs:appinfo>
