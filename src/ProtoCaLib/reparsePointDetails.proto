@@ -11,4 +11,7 @@ message ReparsePointDetails {
 	ReparsePointAction action = 1;
 	bytes path = 2;
 	bytes reparseData = 3;
+
+	uint64 createTime = 4;
+	uint64 writeTime = 5;
 }

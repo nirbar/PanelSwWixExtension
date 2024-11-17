@@ -172,6 +172,15 @@
     <ClCompile Include="ListProcessorFeatures.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="ReparsePoint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FileEntry.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="FileIterator.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\*.pb.*">
@@ -276,6 +285,15 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="ReparsePoint.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileEntry.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="FileIterator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

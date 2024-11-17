@@ -28,6 +28,9 @@
         <PanelSW:RemoveFolderEx Property="REMOVE_ON_UNINSTALL" On="uninstall"/>
         <PanelSW:RemoveFolderEx Property="REMOVE_ON_BOTH" On="both"/>
 
+        <RemoveFile Property="REMOVE_NO_RECURSIVE" Name="file.txt" On="both"/>
+        <RemoveFolder Property="REMOVE_NO_RECURSIVE" On="both"/>
+
         <RemoveFile Property="NEVER_REMOVED" Name="*-file.txt" On="both"/>
         <RemoveFolder Property="NEVER_REMOVED" On="both"/>
       </Component>
@@ -47,7 +50,7 @@
     </StandardDirectory>
 
     <InstallExecuteSequence>
-      <Custom Action="PromptCancel_Deferred" After="RemoveReparseDataSched" Condition="Not Installed"/>
+      <Custom Action="PromptCancel_Deferred" After="RemoveReparseDataSched"/>
     </InstallExecuteSequence>
   </Package>
 </Wix>
