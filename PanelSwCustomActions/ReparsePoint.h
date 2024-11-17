@@ -23,8 +23,8 @@ private:
 
 	HRESULT DeleteReparsePoint(LPCWSTR szPath, LPVOID pBuffer, DWORD dwSize);
 
-	HRESULT CreateReparsePoint(LPCWSTR szPath, LPVOID pBuffer, DWORD dwSize);
+	HRESULT CreateReparsePoint(LPCWSTR szPath, LPVOID pBuffer, DWORD dwSize, FILETIME* pftCreateTime, FILETIME* pftLastWriteTime);
 
-	HRESULT GetReparsePointData(LPCWSTR szPath, void** ppBuffer, DWORD* pdwSize);
+	HRESULT GetReparsePointData(LPCWSTR szPath, void** ppBuffer, DWORD* pdwSize, FILETIME* pftCreateTime, FILETIME* pftLastWriteTime);
 };
 

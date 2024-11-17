@@ -81,6 +81,11 @@ public:
 	{
 		HRESULT hr = S_OK;
 
+		if ((_dwCapacity >= dwSize) || (StrLen() >= dwSize))
+		{
+			ExitFunction();
+		}
+
 		Release();
 
 		hr = StrAlloc(&_pS, dwSize);
@@ -124,6 +129,17 @@ public:
 
 	LExit:
 		return hr;
+	}
+
+	void Attach(LPWSTR szPath)
+	{
+		Release();
+
+		_pS = szPath;
+		if (_pS && *_pS)
+		{
+			_dwCapacity = wcslen(_pS) + 1;
+		}
 	}
 
 	LPWSTR Detach()
