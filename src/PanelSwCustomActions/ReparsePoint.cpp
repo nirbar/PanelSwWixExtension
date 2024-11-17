@@ -4,6 +4,10 @@
 #include <Shellapi.h>
 #include <Shlwapi.h>
 #include "reparsePointDetails.pb.h"
+#include "../CaCommon/WixString.h"
+#include "FileEntry.h"
+#include "FileIterator.h"
+#include <memutil.h>
 using namespace ::com::panelsw::ca;
 using namespace google::protobuf;
 
@@ -51,6 +55,8 @@ typedef struct _REPARSE_DATA_BUFFER {
 #define REPARSE_DATA_BUFFER_HEADER_SIZE   UFIELD_OFFSET(REPARSE_DATA_BUFFER, GenericReparseBuffer)
 // End extract from WDK's ntifs.h
 
+#define E_NOTAREPARSEPOINT				HRESULT_FROM_WIN32(ERROR_NOT_A_REPARSE_POINT)
+
 typedef struct _REPARSE_DATA_COMMON_HEADER {
 	ULONG  ReparseTag;
 	USHORT ReparseDataLength;
@@ -72,9 +78,6 @@ extern "C" UINT __stdcall RemoveReparseDataSched(MSIHANDLE hInstall)
 	DWORD dwRes = 0;
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
-	CFileOperations::FILE_ENTRY rootFileEntry;
-	LPWSTR* pszReparsePoints = nullptr;
-	UINT cReparsePoints = 0;
 	CReparsePoint execCAD;
 	CReparsePoint rollbackCAD;
 
@@ -95,13 +98,12 @@ extern "C" UINT __stdcall RemoveReparseDataSched(MSIHANDLE hInstall)
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
 		ExitOnFailure(hr, "Failed to fetch record.");
-		CFileOperations::ReleaseFileEntries(&rootFileEntry);
-		ReleaseNullStrArray(pszReparsePoints, cReparsePoints);
 
 		// Get fields
-		CWixString szComponent, szFileName, szDirProperty;
+		CWixString szComponent, szFileName, szDirProperty, szBasePath;
 		RemoveFileInstallMode flags = RemoveFileInstallMode::RemoveFileInstallMode_Unknown;
 		WCA_TODO componentAction = WCA_TODO::WCA_TODO_UNKNOWN;
+		CFileIterator fileFinder;
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szComponent);
 		ExitOnFailure(hr, "Failed to get Component_.");
@@ -141,43 +143,27 @@ extern "C" UINT __stdcall RemoveReparseDataSched(MSIHANDLE hInstall)
 			continue;
 		}
 
-		hr = WcaGetProperty(szDirProperty, &rootFileEntry.szPath);
+		hr = WcaGetProperty(szDirProperty, (LPWSTR*)szBasePath);
 		ExitOnFailure(hr, "Failed to get property");
 
-		if (!rootFileEntry.szPath || !*rootFileEntry.szPath)
+		if (szBasePath.IsNullOrEmpty())
 		{
 			CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Skipping RemoveReparseData for property '%ls' because it is empty", (LPCWSTR)szDirProperty);
 			continue;
 		}
 
-		rootFileEntry.dwAttributes = GetFileAttributesW(rootFileEntry.szPath);
-		if (rootFileEntry.dwAttributes == INVALID_FILE_ATTRIBUTES)
+		for (CFileEntry fileEntry = fileFinder.Find(szBasePath, szFileName, false); !fileFinder.IsEnd(); fileEntry = fileFinder.Next())
 		{
-			WcaLogError(HRESULT_FROM_WIN32(::GetLastError()), "Failed to get file attributes for '%ls' because it is empty. Skipping RemoveReparseData for it", rootFileEntry.szPath);
-			continue;
-		}
-		if ((rootFileEntry.dwAttributes & FILE_ATTRIBUTE_DIRECTORY) != FILE_ATTRIBUTE_DIRECTORY)
-		{
-			CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Skipping RemoveReparseData for property '%ls' because it is not a folder", rootFileEntry.szPath);
-			continue;
-		}
+			ExitOnNull(fileEntry.IsValid(), hr, fileFinder.Status(), "Failed to find files in '%ls'", (LPCWSTR)szBasePath);
 
-		if (!szFileName.IsNullOrEmpty())
-		{
-			hr = CFileOperations::ListFileEntries(&rootFileEntry, szFileName, false);
-			ExitOnFailure(hr, "Failed to list file entries under '%ls'", rootFileEntry.szPath);
-		}
+			if (fileEntry.IsSymlink())
+			{
+				hr = rollbackCAD.AddRestoreReparsePoint(fileEntry.Path());
+				ExitOnFailure(hr, "Failed to get reparse point data for '%ls'", (LPCWSTR)fileEntry.Path());
 
-		hr = CFileOperations::FilterFileEntries(&rootFileEntry, FILE_ATTRIBUTE_REPARSE_POINT, 0, &pszReparsePoints, &cReparsePoints);
-		ExitOnFailure(hr, "Failed to filter file entries with reparse points under '%ls'", rootFileEntry.szPath);
-
-		for (UINT i = 0; i < cReparsePoints; ++i)
-		{
-			hr = rollbackCAD.AddRestoreReparsePoint(pszReparsePoints[i]);
-			ExitOnFailure(hr, "Failed to get reparse point data for '%ls'", pszReparsePoints[i]);
-
-			hr = execCAD.AddDeleteReparsePoint(pszReparsePoints[i]);
-			ExitOnFailure(hr, "Failed to add exec data for reparse point of '%ls'", pszReparsePoints[i]);
+				hr = execCAD.AddDeleteReparsePoint(fileEntry.Path());
+				ExitOnFailure(hr, "Failed to add exec data for reparse point of '%ls'", (LPCWSTR)fileEntry.Path());
+			}
 		}
 	}
 	hr = S_OK;
@@ -189,8 +175,6 @@ extern "C" UINT __stdcall RemoveReparseDataSched(MSIHANDLE hInstall)
 	ExitOnFailure(hr, "Failed to do action");
 
 LExit:
-	CFileOperations::ReleaseFileEntries(&rootFileEntry);
-	ReleaseNullStrArray(pszReparsePoints, cReparsePoints);
 
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);
@@ -199,12 +183,14 @@ LExit:
 HRESULT CReparsePoint::AddRestoreReparsePoint(LPCWSTR szPath)
 {
 	HRESULT hr = S_OK;
-	::com::panelsw::ca::Command *pCmd = nullptr;
-	ReparsePointDetails *pDetails = nullptr;
-	::std::string *pAny = nullptr;
+	::com::panelsw::ca::Command* pCmd = nullptr;
+	ReparsePointDetails* pDetails = nullptr;
+	::std::string* pAny = nullptr;
 	bool bRes = true;
 	void* pBuffer = nullptr;
 	DWORD dwSize = 0;
+	FILETIME ftCreateTime = {}, ftWriteTime = {};
+	ULARGE_INTEGER ulCreateTime = {}, ulWriteTime = {};
 
 	hr = AddCommand("CReparsePoint", &pCmd);
 	ExitOnFailure(hr, "Failed to add command");
@@ -212,12 +198,19 @@ HRESULT CReparsePoint::AddRestoreReparsePoint(LPCWSTR szPath)
 	pDetails = new ReparsePointDetails();
 	ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	hr = GetReparsePointData(szPath, &pBuffer, &dwSize);
+	hr = GetReparsePointData(szPath, &pBuffer, &dwSize, &ftCreateTime, &ftWriteTime);
 	ExitOnFailure(hr, "Failed to read reparse point data for '%ls'", szPath);
+
+	ulCreateTime.HighPart = ftCreateTime.dwHighDateTime;
+	ulCreateTime.LowPart = ftCreateTime.dwLowDateTime;
+	ulWriteTime.HighPart = ftWriteTime.dwHighDateTime;
+	ulWriteTime.LowPart = ftWriteTime.dwLowDateTime;
 
 	pDetails->set_action(::com::panelsw::ca::ReparsePointAction::restore);
 	pDetails->set_path(szPath, WSTR_BYTE_SIZE(szPath));
 	pDetails->set_reparsedata(pBuffer, dwSize);
+	pDetails->set_createtime(ulCreateTime.QuadPart);
+	pDetails->set_writetime(ulWriteTime.QuadPart);
 
 	pAny = pCmd->mutable_details();
 	ExitOnNull(pAny, hr, E_FAIL, "Failed allocating any");
@@ -247,7 +240,7 @@ HRESULT CReparsePoint::AddDeleteReparsePoint(LPCWSTR szPath)
 	pDetails = new ReparsePointDetails();
 	ExitOnNull(pDetails, hr, E_FAIL, "Failed allocating details");
 
-	hr = GetReparsePointData(szPath, &pBuffer, &dwSize);
+	hr = GetReparsePointData(szPath, &pBuffer, &dwSize, nullptr, nullptr);
 	ExitOnFailure(hr, "Failed to read reparse point data for '%ls'", szPath);
 
 	pDetails->set_action(::com::panelsw::ca::ReparsePointAction::delete_);
@@ -266,7 +259,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CReparsePoint::DeferredExecute(const ::std::string& command)
+HRESULT CReparsePoint::DeferredExecute(const ::std::string & command)
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -274,6 +267,9 @@ HRESULT CReparsePoint::DeferredExecute(const ::std::string& command)
 	LPCWSTR szPath = nullptr;
 	LPVOID pData = nullptr;
 	DWORD dwSize = 0;
+	FILETIME ftCreateTime = {}, ftWriteTime = {};
+	FILETIME* pftCreateTime = nullptr, * pftWriteTime = nullptr;
+	ULARGE_INTEGER ulCreateTime = {}, ulWriteTime = {};
 
 	bRes = details.ParseFromString(command);
 	ExitOnNull(bRes, hr, E_INVALIDARG, "Failed unpacking ReparsePointDetails");
@@ -291,7 +287,22 @@ HRESULT CReparsePoint::DeferredExecute(const ::std::string& command)
 		break;
 	case ::com::panelsw::ca::ReparsePointAction::restore:
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Restoring reparse point data to '%ls'", szPath);
-		hr = CreateReparsePoint(szPath, pData, dwSize);
+		ulCreateTime.QuadPart = details.createtime();
+		if (ulCreateTime.QuadPart)
+		{
+			ftCreateTime.dwHighDateTime = ulCreateTime.HighPart;
+			ftCreateTime.dwLowDateTime = ulCreateTime.LowPart;
+			pftCreateTime = &ftCreateTime;
+		}
+		ulWriteTime.QuadPart = details.writetime();
+		if (ulWriteTime.QuadPart)
+		{
+			ftWriteTime.dwHighDateTime = ulWriteTime.HighPart;
+			ftWriteTime.dwLowDateTime = ulWriteTime.LowPart;
+			pftWriteTime = &ftWriteTime;
+		}
+
+		hr = CreateReparsePoint(szPath, pData, dwSize, pftCreateTime, pftWriteTime);
 		ExitOnFailure(hr, "Failed to set reparse point in '%ls'", szPath);
 		break;
 	default:
@@ -324,14 +335,14 @@ LExit:
 	return (hr == S_OK) ? IsSymbolicLinkOrMount(&wfaData) : false;
 }
 
-/*static*/ bool CReparsePoint::IsSymbolicLinkOrMount(const WIN32_FIND_DATA* pFindFileData)
+/*static*/ bool CReparsePoint::IsSymbolicLinkOrMount(const WIN32_FIND_DATA * pFindFileData)
 {
 	return ((pFindFileData->dwFileAttributes != INVALID_FILE_ATTRIBUTES)
 		&& (((pFindFileData->dwFileAttributes & FILE_ATTRIBUTE_REPARSE_POINT) == FILE_ATTRIBUTE_REPARSE_POINT)
 			&& ((pFindFileData->dwReserved0 == IO_REPARSE_TAG_SYMLINK) || (pFindFileData->dwReserved0 == IO_REPARSE_TAG_MOUNT_POINT))));
 }
 
-HRESULT CReparsePoint::GetReparsePointData(LPCWSTR szPath, void** ppBuffer, DWORD* pdwSize)
+HRESULT CReparsePoint::GetReparsePointData(LPCWSTR szPath, void** ppBuffer, DWORD * pdwSize, FILETIME * pftCreateTime, FILETIME * pftLastWriteTime)
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -349,6 +360,8 @@ HRESULT CReparsePoint::GetReparsePointData(LPCWSTR szPath, void** ppBuffer, DWOR
 
 	hFile = ::CreateFile(szPath, GENERIC_READ, FILE_SHARE_WRITE | FILE_SHARE_READ | FILE_SHARE_DELETE, nullptr, OPEN_EXISTING, dwFlags, NULL);
 	ExitOnInvalidHandleWithLastError(hFile, hr, "Failed to open file '%ls'", szPath);
+
+	::GetFileTime(hFile, pftCreateTime, nullptr, pftLastWriteTime);
 
 	dwBufferSize = MAX_PATH;
 	do
@@ -391,7 +404,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CReparsePoint::CreateReparsePoint(LPCWSTR szPath, LPVOID pBuffer, DWORD dwSize)
+HRESULT CReparsePoint::CreateReparsePoint(LPCWSTR szPath, LPVOID pBuffer, DWORD dwSize, FILETIME * pftCreateTime, FILETIME * pftLastWriteTime)
 {
 	HRESULT hr = S_OK;
 	BOOL bRes = TRUE;
@@ -409,6 +422,14 @@ HRESULT CReparsePoint::CreateReparsePoint(LPCWSTR szPath, LPVOID pBuffer, DWORD 
 	bRes = ::DeviceIoControl(hFile, FSCTL_SET_REPARSE_POINT, pBuffer, dwSize, nullptr, 0, nullptr, nullptr);
 	ExitOnNullWithLastError(bRes, hr, "Failed to set reparse point data of '%ls'", szPath);
 
+	// Now that the file has a reparse point, reopen it to set file times on the link
+	::CloseHandle(hFile);
+	hFile = ::CreateFile(szPath, GENERIC_ALL, FILE_SHARE_READ, nullptr, OPEN_EXISTING, dwFlags, NULL);
+	if (hFile != INVALID_HANDLE_VALUE)
+	{
+		::SetFileTime(hFile, pftCreateTime, nullptr, pftLastWriteTime);
+	}
+
 LExit:
 	ReleaseFile(hFile);
 
@@ -421,18 +442,19 @@ HRESULT CReparsePoint::DeleteReparsePoint(LPCWSTR szPath, LPVOID pBuffer, DWORD 
 	BOOL bRes = TRUE;
 	HANDLE hFile = INVALID_HANDLE_VALUE;
 	DWORD dwFlags = FILE_FLAG_OPEN_REPARSE_POINT;
-	REPARSE_DATA_COMMON_HEADER *pReparseCommon = nullptr;
+	REPARSE_DATA_COMMON_HEADER* pReparseCommon = nullptr;
 	void* pCurrReparseData = nullptr;
 	DWORD cCurrReparseData = 0;
 
 	// Check if reparse data was already deleted, as may happen if multiple RemoveFile entries match on the same file
-	GetReparsePointData(szPath, &pCurrReparseData, &cCurrReparseData);
-	if (cCurrReparseData == 0)
+	hr = GetReparsePointData(szPath, &pCurrReparseData, &cCurrReparseData, nullptr, nullptr);
+	if (hr == E_NOTAREPARSEPOINT)
 	{
 		hr = S_FALSE;
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Reparse data for '%ls' already removed", szPath);
 		ExitFunction();
 	}
+	ExitOnFailure(hr, "Failed to get current reparse data for '%ls'", szPath);
 
 	if (::PathIsDirectory(szPath))
 	{

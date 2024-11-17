@@ -1,6 +1,9 @@
 #include "pch.h"
 #include "Unzip.h"
 #include "FileOperations.h"
+#include "FileEntry.h"
+#include "FileIterator.h"
+#include "..\CaCommon\WixString.h"
 #include "..\poco\Zip\include\Poco\Zip\ZipArchive.h"
 #include "..\poco\Zip\include\Poco\Zip\ZipStream.h"
 #include "..\poco\Zip\include\Poco\Zip\Compress.h"
@@ -300,14 +303,13 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 	LPCWSTR zipFileW = nullptr;
 	LPCWSTR srcFolderW = nullptr;
 	LPCWSTR szPattern = nullptr;
-	LPWSTR* pszFiles = nullptr;
 	LPSTR szEntryName = nullptr;
-	UINT cFiles = 0;
 	std::string zipFileA;
 	std::ostream* zipFileStream = nullptr;
 	Compress* pZip = nullptr;
 	Poco::Path file, fileName;
 	PMSIHANDLE hActionData;
+	CFileIterator fileFinder;
 
 	zipFileW = (LPCWSTR)(LPVOID)pDetails->zipfile().data();
 	srcFolderW = (LPCWSTR)(LPVOID)pDetails->srcfolder().data();
@@ -317,9 +319,7 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 
 	try
 	{
-		hr = CFileOperations::ListFiles(srcFolderW, szPattern, pDetails->recursive(), &pszFiles, &cFiles);
-		ExitOnFailure(hr, "Failed listing files in '%ls'", srcFolderW);
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Compressing %u files matching '%ls%ls' to zip file '%ls'", cFiles, srcFolderW, szPattern, zipFileW);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Compressing files matching '%ls%ls' to zip file '%ls'", srcFolderW, szPattern, zipFileW);
 		
 		// ActionData: "Compressing from [1] to [2]"
 		hActionData = ::MsiCreateRecord(2);
@@ -330,8 +330,6 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 			WcaProcessMessage(INSTALLMESSAGE::INSTALLMESSAGE_ACTIONDATA, hActionData);
 		}
 
-		if (cFiles > 0)
-		{
 			Poco::UnicodeConverter::toUTF8(zipFileW, zipFileA);
 
 			zipFileStream = new std::ofstream(zipFileA, std::ios::binary);
@@ -340,9 +338,13 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 			pZip = new Compress(*zipFileStream, true);
 			ExitOnNull(zipFileStream, hr, E_OUTOFMEMORY, "Failed creating zip archive for '%ls'", zipFileW);
 
-			for (UINT i = 0; i < cFiles; ++i)
+			for (CFileEntry fileEntry = fileFinder.Find(srcFolderW, szPattern, pDetails->recursive()); !fileFinder.IsEnd(); fileEntry = fileFinder.Next())
 			{
-				hr = StrAnsiAllocString(&szEntryName, pszFiles[i] + ::wcslen(srcFolderW), 0, CP_UTF8);
+				ExitOnNull(fileEntry.IsValid(), hr, fileFinder.Status(), "Failed to find files in '%ls'", srcFolderW);
+
+				if (!fileEntry.IsDirectory() && !fileEntry.IsSymlink())
+				{
+				hr = StrAnsiAllocString(&szEntryName, (LPCWSTR)fileEntry.Path() + ::wcslen(srcFolderW), 0, CP_UTF8);
 				ExitOnFailure(hr, "Failed allocating string");
 
 				while (LPSTR szBackslah = ::strchr(szEntryName, '\\'))
@@ -353,7 +355,7 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 				fileName.setFileName(szEntryName);
 				ReleaseNullMem(szEntryName);
 
-				hr = StrAnsiAllocString(&szEntryName, pszFiles[i], 0, CP_UTF8);
+				hr = StrAnsiAllocString(&szEntryName, fileEntry.Path(), 0, CP_UTF8);
 				ExitOnFailure(hr, "Failed allocating string");
 
 				file.setFileName(szEntryName);
@@ -368,11 +370,11 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 				}
 				catch (Poco::Exception ex)
 				{
-					hr = _zipOneFilePrompter.Prompt((LPCWSTR)pszFiles[i], zipFileW, ex.displayText().c_str());
+					hr = _zipOneFilePrompter.Prompt((LPCWSTR)fileEntry.Path(), zipFileW, ex.displayText().c_str());
 				}
 				catch (std::exception ex)
 				{
-					hr = _zipOneFilePrompter.Prompt((LPCWSTR)pszFiles[i], zipFileW, ex.what());
+					hr = _zipOneFilePrompter.Prompt((LPCWSTR)fileEntry.Path(), zipFileW, ex.what());
 				}
 				catch (...)
 				{
@@ -384,7 +386,7 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 					hr = S_OK;
 					goto LRetryFile;
 				}
-				ExitOnFailure(hr, "Failed to add '%ls' to zip '%ls'", pszFiles[i], zipFileW);
+				ExitOnFailure(hr, "Failed to add '%ls' to zip '%ls'", (LPCWSTR)fileEntry.Path(), zipFileW);
 			}
 
 			pZip->close();
@@ -407,10 +409,6 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 
 LExit:
 	ReleaseNullMem(szEntryName);
-	if (cFiles && pszFiles)
-	{
-		StrArrayFree(pszFiles, cFiles);
-	}
 	if (pZip)
 	{
 		delete pZip;
