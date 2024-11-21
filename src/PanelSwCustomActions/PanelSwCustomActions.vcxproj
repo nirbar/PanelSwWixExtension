@@ -182,6 +182,9 @@
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\obfuscatedString.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\reparsePointDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
     <ClInclude Include="TopShelfService.h" />
     <ClInclude Include="Unzip.h" />
     <ClInclude Include="XslTransform.h" />
