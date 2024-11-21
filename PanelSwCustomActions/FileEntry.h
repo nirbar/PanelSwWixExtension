@@ -11,9 +11,9 @@ public:
 	CFileEntry(LPCWSTR szPath);
 	CFileEntry(const WIN32_FIND_DATA& findData, LPCWSTR szBasePath);
 	CFileEntry(const CFileEntry& other);
-	CFileEntry(CFileEntry&& other);
+	CFileEntry(CFileEntry&& other) noexcept;
 	CFileEntry& operator=(CFileEntry& other);
-	CFileEntry& operator=(CFileEntry&& other);
+	CFileEntry& operator=(CFileEntry&& other) noexcept;
 
 	// Attribute tests
 	DWORD Attributes() const;

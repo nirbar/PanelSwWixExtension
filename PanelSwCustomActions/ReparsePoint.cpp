@@ -476,6 +476,7 @@ LExit:
 	{
 		::CloseHandle(hFile);
 	}
+	ReleaseMem(pCurrReparseData)
 
 	return hr;
 }
