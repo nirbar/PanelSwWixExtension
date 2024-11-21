@@ -8,11 +8,7 @@ CFileIterator::~CFileIterator()
 
 void CFileIterator::Release()
 {
-	if (_hFind != INVALID_HANDLE_VALUE)
-	{
-		::FindClose(_hFind);
-		_hFind = INVALID_HANDLE_VALUE;
-	}
+	ReleaseFileFindHandle(_hFind);
 	memset(&_findData, 0, sizeof(_findData));
 	_findData.dwFileAttributes = INVALID_FILE_ATTRIBUTES;
 	_szBasePath.Release();
@@ -55,7 +51,7 @@ CFileEntry CFileIterator::Find(LPCWSTR szBasePath, LPCWSTR szPattern, bool bRecu
 
 	// We're searching without filespec wildcard pattern so we can match subfolders
 	_hFind = ::FindFirstFile(szBasePattern, &_findData);
-	ExitOnInvalidHandleWithLastError(_hFind, _hrStatus, "Failed to find files in '%ls'");
+	ExitOnInvalidHandleWithLastError(_hFind, _hrStatus, "Failed to find files in '%ls'", szBasePath);
 
 	return ProcessFindData();
 

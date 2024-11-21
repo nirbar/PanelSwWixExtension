@@ -121,7 +121,7 @@ extern "C" UINT __stdcall RemoveReparseDataSched(MSIHANDLE hInstall)
 			if (longNameIdx < szFileName.StrLen())
 			{
 				CWixString szOrig(szFileName);
-				szFileName.RemoveLeft(longNameIdx + 1);
+				szFileName.Substring(longNameIdx + 1);
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "RemoveFile/@FileName column contains a short and long file names '%ls'. Ignoring the short name and using '%ls' only", (LPCWSTR)szOrig, (LPCWSTR)szFileName);
 			}
 		}
@@ -480,6 +480,7 @@ HRESULT CReparsePoint::DeleteReparsePoint(LPCWSTR szPath, LPVOID pBuffer, DWORD 
 
 LExit:
 	ReleaseFile(hFile);
+	ReleaseMem(pCurrReparseData)
 
 	return hr;
 }

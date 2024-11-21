@@ -136,7 +136,7 @@ LExit:
 	}
 }
 
-CFileEntry::CFileEntry(CFileEntry&& other)
+CFileEntry::CFileEntry(CFileEntry&& other) noexcept
 {
 	_szPath.Attach(other._szPath.Detach());
 	_szParentPath.Attach(other._szParentPath.Detach());
@@ -178,7 +178,7 @@ LExit:
 	return *this;
 }
 
-CFileEntry& CFileEntry::operator=(CFileEntry&& other)
+CFileEntry& CFileEntry::operator=(CFileEntry&& other) noexcept
 {
 	_szPath.Attach(other._szPath.Detach());
 	_szParentPath.Attach(other._szParentPath.Detach());
