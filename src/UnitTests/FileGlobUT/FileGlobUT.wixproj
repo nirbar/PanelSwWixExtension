@@ -1,0 +1,19 @@
+<Project Sdk="WixToolset.Sdk">
+  <PropertyGroup>
+    <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <OutputType>Package</OutputType>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="WixToolset.Heat"/>
+    <PackageReference Include="TidyBuild" />
+  </ItemGroup>
+  <ItemGroup>
+    <WixExtension Include="PanelSwWixExtension">
+      <HintPath>$(BuildFolder)..\AnyCPU\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</HintPath>
+      <Name>PanelSwWixExtension</Name>
+    </WixExtension>
+  </ItemGroup>
+</Project>

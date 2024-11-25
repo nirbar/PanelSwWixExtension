@@ -6,6 +6,7 @@
     <SevenZapVersion Condition=" '$(SevenZapVersion)' == '' ">24.8.41</SevenZapVersion>
   </PropertyGroup>
   <ItemGroup>
+    <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="9.0.0" />
     <PackageVersion Include="WixToolset.DUtil" version="$(Wix4Version)" />
     <PackageVersion Include="WixToolset.WcaUtil" version="$(Wix4Version)" />
     <PackageVersion Include="WixToolset.Extensibility" Version="$(Wix4Version)" />

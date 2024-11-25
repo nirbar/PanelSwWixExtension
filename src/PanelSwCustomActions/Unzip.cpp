@@ -355,7 +355,7 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 				fileName.setFileName(szEntryName);
 				ReleaseNullMem(szEntryName);
 
-				hr = StrAnsiAllocString(&szEntryName, fileEntry.Path(), 0, CP_UTF8);
+				hr = StrAnsiAllocString(&szEntryName, (LPCWSTR)fileEntry.Path(), 0, CP_UTF8);
 				ExitOnFailure(hr, "Failed allocating string");
 
 				file.setFileName(szEntryName);

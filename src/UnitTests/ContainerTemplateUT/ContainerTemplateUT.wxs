@@ -3,6 +3,7 @@
   <Bundle Name="ContainerTemplateUT" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7">
     <BootstrapperApplication>
       <WixStandardBootstrapperApplication Theme="rtfLicense" LicenseUrl="www.google.com" xmlns="http://wixtoolset.org/schemas/v4/wxs/bal"/>
+      <PayloadGroupRef Id="ContainerTemplateUT"/>
     </BootstrapperApplication>
     <?if $(EnableZipContainer) ~= true?>
     <PanelSW:ContainerTemplate DefaultType="detached" Compression="SevenZip" NameTemplate="$(TargetName)-{0}.7z"/>
@@ -12,10 +13,19 @@
 
     <Chain ParallelCache="yes" DisableSystemRestore="yes">
       <ExePackage SourceFile="$(DeferredExePackagePath)" DetectCondition="1=0" UninstallArguments="/u" InstallArguments="--ignore-me">
-        <PayloadGroupRef Id="ContainerTemplateUT"/>
         <Payload SourceFile="$(sys.SOURCEFILEPATH)"/>
         <Payload SourceFile="$(sys.SOURCEFILEPATH)" Name="otherfile" Id="_2"/>
       </ExePackage>
     </Chain>
   </Bundle>
+
+  <Fragment>
+    <PayloadGroup Id="ContainerTemplateUT">
+      <PanelSW:FileGlob SourceDir="$(sys.SOURCEFILEDIR)..\..\" Include="**\UnitTests\**">
+        <PanelSW:Pattern Exclude="\**\AccountNamesUT\**"/>
+      </PanelSW:FileGlob>
+
+      <PanelSW:FileGlob SourceDir="$(SolutionDir)UnitTests" Include="**\AccountNamesUT\**"/>
+    </PayloadGroup>
+  </Fragment>
 </Wix>

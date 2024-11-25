@@ -22,14 +22,7 @@
   </ItemGroup>
   <!-- Heat -->
   <PropertyGroup>
-    <HarvestDirectoryAdditionalOptions>-generate payloadgroup</HarvestDirectoryAdditionalOptions>
     <DeferredExePackagePath>$(BuildFolder)bin\Release\DeferredExePackage\DeferredExePackage.exe</DeferredExePackagePath>
     <DefineConstants>$(DefineConstants);DeferredExePackagePath=$(DeferredExePackagePath);EnableZipContainer=$(EnableZipContainer);THISDIR=$(MSBuildThisFileDirectory)..\</DefineConstants>
   </PropertyGroup>
-  <ItemGroup>
-    <HarvestDirectory Include="$(MSBuildThisFileDirectory)..\">
-      <DirectoryRefId>ContainerTemplateUT</DirectoryRefId>
-      <PreprocessorVariable>var.THISDIR</PreprocessorVariable>
-    </HarvestDirectory>
-  </ItemGroup>
 </Project>

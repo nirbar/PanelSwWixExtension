@@ -32,6 +32,74 @@
     </xs:annotation>
   </xs:attribute>
 
+  <xs:element name="FileGlob">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="ComponentGroup" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="ComponentGroupRef" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Feature" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="FeatureRef" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="PayloadGroup" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="PayloadGroupRef" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Use files glob matching to add components and payloads]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="Pattern" />
+      </xs:choice>
+      <xs:attribute name="Directory" type="xs:string" use="optional">
+        <xs:annotation>
+          <xs:documentation>Directory ID</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="SourceDir" type="xs:string" use="required">
+        <xs:annotation>
+          <xs:documentation>Path to source folder. Bind paths are acceptible</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Include" type="xs:string" use="optional">
+        <xs:annotation>
+          <xs:documentation>Glob pattern. For example, '**\TextFiles\**\*.txt'</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Exclude" type="xs:string" use="optional">
+        <xs:annotation>
+          <xs:documentation>Glob pattern. For example, '**\TextFiles\**\*.txt'</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Pattern">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://schemas.panel-sw.co.il/wix/WixExtension" ref="FileGlob" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Additional files glob matching patterns]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Include" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Glob pattern. For example, '**\TextFiles\**\*.txt'</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Exclude" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Glob pattern. For example, '**\TextFiles\**\*.txt'</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="RemoveFolderEx">
     <xs:annotation>
       <xs:appinfo>
