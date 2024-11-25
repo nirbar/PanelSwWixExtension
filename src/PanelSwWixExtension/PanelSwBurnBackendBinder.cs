@@ -24,6 +24,8 @@ namespace PanelSw.Wix.Extensions
                         PSW_ContainerTemplate.SymbolDefinition,
                         PSW_ContainerExtensionData.SymbolDefinition,
                         PSW_CustomSearch.SymbolDefinition,
+                        PSW_FileGlob.SymbolDefinition,
+                        PSW_FileGlobPattern.SymbolDefinition,
                     };
                 }
                 return _intermediateSymbols;
@@ -32,9 +34,12 @@ namespace PanelSw.Wix.Extensions
 
         public override bool TryProcessSymbol(IntermediateSection section, IntermediateSymbol symbol)
         {
-            if (symbol is PSW_ContainerTemplate || symbol is PSW_ContainerExtensionData || symbol is PSW_CustomSearch)
+            foreach (IntermediateSymbolDefinition definition in SymbolDefinitions)
             {
-                return true;
+                if (definition.Name == symbol.Definition.Name)
+                {
+                    return true;
+                }
             }
             return base.TryProcessSymbol(section, symbol);
         }

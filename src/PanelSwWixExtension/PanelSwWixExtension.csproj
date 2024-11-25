@@ -61,20 +61,20 @@
 
   <!-- Zip and 7Zip containers -->
   <ItemGroup Condition=" '$(EnableZipContainer)' != 'true' ">
-    <Compile Remove="PanelSwBurnContainer.cs"/>
+    <Compile Remove="PanelSwBurnContainer.cs" />
   </ItemGroup>
   <ItemGroup Condition=" '$(EnableZipContainer)' == 'true' ">
-    <PackageReference Include="7Zap.NET" GeneratePathProperty="true"/>
+    <PackageReference Include="7Zap.NET" PrivateAssets="all" GeneratePathProperty="true" />
     <None Include="$(Pkg7Zap_NET)\lib\netstandard2.0\7Zap.NET.dll" Visible="false" Pack="true" PackagePath="tools\lib\" CopyToOutputDirectory="PreserveNewest" />
-    <None Include="$(Pkg7Zap_NET)\lib\netstandard2.0\win-x64\7Zap.dll" Visible="false" Pack="true" PackagePath="tools\lib\win-x64\"/>
-    <None Include="$(Pkg7Zap_NET)\lib\netstandard2.0\win-x86\7Zap.dll" Visible="false" Pack="true" PackagePath="tools\lib\win-x86\"/>
+    <None Include="$(Pkg7Zap_NET)\lib\netstandard2.0\win-x64\7Zap.dll" Visible="false" Pack="true" PackagePath="tools\lib\win-x64\" />
+    <None Include="$(Pkg7Zap_NET)\lib\netstandard2.0\win-x86\7Zap.dll" Visible="false" Pack="true" PackagePath="tools\lib\win-x86\" />
   </ItemGroup>
   <PropertyGroup Condition=" '$(EnableZipContainer)' == 'true' ">
     <PackDependsOn>Copy7Zap;$(PackDependsOn)</PackDependsOn>
   </PropertyGroup>
-  <Target Name="Copy7Zap" BeforeTargets="NugetPack" Condition=" '$(EnableZipContainer)' == 'true' ">
-    <Copy SourceFiles="$(Pkg7Zap_NET)\lib\netstandard2.0\win-x64\7Zap.dll" DestinationFolder="$(OutputDirectory)win-x64"/>
-    <Copy SourceFiles="$(Pkg7Zap_NET)\lib\netstandard2.0\win-x86\7Zap.dll" DestinationFolder="$(OutputDirectory)win-x86"/>
+  <Target Name="Copy7Zap" AfterTargets="Restore" Condition=" '$(EnableZipContainer)' == 'true' ">
+    <Copy SourceFiles="$(Pkg7Zap_NET)\lib\netstandard2.0\win-x64\7Zap.dll" DestinationFolder="$(OutputDirectory)win-x64" />
+    <Copy SourceFiles="$(Pkg7Zap_NET)\lib\netstandard2.0\win-x86\7Zap.dll" DestinationFolder="$(OutputDirectory)win-x86" />
   </Target>
 
   <ItemGroup>
@@ -88,12 +88,18 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" PrivateAssets="all" GeneratePathProperty="true"/>
     <PackageReference Include="WixToolset.Extensibility" />
     <PackageReference Include="Newtonsoft.Json" />
     <PackageReference Include="TidyBuild" PrivateAssets="all" />
-  </ItemGroup>
 
-  <ItemGroup>
+    <None Include="$(PkgMicrosoft_Extensions_FileSystemGlobbing)\lib\netstandard2.0\Microsoft.Extensions.FileSystemGlobbing.dll" Visible="false" Pack="true" PackagePath="tools\lib\" />
+  </ItemGroup>
+  <Target Name="CopyOthers" AfterTargets="Restore">
+    <Copy SourceFiles="$(PkgMicrosoft_Extensions_FileSystemGlobbing)\lib\netstandard2.0\Microsoft.Extensions.FileSystemGlobbing.dll" DestinationFolder="$(OutputDirectory)" />
+  </Target>
+
+    <ItemGroup>
     <Compile Update="MessageResources.Designer.cs">
       <DesignTime>True</DesignTime>
       <AutoGen>True</AutoGen>

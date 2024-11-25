@@ -69,6 +69,12 @@ namespace PanelSw.Wix.Extensions
                 case nameof(PSW_ExecOnComponent_ExitCode):
                     symbolDefinition = PSW_ExecOnComponent_ExitCode.SymbolDefinition;
                     break;
+                case nameof(PSW_FileGlob):
+                    symbolDefinition = PSW_FileGlob.SymbolDefinition;
+                    break;
+                case nameof(PSW_FileGlobPattern):
+                    symbolDefinition = PSW_FileGlobPattern.SymbolDefinition;
+                    break;
                 case nameof(PSW_FileRegex):
                     symbolDefinition = PSW_FileRegex.SymbolDefinition;
                     break;

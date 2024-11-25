@@ -486,6 +486,8 @@ namespace PanelSw.Wix.Extensions
                         new TableDefinition(nameof(PSW_ExecOnComponent_Environment), PSW_ExecOnComponent_Environment.SymbolDefinition, PSW_ExecOnComponent_Environment.ColumnDefinitions, symbolIdIsPrimaryKey: false),
                         new TableDefinition(nameof(PSW_ExecOnComponent_ExitCode), PSW_ExecOnComponent_ExitCode.SymbolDefinition, PSW_ExecOnComponent_ExitCode.ColumnDefinitions, symbolIdIsPrimaryKey: false),
                         new TableDefinition(nameof(PSW_ExecuteCommand), PSW_ExecuteCommand.SymbolDefinition, PSW_ExecuteCommand.ColumnDefinitions, symbolIdIsPrimaryKey: true, unreal: true),
+                        new TableDefinition(nameof(PSW_FileGlob), PSW_FileGlob.SymbolDefinition, PSW_FileGlob.ColumnDefinitions, symbolIdIsPrimaryKey: true, unreal: true),
+                        new TableDefinition(nameof(PSW_FileGlobPattern), PSW_FileGlobPattern.SymbolDefinition, PSW_FileGlobPattern.ColumnDefinitions, symbolIdIsPrimaryKey: true, unreal: true),
                         new TableDefinition(nameof(PSW_FileRegex), PSW_FileRegex.SymbolDefinition, PSW_FileRegex.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_ForceVersion), PSW_ForceVersion.SymbolDefinition, PSW_ForceVersion.ColumnDefinitions, symbolIdIsPrimaryKey: false),
                         new TableDefinition(nameof(PSW_InstallUtil), PSW_InstallUtil.SymbolDefinition, PSW_InstallUtil.ColumnDefinitions, symbolIdIsPrimaryKey: false),
@@ -591,7 +593,7 @@ namespace PanelSw.Wix.Extensions
                 }
             }
         }
-        
+
         private void DuplicateFolder(IntermediateSection section)
         {
             List<PSW_DuplicateFolder> duplicateFolders = new List<PSW_DuplicateFolder>();

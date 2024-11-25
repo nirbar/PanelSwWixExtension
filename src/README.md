@@ -8,6 +8,7 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
 ## PanelSwWixExtension WiX Elements
 
 - Bundle elements:
+  - *FileGlob*: In-code payload harvester with include and exclude glob patterns. Works in bundles and in packages 
   - *ContainerTemplate*: A container template to which bundle payloads can be assigned
     - When using PanelSwWix4.Sdk, support 7z and Zip containers
   - *CustomSearch*: Use a BundleExtension to perform custom searches without having to implement a complete WiX extension

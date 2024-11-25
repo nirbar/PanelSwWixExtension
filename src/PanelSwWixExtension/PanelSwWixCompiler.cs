@@ -64,6 +64,10 @@ namespace PanelSw.Wix.Extensions
                             ParseDuplicateFolderElement(section, element);
                             break;
 
+                        case "FileGlob":
+                            ParseFileGlobElement(section, element);
+                            break;
+
                         case "Payload":
                             ParsePayload(section, element, null, null);
                             break;
@@ -313,6 +317,34 @@ namespace PanelSw.Wix.Extensions
                         }
                         break;
                     }
+
+                case "ComponentGroup":
+                case "ComponentGroupRef":
+                case "Feature":
+                case "FeatureRef":
+                    switch (element.Name.LocalName)
+                    {
+                        case "FileGlob":
+                            ParseFileGlobElement(section, element);
+                            break;
+                        default:
+                            ParseHelper.UnexpectedElement(parentElement, element);
+                            break;
+                    }
+                    break;
+
+                case "PayloadGroup":
+                case "PayloadGroupRef":
+                    switch (element.Name.LocalName)
+                    {
+                        case "FileGlob":
+                            ParseFileGlobElement(section, element);
+                            break;
+                        default:
+                            ParseHelper.UnexpectedElement(parentElement, element);
+                            break;
+                    }
+                    break;
 
                 case "PatchFamily":
                     switch (element.Name.LocalName)
@@ -1027,6 +1059,172 @@ namespace PanelSw.Wix.Extensions
 
                     ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", id);
                 }
+            }
+        }
+
+        private void ParseFileGlobElement(IntermediateSection section, XElement element)
+        {
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
+            string directory = null;
+            string baseDir = null;
+            string include = null;
+            string exclude = null;
+            string feature_ = null;
+            string componentGroup_ = null;
+            string payloadGroup_ = null;
+
+            foreach (XAttribute attrib in element.Attributes())
+            {
+                if (IsMyAttribute(element, attrib))
+                {
+                    switch (attrib.Name.LocalName)
+                    {
+                        case "Directory":
+                            directory = ParseHelper.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                            break;
+                        case "SourceDir":
+                            baseDir = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Include":
+                            include = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Exclude":
+                            exclude = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        default:
+                            ParseHelper.UnexpectedAttribute(element, attrib);
+                            break;
+                    }
+                }
+            }
+
+            XAttribute parentIdAttrib = null;
+            XAttribute parentDirAttrib = null;
+            switch (element.Parent.Name.LocalName)
+            {
+                case "Feature":
+                case "FeatureRef":
+                    parentDirAttrib = element.Parent.Attributes().FirstOrDefault(a => a.Name.LocalName.Equals("ConfigurableDirectory"));
+                    parentIdAttrib = element.Parent.Attributes().FirstOrDefault(a => a.Name.LocalName.Equals("Id"));
+                    if (parentIdAttrib != null)
+                    {
+                        feature_ = ParseHelper.GetAttributeIdentifierValue(sourceLineNumbers, parentIdAttrib);
+                    }
+                    break;
+                case "ComponentGroup":
+                case "ComponentGroupRef":
+                    parentDirAttrib = element.Parent.Attributes().FirstOrDefault(a => a.Name.LocalName.Equals("Directory"));
+                    parentIdAttrib = element.Parent.Attributes().FirstOrDefault(a => a.Name.LocalName.Equals("Id"));
+                    if (parentIdAttrib != null)
+                    {
+                        componentGroup_ = ParseHelper.GetAttributeIdentifierValue(sourceLineNumbers, parentIdAttrib);
+                    }
+                    break;
+                case "PayloadGroup":
+                case "PayloadGroupRef":
+                    parentIdAttrib = element.Parent.Attributes().FirstOrDefault(a => a.Name.LocalName.Equals("Id"));
+                    if (parentIdAttrib != null)
+                    {
+                        payloadGroup_ = ParseHelper.GetAttributeIdentifierValue(sourceLineNumbers, parentIdAttrib);
+                    }
+                    break;
+                default:
+                    ParseHelper.UnexpectedElement(element.Parent, element);
+                    break;
+            }
+
+            if (!string.IsNullOrEmpty(payloadGroup_) && !string.IsNullOrEmpty(directory))
+            {
+                XAttribute dirAttrib = element.Attributes().FirstOrDefault(a => a.Name.LocalName.Equals("Directory"));
+                ParseHelper.UnexpectedAttribute(element, dirAttrib);
+            }
+            if (string.IsNullOrEmpty(directory) && string.IsNullOrEmpty(payloadGroup_))
+            {
+                if (parentDirAttrib != null)
+                {
+                    directory = ParseHelper.GetAttributeIdentifierValue(sourceLineNumbers, parentDirAttrib);
+                }
+
+                if (string.IsNullOrEmpty(directory))
+                {
+                    Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Directory"));
+                }
+            }
+            if (string.IsNullOrEmpty(baseDir))
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "SourceDir"));
+            }
+
+            if (Messaging.EncounteredError)
+            {
+                return;
+            }
+
+            PSW_FileGlob globRow = section.AddSymbol(new PSW_FileGlob(sourceLineNumbers));
+            globRow.Directory_ = directory;
+            globRow.SourceDir = baseDir;
+            globRow.ComponentGroup_ = componentGroup_;
+            globRow.Feature_ = feature_;
+            globRow.PayloadGroup_ = payloadGroup_;
+
+            if (!string.IsNullOrEmpty(include) || !string.IsNullOrEmpty(exclude))
+            {
+                PSW_FileGlobPattern filter = section.AddSymbol(new PSW_FileGlobPattern(sourceLineNumbers));
+                filter.FileGlob_ = globRow.Id.Id;
+                filter.Include = include;
+                filter.Exclude = exclude;
+            }
+
+            // Patterns
+            foreach (XElement child in element.Descendants())
+            {
+                include = null;
+                exclude = null;
+                if (child.Name.Namespace.Equals(Namespace))
+                {
+                    switch (child.Name.LocalName)
+                    {
+                        case "Pattern":
+                            {
+                                foreach (XAttribute a in child.Attributes())
+                                {
+                                    if (IsMyAttribute(child, a))
+                                    {
+                                        switch (a.Name.LocalName)
+                                        {
+                                            case "Include":
+                                                include = ParseHelper.GetAttributeValue(sourceLineNumbers, a);
+                                                break;
+                                            case "Exclude":
+                                                exclude = ParseHelper.GetAttributeValue(sourceLineNumbers, a);
+                                                break;
+                                            default:
+                                                ParseHelper.UnexpectedAttribute(element, a);
+                                                break;
+                                        }
+                                    }
+                                }
+                            }
+                            break;
+                        default:
+                            ParseHelper.UnexpectedElement(element, child);
+                            break;
+                    }
+                }
+
+                if (string.IsNullOrEmpty(include) && string.IsNullOrEmpty(exclude))
+                {
+                    Messaging.Write(ErrorMessages.ExpectedAttributes(sourceLineNumbers, child.Name.LocalName, "Include", "Exclude"));
+                }
+                if (Messaging.EncounteredError)
+                {
+                    return;
+                }
+
+                PSW_FileGlobPattern filter = section.AddSymbol(new PSW_FileGlobPattern(sourceLineNumbers));
+                filter.FileGlob_ = globRow.Id.Id;
+                filter.Include = include;
+                filter.Exclude = exclude;
             }
         }
 
