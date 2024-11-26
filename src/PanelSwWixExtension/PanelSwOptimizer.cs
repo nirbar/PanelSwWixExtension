@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using WixToolset.Data;
 using WixToolset.Data.Symbols;
 using WixToolset.Extensibility;
@@ -14,7 +15,7 @@ using WixToolset.Extensibility.Services;
 
 namespace PanelSw.Wix.Extensions
 {
-    public class PanelSwWiOptimizer : BaseOptimizerExtension
+    public class PanelSwOptimizer : BaseOptimizerExtension
     {
         private IParseHelper _parseHelper;
         private IMessaging _messaging;
@@ -91,14 +92,13 @@ namespace PanelSw.Wix.Extensions
                             foreach (FilePatternMatch filePattern in patternMatching.Files)
                             {
                                 string fullPath = Path.Combine(folder, filePattern.Path);
-                                Uri uri = new Uri(fullPath);
-                                fullPath = uri.AbsolutePath;
+                                fullPath = Path.GetFullPath(fullPath);
 
                                 string recursiveDir = Path.GetDirectoryName(filePattern.Path);
 
                                 if (!string.IsNullOrEmpty(glb.PayloadGroup_))
                                 {
-                                    Identifier id = _parseHelper.CreateIdentifier("glb", glb.PayloadGroup_, Path.GetFileName(fullPath));
+                                    Identifier id = _parseHelper.CreateIdentifier("glb", glb.PayloadGroup_, recursiveDir, Path.GetFileName(fullPath));
                                     string fileName = Path.Combine(recursiveDir, Path.GetFileName(fullPath));
 
                                     section.AddSymbol(new WixBundlePayloadSymbol(glb.SourceLineNumbers, id) { SourceFile = new IntermediateFieldPathValue() { Path = fullPath }, Name = fileName });
@@ -113,8 +113,24 @@ namespace PanelSw.Wix.Extensions
                                     }
                                     Identifier id = _parseHelper.CreateIdentifier("glb", directoryId, Path.GetFileName(fullPath));
 
-                                    section.AddSymbol(new ComponentSymbol(glb.SourceLineNumbers, id) { DirectoryRef = directoryId, KeyPath = id.Id, KeyPathType = ComponentKeyPathType.File });
-                                    section.AddSymbol(new FileSymbol(glb.SourceLineNumbers, id) { Source = new IntermediateFieldPathValue() { Path = fullPath }, Name = Path.GetFileName(fullPath), ComponentRef = id.Id, DirectoryRef = directoryId });
+                                    section.AddSymbol(new ComponentSymbol(glb.SourceLineNumbers, id)
+                                    {
+                                        ComponentId = "*",
+                                        DirectoryRef = directoryId,
+                                        KeyPath = id.Id,
+                                        KeyPathType = ComponentKeyPathType.File,
+                                        Location = ComponentLocation.LocalOnly,
+                                        Win64 = _context.Platform == Platform.ARM64 || _context.Platform == Platform.X64,
+                                    });
+
+                                    section.AddSymbol(new FileSymbol(glb.SourceLineNumbers, id)
+                                    {
+                                        Source = new IntermediateFieldPathValue() { Path = fullPath },
+                                        Name = Path.GetFileName(fullPath),
+                                        ComponentRef = id.Id,
+                                        DirectoryRef = directoryId,
+                                        Attributes = FileSymbolAttributes.None | FileSymbolAttributes.Vital,
+                                    });
                                     if (!string.IsNullOrEmpty(glb.ComponentGroup_))
                                     {
                                         _parseHelper.CreateComplexReference(section, glb.SourceLineNumbers, ComplexReferenceParentType.ComponentGroup, glb.ComponentGroup_, null, ComplexReferenceChildType.Component, id.Id, false);

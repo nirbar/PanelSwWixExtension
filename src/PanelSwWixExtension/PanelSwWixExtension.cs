@@ -21,7 +21,7 @@ namespace PanelSw.Wix.Extensions
             typeof(PanelSwWixCompiler),
             typeof(PanelSwWixExtData),
             typeof(PanelSwBurnBackendBinder),
-            typeof(PanelSwWiOptimizer),
+            typeof(PanelSwOptimizer),
 #if EnableZipContainer
             typeof(PanelSwBurnContainer),
 #endif
