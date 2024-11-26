@@ -51,7 +51,16 @@ CFileEntry CFileIterator::Find(LPCWSTR szBasePath, LPCWSTR szPattern, bool bRecu
 
 	// We're searching without filespec wildcard pattern so we can match subfolders
 	_hFind = ::FindFirstFile(szBasePattern, &_findData);
-	ExitOnInvalidHandleWithLastError(_hFind, _hrStatus, "Failed to find files in '%ls'", szBasePath);
+	if (_hFind == INVALID_HANDLE_VALUE)
+	{
+		DWORD dwError = ::GetLastError();
+		if ((dwError == ERROR_FILE_NOT_FOUND) || (dwError == ERROR_PATH_NOT_FOUND) || (dwError == ERROR_NO_MORE_FILES))
+		{
+			_hrStatus = E_NOMOREFILES;
+			ExitFunction();
+		}
+		ExitOnWin32Error(dwError, _hrStatus, "Failed to find files in '%ls'", szBasePath);
+	}
 
 	return ProcessFindData();
 
