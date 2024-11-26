@@ -100,6 +100,10 @@ namespace PanelSw.Wix.Extensions
                                 {
                                     Identifier id = _parseHelper.CreateIdentifier("glb", glb.PayloadGroup_, recursiveDir, Path.GetFileName(fullPath));
                                     string fileName = Path.Combine(recursiveDir, Path.GetFileName(fullPath));
+                                    if (!string.IsNullOrEmpty(glb.PayloadPrefix))
+                                    {
+                                        fileName = Path.Combine(glb.PayloadPrefix, fileName);
+                                    }
 
                                     section.AddSymbol(new WixBundlePayloadSymbol(glb.SourceLineNumbers, id) { SourceFile = new IntermediateFieldPathValue() { Path = fullPath }, Name = fileName });
                                     section.AddSymbol(new WixGroupSymbol(glb.SourceLineNumbers, id) { ChildId = id.Id, ChildType = ComplexReferenceChildType.Payload, ParentId = glb.PayloadGroup_, ParentType = ComplexReferenceParentType.PayloadGroup });

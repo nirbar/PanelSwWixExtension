@@ -25,7 +25,7 @@
         <PanelSW:Pattern Exclude="\**\AccountNamesUT\**"/>
       </PanelSW:FileGlob>
 
-      <PanelSW:FileGlob SourceDir="!(bindpath.UT)" Include="**\AccountNamesUT\**"/>
+      <PanelSW:FileGlob SourceDir="!(bindpath.UT)" Include="**\AccountNamesUT\**" PayloadPrefix="my\sub\folder"/>
     </PayloadGroup>
   </Fragment>
 </Wix>

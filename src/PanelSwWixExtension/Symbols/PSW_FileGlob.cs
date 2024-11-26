@@ -25,6 +25,7 @@ namespace PanelSw.Wix.Extensions.Symbols
                     new ColumnDefinition(nameof(Feature_), ColumnType.String, 72, false, true, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.None, keyTable: "Feature", keyColumn: 1),
                     new ColumnDefinition(nameof(ComponentGroup_), ColumnType.String, 72, false, true, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.None),
                     new ColumnDefinition(nameof(PayloadGroup_), ColumnType.String, 72, false, true, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.None),
+                    new ColumnDefinition(nameof(PayloadPrefix), ColumnType.String, 72, false, true, ColumnCategory.Text, modularizeType: ColumnModularizeType.None),
                 };
             }
         }
@@ -63,6 +64,12 @@ namespace PanelSw.Wix.Extensions.Symbols
         {
             get => Fields[4].AsString();
             set => this.Set(4, value);
+        }
+
+        public string PayloadPrefix
+        {
+            get => Fields[5].AsString();
+            set => this.Set(5, value);
         }
     }
 }

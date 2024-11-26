@@ -1072,6 +1072,7 @@ namespace PanelSw.Wix.Extensions
             string feature_ = null;
             string componentGroup_ = null;
             string payloadGroup_ = null;
+            string payloadPrefix = null;
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -1090,6 +1091,9 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "Exclude":
                             exclude = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "PayloadPrefix":
+                            payloadPrefix = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         default:
                             ParseHelper.UnexpectedAttribute(element, attrib);
@@ -1133,6 +1137,11 @@ namespace PanelSw.Wix.Extensions
                     break;
             }
 
+            if (string.IsNullOrEmpty(payloadGroup_) && !string.IsNullOrEmpty(payloadPrefix))
+            {
+                XAttribute pldPreAttrib = element.Attributes().FirstOrDefault(a => a.Name.LocalName.Equals("PayloadPrefix"));
+                ParseHelper.UnexpectedAttribute(element, pldPreAttrib);
+            }
             if (!string.IsNullOrEmpty(payloadGroup_) && !string.IsNullOrEmpty(directory))
             {
                 XAttribute dirAttrib = element.Attributes().FirstOrDefault(a => a.Name.LocalName.Equals("Directory"));
@@ -1166,6 +1175,7 @@ namespace PanelSw.Wix.Extensions
             globRow.ComponentGroup_ = componentGroup_;
             globRow.Feature_ = feature_;
             globRow.PayloadGroup_ = payloadGroup_;
+            globRow.PayloadPrefix = payloadPrefix;
 
             if (!string.IsNullOrEmpty(include) || !string.IsNullOrEmpty(exclude))
             {
