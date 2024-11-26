@@ -21,7 +21,9 @@
       </Directory>
     </Directory>
 
-    <Property Id="MSIFASTINSTALL" Value="1"></Property>
+    <Property Id="MSIFASTINSTALL" Value="1"/>
+    <SetProperty Id="NONEXISTENT_FOLDER" Value="[OriginalDatabase].doesnt_exist" Before="AppSearch" Sequence="both"/>
+    
     <InstallExecuteSequence>
       <Custom Action="PromptCancel_Deferred" After="RemoveReparseDataSched"/>
     </InstallExecuteSequence>
@@ -33,7 +35,8 @@
         <PanelSW:RemoveFolderEx Property="REMOVE_ON_INSTALL" On="install"/>
         <PanelSW:RemoveFolderEx Property="REMOVE_ON_UNINSTALL" On="uninstall"/>
         <PanelSW:RemoveFolderEx Property="REMOVE_ON_BOTH" On="both"/>
-
+        <PanelSW:RemoveFolderEx Property="NONEXISTENT_FOLDER" On="both"/>
+        
         <RemoveFile Property="REMOVE_NO_RECURSIVE" Name="file.txt" On="both" Id="REMOVE_NO_RECURSIVE.file"/>
         <RemoveFolder Property="REMOVE_NO_RECURSIVE" On="both" Id="REMOVE_NO_RECURSIVE.dir"/>
       </Component>
