@@ -1073,6 +1073,7 @@ namespace PanelSw.Wix.Extensions
             string feature_ = null;
             string componentGroup_ = null;
             string payloadGroup_ = null;
+            string payloadPrefix = null;
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -1091,6 +1092,9 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "Exclude":
                             excludes.Add(ParseHelper.GetAttributeValue(sourceLineNumbers, attrib));
+                            break;
+                        case "PayloadPrefix":
+                            payloadPrefix = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         default:
                             ParseHelper.UnexpectedAttribute(element, attrib);
@@ -1134,6 +1138,11 @@ namespace PanelSw.Wix.Extensions
                     break;
             }
 
+            if (string.IsNullOrEmpty(payloadGroup_) && !string.IsNullOrEmpty(payloadPrefix))
+            {
+                XAttribute pldPreAttrib = element.Attributes().FirstOrDefault(a => a.Name.LocalName.Equals("PayloadPrefix"));
+                ParseHelper.UnexpectedAttribute(element, pldPreAttrib);
+            }
             if (!string.IsNullOrEmpty(payloadGroup_) && !string.IsNullOrEmpty(directoryId))
             {
                 XAttribute dirAttrib = element.Attributes().FirstOrDefault(a => a.Name.LocalName.Equals("Directory"));
@@ -1201,10 +1210,10 @@ namespace PanelSw.Wix.Extensions
                 return;
             }
 
-            ExecuteFileGlob(section, sourceLineNumbers, baseDir, includes, excludes, directoryId, feature_, componentGroup_, payloadGroup_);
+            ExecuteFileGlob(section, sourceLineNumbers, baseDir, includes, excludes, directoryId, feature_, componentGroup_, payloadGroup_, payloadPrefix);
         }
 
-        private void ExecuteFileGlob(IntermediateSection section, SourceLineNumber sourceLineNumbers, string baseDir, List<string> includes, List<string> excludes, string directoryId, string feature_, string componentGroup_, string payloadGroup_)
+        private void ExecuteFileGlob(IntermediateSection section, SourceLineNumber sourceLineNumbers, string baseDir, List<string> includes, List<string> excludes, string directoryId, string feature_, string componentGroup_, string payloadGroup_, string payloadPrefix)
         {
             Matcher matcher = new Matcher();
             matcher.AddIncludePatterns(includes);
@@ -1232,6 +1241,10 @@ namespace PanelSw.Wix.Extensions
                 {
                     Identifier id = ParseHelper.CreateIdentifier("glb", payloadGroup_, recursiveDir, Path.GetFileName(fullPath));
                     string fileName = Path.Combine(recursiveDir, Path.GetFileName(fullPath));
+                    if (!string.IsNullOrEmpty(payloadPrefix))
+                    {
+                        fileName = Path.Combine(payloadPrefix, fileName);
+                    }
 
                     section.AddSymbol(new WixBundlePayloadSymbol(sourceLineNumbers, id) { SourceFile = new IntermediateFieldPathValue() { Path = fullPath }, Name = fileName });
                     section.AddSymbol(new WixGroupSymbol(sourceLineNumbers, id) { ChildId = id.Id, ChildType = ComplexReferenceChildType.Payload, ParentId = payloadGroup_, ParentType = ComplexReferenceParentType.PayloadGroup });

@@ -13,6 +13,7 @@
 
     <Property Id="MSIFASTINSTALL" Value="1"/>
     <SetProperty Id="NONEXISTENT_FOLDER" Value="[OriginalDatabase].doesnt_exist" Before="AppSearch" Sequence="both"/>
+    <SetProperty Id="NONEXISTENT_FOLDER2" Value="[OriginalDatabase].doesnt_exist" Before="AppSearch" Sequence="both"/>
 
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component Id="Test">
@@ -40,6 +41,12 @@
       <Component Transitive="yes" Condition="Installed">
         <File Source="$(sys.SOURCEFILEDIR)\run-test.bat" Name="run-test-on-repair.bat"/>
         <PanelSW:RemoveFolderEx Property="REMOVE_ON_REPAIR" On="install"/>
+      </Component>
+
+      <!-- Never installed -->
+      <Component Guid="" Condition="Installed And Not Installed">
+        <File Source="$(sys.SOURCEFILEDIR)\run-test.bat" Name="never.bat"/>
+        <PanelSW:RemoveFolderEx Property="NONEXISTENT_FOLDER2" On="both"/>
       </Component>
     </ComponentGroup>
 

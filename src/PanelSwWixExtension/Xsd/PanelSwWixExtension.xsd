@@ -70,6 +70,11 @@
           <xs:documentation>Glob pattern. For example, '**\TextFiles\**\*.txt'</xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="PayloadPrefix" type="xs:string" use="optional">
+        <xs:annotation>
+          <xs:documentation>When nested under a PayloadGroup, the payloads will be extracted to the provided subfolder</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
 
