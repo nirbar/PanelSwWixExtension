@@ -139,7 +139,7 @@ namespace PanelSw.Wix.Extensions
                 for (int i = myPayloadSymbols.Count - 1; i >= 0; --i)
                 {
                     WixBundlePayloadSymbol payload = myPayloadSymbols[i];
-                    if (!payload.FileSize.HasValue || (containerSize[defaultContainer] + payload.FileSize.Value) < containerTemplate.MaximumUncompressedExeSize)
+                    if (!payload.FileSize.HasValue || (containerSize[defaultContainer] + payload.FileSize.Value + exeSize) < containerTemplate.MaximumUncompressedExeSize)
                     {
                         containerSize[defaultContainer] += payload.FileSize ?? 0;
                         payload.ContainerRef = defaultContainer.Id.Id;
@@ -158,7 +158,7 @@ namespace PanelSw.Wix.Extensions
                 if ((prevContainer != null) && (prevPayload != null) && (SortPayloads(payload, prevPayload, groupSymbols) == 0))
                 {
                     long maxContainerSize = ((prevContainer == defaultContainer) && (defaultContainer.Type == ContainerType.Attached) && (containerTemplate.MaximumUncompressedContainerSize > containerTemplate.MaximumUncompressedExeSize))
-                        ? containerTemplate.MaximumUncompressedExeSize : containerTemplate.MaximumUncompressedContainerSize;
+                        ? containerTemplate.MaximumUncompressedExeSize - exeSize : containerTemplate.MaximumUncompressedContainerSize;
 
                     // Previous container has enough capacity ?
                     if (!payload.FileSize.HasValue || ((containerSize[prevContainer] + payload.FileSize.Value) < maxContainerSize))

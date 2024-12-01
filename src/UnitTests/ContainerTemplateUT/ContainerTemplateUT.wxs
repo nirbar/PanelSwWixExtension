@@ -6,7 +6,7 @@
       <PayloadGroupRef Id="ContainerTemplateUT"/>
     </BootstrapperApplication>
     <?if $(EnableZipContainer) ~= true?>
-    <PanelSW:ContainerTemplate DefaultType="detached" Compression="SevenZip" NameTemplate="$(TargetName)-{0}.7z"/>
+    <PanelSW:ContainerTemplate DefaultType="attached" Compression="SevenZip" NameTemplate="$(TargetName).7z"/>
     <?else?>
     <PanelSW:ContainerTemplate DefaultType="detached"/>
     <?endif?>
