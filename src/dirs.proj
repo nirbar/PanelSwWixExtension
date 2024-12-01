@@ -30,7 +30,7 @@
   </ItemGroup>
   <ItemGroup Condition="'$(UnitTest)' != ''">
     <ProjectReference Include="UnitTests\$(UnitTest)\$(UnitTest).wixproj" Properties="Configuration=$(Configuration);Platform=x86" Targets="Restore;Build" BuildInParallel="false" />
-    <ProjectReference Include="UnitTests\$(UnitTest)\$(UnitTest).wixproj" Properties="Configuration=$(Configuration);Platform=x64" Targets="Restore;Build" BuildInParallel="false" />
+    <ProjectReference Include="UnitTests\$(UnitTest)\$(UnitTest).wixproj" Properties="Configuration=$(Configuration);Platform=x64" Targets="Restore;Build" BuildInParallel="false" Condition=" '$(UnitTestX64)' == '' Or $(UnitTestX64) " />
   </ItemGroup>
   
   <ItemGroup>

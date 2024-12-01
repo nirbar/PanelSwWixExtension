@@ -528,7 +528,7 @@ namespace PanelSw.Wix.Extensions
             }
             if ((maximumUncompressedContainerSize < long.MaxValue) && !cabinetTemplate.Contains("{0}"))
             {
-                Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, element.Name.LocalName, "CabinetTemplate", cabinetTemplate, "Must contain format string {0}"));
+                Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, element.Name.LocalName, "NameTemplate", cabinetTemplate, "Must contain format string {0}"));
             }
             if ((defaultType == ContainerType.Detached) && (maximumUncompressedExeSize > 0))
             {
