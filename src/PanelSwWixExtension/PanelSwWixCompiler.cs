@@ -1234,6 +1234,7 @@ namespace PanelSw.Wix.Extensions
             {
                 string fullPath = Path.Combine(baseDir, filePattern.Path);
                 fullPath = Path.GetFullPath(fullPath);
+                string subdirId = directoryId;
 
                 string recursiveDir = Path.GetDirectoryName(filePattern.Path);
 
@@ -1253,14 +1254,14 @@ namespace PanelSw.Wix.Extensions
                 {
                     if (!string.IsNullOrEmpty(recursiveDir))
                     {
-                        directoryId = ParseHelper.CreateDirectoryReferenceFromInlineSyntax(section, sourceLineNumbers, null, directoryId, recursiveDir, sectionCachedInlinedDirectoryIds);
+                        subdirId = ParseHelper.CreateDirectoryReferenceFromInlineSyntax(section, sourceLineNumbers, null, directoryId, recursiveDir, sectionCachedInlinedDirectoryIds);
                     }
-                    Identifier id = ParseHelper.CreateIdentifier("glb", directoryId, Path.GetFileName(fullPath));
+                    Identifier id = ParseHelper.CreateIdentifier("glb", subdirId, Path.GetFileName(fullPath));
 
                     section.AddSymbol(new ComponentSymbol(sourceLineNumbers, id)
                     {
                         ComponentId = "*",
-                        DirectoryRef = directoryId,
+                        DirectoryRef = subdirId,
                         KeyPath = id.Id,
                         KeyPathType = ComponentKeyPathType.File,
                         Location = ComponentLocation.LocalOnly,
@@ -1272,7 +1273,7 @@ namespace PanelSw.Wix.Extensions
                         Source = new IntermediateFieldPathValue() { Path = fullPath },
                         Name = Path.GetFileName(fullPath),
                         ComponentRef = id.Id,
-                        DirectoryRef = directoryId,
+                        DirectoryRef = subdirId,
                         Attributes = FileSymbolAttributes.None | FileSymbolAttributes.Vital,
                     });
                     if (!string.IsNullOrEmpty(componentGroup_))
