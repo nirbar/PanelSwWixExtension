@@ -337,7 +337,7 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 		zipFileStream = new std::ofstream(zipFileA, std::ios::binary);
 		ExitOnNull(zipFileStream, hr, E_OUTOFMEMORY, "Failed creating zip file '%ls'", zipFileW);
 
-		pZip = new Compress(*zipFileStream, true);
+		pZip = new Compress(*zipFileStream, true, true);
 		ExitOnNull(zipFileStream, hr, E_OUTOFMEMORY, "Failed creating zip archive for '%ls'", zipFileW);
 
 		for (CFileEntry fileEntry = fileFinder.Find(srcFolderW, szPattern, pDetails->recursive()); !fileFinder.IsEnd(); fileEntry = fileFinder.Next())
@@ -357,7 +357,7 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 				fileName.setFileName(szEntryName);
 				ReleaseNullMem(szEntryName);
 
-				hr = StrAnsiAllocString(&szEntryName, fileEntry.Path(), 0, CP_UTF8);
+				hr = StrAnsiAllocString(&szEntryName, (LPCWSTR)fileEntry.Path(), 0, CP_UTF8);
 				ExitOnFailure(hr, "Failed allocating string");
 
 				file.setFileName(szEntryName);
@@ -390,10 +390,15 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 				}
 				ExitOnFailure(hr, "Failed to add '%ls' to zip '%ls'", (LPCWSTR)fileEntry.Path(), zipFileW);
 			}
-
-			pZip->close();
-			zipFileStream->flush();
 		}
+
+		pZip->close();
+		delete pZip;
+		pZip = nullptr;
+
+		zipFileStream->flush();
+		delete zipFileStream;
+		zipFileStream = nullptr;
 	}
 	catch (Poco::Exception ex)
 	{

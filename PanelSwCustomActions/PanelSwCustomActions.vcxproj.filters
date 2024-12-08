@@ -293,6 +293,9 @@
     <ClInclude Include="FileIterator.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\reparsePointDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

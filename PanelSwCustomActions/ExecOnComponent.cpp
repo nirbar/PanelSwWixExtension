@@ -1,6 +1,8 @@
 #include "ExecOnComponent.h"
 #include "../CaCommon/RegistryKey.h"
 #include <Poco/JSON/Parser.h>
+#include <Poco/JSON/Object.h>
+#include <Poco/JSON/JSONException.h>
 #include "FileOperations.h"
 #include "../CaCommon/WixString.h"
 #include <regex>

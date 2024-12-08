@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
   <Import Project="$(MSBuildThisFileDirectory)TidyBuild.user.props" Condition="Exists('$(MSBuildThisFileDirectory)TidyBuild.user.props')"/>
   <PropertyGroup>
-    <FullVersion>3.13.1</FullVersion>
+    <FullVersion>3.13.3</FullVersion>
     <FullVersion Condition=" '$(GITHUB_RUN_NUMBER)'!='' ">$(FullVersion).$(GITHUB_RUN_NUMBER)</FullVersion>
     <ProductName>PanelSwWixExtension</ProductName>
     <Manufacturer>Panel::Software</Manufacturer>
@@ -12,7 +12,7 @@
     -->
     
     <!-- CMake -->
-    <CMakeDir Condition="'$(CMakeDir)'==''">D:\Tools\cmake-3.26.4-windows-x86_64\bin\</CMakeDir>
+    <CMakeDir Condition="'$(CMakeDir)'==''">D:\Tools\cmake-3.30.3-windows-x86_64\bin\</CMakeDir>
     <CMakeVsVersion Condition="'$(CMakeVsVersion)'==''">Visual Studio 16 2019</CMakeVsVersion>
     <PlatformToolset Condition="'$(PlatformToolset)'==''">v141_xp</PlatformToolset>
     <XPDeprecationWarning>false</XPDeprecationWarning>

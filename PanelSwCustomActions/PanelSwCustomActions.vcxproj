@@ -46,7 +46,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>CaCommon.lib;libprotobuf-lite.lib;ProtoCaLib.lib;msi.lib;dutil.lib;wcautil.lib;Version.lib;Shell32.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(WixSdkPath)\$(WixPlatformToolset)\lib\x86;$(OutDir)\..\CaCommon\;$(OutDir)\..\ProtoCaLib;$(BuildFolder)\poco\lib\$(Configuration);$(BuildFolder)\protobuf\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(WixSdkPath)\$(WixPlatformToolset)\lib\x86;$(OutDir)\..\CaCommon\;$(OutDir)\..\ProtoCaLib;$(BuildFolder)\poco\lib\;$(BuildFolder)\protobuf\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
     </Link>
@@ -62,6 +62,7 @@
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -213,11 +214,11 @@
   <Target Name="EnsureWixToolsetInstalled" Condition=" '$(WixNativeCATargetsImported)' != 'true' ">
     <Error Text="The WiX Toolset v3.11 (or newer) build tools must be installed to build this project. To download the WiX Toolset, see http://wixtoolset.org/releases/" />
   </Target>
-  <Target Name="BuildPoco" BeforeTargets="PrepareForBuild" Condition="!Exists('$(BuildFolder)\poco\lib\$(Configuration)\PocoZipmt.lib')">
+  <Target Name="BuildPoco" BeforeTargets="PrepareForBuild" Condition="!Exists('$(BuildFolder)\poco\lib\PocoZipmt.lib')">
     <MakeDir Directories="$(BuildFolder)\poco;$(IntDir)\..\poco" />
     <MakeDir Directories="" />
-    <Exec Command="&quot;$(CMakeDir)\cmake.exe&quot; -G &quot;$(CMakeVsVersion)&quot; -T $(PlatformToolset),host=x86 -A Win32 -DPOCO_STATIC=ON -DPOCO_MT=ON ..\..\poco" WorkingDirectory="$(BuildFolder)\poco" />
-    <Exec Command="&quot;$(CMakeDir)\cmake.exe&quot; --build . --config $(Configuration)" WorkingDirectory="$(BuildFolder)\poco" />
+    <Exec Command="&quot;$(CMakeDir)cmake.exe&quot; -G &quot;$(CMakeVsVersion)&quot; -T $(PlatformToolset),host=x86 -A Win32 -DPOCO_MT=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DENABLE_XML=ON -DENABLE_ZIP=ON -DENABLE_ENCODINGS=OFF -DENABLE_UTIL=OFF -DENABLE_NET=OFF -DENABLE_MONGODB=OFF -DENABLE_REDIS=OFF -DENABLE_DNSSD=OFF -DENABLE_PROMETHEUS=OFF -DENABLE_PDF=OFF -DENABLE_JWT=OFF -DENABLE_NETSSL_WIN=OFF -DENABLE_NETSSL=OFF -DENABLE_CRYPTO=OFF -DENABLE_DATA=OFF -DENABLE_DATA_SQLITE=OFF -DENABLE_DATA_MYSQL=OFF -DENABLE_DATA_POSTGRESQL=OFF -DENABLE_ACTIVERECORD=OFF -DENABLE_ACTIVERECORD_COMPILER=OFF -DENABLE_APACHECONNECTOR=OFF -DENABLE_CPPPARSER=OFF -DENABLE_POCODOC=OFF -DENABLE_PAGECOMPILER=OFF -DENABLE_PAGECOMPILER_FILE2PAGE=OFF -DENABLE_ENCODINGS_COMPILER=OFF -DENABLE_TRACE=OFF -DENABLE_TESTS=OFF -DENABLE_DATA_ODBC=OFF ..\..\poco" WorkingDirectory="$(BuildFolder)\poco" />
+    <Exec Command="&quot;$(CMakeDir)cmake.exe&quot; --build . --config $(Configuration)" WorkingDirectory="$(BuildFolder)\poco" />
   </Target>
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
