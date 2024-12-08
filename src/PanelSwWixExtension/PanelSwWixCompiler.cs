@@ -423,7 +423,7 @@ namespace PanelSw.Wix.Extensions
                     switch (attrib.Name.LocalName)
                     {
                         case "Id":
-                            id = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, attrib); 
+                            id = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, attrib);
                             break;
                         case "BundleExtensionRef":
                             bundleExtension = ParseHelper.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
@@ -1277,15 +1277,22 @@ namespace PanelSw.Wix.Extensions
                 return;
             }
 
-            // Dummy ComponentGroup to reference our PSW_DuplicateFile ComponentGroup to reference the InstallExecuteSequence with DuplicateFiles and RemoveDuplicateFiles actions.
-            WixGroupSymbol wixGroupSymbol = section.AddSymbol(new WixGroupSymbol(sourceLineNumbers, new Identifier(AccessModifier.Global, $"cg{Guid.NewGuid().ToString("N")}"))
+            if (WindowsInstallerStandard.TryGetStandardAction("InstallExecuteSequence", "RemoveDuplicateFiles", out WixActionSymbol removeDuplicateFilesSymbol))
             {
-                ParentType = ComplexReferenceParentType.Unknown,
-                ParentId = section.CompilationId,
-                ChildType = ComplexReferenceChildType.ComponentGroup,
-                ChildId = section.CompilationId,
-            });
-            ParseHelper.CreateComplexReference(section, sourceLineNumbers, ComplexReferenceParentType.ComponentGroup, wixGroupSymbol.Id.Id, "WiX", ComplexReferenceChildType.ComponentGroup, "PSW_DuplicateFile", false);
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, removeDuplicateFilesSymbol.Definition, removeDuplicateFilesSymbol.Id.Id);
+            }
+            else
+            {
+                Messaging.Write(ErrorMessages.IdentifierNotFound("InstallExecuteSequence", "RemoveDuplicateFiles"));
+            }
+            if (WindowsInstallerStandard.TryGetStandardAction("InstallExecuteSequence", "RemoveDuplicateFiles", out WixActionSymbol duplicateFilesSymbol))
+            {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, duplicateFilesSymbol.Definition, duplicateFilesSymbol.Id.Id);
+            }
+            else
+            {
+                Messaging.Write(ErrorMessages.IdentifierNotFound("InstallExecuteSequence", "RemoveDuplicateFiles"));
+            }
 
             ParseHelper.EnsureTable(section, sourceLineNumbers, "CreateFolder");
             ParseHelper.EnsureTable(section, sourceLineNumbers, "DuplicateFile");

@@ -931,14 +931,6 @@
     <UIRef Id="ExecOnErros"/>
   </Fragment>
 
-  <Fragment>
-    <ComponentGroup Id="PSW_DuplicateFile"/>
-    <InstallExecuteSequence>
-      <RemoveDuplicateFiles/>
-      <DuplicateFiles/>
-    </InstallExecuteSequence>
-  </Fragment>
-
   <!-- RemoveFolderEx -->
   <Fragment>
     <CustomAction Id="PSW_RemoveFolderEx" DllEntry="RemoveFolderEx" Execute="immediate" BinaryRef="PanelSwCustomActions.dll" />
