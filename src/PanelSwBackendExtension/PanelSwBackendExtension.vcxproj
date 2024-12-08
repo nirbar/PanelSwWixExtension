@@ -44,7 +44,7 @@
     </ClCompile>
     <Link>
       <AdditionalDependencies>/WHOLEARCHIVE:7zrLib.lib;Version.lib;Shell32.lib;User32.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SevenZapLibPath);$(BuildFolderCommon)$(Platform)\poco\lib\$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SevenZapLibPath);$(BuildFolderCommon)$(Platform)\poco\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
       <SubSystem>Windows</SubSystem>
       <TargetMachine Condition="'$(Platform)' == 'x86'">MachineX86</TargetMachine>
       <ModuleDefinitionFile>PanelSwBackendExtension.def</ModuleDefinitionFile>
@@ -85,9 +85,9 @@
     <None Include="PanelSwBackendExtension.def" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
-  <Target Name="BuildPoco" BeforeTargets="PrepareForBuild" Condition="!Exists('$(BuildFolderCommon)$(Platform)\poco\lib\$(Configuration)\PocoZipmt.lib') Or !Exists('$(BuildFolderCommon)$(Platform)\poco\lib\$(Configuration)\PocoFoundationmt.lib')">
+  <Target Name="BuildPoco" BeforeTargets="PrepareForBuild" Condition="!Exists('$(BuildFolderCommon)$(Platform)\poco\lib\PocoZipmt.lib') Or !Exists('$(BuildFolderCommon)$(Platform)\poco\lib\PocoFoundationmt.lib')">
     <MakeDir Directories="$(BuildFolderCommon)$(Platform)\poco" />
-    <Exec Command="&quot;$(CMakeDir)cmake.exe&quot; -G &quot;$(CMakeVsVersion)&quot; -A $(Platform) -T $(PlatformToolset),host=x86 -DPOCO_STATIC=ON -DPOCO_MT=ON &quot;$(MSBuildThisFileDirectory)..\poco&quot;" WorkingDirectory="$(BuildFolderCommon)$(Platform)\poco" />
+    <Exec Command="&quot;$(CMakeDir)cmake.exe&quot; -G &quot;$(CMakeVsVersion)&quot; -T $(PlatformToolset) -A $(Platform) -DPOCO_MT=ON -DBUILD_SHARED_LIBS=OFF -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded -DENABLE_XML=ON -DENABLE_ZIP=ON -DENABLE_ENCODINGS=OFF -DENABLE_UTIL=OFF -DENABLE_NET=OFF -DENABLE_MONGODB=OFF -DENABLE_REDIS=OFF -DENABLE_DNSSD=OFF -DENABLE_PROMETHEUS=OFF -DENABLE_PDF=OFF -DENABLE_JWT=OFF -DENABLE_NETSSL_WIN=OFF -DENABLE_NETSSL=OFF -DENABLE_CRYPTO=OFF -DENABLE_DATA=OFF -DENABLE_DATA_SQLITE=OFF -DENABLE_DATA_MYSQL=OFF -DENABLE_DATA_POSTGRESQL=OFF -DENABLE_ACTIVERECORD=OFF -DENABLE_ACTIVERECORD_COMPILER=OFF -DENABLE_APACHECONNECTOR=OFF -DENABLE_CPPPARSER=OFF -DENABLE_POCODOC=OFF -DENABLE_PAGECOMPILER=OFF -DENABLE_PAGECOMPILER_FILE2PAGE=OFF -DENABLE_ENCODINGS_COMPILER=OFF -DENABLE_TRACE=OFF -DENABLE_TESTS=OFF -DENABLE_DATA_ODBC=OFF &quot;$(MSBuildThisFileDirectory)..\poco&quot;" WorkingDirectory="$(BuildFolderCommon)$(Platform)\poco" />
     <Exec Command="&quot;$(CMakeDir)cmake.exe&quot; --build . --config $(Configuration)" WorkingDirectory="$(BuildFolderCommon)$(Platform)\poco" />
   </Target>
 </Project>
