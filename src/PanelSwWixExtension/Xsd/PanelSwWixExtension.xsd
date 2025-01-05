@@ -122,6 +122,11 @@
               <xs:documentation>Property that hold folder path to remove entirely. This field may be formatted, but is resolved before CostInitialize, so it may not be a Directory table key.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="Condition" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Condition to test whether or not RemoveFolderEx should handle this folder. Note that since the condition is evaluated before CostInitialize, it can not use feature and component states and actions</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
           <xs:attribute name="On" type="wix:InstallUninstallType" use="optional">
             <xs:annotation>
               <xs:documentation>

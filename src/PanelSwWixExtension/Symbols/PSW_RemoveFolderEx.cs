@@ -31,6 +31,7 @@ namespace PanelSw.Wix.Extensions.Symbols
                     new ColumnDefinition(nameof(Component_), ColumnType.String, 0, false, false, ColumnCategory.Text, modularizeType: ColumnModularizeType.Column),
                     new ColumnDefinition(nameof(Property), ColumnType.String, 0, false, false, ColumnCategory.Text, modularizeType: ColumnModularizeType.Column),
                     new ColumnDefinition(nameof(InstallMode), ColumnType.Number, 0, false, false, ColumnCategory.Integer, modularizeType: ColumnModularizeType.None),
+                    new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
                 };
             }
         }
@@ -57,6 +58,12 @@ namespace PanelSw.Wix.Extensions.Symbols
         {
             get => (RemoveFolderExInstallMode)Fields[2].AsNumber();
             set => this.Set(2, (int)value);
+        }
+
+        public string Condition
+        {
+            get => Fields[3].AsString();
+            set => this.Set(3, value);
         }
     }
 }

@@ -368,6 +368,7 @@ namespace PanelSw.Wix.Extensions
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string property = null;
+            string condition = null;
             PSW_RemoveFolderEx.RemoveFolderExInstallMode on = PSW_RemoveFolderEx.RemoveFolderExInstallMode.Uninstall;
 
             foreach (XAttribute attrib in element.Attributes())
@@ -378,6 +379,9 @@ namespace PanelSw.Wix.Extensions
                     {
                         case "Property":
                             property = ParseHelper.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Condition":
+                            condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "On":
                             TryParseEnumAttribute(sourceLineNumbers, element, attrib, out on);
@@ -403,6 +407,7 @@ namespace PanelSw.Wix.Extensions
                 symbol.Component_ = componentId;
                 symbol.Property = property;
                 symbol.InstallMode = on;
+                symbol.Condition = condition;
             }
         }
 
