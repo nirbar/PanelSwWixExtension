@@ -3,19 +3,19 @@ SET /A MY_ERR=0
 
 :: Install
 CALL :prepareFolders
-msiexec /i FileOperationsUT.msi /l*v FileOperationsUT.msi.log REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove"
+msiexec /i FileOperationsUT.msi /l*v FileOperationsUT.msi.log REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove" CONDITIONED_FOLDER="%CD%\never-remove-2"
 CALL :testInstall
 PAUSE
 
 :: Repair
 CALL :prepareFolders
-msiexec /fvamus FileOperationsUT.msi /l*v FileOperationsUT.msif.log REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove"
+msiexec /fvamus FileOperationsUT.msi /l*v FileOperationsUT.msif.log REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove" CONDITIONED_FOLDER="%CD%\never-remove-2"
 CALL :testRepair
 PAUSE
 
 :: Uninstall
 CALL :prepareFolders
-msiexec /xFileOperationsUT.msi /l*v FileOperationsUT.msix.log REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove"
+msiexec /xFileOperationsUT.msi /l*v FileOperationsUT.msix.log REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove" CONDITIONED_FOLDER="%CD%\never-remove-2"
 CALL :testUninstall
 PAUSE
 
@@ -93,6 +93,13 @@ EXIT /B %MY_ERR%
 	mklink "%CD%\never-remove\f-sl-1.txt" "%CD%\d-target\f-target.txt"
 	mklink "%CD%\never-remove\f-sl-dangling-1.txt" "%CD%\d-target\f-temp.txt"
 
+	:: Folder "%CD%\never-remove-2" and all content should never be removed
+	MKDIR "%CD%\never-remove-2"
+	ECHO test > "%CD%\never-remove-2\file.txt"
+	mklink /D "%CD%\never-remove-2\d-sl-2" "%CD%\d-target"
+	mklink "%CD%\never-remove-2\f-sl-1.txt" "%CD%\d-target\f-target.txt"
+	mklink "%CD%\never-remove-2\f-sl-dangling-1.txt" "%CD%\d-target\f-temp.txt"
+
 	DEL "%CD%\d-target\f-temp.txt"
 EXIT /B %MY_ERR%
 
@@ -104,6 +111,7 @@ EXIT /B %MY_ERR%
     RMDIR /s /q "%CD%\both-remove"
     RMDIR /s /q "%CD%\remove-no-recursive"
     RMDIR /s /q "%CD%\never-remove"
+    RMDIR /s /q "%CD%\never-remove-2"
 EXIT /B %MY_ERR%
 
 :testInstall
@@ -145,6 +153,10 @@ EXIT /B %MY_ERR%
 	)
 	IF NOT EXIST "%CD%\never-remove\" (
 		ECHO Folder "%CD%\both-remove\" should exist
+		SET /A MY_ERR=1
+	)
+	IF NOT EXIST "%CD%\never-remove-2\" (
+		ECHO Folder "%CD%\both-remove-2\" should exist
 		SET /A MY_ERR=1
 	)
 EXIT /B %MY_ERR%
@@ -190,6 +202,10 @@ EXIT /B %MY_ERR%
 		ECHO Folder "%CD%\both-remove\" should exist
 		SET /A MY_ERR=1
 	)
+	IF NOT EXIST "%CD%\never-remove-2\" (
+		ECHO Folder "%CD%\both-remove-2\" should exist
+		SET /A MY_ERR=1
+	)
 EXIT /B %MY_ERR%
 
 :testUninstall
@@ -231,6 +247,10 @@ EXIT /B %MY_ERR%
 	)
 	IF NOT EXIST "%CD%\never-remove\" (
 		ECHO Folder "%CD%\both-remove\" should exist
+		SET /A MY_ERR=1
+	)
+	IF NOT EXIST "%CD%\never-remove-2\" (
+		ECHO Folder "%CD%\both-remove-2\" should exist
 		SET /A MY_ERR=1
 	)
 EXIT /B %MY_ERR%

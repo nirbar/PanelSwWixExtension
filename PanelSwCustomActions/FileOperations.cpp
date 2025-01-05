@@ -33,7 +33,7 @@ extern "C" UINT __stdcall RemoveFolderEx(MSIHANDLE hInstall)
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_RemoveFolderEx'. Have you authored 'PanelSw:RemoveFolderEx' entries in WiX code?");
 
 	// Execute view
-	hr = WcaOpenExecuteView(L"SELECT `Component_`, `Property`, `InstallMode` FROM `PSW_RemoveFolderEx`", &hView);
+	hr = WcaOpenExecuteView(L"SELECT `Component_`, `Property`, `InstallMode`, `Condition` FROM `PSW_RemoveFolderEx`", &hView);
 	ExitOnFailure(hr, "Failed to execute SQL query");
 
 	// Iterate records
@@ -42,7 +42,7 @@ extern "C" UINT __stdcall RemoveFolderEx(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		CWixString szComponent, szBaseProperty, szBasePath;
+		CWixString szComponent, szBaseProperty, szBasePath, szCondition;
 		int flags = 0;
 		CFileIterator fileFinder;
 		UINT i = 0;
@@ -53,9 +53,30 @@ extern "C" UINT __stdcall RemoveFolderEx(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to get Property.");
 		hr = WcaGetRecordInteger(hRecord, 3, &flags);
 		ExitOnFailure(hr, "Failed to get Flags.");
+		hr = WcaGetRecordString(hRecord, 4, (LPWSTR*)szCondition);
+		ExitOnFailure(hr, "Failed to get Property.");
 
 		hr = WcaGetProperty(szBaseProperty, (LPWSTR*)szBasePath);
 		ExitOnFailure(hr, "Failed to get property");
+
+
+		// Test condition
+		if (!szCondition.IsNullOrEmpty())
+		{
+			MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, szCondition);
+			switch (condRes)
+			{
+			case MSICONDITION::MSICONDITION_NONE:
+			case MSICONDITION::MSICONDITION_TRUE:
+				break;
+			case MSICONDITION::MSICONDITION_FALSE:
+				WcaLog(LOGMSG_STANDARD, "Skipping %ls for '%ls'. Condition evaluated false", __FUNCTIONW__, (LPCWSTR)szBaseProperty);
+				continue;
+			case MSICONDITION::MSICONDITION_ERROR:
+				hr = E_FAIL;
+				ExitOnFailure(hr, "Bad Condition field");
+			}
+		}
 
 		if (szBasePath.IsNullOrEmpty())
 		{

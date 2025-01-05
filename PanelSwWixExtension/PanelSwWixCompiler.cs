@@ -359,6 +359,7 @@ namespace PanelSw.Wix.Extensions
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
             string property = null;
+            string condition = null;
             RemoveFolderExInstallMode on = RemoveFolderExInstallMode.Uninstall;
 
             foreach (XmlAttribute attrib in element.Attributes)
@@ -372,6 +373,9 @@ namespace PanelSw.Wix.Extensions
                 {
                     case "Property":
                         property = Core.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                        break;
+                    case "Condition":
+                        condition = Core.GetAttributeValue(sourceLineNumbers, attrib);
                         break;
                     case "On":
                         string onName = Core.GetAttributeValue(sourceLineNumbers, attrib);
@@ -404,6 +408,7 @@ namespace PanelSw.Wix.Extensions
             row[1] = componentId;
             row[2] = property;
             row[3] = (int)on;
+            row[4] = condition;
         }
 
         private void ParseDuplicateFolderElement(XmlElement element)

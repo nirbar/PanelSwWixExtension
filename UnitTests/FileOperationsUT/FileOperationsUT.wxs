@@ -30,9 +30,10 @@
       <Component>
         <File Source="$(sys.SOURCEFILEDIR)\run-test.bat" Compressed="no"/>
 
-        <PanelSW:RemoveFolderEx Property="REMOVE_ON_INSTALL" On="install"/>
+        <PanelSW:RemoveFolderEx Property="REMOVE_ON_INSTALL" On="install" Condition="1=1"/>
         <PanelSW:RemoveFolderEx Property="REMOVE_ON_UNINSTALL" On="uninstall"/>
         <PanelSW:RemoveFolderEx Property="REMOVE_ON_BOTH" On="both"/>
+        <PanelSW:RemoveFolderEx Property="CONDITIONED_FOLDER" On="both" Condition='NEVER ~= "ever"'/>
 
         <RemoveFile Property="REMOVE_NO_RECURSIVE" Name="file.txt" On="both" Id="REMOVE_NO_RECURSIVE.file"/>
         <RemoveFolder Property="REMOVE_NO_RECURSIVE" On="both" Id="REMOVE_NO_RECURSIVE.dir"/>
