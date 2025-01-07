@@ -8,39 +8,20 @@ CFileIterator::~CFileIterator()
 
 void CFileIterator::Release()
 {
-	ReleaseFileFindHandle(_hFind);
-	memset(&_findData, 0, sizeof(_findData));
-	_findData.dwFileAttributes = INVALID_FILE_ATTRIBUTES;
-	_szBasePath.Release();
-	_szPattern.Release();
-	_bRecursive = false;
-	if (_pCurrSubDir)
+	while (_cFolders)
 	{
-		delete _pCurrSubDir;
-		_pCurrSubDir = nullptr;
+		ReleaseOne();
 	}
+	ReleaseNullMem(_pFolders);
 	_hrStatus = S_OK;
+	_szPattern.Release();
 }
 
 CFileEntry CFileIterator::Find(LPCWSTR szBasePath, LPCWSTR szPattern, bool bRecursive)
 {
-	return Find(szBasePath, szPattern, bRecursive, true);
-}
-
-CFileEntry CFileIterator::Find(LPCWSTR szBasePath, LPCWSTR szPattern, bool bRecursive, bool bIncludeSelf)
-{
 	Release();
-	DWORD dwAttributes = INVALID_FILE_ATTRIBUTES;
-	CWixString szBasePattern;
-	bool bSkip = true;
-	CFileEntry entry = CFileEntry::InvalidFileEntry();
 
-	_hrStatus = _szBasePath.Copy(szBasePath);
-	ExitOnFailure(_hrStatus, "Failed to copy string");
-	::PathRemoveBackslash((LPWSTR)_szBasePath);
-
-	_hrStatus = szBasePattern.AppnedFormat(L"%ls\\*", (LPCWSTR)_szBasePath);
-	ExitOnFailure(_hrStatus, "Failed to copy string");
+	_bRecursive = bRecursive;
 
 	if (szPattern && *szPattern)
 	{
@@ -48,90 +29,68 @@ CFileEntry CFileIterator::Find(LPCWSTR szBasePath, LPCWSTR szPattern, bool bRecu
 		ExitOnFailure(_hrStatus, "Failed to copy string");
 	}
 
-	_bRecursive = bRecursive;
-	_bIncludeSelf = bIncludeSelf;
+	_hrStatus = MemAllocArray((LPVOID*)&_pFolders, sizeof(FolderIterator), _bRecursive ? 10 : 1);
+	ExitOnFailure(_hrStatus, "Failed to allocate memory");
 
-	// We're searching without filespec wildcard pattern so we can match subfolders
-	_hFind = ::FindFirstFile(szBasePattern, &_findData);
-	if (_hFind == INVALID_HANDLE_VALUE)
-	{
-		DWORD dwError = ::GetLastError();
-		if ((dwError == ERROR_FILE_NOT_FOUND) || (dwError == ERROR_PATH_NOT_FOUND) || (dwError == ERROR_NO_MORE_FILES))
-		{
-			_hrStatus = E_NOMOREFILES;
-			ExitFunction();
-		}
-		ExitOnWin32Error(dwError, _hrStatus, "Failed to find files in '%ls'", szBasePath);
-	}
+	_hrStatus = AppendFolder(szBasePath);
+	ExitOnFailure(_hrStatus, "Failed to initlize find");
 
-	entry = ProcessFindData(&bSkip);
-	if (bSkip)
-	{
-		return Next();
-	}
-	return entry;
+	return Next();
 
 LExit:
 	return CFileEntry::InvalidFileEntry();
+}
+
+HRESULT CFileIterator::AppendFolder(LPCWSTR szPath)
+{
+	_hrStatus = MemEnsureArraySize((LPVOID*)&_pFolders, ++_cFolders, sizeof(FolderIterator), 10);
+	ExitOnFailure(_hrStatus, "Failed to allocate memory");
+
+	_pFolders[_cFolders - 1] = FolderIterator();
+
+	_hrStatus = _pFolders[_cFolders - 1]._szBasePath.Copy(szPath);
+	ExitOnFailure(_hrStatus, "Failed to copy string");
+	::PathRemoveBackslash((LPWSTR)_pFolders[_cFolders - 1]._szBasePath);
+
+LExit:
+	return _hrStatus;
 }
 
 CFileEntry CFileIterator::Next()
 {
 	CFileEntry entry = CFileEntry::InvalidFileEntry();
 
-	while (true)
+	while (_pFolders && _cFolders)
 	{
 		bool bSkip = false;
+		BOOL bRes = TRUE;
+		FolderIterator* pFolder = &_pFolders[_cFolders - 1];
 
-		// Sub dir is enumerating?
-		if (_pCurrSubDir)
+		if (pFolder->_hFind == INVALID_HANDLE_VALUE)
 		{
-			HRESULT hrSubDir = S_OK;
-			// First entry of the subdir?
-			if (_pCurrSubDir->_szBasePath.IsNullOrEmpty())
-			{
-				CWixString szSubDirPath;
+			CWixString szBasePattern;
 
-				_hrStatus = szSubDirPath.AppnedFormat(L"%ls\\%ls", (LPCWSTR)_szBasePath, _findData.cFileName);
-				ExitOnFailure(_hrStatus, "Failed to format fodler path");
+			// We're searching without filespec wildcard pattern so we can match subfolders
+			_hrStatus = szBasePattern.AppnedFormat(L"%ls\\*", (LPCWSTR)pFolder->_szBasePath);
+			ExitOnFailure(_hrStatus, "Failed to copy string");
 
-				CFileEntry entry = _pCurrSubDir->Find((LPCWSTR)szSubDirPath, _szPattern, _bRecursive, false);
-				hrSubDir = _pCurrSubDir->Status();
-				if (SUCCEEDED(hrSubDir))
-				{
-					return entry;
-				}
-			}
-			else
-			{
-				CFileEntry entry = _pCurrSubDir->Next();
-				hrSubDir = _pCurrSubDir->Status();
-				if (SUCCEEDED(hrSubDir))
-				{
-					return entry;
-				}
-			}
-
-			delete _pCurrSubDir;
-			_pCurrSubDir = nullptr;
-
-			// Bad failure
-			if (hrSubDir != E_NOMOREFILES)
-			{
-				_hrStatus = hrSubDir;
-				ExitOnFailure(_hrStatus, "Failed to enumerate entries in %ls\\%ls", (LPCWSTR)_szBasePath, _findData.cFileName);
-			}
+			pFolder->_hFind = FindFirstFile(szBasePattern, &pFolder->_findData);
+			bRes = (pFolder->_hFind != INVALID_HANDLE_VALUE);
+		}
+		else
+		{
+			bRes = ::FindNextFile(pFolder->_hFind, &pFolder->_findData);
 		}
 
-		if (!::FindNextFile(_hFind, &_findData))
+		if (!bRes)
 		{
-			_hrStatus = HRESULT_FROM_WIN32(::GetLastError());
-			if (_hrStatus == E_NOMOREFILES)
+			DWORD dwError = ::GetLastError();
+			if ((dwError == ERROR_FILE_NOT_FOUND) || (dwError == ERROR_PATH_NOT_FOUND) || (dwError == ERROR_NO_MORE_FILES))
 			{
-				return CFileEntry::InvalidFileEntry();
+				ReleaseOne();
+				continue;
 			}
-
-			ExitOnFailure(_hrStatus, "Failed to find next entry in %ls", (LPCWSTR)_szBasePath);
+			ExitOnWin32Error(dwError, _hrStatus, "Failed to find files in '%ls'", (LPCWSTR)pFolder->_szBasePath);
 		}
 
 		entry = ProcessFindData(&bSkip);
@@ -140,6 +99,7 @@ CFileEntry CFileIterator::Next()
 			return entry;
 		}
 	}
+	_hrStatus = E_NOMOREFILES;
 
 LExit:
 	return CFileEntry::InvalidFileEntry();
@@ -147,112 +107,81 @@ LExit:
 
 CFileEntry CFileIterator::ProcessFindData(bool* pbSkip)
 {
+	FolderIterator* pFolder = &_pFolders[_cFolders - 1];
 	*pbSkip = false;
 
-	if (_bIncludeSelf && (wcscmp(_findData.cFileName, L".") == 0))
+	if (wcscmp(pFolder->_findData.cFileName, L".") == 0)
 	{
-		CFileEntry entry(_findData, (LPCWSTR)_szBasePath);
-		return ProcessEntry(entry, pbSkip);
+		CFileEntry entry(pFolder->_findData, (LPCWSTR)pFolder->_szBasePath);
+		return entry;
 	}
-	if ((wcscmp(_findData.cFileName, L".") == 0) || (wcscmp(_findData.cFileName, L"..") == 0))
+	if (wcscmp(pFolder->_findData.cFileName, L"..") == 0)
 	{
 		*pbSkip = true;
 		return CFileEntry::InvalidFileEntry();
 	}
 
 	// File?
-	if (!CFileEntry::IsDirectory(_findData.dwFileAttributes))
+	if (!CFileEntry::IsDirectory(pFolder->_findData.dwFileAttributes))
 	{
 		// Skip files that don't match the wildcard pattern
-		if (_szPattern.IsNullOrEmpty() || !::PathMatchSpec(_findData.cFileName, _szPattern))
+		if (_szPattern.IsNullOrEmpty() || !::PathMatchSpec(pFolder->_findData.cFileName, _szPattern))
 		{
 			*pbSkip = true;
 			return CFileEntry::InvalidFileEntry();
 		}
 
-		CFileEntry entry(_findData, (LPCWSTR)_szBasePath);
-		return ProcessEntry(entry, pbSkip);
+		CFileEntry entry(pFolder->_findData, (LPCWSTR)pFolder->_szBasePath);
+		return entry;
 	}
 	// Skip symlink folders
-	if (CFileEntry::IsSymlink(_findData.dwFileAttributes, _findData.dwReserved0))
+	if (CFileEntry::IsSymlink(pFolder->_findData.dwFileAttributes, pFolder->_findData.dwReserved0))
 	{
 		// Skip files that don't match the wildcard pattern
-		if (_szPattern.IsNullOrEmpty() || !::PathMatchSpec(_findData.cFileName, _szPattern))
+		if (_szPattern.IsNullOrEmpty() || !::PathMatchSpec(pFolder->_findData.cFileName, _szPattern))
 		{
 			*pbSkip = true;
 			return CFileEntry::InvalidFileEntry();
 		}
 
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping files under symbolic link folder '%ls\\%ls'", (LPCWSTR)_szBasePath, _findData.cFileName);
-		CFileEntry entry(_findData, (LPCWSTR)_szBasePath);
-		return ProcessEntry(entry, pbSkip);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping files under symbolic link folder '%ls\\%ls'", (LPCWSTR)pFolder->_szBasePath, pFolder->_findData.cFileName);
+		CFileEntry entry(pFolder->_findData, (LPCWSTR)pFolder->_szBasePath);
+		return entry;
 	}
 	// Skip mount folders
-	if (CFileEntry::IsMountPoint(_findData.dwFileAttributes, _findData.dwReserved0))
+	if (CFileEntry::IsMountPoint(pFolder->_findData.dwFileAttributes, pFolder->_findData.dwReserved0))
 	{
 		// Skip files that don't match the wildcard pattern
-		if (_szPattern.IsNullOrEmpty() || !::PathMatchSpec(_findData.cFileName, _szPattern))
+		if (_szPattern.IsNullOrEmpty() || !::PathMatchSpec(pFolder->_findData.cFileName, _szPattern))
 		{
 			*pbSkip = true;
 			return CFileEntry::InvalidFileEntry();
 		}
 
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping files under mount point folder '%ls\\%ls'", (LPCWSTR)_szBasePath, _findData.cFileName);
-		CFileEntry entry(_findData, (LPCWSTR)_szBasePath);
-		return ProcessEntry(entry, pbSkip);
-	}
-
-	// Return the subfolder name too?
-	if (_bRecursive || (!_szPattern.IsNullOrEmpty() && ::PathMatchSpec(_findData.cFileName, _szPattern)))
-	{
-		// When recursive, Next() will handle subfolder
-		if (_bRecursive)
-		{
-			_pCurrSubDir = new CFileIterator();
-			ExitOnNull(_pCurrSubDir, _hrStatus, E_OUTOFMEMORY, "Failed to allocate CFileIterator");
-		}
-
-		CFileEntry entry(_findData, (LPCWSTR)_szBasePath);
-		return ProcessEntry(entry, pbSkip);
-	}
-
-	*pbSkip = true;
-	return CFileEntry::InvalidFileEntry();
-
-LExit:
-	return CFileEntry::InvalidFileEntry();
-}
-
-CFileEntry CFileIterator::ProcessEntry(CFileEntry entry, bool* pbSkip)
-{
-	if (entry.IsValid())
-	{
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping files under mount point folder '%ls\\%ls'", (LPCWSTR)pFolder->_szBasePath, pFolder->_findData.cFileName);
+		CFileEntry entry(pFolder->_findData, (LPCWSTR)pFolder->_szBasePath);
 		return entry;
 	}
 
-	if (_pCurrSubDir)
+	if (_bRecursive)
 	{
-		if (_pCurrSubDir->IsEnd())
-		{
-			delete _pCurrSubDir;
-			_pCurrSubDir = nullptr;
+		CWixString szSubDirPath;
 
-			*pbSkip = true;
-			return CFileEntry::InvalidFileEntry();
-		}
+		_hrStatus = szSubDirPath.AppnedFormat(L"%ls\\%ls", (LPCWSTR)pFolder->_szBasePath, pFolder->_findData.cFileName);
+		ExitOnFailure(_hrStatus, "Failed to format fodler path");
 
-		if (FAILED(_pCurrSubDir->Status()))
-		{
-			_hrStatus = _pCurrSubDir->Status();
-			ExitOnFailure(_hrStatus, "Failed to find in folder '%ls'", (LPCWSTR)_szBasePath);
-		}
+		_hrStatus = AppendFolder(szSubDirPath);
+		ExitOnFailure(_hrStatus, "Failed to initialize find in fodler '%ls'", (LPCWSTR)szSubDirPath);
 	}
 
-	if (SUCCEEDED(_hrStatus))
+	// Return the subfolder name too?
+	if (!_bRecursive && !_szPattern.IsNullOrEmpty() && ::PathMatchSpec(pFolder->_findData.cFileName, _szPattern))
 	{
-		_hrStatus = E_FAIL;
+		CFileEntry entry(pFolder->_findData, (LPCWSTR)pFolder->_szBasePath);
+		return entry;
 	}
-	ExitOnFailure(_hrStatus, "Failed to find");
+
+	*pbSkip = true;
 
 LExit:
 	return CFileEntry::InvalidFileEntry();
@@ -264,5 +193,16 @@ HRESULT CFileIterator::Status() const
 }
 bool CFileIterator::IsEnd() const
 {
-	return (_hrStatus == E_NOMOREFILES);
+	return (_hrStatus == E_NOMOREFILES) || !_cFolders;
+}
+
+void CFileIterator::ReleaseOne()
+{
+	if (_pFolders && _cFolders)
+	{
+		--_cFolders;
+		ReleaseFileFindHandle(_pFolders[_cFolders]._hFind);
+		memset(&_pFolders[_cFolders]._findData, 0, sizeof(_pFolders[_cFolders]._findData));
+		_pFolders[_cFolders]._szBasePath.Release();
+	}
 }
