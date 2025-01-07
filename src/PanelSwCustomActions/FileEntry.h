@@ -15,6 +15,9 @@ public:
 	CFileEntry& operator=(CFileEntry& other);
 	CFileEntry& operator=(CFileEntry&& other) noexcept;
 
+	void Release() noexcept;
+	void MoveFrom(CFileEntry& other) noexcept;
+
 	// Attribute tests
 	DWORD Attributes() const;
 	bool IsValid() const;
