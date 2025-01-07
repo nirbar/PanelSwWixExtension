@@ -21,16 +21,20 @@ public:
 
 private:
 
-	CFileEntry Find(LPCWSTR szBasePath, LPCWSTR szPattern, bool bRecursive, bool bIncludeSelf);
-	CFileEntry ProcessFindData(bool * pbSkip);
-	CFileEntry ProcessEntry(CFileEntry entry, bool* pbSkip);
+	CFileEntry ProcessFindData(bool* pbSkip);
+	void ReleaseOne();
+	HRESULT AppendFolder(LPCWSTR szPath);
 
-	HANDLE _hFind = INVALID_HANDLE_VALUE;
-	WIN32_FIND_DATA _findData = {};
-	CWixString _szBasePath;
-	CWixString _szPattern;
-	bool _bIncludeSelf = false;
+	struct FolderIterator
+	{
+		HANDLE _hFind = INVALID_HANDLE_VALUE;
+		WIN32_FIND_DATA _findData = {};
+		CWixString _szBasePath;
+	};
+
 	bool _bRecursive = false;
-	CFileIterator* _pCurrSubDir = nullptr;
+	CWixString _szPattern;
+	FolderIterator* _pFolders = nullptr;
+	UINT _cFolders = 0;
 	HRESULT _hrStatus = S_OK;
 };

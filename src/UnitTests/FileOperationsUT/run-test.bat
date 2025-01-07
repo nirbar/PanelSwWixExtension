@@ -75,7 +75,7 @@ EXIT /B %MY_ERR%
 	mklink "%CD%\both-remove\2\3\f-sl-2.txt" "%CD%\d-target\f-target.txt"
 	mklink "%CD%\both-remove\2\3\f-sl-dangling-2.txt" "%CD%\d-target\f-temp.txt"
 
-	:: Folder both-remove should be removed entirely on both install and uninstall
+	:: Folder remove-no-recursive should exist, but the file.txt in the root should be removed
 	MKDIR "%CD%\remove-no-recursive\2\3"
 	ECHO test > "%CD%\remove-no-recursive\file.txt"
 	ECHO test > "%CD%\remove-no-recursive\2\3\file.txt"
