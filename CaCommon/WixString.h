@@ -37,18 +37,12 @@ public:
 
 	CWixString(CWixString&& other) noexcept
 	{
-		_dwCapacity = other._dwCapacity;
-		_pTokenContext = other._pTokenContext;
-		_szObfuscated = other._szObfuscated;
-		_pS = other.Detach();
+		MoveFrom(other);
 	}
 
 	CWixString& operator=(CWixString&& other) noexcept
 	{
-		_dwCapacity = other._dwCapacity;
-		_pTokenContext = other._pTokenContext;
-		_szObfuscated = other._szObfuscated;
-		_pS = other.Detach();
+		MoveFrom(other);
 		return *this;
 	}
 
@@ -62,6 +56,22 @@ public:
 	{
 		Copy(szOther);
 		return *this;
+	}
+
+	void MoveFrom(CWixString& from) noexcept
+	{
+		if (this != &from) 
+		{
+			Release();
+			_dwCapacity = from._dwCapacity;
+			_pTokenContext = from._pTokenContext;
+			_szObfuscated = from._szObfuscated;
+			_pS = from._pS;
+
+			from._pS = nullptr;
+			from._szObfuscated = nullptr;
+			from.Release();
+		}
 	}
 
 	WCHAR& operator[](size_t i)

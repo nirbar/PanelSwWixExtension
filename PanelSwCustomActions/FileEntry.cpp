@@ -108,6 +108,23 @@ LExit:
 	}
 }
 
+void CFileEntry::Release() noexcept
+{
+	_dwFileAttributes = INVALID_FILE_ATTRIBUTES;
+	_ftLastAccessTime.dwLowDateTime = 0;
+	_ftLastAccessTime.dwHighDateTime = 0;
+	_ftCreationTime.dwLowDateTime = 0;
+	_ftCreationTime.dwHighDateTime = 0;
+	_ftLastWriteTime.dwLowDateTime = 0;
+	_ftLastWriteTime.dwHighDateTime = 0;
+
+	_ulFileSize.QuadPart = 0;
+	_dwReserved0 = 0;
+	_szPath.Release();
+	_szFileName.Release();
+	_szParentPath.Release();
+}
+
 CFileEntry::CFileEntry(const CFileEntry& other)
 {
 	HRESULT hr = S_OK;
@@ -137,15 +154,7 @@ LExit:
 
 CFileEntry::CFileEntry(CFileEntry&& other) noexcept
 {
-	_szPath.Attach(other._szPath.Detach());
-	_szParentPath.Attach(other._szParentPath.Detach());
-	_szFileName.Attach(other._szFileName.Detach());
-	_dwFileAttributes = other._dwFileAttributes;
-	_ftCreationTime = other._ftCreationTime;
-	_ftLastAccessTime = other._ftLastAccessTime;
-	_ftLastWriteTime = other._ftLastWriteTime;
-	_ulFileSize = other._ulFileSize;
-	_dwReserved0 = other._dwReserved0;
+	MoveFrom(other);
 }
 
 CFileEntry& CFileEntry::operator=(CFileEntry& other)
@@ -179,16 +188,26 @@ LExit:
 
 CFileEntry& CFileEntry::operator=(CFileEntry&& other) noexcept
 {
-	_szPath.Attach(other._szPath.Detach());
-	_szParentPath.Attach(other._szParentPath.Detach());
-	_szFileName.Attach(other._szFileName.Detach());
-	_dwFileAttributes = other._dwFileAttributes;
-	_ftCreationTime = other._ftCreationTime;
-	_ftLastAccessTime = other._ftLastAccessTime;
-	_ftLastWriteTime = other._ftLastWriteTime;
-	_ulFileSize = other._ulFileSize;
-	_dwReserved0 = other._dwReserved0;
+	MoveFrom(other);
 	return *this;
+}
+
+void CFileEntry::MoveFrom(CFileEntry& other) noexcept
+{
+	if (this != &other)
+	{
+		Release();
+		_szPath.MoveFrom(other._szPath);
+		_szParentPath.MoveFrom(other._szParentPath);
+		_szFileName.MoveFrom(other._szFileName);
+		_dwFileAttributes = other._dwFileAttributes;
+		_ftCreationTime = other._ftCreationTime;
+		_ftLastAccessTime = other._ftLastAccessTime;
+		_ftLastWriteTime = other._ftLastWriteTime;
+		_ulFileSize = other._ulFileSize;
+		_dwReserved0 = other._dwReserved0;
+		other.Release();
+	}
 }
 
 DWORD CFileEntry::Attributes() const
