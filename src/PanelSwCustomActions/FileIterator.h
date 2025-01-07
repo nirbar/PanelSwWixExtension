@@ -22,8 +22,8 @@ public:
 private:
 
 	CFileEntry Find(LPCWSTR szBasePath, LPCWSTR szPattern, bool bRecursive, bool bIncludeSelf);
-	CFileEntry ProcessFindData();
-	CFileEntry ProcessEntry(CFileEntry entry);
+	CFileEntry ProcessFindData(bool * pbSkip);
+	CFileEntry ProcessEntry(CFileEntry entry, bool* pbSkip);
 
 	HANDLE _hFind = INVALID_HANDLE_VALUE;
 	WIN32_FIND_DATA _findData = {};

@@ -32,6 +32,8 @@ CFileEntry CFileIterator::Find(LPCWSTR szBasePath, LPCWSTR szPattern, bool bRecu
 	Release();
 	DWORD dwAttributes = INVALID_FILE_ATTRIBUTES;
 	CWixString szBasePattern;
+	bool bSkip = true;
+	CFileEntry entry = CFileEntry::InvalidFileEntry();
 
 	_hrStatus = _szBasePath.Copy(szBasePath);
 	ExitOnFailure(_hrStatus, "Failed to copy string");
@@ -45,7 +47,7 @@ CFileEntry CFileIterator::Find(LPCWSTR szBasePath, LPCWSTR szPattern, bool bRecu
 		_hrStatus = _szPattern.Copy(szPattern);
 		ExitOnFailure(_hrStatus, "Failed to copy string");
 	}
-	
+
 	_bRecursive = bRecursive;
 	_bIncludeSelf = bIncludeSelf;
 
@@ -62,7 +64,12 @@ CFileEntry CFileIterator::Find(LPCWSTR szBasePath, LPCWSTR szPattern, bool bRecu
 		ExitOnWin32Error(dwError, _hrStatus, "Failed to find files in '%ls'", szBasePath);
 	}
 
-	return ProcessFindData();
+	entry = ProcessFindData(&bSkip);
+	if (bSkip)
+	{
+		return Next();
+	}
+	return entry;
 
 LExit:
 	return CFileEntry::InvalidFileEntry();
@@ -70,73 +77,87 @@ LExit:
 
 CFileEntry CFileIterator::Next()
 {
-	// Sub dir is enumerating?
-	if (_pCurrSubDir)
+	CFileEntry entry = CFileEntry::InvalidFileEntry();
+
+	while (true)
 	{
-		HRESULT hrSubDir = S_OK;
-		// First entry of the subdir?
-		if (_pCurrSubDir->_szBasePath.IsNullOrEmpty())
+		bool bSkip = false;
+
+		// Sub dir is enumerating?
+		if (_pCurrSubDir)
 		{
-			CWixString szSubDirPath;
-
-			_hrStatus = szSubDirPath.AppnedFormat(L"%ls\\%ls", (LPCWSTR)_szBasePath, _findData.cFileName);
-			ExitOnFailure(_hrStatus, "Failed to format fodler path");
-
-			CFileEntry entry = _pCurrSubDir->Find((LPCWSTR)szSubDirPath, _szPattern, _bRecursive, false);
-			hrSubDir = _pCurrSubDir->Status();
-			if (SUCCEEDED(hrSubDir))
+			HRESULT hrSubDir = S_OK;
+			// First entry of the subdir?
+			if (_pCurrSubDir->_szBasePath.IsNullOrEmpty())
 			{
-				return entry;
+				CWixString szSubDirPath;
+
+				_hrStatus = szSubDirPath.AppnedFormat(L"%ls\\%ls", (LPCWSTR)_szBasePath, _findData.cFileName);
+				ExitOnFailure(_hrStatus, "Failed to format fodler path");
+
+				CFileEntry entry = _pCurrSubDir->Find((LPCWSTR)szSubDirPath, _szPattern, _bRecursive, false);
+				hrSubDir = _pCurrSubDir->Status();
+				if (SUCCEEDED(hrSubDir))
+				{
+					return entry;
+				}
+			}
+			else
+			{
+				CFileEntry entry = _pCurrSubDir->Next();
+				hrSubDir = _pCurrSubDir->Status();
+				if (SUCCEEDED(hrSubDir))
+				{
+					return entry;
+				}
+			}
+
+			delete _pCurrSubDir;
+			_pCurrSubDir = nullptr;
+
+			// Bad failure
+			if (hrSubDir != E_NOMOREFILES)
+			{
+				_hrStatus = hrSubDir;
+				ExitOnFailure(_hrStatus, "Failed to enumerate entries in %ls\\%ls", (LPCWSTR)_szBasePath, _findData.cFileName);
 			}
 		}
-		else
+
+		if (!::FindNextFile(_hFind, &_findData))
 		{
-			CFileEntry entry = _pCurrSubDir->Next();
-			hrSubDir = _pCurrSubDir->Status();
-			if (SUCCEEDED(hrSubDir))
+			_hrStatus = HRESULT_FROM_WIN32(::GetLastError());
+			if (_hrStatus == E_NOMOREFILES)
 			{
-				return entry;
+				return CFileEntry::InvalidFileEntry();
 			}
+
+			ExitOnFailure(_hrStatus, "Failed to find next entry in %ls", (LPCWSTR)_szBasePath);
 		}
 
-		delete _pCurrSubDir;
-		_pCurrSubDir = nullptr;
-
-		// Bad failure
-		if (hrSubDir != E_NOMOREFILES)
+		entry = ProcessFindData(&bSkip);
+		if (!bSkip)
 		{
-			_hrStatus = hrSubDir;
-			ExitOnFailure(_hrStatus, "Failed to enumerate entries in %ls\\%ls", (LPCWSTR)_szBasePath, _findData.cFileName);
+			return entry;
 		}
 	}
-
-	if (!::FindNextFile(_hFind, &_findData))
-	{
-		_hrStatus = HRESULT_FROM_WIN32(::GetLastError());
-		if (_hrStatus == E_NOMOREFILES)
-		{
-			return CFileEntry::InvalidFileEntry();
-		}
-
-		ExitOnFailure(_hrStatus, "Failed to find next entry in %ls", (LPCWSTR)_szBasePath);
-	}
-
-	return ProcessFindData();
 
 LExit:
 	return CFileEntry::InvalidFileEntry();
 }
 
-CFileEntry CFileIterator::ProcessFindData()
+CFileEntry CFileIterator::ProcessFindData(bool* pbSkip)
 {
+	*pbSkip = false;
+
 	if (_bIncludeSelf && (wcscmp(_findData.cFileName, L".") == 0))
 	{
 		CFileEntry entry(_findData, (LPCWSTR)_szBasePath);
-		return ProcessEntry(entry);
+		return ProcessEntry(entry, pbSkip);
 	}
 	if ((wcscmp(_findData.cFileName, L".") == 0) || (wcscmp(_findData.cFileName, L"..") == 0))
 	{
-		return Next();
+		*pbSkip = true;
+		return CFileEntry::InvalidFileEntry();
 	}
 
 	// File?
@@ -145,11 +166,12 @@ CFileEntry CFileIterator::ProcessFindData()
 		// Skip files that don't match the wildcard pattern
 		if (_szPattern.IsNullOrEmpty() || !::PathMatchSpec(_findData.cFileName, _szPattern))
 		{
-			return Next();
+			*pbSkip = true;
+			return CFileEntry::InvalidFileEntry();
 		}
 
 		CFileEntry entry(_findData, (LPCWSTR)_szBasePath);
-		return ProcessEntry(entry);
+		return ProcessEntry(entry, pbSkip);
 	}
 	// Skip symlink folders
 	if (CFileEntry::IsSymlink(_findData.dwFileAttributes, _findData.dwReserved0))
@@ -157,12 +179,13 @@ CFileEntry CFileIterator::ProcessFindData()
 		// Skip files that don't match the wildcard pattern
 		if (_szPattern.IsNullOrEmpty() || !::PathMatchSpec(_findData.cFileName, _szPattern))
 		{
-			return Next();
+			*pbSkip = true;
+			return CFileEntry::InvalidFileEntry();
 		}
 
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping files under symbolic link folder '%ls\\%ls'", (LPCWSTR)_szBasePath, _findData.cFileName);
 		CFileEntry entry(_findData, (LPCWSTR)_szBasePath);
-		return ProcessEntry(entry);
+		return ProcessEntry(entry, pbSkip);
 	}
 	// Skip mount folders
 	if (CFileEntry::IsMountPoint(_findData.dwFileAttributes, _findData.dwReserved0))
@@ -170,12 +193,13 @@ CFileEntry CFileIterator::ProcessFindData()
 		// Skip files that don't match the wildcard pattern
 		if (_szPattern.IsNullOrEmpty() || !::PathMatchSpec(_findData.cFileName, _szPattern))
 		{
-			return Next();
+			*pbSkip = true;
+			return CFileEntry::InvalidFileEntry();
 		}
 
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping files under mount point folder '%ls\\%ls'", (LPCWSTR)_szBasePath, _findData.cFileName);
 		CFileEntry entry(_findData, (LPCWSTR)_szBasePath);
-		return ProcessEntry(entry);
+		return ProcessEntry(entry, pbSkip);
 	}
 
 	// Return the subfolder name too?
@@ -189,16 +213,17 @@ CFileEntry CFileIterator::ProcessFindData()
 		}
 
 		CFileEntry entry(_findData, (LPCWSTR)_szBasePath);
-		return ProcessEntry(entry);
+		return ProcessEntry(entry, pbSkip);
 	}
 
-	return Next();
+	*pbSkip = true;
+	return CFileEntry::InvalidFileEntry();
 
 LExit:
 	return CFileEntry::InvalidFileEntry();
 }
 
-CFileEntry CFileIterator::ProcessEntry(CFileEntry entry)
+CFileEntry CFileIterator::ProcessEntry(CFileEntry entry, bool* pbSkip)
 {
 	if (entry.IsValid())
 	{
@@ -212,7 +237,8 @@ CFileEntry CFileIterator::ProcessEntry(CFileEntry entry)
 			delete _pCurrSubDir;
 			_pCurrSubDir = nullptr;
 
-			return Next();
+			*pbSkip = true;
+			return CFileEntry::InvalidFileEntry();
 		}
 
 		if (FAILED(_pCurrSubDir->Status()))
