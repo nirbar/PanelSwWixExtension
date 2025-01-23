@@ -67,9 +67,24 @@ CFileEntry CFileIterator::Next()
 		{
 			CWixString szBasePattern;
 
-			// We're searching without filespec wildcard pattern so we can match subfolders
-			_hrStatus = szBasePattern.AppnedFormat(L"%ls\\*", (LPCWSTR)pFolder->_szBasePath);
-			ExitOnFailure(_hrStatus, "Failed to copy string");
+			if (_bRecursive)
+			{
+				// We're searching without the given filespec wildcard pattern so we can match subfolders
+				_hrStatus = szBasePattern.AppnedFormat(L"%ls\\*", (LPCWSTR)pFolder->_szBasePath);
+				ExitOnFailure(_hrStatus, "Failed to copy string");
+			}
+			else if (_szPattern.IsNullOrEmpty())
+			{
+				// Match on the folder only
+				_hrStatus = szBasePattern.AppnedFormat(L"%ls\\.", (LPCWSTR)pFolder->_szBasePath);
+				ExitOnFailure(_hrStatus, "Failed to copy string");
+			}
+			else
+			{
+				// Match on the pattern in this folder alone (not recursive)
+				_hrStatus = szBasePattern.AppnedFormat(L"%ls\\%ls", (LPCWSTR)pFolder->_szBasePath, (LPCWSTR)_szPattern);
+				ExitOnFailure(_hrStatus, "Failed to copy string");
+			}
 
 			pFolder->_hFind = FindFirstFile(szBasePattern, &pFolder->_findData);
 			bRes = (pFolder->_hFind != INVALID_HANDLE_VALUE);
