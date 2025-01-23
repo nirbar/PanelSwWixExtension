@@ -129,7 +129,7 @@ extern "C" UINT __stdcall RemoveReparseDataSched(MSIHANDLE hInstall)
 		componentAction = WcaGetComponentToDo(szComponent);
 		if ((componentAction != WCA_TODO_INSTALL) && (componentAction != WCA_TODO_REINSTALL) && (componentAction != WCA_TODO_UNINSTALL))
 		{
-			CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Skipping RemoveReparseData for property '%ls' because component action isn't compatible", (LPCWSTR)szDirProperty);
+			CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Skipping RemoveReparseData for property '%ls' because component isn't executing", (LPCWSTR)szDirProperty);
 			continue;
 		}
 		if (((componentAction == WCA_TODO_INSTALL) || (componentAction == WCA_TODO_REINSTALL)) && !(flags & RemoveFileInstallMode_Install))
@@ -156,7 +156,7 @@ extern "C" UINT __stdcall RemoveReparseDataSched(MSIHANDLE hInstall)
 		{
 			ExitOnNull(fileEntry.IsValid(), hr, fileFinder.Status(), "Failed to find files in '%ls'", (LPCWSTR)szBasePath);
 
-			if (fileEntry.IsSymlink())
+			if (fileEntry.IsSymlink() || fileEntry.IsMountPoint())
 			{
 				hr = rollbackCAD.AddRestoreReparsePoint(fileEntry.Path());
 				ExitOnFailure(hr, "Failed to get reparse point data for '%ls'", (LPCWSTR)fileEntry.Path());
@@ -307,12 +307,12 @@ HRESULT CReparsePoint::DeferredExecute(const ::std::string & command)
 		break;
 	default:
 		hr = E_INVALIDDATA;
-		ExitOnFailure(hr, "Illega reparse point action %i requested for '%ls'", details.action(), (LPCWSTR)details.path().c_str());
+		ExitOnFailure(hr, "Illegal reparse point action %i requested for '%ls'", details.action(), (LPCWSTR)details.path().c_str());
 		break;
 	}
 
 LExit:
-	return hr;
+	return S_OK; // Since the whole point is to *help* Windows Installer, we never fail the install
 }
 
 /*static*/ bool CReparsePoint::IsSymbolicLinkOrMount(LPCWSTR szPath)
