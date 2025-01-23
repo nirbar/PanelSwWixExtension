@@ -948,8 +948,8 @@
 
   <!-- RemoveReparseData -->
   <Fragment>
-    <CustomAction Id="RemoveReparseDataSched" SuppressModularization="yes" DllEntry="RemoveReparseDataSched" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="RemoveReparseDataExec" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Return="check" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="RemoveReparseDataSched" SuppressModularization="yes" DllEntry="RemoveReparseDataSched" Execute="immediate" Return="ignore" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="RemoveReparseDataExec" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="RemoveReparseDataRollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
 
     <InstallExecuteSequence>
