@@ -354,6 +354,14 @@ namespace PanelSw.Wix.Extensions
             Uninstall = 2,
             Both = 3,
         }
+        
+        public enum RemoveFolderExLongPathHandling
+        {
+            Default = 0,
+            Ignore = 1,
+            Rename = 2,
+            Prompt = 3,
+        }
 
         private void ParseRemoveFolderEx(XmlElement element, string componentId)
         {
@@ -361,6 +369,7 @@ namespace PanelSw.Wix.Extensions
             string property = null;
             string condition = null;
             RemoveFolderExInstallMode on = RemoveFolderExInstallMode.Uninstall;
+            RemoveFolderExLongPathHandling longPathHandling = RemoveFolderExLongPathHandling.Default;
 
             foreach (XmlAttribute attrib in element.Attributes)
             {
@@ -382,6 +391,13 @@ namespace PanelSw.Wix.Extensions
                         if (!Enum.TryParse(onName, true, out on))
                         {
                             Core.OnMessage(WixErrors.IllegalAttributeValueWithLegalList(sourceLineNumbers, element.LocalName, attrib.LocalName, onName, $"{nameof(RemoveFolderExInstallMode.Install)}, {nameof(RemoveFolderExInstallMode.Uninstall)}, {nameof(RemoveFolderExInstallMode.Both)}"));
+                        }
+                        break;
+                    case "LongPathHandling":
+                        string longPathHandlingName = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                        if (!Enum.TryParse(longPathHandlingName, true, out longPathHandling))
+                        {
+                            Core.OnMessage(WixErrors.IllegalAttributeValueWithLegalList(sourceLineNumbers, element.LocalName, attrib.LocalName, longPathHandlingName, $"{nameof(RemoveFolderExLongPathHandling.Default)}, {nameof(RemoveFolderExLongPathHandling.Ignore)}, {nameof(RemoveFolderExLongPathHandling.Rename)}, {nameof(RemoveFolderExLongPathHandling.Prompt)}"));
                         }
                         break;
                     default:
@@ -408,7 +424,8 @@ namespace PanelSw.Wix.Extensions
             row[1] = componentId;
             row[2] = property;
             row[3] = (int)on;
-            row[4] = condition;
+            row[4] = (int)longPathHandling;
+            row[5] = condition;
         }
 
         private void ParseDuplicateFolderElement(XmlElement element)

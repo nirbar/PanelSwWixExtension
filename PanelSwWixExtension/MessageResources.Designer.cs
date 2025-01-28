@@ -68,5 +68,14 @@ namespace PanelSw.Wix.Extensions {
                 return ResourceManager.GetString("ExecuteCommandSequence", resourceCulture);
             }
         }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RemoveFolderEx element has a &apos;LongPathHandling&apos; attribute that collides with another aothored RemoveFolderEx.
+        /// </summary>
+        internal static string MismatchingRemoveFolderExLongPathHandling {
+            get {
+                return ResourceManager.GetString("MismatchingRemoveFolderExLongPathHandling", resourceCulture);
+            }
+        }
     }
 }

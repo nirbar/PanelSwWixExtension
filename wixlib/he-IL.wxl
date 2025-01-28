@@ -84,4 +84,5 @@
   <String Overridable="yes" Id="ListProcessorFeatures"><![CDATA[בודק זמינות תכונות של המעבד ]]></String>
   <String Overridable="yes" Id="PSW_RemoveFolderEx"><![CDATA[מסיר ספריות]]></String>
   <String Overridable="yes" Id="RemoveReparseData"><![CDATA[מסיר ספריות]]></String>
+  <String Overridable="yes" Id="LongPathsWarning"><![CDATA[הקבצים הבאים הם בעלי נתיב ארוך מדי. האם לנסות למחוק אותם בכל זאת? פעולה זו עלולה להיות בלתי הפיכה.[2]]]></String>
 </WixLocalization>

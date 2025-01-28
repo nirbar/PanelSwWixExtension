@@ -82,4 +82,5 @@
   <String Overridable="yes" Id="ListProcessorFeatures"><![CDATA[Detecting available processor features]]></String>
   <String Overridable="yes" Id="PSW_RemoveFolderEx"><![CDATA[Removing folders]]></String>
   <String Overridable="yes" Id="RemoveReparseData"><![CDATA[Removing reparse point data]]></String>
+  <String Overridable="yes" Id="LongPathsWarning"><![CDATA[The following files have oversized path. Windows Installer cannot delete these files. Would you like to attempt to delete them anyway? This operation might be irreversible.[2]]]></String>
 </WixLocalization>

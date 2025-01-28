@@ -169,6 +169,7 @@ namespace PanelSw.Wix.Extensions
             ResolveTaskScheduler(output);
             DuplicateFolder(output);
             CheckExecuteCommandSequences(output);
+            ValidateSingleRemoveFolderExLongPathHandling(output);
         }
 
         private void CheckExecuteCommandSequences(Output output)
@@ -205,6 +206,35 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
+        private void ValidateSingleRemoveFolderExLongPathHandling(Output output)
+        {
+            Table removeFolderEx = output.Tables["PSW_RemoveFolderEx"];
+            if ((removeFolderEx == null) || (removeFolderEx.Rows.Count <= 0))
+            {
+                return;
+            }
+
+            // Collect temporary file paths to later delete
+            Row nonDefault = null;
+            foreach (Row rmf in removeFolderEx.Rows)
+            {
+                if ((int)rmf[4] == (int)PanelSwWixCompiler.RemoveFolderExLongPathHandling.Default)
+                {
+                    continue;
+                }
+                if (nonDefault == null)
+                {
+                    nonDefault = rmf;
+                    continue;
+                }
+                if (nonDefault[4] != rmf[4])
+                {
+                    Core.OnMessage(PanelSwWixErrorMessages.MismatchingRemoveFolderExLongPathHandling(rmf.SourceLineNumbers));
+                    Core.OnMessage(PanelSwWixErrorMessages.MismatchingRemoveFolderExLongPathHandling(nonDefault.SourceLineNumbers));
+                }
+            }
+        }
+
         private void DuplicateFolder(Output output)
         {
             Table duplicateFolders = output.Tables["PSW_DuplicateFolder"];
@@ -229,10 +259,10 @@ namespace PanelSw.Wix.Extensions
         private void DuplicateFolder(Table duplicateFiles, Table components, Table files, Table directories, Table createFolders, SourceLineNumberCollection sourceLineNumber, string sourceDir, string dstDir)
         {
             // Duplicate files in source dir
-            IEnumerable<Row> dirComponents = Select( components, c => c[2].Equals(sourceDir));
+            IEnumerable<Row> dirComponents = Select(components, c => c[2].Equals(sourceDir));
             foreach (Row component in dirComponents)
             {
-                IEnumerable<Row> compFiles =  Select(files, f => f[1].Equals(component[0]));
+                IEnumerable<Row> compFiles = Select(files, f => f[1].Equals(component[0]));
                 foreach (Row file in compFiles)
                 {
                     Row createFolder = Find(createFolders, dstDir, component[0]);
@@ -244,7 +274,7 @@ namespace PanelSw.Wix.Extensions
                         createFolders.Rows.Add(createFolder);
                     }
 
-                    Row duplicateFile = FindOne(duplicateFiles,  d => d[1].Equals(component[0]) && file[0].Equals(d[2]) && dstDir.Equals(d[4]));
+                    Row duplicateFile = FindOne(duplicateFiles, d => d[1].Equals(component[0]) && file[0].Equals(d[2]) && dstDir.Equals(d[4]));
                     if (duplicateFile == null)
                     {
                         duplicateFile = new Row(sourceLineNumber, duplicateFiles);
@@ -269,7 +299,7 @@ namespace PanelSw.Wix.Extensions
                     destChildDir[0] = Core.GenerateIdentifier("dpd", dstDir, dir[0].ToString());
                     destChildDir[1] = dstDir;
                     destChildDir[2] = dir[2];
-                    
+
                     directories.Rows.Add(destChildDir);
                 }
 

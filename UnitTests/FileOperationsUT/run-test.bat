@@ -35,6 +35,7 @@ EXIT /B %MY_ERR%
 	MKDIR "%CD%\install-remove\2\3"
 	ECHO test > "%CD%\install-remove\2\file.txt"
 	ECHO test > "%CD%\install-remove\2\3\file.txt"
+	ECHO test > "\\?\%CD%\install-remove\2\filefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefile.txt"
 	mklink /D "%CD%\install-remove\d-sl-1" "%CD%\d-target"
 	mklink /D "%CD%\install-remove\2\3\d-sl-2" "%CD%\d-target"
 	mklink "%CD%\install-remove\f-sl-1.txt" "%CD%\d-target\f-target.txt"
@@ -46,6 +47,7 @@ EXIT /B %MY_ERR%
 	MKDIR "%CD%\repair-remove\2\3"
 	ECHO test > "%CD%\repair-remove\2\file.txt"
 	ECHO test > "%CD%\repair-remove\2\3\file.txt"
+	ECHO test > "\\?\%CD%\repair-remove\2\filefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefile.txt"
 	mklink /D "%CD%\repair-remove\d-sl-1" "%CD%\d-target"
 	mklink /D "%CD%\repair-remove\2\3\d-sl-2" "%CD%\d-target"
 	mklink "%CD%\repair-remove\f-sl-1.txt" "%CD%\d-target\f-target.txt"
@@ -57,6 +59,7 @@ EXIT /B %MY_ERR%
 	MKDIR "%CD%\uninstall-remove\2\3"
 	ECHO test > "%CD%\uninstall-remove\2\file.txt"
 	ECHO test > "%CD%\uninstall-remove\2\3\file.txt"
+	ECHO test > "\\?\%CD%\uninstall-remove\2\filefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefile.txt"
 	mklink /D "%CD%\uninstall-remove\d-sl-1" "%CD%\d-target"
 	mklink /D "%CD%\uninstall-remove\2\3\d-sl-2" "%CD%\d-target"
 	mklink "%CD%\uninstall-remove\f-sl-1.txt" "%CD%\d-target\f-target.txt"
@@ -68,6 +71,7 @@ EXIT /B %MY_ERR%
 	MKDIR "%CD%\both-remove\2\3"
 	ECHO test > "%CD%\both-remove\2\file.txt"
 	ECHO test > "%CD%\both-remove\2\3\file.txt"
+	ECHO test > "\\?\%CD%\both-remove\2\filefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefilefile.txt"
 	mklink /D "%CD%\both-remove\d-sl-1" "%CD%\d-target"
 	mklink /D "%CD%\both-remove\2\3\d-sl-2" "%CD%\d-target"
 	mklink "%CD%\both-remove\f-sl-1.txt" "%CD%\d-target\f-target.txt"
@@ -123,8 +127,16 @@ EXIT /B %MY_ERR%
 		ECHO Folder "%CD%\repair-remove\" should exist
 		SET /A MY_ERR=1
 	)
+	IF NOT EXIST "\\?\%CD%\repair-remove\2\filefilefile*.txt" (
+		ECHO File "%CD%\repair-remove\2\filefilefile*.txt" should exist
+		SET /A MY_ERR=1
+	)
 	IF NOT EXIST "%CD%\uninstall-remove\" (
 		ECHO Folder "%CD%\uninstall-remove\" should exist
+		SET /A MY_ERR=1
+	)
+	IF NOT EXIST "\\?\%CD%\uninstall-remove\2\filefilefile*.txt" (
+		ECHO File "%CD%\uninstall-remove\2\filefilefile*.txt" should exist
 		SET /A MY_ERR=1
 	)
 	IF EXIST "%CD%\both-remove\2\3\file.txt" (
@@ -174,6 +186,10 @@ EXIT /B %MY_ERR%
 		ECHO Folder "%CD%\uninstall-remove\" should exist
 		SET /A MY_ERR=1
 	)
+	IF NOT EXIST "\\?\%CD%\uninstall-remove\2\filefilefile*.txt" (
+		ECHO File "%CD%\uninstall-remove\2\filefilefile*.txt" should exist
+		SET /A MY_ERR=1
+	)
 	IF EXIST "%CD%\both-remove\" (
 		ECHO Folder "%CD%\both-remove\" should not exist
 		SET /A MY_ERR=1
@@ -213,8 +229,16 @@ EXIT /B %MY_ERR%
 		ECHO Folder "%CD%\install-remove\" should exist
 		SET /A MY_ERR=1
 	)
+	IF NOT EXIST "\\?\%CD%\install-remove\2\filefilefile*.txt" (
+		ECHO File "%CD%\install-remove\2\filefilefile*.txt" should exist
+		SET /A MY_ERR=1
+	)
 	IF NOT EXIST "%CD%\repair-remove\2\3\file.txt" (
 		ECHO Folder "%CD%\repair-remove\" should exist
+		SET /A MY_ERR=1
+	)
+	IF NOT EXIST "\\?\%CD%\repair-remove\2\filefilefile*.txt" (
+		ECHO File "%CD%\repair-remove\2\filefilefile*.txt" should exist
 		SET /A MY_ERR=1
 	)
 	IF EXIST "%CD%\uninstall-remove\" (

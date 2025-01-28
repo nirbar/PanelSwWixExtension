@@ -119,6 +119,7 @@
     <ClCompile Include="RegularExpression.cpp" />
     <ClCompile Include="RemoveRegistryValue.cpp" />
     <ClCompile Include="ReparsePoint.cpp" />
+    <ClCompile Include="RemoveFolderEx.cpp" />
     <ClCompile Include="Rollback.cpp" />
     <ClCompile Include="ServiceConfig.cpp" />
     <ClCompile Include="SetPropertyFromPipe.cpp" />

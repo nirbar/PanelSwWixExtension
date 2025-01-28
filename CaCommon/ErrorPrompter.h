@@ -5,6 +5,8 @@
 
 #define E_RETRY					__HRESULT_FROM_WIN32(ERROR_RETRY)
 #define E_INSTALL_USEREXIT		__HRESULT_FROM_WIN32(ERROR_INSTALL_USEREXIT)
+#define S_YES					((HRESULT)2L)
+#define S_NO					((HRESULT)3L)
 
 // Must match with ..\PanelSwCustomActions\pch.h
 enum PSW_MSI_MESSAGES
@@ -27,6 +29,7 @@ enum PSW_MSI_MESSAGES
 	PSW_MSI_MESSAGES_UNZIP_ARCHIVE_ERROR = 27015,
 	PSW_MSI_MESSAGES_UNZIP_FILE_ERROR = 27016,
 	PSW_MSI_MESSAGES_APPPOOL_CONFIG_ERROR = 27017,
+	PSW_MSI_MESSAGES_LONG_PATHS_WARNING = 27018,
 };
 
 class CErrorPrompter
@@ -107,6 +110,14 @@ private:
 		case IDOK:
 			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User approved");
 			return S_OK;
+
+		case IDYES:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose Yes");
+			return S_YES;
+
+		case IDNO:
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "User chose No");
+			return S_NO;
 
 		case IDIGNORE:
 		case IDCONTINUE:

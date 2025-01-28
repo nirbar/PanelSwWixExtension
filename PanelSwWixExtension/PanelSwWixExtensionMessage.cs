@@ -17,10 +17,16 @@ namespace PanelSw.Wix.Extensions
         {
             return new PanelSwWixErrorMessages(sourceLineNumber, (int)PswErrorId.ExecuteCommandSequence, nameof(MessageResources.ExecuteCommandSequence), executeCommandId, otherActionId);
         }
+
+        public static PanelSwWixErrorMessages MismatchingRemoveFolderExLongPathHandling(SourceLineNumberCollection sourceLineNumber)
+        {
+            return new PanelSwWixErrorMessages(sourceLineNumber, (int)PswErrorId.MismatchingRemoveFolderExLongPathHandling, nameof(MessageResources.MismatchingRemoveFolderExLongPathHandling));
+        }
     }
 
     public enum PswErrorId
     {
         ExecuteCommandSequence = 9000,
+        MismatchingRemoveFolderExLongPathHandling,
     }
 }

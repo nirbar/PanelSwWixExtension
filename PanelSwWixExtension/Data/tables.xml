@@ -448,6 +448,7 @@
     <columnDefinition name="Component_" type="string" length="72" modularize="column" category="identifier" keyTable="Component" keyColumn="1" />
     <columnDefinition name="Property" type="string" length="72" modularize="column" category="identifier" />
     <columnDefinition name="InstallMode" type="number" length="2" minValue="1" maxValue="3" description="1 == Remove only when the associated component is being installed (msiInstallStateLocal or msiInstallStateSource), 2 == Remove only when the associated component is being removed (msiInstallStateAbsent), 3 = Remove in either of the above cases."/>
+    <columnDefinition name="LongPathHandling" type="number" length="2" minValue="0" maxValue="3"/>
     <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
   </tableDefinition>
 </tableDefinitions>
