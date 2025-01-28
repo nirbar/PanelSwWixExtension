@@ -14,6 +14,14 @@ namespace PanelSw.Wix.Extensions.Symbols
             Both = 3,
         }
 
+        public enum RemoveFolderExLongPathHandling
+        {
+            Default = 0,
+            Ignore = 1,
+            Rename = 2,
+            Prompt = 3,
+        }
+
         public static IntermediateSymbolDefinition SymbolDefinition
         {
             get
@@ -31,6 +39,7 @@ namespace PanelSw.Wix.Extensions.Symbols
                     new ColumnDefinition(nameof(Component_), ColumnType.String, 0, false, false, ColumnCategory.Text, modularizeType: ColumnModularizeType.Column),
                     new ColumnDefinition(nameof(Property), ColumnType.String, 0, false, false, ColumnCategory.Text, modularizeType: ColumnModularizeType.Column),
                     new ColumnDefinition(nameof(InstallMode), ColumnType.Number, 0, false, false, ColumnCategory.Integer, modularizeType: ColumnModularizeType.None),
+                    new ColumnDefinition(nameof(LongPathHandling), ColumnType.Number, 0, false, false, ColumnCategory.Integer, modularizeType: ColumnModularizeType.None),
                     new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
                 };
             }
@@ -60,10 +69,16 @@ namespace PanelSw.Wix.Extensions.Symbols
             set => this.Set(2, (int)value);
         }
 
+        public RemoveFolderExLongPathHandling LongPathHandling
+        {
+            get => (RemoveFolderExLongPathHandling)Fields[3].AsNumber();
+            set => this.Set(3, (int)value);
+        }
+
         public string Condition
         {
-            get => Fields[3].AsString();
-            set => this.Set(3, value);
+            get => Fields[4].AsString();
+            set => this.Set(4, value);
         }
     }
 }

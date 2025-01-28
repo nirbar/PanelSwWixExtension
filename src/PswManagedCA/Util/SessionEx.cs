@@ -29,6 +29,7 @@ namespace PswManagedCA.Util
         ZipArchiveError = 27014,
         UnzipArchiveError = 27015,
         UnzipFileeError = 27016,
+        LongPathsWarning = 27017,
     }
 
     static class SessionEx

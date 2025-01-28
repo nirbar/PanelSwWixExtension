@@ -64,4 +64,5 @@
   <String Overridable="yes" Id="ListProcessorFeatures" Value="בודק זמינות תכונות של המעבד" />
   <String Overridable="yes" Id="PSW_RemoveFolderEx" Value="מסיר ספריות" />
   <String Overridable="yes" Id="RemoveReparseData" Value="מסיר נתוני קישור" />
+  <String Overridable="yes" Id="LongPathsWarning" Value="הקבצים הבאים הם בעלי נתיב ארוך מדי. האם לנסות למחוק אותם בכל זאת? פעולה זו עלולה להיות בלתי הפיכה.[2]" />
 </WixLocalization>

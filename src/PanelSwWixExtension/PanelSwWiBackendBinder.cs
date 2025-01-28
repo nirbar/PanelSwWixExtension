@@ -12,6 +12,25 @@ namespace PanelSw.Wix.Extensions
 {
     public class PanelSwWiBackendBinder : BaseWindowsInstallerBackendBinderExtension
     {
+        public override void SymbolsFinalized(IntermediateSection section)
+        {
+            base.SymbolsFinalized(section);
+            GetSplitFiles();
+            ResolveTaskScheduler();
+            DuplicateFolder(section);
+            CheckExecuteCommandSequences();
+            ValidateSingleRemoveFolderExLongPathHandling();
+        }
+
+        private List<string> tempFiles_ = new List<string>();
+        ~PanelSwWiBackendBinder()
+        {
+            // Delete temporary files
+            foreach (string f in tempFiles_)
+            {
+                File.Delete(f);
+            }
+        }
 
         #region Assign section ID
         public override void FinalizePatchFilterIds(WindowsInstallerData data, IDictionary<Row, string> rowToFilterId, string filterIdPrefix)
@@ -535,25 +554,6 @@ namespace PanelSw.Wix.Extensions
 
         #region Bind split files
 
-        private List<string> tempFiles_ = new List<string>();
-        ~PanelSwWiBackendBinder()
-        {
-            // Delete temporary files
-            foreach (string f in tempFiles_)
-            {
-                File.Delete(f);
-            }
-        }
-
-        public override void SymbolsFinalized(IntermediateSection section)
-        {
-            base.SymbolsFinalized(section);
-            GetSplitFiles();
-            ResolveTaskScheduler();
-            DuplicateFolder(section);
-            CheckExecuteCommandSequences();
-        }
-
         private void CheckExecuteCommandSequences()
         {
             List<PSW_ExecuteCommand> executeCommands = new List<PSW_ExecuteCommand>();
@@ -733,6 +733,34 @@ namespace PanelSw.Wix.Extensions
         }
 
         #endregion
+
+        private void ValidateSingleRemoveFolderExLongPathHandling()
+        {
+            PSW_RemoveFolderEx nonDefault = null;
+            foreach (IntermediateSection intermediate in base.Context.IntermediateRepresentation.Sections)
+            {
+                foreach (IntermediateSymbol symbol in intermediate.Symbols)
+                {
+                    if (symbol is PSW_RemoveFolderEx removeFolderEx)
+                    {
+                        if (removeFolderEx.LongPathHandling == PSW_RemoveFolderEx.RemoveFolderExLongPathHandling.Default)
+                        {
+                            continue;
+                        }
+                        if (nonDefault == null)
+                        {
+                            nonDefault = removeFolderEx;
+                            continue;
+                        }
+                        if (nonDefault.LongPathHandling != removeFolderEx.LongPathHandling)
+                        {
+                            Messaging.Write(PanelSwWixErrorMessages.MismatchingRemoveFolderExLongPathHandling(removeFolderEx.SourceLineNumbers));
+                            Messaging.Write(PanelSwWixErrorMessages.MismatchingRemoveFolderExLongPathHandling(nonDefault.SourceLineNumbers));
+                        }
+                    }
+                }
+            }
+        }
 
         private void ResolveTaskScheduler()
         {
