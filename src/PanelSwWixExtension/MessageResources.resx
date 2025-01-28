@@ -123,6 +123,9 @@
   <data name="ExecuteCommandSequence" xml:space="preserve">
     <value>The InstallExecuteSequence table contains action '{1}' in between actions required for ExecuteCommand action '{0}'. Please schedule commands to execute after '{0}' or before 'Prepare{0}'</value>
   </data>
+  <data name="MismatchingRemoveFolderExLongPathHandling" xml:space="preserve">
+    <value>RemoveFolderEx element has a 'LongPathHandling' attribute that collides with another aothored RemoveFolderEx</value>
+  </data>
   <data name="MissingContainerTemplate" xml:space="preserve">
     <value>Could not find ContainerTemplate element to create container '{0}' with.</value>
   </data>

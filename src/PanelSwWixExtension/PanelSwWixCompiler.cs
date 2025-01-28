@@ -372,6 +372,7 @@ namespace PanelSw.Wix.Extensions
             string property = null;
             string condition = null;
             PSW_RemoveFolderEx.RemoveFolderExInstallMode on = PSW_RemoveFolderEx.RemoveFolderExInstallMode.Uninstall;
+            PSW_RemoveFolderEx.RemoveFolderExLongPathHandling longPathHandling = PSW_RemoveFolderEx.RemoveFolderExLongPathHandling.Default;
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -387,6 +388,9 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "On":
                             TryParseEnumAttribute(sourceLineNumbers, element, attrib, out on);
+                            break;
+                        case "LongPathHandling":
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out longPathHandling);
                             break;
                         default:
                             ParseHelper.UnexpectedAttribute(element, attrib);
@@ -409,6 +413,7 @@ namespace PanelSw.Wix.Extensions
                 symbol.Component_ = componentId;
                 symbol.Property = property;
                 symbol.InstallMode = on;
+                symbol.LongPathHandling = longPathHandling;
                 symbol.Condition = condition;
             }
         }

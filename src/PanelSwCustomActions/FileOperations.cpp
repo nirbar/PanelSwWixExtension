@@ -14,135 +14,6 @@
 using namespace ::com::panelsw::ca;
 using namespace google::protobuf;
 
-extern "C" UINT __stdcall RemoveFolderEx(MSIHANDLE hInstall)
-{
-	HRESULT hr = S_OK;
-	UINT er = ERROR_SUCCESS;
-	PMSIHANDLE hView;
-	PMSIHANDLE hRecord;
-	MSIHANDLE hRemoveFileTable = NULL;
-	MSIHANDLE hRemoveFileColumns = NULL;
-	DWORD dwRes = 0;
-
-	hr = WcaInitialize(hInstall, __FUNCTION__);
-	ExitOnFailure(hr, "Failed to initialize");
-	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
-
-	// Ensure table PSW_RemoveFolderEx exists.
-	hr = WcaTableExists(L"PSW_RemoveFolderEx");
-	ExitOnFailure(hr, "Failed to check if table exists 'PSW_RemoveFolderEx'");
-	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_RemoveFolderEx'. Have you authored 'PanelSw:RemoveFolderEx' entries in WiX code?");
-
-	// Execute view
-	hr = WcaOpenExecuteView(L"SELECT `Component_`, `Property`, `InstallMode`, `Condition` FROM `PSW_RemoveFolderEx`", &hView);
-	ExitOnFailure(hr, "Failed to execute SQL query");
-
-	// Iterate records
-	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
-	{
-		ExitOnFailure(hr, "Failed to fetch record.");
-
-		// Get fields
-		CWixString szComponent, szBaseProperty, szBasePath, szCondition;
-		int flags = 0;
-		CFileIterator fileFinder;
-		UINT i = 0;
-
-		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)szComponent);
-		ExitOnFailure(hr, "Failed to get Component_.");
-		hr = WcaGetRecordString(hRecord, 2, (LPWSTR*)szBaseProperty);
-		ExitOnFailure(hr, "Failed to get Property.");
-		hr = WcaGetRecordInteger(hRecord, 3, &flags);
-		ExitOnFailure(hr, "Failed to get Flags.");
-		hr = WcaGetRecordString(hRecord, 4, (LPWSTR*)szCondition);
-		ExitOnFailure(hr, "Failed to get Property.");
-
-		hr = WcaGetProperty(szBaseProperty, (LPWSTR*)szBasePath);
-		ExitOnFailure(hr, "Failed to get property");
-
-
-		// Test condition
-		if (!szCondition.IsNullOrEmpty())
-		{
-			MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, szCondition);
-			switch (condRes)
-			{
-			case MSICONDITION::MSICONDITION_NONE:
-			case MSICONDITION::MSICONDITION_TRUE:
-				break;
-			case MSICONDITION::MSICONDITION_FALSE:
-				WcaLog(LOGMSG_STANDARD, "Skipping %ls for '%ls'. Condition evaluated false", __FUNCTIONW__, (LPCWSTR)szBaseProperty);
-				continue;
-			case MSICONDITION::MSICONDITION_ERROR:
-				hr = E_FAIL;
-				ExitOnFailure(hr, "Bad Condition field");
-			}
-		}
-
-		if (szBasePath.IsNullOrEmpty())
-		{
-			CDeferredActionBase::LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, false, L"Skipping RemoveFolderEx for property '%ls' because it is empty", (LPCWSTR)szBaseProperty);
-			continue;
-		}
-
-		hr = WcaAddTempRecord(&hRemoveFileTable, &hRemoveFileColumns, L"RemoveFile", nullptr, 1, 5, L"RfxFolder", (LPCWSTR)szComponent, nullptr, (LPCWSTR)szBaseProperty, flags);
-		ExitOnFailure(hr, "Failed to add temporary row table");
-
-		// Skip if this isn't a folder, or if it is a reaprse point
-		{
-			CFileEntry fileEntry(szBasePath);
-			if (!fileEntry.IsDirectory() || fileEntry.IsSymlink() || fileEntry.IsMountPoint())
-			{
-				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Path is not a folder, or it is a symlink, or it is a mounted folder: '%ls'", (LPCWSTR)szBasePath);
-				continue;
-			}
-		}
-
-		hr = WcaAddTempRecord(&hRemoveFileTable, &hRemoveFileColumns, L"RemoveFile", nullptr, 1, 5, L"RfxFiles", (LPCWSTR)szComponent, L"*", (LPCWSTR)szBaseProperty, flags);
-		ExitOnFailure(hr, "Failed to add temporary row table");
-
-		for (CFileEntry fileEntry = fileFinder.Find(szBasePath, L"*", true); !fileFinder.IsEnd(); fileEntry = fileFinder.Next())
-		{
-			ExitOnNull(fileEntry.IsValid(), hr, fileFinder.Status(), "Failed to find files in '%ls'", (LPCWSTR)szBasePath);
-
-			if (fileEntry.IsDirectory())
-			{
-				CWixString szDirProperty;
-				++i;
-
-				hr = szDirProperty.Format(L"_DIR_%ls_%u", (LPCWSTR)szBaseProperty, i);
-				ExitOnFailure(hr, "Failed to format string");
-
-				hr = WcaSetProperty((LPCWSTR)szDirProperty, (LPCWSTR)fileEntry.Path());
-				ExitOnFailure(hr, "Failed to set property");
-
-				hr = WcaAddTempRecord(&hRemoveFileTable, &hRemoveFileColumns, L"RemoveFile", nullptr, 1, 5, L"RfxFolder", (LPCWSTR)szComponent, nullptr, (LPCWSTR)szDirProperty, flags);
-				ExitOnFailure(hr, "Failed to add temporary row table");
-
-				if (!fileEntry.IsMountPoint() && !fileEntry.IsSymlink())
-				{
-					hr = WcaAddTempRecord(&hRemoveFileTable, &hRemoveFileColumns, L"RemoveFile", nullptr, 1, 5, L"RfxFiles", (LPCWSTR)szComponent, L"*", (LPCWSTR)szDirProperty, flags);
-					ExitOnFailure(hr, "Failed to add temporary row table");
-				}
-			}
-		}
-	}
-	hr = S_OK;
-
-LExit:
-	if (hRemoveFileTable)
-	{
-		::MsiCloseHandle(hRemoveFileTable);
-	}
-	if (hRemoveFileColumns)
-	{
-		::MsiCloseHandle(hRemoveFileColumns);
-	}
-
-	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
-	return WcaFinalize(er);
-}
-
 extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
 {
 	HRESULT hr = S_OK;
@@ -327,7 +198,7 @@ HRESULT CFileOperations::DeferredExecute(const ::std::string & command)
 	{
 		szFrom = (LPCWSTR)(LPVOID)details.from().data();
 	}
-	ExitOnNull(szFrom && *szFrom, hr, E_FAIL, "'From' field is empty");
+	ExitOnNull((szFrom && *szFrom), hr, E_FAIL, "'From' field is empty");
 
 	if (details.to().size())
 	{
@@ -350,6 +221,44 @@ LExit:
 }
 
 HRESULT CFileOperations::CopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool bIgnoreMissing, bool bIgnoreErrors, bool bOnlyIfEmpty, bool bAllowReboot)
+{
+	HRESULT hr = S_OK;
+	BOOL bRes = TRUE;
+	DWORD dwRes = ERROR_SUCCESS;
+
+	// Let the legacy implementation handle all but move file
+	if (!bMove || !::PathFileExists(szFrom) || ::PathIsDirectory(szFrom))
+	{
+		hr = ShellCopyPath(szFrom, szTo, bMove, bIgnoreMissing, bIgnoreErrors, bOnlyIfEmpty, bAllowReboot);
+		ExitFunction();
+	}
+
+	LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Moving '%ls' to '%ls'", szFrom, szTo);
+	bRes = ::MoveFileExW(szFrom, szTo, MOVEFILE_REPLACE_EXISTING | MOVEFILE_WRITE_THROUGH);
+	if (!bRes)
+	{
+		dwRes = ::GetLastError();
+		if (bAllowReboot && ((dwRes == ERROR_LOCK_VIOLATION) || (dwRes == ERROR_DRIVE_LOCKED) || (dwRes == ERROR_SHARING_VIOLATION)))
+		{
+			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Failed moving file '%ls' to '%ls' due to a lock on the file(s), so reboot will be required", szFrom, szTo);
+
+			::MoveFileEx(szFrom, szTo, MOVEFILE_DELAY_UNTIL_REBOOT);
+			WcaDeferredActionRequiresReboot();
+			ExitFunction1(hr = S_OK);
+		}
+		if (bIgnoreErrors)
+		{
+			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Failed moving '%ls' to '%ls'; Ignoring error (%i)", szFrom, szTo, dwRes);
+			ExitFunction1(hr = S_FALSE);
+		}
+		ExitOnWin32Error(dwRes, hr, "Failed moving file '%ls' to '%ls'", szFrom, szTo);
+	}
+
+LExit:
+	return hr;
+}
+
+HRESULT CFileOperations::ShellCopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool bIgnoreMissing, bool bIgnoreErrors, bool bOnlyIfEmpty, bool bAllowReboot)
 {
 	SHFILEOPSTRUCT opInfo;
 	HRESULT hr = S_OK;

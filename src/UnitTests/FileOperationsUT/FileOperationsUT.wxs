@@ -27,7 +27,7 @@
         <File Source="$(sys.SOURCEFILEDIR)\run-test.bat" Compressed="no"/>
 
         <PanelSW:RemoveFolderEx Property="REMOVE_ON_INSTALL" On="install" Condition="1=1"/>
-        <PanelSW:RemoveFolderEx Property="REMOVE_ON_UNINSTALL" On="uninstall"/>
+        <PanelSW:RemoveFolderEx Property="REMOVE_ON_UNINSTALL" On="uninstall" LongPathHandling="prompt"/>
         <PanelSW:RemoveFolderEx Property="REMOVE_ON_BOTH" On="both"/>
         <PanelSW:RemoveFolderEx Property="NONEXISTENT_FOLDER" On="both"/>
         <PanelSW:RemoveFolderEx Property="CONDITIONED_FOLDER" On="both" Condition='NEVER ~= "ever"'/>

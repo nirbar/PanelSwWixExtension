@@ -941,16 +941,27 @@
 
   <!-- RemoveFolderEx -->
   <Fragment>
+    <Property Id="PSW_REMOVEFOLDEREXEXEC" Secure="yes" Hidden="yes"/>
+    <Property Id="PSW_REMOVEFOLDEREXROLLBACK" Secure="yes" Hidden="yes"/>
+    <SetProperty Id="PSW_RemoveFolderExExec" Value="[PSW_REMOVEFOLDEREXEXEC]" Before="PSW_RemoveFolderExExec" Sequence="execute" Condition="PSW_REMOVEFOLDEREXEXEC"/>
+    <SetProperty Id="PSW_RemoveFolderExRollback" Value="[PSW_REMOVEFOLDEREXROLLBACK]" Before="PSW_RemoveFolderExRollback" Sequence="execute" Condition="PSW_RemoveFolderExRollback"/>
     <CustomAction Id="PSW_RemoveFolderEx" DllEntry="RemoveFolderEx" Execute="immediate" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="PSW_RemoveFolderExExec" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="PSW_RemoveFolderExRollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomActionRef Id="RemoveReparseDataSched"/>
     <InstallExecuteSequence>
       <Custom Action="PSW_RemoveFolderEx" Before="CostInitialize" Overridable="yes" />
+      <Custom Action="PSW_RemoveFolderExRollback" Before="RemoveFiles" Overridable="yes" Condition="PSW_RemoveFolderExRollback" />
+      <Custom Action="PSW_RemoveFolderExExec" After="RemoveFiles" Overridable="yes" Condition="PSW_RemoveFolderExExec" />
     </InstallExecuteSequence>
     <InstallUISequence>
       <Custom Action="PSW_RemoveFolderEx" Before="CostInitialize" Overridable="yes" />
     </InstallUISequence>
     <UI>
+      <Error Id="27017" Message="!(loc.LongPathsWarning)" />
       <ProgressText Action="PSW_RemoveFolderEx" Message="!(loc.PSW_RemoveFolderEx)" />
+      <ProgressText Action="PSW_RemoveFolderExExec" Message="!(loc.PSW_RemoveFolderEx)" />
+      <ProgressText Action="PSW_RemoveFolderExRollback" Message="!(loc.PSW_RemoveFolderEx)" />
     </UI>
   </Fragment>
 

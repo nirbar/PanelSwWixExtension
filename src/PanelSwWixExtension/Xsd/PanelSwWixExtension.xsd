@@ -137,6 +137,7 @@
               </xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="LongPathHandling" type="LongPathHandlingType" use="optional" default="default"/>
         </xs:extension>
       </xs:simpleContent>
     </xs:complexType>
@@ -2524,6 +2525,41 @@ Call ShellExecuteEx with parameters
       <xs:enumeration value="SevenZip"></xs:enumeration>
       <xs:enumeration value="Zip"></xs:enumeration>
       <xs:enumeration value="Cab"></xs:enumeration>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="LongPathHandlingType">
+    <xs:annotation>
+      <xs:documentation>Determine how RemoveFolderEx should handle file paths longer than MAX_PATH.</xs:documentation>
+    </xs:annotation>
+    <xs:restriction base="xs:NMTOKEN">
+      <xs:enumeration value="default">
+        <xs:annotation>
+          <xs:documentation>Default handling: prompt. If there are multiple RemoveFolderEx elements authored, then specifiying a behavior in any of them will determine the default for the rest as well.</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="ignore">
+        <xs:annotation>
+          <xs:documentation>RemoveFolderEx ignores paths longer than MAX_PATH. In most cases, Windows Installer will fail during InstallValidate action</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="prompt">
+        <xs:annotation>
+          <xs:documentation>RemoveFolderEx will prompt the user with the options to ignore, or delete the files, or abort the installation</xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
+      <xs:enumeration value="rename">
+        <xs:annotation>
+          <xs:documentation>
+            RemoveFolderEx will attempt to rename the files to a shorter name and schedule deferred and rollback actions: PSW_RemoveFolderExExec and PSW_RemoveFolderExRollback.
+            During RemoveFiles action, Windows Installer will delete the files based on their component actions.
+            If the file is not deleted during RenoveFiles action then RemoveFolderExExec will revert it's name to the original name.
+            In case of rollback, RemoveFolderExRollback action will also revert deleted files to their original names.
+            Note that, if the installation fails after RemoveFolderEx has renamed the files and before PSW_RemoveFolderExRollback runs then the files will stay at their renamed path.
+            Note that, RemoveFolderEx runs immediate, thus it might not have permissions to renmae some of the files. In that case, InstallValidate will fail and renamed files will stay at their new name.
+          </xs:documentation>
+        </xs:annotation>
+      </xs:enumeration>
     </xs:restriction>
   </xs:simpleType>
 </xs:schema>

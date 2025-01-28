@@ -106,6 +106,9 @@ namespace PanelSw.Wix.Extensions
                 case nameof(PSW_RegularExpression):
                     symbolDefinition = PSW_RegularExpression.SymbolDefinition;
                     break;
+                case nameof(PSW_RemoveFolderEx):
+                    symbolDefinition = PSW_RemoveFolderEx.SymbolDefinition;
+                    break;
                 case nameof(PSW_RemoveRegistryValue):
                     symbolDefinition = PSW_RemoveRegistryValue.SymbolDefinition;
                     break;

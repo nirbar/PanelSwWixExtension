@@ -103,6 +103,7 @@
     <ClCompile Include="Md5Hash.cpp" />
     <ClCompile Include="ExtractPayload.cpp" />
     <ClCompile Include="PromptFileDowngrades.cpp" />
+    <ClCompile Include="RemoveFolderEx.cpp" />
     <ClCompile Include="ReparsePoint.cpp" />
     <ClCompile Include="RestartLocalResources.cpp" />
     <ClCompile Include="Log.cpp" />

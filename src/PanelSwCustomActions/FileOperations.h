@@ -32,4 +32,7 @@ public:
 protected:
 
 	HRESULT DeferredExecute(const ::std::string& command) override;
+
+private:
+	HRESULT ShellCopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove, bool bIgnoreMissing, bool bIgnoreErrors, bool bOnlyIfEmpty, bool bAllowReboot);
 };

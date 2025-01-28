@@ -24,6 +24,10 @@ namespace PanelSw.Wix.Extensions
         {
             return new Message(sourceLineNumber, MessageLevel.Error, (int)PswErrorId.MissingContainerTemplate, MessageResources.MissingContainerTemplate, containerId);
         }
+        public static Message MismatchingRemoveFolderExLongPathHandling(SourceLineNumber sourceLineNumber)
+        {
+            return new Message(sourceLineNumber, MessageLevel.Error, (int)PswErrorId.MismatchingRemoveFolderExLongPathHandling, MessageResources.MismatchingRemoveFolderExLongPathHandling);
+        }
     }
 
     public enum PswErrorId : int
@@ -33,5 +37,6 @@ namespace PanelSw.Wix.Extensions
         ContainerError,
         PswWixAttribute,
         MissingContainerTemplate,
+        MismatchingRemoveFolderExLongPathHandling,
     }
 }

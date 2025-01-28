@@ -79,6 +79,15 @@ namespace PanelSw.Wix.Extensions {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to RemoveFolderEx element has a &apos;LongPathHandling&apos; attribute that collides with another aothored RemoveFolderEx.
+        /// </summary>
+        internal static string MismatchingRemoveFolderExLongPathHandling {
+            get {
+                return ResourceManager.GetString("MismatchingRemoveFolderExLongPathHandling", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not find ContainerTemplate element to create container &apos;{0}&apos; with..
         /// </summary>
         internal static string MissingContainerTemplate {
