@@ -4698,7 +4698,8 @@ namespace PanelSw.Wix.Extensions
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string dstZipFile = null;
             string srcDir = null;
-            string filePattern = "*.*";
+            string includePattern = null;
+            string excludePattern = null;
             bool recursive = true;
             string condition = null;
             ErrorHandling promptOnError = ErrorHandling.fail;
@@ -4716,7 +4717,22 @@ namespace PanelSw.Wix.Extensions
                             srcDir = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "FilePattern":
-                            filePattern = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            Messaging.Write(WarningMessages.DeprecatedAttribute(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, "IncludePattern"));
+                            if (!string.IsNullOrEmpty(includePattern))
+                            {
+                                Messaging.Write(ErrorMessages.ExpectedAttributesWithOtherAttribute(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, "IncludePattern"));
+                            }
+                            includePattern = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "IncludePattern":
+                            if (!string.IsNullOrEmpty(includePattern))
+                            {
+                                Messaging.Write(ErrorMessages.ExpectedAttributesWithOtherAttribute(sourceLineNumbers, element.Name.LocalName, "IncludePattern", attrib.Name.LocalName));
+                            }
+                            includePattern = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "ExcludePattern":
+                            excludePattern = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Recursive":
                             recursive = (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes);
@@ -4751,7 +4767,8 @@ namespace PanelSw.Wix.Extensions
                 PSW_ZipFile row = section.AddSymbol(new PSW_ZipFile(sourceLineNumbers));
                 row.ZipFile = dstZipFile;
                 row.CompressFolder = srcDir;
-                row.FilePattern = filePattern;
+                row.IncludePattern = includePattern;
+                row.ExcludePattern = excludePattern;
                 row.Recursive = recursive ? 1 : 0;
                 row.Condition = condition;
                 row.ErrorHandling = (int)promptOnError;

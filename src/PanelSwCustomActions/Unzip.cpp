@@ -132,7 +132,7 @@ extern "C" UINT __stdcall ZipFileSched(MSIHANDLE hInstall)
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ZipFile'. Have you authored 'PanelSw:ZipFile' entries in WiX code?");
 
 	// Execute view
-	hr = WcaOpenExecuteView(L"SELECT `ZipFile`, `CompressFolder`, `FilePattern`, `Recursive`, `Condition`, `ErrorHandling` FROM `PSW_ZipFile`", &hView);
+	hr = WcaOpenExecuteView(L"SELECT `ZipFile`, `CompressFolder`, `IncludePattern`, `ExcludePattern`, `Recursive`, `Condition`, `ErrorHandling` FROM `PSW_ZipFile`", &hView);
 	ExitOnFailure(hr, "Failed to execute SQL query");
 
 	// Iterate records
@@ -141,7 +141,7 @@ extern "C" UINT __stdcall ZipFileSched(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		CWixString zip, folder, pattern, condition;
+		CWixString zip, folder, szIncludePattern, szExcludePattern, condition;
 		int recursive = 0;
 		int errorHandling = ErrorHandling::fail;
 
@@ -149,13 +149,15 @@ extern "C" UINT __stdcall ZipFileSched(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to get ZipFile.");
 		hr = WcaGetRecordFormattedString(hRecord, 2, (LPWSTR*)folder);
 		ExitOnFailure(hr, "Failed to get CompressFolder.");
-		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)pattern);
-		ExitOnFailure(hr, "Failed to get FilePattern.");
-		hr = WcaGetRecordInteger(hRecord, 4, &recursive);
+		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)szIncludePattern);
+		ExitOnFailure(hr, "Failed to get IncludePattern.");
+		hr = WcaGetRecordFormattedString(hRecord, 4, (LPWSTR*)szExcludePattern);
+		ExitOnFailure(hr, "Failed to get ExcludePattern.");
+		hr = WcaGetRecordInteger(hRecord, 5, &recursive);
 		ExitOnFailure(hr, "Failed to get Recursive.");
-		hr = WcaGetRecordString(hRecord, 5, (LPWSTR*)condition);
+		hr = WcaGetRecordString(hRecord, 6, (LPWSTR*)condition);
 		ExitOnFailure(hr, "Failed to get Condition.");
-		hr = WcaGetRecordInteger(hRecord, 6, &errorHandling);
+		hr = WcaGetRecordInteger(hRecord, 7, &errorHandling);
 		ExitOnFailure(hr, "Failed to get ErrorHandling.");
 
 		MSICONDITION condRes = ::MsiEvaluateConditionW(hInstall, (LPCWSTR)condition);
@@ -183,7 +185,7 @@ extern "C" UINT __stdcall ZipFileSched(MSIHANDLE hInstall)
 			ExitOnFailure(hr, "Failed appending backslash");
 		}
 
-		hr = cad.AddZip(zip, folder, pattern, recursive, (ErrorHandling)errorHandling);
+		hr = cad.AddZip(zip, folder, szIncludePattern, szExcludePattern, recursive, (ErrorHandling)errorHandling);
 		ExitOnFailure(hr, "Failed scheduling zip file compression");
 	}
 
@@ -235,7 +237,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CUnzip::AddZip(LPCWSTR zipFile, LPCWSTR sourceFolder, LPCWSTR szPattern, bool bRecursive, ErrorHandling errorHandling)
+HRESULT CUnzip::AddZip(LPCWSTR zipFile, LPCWSTR sourceFolder, LPCWSTR szIncludePattern, LPCWSTR szExcludePattern, bool bRecursive, ErrorHandling errorHandling)
 {
 	HRESULT hr = S_OK;
 	Command* pCmd = nullptr;
@@ -253,7 +255,8 @@ HRESULT CUnzip::AddZip(LPCWSTR zipFile, LPCWSTR sourceFolder, LPCWSTR szPattern,
 
 	pDetails->set_zipfile(zipFile, WSTR_BYTE_SIZE(zipFile));
 	pDetails->set_srcfolder(sourceFolder, WSTR_BYTE_SIZE(sourceFolder));
-	pDetails->set_pattern(szPattern, WSTR_BYTE_SIZE(szPattern));
+	pDetails->set_includepattern(szIncludePattern, WSTR_BYTE_SIZE(szIncludePattern));
+	pDetails->set_excludepattern(szExcludePattern, WSTR_BYTE_SIZE(szExcludePattern));
 	pDetails->set_recursive(bRecursive);
 	pDetails->set_errorhandling(errorHandling);
 
@@ -302,7 +305,8 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 	bool bRes = true;
 	LPCWSTR zipFileW = nullptr;
 	LPCWSTR srcFolderW = nullptr;
-	LPCWSTR szPattern = nullptr;
+	LPCWSTR szIncludePattern = nullptr;
+	LPCWSTR szExcludePattern = nullptr;
 	LPSTR szEntryName = nullptr;
 	std::string zipFileA;
 	std::ostream* zipFileStream = nullptr;
@@ -310,40 +314,65 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 	Poco::Path file, fileName;
 	PMSIHANDLE hActionData;
 	CFileIterator fileFinder;
+	IFileFilter *pIncludeFilter = nullptr;
+	IFileFilter *pExcludeFilter = nullptr;
 
 	zipFileW = (LPCWSTR)(LPVOID)pDetails->zipfile().data();
 	srcFolderW = (LPCWSTR)(LPVOID)pDetails->srcfolder().data();
-	szPattern = (LPCWSTR)(LPVOID)pDetails->pattern().data();
+	szIncludePattern = (LPCWSTR)(LPVOID)pDetails->includepattern().data();
+	szExcludePattern = (LPCWSTR)(LPVOID)pDetails->excludepattern().data();
 	_zipPrompter.SetErrorHandling((PSW_ERROR_HANDLING)pDetails->errorhandling());
 	_zipOneFilePrompter.SetErrorHandling((PSW_ERROR_HANDLING)pDetails->errorhandling());
 
+	if (szIncludePattern && *szIncludePattern)
+	{
+		hr = IFileFilter::InferFilter(srcFolderW, szIncludePattern, pDetails->recursive(), &pIncludeFilter);
+		ExitOnFailure(hr, "Failed to initialize file filter");
+	}
+
+	if (szExcludePattern && *szExcludePattern)
+	{
+		hr = IFileFilter::InferFilter(srcFolderW, szExcludePattern, pDetails->recursive(), &pExcludeFilter);
+		ExitOnFailure(hr, "Failed to initialize file filter");
+	}
+
 	try
 	{
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Compressing files matching '%ls%ls' to zip file '%ls'", srcFolderW, szPattern, zipFileW);
-		
+		BOOL bRes = TRUE;
+
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Compressing files matching '%ls%ls', excluding files matcing '%ls%ls', to zip file '%ls'", srcFolderW, szIncludePattern, srcFolderW, szExcludePattern, zipFileW);
+
 		// ActionData: "Compressing from [1] to [2]"
 		hActionData = ::MsiCreateRecord(2);
-		if (hActionData 
+		if (hActionData
 			&& SUCCEEDED(WcaSetRecordString(hActionData, 1, srcFolderW))
 			&& SUCCEEDED(WcaSetRecordString(hActionData, 2, zipFileW)))
 		{
 			WcaProcessMessage(INSTALLMESSAGE::INSTALLMESSAGE_ACTIONDATA, hActionData);
 		}
 
-			Poco::UnicodeConverter::toUTF8(zipFileW, zipFileA);
+		Poco::UnicodeConverter::toUTF8(zipFileW, zipFileA);
 
-			zipFileStream = new std::ofstream(zipFileA, std::ios::binary);
-			ExitOnNull(zipFileStream, hr, E_OUTOFMEMORY, "Failed creating zip file '%ls'", zipFileW);
+		zipFileStream = new std::ofstream(zipFileA, std::ios::binary);
+		ExitOnNull(zipFileStream, hr, E_OUTOFMEMORY, "Failed creating zip file '%ls'", zipFileW);
 
-			pZip = new Compress(*zipFileStream, true, true);
-			ExitOnNull(zipFileStream, hr, E_OUTOFMEMORY, "Failed creating zip archive for '%ls'", zipFileW);
+		pZip = new Compress(*zipFileStream, true, true);
+		ExitOnNull(zipFileStream, hr, E_OUTOFMEMORY, "Failed creating zip archive for '%ls'", zipFileW);
 
-			for (CFileEntry fileEntry = fileFinder.Find(srcFolderW, szPattern, pDetails->recursive()); !fileFinder.IsEnd(); fileEntry = fileFinder.Next())
+		for (CFileEntry fileEntry = fileFinder.Find(srcFolderW, pIncludeFilter, pExcludeFilter, pDetails->recursive()); !fileFinder.IsEnd(); fileEntry = fileFinder.Next())
+		{
+			ExitOnNull(fileEntry.IsValid(), hr, fileFinder.Status(), "Failed to find files in '%ls'", srcFolderW);
+
+			hr = PathCompareCanonicalized(fileEntry.Path(), zipFileW, &bRes);
+			ExitOnFailure(hr, "Failed to compare path '%ls' to '%ls'", (LPCWSTR)fileEntry.Path(), zipFileW);
+			if (bRes)
 			{
-				ExitOnNull(fileEntry.IsValid(), hr, fileFinder.Status(), "Failed to find files in '%ls'", srcFolderW);
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skip compressing file '%ls' into itself", zipFileW);
+				continue;
+			}
 
-				if (!fileEntry.IsDirectory() && !fileEntry.IsSymlink())
-				{
+			if (!fileEntry.IsDirectory() && !fileEntry.IsSymlink())
+			{
 				hr = StrAnsiAllocString(&szEntryName, (LPCWSTR)fileEntry.Path() + ::wcslen(srcFolderW), 0, CP_UTF8);
 				ExitOnFailure(hr, "Failed allocating string");
 
@@ -363,7 +392,7 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Adding '%hs' as '%hs' to zip file '%hs'", file.getFileName().c_str(), fileName.getFileName().c_str(), zipFileA.c_str());
 			LRetryFile:
-				try 
+				try
 				{
 					pZip->addFile(file, fileName);
 					//TODO Set extra time fields, once POCO support getting the entry of the added file.
@@ -421,6 +450,14 @@ LExit:
 	if (zipFileStream)
 	{
 		delete zipFileStream;
+	}
+	if (pIncludeFilter)
+	{
+		delete pIncludeFilter;
+	}
+	if (pExcludeFilter)
+	{
+		delete pExcludeFilter;
 	}
 
 	return hr;

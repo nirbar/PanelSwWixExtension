@@ -11,9 +11,12 @@
       <PanelSW:RegularExpression Input="[OriginalDatabase]" Expression="\\\w+.msi" Replacement=""/>
     </Property>
 
-    <PanelSW:ZipFile SourceFolder="[INSTALLFOLDER]" FilePattern="*.log" TargetZipFile="[INSTALLFOLDER]1.logs.zip" Condition="Not Installed"/>
+    <PanelSW:ZipFile SourceFolder="[ORIGINAL_DATABASE_DIR_]" FilePattern="*.log" TargetZipFile="[INSTALLFOLDER]1.logs.zip" Condition="Not Installed"/>
     <PanelSW:ZipFile SourceFolder="[INSTALLFOLDER]" TargetZipFile="[INSTALLFOLDER]1.zip" Condition="Not Installed"/>
     <PanelSW:ZipFile SourceFolder="[ORIGINAL_DATABASE_DIR_]" TargetZipFile="[INSTALLFOLDER]origdir.zip" Condition="Not Installed" ErrorHandling="prompt"/>
+    <PanelSW:ZipFile SourceFolder="[INSTALLFOLDER]" IncludePattern="**/*.txt" TargetZipFile="[INSTALLFOLDER]txt.zip" Condition="Not Installed" ErrorHandling="prompt"/>
+    <PanelSW:ZipFile SourceFolder="[INSTALLFOLDER]" ExcludePattern="**/*.txt" TargetZipFile="[INSTALLFOLDER]notxt.zip" Condition="Not Installed" ErrorHandling="prompt"/>
+    <PanelSW:ZipFile SourceFolder="[INSTALLFOLDER]" IncludePattern="**/*.txt" ExcludePattern="**/*.txt" TargetZipFile="[INSTALLFOLDER]none.zip" Condition="Not Installed" ErrorHandling="prompt"/>
     <PanelSW:Unzip TargetFolder="[INSTALLFOLDER]" ZipFile="[INSTALLFOLDER]1.zip" OverwriteMode="Unmodified" Condition="Not Installed"/>
     <PanelSW:Unzip TargetFolder="[WindowsVolume]1\2\3" ZipFile="[INSTALLFOLDER]1.zip" Overwrite="yes" Condition="Not Installed"/>
     <PanelSW:Unzip TargetFolder="[WindowsVolume]1\2\4" ZipFile="[INSTALLFOLDER]1.zip" Overwrite="yes" DeleteZip="yes" CreateRootFolder="no" Condition="Not Installed"/>
