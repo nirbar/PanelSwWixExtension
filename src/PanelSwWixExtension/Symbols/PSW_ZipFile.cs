@@ -22,7 +22,8 @@ namespace PanelSw.Wix.Extensions.Symbols
                     new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
                     new ColumnDefinition(nameof(ZipFile), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
                     new ColumnDefinition(nameof(CompressFolder), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
-                    new ColumnDefinition(nameof(FilePattern), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(IncludePattern), ColumnType.Localized, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(ExcludePattern), ColumnType.Localized, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
                     new ColumnDefinition(nameof(Recursive), ColumnType.Number, 1, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 1),
                     new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
                     new ColumnDefinition(nameof(ErrorHandling), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 2),
@@ -48,28 +49,34 @@ namespace PanelSw.Wix.Extensions.Symbols
             set => this.Set(1, value);
         }
 
-        public string FilePattern
+        public string IncludePattern
         {
             get => Fields[2].AsString();
             set => this.Set(2, value);
         }
 
+        public string ExcludePattern
+        {
+            get => Fields[3].AsString();
+            set => this.Set(3, value);
+        }
+
         public int Recursive
         {
-            get => Fields[3].AsNumber();
-            set => this.Set(3, value);
+            get => Fields[4].AsNumber();
+            set => this.Set(4, value);
         }
 
         public string Condition
         {
-            get => Fields[4].AsString();
-            set => this.Set(4, value);
+            get => Fields[5].AsString();
+            set => this.Set(5, value);
         }
 
         public int ErrorHandling
         {
-            get => Fields[5].AsNumber();
-            set => this.Set(5, value);
+            get => Fields[6].AsNumber();
+            set => this.Set(6, value);
         }
     }
 }

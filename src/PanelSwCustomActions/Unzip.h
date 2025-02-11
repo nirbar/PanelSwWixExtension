@@ -15,7 +15,7 @@ public:
 
 	HRESULT AddUnzip(LPCWSTR zipFile, LPCWSTR targetFolder, ::com::panelsw::ca::UnzipDetails_UnzipFlags flags, com::panelsw::ca::ErrorHandling errorHandling);
 
-	HRESULT AddZip(LPCWSTR zipFile, LPCWSTR sourceFolder, LPCWSTR szPattern, bool bRecursive, com::panelsw::ca::ErrorHandling errorHandling);
+	HRESULT AddZip(LPCWSTR zipFile, LPCWSTR sourceFolder, LPCWSTR szIncludePattern, LPCWSTR szExcludePattern, bool bRecursive, com::panelsw::ca::ErrorHandling errorHandling);
 
 protected:
 	HRESULT DeferredExecute(const ::std::string& command) override;

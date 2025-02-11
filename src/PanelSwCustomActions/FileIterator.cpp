@@ -8,25 +8,37 @@ CFileIterator::~CFileIterator()
 
 void CFileIterator::Release()
 {
+	_hrStatus = S_OK;
+	_szBasePath.Release();
+	_bRecursive = false;
+
 	while (_cFolders)
 	{
 		ReleaseOne();
 	}
 	ReleaseNullMem(_pFolders);
-	_hrStatus = S_OK;
-	_szPattern.Release();
+
+	_pIncludeFilter = nullptr;
+	_pExcludeFilter = nullptr;
 }
 
-CFileEntry CFileIterator::Find(LPCWSTR szBasePath, LPCWSTR szPattern, bool bRecursive)
+CFileEntry CFileIterator::Find(LPCWSTR szBasePath, const IFileFilter* pIncludeFilter, const IFileFilter* pExcludeFilter, bool bRecursive)
 {
 	Release();
 
-	_bRecursive = bRecursive;
+	CFileEntry entry(szBasePath);
 
-	if (szPattern && *szPattern)
+	_hrStatus = _szBasePath.Copy(szBasePath);
+	ExitOnFailure(_hrStatus, "Failed to allcate string");
+	::PathRemoveBackslash((LPWSTR)_szBasePath);
+
+	_bRecursive = bRecursive;
+	_pIncludeFilter = pIncludeFilter;
+	_pExcludeFilter = pExcludeFilter;
+
+	if (entry.IsMountPoint() || entry.IsSymlink())
 	{
-		_hrStatus = _szPattern.Copy(szPattern);
-		ExitOnFailure(_hrStatus, "Failed to copy string");
+		return entry;
 	}
 
 	_hrStatus = MemAllocArray((LPVOID*)&_pFolders, sizeof(FolderIterator), _bRecursive ? 10 : 1);
@@ -70,22 +82,16 @@ CFileEntry CFileIterator::Next()
 		{
 			CWixString szBasePattern;
 
-			if (_bRecursive)
+			if (_bRecursive || _pExcludeFilter || _pIncludeFilter)
 			{
 				// We're searching without the given filespec wildcard pattern so we can match subfolders
 				_hrStatus = szBasePattern.AppnedFormat(L"%ls\\*", (LPCWSTR)pFolder->_szBasePath);
 				ExitOnFailure(_hrStatus, "Failed to copy string");
 			}
-			else if (_szPattern.IsNullOrEmpty())
+			else
 			{
 				// Match on the folder only
 				_hrStatus = szBasePattern.AppnedFormat(L"%ls\\.", (LPCWSTR)pFolder->_szBasePath);
-				ExitOnFailure(_hrStatus, "Failed to copy string");
-			}
-			else
-			{
-				// Match on the pattern in this folder alone (not recursive)
-				_hrStatus = szBasePattern.AppnedFormat(L"%ls\\%ls", (LPCWSTR)pFolder->_szBasePath, (LPCWSTR)_szPattern);
 				ExitOnFailure(_hrStatus, "Failed to copy string");
 			}
 
@@ -139,26 +145,37 @@ CFileEntry CFileIterator::ProcessFindData(bool* pbSkip)
 	// File?
 	if (!CFileEntry::IsDirectory(pFolder->_findData.dwFileAttributes))
 	{
+		CFileEntry entry(pFolder->_findData, (LPCWSTR)pFolder->_szBasePath);
+
 		// Skip files that don't match the wildcard pattern
-		if (_szPattern.IsNullOrEmpty() || !::PathMatchSpec(pFolder->_findData.cFileName, _szPattern))
+		if (_pIncludeFilter)
 		{
-			*pbSkip = true;
-			return CFileEntry::InvalidFileEntry();
+			_hrStatus = _pIncludeFilter->IsMatch(entry.Path());
+			ExitOnFailure(_hrStatus, "Failed to check pattern match");
+			if (_hrStatus == S_FALSE)
+			{
+				_hrStatus = S_OK;
+				*pbSkip = true;
+				return CFileEntry::InvalidFileEntry();
+			}
+		}
+		if (_pExcludeFilter)
+		{
+			_hrStatus = _pExcludeFilter->IsMatch(entry.Path());
+			ExitOnFailure(_hrStatus, "Failed to check pattern match");
+			if (_hrStatus == S_OK)
+			{
+				*pbSkip = true;
+				return CFileEntry::InvalidFileEntry();
+			}
+			_hrStatus = S_OK;
 		}
 
-		CFileEntry entry(pFolder->_findData, (LPCWSTR)pFolder->_szBasePath);
 		return entry;
 	}
 	// Skip symlink folders
 	if (CFileEntry::IsSymlink(pFolder->_findData.dwFileAttributes, pFolder->_findData.dwReserved0))
 	{
-		// Skip files that don't match the wildcard pattern
-		if (_szPattern.IsNullOrEmpty() || !::PathMatchSpec(pFolder->_findData.cFileName, _szPattern))
-		{
-			*pbSkip = true;
-			return CFileEntry::InvalidFileEntry();
-		}
-
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping files under symbolic link folder '%ls\\%ls'", (LPCWSTR)pFolder->_szBasePath, pFolder->_findData.cFileName);
 		CFileEntry entry(pFolder->_findData, (LPCWSTR)pFolder->_szBasePath);
 		return entry;
@@ -166,13 +183,6 @@ CFileEntry CFileIterator::ProcessFindData(bool* pbSkip)
 	// Skip mount folders
 	if (CFileEntry::IsMountPoint(pFolder->_findData.dwFileAttributes, pFolder->_findData.dwReserved0))
 	{
-		// Skip files that don't match the wildcard pattern
-		if (_szPattern.IsNullOrEmpty() || !::PathMatchSpec(pFolder->_findData.cFileName, _szPattern))
-		{
-			*pbSkip = true;
-			return CFileEntry::InvalidFileEntry();
-		}
-
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping files under mount point folder '%ls\\%ls'", (LPCWSTR)pFolder->_szBasePath, pFolder->_findData.cFileName);
 		CFileEntry entry(pFolder->_findData, (LPCWSTR)pFolder->_szBasePath);
 		return entry;
@@ -187,13 +197,6 @@ CFileEntry CFileIterator::ProcessFindData(bool* pbSkip)
 
 		_hrStatus = AppendFolder(szSubDirPath);
 		ExitOnFailure(_hrStatus, "Failed to initialize find in fodler '%ls'", (LPCWSTR)szSubDirPath);
-	}
-
-	// Return the subfolder name too?
-	if (!_bRecursive && !_szPattern.IsNullOrEmpty() && ::PathMatchSpec(pFolder->_findData.cFileName, _szPattern))
-	{
-		CFileEntry entry(pFolder->_findData, (LPCWSTR)pFolder->_szBasePath);
-		return entry;
 	}
 
 	*pbSkip = true;

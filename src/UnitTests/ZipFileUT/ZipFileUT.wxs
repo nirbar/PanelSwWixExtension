@@ -37,7 +37,7 @@
     </ComponentGroup>
 
     <InstallExecuteSequence>
-      <Custom Action="UnzipSched" After="ZipFileSched" />
+      <Custom Action="override UnzipSched" After="ZipFileSched" />
     </InstallExecuteSequence>
 
     <StandardDirectory Id="ProgramFiles6432Folder">

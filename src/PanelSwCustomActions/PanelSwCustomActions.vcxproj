@@ -96,6 +96,9 @@
     <ClCompile Include="DismSched.cpp" />
     <ClCompile Include="EvaluateExpression.cpp" />
     <ClCompile Include="ExecOnComponent.cpp" />
+    <ClCompile Include="IFileFilter.cpp" />
+    <ClCompile Include="FileSpecFilter.cpp" />
+    <ClCompile Include="FileGlobFilter.cpp" />
     <ClCompile Include="FileOperations.cpp" />
     <ClCompile Include="FileRegex.cpp" />
     <ClCompile Include="ListProcessorFeatures.cpp" />
@@ -139,6 +142,9 @@
   <ItemGroup>
     <ClInclude Include="ConcatFiles.h" />
     <ClInclude Include="ExecOnComponent.h" />
+    <ClInclude Include="IFileFilter.h" />
+    <ClInclude Include="FileSpecFilter.h" />
+    <ClInclude Include="FileGlobFilter.h" />
     <ClInclude Include="FileEntry.h" />
     <ClInclude Include="FileIterator.h" />
     <ClInclude Include="FileOperations.h" />
