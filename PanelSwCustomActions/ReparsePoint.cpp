@@ -4,6 +4,7 @@
 #include "../CaCommon/WixString.h"
 #include "FileEntry.h"
 #include "FileIterator.h"
+#include "FileSpecFilter.h"
 #include <memutil.h>
 using namespace ::com::panelsw::ca;
 using namespace google::protobuf;
@@ -76,6 +77,7 @@ extern "C" UINT __stdcall RemoveReparseDataSched(MSIHANDLE hInstall)
 	PMSIHANDLE hRecord;
 	CReparsePoint execCAD;
 	CReparsePoint rollbackCAD;
+	CFileSpecFilter* pFileFilter = nullptr;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
@@ -94,6 +96,11 @@ extern "C" UINT __stdcall RemoveReparseDataSched(MSIHANDLE hInstall)
 	while ((hr = WcaFetchRecord(hView, &hRecord)) != E_NOMOREITEMS)
 	{
 		ExitOnFailure(hr, "Failed to fetch record.");
+		if (pFileFilter)
+		{
+			delete pFileFilter;
+			pFileFilter = nullptr;
+		}
 
 		// Get fields
 		CWixString szComponent, szFileName, szDirProperty, szBasePath;
@@ -136,7 +143,16 @@ extern "C" UINT __stdcall RemoveReparseDataSched(MSIHANDLE hInstall)
 			continue;
 		}
 
-		for (CFileEntry fileEntry = fileFinder.Find(szBasePath, szFileName, false); !fileFinder.IsEnd(); fileEntry = fileFinder.Next())
+		if (!szFileName.IsNullOrEmpty())
+		{
+			pFileFilter = new CFileSpecFilter();
+			ExitOnNull(pFileFilter, hr, E_OUTOFMEMORY, "Failed to instantiate file filter");
+
+			hr = pFileFilter->Initialize(szBasePath, szFileName, false);
+			ExitOnFailure(hr, "Failed to initialize file filter");
+		}
+
+		for (CFileEntry fileEntry = fileFinder.Find(szBasePath, pFileFilter, nullptr, false); !fileFinder.IsEnd(); fileEntry = fileFinder.Next())
 		{
 			ExitOnNull(fileEntry.IsValid(), hr, fileFinder.Status(), "Failed to find files in '%ls'", (LPCWSTR)szBasePath);
 
@@ -159,6 +175,11 @@ extern "C" UINT __stdcall RemoveReparseDataSched(MSIHANDLE hInstall)
 	ExitOnFailure(hr, "Failed to do action");
 
 LExit:
+	if (pFileFilter)
+	{
+		delete pFileFilter;
+		pFileFilter = nullptr;
+	}
 
 	er = SUCCEEDED(hr) ? ERROR_SUCCESS : ERROR_INSTALL_FAILURE;
 	return WcaFinalize(er);

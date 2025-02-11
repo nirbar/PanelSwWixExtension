@@ -269,7 +269,7 @@ HRESULT CFileOperations::ShellCopyPath(LPCWSTR szFrom, LPCWSTR szTo, bool bMove,
 	{
 		CFileIterator fileFinder;
 
-		for (CFileEntry fileEntry = fileFinder.Find(szFrom, L"*", true); !fileFinder.IsEnd(); fileEntry = fileFinder.Next())
+		for (CFileEntry fileEntry = fileFinder.Find(szFrom, nullptr, nullptr, true); !fileFinder.IsEnd(); fileEntry = fileFinder.Next())
 		{
 			ExitOnNull(fileEntry.IsValid(), hr, fileFinder.Status(), "Failed to find files in '%ls'", (LPCWSTR)szFrom);
 
@@ -353,7 +353,7 @@ HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bI
 	{
 		CFileIterator fileFinder;
 
-		for (CFileEntry fileEntry = fileFinder.Find(szFrom, L"*", true); !fileFinder.IsEnd(); fileEntry = fileFinder.Next())
+		for (CFileEntry fileEntry = fileFinder.Find(szFrom, nullptr, nullptr, true); !fileFinder.IsEnd(); fileEntry = fileFinder.Next())
 		{
 			ExitOnNull(fileEntry.IsValid(), hr, fileFinder.Status(), "Failed to find files in '%ls'", (LPCWSTR)szFrom);
 
@@ -397,7 +397,7 @@ HRESULT CFileOperations::DeletePath(LPCWSTR szFrom, bool bIgnoreMissing, bool bI
 			{
 				CFileIterator fileFinder;
 
-				for (CFileEntry fileEntry = fileFinder.Find(szFrom, L"*", true); !fileFinder.IsEnd(); fileEntry = fileFinder.Next())
+				for (CFileEntry fileEntry = fileFinder.Find(szFrom, nullptr, nullptr, true); !fileFinder.IsEnd(); fileEntry = fileFinder.Next())
 				{
 					ExitOnNull(fileEntry.IsValid(), hr, fileFinder.Status(), "Failed to find files in '%ls'", (LPCWSTR)szFrom);
 					int nCompare = 0;

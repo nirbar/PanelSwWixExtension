@@ -164,7 +164,8 @@
     <columnDefinition name="Id" type="string" length="72" primaryKey="yes" modularize="column" category="identifier" />
     <columnDefinition name="ZipFile" type="string" length="0" modularize="property" category="formatted" />
     <columnDefinition name="CompressFolder" type="string" length="0" modularize="property" category="formatted" />
-    <columnDefinition name="FilePattern" type="string" length="0" modularize="property" category="formatted" />
+    <columnDefinition name="IncludePattern" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
+    <columnDefinition name="ExcludePattern" type="string" length="0" modularize="property" category="formatted" nullable="yes" />
     <columnDefinition name="Recursive" type="number" length="1" minValue="0" maxValue="1" />
     <columnDefinition name="Condition" type="string" length="0" modularize="condition" nullable="yes" category="condition" />
     <columnDefinition name="ErrorHandling" type="number" minValue="0" maxValue="2" length="2" />

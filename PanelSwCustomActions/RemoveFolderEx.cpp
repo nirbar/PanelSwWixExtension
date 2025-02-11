@@ -120,7 +120,7 @@ extern "C" UINT __stdcall RemoveFolderEx(MSIHANDLE hInstall)
 		hr = WcaAddTempRecord(&hRemoveFileTable, &hRemoveFileColumns, L"RemoveFile", nullptr, 1, 5, L"RfxFiles", (LPCWSTR)szComponent, L"*", (LPCWSTR)szBaseProperty, flags);
 		ExitOnFailure(hr, "Failed to add temporary row table");
 
-		for (CFileEntry fileEntry = fileFinder.Find(szBasePath, L"*", true); !fileFinder.IsEnd(); fileEntry = fileFinder.Next())
+		for (CFileEntry fileEntry = fileFinder.Find(szBasePath, nullptr, nullptr, true); !fileFinder.IsEnd(); fileEntry = fileFinder.Next())
 		{
 			ExitOnNull(fileEntry.IsValid(), hr, fileFinder.Status(), "Failed to find files in '%ls'", (LPCWSTR)szBasePath);
 

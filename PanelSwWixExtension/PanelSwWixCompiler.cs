@@ -5493,7 +5493,8 @@ namespace PanelSw.Wix.Extensions
             string id = null;
             string dstZipFile = null;
             string srcDir = null;
-            string filePattern = "*.*";
+            string includePattern = null;
+            string excludePattern = null;
             bool recursive = true;
             string condition = null;
             ErrorHandling promptOnError = ErrorHandling.fail;
@@ -5514,7 +5515,22 @@ namespace PanelSw.Wix.Extensions
                             srcDir = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "FilePattern":
-                            filePattern = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            Core.OnMessage(WixWarnings.DeprecatedAttribute(sourceLineNumbers, node.LocalName, attrib.LocalName, "IncludePattern"));
+                            if (!string.IsNullOrEmpty(includePattern))
+                            {
+                                Core.OnMessage(WixErrors.ExpectedAttributesWithOtherAttribute(sourceLineNumbers, node.LocalName, attrib.LocalName, "IncludePattern"));
+                            }
+                            includePattern = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "IncludePattern":
+                            if (!string.IsNullOrEmpty(includePattern))
+                            {
+                                Core.OnMessage(WixErrors.ExpectedAttributesWithOtherAttribute(sourceLineNumbers, node.LocalName, "IncludePattern", attrib.LocalName));
+                            }
+                            includePattern = Core.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "ExcludePattern":
+                            excludePattern = Core.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "Recursive":
                             recursive = (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes);
@@ -5585,10 +5601,11 @@ namespace PanelSw.Wix.Extensions
                 row[0] = id;
                 row[1] = dstZipFile;
                 row[2] = srcDir;
-                row[3] = filePattern;
-                row[4] = recursive ? 1 : 0;
-                row[5] = condition;
-                row[6] = (int)promptOnError;
+                row[3] = includePattern;
+                row[4] = excludePattern;
+                row[5] = recursive ? 1 : 0;
+                row[6] = condition;
+                row[7] = (int)promptOnError;
             }
         }
 

@@ -1,5 +1,6 @@
 #pragma once
 #include "FileEntry.h"
+#include "IFileFilter.h"
 #include "../CaCommon/WixString.h"
 
 #ifndef E_NOMOREFILES
@@ -13,17 +14,13 @@ public:
 	~CFileIterator();
 	void Release();
 
-	CFileEntry Find(LPCWSTR szBasePath, LPCWSTR szPattern, bool bRecursive);
+	CFileEntry Find(LPCWSTR szBasePath, const IFileFilter* pIncludeFilter, const IFileFilter* pExcludeFilter, bool bRecursive);
 	CFileEntry Next();
 
 	HRESULT Status() const;
 	bool IsEnd() const;
 
 private:
-
-	CFileEntry ProcessFindData(bool* pbSkip);
-	void ReleaseOne();
-	HRESULT AppendFolder(LPCWSTR szPath);
 
 	struct FolderIterator
 	{
@@ -32,9 +29,15 @@ private:
 		CWixString _szBasePath;
 	};
 
+	CFileEntry ProcessFindData(bool* pbSkip);
+	void ReleaseOne();
+	HRESULT AppendFolder(LPCWSTR szPath);
+
+	CWixString _szBasePath;
 	bool _bRecursive = false;
-	CWixString _szPattern;
 	FolderIterator* _pFolders = nullptr;
 	UINT _cFolders = 0;
 	HRESULT _hrStatus = S_OK;
+	const IFileFilter* _pIncludeFilter = nullptr;
+	const IFileFilter* _pExcludeFilter = nullptr;
 };
