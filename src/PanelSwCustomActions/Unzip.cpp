@@ -340,7 +340,7 @@ HRESULT CUnzip::ExecuteOneZip(::com::panelsw::ca::ZipDetails* pDetails)
 	{
 		BOOL bRes = TRUE;
 
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Compressing files matching '%ls%ls', excluding files matcing '%ls%ls', to zip file '%ls'", srcFolderW, szIncludePattern, srcFolderW, szExcludePattern, zipFileW);
+		LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Compressing files from '%ls' matching '%ls', excluding files matcing '%ls', to zip file '%ls'", srcFolderW, szIncludePattern, szExcludePattern, zipFileW);
 
 		// ActionData: "Compressing from [1] to [2]"
 		hActionData = ::MsiCreateRecord(2);

@@ -7,35 +7,45 @@
     </Feature>
 
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
-    <Property Id="ORIGINAL_DATABASE_DIR_">
-      <PanelSW:RegularExpression Input="[OriginalDatabase]" Expression="\\\w+.msi" Replacement=""/>
-    </Property>
 
-    <PanelSW:ZipFile SourceFolder="[ORIGINAL_DATABASE_DIR_]" FilePattern="*.log" TargetZipFile="[INSTALLFOLDER]1.logs.zip" Condition="Not Installed"/>
-    <PanelSW:ZipFile SourceFolder="[INSTALLFOLDER]" TargetZipFile="[INSTALLFOLDER]1.zip" Condition="Not Installed"/>
-    <PanelSW:ZipFile SourceFolder="[ORIGINAL_DATABASE_DIR_]" TargetZipFile="[INSTALLFOLDER]origdir.zip" Condition="Not Installed" ErrorHandling="prompt"/>
-    <PanelSW:ZipFile SourceFolder="[INSTALLFOLDER]" IncludePattern="**/*.txt" TargetZipFile="[INSTALLFOLDER]txt.zip" Condition="Not Installed" ErrorHandling="prompt"/>
-    <PanelSW:ZipFile SourceFolder="[INSTALLFOLDER]" ExcludePattern="**/*.txt" TargetZipFile="[INSTALLFOLDER]notxt.zip" Condition="Not Installed" ErrorHandling="prompt"/>
-    <PanelSW:ZipFile SourceFolder="[INSTALLFOLDER]" IncludePattern="**/*.txt" ExcludePattern="**/*.txt" TargetZipFile="[INSTALLFOLDER]none.zip" Condition="Not Installed" ErrorHandling="prompt"/>
-    <PanelSW:Unzip TargetFolder="[INSTALLFOLDER]" ZipFile="[INSTALLFOLDER]1.zip" OverwriteMode="Unmodified" Condition="Not Installed"/>
-    <PanelSW:Unzip TargetFolder="[WindowsVolume]1\2\3" ZipFile="[INSTALLFOLDER]1.zip" Overwrite="yes" Condition="Not Installed"/>
-    <PanelSW:Unzip TargetFolder="[WindowsVolume]1\2\4" ZipFile="[INSTALLFOLDER]1.zip" Overwrite="yes" DeleteZip="yes" CreateRootFolder="no" Condition="Not Installed"/>
-    <PanelSW:Unzip TargetFolder="[INSTALLFOLDER]npp" ZipFile="[#iconsext.zip]" OverwriteMode="Always" Condition="&amp;ProductFeature &gt;= 3"/>
-    <PanelSW:Unzip TargetFolder="[INSTALLFOLDER]msi" ZipFile="[INSTALLFOLDER]origdir.zip" OverwriteMode="Always" DeleteZip="yes" Condition="&amp;ProductFeature &gt;= 3" ErrorHandling="prompt"/>
+    <PanelSW:ZipFile SourceFolder="[MY_DIR]\src" IncludePattern="/*.log" TargetZipFile="[MY_DIR]root-logs.zip" Condition="MY_DIR AND Not Installed"/>
+    <PanelSW:ZipFile SourceFolder="[MY_DIR]\src" ExcludePattern="/*.log" TargetZipFile="[MY_DIR]no-root-logs.zip" Condition="MY_DIR AND Not Installed"/>
 
+    <PanelSW:ZipFile SourceFolder="[MY_DIR]\src" IncludePattern="**/*.txt" TargetZipFile="[MY_DIR]txt.zip" Condition="MY_DIR AND Not Installed"/>
+    <PanelSW:ZipFile SourceFolder="[MY_DIR]\src" IncludePattern="**/*.?xt" TargetZipFile="[MY_DIR]txt2.zip" Condition="MY_DIR AND Not Installed"/>
+    
+    <PanelSW:ZipFile SourceFolder="[MY_DIR]\src" TargetZipFile="[MY_DIR]all.zip" Condition="MY_DIR AND Not Installed"/>
+    <PanelSW:ZipFile SourceFolder="[MY_DIR]\src" IncludePattern="**" TargetZipFile="[MY_DIR]all2.zip" Condition="MY_DIR AND Not Installed"/>
+
+    <PanelSW:ZipFile SourceFolder="[MY_DIR]\src" IncludePattern="**/*.txt" ExcludePattern="**/*.txt" TargetZipFile="[MY_DIR]none.zip" Condition="MY_DIR AND Not Installed"/>
+    <PanelSW:ZipFile SourceFolder="[MY_DIR]\src" IncludePattern="**/*.?x" TargetZipFile="[MY_DIR]none2.zip" Condition="MY_DIR AND Not Installed"/>
+
+    <PanelSW:ZipFile SourceFolder="[MY_DIR]\src" IncludePattern="**/[\{]*.tx,*.log[\}]" TargetZipFile="[MY_DIR]group-logs.zip" Condition="MY_DIR AND Not Installed"/>
+    <PanelSW:ZipFile SourceFolder="[MY_DIR]\src" IncludePattern="**/[\{]*.txt,*.log[\}]" TargetZipFile="[MY_DIR]group-all.zip" Condition="MY_DIR AND Not Installed"/>
+    <PanelSW:ZipFile SourceFolder="[MY_DIR]\src" ExcludePattern="**/[\{]*.txt,*.log[\}]" TargetZipFile="[MY_DIR]group-none.zip" Condition="MY_DIR AND Not Installed"/>
+    <PanelSW:ZipFile SourceFolder="[MY_DIR]\src" IncludePattern="**/\[\{]*.txt,*.log\[\}]" TargetZipFile="[MY_DIR]ungroup-none.zip" Condition="MY_DIR AND Not Installed"/>
+
+    <PanelSW:ZipFile SourceFolder="[MY_DIR]\src" IncludePattern="**/[\[]a-z[\]].log" TargetZipFile="[MY_DIR]range-logs.zip" Condition="MY_DIR AND Not Installed"/>
+    <PanelSW:ZipFile SourceFolder="[MY_DIR]\src" IncludePattern="**/[\[]!a-z[\]].log" TargetZipFile="[MY_DIR]range-none.zip" Condition="MY_DIR AND Not Installed"/>
+
+    <PanelSW:Unzip TargetFolder="[MY_DIR]root-logs" ZipFile="[MY_DIR]root-logs.zip" OverwriteMode="Unmodified" DeleteZip="yes" Condition="MY_DIR AND Not Installed"/>    
+    <PanelSW:Unzip TargetFolder="[MY_DIR]no-root-logs" ZipFile="[MY_DIR]no-root-logs.zip" OverwriteMode="Unmodified" Condition="MY_DIR AND Not Installed"/>    
+    <PanelSW:Unzip TargetFolder="[MY_DIR]txt" ZipFile="[MY_DIR]txt.zip" OverwriteMode="Unmodified" Condition="MY_DIR AND Not Installed"/>    
+    <PanelSW:Unzip TargetFolder="[MY_DIR]txt2" ZipFile="[MY_DIR]txt2.zip" OverwriteMode="Unmodified" Condition="MY_DIR AND Not Installed"/>    
+    <PanelSW:Unzip TargetFolder="[MY_DIR]all" ZipFile="[MY_DIR]all.zip" OverwriteMode="Unmodified" Condition="MY_DIR AND Not Installed"/>    
+    <PanelSW:Unzip TargetFolder="[MY_DIR]all2" ZipFile="[MY_DIR]all2.zip" OverwriteMode="Unmodified" Condition="MY_DIR AND Not Installed"/>    
+    <PanelSW:Unzip TargetFolder="[MY_DIR]none" ZipFile="[MY_DIR]none.zip" OverwriteMode="Unmodified" Condition="MY_DIR AND Not Installed"/>    
+    <PanelSW:Unzip TargetFolder="[MY_DIR]none2" ZipFile="[MY_DIR]none2.zip" OverwriteMode="Unmodified" Condition="MY_DIR AND Not Installed"/>    
+    <PanelSW:Unzip TargetFolder="[MY_DIR]group-all" ZipFile="[MY_DIR]group-all.zip" OverwriteMode="Unmodified" Condition="MY_DIR AND Not Installed"/>    
+    <PanelSW:Unzip TargetFolder="[MY_DIR]group-logs" ZipFile="[MY_DIR]group-logs.zip" OverwriteMode="Unmodified" Condition="MY_DIR AND Not Installed"/>    
+    <PanelSW:Unzip TargetFolder="[MY_DIR]group-none" ZipFile="[MY_DIR]group-none.zip" OverwriteMode="Unmodified" Condition="MY_DIR AND Not Installed"/>    
+    <PanelSW:Unzip TargetFolder="[MY_DIR]ungroup-none" ZipFile="[MY_DIR]ungroup-none.zip" OverwriteMode="Unmodified" Condition="MY_DIR AND Not Installed"/>    
+    <PanelSW:Unzip TargetFolder="[MY_DIR]range-logs" ZipFile="[MY_DIR]range-logs.zip" OverwriteMode="Unmodified" Condition="MY_DIR AND Not Installed"/>    
+    <PanelSW:Unzip TargetFolder="[MY_DIR]range-none" ZipFile="[MY_DIR]range-none.zip" OverwriteMode="Unmodified" Condition="MY_DIR AND Not Installed"/>    
+    
     <ComponentGroup Id="ProductComponents">
       <Component Directory="INSTALLFOLDER">
-        <File Source="$(sys.SOURCEFILEPATH)" />
-        <RemoveFile On="both" Name="1.zip" Id="_1" />
-      </Component>
-      <Component Directory="INSTALLFOLDER">
-        <File Source="$(var.ProjectDir)SizeZero.txt" />
-      </Component>
-      <Component Directory="INSTALLFOLDER1">
-        <File Source="$(var.ProjectDir)ZipFileUT.wixproj" ReadOnly="yes" />
-      </Component>
-      <Component Directory="INSTALLFOLDER">
-        <File Source="D:\Tools\iconsext.zip" Id="iconsext.zip" />
+        <File Source="$(sys.SOURCEFILEDIR)ZipFileUT.bat" Compressed="no"/>
       </Component>
     </ComponentGroup>
 

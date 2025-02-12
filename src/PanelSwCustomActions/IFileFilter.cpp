@@ -6,8 +6,7 @@
 /*static*/ HRESULT IFileFilter::InferFilter(LPCWSTR szBaseFolder, LPCWSTR szFilter, bool bRecursive, IFileFilter** ppFilter)
 {
 	HRESULT hr = S_OK;
-	bool bMustBeGlob = false;
-	bool bMustBeFileSpec = false;
+	bool bGlob = false;
 	IFileFilter* pFilter = nullptr;
 	
 	if (!(szFilter && *szFilter))
@@ -15,27 +14,13 @@
 		ExitFunction();
 	}
 
-	bMustBeGlob = wcschr(szFilter, L'/') || wcschr(szFilter, L'\\');
-	bMustBeFileSpec = wcschr(szFilter, L'?');
-	ExitOnNull((!(bMustBeFileSpec && bMustBeGlob)), hr, E_INVALIDARG, "File pattern '%ls' is invalid as either glob or filespec", szFilter);
+	bGlob = wcschr(szFilter, L'/') || wcschr(szFilter, L'\\') || wcschr(szFilter, L'{') || wcschr(szFilter, L'[') || wcsstr(szFilter, L"**");
 
-	if (bMustBeGlob)
+	if (bGlob)
 	{
 		pFilter = new CFileGlobFilter();
 		ExitOnNull(pFilter, hr, E_OUTOFMEMORY, "Failed to instanciate CFileGlobFilter");
 	}
-	else if (bMustBeFileSpec)
-	{
-		pFilter = new CFileSpecFilter();
-		ExitOnNull(pFilter, hr, E_OUTOFMEMORY, "Failed to instanciate CFileSpecFilter");
-	}
-	// ** is probably glob
-	else if (wcsstr(szFilter, L"**"))
-	{
-		pFilter = new CFileGlobFilter();
-		ExitOnNull(pFilter, hr, E_OUTOFMEMORY, "Failed to instanciate CFileGlobFilter");
-	}
-	// Default to filespec because it is more widespread in Windows
 	else
 	{
 		pFilter = new CFileSpecFilter();
