@@ -19,6 +19,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ZipFileUT.wxs" />
+    <None Include="ZipFileUT.bat" />
   </ItemGroup>
   <ItemGroup>
     <WixExtension Include="WixUtilExtension">

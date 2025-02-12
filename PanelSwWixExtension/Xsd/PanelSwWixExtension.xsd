@@ -1158,12 +1158,14 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
           </xs:attribute>
           <xs:attribute name="IncludePattern" type="xs:string">
             <xs:annotation>
-              <xs:documentation><![CDATA[Optional glob pattern to add to the archive. Defaults to '**']]></xs:documentation>
+              <xs:documentation>
+                <![CDATA[Optional glob pattern to add to the archive. Supported glob format as in https://code.visualstudio.com/docs/editor/glob-patterns. If not specified then all files will be compressed]]>
+              </xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="ExcludePattern" type="xs:string">
             <xs:annotation>
-              <xs:documentation><![CDATA[Optional glob pattern to exclude from the archive.]]></xs:documentation>
+              <xs:documentation><![CDATA[Optional glob pattern to exclude from the archive. Supported glob format as in https://code.visualstudio.com/docs/editor/glob-patterns]]></xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="Recursive" type="wix:YesNoType">
