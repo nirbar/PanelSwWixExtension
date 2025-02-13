@@ -4,6 +4,11 @@
 #include <shlwapi.h>
 #pragma comment (lib, "shlwapi.lib")
 
+CFileSpecFilter::~CFileSpecFilter()
+{
+	Release();
+}
+
 void CFileSpecFilter::Release()
 {
 	ReleaseNullStr(_szBaseFolder);

@@ -15,7 +15,6 @@
 	}
 
 	bGlob = wcschr(szFilter, L'/') || wcschr(szFilter, L'\\') || wcschr(szFilter, L'{') || wcschr(szFilter, L'[') || wcsstr(szFilter, L"**");
-
 	if (bGlob)
 	{
 		pFilter = new CFileGlobFilter();
@@ -33,7 +32,6 @@
 	*ppFilter = pFilter;
 	pFilter = nullptr;
 	
-
 LExit:
 	if (pFilter)
 	{

@@ -5,6 +5,8 @@ class CFileSpecFilter
 	: public IFileFilter
 {
 public:
+	virtual ~CFileSpecFilter();
+
 	HRESULT Initialize(LPCWSTR szBaseFolder, LPCWSTR szFilter, bool bRecursive) override;
 
 	HRESULT IsMatch(LPCWSTR szFilePath) const override;
