@@ -6,6 +6,8 @@ class CFileGlobFilter
 	: public IFileFilter
 {
 public:
+	virtual ~CFileGlobFilter();
+
 	/* Supported glob format as in https://code.visualstudio.com/docs/editor/glob-patterns
 		- / to separate path segments
 		- * to match zero or more characters in a path segment

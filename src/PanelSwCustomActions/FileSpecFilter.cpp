@@ -1,6 +1,11 @@
 #include "pch.h"
 #include "FileSpecFilter.h"
 
+CFileSpecFilter::~CFileSpecFilter()
+{
+	Release();
+}
+
 void CFileSpecFilter::Release()
 {
 	ReleaseNullStr(_szBaseFolder);
