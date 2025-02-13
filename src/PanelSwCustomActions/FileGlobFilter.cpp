@@ -3,6 +3,11 @@
 #include "../CaCommon/DeferredActionBase.h"
 using namespace std;
 
+CFileGlobFilter::~CFileGlobFilter()
+{
+	Release();
+}
+
 void CFileGlobFilter::Release()
 {
 	_rxPattern.assign(L".*");
@@ -30,6 +35,7 @@ HRESULT CFileGlobFilter::Initialize(LPCWSTR szBaseFolder, LPCWSTR szFilter, bool
 	LPCWSTR szQuestionMark = L"[^\\\\]?";	// ? = Any character within segment
 	LPCWSTR szGlobstar = L".*(^|$|\\\\)";	// ** = Multi segment
 	LPCWSTR szGlobSpecialChar = L"?*[]{},";
+	LPCWSTR szRxSpecialChar = L".()^$";
 	bool bInGroup = false;
 	bool bInRange = false;
 
@@ -56,7 +62,7 @@ HRESULT CFileGlobFilter::Initialize(LPCWSTR szBaseFolder, LPCWSTR szFilter, bool
 		// Escaping special glob character
 		if (c == L'\\')
 		{
-			ExitOnNull(wcschr(szGlobSpecialChar, szFilter[i + 1]), hr, E_INVALIDARG, "Invalid glob expression: Escape char before a non-special character '%lc'. Pattern '%ls', index %i", szFilter[i + 1], szFilter, i);
+			ExitOnNull(StrChrW(szGlobSpecialChar, szFilter[i + 1]), hr, E_INVALIDARG, "Invalid glob expression: Escape char before a non-special character '%lc'. Pattern '%ls', index %i", szFilter[i + 1], szFilter, i);
 
 			szRxPattern[nRxIndex++] = L'\\';
 			szRxPattern[nRxIndex++] = szFilter[++i];
@@ -88,11 +94,13 @@ HRESULT CFileGlobFilter::Initialize(LPCWSTR szBaseFolder, LPCWSTR szFilter, bool
 		}
 		if ((c == L',') && bInGroup)
 		{
+			ExitOnNull(!bInRange, hr, E_INVALIDARG, "Invalid glob expression: Group separator before previous range ended. Pattern '%ls', index %i", szFilter, i);
 			szRxPattern[nRxIndex++] = L'|';
 			continue;
 		}
 		if (c == L'}')
 		{
+			ExitOnNull(!bInRange, hr, E_INVALIDARG, "Invalid glob expression: Group end before previous range ended. Pattern '%ls', index %i", szFilter, i);
 			if (bInGroup)
 			{
 				bInGroup = false;
@@ -142,7 +150,7 @@ HRESULT CFileGlobFilter::Initialize(LPCWSTR szBaseFolder, LPCWSTR szFilter, bool
 		}
 
 		// Regex special charactres
-		if ((c == L'.') || (c == L'(') || (c == L')') || (c == L'^') || (c == L'$'))
+		if (StrChrW(szRxSpecialChar, c))
 		{
 			szRxPattern[nRxIndex++] = L'\\';
 			szRxPattern[nRxIndex++] = c;
@@ -159,8 +167,6 @@ HRESULT CFileGlobFilter::Initialize(LPCWSTR szBaseFolder, LPCWSTR szFilter, bool
 		if (szFilter[i + 1] == L'*')
 		{
 			++i;
-			// '**/MyFile.txt' should match both in the root folder and in subfolders, so the slash is optional.
-			//TODO Problem: It would match for 'NotMyFile.txt'
 			hr = StringCchCat(szRxPattern, nRxStrLen, szGlobstar);
 			ExitOnFailure(hr, "Failed to concatentate strings");
 
