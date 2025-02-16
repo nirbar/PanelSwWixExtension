@@ -82,6 +82,8 @@
     <ClCompile Include="CheckRebootRequired.cpp" />
     <ClCompile Include="ConcatFiles.cpp" />
     <ClCompile Include="DllMain.cpp" />
+    <ClCompile Include="DirectoryTableResolver.cpp" />
+    <ClCompile Include="DuplicateFolder.cpp" />
     <ClCompile Include="FileEntry.cpp" />
     <ClCompile Include="FileIterator.cpp" />
     <ClCompile Include="FolderPaths.cpp" />
@@ -142,6 +144,7 @@
   <ItemGroup>
     <ClInclude Include="ConcatFiles.h" />
     <ClInclude Include="ExecOnComponent.h" />
+    <ClInclude Include="DirectoryTableResolver.h" />
     <ClInclude Include="IFileFilter.h" />
     <ClInclude Include="FileSpecFilter.h" />
     <ClInclude Include="FileGlobFilter.h" />

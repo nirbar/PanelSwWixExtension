@@ -14,14 +14,14 @@
     <PanelSW:DuplicateFolder SourceDir="INSTALLFOLDER" DestinationDir="INSTALLFOLDER_COPY"/>
 
     <StandardDirectory Id="ProgramFiles6432Folder">
-      <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+      <Directory Id="INSTALLFOLDER" Name="UnitTestSetup"/>
       <Directory Id="INSTALLFOLDER_COPY" Name="Copy of UnitTestSetup" />
     </StandardDirectory>
 
     <ComponentGroup Id="Core" Directory="INSTALLFOLDER">
       <Component>
         <CreateFolder Directory="INSTALLFOLDER_COPY"/>
-        <File Source="$(sys.SOURCEFILEPATH)">
+        <File Source="$(sys.SOURCEFILEDIR)DuplicateFolderUT.bat" Compressed="no">
           <CopyFile DestinationDirectory="INSTALLFOLDER_COPY" Delete="no" Id="tst"/>
         </File>
       </Component>
@@ -30,10 +30,22 @@
 
   <Fragment>
     <StandardDirectory Id="ProgramFiles6432Folder">
-      <Directory Id="INSTALLFOLDER_COPY_2" Name="Another Copy of UnitTestSetup" />
+      <Directory Id="INSTALLFOLDER_COPY_2" Name="Copy2 of UnitTestSetup">
+        <Directory Id="NoDir">
+          <Directory Id="CopySubDir" Name="copysub"/>
+        </Directory>
+      </Directory>
     </StandardDirectory>
 
-    <PanelSW:DuplicateFolder SourceDir="INSTALLFOLDER" DestinationDir="INSTALLFOLDER_COPY_2"/>
-    <ComponentGroup Id="INSTALLFOLDER_COPY_2"/>
+    <ComponentGroup Id="INSTALLFOLDER_COPY_2">
+      <Component Id="testDupComp" Guid="" Directory="INSTALLFOLDER">
+        <CreateFolder/>
+        <PanelSW:DuplicateFolder DestinationDir="INSTALLFOLDER_COPY_2" DuplicateExistingFiles="yes"/>
+      </Component>
+      <Component Id="testDupComp1" Guid="{4F381019-D3A9-476C-BA25-8C8432F23A1F}" Directory="INSTALLFOLDER">
+        <CreateFolder/>
+        <PanelSW:DuplicateFolder DestinationDir="CopySubDir" DuplicateExistingFiles="yes"/>
+      </Component>
+    </ComponentGroup>
   </Fragment>
 </Wix>

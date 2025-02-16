@@ -221,22 +221,30 @@
         <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Package" />
         <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Module" />
         <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Fragment" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Component" />
       </xs:appinfo>
       <xs:documentation>
-        <![CDATA[Adds an entire folder hierarchy to DuplicateFile table. Adds corresponding entries to Directory and CreateFolder tables. Only files in the File table are duplicated]]>
+        <![CDATA[Adds an entire folder hierarchy to DuplicateFile table and optionally, to MoveFile table. Adds corresponding entries to Directory and CreateFolder tables.
+        When nested in a Component element, the DuplicateFile (and optionally, the CopyFile) rows references that component. Otherwise, the DuplicateFile (and optionally, the CopyFile) rows references the component of each respsective source file.
+        ]]>
       </xs:documentation>
     </xs:annotation>
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="SourceDir" type="xs:string" use="required">
+          <xs:attribute name="SourceDir" type="xs:string" use="optional">
             <xs:annotation>
-              <xs:documentation>Directory Id of the source folder</xs:documentation>
+              <xs:documentation>Directory Id of the source folder. Required when the DuplicateFolder is not nested under a Component element</xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="DestinationDir" type="xs:string" use="required">
             <xs:annotation>
               <xs:documentation>Directory Id of the target folder</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="DuplicateExistingFiles" type="wix:YesNoType" use="optional" default="no">
+            <xs:annotation>
+              <xs:documentation>If set to yes, adds a CopyFile entry with Delete flag set to no.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>

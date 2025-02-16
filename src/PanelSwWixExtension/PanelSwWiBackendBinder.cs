@@ -498,7 +498,7 @@ namespace PanelSw.Wix.Extensions
                         new TableDefinition(nameof(PSW_DeletePath), PSW_DeletePath.SymbolDefinition, PSW_DeletePath.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_DiskSpace), PSW_DiskSpace.SymbolDefinition, PSW_DiskSpace.ColumnDefinitions, symbolIdIsPrimaryKey: false),
                         new TableDefinition(nameof(PSW_Dism), PSW_Dism.SymbolDefinition, PSW_Dism.ColumnDefinitions, symbolIdIsPrimaryKey: true),
-                        new TableDefinition(nameof(PSW_DuplicateFolder), PSW_DuplicateFolder.SymbolDefinition, PSW_DuplicateFolder.ColumnDefinitions, symbolIdIsPrimaryKey: true, unreal: true),
+                        new TableDefinition(nameof(PSW_DuplicateFolder), PSW_DuplicateFolder.SymbolDefinition, PSW_DuplicateFolder.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_EvaluateExpression), PSW_EvaluateExpression.SymbolDefinition, PSW_EvaluateExpression.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_ExecOn_ConsoleOutput), PSW_ExecOn_ConsoleOutput.SymbolDefinition, PSW_ExecOn_ConsoleOutput.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_ExecOnComponent), PSW_ExecOnComponent.SymbolDefinition, PSW_ExecOnComponent.ColumnDefinitions, symbolIdIsPrimaryKey: true),
@@ -630,44 +630,44 @@ namespace PanelSw.Wix.Extensions
                     {
                         directories.Add(d);
                     }
+                    }
                 }
-            }
 
             // Collect temporary file paths to later delete
             foreach (PSW_DuplicateFolder dup in duplicateFolders)
             {
-                DuplicateFolder(section, duplicateFiles, components, files, directories, createFolders, dup.SourceLineNumbers, dup.Id.Id, dup.SourceDir_, dup.DestinationDir_);
+                DuplicateFolder(section, duplicateFiles, components, files, directories, createFolders, dup.SourceLineNumbers, dup.Id.Id, dup.SourceDir_, dup.DestinationDir_, dup.Component_);
             }
         }
 
-        private void DuplicateFolder(IntermediateSection section, List<DuplicateFileSymbol> duplicateFiles, List<ComponentSymbol> components, List<FileSymbol> files, List<DirectorySymbol> directories, List<CreateFolderSymbol> createFolders, SourceLineNumber sourceLineNumber, string dupId, string sourceDir, string dstDir)
+        private void DuplicateFolder(IntermediateSection section, List<DuplicateFileSymbol> duplicateFiles, List<ComponentSymbol> components, List<FileSymbol> files, List<DirectorySymbol> directories, List<CreateFolderSymbol> createFolders, SourceLineNumber sourceLineNumber, string dupId, string sourceDir, string dstDir, string componentId)
         {
             // Duplicate files in source dir
             IEnumerable<ComponentSymbol> dirComponents = components.Where(c => c.DirectoryRef.Equals(sourceDir));
             foreach (ComponentSymbol component in dirComponents)
             {
+                CreateFolderSymbol createFolder = createFolders.FirstOrDefault(s => s is CreateFolderSymbol cf && dstDir.Equals(cf.DirectoryRef) && cf.ComponentRef.Equals(componentId ?? component.Id.Id));
+                if (createFolder == null)
+                {
+                    createFolder = section.AddSymbol(new CreateFolderSymbol(sourceLineNumber, new Identifier(AccessModifier.Global, this.BackendHelper.GenerateIdentifier("cf", dupId, componentId ?? component.Id.Id, sourceDir, dstDir)))
+                    {
+                        ComponentRef = componentId ?? component.Id.Id,
+                        DirectoryRef = dstDir
+                    });
+                    createFolders.Add(createFolder);
+                }
+
                 IEnumerable<FileSymbol> compFiles = files.Where(f => f.ComponentRef.Equals(component.Id.Id));
                 foreach (FileSymbol file in compFiles)
                 {
-                    CreateFolderSymbol createFolder = createFolders.FirstOrDefault(s => s is CreateFolderSymbol cf && dstDir.Equals(cf.DirectoryRef) && cf.ComponentRef.Equals(component.Id.Id)) as CreateFolderSymbol;
-                    if (createFolder == null)
-                    {
-                        createFolder = section.AddSymbol(new CreateFolderSymbol(sourceLineNumber, new Identifier(AccessModifier.Global, this.BackendHelper.GenerateIdentifier("cf", dupId, file.Id.Id)))
-                        {
-                            ComponentRef = component.Id.Id,
-                            DirectoryRef = dstDir
-                        });
-                        createFolders.Add(createFolder);
-                    }
-
-                    DuplicateFileSymbol duplicateFileSymbol = duplicateFiles.FirstOrDefault(d => d.ComponentRef.Equals(component.Id.Id) && file.Id.Id.Equals(d.FileRef) && dstDir.Equals(d.DestinationFolder));
+                    DuplicateFileSymbol duplicateFileSymbol = duplicateFiles.FirstOrDefault(d => d.ComponentRef.Equals(componentId ?? component.Id.Id) && file.Id.Id.Equals(d.FileRef) && dstDir.Equals(d.DestinationFolder));
                     if (duplicateFileSymbol == null)
                     {
                         duplicateFileSymbol = section.AddSymbol(new DuplicateFileSymbol(sourceLineNumber, new Identifier(AccessModifier.Global, this.BackendHelper.GenerateIdentifier("dup", dupId, file.Id.Id)))
                         {
                             DestinationFolder = dstDir,
                             FileRef = file.Id.Id,
-                            ComponentRef = component.Id.Id,
+                            ComponentRef = componentId ?? component.Id.Id,
                         });
                         duplicateFiles.Add(duplicateFileSymbol);
                     }
@@ -691,7 +691,7 @@ namespace PanelSw.Wix.Extensions
                         directories.Add(destChildDir);
                     }
 
-                    DuplicateFolder(section, duplicateFiles, components, files, directories, createFolders, sourceLineNumber, dupId, dir.Id.Id, destChildDir.Id.Id);
+                    DuplicateFolder(section, duplicateFiles, components, files, directories, createFolders, sourceLineNumber, dupId, dir.Id.Id, destChildDir.Id.Id, componentId);
                 }
             }
         }

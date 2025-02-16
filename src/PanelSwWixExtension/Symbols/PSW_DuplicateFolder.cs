@@ -22,6 +22,8 @@ namespace PanelSw.Wix.Extensions.Symbols
                     new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
                     new ColumnDefinition(nameof(SourceDir_), ColumnType.String, 72, false, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "Directory", keyColumn: 1),
                     new ColumnDefinition(nameof(DestinationDir_), ColumnType.String, 72, false, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "Directory", keyColumn: 1),
+                    new ColumnDefinition(nameof(Component_), ColumnType.String, 72, false, true, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column, keyTable: "Component", keyColumn: 1),
+                    new ColumnDefinition(nameof(DuplicateExistingFiles), ColumnType.Number, 0, false, false, ColumnCategory.Integer, modularizeType: ColumnModularizeType.None),
                 };
             }
         }
@@ -42,6 +44,18 @@ namespace PanelSw.Wix.Extensions.Symbols
         {
             get => Fields[1].AsString();
             set => this.Set(1, value);
+        }
+
+        public string Component_
+        {
+            get => Fields[2].AsString();
+            set => this.Set(2, value);
+        }
+
+        public bool DuplicateExistingFiles
+        {
+            get => Fields[3].AsBool();
+            set => this.Set(3, value);
         }
     }
 }

@@ -7,7 +7,7 @@
     <OutputType>Package</OutputType>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="WixToolset.Heat"/>
+    <PackageReference Include="WixToolset.Heat" />
     <PackageReference Include="TidyBuild" />
   </ItemGroup>
   <ItemGroup>
@@ -16,7 +16,6 @@
       <Name>PanelSwWixExtension</Name>
     </WixExtension>
   </ItemGroup>
-  
   <!-- Heat -->
   <PropertyGroup>
     <DefineConstants>$(DefineConstants);THISDIR=$(MSBuildThisFileDirectory)..\</DefineConstants>
@@ -28,5 +27,8 @@
       <PreprocessorVariable>var.THISDIR</PreprocessorVariable>
       <SuppressRootDirectory>true</SuppressRootDirectory>
     </HarvestDirectory>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="DuplicateFolderUT.bat" />
   </ItemGroup>
 </Project>

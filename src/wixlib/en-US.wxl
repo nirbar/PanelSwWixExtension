@@ -65,4 +65,5 @@
   <String Overridable="yes" Id="PSW_RemoveFolderEx" Value="Removing folders" />
   <String Overridable="yes" Id="RemoveReparseData" Value="Removing reparse point data" />
   <String Overridable="yes" Id="LongPathsWarning" Value="The following files have oversized path. Windows Installer cannot delete these files. Would you like to attempt to delete them anyway? This operation might be irreversible.[2]" />
+  <String Overridable="yes" Id="DuplicateFolder" Value="Duplicate folders" />
 </WixLocalization>

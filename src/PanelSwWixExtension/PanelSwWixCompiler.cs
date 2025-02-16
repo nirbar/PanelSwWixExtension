@@ -224,6 +224,10 @@ namespace PanelSw.Wix.Extensions
 
                         switch (element.Name.LocalName)
                         {
+                            case "DuplicateFolder":
+                                ParseDuplicateFolderElement(section, element, componentId, directoryId);
+                                break;
+                            
                             case "JsonJPath":
                                 ParseJsonJPathElement(section, element, componentId, null);
                                 break;
@@ -1248,11 +1252,11 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private void ParseDuplicateFolderElement(IntermediateSection section, XElement element)
+        private void ParseDuplicateFolderElement(IntermediateSection section, XElement element, string componentId = null, string sourceDir = null)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
-            string sourceDir = null;
             string destDir = null;
+            bool duplicateExistingFiles = false;
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -1265,6 +1269,9 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "DestinationDir":
                             destDir = ParseHelper.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                            break;
+                        case "DuplicateExistingFiles":
+                            duplicateExistingFiles = (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes);
                             break;
                         default:
                             ParseHelper.UnexpectedAttribute(element, attrib);
@@ -1303,13 +1310,31 @@ namespace PanelSw.Wix.Extensions
             {
                 Messaging.Write(ErrorMessages.IdentifierNotFound("InstallExecuteSequence", "RemoveDuplicateFiles"));
             }
+            if (duplicateExistingFiles)
+            {
+                if (WindowsInstallerStandard.TryGetStandardAction("InstallExecuteSequence", "MoveFiles", out WixActionSymbol moveFilesSymbol))
+                {
+                    ParseHelper.CreateSimpleReference(section, sourceLineNumbers, moveFilesSymbol.Definition, moveFilesSymbol.Id.Id);
+                }
+                else
+                {
+                    Messaging.Write(ErrorMessages.IdentifierNotFound("InstallExecuteSequence", "MoveFiles"));
+                }
+            }
 
             ParseHelper.EnsureTable(section, sourceLineNumbers, "CreateFolder");
             ParseHelper.EnsureTable(section, sourceLineNumbers, "DuplicateFile");
+            if (duplicateExistingFiles)
+            {
+                ParseHelper.EnsureTable(section, sourceLineNumbers, "MoveFile");
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_DuplicateFolder");
+            }
 
             PSW_DuplicateFolder row = section.AddSymbol(new PSW_DuplicateFolder(sourceLineNumbers));
             row.SourceDir_ = sourceDir;
             row.DestinationDir_ = destDir;
+            row.Component_ = componentId;
+            row.DuplicateExistingFiles = duplicateExistingFiles;
         }
 
         private void ParseExecuteCommand(IntermediateSection section, XElement element)

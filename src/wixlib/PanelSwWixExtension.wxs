@@ -972,4 +972,15 @@
       <ProgressText Action="RemoveReparseDataRollback" Message="!(loc.RemoveReparseData)" />
     </UI>
   </Fragment>
+
+  <!-- DuplicateFolder -->
+  <Fragment>
+    <CustomAction Id="PSW_DuplicateFolder" SuppressModularization="yes" DllEntry="DuplicateFolder" Execute="immediate" BinaryRef="PanelSwCustomActions.dll" />
+    <InstallExecuteSequence>
+      <Custom Action="PSW_DuplicateFolder" Before="CostInitialize" Overridable="yes" />
+    </InstallExecuteSequence>
+    <UI>
+      <ProgressText Action="PSW_DuplicateFolder" Message="!(loc.DuplicateFolder)" />
+    </UI>
+  </Fragment>
 </Wix>
