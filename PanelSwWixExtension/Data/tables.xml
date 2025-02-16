@@ -435,9 +435,11 @@
     <columnDefinition name="Size" type="number" length="4" minValue="0" maxValue="2147483647" />
   </tableDefinition>
 
-  <tableDefinition name="PSW_DuplicateFolder" unreal="yes">
+  <tableDefinition name="PSW_DuplicateFolder">
     <columnDefinition name="SourceDir_" type="string" length="72" modularize="column" category="identifier" keyTable="Directory" keyColumn="1" primaryKey="yes"/>
     <columnDefinition name="DestinationDir_" type="string" length="72" modularize="column" category="identifier" keyTable="Directory" keyColumn="1" primaryKey="yes"/>
+    <columnDefinition name="Component_" type="string" length="72" modularize="column" category="identifier" nullable="yes" keyTable="Component" keyColumn="1" primaryKey="yes"/>
+    <columnDefinition name="DuplicateExistingFiles" type="number" length="2" minValue="0" maxValue="1"/>
   </tableDefinition>
 
   <tableDefinition name="PSW_ExecuteCommand" unreal="yes">

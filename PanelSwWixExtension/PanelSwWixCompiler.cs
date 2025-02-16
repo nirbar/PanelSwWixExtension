@@ -216,6 +216,10 @@ namespace PanelSw.Wix.Extensions
 
                         switch (element.LocalName)
                         {
+                            case "DuplicateFolder":
+                                ParseDuplicateFolderElement(element, componentId, directoryId);
+                                break;
+
                             case "JsonJPath":
                                 ParseJsonJPathElement(element, componentId, null);
                                 break;
@@ -428,11 +432,11 @@ namespace PanelSw.Wix.Extensions
             row[5] = condition;
         }
 
-        private void ParseDuplicateFolderElement(XmlElement element)
+        private void ParseDuplicateFolderElement(XmlElement element, string componentId = null, string sourceDir = null)
         {
             SourceLineNumberCollection sourceLineNumbers = Preprocessor.GetSourceLineNumbers(element);
-            string sourceDir = null;
             string destDir = null;
+            bool duplicateExistingFiles = false;
 
             foreach (XmlAttribute attrib in element.Attributes)
             {
@@ -448,6 +452,9 @@ namespace PanelSw.Wix.Extensions
                         break;
                     case "DestinationDir":
                         destDir = Core.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                        break;
+                    case "DuplicateExistingFiles":
+                        duplicateExistingFiles = (Core.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes);
                         break;
                     default:
                         Core.UnexpectedAttribute(sourceLineNumbers, attrib);
@@ -469,18 +476,19 @@ namespace PanelSw.Wix.Extensions
                 return;
             }
 
-            Row myComponentGroupRow = Core.CreateRow(sourceLineNumbers, "WixComponentGroup");
-            myComponentGroupRow[0] = $"cg{Guid.NewGuid().ToString("N")}";
-
-            Core.CreateWixGroupRow(sourceLineNumbers, ComplexReferenceParentType.Unknown, null, ComplexReferenceChildType.ComponentGroup, myComponentGroupRow[0].ToString());
-            Core.CreateComplexReference(sourceLineNumbers, ComplexReferenceParentType.ComponentGroup, myComponentGroupRow[0].ToString(), "WiX", ComplexReferenceChildType.ComponentGroup, "PSW_DuplicateFile", false);
-
             Core.EnsureTable(sourceLineNumbers, "CreateFolder");
             Core.EnsureTable(sourceLineNumbers, "DuplicateFile");
+            if (duplicateExistingFiles)
+            {
+                Core.EnsureTable(sourceLineNumbers, "MoveFile");
+            }
 
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "PSW_DuplicateFolder");
             Row dupRow = Core.CreateRow(sourceLineNumbers, "PSW_DuplicateFolder");
             dupRow[0] = sourceDir;
             dupRow[1] = destDir;
+            dupRow[2] = componentId;
+            dupRow[3] = duplicateExistingFiles ? 1 : 0;
         }
 
         private void ParsePayload(XmlElement element, object p1, object p2)

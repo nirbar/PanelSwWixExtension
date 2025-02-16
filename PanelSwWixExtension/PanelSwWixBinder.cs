@@ -252,34 +252,34 @@ namespace PanelSw.Wix.Extensions
             // Collect temporary file paths to later delete
             foreach (Row dup in duplicateFolders.Rows)
             {
-                DuplicateFolder(duplicateFiles, components, files, directories, createFolders, dup.SourceLineNumbers, dup[0].ToString(), dup[1].ToString());
+                DuplicateFolder(duplicateFiles, components, files, directories, createFolders, dup.SourceLineNumbers, dup[0].ToString(), dup[1].ToString(), dup[2]?.ToString());
             }
         }
 
-        private void DuplicateFolder(Table duplicateFiles, Table components, Table files, Table directories, Table createFolders, SourceLineNumberCollection sourceLineNumber, string sourceDir, string dstDir)
+        private void DuplicateFolder(Table duplicateFiles, Table components, Table files, Table directories, Table createFolders, SourceLineNumberCollection sourceLineNumber, string sourceDir, string dstDir, string componentId)
         {
             // Duplicate files in source dir
             IEnumerable<Row> dirComponents = Select(components, c => c[2].Equals(sourceDir));
             foreach (Row component in dirComponents)
             {
+                Row createFolder = Find(createFolders, dstDir, componentId ?? component[0]);
+                if (createFolder == null)
+                {
+                    createFolder = new Row(sourceLineNumber, createFolders);
+                    createFolder[0] = dstDir;
+                    createFolder[1] = componentId ?? component[0];
+                    createFolders.Rows.Add(createFolder);
+                }
+
                 IEnumerable<Row> compFiles = Select(files, f => f[1].Equals(component[0]));
                 foreach (Row file in compFiles)
                 {
-                    Row createFolder = Find(createFolders, dstDir, component[0]);
-                    if (createFolder == null)
-                    {
-                        createFolder = new Row(sourceLineNumber, createFolders);
-                        createFolder[0] = dstDir;
-                        createFolder[1] = component[0];
-                        createFolders.Rows.Add(createFolder);
-                    }
-
-                    Row duplicateFile = FindOne(duplicateFiles, d => d[1].Equals(component[0]) && file[0].Equals(d[2]) && dstDir.Equals(d[4]));
+                    Row duplicateFile = FindOne(duplicateFiles, d => d[1].Equals(componentId ?? component[0]) && file[0].Equals(d[2]) && dstDir.Equals(d[4]));
                     if (duplicateFile == null)
                     {
                         duplicateFile = new Row(sourceLineNumber, duplicateFiles);
                         duplicateFile[0] = Core.GenerateIdentifier("dpf", component[0].ToString(), file[0].ToString(), dstDir);
-                        duplicateFile[1] = component[0];
+                        duplicateFile[1] = componentId ?? component[0];
                         duplicateFile[2] = file[0];
                         duplicateFile[4] = dstDir;
 
@@ -303,7 +303,7 @@ namespace PanelSw.Wix.Extensions
                     directories.Rows.Add(destChildDir);
                 }
 
-                DuplicateFolder(duplicateFiles, components, files, directories, createFolders, sourceLineNumber, dir[0].ToString(), destChildDir[0].ToString());
+                DuplicateFolder(duplicateFiles, components, files, directories, createFolders, sourceLineNumber, dir[0].ToString(), destChildDir[0].ToString(), componentId);
             }
         }
 

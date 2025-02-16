@@ -60,3 +60,4 @@ EXPORTS
 	ExecuteCommand
 	RemoveFolderEx
 	RemoveReparseDataSched
+	DuplicateFolder

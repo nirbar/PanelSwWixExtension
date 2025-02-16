@@ -23,6 +23,9 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <None Include="DuplicateFolderUT.bat" />
+  </ItemGroup>
+  <ItemGroup>
     <WixExtension Include="WixUtilExtension">
       <HintPath>$(WixToolPath)\WixUtilExtension.dll</HintPath>
       <Name>WixUtilExtension</Name>
@@ -49,10 +52,10 @@
   
   <!-- Heat -->
   <PropertyGroup>
-    <DefineConstants>$(DefineConstants);THISDIR=$(MSBuildThisFileDirectory)</DefineConstants>
+    <DefineConstants>$(DefineConstants);THISDIR=$(MSBuildThisFileDirectory)\..\</DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <HarvestDirectory Include="$(MSBuildThisFileDirectory)">
+    <HarvestDirectory Include="$(MSBuildThisFileDirectory)\..\">
       <DirectoryRefId>INSTALLFOLDER</DirectoryRefId>
       <ComponentGroupName>DuplicateFolderUT</ComponentGroupName>
       <PreprocessorVariable>var.THISDIR</PreprocessorVariable>

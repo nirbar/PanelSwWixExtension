@@ -22,6 +22,12 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="DirectoryTableResolver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="DuplicateFolder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="ReadIniValues.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -200,6 +206,9 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="DirectoryTableResolver.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="IFileFilter.h">
       <Filter>Header Files</Filter>
     </ClInclude>
