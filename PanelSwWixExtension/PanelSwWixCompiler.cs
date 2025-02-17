@@ -478,12 +478,15 @@ namespace PanelSw.Wix.Extensions
 
             Core.EnsureTable(sourceLineNumbers, "CreateFolder");
             Core.EnsureTable(sourceLineNumbers, "DuplicateFile");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "WixAction", "InstallExecuteSequence", "RemoveDuplicateFiles");
+            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "WixAction", "InstallExecuteSequence", "DuplicateFiles");
             if (duplicateExistingFiles)
             {
+                Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "PSW_DuplicateFolder");
+                Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "WixAction", "InstallExecuteSequence", "MoveFiles");
                 Core.EnsureTable(sourceLineNumbers, "MoveFile");
             }
 
-            Core.CreateWixSimpleReferenceRow(sourceLineNumbers, "CustomAction", "PSW_DuplicateFolder");
             Row dupRow = Core.CreateRow(sourceLineNumbers, "PSW_DuplicateFolder");
             dupRow[0] = sourceDir;
             dupRow[1] = destDir;

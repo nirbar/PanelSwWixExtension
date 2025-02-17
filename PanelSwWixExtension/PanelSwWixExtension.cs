@@ -19,6 +19,13 @@ namespace PanelSw.Wix.Extensions
         public override UnbinderExtension UnbinderExtension => unbinder_ ?? (unbinder_ = new PanelSwWixUnbinder(TableDefinitions));
         public override PreprocessorExtension PreprocessorExtension => preprocessor_ ?? (preprocessor_ = new PanelSwWixPreprocessor());
 
+        public PanelSwWixExtension()
+        {
+#if DEBUG
+            System.Diagnostics.Debugger.Launch();
+#endif
+        }
+
         /// <summary>
         /// Gets the optional compiler extension.
         /// </summary>

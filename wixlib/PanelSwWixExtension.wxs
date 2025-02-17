@@ -945,9 +945,6 @@
     <CustomAction Id="PSW_DuplicateFolder" SuppressModularization="yes" DllEntry="DuplicateFolder" Execute="immediate" BinaryKey="PanelSwCustomActions.dll" />
     <InstallExecuteSequence>
       <Custom Action="PSW_DuplicateFolder" Before="CostInitialize" Overridable="yes" />
-      <RemoveDuplicateFiles/>
-      <DuplicateFiles/>
-      <MoveFiles/>
     </InstallExecuteSequence>
     <UI>
       <ProgressText Action="PSW_DuplicateFolder">!(loc.DuplicateFolder)"</ProgressText>
