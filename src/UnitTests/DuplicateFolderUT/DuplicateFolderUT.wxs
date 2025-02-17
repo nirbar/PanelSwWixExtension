@@ -13,9 +13,9 @@
     <PanelSW:DuplicateFolder SourceDir="INSTALLFOLDER" DestinationDir="INSTALLFOLDER_COPY"/>
     <PanelSW:DuplicateFolder SourceDir="INSTALLFOLDER" DestinationDir="INSTALLFOLDER_COPY"/>
 
-    <StandardDirectory Id="ProgramFiles6432Folder">
-      <Directory Id="INSTALLFOLDER" Name="UnitTestSetup"/>
-      <Directory Id="INSTALLFOLDER_COPY" Name="Copy of UnitTestSetup" />
+    <StandardDirectory Id="TARGETDIR">
+      <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" ComponentGuidGenerationSeed="{85A6B1F8-4BEC-4D89-A772-307F03EEB095}"/>
+      <Directory Id="INSTALLFOLDER_COPY" Name="Copy of UnitTestSetup" ComponentGuidGenerationSeed="{FC278F41-BBB1-421D-BB6F-F55578C341B5}"/>
     </StandardDirectory>
 
     <ComponentGroup Id="Core" Directory="INSTALLFOLDER">

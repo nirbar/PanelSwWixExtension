@@ -3,12 +3,12 @@ SET /A MY_ERR=0
 
 :: Install
 CALL :prepareFolders
-msiexec /i DuplicateFolderUT.msi /l*v DuplicateFolderUT.msi.log INSTALLFOLDER="%CD%\\INSTALLFOLDER" INSTALLFOLDER_COPY="%CD%\\INSTALLFOLDER_COPY" INSTALLFOLDER_COPY_2="%CD%\\INSTALLFOLDER_COPY_2"
+msiexec /i DuplicateFolderUT.msi /qn /l*v DuplicateFolderUT.msi.log TARGETDIR="%CD%\" INSTALLFOLDER_COPY="%CD%\\INSTALLFOLDER_COPY" INSTALLFOLDER_COPY_2="%CD%\\INSTALLFOLDER_COPY_2"
 CALL :testInstall
 PAUSE
 
 :: Uninstall
-msiexec /xDuplicateFolderUT.msi /l*v DuplicateFolderUT.msix.log INSTALLFOLDER="%CD%\\INSTALLFOLDER" INSTALLFOLDER_COPY="%CD%\\INSTALLFOLDER_COPY" INSTALLFOLDER_COPY_2="%CD%\\INSTALLFOLDER_COPY_2"
+msiexec /xDuplicateFolderUT.msi /qn /l*v DuplicateFolderUT.msix.log TARGETDIR="%CD%\" INSTALLFOLDER_COPY="%CD%\\INSTALLFOLDER_COPY" INSTALLFOLDER_COPY_2="%CD%\\INSTALLFOLDER_COPY_2"
 CALL :testUninstall
 PAUSE
 
@@ -20,14 +20,14 @@ EXIT /B %MY_ERR%
 :prepareFolders
 	CALL :cleanFolders
 
-	MKDIR "%CD%\INSTALLFOLDER\sub\sub2"
-	ECHO test > "%CD%\INSTALLFOLDER\a.txt"
-	ECHO test > "%CD%\INSTALLFOLDER\sub\b.txt"
-	ECHO test > "%CD%\INSTALLFOLDER\sub\sub2\c.txt"
+	MKDIR "%CD%\UnitTestSetup\sub\sub2"
+	ECHO test > "%CD%\UnitTestSetup\a.txt"
+	ECHO test > "%CD%\UnitTestSetup\sub\b.txt"
+	ECHO test > "%CD%\UnitTestSetup\sub\sub2\c.txt"
 EXIT /B %MY_ERR%
 
 :cleanFolders
-    RMDIR /s /q "%CD%\INSTALLFOLDER"
+    RMDIR /s /q "%CD%\UnitTestSetup"
     RMDIR /s /q "%CD%\INSTALLFOLDER_COPY"
     RMDIR /s /q "%CD%\INSTALLFOLDER_COPY_2"
 EXIT /B %MY_ERR%
