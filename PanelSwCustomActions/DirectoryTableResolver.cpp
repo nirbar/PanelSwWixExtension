@@ -53,6 +53,8 @@ HRESULT CDirectoryTableResolver::InsertHierarchy(LPCWSTR szParentId, LPCWSTR szR
 	LPCWSTR szMissingPathParts = 0;
 	static DWORD dwUniquifyValue = ::GetTickCount();
 
+	ExitOnNull(_hInsertDirQueryView, hr, E_NOT_VALID_STATE, "Query view not initialized");
+	
 	hr = InsertDirectoryIfMissing(szParentId, L"TARGETDIR", L"."); // If the root copy-to is a property, we need to have it in Directory table to be able to insert its descendants
 	ExitOnFailure(hr, "Failed to insert directory '%ls' to Directory table", szParentId);
 
@@ -172,7 +174,7 @@ HRESULT CDirectoryTableResolver::ResolvePath(LPCWSTR szDirecotoryId, LPWSTR* psz
 	ExitOnNull(_hQueryDirView, hr, E_NOT_VALID_STATE, "Query view not initialized");
 
 	hr = WcaGetProperty(szDirecotoryId, (LPWSTR*)szBasePath);
-	ExitOnFailure(hr, "Failed to get property");
+	ExitOnFailure(hr, "Failed to get property '%ls'", (LPCWSTR)szDirecotoryId);
 	if (!szBasePath.IsNullOrEmpty())
 	{
 		*pszPath = szBasePath.Detach();
@@ -209,14 +211,33 @@ HRESULT CDirectoryTableResolver::ResolvePath(LPCWSTR szDirecotoryId, LPWSTR* psz
 		
 		if (!szDirName.IsNullOrEmpty() && !szDirName.EqualsIgnoreCase(L"."))
 		{
+			UINT iLongName = szDirName.Find(L'|');
+			if (iLongName < szDirName.StrLen())
+			{
+				hr = szDirName.Substring(iLongName + 1);
+				ExitOnFailure(hr, "Failed to remove short name from dir name '%ls'", (LPCWSTR)szDirName);
+			}
+
 			nPathLen += 1 + szDirName.StrLen(); // Add place for backslash
 
 			hr = StrArrayAllocString(&pszPathParts, &cPathParts, szDirName, 0);
 			ExitOnFailure(hr, "Failed to insert string to array");
 		}
+		if (szNextDirId.IsNullOrEmpty())
+		{
+			hr = WcaGetProperty(L"ROOTDRIVE", (LPWSTR*)szBasePath);
+			ExitOnFailure(hr, "Failed to get property 'ROOTDRIVE'");
+
+			if (szNextDirId.IsNullOrEmpty())
+			{
+				hr = S_FALSE;
+				ExitFunction();
+			}
+			break;
+		}
 
 		hr = WcaGetProperty(szNextDirId, (LPWSTR*)szBasePath);
-		ExitOnFailure(hr, "Failed to get property");
+		ExitOnFailure(hr, "Failed to get property '%ls'", (LPCWSTR)szNextDirId);
 
 	} while (szBasePath.IsNullOrEmpty());
 
@@ -248,6 +269,8 @@ HRESULT CDirectoryTableResolver::InsertDirectoryIfMissing(LPCWSTR szDirectory, L
 	HRESULT hr = S_OK;
 	PMSIHANDLE hQueryRecord, hDataRecord;
 
+	ExitOnNull(_hQueryDirView, hr, E_NOT_VALID_STATE, "Query view not initialized");
+
 	hQueryRecord = ::MsiCreateRecord(2);
 	ExitOnNullWithLastError(hQueryRecord, hr, "Failed to create record");
 
@@ -276,6 +299,8 @@ HRESULT CDirectoryTableResolver::InsertCreateFolderIfMissing(LPCWSTR szDirectory
 {
 	HRESULT hr = S_OK;
 	PMSIHANDLE hQueryRecord, hDataRecord;
+
+	ExitOnNull(_hQueryCreateFolderView, hr, E_NOT_VALID_STATE, "Query view not initialized");
 
 	hQueryRecord = ::MsiCreateRecord(3);
 	ExitOnNullWithLastError(hQueryRecord, hr, "Failed to create record");

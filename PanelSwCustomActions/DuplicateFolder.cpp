@@ -50,10 +50,10 @@ extern "C" UINT __stdcall DuplicateFolder(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to get Property.");
 
 		hr = dirResolver.ResolvePath(szSourceDir_, (LPWSTR*)szSourcePath);
-		ExitOnFailure(hr, "Failed to get source path");
+		ExitOnFailure(hr, "Failed to get source path for '%ls'", (LPCWSTR)szSourceDir_);
 		if (hr == S_FALSE)
 		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping DuplicateFolder from directory '%ls' to '%ls' because source path is empty.", (LPCWSTR)szSourceDir_, (LPCWSTR)szDestinationDir_);
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Skipping DuplicateFolder from directory '%ls' to '%ls' because source path could not be resolved.", (LPCWSTR)szSourceDir_, (LPCWSTR)szDestinationDir_);
 			continue;
 		}
 		if (!::PathIsDirectory(szSourcePath))

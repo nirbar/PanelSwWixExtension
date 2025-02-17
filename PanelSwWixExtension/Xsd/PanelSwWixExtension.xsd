@@ -60,7 +60,10 @@
           </xs:attribute>
           <xs:attribute name="DuplicateExistingFiles" type="wix:YesNoType" use="optional" default="no">
             <xs:annotation>
-              <xs:documentation>If set to yes, adds a CopyFile entry with Delete flag set to no.</xs:documentation>
+              <xs:documentation>
+                If set to yes, adds MoveFile rows to copy files from the source folder hierarchy on the file system.
+                Note that, the source folder needs to be resolved before CostInitialize to be able to add the MoveFile rows. That means that the source folder, or one of its ancestors, should be set from the command line, or detected during AppSearch.
+              </xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>

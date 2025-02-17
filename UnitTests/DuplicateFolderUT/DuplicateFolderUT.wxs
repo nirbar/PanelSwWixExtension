@@ -18,10 +18,8 @@
     <PanelSW:DuplicateFolder SourceDir="INSTALLFOLDER" DestinationDir="INSTALLFOLDER_COPY"/>
 
     <Directory Id="TARGETDIR" Name="SourceDir">
-      <Directory Id="ProgramFilesFolder">
-        <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
-        <Directory Id="INSTALLFOLDER_COPY" Name="Copy of UnitTestSetup" />
-      </Directory>
+      <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" ComponentGuidGenerationSeed="{85A6B1F8-4BEC-4D89-A772-307F03EEB095}"/>
+      <Directory Id="INSTALLFOLDER_COPY" Name="Copy of UnitTestSetup" ComponentGuidGenerationSeed="{FC278F41-BBB1-421D-BB6F-F55578C341B5}"/>
     </Directory>
 
     <ComponentGroup Id="Core" Directory="INSTALLFOLDER">
@@ -35,10 +33,12 @@
   </Product>
 
   <Fragment>
-    <DirectoryRef Id="ProgramFilesFolder">
-      <Directory Id="INSTALLFOLDER_COPY_2" Name="Copy2 of UnitTestSetup">
-        <Directory Id="NoDir">
-          <Directory Id="CopySubDir" Name="copysub"/>
+    <DirectoryRef Id="TARGETDIR">
+      <Directory Id="ProgramFilesFolder">
+        <Directory Id="INSTALLFOLDER_COPY_2" Name="Copy2 of UnitTestSetup">
+          <Directory Id="NoDir">
+            <Directory Id="CopySubDir" Name="copysub"/>
+          </Directory>
         </Directory>
       </Directory>
     </DirectoryRef>
