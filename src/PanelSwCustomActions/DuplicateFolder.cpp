@@ -64,7 +64,7 @@ extern "C" UINT __stdcall DuplicateFolder(MSIHANDLE hInstall)
 		::PathRemoveBackslash((LPWSTR)szSourcePath);
 
 		hr = WcaAddTempRecord(&hMoveFileTable, &hMoveFileColumns, L"MoveFile", nullptr, 1, 7, L"DupFolder", (LPCWSTR)szComponent, L"*", nullptr, (LPCWSTR)szSourceDir_, (LPCWSTR)szDestinationDir_, 0);
-		ExitOnFailure(hr, "Failed to add temporary row table");
+		ExitOnFailure(hr, "Failed to add temporary MoveFile row table");
 
 		for (CFileEntry fileEntry = fileFinder.Find(szSourcePath, nullptr, nullptr, true); !fileFinder.IsEnd(); fileEntry = fileFinder.Next())
 		{
@@ -89,10 +89,11 @@ extern "C" UINT __stdcall DuplicateFolder(MSIHANDLE hInstall)
 				hr = WcaSetProperty((LPCWSTR)szSrcDirProperty, (LPCWSTR)fileEntry.Path());
 				ExitOnFailure(hr, "Failed to set property");
 
-				WcaAddTempRecord(&hCreateFolderTable, &hCreateFolderColumns, L"CreateFolder", nullptr, 0, 2, (LPCWSTR)szDstDirProperty, (LPCWSTR)szComponent);
+				hr = dirResolver.InsertCreateFolderIfMissing((LPCWSTR)szDstDirProperty, (LPCWSTR)szComponent);
+				ExitOnFailure(hr, "Failed to add temporary CreateFolder row table");
 
 				hr = WcaAddTempRecord(&hMoveFileTable, &hMoveFileColumns, L"MoveFile", &dbErr, 1, 7, L"DupFolder", (LPCWSTR)szComponent, L"*", nullptr, (LPCWSTR)szSrcDirProperty, (LPCWSTR)szDstDirProperty, 0);
-				ExitOnFailure(hr, "Failed to add temporary row table");
+				ExitOnFailure(hr, "Failed to add temporary MoveFile row table");
 			}
 		}
 	}

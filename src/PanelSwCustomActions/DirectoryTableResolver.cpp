@@ -4,6 +4,30 @@
 #include <PathCch.h>
 #pragma comment (lib, "pathcch.lib")
 
+CDirectoryTableResolver::~CDirectoryTableResolver()
+{
+	if (_hDirectoryTable)
+	{
+		::MsiCloseHandle(_hDirectoryTable);
+		_hDirectoryTable = NULL;
+	}
+	if (_hDirectoryColumns)
+	{
+		::MsiCloseHandle(_hDirectoryColumns);
+		_hDirectoryColumns = NULL;
+	}
+	if (_hCreateFolderTable)
+	{
+		::MsiCloseHandle(_hCreateFolderTable);
+		_hCreateFolderTable = NULL;
+	}
+	if (_hCreateFolderColumns)
+	{
+		::MsiCloseHandle(_hCreateFolderColumns);
+		_hCreateFolderColumns = NULL;
+	}
+}
+
 HRESULT CDirectoryTableResolver::Initialize()
 {
 	HRESULT hr = S_OK;
@@ -14,6 +38,9 @@ HRESULT CDirectoryTableResolver::Initialize()
 	hr = WcaOpenView(L"SELECT `Directory` FROM `Directory` WHERE `Directory_Parent` = ? AND `DefaultDir` = ?", &_hInsertDirQueryView);
 	ExitOnFailure(hr, "Failed to open insert view");
 
+	hr = WcaOpenView(L"SELECT `Directory_`, `Component_` FROM `CreateFolder` WHERE `Directory_` = ? AND `Component_` = ?", &_hQueryCreateFolderView);
+	ExitOnFailure(hr, "Failed to open insert view");
+
 LExit:
 	return hr;
 }
@@ -22,11 +49,12 @@ HRESULT CDirectoryTableResolver::InsertHierarchy(LPCWSTR szParentId, LPCWSTR szR
 {
 	HRESULT hr = S_OK;
 	PMSIHANDLE hQueryRecord, hDataRecord;
-	MSIHANDLE hDirectoryTable = NULL;
-	MSIHANDLE hDirectoryColumns = NULL;
 	CWixString szClosestParent;
 	LPCWSTR szMissingPathParts = 0;
 	static DWORD dwUniquifyValue = ::GetTickCount();
+
+	hr = InsertDirectoryIfMissing(szParentId, L"TARGETDIR", L"."); // If the root copy-to is a property, we need to have it in Directory table to be able to insert its descendants
+	ExitOnFailure(hr, "Failed to insert directory '%ls' to Directory table", szParentId);
 
 	while (szRelativeHierarchy && (*szRelativeHierarchy == L'\\'))
 	{
@@ -118,7 +146,7 @@ HRESULT CDirectoryTableResolver::InsertHierarchy(LPCWSTR szParentId, LPCWSTR szR
 		hr = szPartId.Format(L"_DUP_%ls%u", szParentId, ++dwUniquifyValue);
 		ExitOnFailure(hr, "Failed to format string");
 
-		hr = WcaAddTempRecord(&hDirectoryTable, &hDirectoryColumns, L"Directory", nullptr, 0, 3, (LPCWSTR)szPartId, (LPCWSTR)szClosestParent, (LPCWSTR)szPart);
+		hr = WcaAddTempRecord(&_hDirectoryTable, &_hDirectoryColumns, L"Directory", nullptr, 0, 3, (LPCWSTR)szPartId, (LPCWSTR)szClosestParent, (LPCWSTR)szPart);
 		ExitOnFailure(hr, "Failed to add temporary row table");
 
 		szClosestParent.Attach(szPartId.Detach());
@@ -127,14 +155,6 @@ HRESULT CDirectoryTableResolver::InsertHierarchy(LPCWSTR szParentId, LPCWSTR szR
 	*pszDirectoryId = szClosestParent.Detach();
 
 LExit:
-	if (hDirectoryTable)
-	{
-		::MsiCloseHandle(hDirectoryTable);
-	}
-	if (hDirectoryColumns)
-	{
-		::MsiCloseHandle(hDirectoryColumns);
-	}
 	return hr;
 }
 
@@ -217,6 +237,67 @@ HRESULT CDirectoryTableResolver::ResolvePath(LPCWSTR szDirecotoryId, LPWSTR* psz
 LExit:
 	ReleaseStrArray(pszPathParts, cPathParts);
 	ReleaseStr(szFullPath);
+
+	return hr;
+}
+
+HRESULT CDirectoryTableResolver::InsertDirectoryIfMissing(LPCWSTR szDirectory, LPCWSTR szParent, LPCWSTR szName)
+{
+	HRESULT hr = S_OK;
+	PMSIHANDLE hQueryRecord, hDataRecord;
+
+	hQueryRecord = ::MsiCreateRecord(2);
+	ExitOnNullWithLastError(hQueryRecord, hr, "Failed to create record");
+
+	hr = WcaSetRecordString(hQueryRecord, 1, szDirectory);
+	ExitOnFailure(hr, "Failed to set record");
+
+	hr = WcaExecuteView(_hQueryDirView, hQueryRecord);
+	ExitOnFailure(hr, "Failed to execute view");
+
+	hr = WcaFetchSingleRecord(_hQueryDirView, &hDataRecord);
+	ExitOnFailure(hr, "Failed to fetch record");
+	if (hr == S_OK)
+	{
+		ExitFunction();
+	}
+
+	hr = WcaAddTempRecord(&_hDirectoryTable, &_hDirectoryColumns, L"Directory", nullptr, 0, 3, szDirectory, szParent, szName);
+	ExitOnFailure(hr, "Failed to add temporary row table");
+
+LExit:
+
+	return hr;
+}
+
+HRESULT CDirectoryTableResolver::InsertCreateFolderIfMissing(LPCWSTR szDirectory, LPCWSTR szComponent)
+{
+	HRESULT hr = S_OK;
+	PMSIHANDLE hQueryRecord, hDataRecord;
+
+	hQueryRecord = ::MsiCreateRecord(3);
+	ExitOnNullWithLastError(hQueryRecord, hr, "Failed to create record");
+
+	hr = WcaSetRecordString(hQueryRecord, 1, szDirectory);
+	ExitOnFailure(hr, "Failed to set record");
+
+	hr = WcaSetRecordString(hQueryRecord, 2, szComponent);
+	ExitOnFailure(hr, "Failed to set record");
+
+	hr = WcaExecuteView(_hQueryCreateFolderView, hQueryRecord);
+	ExitOnFailure(hr, "Failed to execute view");
+
+	hr = WcaFetchSingleRecord(_hQueryCreateFolderView, &hDataRecord);
+	ExitOnFailure(hr, "Failed to fetch record");
+	if (hr == S_OK)
+	{
+		ExitFunction();
+	}
+
+	hr = WcaAddTempRecord(&_hCreateFolderTable, &_hCreateFolderColumns, L"CreateFolder", nullptr, 0, 2, szDirectory, szComponent);
+	ExitOnFailure(hr, "Failed to add temporary row table");
+
+LExit:
 
 	return hr;
 }
