@@ -103,12 +103,19 @@ extern "C" UINT __stdcall RemoveFolderEx(MSIHANDLE hInstall)
 			continue;
 		}
 
-		hr = WcaAddTempRecord(&hRemoveFileTable, &hRemoveFileColumns, L"RemoveFile", nullptr, 1, 5, L"RfxFolder", (LPCWSTR)szComponent, nullptr, (LPCWSTR)szBaseProperty, flags);
-		ExitOnFailure(hr, "Failed to add temporary row table");
-
 		// Skip if this isn't a folder, or if it is a reaprse point
 		{
 			CFileEntry fileEntry(szBasePath);
+
+			if (!fileEntry.IsValid())
+			{
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Path does not exist: '%ls'", (LPCWSTR)szBasePath);
+				continue;
+			}
+
+			hr = WcaAddTempRecord(&hRemoveFileTable, &hRemoveFileColumns, L"RemoveFile", nullptr, 1, 5, L"RfxFolder", (LPCWSTR)szComponent, nullptr, (LPCWSTR)szBaseProperty, flags);
+			ExitOnFailure(hr, "Failed to add temporary row table");
+
 			if (!fileEntry.IsDirectory() || fileEntry.IsSymlink() || fileEntry.IsMountPoint())
 			{
 				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Path is not a folder, or it is a symlink, or it is a mounted folder: '%ls'", (LPCWSTR)szBasePath);
