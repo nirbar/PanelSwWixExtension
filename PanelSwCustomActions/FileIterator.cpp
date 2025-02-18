@@ -52,10 +52,10 @@ LExit:
 
 HRESULT CFileIterator::AppendFolder(LPCWSTR szPath)
 {
-	_hrStatus = MemEnsureArraySize((LPVOID*)&_pFolders, ++_cFolders, sizeof(FolderIterator), 10);
+	_hrStatus = MemEnsureArraySize((LPVOID*)&_pFolders, 1 + _cFolders, sizeof(FolderIterator), 10);
 	ExitOnFailure(_hrStatus, "Failed to allocate memory");
 
-	_pFolders[_cFolders - 1] = FolderIterator();
+	_pFolders[_cFolders++] = FolderIterator();
 
 	_hrStatus = _pFolders[_cFolders - 1]._szBasePath.Copy(szPath);
 	ExitOnFailure(_hrStatus, "Failed to copy string");
