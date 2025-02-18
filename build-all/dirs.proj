@@ -1,0 +1,40 @@
+<Project Sdk="Microsoft.Build.Traversal">
+  <Import Project="..\packages\TidyBuild.1.5.2\build\TidyBuild.props" Condition="Exists('..\packages\TidyBuild.1.5.2\build\TidyBuild.props')" />
+  <PropertyGroup>
+    <TraversalGlobalProperties>SolutionDir=$(MSBuildThisFileDirectory)..\;BuildProjectReferences=false</TraversalGlobalProperties>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- x86 -->
+    <ProjectReference Include="..\DeferredExePackage\DeferredExePackage.vcxproj" Properties="Configuration=Release;Platform=Win32;DebugCA=$(DebugCA)" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="..\ProtoCaLib\ProtoCaLib.vcxproj" Properties="Configuration=Release;Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="..\CaCommon\CaCommon.vcxproj" Properties="Configuration=Release;Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="..\Dism\Dism.vcxproj" Properties="Configuration=Release;Platform=Win32" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="..\PanelSwCustomActions\PanelSwCustomActions.vcxproj" Properties="Configuration=Release;Platform=Win32;DebugCA=$(DebugCA)" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="..\PswManagedCA\PswManagedCA.csproj" Properties="Configuration=Release;Platform=x86" Targets="Restore;Build" BuildInParallel="false"/>
+
+    <!-- x64 -->
+    <ProjectReference Include="..\DeferredExePackage\DeferredExePackage.vcxproj" Properties="Configuration=Release;Platform=x64;DebugCA=$(DebugCA)" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="..\Dism\Dism.vcxproj" Properties="Configuration=Release;Platform=x64" Targets="Restore;Build" BuildInParallel="false"/>
+    <ProjectReference Include="..\PswManagedCA\PswManagedCA.csproj" Properties="Configuration=Release;Platform=x64" Targets="Restore;Build" BuildInParallel="false"/>
+
+    <!-- WiX -->
+    <ProjectReference Include="..\wixlib\PanelSwWixLib.wixproj" Properties="Configuration=Release;Platform=x86" Targets="Restore;Build" BuildInParallel="false" />
+    <ProjectReference Include="..\PanelSwWixExtension\PanelSwWixExtension.csproj" Properties="Configuration=$(Configuration);Platform=AnyCPU;NugetPrereleaseVersion=$(NugetPrereleaseVersion)" Targets="Restore;Build" BuildInParallel="false" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(UnitTest)' != ''">
+    <ProjectReference Include="..\UnitTests\$(UnitTest)\$(UnitTest).wixproj" Properties="Configuration=$(Configuration);Platform=x86" Targets="Restore;Build" BuildInParallel="false" />
+    <ProjectReference Include="..\UnitTests\$(UnitTest)\$(UnitTest).wixproj" Properties="Configuration=$(Configuration);Platform=x64" Targets="Restore;Build" BuildInParallel="false" Condition=" '$(UnitTestX64)' == '' Or $(UnitTestX64) " />
+  </ItemGroup>
+  <ImportGroup Label="ExtensionTargets">
+    <Import Project="..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets" Condition="Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" />
+    <Import Project="..\packages\TidyBuild.1.5.2\build\TidyBuild.targets" Condition="Exists('..\packages\TidyBuild.1.5.2\build\TidyBuild.targets')" />
+  </ImportGroup>
+  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+    <PropertyGroup>
+      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+    </PropertyGroup>
+    <Error Condition="!Exists('..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\MSBuildTasks.1.5.0.235\build\MSBuildTasks.targets'))" />
+    <Error Condition="!Exists('..\packages\TidyBuild.1.5.2\build\TidyBuild.props')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.5.2\build\TidyBuild.props'))" />
+    <Error Condition="!Exists('..\packages\TidyBuild.1.5.2\build\TidyBuild.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\TidyBuild.1.5.2\build\TidyBuild.targets'))" />
+  </Target>
+</Project>
