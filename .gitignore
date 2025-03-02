@@ -13,5 +13,6 @@ bin/
 packages/
 /build/
 /build-common/
+/build-v142/
 *.user.*
 *.log

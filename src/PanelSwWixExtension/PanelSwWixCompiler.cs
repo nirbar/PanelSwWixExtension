@@ -41,6 +41,9 @@ namespace PanelSw.Wix.Extensions
                         case "CustomSearch":
                             ParseCustomSearchElement(section, element);
                             break;
+                        case "BundleVariableSearch":
+                            ParseBundleVariableSearchElement(section, element);
+                            break;
                         default:
                             ParseHelper.UnexpectedElement(parentElement, element);
                             break;
@@ -58,6 +61,9 @@ namespace PanelSw.Wix.Extensions
 
                         case "CustomSearch":
                             ParseCustomSearchElement(section, element);
+                            break;
+                        case "BundleVariableSearch":
+                            ParseBundleVariableSearchElement(section, element);
                             break;
 
                         case "DuplicateFolder":
@@ -474,6 +480,75 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
+        private void ParseBundleVariableSearchElement(IntermediateSection section, XElement element)
+        {
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
+            string searchVariable = null;
+            string resultVariable = null;
+            string upgradeCode = null;
+            string condition = null;
+            string after = null;
+            bool format = true;
+            Identifier id = new Identifier(AccessModifier.Global, $"srch{Guid.NewGuid().ToString("N")}");
+
+            foreach (XAttribute attrib in element.Attributes())
+            {
+                if (IsMyAttribute(element, attrib))
+                {
+                    switch (attrib.Name.LocalName)
+                    {
+                        case "Id":
+                            id = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, attrib);
+                            break;
+                        case "SearchVariable":
+                            searchVariable = ParseHelper.GetAttributeBundleVariableNameValue(sourceLineNumbers, attrib);
+                            break;
+                        case "ResultVariable":
+                            resultVariable = ParseHelper.GetAttributeBundleVariableNameValue(sourceLineNumbers, attrib);
+                            break;
+                        case "UpgradeCode":
+                            upgradeCode = ParseHelper.GetAttributeGuidValue(sourceLineNumbers, attrib, false, false);
+                            break;
+                        case "Format":
+                            format = (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes);
+                            break;
+                        case "Condition":
+                            condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "After":
+                            after = ParseHelper.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                            break;
+                        default:
+                            ParseHelper.UnexpectedAttribute(element, attrib);
+                            break;
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(upgradeCode))
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "UpgradeCode"));
+            }
+            if (string.IsNullOrEmpty(searchVariable))
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "SearchVariable"));
+            }
+            if (string.IsNullOrEmpty(resultVariable))
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "ResultVariable"));
+            }
+
+            if (!Messaging.EncounteredError)
+            {
+                var symbol = section.AddSymbol(new PSW_BundleVariableSearch(sourceLineNumbers, id));
+                symbol.SearchVariable = searchVariable;
+                symbol.UpgradeCode = upgradeCode;
+                symbol.Format = format;
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, SymbolDefinitions.WixBootstrapperExtension, PanelSwWixExtension.MY_EXTENSION_ID);
+                ParseHelper.CreateWixSearchSymbol(section, sourceLineNumbers, element.Name.LocalName, id, resultVariable, condition, after, PanelSwWixExtension.MY_EXTENSION_ID);
+            }
+        }
+
         private void ParseContainerTemplateElement(IntermediateSection section, XElement element)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
@@ -564,7 +639,7 @@ namespace PanelSw.Wix.Extensions
 
                 if (compression != PSW_ContainerTemplate.ContainerCompressionType.Cab)
                 {
-                    ParseHelper.CreateSimpleReference(section, sourceLineNumbers, SymbolDefinitions.WixBootstrapperExtension, "PanelSwWixContainer");
+                    ParseHelper.CreateSimpleReference(section, sourceLineNumbers, SymbolDefinitions.WixBootstrapperExtension, PanelSwWixExtension.MY_EXTENSION_ID);
                 }
             }
         }

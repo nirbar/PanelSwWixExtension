@@ -1,0 +1,33 @@
+<Project Sdk="WixToolset.Sdk">
+  <PropertyGroup>
+    <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
+    <DefineConstants>$(DefineConstants);PanelSwWixExtensionDll=$(BuildFolder)..\AnyCPU\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <OutputType>Bundle</OutputType>
+    <DefaultCompressionLevel>Low</DefaultCompressionLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\DeferredExePackage\DeferredExePackage.vcxproj"/>
+    <PackageReference Include="WixToolset.Bal.wixext"/>
+    <PackageReference Include="WixToolset.Heat"/>
+    <PackageReference Include="TidyBuild" />
+  </ItemGroup>
+  <ItemGroup>
+    <WixExtension Include="PanelSwWixExtension">
+      <HintPath>$(BuildFolder)..\AnyCPU\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</HintPath>
+      <Name>PanelSwWixExtension</Name>
+    </WixExtension>
+  </ItemGroup>
+  <!-- Heat -->
+  <PropertyGroup>
+    <DeferredExePackagePath>$(BuildFolder)bin\Release\DeferredExePackage\DeferredExePackage.exe</DeferredExePackagePath>
+    <DefineConstants>$(DefineConstants);DeferredExePackagePath=$(DeferredExePackagePath);EnableZipContainer=$(EnableZipContainer);THISDIR=$(MSBuildThisFileDirectory)..\</DefineConstants>
+  </PropertyGroup>
+  <ItemGroup>
+    <BindInputPaths Include="$(SolutionDir)UnitTests\">
+      <BindName>UT</BindName>
+    </BindInputPaths>
+  </ItemGroup>
+</Project>

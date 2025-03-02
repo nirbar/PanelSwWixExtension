@@ -214,6 +214,59 @@
       </xs:simpleContent>
     </xs:complexType>
   </xs:element>
+
+  <xs:element name="BundleVariableSearch">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Bundle" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Fragment" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Search for a variable of an installed bundle]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Id" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Id of the search</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="ResultVariable" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Variable name to receive the search result</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="SearchVariable" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Variable name in the installed bundle</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="UpgradeCode" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Bundle UpgradeCode</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Format" type="wix:YesNoType" use="optional" default="yes" >
+            <xs:annotation>
+              <xs:documentation>Whether or not to format the variable. If set to yes, the value will be formatted using persisted variables of the detcted bundle. Defaults to yes.</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Condition" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Condition to execute the search</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="After" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>ID of a search to be scheduled after</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
   
   <xs:element name="DuplicateFolder">
     <xs:annotation>

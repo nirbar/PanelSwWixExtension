@@ -12,7 +12,7 @@
     <ProjectReference Include="..\PanelSwCustomActions\PanelSwCustomActions.vcxproj" Properties="Configuration=Release"/>
     <ProjectReference Include="..\Dism\Dism.vcxproj" Platforms="Win32;x64" Properties="Configuration=Release"/>
     <ProjectReference Include="..\DeferredExePackage\DeferredExePackage.vcxproj" Properties="Configuration=Release"/>
-    <ProjectReference Include="..\PanelSwBackendExtension\PanelSwBackendExtension.vcxproj" Properties="Configuration=Release" Condition="$(EnableZipContainer)"/>
+    <ProjectReference Include="..\PanelSwBackendExtension\PanelSwBackendExtension.vcxproj" Properties="Configuration=Release"/>
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="WixToolset.Util.wixext" />

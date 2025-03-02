@@ -10,6 +10,8 @@ public:
 
 	virtual ~CPanelSwBundleExtension();
 
+	STDMETHOD(Initialize)(const BOOTSTRAPPER_EXTENSION_CREATE_ARGS* pCreateArgs) override;
+
 	STDMETHOD(Search)(LPCWSTR wzId, LPCWSTR wzVariable) override;
 
 #ifdef EnableZipContainer
@@ -31,11 +33,29 @@ public:
 
 private:
 
+	struct BUNDLE_VARIABLE_SEARCH
+	{
+		LPWSTR _szId = nullptr;
+		LPWSTR _szUpgradeCode = nullptr;
+		LPWSTR _szSearchVariable = nullptr;
+		BOOL _bFormat = TRUE;
+	};
+
+	HRESULT ParseSearches(IXMLDOMNode* pixnBundleExtension);
+	HRESULT SearchBundleVariable(LPCWSTR szUpgradeCode, LPCWSTR szVariableName, BOOL bFormat, LPCWSTR szResultVariableName);
+	HRESULT SearchBundleVariable(BUNDLE_INSTALL_CONTEXT context, REG_KEY_BITNESS kbKeyBitness, LPCWSTR szUpgradeCode, LPCWSTR szVariableName, BOOL bFormat, LPCWSTR szResultVariableName);
+	HRESULT ReadBundleVariable(HKEY hkVariables, LPCWSTR szVariableName, BOOL bFormat, LPWSTR *pszValue);
+
 	HRESULT CreateContainer(LPCWSTR wzContainerId, IPanelSwContainer** ppContainer);
 	HRESULT GetContainer(LPVOID pContext, IPanelSwContainer** ppContainer);
 	HRESULT ReleaseContainer(IPanelSwContainer* pContainer);
+	
 	HRESULT Reset();
 
 	std::list<IPanelSwContainer*> _containers;
 	typedef std::list<IPanelSwContainer*>::iterator ContainerIterator;
+	BUNDLE_VARIABLE_SEARCH* _pSearches = nullptr;
+	long _cSearches = 0;
+	int _cSearchRecursion = 0;
+	int MAX_SEARCH_RECURSION = 100;
 };

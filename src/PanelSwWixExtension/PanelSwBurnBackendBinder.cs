@@ -23,6 +23,7 @@ namespace PanelSw.Wix.Extensions
                     {
                         PSW_ContainerTemplate.SymbolDefinition,
                         PSW_ContainerExtensionData.SymbolDefinition,
+                        PSW_BundleVariableSearch.SymbolDefinition,
                         PSW_CustomSearch.SymbolDefinition,
                         PSW_FileGlob.SymbolDefinition,
                         PSW_FileGlobPattern.SymbolDefinition,
@@ -127,8 +128,8 @@ namespace PanelSw.Wix.Extensions
 #if EnableZipContainer
             if (containerTemplate.Compression != PSW_ContainerTemplate.ContainerCompressionType.Cab)
             {
-                defaultContainer.BootstrapperExtensionRef = PanelSwWixExtension.CONTAINER_EXTENSION_ID;
-                BackendHelper.AddBootstrapperExtensionData(PanelSwWixExtension.CONTAINER_EXTENSION_ID, new PSW_ContainerExtensionData(defaultContainer.SourceLineNumbers)
+                defaultContainer.BootstrapperExtensionRef = PanelSwWixExtension.MY_EXTENSION_ID;
+                BackendHelper.AddBootstrapperExtensionData(PanelSwWixExtension.MY_EXTENSION_ID, new PSW_ContainerExtensionData(defaultContainer.SourceLineNumbers)
                 {
                     Compression = containerTemplate.Compression,
                     ContainerId = defaultContainer.Id.Id
@@ -197,7 +198,7 @@ namespace PanelSw.Wix.Extensions
                     container.BootstrapperExtensionRef = defaultContainer.BootstrapperExtensionRef;
                     if (containerTemplate.Compression != PSW_ContainerTemplate.ContainerCompressionType.Cab)
                     {
-                        BackendHelper.AddBootstrapperExtensionData(PanelSwWixExtension.CONTAINER_EXTENSION_ID, new PSW_ContainerExtensionData(container.SourceLineNumbers)
+                        BackendHelper.AddBootstrapperExtensionData(PanelSwWixExtension.MY_EXTENSION_ID, new PSW_ContainerExtensionData(container.SourceLineNumbers)
                         {
                             Compression = containerTemplate.Compression,
                             ContainerId = container.Id.Id

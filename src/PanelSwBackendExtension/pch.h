@@ -7,7 +7,7 @@
 #ifndef PCH_H
 #define PCH_H
 
-#define PANELSW_BACKEND_EXTENSION_ID L"PanelSwWixContainer"
+#define PANELSW_BACKEND_EXTENSION_ID L"PanelSwBackendExtension"
 
 // add headers that you want to pre-compile here
 #include "framework.h"

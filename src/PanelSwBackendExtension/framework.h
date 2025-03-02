@@ -17,6 +17,9 @@
 #include <pathutil.h>
 #include <dirutil.h>
 #include <xmlutil.h>
+#include <regutil.h>
+#include <butil.h>
+#include <verutil.h>
 #include <BootstrapperExtensionEngineTypes.h>
 #include <BootstrapperExtensionTypes.h>
 

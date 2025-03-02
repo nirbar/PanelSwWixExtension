@@ -27,7 +27,7 @@ namespace PanelSw.Wix.Extensions
 #endif
         };
 
-        public static string CONTAINER_EXTENSION_ID = "PanelSwWixContainer";
+        public static string MY_EXTENSION_ID = "PanelSwBackendExtension";
 
         public override bool TryCreateExtension(Type extensionType, out object extension)
         {

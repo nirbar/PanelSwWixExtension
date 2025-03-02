@@ -14,7 +14,9 @@ namespace PanelSw.Wix.Extensions
 {
     public class PanelSwBurnContainer : BaseBurnContainerExtension
     {
-        public override IReadOnlyCollection<string> ContainerExtensionIds => new[] { PanelSwWixExtension.CONTAINER_EXTENSION_ID };
+        private static string EXTENSION_XML_FILE = "PanelSwWixContainer";
+
+        public override IReadOnlyCollection<string> ContainerExtensionIds => new[] { PanelSwWixExtension.MY_EXTENSION_ID, EXTENSION_XML_FILE };
 
         public override void CreateContainer(WixBundleContainerSymbol container, IEnumerable<WixBundlePayloadSymbol> containerPayloads, WixToolset.Data.CompressionLevel? level, out string sha512, out long size)
         {
@@ -128,7 +130,7 @@ namespace PanelSw.Wix.Extensions
 
             if (!string.IsNullOrEmpty(xmlFile))
             {
-                entries.Add(new SevenZap.SevenZap.FileEntry { EntryName = PanelSwWixExtension.CONTAINER_EXTENSION_ID, FullPath = xmlFile });
+                entries.Add(new SevenZap.SevenZap.FileEntry { EntryName = EXTENSION_XML_FILE, FullPath = xmlFile });
             }
 
             // Compression level
@@ -188,7 +190,7 @@ namespace PanelSw.Wix.Extensions
         {
             SevenZap.SevenZap.Extract(containerPath, outputFolder);
 
-            string xmlFile = Path.Combine(outputFolder, PanelSwWixExtension.CONTAINER_EXTENSION_ID);
+            string xmlFile = Path.Combine(outputFolder, EXTENSION_XML_FILE);
             if (File.Exists(xmlFile))
             {
                 XmlDocument xmlDocument = new XmlDocument();
