@@ -8,6 +8,7 @@
 #include <shellapi.h>
 #include <combaseapi.h>
 #include <atlbase.h>
+#include <intsafe.h>
 
 // WiX Header Files:
 #include <dutil.h>

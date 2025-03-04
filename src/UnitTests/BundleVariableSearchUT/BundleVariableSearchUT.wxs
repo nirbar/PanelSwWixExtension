@@ -6,37 +6,37 @@
     </BootstrapperApplication>
 
     <Variable Name="SKIP_CONDITIONS" Value="0" Type="numeric" bal:Overridable="yes"/>
-    
+
     <Variable Name="wix" Value="Wix" Persisted="yes" Type="string"/>
     <Variable Name="bundle" Value="Bundle" Persisted="yes" Type="string"/>
     <Variable Name="name" Value="Name" Persisted="yes" Type="string"/>
     <Variable Name="myWiXBundleName" Value="[[wix][bundle][name]]" Persisted="yes" Type="string"/>
-    <PanelSW:BundleVariableSearch ResultVariable="testWiXBundleName" SearchVariable="myWiXBundleName" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
+    <PanelSW:BundleVariableSearch Condition='SKIP_CONDITIONS&lt;&gt;1' ResultVariable="testWiXBundleName" SearchVariable="myWiXBundleName" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
     <bal:Condition Condition='(SKIP_CONDITIONS=1) OR NOT WixBundleInstalled OR (testWiXBundleName="BundleVariableSearchUT")' Message="Expected testWiXBundleName to be BundleVariableSearchUT"/>
-    <PanelSW:BundleVariableSearch ResultVariable="testWiXBundleNameUnformatted" SearchVariable="myWiXBundleName" Format="no" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
+    <PanelSW:BundleVariableSearch Condition='SKIP_CONDITIONS&lt;&gt;1' ResultVariable="testWiXBundleNameUnformatted" SearchVariable="myWiXBundleName" Format="no" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
     <bal:Condition Condition='(SKIP_CONDITIONS=1) OR NOT WixBundleInstalled OR (testWiXBundleNameUnformatted="[[wix][bundle][name]]")' Message="Expected testWiXBundleNameUnformatted to be '[[wix][bundle][name]]'"/>
 
     <Variable Name="SomeVersion" Value="$(var.JetVersion)" Persisted="yes" Type="version"/>
-    <PanelSW:BundleVariableSearch After="testFolder" ResultVariable="testVersion" SearchVariable="SomeVersion" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
+    <PanelSW:BundleVariableSearch Condition='SKIP_CONDITIONS&lt;&gt;1' After="testFolder" ResultVariable="testVersion" SearchVariable="SomeVersion" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
     <bal:Condition Condition="(SKIP_CONDITIONS=1) OR NOT WixBundleInstalled OR (testVersion=v$(JetVersion))" Message="Expected testVersion to be $(JetVersion)"/>
 
     <Variable Name="InstallFolder" Value="[ProgramFiles6432Folder]test" Persisted="yes" Type="formatted"/>
-    <PanelSW:BundleVariableSearch Id="testFolder" ResultVariable="testFolder" SearchVariable="InstallFolder" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
+    <PanelSW:BundleVariableSearch Condition='SKIP_CONDITIONS&lt;&gt;1' Id="testFolder" ResultVariable="testFolder" SearchVariable="InstallFolder" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
     <bal:Condition Condition='(SKIP_CONDITIONS=1) OR NOT WixBundleInstalled OR (testFolder="C:\Program Files\test")' Message='Expected testFolder to be "C:\Program Files\test"'/>
 
     <Variable Name="SomeNumber" Value="3" Persisted="yes" Type="numeric"/>
-    <PanelSW:BundleVariableSearch ResultVariable="testNumber" After="never" SearchVariable="SomeNumber" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
+    <PanelSW:BundleVariableSearch Condition='SKIP_CONDITIONS&lt;&gt;1' ResultVariable="testNumber" After="never" SearchVariable="SomeNumber" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
     <bal:Condition Condition='(SKIP_CONDITIONS=1) OR NOT WixBundleInstalled OR (testNumber=3)' Message='Expected testNumber to be 3'/>
 
     <PanelSW:BundleVariableSearch Id="never" ResultVariable="testNever" Condition="1=0" SearchVariable="SomeNumber" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
     <bal:Condition Condition='(SKIP_CONDITIONS=1) OR NOT testNever' Message='Expected testNever to be empty'/>
 
     <Variable Name="myMalFormatted" Value="[[wix][bundle]]version[]" Persisted="yes" Type="string"/>
-    <PanelSW:BundleVariableSearch ResultVariable="testMalFormatted" SearchVariable="myMalFormatted" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
+    <PanelSW:BundleVariableSearch Condition='SKIP_CONDITIONS&lt;&gt;1' ResultVariable="testMalFormatted" SearchVariable="myMalFormatted" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
     <bal:Condition Condition='(SKIP_CONDITIONS=1) OR NOT WixBundleInstalled OR (testMalFormatted="version")' Message="Expected testWiXBundleVersion to be 'version'"/>
 
     <Variable Name="TooDeep" Value="[TooDeep]" Persisted="yes" Type="string"/>
-    <PanelSW:BundleVariableSearch ResultVariable="testTooDeep" SearchVariable="TooDeep" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
+    <PanelSW:BundleVariableSearch Condition='SKIP_CONDITIONS&lt;&gt;1' ResultVariable="testTooDeep" SearchVariable="TooDeep" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
     <bal:Condition Condition='(SKIP_CONDITIONS=1) OR NOT WixBundleInstalled OR NOT testTooDeep' Message="Expected testTooDeep to be empty"/>
 
     <Chain ParallelCache="yes" DisableSystemRestore="yes">

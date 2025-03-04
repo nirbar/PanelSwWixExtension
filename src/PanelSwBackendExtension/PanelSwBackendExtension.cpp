@@ -123,7 +123,6 @@ HRESULT CPanelSwBundleExtension::Reset()
 	}
 	ReleaseNullMem(_pSearches);
 	_cSearches = 0;
-	_cSearchRecursion = 0;
 
 	return S_OK;
 }
@@ -153,12 +152,12 @@ HRESULT CPanelSwBundleExtension::CreateContainer(LPCWSTR wzContainerId, IPanelSw
 	hr = pixnCompression->get_nodeValue(&compression);
 	BextExitOnFailure(hr, "Failed to get container compression");
 
-	if (::wcsicmp(compression.bstrVal, L"Zip") == 0)
+	if (CSTR_EQUAL == ::CompareStringW(LOCALE_INVARIANT, NORM_IGNORECASE, compression.bstrVal, -1, L"Zip", -1))
 	{
 		pContainer = new CPanelSwZipContainer();
 		BextExitOnNull(pContainer, hr, E_FAIL, "Failed to allocate zip container");
 	}
-	else if (::wcsicmp(compression.bstrVal, L"SevenZip") == 0)
+	else if (CSTR_EQUAL == ::CompareStringW(LOCALE_INVARIANT, NORM_IGNORECASE, compression.bstrVal, -1, L"SevenZip", -1))
 	{
 		pContainer = new CPanelSwLzmaContainer();
 		BextExitOnNull(pContainer, hr, E_FAIL, "Failed to allocate 7z container");
@@ -327,275 +326,50 @@ HRESULT CPanelSwBundleExtension::ReleaseContainer(IPanelSwContainer* pContainer)
 			break;
 		}
 	}
-	
-LExit:
 	return hr;
 }
 
 HRESULT CPanelSwBundleExtension::SearchBundleVariable(LPCWSTR szUpgradeCode, LPCWSTR szVariableName, BOOL bFormat, LPCWSTR szResultVariableName)
 {
 	HRESULT hr = S_OK;
-
-	hr = SearchBundleVariable(BUNDLE_INSTALL_CONTEXT_MACHINE, REG_KEY_64BIT, szUpgradeCode, szVariableName, bFormat, szResultVariableName);
-	BextExitOnFailure(hr, "Failed to search for bundle variable '%ls'", szVariableName);
-	if (hr == S_OK)
-	{
-		ExitFunction();
-	}
-
-	hr = SearchBundleVariable(BUNDLE_INSTALL_CONTEXT_MACHINE, REG_KEY_32BIT, szUpgradeCode, szVariableName, bFormat, szResultVariableName);
-	BextExitOnFailure(hr, "Failed to search for bundle variable '%ls'", szVariableName);
-	if (hr == S_OK)
-	{
-		ExitFunction();
-	}
-
-	hr = SearchBundleVariable(BUNDLE_INSTALL_CONTEXT_USER, REG_KEY_64BIT, szUpgradeCode, szVariableName, bFormat, szResultVariableName);
-	BextExitOnFailure(hr, "Failed to search for bundle variable '%ls'", szVariableName);
-	if (hr == S_OK)
-	{
-		ExitFunction();
-	}
-
-	hr = SearchBundleVariable(BUNDLE_INSTALL_CONTEXT_USER, REG_KEY_32BIT, szUpgradeCode, szVariableName, bFormat, szResultVariableName);
-	BextExitOnFailure(hr, "Failed to search for bundle variable '%ls'", szVariableName);
-	if (hr == S_OK)
-	{
-		ExitFunction();
-	}
-
-LExit:
-	return hr;
-}
-
-HRESULT CPanelSwBundleExtension::SearchBundleVariable(BUNDLE_INSTALL_CONTEXT context, REG_KEY_BITNESS kbKeyBitness, LPCWSTR szUpgradeCode, LPCWSTR szVariableName, BOOL bFormat, LPCWSTR szResultVariableName)
-{
-	HRESULT hr = S_OK;
-	HKEY hkRoot = (context == BUNDLE_INSTALL_CONTEXT_USER) ? HKEY_CURRENT_USER : HKEY_LOCAL_MACHINE;
-	HKEY hkUninstall = NULL;
-	HKEY hkVariables = NULL;
-	VERUTIL_VERSION* pVersion = nullptr;
-	LPWSTR szBundleId = nullptr;
-	LPWSTR szVariablesKey = nullptr;
 	LPWSTR szValue = nullptr;
 	LPWSTR szTemp = nullptr;
+	VERUTIL_VERSION* pVersion = nullptr;
 	long lVal = 0;
 
-	hr = RegOpenEx(hkRoot, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall", KEY_READ, kbKeyBitness, &hkUninstall);
-	if ((hr == E_FILENOTFOUND) || (hr == E_PATHNOTFOUND))
+	hr = _bundles.SearchBundleVariable(szUpgradeCode, szVariableName, bFormat, &szValue);
+	BextExitOnFailure(hr, "Failed to search for bundle variable '%ls'", szVariableName);
+
+	if (!szValue || !*szValue)
 	{
-		hr = S_FALSE;
+		hr = m_pEngine->SetVariableString(szResultVariableName, L"", FALSE);
+		BextExitOnFailure(hr, "Failed to set variable");
 		ExitFunction();
 	}
-	BextExitOnFailure(hr, "Failed to open registry uninstall key.");
 
-	for (DWORD dwIndex = 0;(hr = BundleEnumRelatedBundle(szUpgradeCode, context, kbKeyBitness, &dwIndex, &szBundleId)) == S_OK; ++dwIndex)
+	lVal = wcstol(szValue, &szTemp, 10);
+	if ((errno == 0) && (szTemp == (szValue + wcslen(szValue))))
 	{
-		hr = StrAllocFormatted(&szVariablesKey, L"%ls\\variables", szBundleId);
-		BextExitOnFailure(hr, "Failed to format string");
-
-		hr = RegOpenEx(hkUninstall, szVariablesKey, KEY_READ, kbKeyBitness, &hkVariables);
-		if ((hr == E_FILENOTFOUND) || (hr == E_PATHNOTFOUND))
-		{
-			continue;
-		}
-		BextExitOnFailure(hr, "Failed to open bundle '%ls' variables key.", szBundleId);
-
-		_cSearchRecursion = 0;
-		hr = ReadBundleVariable(hkVariables, szVariableName, bFormat, &szValue);
-		if ((hr == E_FILENOTFOUND) || (hr == E_PATHNOTFOUND))
-		{
-			continue;
-		}
-		BextExitOnFailure(hr, "Failed to get variable '%ls' for bundle '%ls'", szVariableName, szBundleId);
-		BextLog(BOOTSTRAPPER_EXTENSION_LOG_LEVEL_STANDARD, "Detected variable '%ls' belonging to bundle '%ls' in %ls %ls context", szVariableName, szBundleId, (kbKeyBitness == REG_KEY_BITNESS::REG_KEY_32BIT) ? L"x86" : L"x64", (context == BUNDLE_INSTALL_CONTEXT::BUNDLE_INSTALL_CONTEXT_MACHINE) ? L"machine" : L"user");
-
-		if (!szValue || !*szValue)
-		{
-			hr = m_pEngine->SetVariableString(szResultVariableName, L"", FALSE);
-			BextExitOnFailure(hr, "Failed to set variable");
-			ExitFunction();
-		}
-
-		if (bFormat)
-		{
-			SIZE_T cch = 0;
-
-			hr = m_pEngine->FormatString(szValue, szTemp, &cch);
-			if (hr == E_MOREDATA)
-			{
-				hr = StrAlloc(&szTemp, ++cch);
-				BextExitOnFailure(hr, "Failed to allocate memory");
-
-				hr = m_pEngine->FormatString(szValue, szTemp, &cch);
-			}
-			BextExitOnFailure(hr, "Failed to format string");
-			BextExitOnNull(szTemp, hr, E_INVALIDSTATE, "Failed to format string"); // Just to keep the compiler happy
-			ReleaseStr(szValue);
-			szValue = szTemp;
-			szTemp = nullptr;
-		}
-
-		lVal = wcstol(szValue, &szTemp, 10);
-		if ((errno == 0) && (szTemp == (szValue + wcslen(szValue))))
-		{
-			hr = m_pEngine->SetVariableNumeric(szResultVariableName, lVal);
-			BextExitOnFailure(hr, "Failed to set variable");
-		}
-		else if (SUCCEEDED(VerParseVersion(szValue, 0, TRUE, &pVersion)) && pVersion)
-		{
-			hr = m_pEngine->SetVariableVersion(szResultVariableName, szValue);
-			BextExitOnFailure(hr, "Failed to set variable");
-		}
-		else
-		{
-			hr = m_pEngine->SetVariableString(szResultVariableName, szValue, FALSE);
-			BextExitOnFailure(hr, "Failed to set variable");
-		}
-		ExitFunction();
+		hr = m_pEngine->SetVariableNumeric(szResultVariableName, lVal);
+		BextExitOnFailure(hr, "Failed to set variable");
 	}
-	if (hr == E_NOMOREITEMS)
+	else if (SUCCEEDED(VerParseVersion(szValue, 0, TRUE, &pVersion)) && pVersion)
 	{
-		hr = S_FALSE;
+		hr = m_pEngine->SetVariableVersion(szResultVariableName, szValue);
+		BextExitOnFailure(hr, "Failed to set variable");
 	}
-	BextExitOnFailure(hr, "Failed to find bundles with upgrade code '%ls'", szUpgradeCode);
+	else
+	{
+		hr = m_pEngine->SetVariableString(szResultVariableName, szValue, bFormat);
+		BextExitOnFailure(hr, "Failed to set variable");
+	}
 
 LExit:
 	ReleaseStr(szValue);
-	ReleaseStr(szVariablesKey);
-	ReleaseStr(szBundleId);
-	ReleaseRegKey(hkVariables);
-	ReleaseRegKey(hkUninstall);
 	ReleaseVerutilVersion(pVersion);
 
 	return hr;
 }
-
-HRESULT CPanelSwBundleExtension::ReadBundleVariable(HKEY hkVariables, LPCWSTR szVariableName, BOOL bFormat, LPWSTR* pszValue)
-{
-	HRESULT hr = S_OK;
-	LPWSTR szValue = nullptr;
-	BYTE* pbData = nullptr;
-	SIZE_T cbData = 0;
-	DWORD dwType = 0;
-	LPWSTR szEmbeddedVar = nullptr;
-	LPWSTR szEmbeddedValue = nullptr;
-	LPWSTR szTemp = nullptr;
-
-	if (++_cSearchRecursion >= MAX_SEARCH_RECURSION)
-	{
-		BextLog(BOOTSTRAPPER_EXTENSION_LOG_LEVEL_ERROR, "To deep recursion when formatting bundle search variable");
-
-		hr = StrAllocString(pszValue, L"", 0);
-		BextExitOnFailure(hr, "Failed to allocate string");
-		ExitFunction();
-	}
-
-	if (!szVariableName || !*szVariableName)
-	{
-		hr = StrAllocString(pszValue, L"", 0);
-		BextExitOnFailure(hr, "Failed to allocate string");
-		ExitFunction();
-	}
-
-	hr = RegReadValue(hkVariables, szVariableName, TRUE, &pbData, &cbData, &dwType);
-	if ((hr == E_FILENOTFOUND) || (hr == E_PATHNOTFOUND))
-	{
-		ExitFunction();
-	}
-	BextExitOnFailure(hr, "Failed to get variable '%ls'", szVariableName);
-
-	switch (dwType)
-	{
-	case REG_NONE:
-		hr = StrAllocString(pszValue, L"", 0);
-		BextExitOnFailure(hr, "Failed to allocate string");
-		ExitFunction();
-		break;
-
-	case REG_SZ:
-	case REG_EXPAND_SZ:
-		hr = StrAllocFormatted(&szValue, L"%.*ls", cbData / 2, (LPCWSTR)pbData);
-		BextExitOnFailure(hr, "Failed to allocate string");
-		break;
-
-	case REG_DWORD:
-		if (pbData && (cbData == sizeof(DWORD)))
-		{
-			hr = StrAllocFormatted(pszValue, L"%ul", (DWORD)*pbData);
-			BextExitOnFailure(hr, "Failed to allocate string");
-		}
-		else
-		{
-			hr = StrAllocString(pszValue, L"", 0);
-			BextExitOnFailure(hr, "Failed to allocate string");
-		}
-		ExitFunction();
-		break;
-
-	default:
-		hr = E_INVALIDDATA;
-		BextExitOnFailure(hr, "Unsupported variable data type in registry. Variable '%ls', data type %u", szVariableName, dwType);
-		break;
-	}
-
-	if (!bFormat || !szValue || !*szValue)
-	{
-		*pszValue = szValue;
-		szValue = nullptr;
-		ExitFunction();
-	}
-
-	// Now parse embedded formatting.
-	for (LPWSTR szNext = StrChr(szValue, L'['); szNext && *szNext; szNext = StrChr(szNext, L'['))
-	{
-		LPCWSTR szNextEnd = nullptr;
-
-		ReleaseNullStr(szEmbeddedVar);
-		ReleaseNullStr(szEmbeddedValue);
-		ReleaseNullStr(szTemp);
-
-		szNextEnd = StrChr(szNext, L']');
-		if (!szNextEnd || !*szNextEnd)
-		{
-			break;
-		}
-
-		hr = StrAllocFormatted(&szEmbeddedVar, L"%.*ls", szNextEnd - szNext - 1, szNext + 1);
-		BextExitOnFailure(hr, "Failed to allocate string");
-
-		hr = ReadBundleVariable(hkVariables, szEmbeddedVar, bFormat, &szEmbeddedValue);
-		if ((hr == E_FILENOTFOUND) || (hr == E_PATHNOTFOUND))
-		{
-			hr = S_OK;
-			++szNext;
-			continue;
-		}
-		BextExitOnFailure(hr, "Failed to read embedded variable '%ls'", szEmbeddedVar);
-
-		// Replace the embedded variable and restart
-		hr = StrAllocFormatted(&szTemp, L"%.*ls%ls%ls", szNext - szValue, szValue, szEmbeddedValue, szNextEnd + 1);
-		BextExitOnFailure(hr, "Failed to allocate string");
-
-		ReleaseStr(szValue);
-		szValue = szTemp;
-		szNext = szValue;
-		szTemp = nullptr;
-	}
-
-	*pszValue = szValue;
-	szValue = nullptr;
-
-LExit:
-	ReleaseStr(szValue);
-	ReleaseStr(szEmbeddedVar);
-	ReleaseStr(szEmbeddedValue);
-	ReleaseStr(szTemp);
-	--_cSearchRecursion;
-
-	return hr;
-}
-
 
 extern "C" HRESULT WINAPI BootstrapperExtensionCreate(const BOOTSTRAPPER_EXTENSION_CREATE_ARGS* pArgs, BOOTSTRAPPER_EXTENSION_CREATE_RESULTS* pResults)
 {

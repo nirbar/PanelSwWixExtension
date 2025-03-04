@@ -67,6 +67,7 @@
     <ClCompile Include="PanelSwLzmaContainer.cpp" />
     <ClCompile Include="PanelSwLzmaExtractCallback.cpp" />
     <ClCompile Include="PanelSwLzmaInStream.cpp" />
+    <ClCompile Include="PanelSwBundleVariables.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader>Create</PrecompiledHeader>
     </ClCompile>
@@ -80,6 +81,7 @@
     <ClInclude Include="PanelSwLzmaContainer.h" />
     <ClInclude Include="PanelSwLzmaExtractCallback.h" />
     <ClInclude Include="PanelSwLzmaInStream.h" />
+    <ClInclude Include="PanelSwBundleVariables.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
@@ -87,7 +89,6 @@
     <PackageReference Include="7Zap" />
     <PackageReference Include="WixToolset.DUtil" />
     <PackageReference Include="WixToolset.BootstrapperExtensionApi" />
-    <PackageReference Include="WixToolset.WcaUtil" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PanelSwBackendExtension.def" />

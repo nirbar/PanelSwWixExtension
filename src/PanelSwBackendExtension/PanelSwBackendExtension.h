@@ -1,6 +1,7 @@
 #pragma once
 
 #include "pch.h"
+#include "PanelSwBundleVariables.h"
 #include <list>
 
 class CPanelSwBundleExtension : public CBextBaseBootstrapperExtension
@@ -43,8 +44,6 @@ private:
 
 	HRESULT ParseSearches(IXMLDOMNode* pixnBundleExtension);
 	HRESULT SearchBundleVariable(LPCWSTR szUpgradeCode, LPCWSTR szVariableName, BOOL bFormat, LPCWSTR szResultVariableName);
-	HRESULT SearchBundleVariable(BUNDLE_INSTALL_CONTEXT context, REG_KEY_BITNESS kbKeyBitness, LPCWSTR szUpgradeCode, LPCWSTR szVariableName, BOOL bFormat, LPCWSTR szResultVariableName);
-	HRESULT ReadBundleVariable(HKEY hkVariables, LPCWSTR szVariableName, BOOL bFormat, LPWSTR *pszValue);
 
 	HRESULT CreateContainer(LPCWSTR wzContainerId, IPanelSwContainer** ppContainer);
 	HRESULT GetContainer(LPVOID pContext, IPanelSwContainer** ppContainer);
@@ -56,6 +55,5 @@ private:
 	typedef std::list<IPanelSwContainer*>::iterator ContainerIterator;
 	BUNDLE_VARIABLE_SEARCH* _pSearches = nullptr;
 	long _cSearches = 0;
-	int _cSearchRecursion = 0;
-	int MAX_SEARCH_RECURSION = 100;
+	CPanelSwBundleVariables _bundles;
 };
