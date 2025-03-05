@@ -240,7 +240,11 @@
           </xs:attribute>
           <xs:attribute name="SearchVariable" type="xs:string" use="required">
             <xs:annotation>
-              <xs:documentation>Variable name in the installed bundle</xs:documentation>
+              <xs:documentation>
+                Variable name in the installed bundle. This may be any of the bundle's persisted variable,
+                or one of: WixBundleName, WixBundleId, WixBundleTag, WixBundleManufacturer, WixBundleProviderKey, WixBundleVersion, WixBundleFileVersion, ProgramFiles6432Folder, CommonFiles6432Folder.
+                And additionally, WixBundleContext=machine/user, and WixBundlePlatform=x86/x64.
+              </xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="UpgradeCode" type="xs:string" use="required">

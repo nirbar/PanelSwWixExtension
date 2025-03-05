@@ -4,9 +4,12 @@
 class CPanelSwBundleVariables
 {
 public:
+	CPanelSwBundleVariables(IBootstrapperExtensionEngine* pEngine);
 	virtual ~CPanelSwBundleVariables();
 
 	HRESULT SearchBundleVariable(LPCWSTR szUpgradeCode, LPCWSTR szVariableName, BOOL bFormat, LPWSTR *pszValue);
+
+	HRESULT FormatString(LPCWSTR szFormat, LPWSTR* pszValue);
 
 private:
 
@@ -20,11 +23,15 @@ private:
 	{
 		LPWSTR _szUpgradeCode = nullptr;
 		LPWSTR _szId = nullptr;
-		LPWSTR _szDisplayName = nullptr;
+		LPWSTR _szDisplayName = nullptr; // WixBundleName
 		LPWSTR _szStatePath = nullptr;
+		LPWSTR _szTag = nullptr; // WixBundleTag
+		LPWSTR _szPublisher = nullptr; // WixBundleManufacturer
+		LPWSTR _szProviderKey = nullptr; // WixBundleProviderKey
 		bool _bIsX64 = false;
+		bool _bIsMachineContext = false;
 		VERUTIL_VERSION* _pEngineVersion = nullptr;
-		VERUTIL_VERSION* _pDisplayVersion = nullptr;
+		VERUTIL_VERSION* _pDisplayVersion = nullptr; // WixBundleVersion
 		
 		BUNDLE_VARIABLE *_rgVariables = nullptr;
 		DWORD _cVariables = 0;
@@ -58,6 +65,7 @@ private:
 	HRESULT ReadString64(HANDLE hVariables, LPWSTR* psz);
 	
 	HRESULT GetVariable(BUNDLE_INFO* pBundleInfo, LPCWSTR szVariableName, BOOL bFormat, LPWSTR *pszValue);
+	HRESULT GetBuiltInVariable(BUNDLE_INFO* pBundleInfo, LPCWSTR szVariableName, LPWSTR *pszValue);
 
 	void Reset();
 
@@ -66,4 +74,6 @@ private:
 	
 	BUNDLE_INFO *_rgBundles = nullptr;
 	SIZE_T _cBundles = 0;
+
+	IBootstrapperExtensionEngine* _pEngine = nullptr;
 };

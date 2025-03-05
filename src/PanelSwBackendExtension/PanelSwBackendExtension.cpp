@@ -7,6 +7,7 @@ using namespace std;
 
 CPanelSwBundleExtension::CPanelSwBundleExtension(IBootstrapperExtensionEngine* pEngine)
 	: CBextBaseBootstrapperExtension(pEngine)
+	, _bundles(pEngine)
 {
 	XmlInitialize();
 }

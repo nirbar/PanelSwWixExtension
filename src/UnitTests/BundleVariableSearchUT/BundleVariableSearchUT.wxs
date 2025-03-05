@@ -22,7 +22,9 @@
 
     <Variable Name="InstallFolder" Value="[ProgramFiles6432Folder]test" Persisted="yes" Type="formatted"/>
     <PanelSW:BundleVariableSearch Condition='SKIP_CONDITIONS&lt;&gt;1' Id="testFolder" ResultVariable="testFolder" SearchVariable="InstallFolder" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
-    <bal:Condition Condition='(SKIP_CONDITIONS=1) OR NOT WixBundleInstalled OR (testFolder="C:\Program Files\test")' Message='Expected testFolder to be "C:\Program Files\test"'/>
+    <PanelSW:BundleVariableSearch Condition='SKIP_CONDITIONS&lt;&gt;1' ResultVariable="testPlatform" SearchVariable="WixBundlePlatform" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
+    <bal:Condition Condition='(SKIP_CONDITIONS=1) OR NOT WixBundleInstalled OR (testPlatform="x86") OR (testPlatform="x64")' Message='Expected testFolder to be "C:\Program Files (x86)\test"'/>
+    <bal:Condition Condition='(SKIP_CONDITIONS=1) OR NOT WixBundleInstalled OR ((testPlatform="x64") AND (testFolder="C:\Program Files\test")) OR ((testPlatform="x86") AND (testFolder="C:\Program Files (x86)\test"))' Message='Expected testFolder to be "C:\Program Files (x86)\test" or "C:\Program Files\test"'/>
 
     <Variable Name="SomeNumber" Value="3" Persisted="yes" Type="numeric"/>
     <PanelSW:BundleVariableSearch Condition='SKIP_CONDITIONS&lt;&gt;1' ResultVariable="testNumber" After="never" SearchVariable="SomeNumber" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
@@ -38,6 +40,15 @@
     <Variable Name="TooDeep" Value="[TooDeep]" Persisted="yes" Type="string"/>
     <PanelSW:BundleVariableSearch Condition='SKIP_CONDITIONS&lt;&gt;1' ResultVariable="testTooDeep" SearchVariable="TooDeep" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
     <bal:Condition Condition='(SKIP_CONDITIONS=1) OR NOT WixBundleInstalled OR NOT testTooDeep' Message="Expected testTooDeep to be empty"/>
+
+    <PanelSW:BundleVariableSearch Condition='SKIP_CONDITIONS&lt;&gt;1' ResultVariable="testWixBundlePlatform" SearchVariable="WixBundlePlatform" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
+    <bal:Condition Condition='(SKIP_CONDITIONS=1) OR NOT WixBundleInstalled OR (testWixBundlePlatform="x86") OR (testWixBundlePlatform="x64")' Message="Expected testWixBundlePlatform to be x86 or x64"/>
+
+    <PanelSW:BundleVariableSearch Condition='SKIP_CONDITIONS&lt;&gt;1' ResultVariable="testWixBundleContext" SearchVariable="WixBundleContext" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
+    <bal:Condition Condition='(SKIP_CONDITIONS=1) OR NOT WixBundleInstalled OR (testWixBundleContext="machine")' Message="Expected testWixBundleContext to be machine"/>
+
+    <PanelSW:BundleVariableSearch Condition='SKIP_CONDITIONS&lt;&gt;1' ResultVariable="testDoesntExist" SearchVariable="DoesntExist" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
+    <bal:Condition Condition='(SKIP_CONDITIONS=1) OR NOT WixBundleInstalled OR NOT testDoesntExist' Message="Expected testDoesntExist to be empty"/>
 
     <Chain ParallelCache="yes" DisableSystemRestore="yes">
       <ExePackage SourceFile="$(DeferredExePackagePath)" DetectCondition="1=0" UninstallArguments="/u" InstallArguments="--ignore-me"/>

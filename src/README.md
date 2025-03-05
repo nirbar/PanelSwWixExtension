@@ -11,6 +11,7 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
   - *FileGlob*: In-code payload harvester with include and exclude glob patterns. Works in bundles and in packages 
   - *ContainerTemplate*: A container template to which bundle payloads can be assigned
     - When using PanelSwWix4.Sdk, support 7z and Zip containers
+  - *BundleVariableSearch*: Get a persisted variable value of another bundle
   - *CustomSearch*: Use a BundleExtension to perform custom searches without having to implement a complete WiX extension
   - *!(bindpath.PanelSwWixExtension)\x86\DeferredExePackage.exe* An executable that can execute arbitrary commands during chain execution
 	- Use InstallArguments='--skip-until-here "[SomeExecutable]" "arg1" "arg2"': Create a process with any arguments after the `--skip-until-here` part

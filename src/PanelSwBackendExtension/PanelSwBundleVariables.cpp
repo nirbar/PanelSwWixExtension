@@ -1,6 +1,11 @@
 #include "pch.h"
 #include "PanelSwBundleVariables.h"
 
+CPanelSwBundleVariables::CPanelSwBundleVariables(IBootstrapperExtensionEngine* pEngine)
+	: _pEngine(pEngine)
+{
+}
+
 CPanelSwBundleVariables::~CPanelSwBundleVariables()
 {
 	Reset();
@@ -23,10 +28,14 @@ void CPanelSwBundleVariables::Reset()
 		ReleaseNullStr(pBundle->_szId);
 		ReleaseNullStr(pBundle->_szDisplayName);
 		ReleaseNullStr(pBundle->_szStatePath);
+		ReleaseNullStr(pBundle->_szTag);
+		ReleaseNullStr(pBundle->_szPublisher);
+		ReleaseNullStr(pBundle->_szProviderKey);
 		ReleaseNullMem(pBundle->_rgVariables);
 		ReleaseVerutilVersion(pBundle->_pEngineVersion);
 		ReleaseVerutilVersion(pBundle->_pDisplayVersion);
 		pBundle->_bIsX64 = false;
+		pBundle->_bIsMachineContext = false;
 		pBundle->_cVariables = 0;
 	}
 	ReleaseNullMem(_rgBundles);
@@ -164,19 +173,14 @@ HRESULT CPanelSwBundleVariables::SearchBundle(BUNDLE_INSTALL_CONTEXT context, RE
 		ZeroMemory(pBundle, sizeof(BUNDLE_INFO));
 		pBundle->_szId = szBundleId;
 		pBundle->_bIsX64 = (kbKeyBitness == REG_KEY_BITNESS::REG_KEY_64BIT);
+		pBundle->_bIsMachineContext = (context == BUNDLE_INSTALL_CONTEXT::BUNDLE_INSTALL_CONTEXT_MACHINE);
 		szBundleId = nullptr;
 
 		hr = StrAllocString(&pBundle->_szUpgradeCode, szUpgradeCode, 0);
 		BextExitOnFailure(hr, "Failed to allocate string");
 
-		hr = RegReadString(hkBundle, L"DisplayName", &pBundle->_szDisplayName);
-		BextExitOnFailure(hr, "Failed to read DisplayName");
-
 		hr = RegReadWixVersion(hkBundle, L"EngineVersion", &pBundle->_pEngineVersion);
 		BextExitOnFailure(hr, "Failed to read EngineVersion");
-
-		hr = RegReadWixVersion(hkBundle, L"DisplayVersion", &pBundle->_pDisplayVersion);
-		BextExitOnFailure(hr, "Failed to read DisplayVersion");
 
 		hr = RegReadString(hkBundle, L"BundleCachePath", &szCachePath);
 		BextExitOnFailure(hr, "Failed to read BundleCachePath");
@@ -188,9 +192,17 @@ HRESULT CPanelSwBundleVariables::SearchBundle(BUNDLE_INSTALL_CONTEXT context, RE
 		hr = StrAllocFormatted(&pBundle->_szStatePath, L"%.*ls\\state.rsm", dwVarLen, szCachePath);
 		BextExitOnFailure(hr, "Failed to format string");
 
+		// Optional values
+		RegReadString(hkBundle, L"DisplayName", &pBundle->_szDisplayName);
+		RegReadString(hkBundle, L"BundleTag", &pBundle->_szTag);
+		RegReadString(hkBundle, L"Publisher", &pBundle->_szPublisher);
+		RegReadString(hkBundle, L"BundleProviderKey", &pBundle->_szProviderKey);
+		RegReadWixVersion(hkBundle, L"DisplayVersion", &pBundle->_pDisplayVersion);
+
 		hr = LoadBundleVariables(pBundle);
 		BextExitOnFailure(hr, "Failed to load bundle variables");
 
+		BextLog(BOOTSTRAPPER_EXTENSION_LOG_LEVEL_STANDARD, "Detected variables of bundle '%ls' v%ls in %ls %ls context", pBundle->_szDisplayName, pBundle->_pDisplayVersion && pBundle->_pDisplayVersion->sczVersion ? pBundle->_pDisplayVersion->sczVersion : L"N/A", pBundle->_bIsX64 ? L"x64" : L"x86", pBundle->_bIsMachineContext ? L"machine" : L"user");
 		*ppBundleInfo = pBundle;
 		ExitFunction();
 	}
@@ -589,6 +601,14 @@ HRESULT CPanelSwBundleVariables::GetVariable(BUNDLE_INFO* pBundleInfo, LPCWSTR s
 		ExitFunction();
 	}
 
+	hr = GetBuiltInVariable(pBundleInfo, szVariableName, pszValue);
+	BextExitOnFailure(hr, "Failed to replace builtin variable '%ls'", szVariableName);
+	if (hr == S_OK)
+	{
+		ExitFunction();
+	}
+	hr = S_OK;
+
 	for (SIZE_T i = 0; i < pBundleInfo->_cVariables; ++i)
 	{
 		if (CSTR_EQUAL == ::CompareStringW(LOCALE_INVARIANT, 0, pBundleInfo->_rgVariables[i]._szName, -1, szVariableName, -1))
@@ -661,6 +681,105 @@ LExit:
 	ReleaseStr(szEmbeddedValue);
 	ReleaseStr(szTemp);
 	--_cSearchRecursion;
+
+	return hr;
+}
+
+HRESULT CPanelSwBundleVariables::GetBuiltInVariable(BUNDLE_INFO* pBundleInfo, LPCWSTR szVariableName, LPWSTR* pszValue)
+{
+	HRESULT hr = S_OK;
+
+	// Bundle property?
+	if (CSTR_EQUAL == ::CompareStringW(LOCALE_INVARIANT, 0, L"WixBundleName", -1, szVariableName, -1))
+	{
+		hr = StrAllocString(pszValue, pBundleInfo->_szDisplayName ? pBundleInfo->_szDisplayName : L"", 0);
+		BextExitOnFailure(hr, "Failed to allocate string");
+		ExitFunction();
+	}
+	if (CSTR_EQUAL == ::CompareStringW(LOCALE_INVARIANT, 0, L"WixBundleId", -1, szVariableName, -1))
+	{
+		hr = StrAllocString(pszValue, pBundleInfo->_szId, 0);
+		BextExitOnFailure(hr, "Failed to allocate string");
+		ExitFunction();
+	}
+	if (CSTR_EQUAL == ::CompareStringW(LOCALE_INVARIANT, 0, L"WixBundlePlatform", -1, szVariableName, -1))
+	{
+		hr = StrAllocString(pszValue, pBundleInfo->_bIsX64 ? L"x64" : L"x86", 0);
+		BextExitOnFailure(hr, "Failed to allocate string");
+		ExitFunction();
+	}
+	if (CSTR_EQUAL == ::CompareStringW(LOCALE_INVARIANT, 0, L"WixBundleContext", -1, szVariableName, -1))
+	{
+		hr = StrAllocString(pszValue, pBundleInfo->_bIsMachineContext ? L"machine" : L"user", 0);
+		BextExitOnFailure(hr, "Failed to allocate string");
+		ExitFunction();
+	}
+	if (CSTR_EQUAL == ::CompareStringW(LOCALE_INVARIANT, 0, L"WixBundleTag", -1, szVariableName, -1))
+	{
+		hr = StrAllocString(pszValue, pBundleInfo->_szTag ? pBundleInfo->_szTag : L"", 0);
+		BextExitOnFailure(hr, "Failed to allocate string");
+		ExitFunction();
+	}
+	if (CSTR_EQUAL == ::CompareStringW(LOCALE_INVARIANT, 0, L"WixBundleManufacturer", -1, szVariableName, -1))
+	{
+		hr = StrAllocString(pszValue, pBundleInfo->_szPublisher ? pBundleInfo->_szPublisher : L"", 0);
+		BextExitOnFailure(hr, "Failed to allocate string");
+		ExitFunction();
+	}
+	if (CSTR_EQUAL == ::CompareStringW(LOCALE_INVARIANT, 0, L"WixBundleProviderKey", -1, szVariableName, -1))
+	{
+		hr = StrAllocString(pszValue, pBundleInfo->_szProviderKey ? pBundleInfo->_szProviderKey : L"", 0);
+		BextExitOnFailure(hr, "Failed to allocate string");
+		ExitFunction();
+	}
+	if ((CSTR_EQUAL == ::CompareStringW(LOCALE_INVARIANT, 0, L"WixBundleVersion", -1, szVariableName, -1)) || (CSTR_EQUAL == ::CompareStringW(LOCALE_INVARIANT, 0, L"WixBundleFileVersion", -1, szVariableName, -1)))
+	{
+		hr = StrAllocString(pszValue, (pBundleInfo->_pDisplayVersion && pBundleInfo->_pDisplayVersion->sczVersion) ? pBundleInfo->_pDisplayVersion->sczVersion : L"", 0);
+		BextExitOnFailure(hr, "Failed to allocate string");
+		ExitFunction();
+	}
+
+	// Bitness variables
+	if (CSTR_EQUAL == ::CompareStringW(LOCALE_INVARIANT, 0, L"ProgramFiles6432Folder", -1, szVariableName, -1))
+	{
+		hr = FormatString(pBundleInfo->_bIsX64 ? L"[ProgramFiles64Folder]" : L"[ProgramFilesFolder]", pszValue);
+		BextExitOnFailure(hr, "Failed to allocate string");
+		ExitFunction();
+	}
+	if (CSTR_EQUAL == ::CompareStringW(LOCALE_INVARIANT, 0, L"CommonFiles6432Folder", -1, szVariableName, -1))
+	{
+		hr = FormatString(pBundleInfo->_bIsX64 ? L"[CommonFiles64Folder]" : L"[CommonFilesFolder]", pszValue);
+		BextExitOnFailure(hr, "Failed to allocate string");
+		ExitFunction();
+	}
+
+	hr = S_FALSE;
+
+LExit:
+	return hr;
+}
+
+HRESULT CPanelSwBundleVariables::FormatString(LPCWSTR szFormat, LPWSTR* pszValue)
+{
+	HRESULT hr = S_OK;
+	LPWSTR szValue = nullptr;
+	SIZE_T cch = 0;
+
+	hr = _pEngine->FormatString(szFormat, szValue, &cch);
+	if (hr == E_MOREDATA)
+	{
+		hr = StrAlloc(&szValue, ++cch);
+		BextExitOnFailure(hr, "Failed to allocate memory");
+
+		hr = _pEngine->FormatString(szFormat, szValue, &cch);
+	}
+	BextExitOnFailure(hr, "Failed to format string");
+
+	*pszValue = szValue;
+	szValue = nullptr;
+
+LExit:
+	ReleaseStr(szValue);
 
 	return hr;
 }
