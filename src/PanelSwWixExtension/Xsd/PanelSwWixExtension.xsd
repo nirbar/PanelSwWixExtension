@@ -243,7 +243,7 @@
               <xs:documentation>
                 Variable name in the installed bundle. This may be any of the bundle's persisted variable,
                 or one of: WixBundleName, WixBundleId, WixBundleTag, WixBundleManufacturer, WixBundleProviderKey, WixBundleVersion, WixBundleFileVersion, ProgramFiles6432Folder, CommonFiles6432Folder.
-                And additionally, WixBundleContext=machine/user, and WixBundlePlatform=x86/x64.
+                And additionally, WixBundleContext=machine/user, WixBundlePlatform=x86/x64, and WixBundleInstalled=0/1.
               </xs:documentation>
             </xs:annotation>
           </xs:attribute>

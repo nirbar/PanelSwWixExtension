@@ -50,6 +50,17 @@
     <PanelSW:BundleVariableSearch Condition='SKIP_CONDITIONS&lt;&gt;1' ResultVariable="testDoesntExist" SearchVariable="DoesntExist" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
     <bal:Condition Condition='(SKIP_CONDITIONS=1) OR NOT WixBundleInstalled OR NOT testDoesntExist' Message="Expected testDoesntExist to be empty"/>
 
+    <Variable Name="NotPersisted" Value="1" Type="numeric"/>
+    <PanelSW:BundleVariableSearch Condition='SKIP_CONDITIONS&lt;&gt;1' ResultVariable="testNotPersisted" SearchVariable="NotPersisted" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
+    <bal:Condition Condition='(SKIP_CONDITIONS=1) OR NOT testNotPersisted' Message="Expected testNotPersisted to be empty"/>
+
+    <Variable Name="NotChanged" Value="1" Type="numeric"/>
+    <PanelSW:BundleVariableSearch Condition='SKIP_CONDITIONS&lt;&gt;1' ResultVariable="NotChanged" SearchVariable="NotChanged" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
+    <bal:Condition Condition='(SKIP_CONDITIONS=1) OR (NotChanged=1)' Message="Expected NotChanged to be 1"/>
+
+    <PanelSW:BundleVariableSearch Condition='SKIP_CONDITIONS&lt;&gt;1' ResultVariable="testWixBundleInstalled" SearchVariable="WixBundleInstalled" UpgradeCode="f37b5c48-dd17-4ff6-af58-1bd697c2c1d7"/>
+    <bal:Condition Condition='(SKIP_CONDITIONS=1) OR (testWixBundleInstalled = WixBundleInstalled)' Message="Expected testWixBundleInstalled to equal WixBundleInstalled"/>
+
     <Chain ParallelCache="yes" DisableSystemRestore="yes">
       <ExePackage SourceFile="$(DeferredExePackagePath)" DetectCondition="1=0" UninstallArguments="/u" InstallArguments="--ignore-me"/>
     </Chain>

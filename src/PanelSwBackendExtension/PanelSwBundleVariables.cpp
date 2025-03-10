@@ -50,6 +50,14 @@ HRESULT CPanelSwBundleVariables::SearchBundleVariable(LPCWSTR szUpgradeCode, LPC
 
 	hr = SearchBundle(szUpgradeCode, &pBundle);
 	BextExitOnFailure(hr, "Failed to search for bundle '%ls'", szUpgradeCode);
+
+	if (CSTR_EQUAL == ::CompareStringW(LOCALE_INVARIANT, 0, L"WixBundleInstalled", -1, szVariableName, -1))
+	{
+		hr = StrAllocString(pszValue, (hr == S_OK) ? L"1" : L"0", 0);
+		BextExitOnFailure(hr, "Failed to allocate string");
+		ExitFunction();
+	}
+
 	if (hr == S_FALSE)
 	{
 		ExitFunction();

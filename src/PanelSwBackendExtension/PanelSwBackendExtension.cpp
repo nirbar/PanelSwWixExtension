@@ -341,6 +341,10 @@ HRESULT CPanelSwBundleExtension::SearchBundleVariable(LPCWSTR szUpgradeCode, LPC
 	hr = _bundles.SearchBundleVariable(szUpgradeCode, szVariableName, bFormat, &szValue);
 	BextExitOnFailure(hr, "Failed to search for bundle variable '%ls'", szVariableName);
 
+	if (hr == S_FALSE)
+	{
+		ExitFunction();
+	}
 	if (!szValue || !*szValue)
 	{
 		hr = m_pEngine->SetVariableString(szResultVariableName, L"", FALSE);

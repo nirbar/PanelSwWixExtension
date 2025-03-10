@@ -501,7 +501,7 @@ namespace PanelSw.Wix.Extensions
                             id = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, attrib);
                             break;
                         case "SearchVariable":
-                            searchVariable = ParseHelper.GetAttributeBundleVariableNameValue(sourceLineNumbers, attrib);
+                            searchVariable = ParseHelper.GetAttributeBundleVariableNameValue(sourceLineNumbers, attrib, WixToolset.Extensibility.Data.BundleVariableNameRule.CanBeBuiltIn | WixToolset.Extensibility.Data.BundleVariableNameRule.CanBeWellKnown | WixToolset.Extensibility.Data.BundleVariableNameRule.CanHaveReservedPrefix);
                             break;
                         case "ResultVariable":
                             resultVariable = ParseHelper.GetAttributeBundleVariableNameValue(sourceLineNumbers, attrib);
