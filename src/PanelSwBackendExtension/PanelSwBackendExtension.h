@@ -44,6 +44,7 @@ private:
 
 	HRESULT ParseSearches(IXMLDOMNode* pixnBundleExtension);
 	HRESULT SearchBundleVariable(LPCWSTR szUpgradeCode, LPCWSTR szVariableName, BOOL bFormat, LPCWSTR szResultVariableName);
+	HRESULT IsOnCommandLine(LPCWSTR szVariableName);
 
 	HRESULT CreateContainer(LPCWSTR wzContainerId, IPanelSwContainer** ppContainer);
 	HRESULT GetContainer(LPVOID pContext, IPanelSwContainer** ppContainer);
@@ -56,4 +57,7 @@ private:
 	BUNDLE_VARIABLE_SEARCH* _pSearches = nullptr;
 	long _cSearches = 0;
 	CPanelSwBundleVariables _bundles;
+	BAL_INFO_BUNDLE _bundleInfo = {};
+	LPWSTR* _pszCommandLineArgs = nullptr;
+	int _cCommandLineArgs = 0;
 };

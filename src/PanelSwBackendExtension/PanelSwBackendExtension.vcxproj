@@ -89,6 +89,7 @@
     <PackageReference Include="7Zap" />
     <PackageReference Include="WixToolset.DUtil" />
     <PackageReference Include="WixToolset.BootstrapperExtensionApi" />
+    <PackageReference Include="WixToolset.BootstrapperApplicationApi" />
   </ItemGroup>
   <ItemGroup>
     <None Include="PanelSwBackendExtension.def" />

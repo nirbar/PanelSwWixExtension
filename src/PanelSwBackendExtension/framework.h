@@ -12,6 +12,7 @@
 
 // WiX Header Files:
 #include <dutil.h>
+#include <dictutil.h>
 #include <fileutil.h>
 #include <strutil.h>
 #include <memutil.h>
@@ -29,3 +30,7 @@
 #include <bextutil.h>
 #include <BextBootstrapperExtensionEngine.h>
 #include <BextBaseBootstrapperExtension.h>
+#include <BootstrapperApplication.h>
+#include <apputil.h>
+#include <balutil.h>
+#include <balinfo.h>

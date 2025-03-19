@@ -4,6 +4,7 @@
 #include "PanelSwLzmaContainer.h"
 #include <BextBaseBootstrapperExtensionProc.h>
 using namespace std;
+extern HINSTANCE g_hInstance;
 
 CPanelSwBundleExtension::CPanelSwBundleExtension(IBootstrapperExtensionEngine* pEngine)
 	: CBextBaseBootstrapperExtension(pEngine)
@@ -21,16 +22,26 @@ CPanelSwBundleExtension::~CPanelSwBundleExtension()
 STDMETHODIMP CPanelSwBundleExtension::Initialize(const BOOTSTRAPPER_EXTENSION_CREATE_ARGS* pCreateArgs)
 {
 	HRESULT hr = S_OK;
-	CComPtr<IXMLDOMDocument> pixdManifest;
+	CComPtr<IXMLDOMDocument> pixdBextManifest;
+	CComPtr<IXMLDOMDocument> pixdBadManifest;
 	CComPtr<IXMLDOMNode> pixnBundleExtension;
 
 	hr = __super::Initialize(pCreateArgs);
 	BextExitOnFailure(hr, "CBextBaseBootstrapperExtension initialization failed.");
 
-	hr = XmlLoadDocumentFromFile(m_sczBootstrapperExtensionDataPath, &pixdManifest);
+	hr = BalManifestLoad((HMODULE)g_hInstance, &pixdBadManifest);
+	BextExitOnFailure(hr, "Failed to load bootstrapper application manifest.");
+
+	hr = BalInfoParseFromXml(&_bundleInfo, pixdBadManifest);
+	BextExitOnFailure(hr, "Failed to load bundle information.");
+
+	hr = AppParseCommandLine(::GetCommandLineW(), &_cCommandLineArgs, &_pszCommandLineArgs);
+	BextExitOnFailure(hr, "Failed to parse command line.");
+
+	hr = XmlLoadDocumentFromFile(m_sczBootstrapperExtensionDataPath, &pixdBextManifest);
 	BextExitOnFailure(hr, "Failed to load bundle extension manifest from path: %ls", m_sczBootstrapperExtensionDataPath);
 
-	hr = BextGetBootstrapperExtensionDataNode(pixdManifest, PANELSW_BACKEND_EXTENSION_ID, &pixnBundleExtension);
+	hr = BextGetBootstrapperExtensionDataNode(pixdBextManifest, PANELSW_BACKEND_EXTENSION_ID, &pixnBundleExtension);
 	BextExitOnFailure(hr, "Failed to get BundleExtensionData entry for '%ls'", PANELSW_BACKEND_EXTENSION_ID);
 
 	hr = ParseSearches(pixnBundleExtension);
@@ -88,6 +99,15 @@ STDMETHODIMP CPanelSwBundleExtension::Search(LPCWSTR wzId, LPCWSTR wzVariable)
 {
 	HRESULT hr = S_OK;
 
+	hr = IsOnCommandLine(wzVariable);
+	BextExitOnFailure(hr, "Failed to check whether or not variable '%ls' is on the command line", wzVariable);
+
+	if (hr == S_OK)
+	{
+		BextLog(BOOTSTRAPPER_EXTENSION_LOG_LEVEL_STANDARD, "Skipping search for variable '%ls' because it was set on the command line", wzVariable);
+		ExitFunction();
+	}
+
 	for (long i = 0; i < _cSearches; ++i)
 	{
 		if (CSTR_EQUAL == ::CompareStringW(LOCALE_INVARIANT, 0, _pSearches[i]._szId, -1, wzId, -1))
@@ -124,6 +144,15 @@ HRESULT CPanelSwBundleExtension::Reset()
 	}
 	ReleaseNullMem(_pSearches);
 	_cSearches = 0;
+
+	if (_pszCommandLineArgs)
+	{
+		AppFreeCommandLineArgs(_pszCommandLineArgs);
+		_pszCommandLineArgs = nullptr;
+	}
+	_cCommandLineArgs = 0;
+
+	BalInfoUninitialize(&_bundleInfo);
 
 	return S_OK;
 }
@@ -373,6 +402,46 @@ LExit:
 	ReleaseStr(szValue);
 	ReleaseVerutilVersion(pVersion);
 
+	return hr;
+}
+
+HRESULT CPanelSwBundleExtension::IsOnCommandLine(LPCWSTR szVariableName)
+{
+	HRESULT hr = S_OK;
+	BAL_INFO_OVERRIDABLE_VARIABLE* pOverridableVar = nullptr;
+	DWORD dwCmpFlags = 0;
+
+	hr = DictGetValue(_bundleInfo.overridableVariables.sdVariables, szVariableName, (void**)&pOverridableVar);
+	if ((hr == E_NOTFOUND) || (hr == E_INVALIDARG))
+	{
+		hr = S_FALSE;
+		ExitFunction();
+	}
+
+	if (_bundleInfo.overridableVariables.commandLineType == BAL_INFO_VARIABLE_COMMAND_LINE_TYPE_CASE_INSENSITIVE)
+	{
+		dwCmpFlags |= NORM_IGNORECASE;
+	}
+
+	for (int i = 0; i < _cCommandLineArgs; ++i)
+	{
+		LPCWSTR szArg = _pszCommandLineArgs[i];
+		LPCWSTR szVarNameEnd = ::wcschr(szArg, L'=');
+
+		if (!szVarNameEnd)
+		{
+			continue;
+		}
+
+		if (CSTR_EQUAL == ::CompareString(LOCALE_NEUTRAL, dwCmpFlags, szArg, szVarNameEnd - szArg, szVariableName, -1))
+		{
+			hr = S_OK;
+			ExitFunction();
+		}
+	}
+	hr = S_FALSE;
+
+LExit:
 	return hr;
 }
 
