@@ -7,18 +7,53 @@ HRESULT CSummaryStream::IsUserContext()
 {
 	HRESULT hr = S_OK;
 	INT iWordCount = 0;
+	CWixString szALLUSERS;
+	CWixString szMSIINSTALLPERUSER;
 
-	hr = GetSummaryStreamProperty(SummaryStreamProperties::PID_WORDCOUNT, &iWordCount);
+	hr = GetSummaryStreamProperty(SummaryStreamProperties::SUMMARYSTREAM_PID_WORDCOUNT, &iWordCount);
 	ExitOnFailure(hr, "Failed getting word-count property from summary stream");
 
-	if ((iWordCount & SummaryStreamWordCount::WORD_COUNT_UAC_COMPLIANT) == SummaryStreamWordCount::WORD_COUNT_UAC_COMPLIANT)
-	{
-		hr = S_OK;
-	}
-	else
+	if ((iWordCount & SummaryStreamWordCount::WORD_COUNT_UAC_COMPLIANT) == 0)
 	{
 		hr = S_FALSE;
+		ExitFunction();
 	}
+
+	hr = WcaGetProperty(L"ALLUSERS", (LPWSTR*)szALLUSERS);
+	ExitOnFailure(hr, "Failed to get property");
+
+	if (szALLUSERS.IsNullOrEmpty())
+	{
+		hr = S_FALSE;
+		ExitFunction();
+	}
+	if (szALLUSERS.Equals(L"1"))
+	{
+		hr = S_OK;
+		ExitFunction();
+	}
+	if (!szALLUSERS.Equals(L"2"))
+	{
+		hr = E_INVALIDDATA;
+		ExitOnFailure(hr, "ALLUSERS has invalid value '%ls'", (LPCWSTR)szALLUSERS);
+	}
+
+	hr = WcaGetProperty(L"MSIINSTALLPERUSER", (LPWSTR*)szMSIINSTALLPERUSER);
+	ExitOnFailure(hr, "Failed to get property");
+
+	if (szMSIINSTALLPERUSER.IsNullOrEmpty())
+	{
+		hr = S_OK;
+		ExitFunction();
+	}
+	if (szMSIINSTALLPERUSER.Equals(L"1"))
+	{
+		hr = S_FALSE;
+		ExitFunction();
+	}
+
+	hr = E_INVALIDDATA;
+	ExitOnFailure(hr, "MSIINSTALLPERUSER has invalid value '%ls'", (LPCWSTR)szMSIINSTALLPERUSER);
 
 LExit:
 	return hr;
@@ -31,7 +66,7 @@ HRESULT CSummaryStream::IsPackageX64()
 	DWORD dwSemiColonIndex = INFINITE;
 	DWORD dw64Index = INFINITE;
 
-	hr = GetSummaryStreamProperty(SummaryStreamProperties::PID_TEMPLATE, (LPWSTR*)szTemplate);
+	hr = GetSummaryStreamProperty(SummaryStreamProperties::SUMMARYSTREAM_PID_TEMPLATE, (LPWSTR*)szTemplate);
 	ExitOnFailure(hr, "Failed getting template property from summary stream");
 
 	if (szTemplate.IsNullOrEmpty())
@@ -93,8 +128,7 @@ HRESULT CSummaryStream::GetSummaryStreamProperty(SummaryStreamProperties iProper
 	dwRes = ::MsiSummaryInfoGetProperty(hSummaryInfo, iProperty, &uiDataType, &iJunk, &ftJunk, (LPWSTR)szValue, &dwDataSize);
 	ExitOnWin32Error(dwRes, hr, "Failed to get summary stream property");
 
-	*pszValue = szValue;
-	szValue = nullptr;
+	*pszValue = szValue.Detach();
 
 LExit:
 	return hr;

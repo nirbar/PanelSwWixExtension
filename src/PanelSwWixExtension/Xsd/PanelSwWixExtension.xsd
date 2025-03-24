@@ -2076,7 +2076,9 @@ Call ShellExecuteEx with parameters
         <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Fragment" />
       </xs:appinfo>
       <xs:documentation>
-        <![CDATA[Overwrite or create registry values in Software\Microsoft\Windows\CurrentVersion\Uninstall\[ProductCode].]]>
+        <![CDATA[Overwrite or create registry values in Software\Microsoft\Windows\CurrentVersion\Uninstall\[ProductCode].
+        By default, the value will be removed on uninstall and set on clean install. To override this behavior set the Condition value.
+        ]]>
       </xs:documentation>
     </xs:annotation>
     <xs:complexType>
@@ -2094,17 +2096,17 @@ Call ShellExecuteEx with parameters
           </xs:attribute>
           <xs:attribute name="Data" type="xs:string" use="required">
             <xs:annotation>
-              <xs:documentation>Data of the registry value.</xs:documentation>
+              <xs:documentation>Data of the registry value. If the data evaluates to a null value, then the registry value will be deleted</xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="DataType" default="REG_SZ" use="optional" type="RegistryValueType">
             <xs:annotation>
-              <xs:documentation>Data type of the registry value. One of REG_SZ, REG_DWORD. Default is REG_SZ</xs:documentation>
+              <xs:documentation>Data type of the registry value. One of REG_NONE, REG_SZ, REG_EXPAND_SZ, REG_DWORD, REG_QWORD. Default is REG_SZ</xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="Condition" type="xs:string" use="optional">
             <xs:annotation>
-              <xs:documentation>Condition on executing the modification</xs:documentation>
+              <xs:documentation>Condition on executing the modification. By default, the value will be removed on uninstall and set on clean install</xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>
@@ -2237,12 +2239,13 @@ Call ShellExecuteEx with parameters
   <xs:element name="RemoveRegistryValue">
     <xs:annotation>
       <xs:appinfo>
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Component" />
         <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Package" />
         <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Module" />
         <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Fragment" />
       </xs:appinfo>
       <xs:documentation>
-        <![CDATA[Remove registry values.]]>
+        <![CDATA[Remove registry values. When nested under a Component, the value will be removed on uninstall, only if the Condition evaluates to true. When not under a Component, the value will be removed based on the condition evaluation alone.]]>
       </xs:documentation>
     </xs:annotation>
     <xs:complexType>
@@ -2268,17 +2271,10 @@ Call ShellExecuteEx with parameters
               <xs:documentation>Name of the registry value. Deafult is same as Id attribute.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="Area" use="optional">
+          <xs:attribute name="x64" use="optional" type="wix:YesNoDefaultType" default="default">
             <xs:annotation>
-              <xs:documentation>Remove the value from the x86 / x64 area. Default to the package's platform.</xs:documentation>
+              <xs:documentation>Remove the value from the x86 / x64 area. Default to the component's or package's platform.</xs:documentation>
             </xs:annotation>
-            <xs:simpleType>
-              <xs:restriction base="xs:string">
-                <xs:enumeration value="x86" />
-                <xs:enumeration value="x64" />
-                <xs:enumeration value="Default" />
-              </xs:restriction>
-            </xs:simpleType>
           </xs:attribute>
         </xs:extension>
       </xs:simpleContent>
@@ -2454,8 +2450,11 @@ Call ShellExecuteEx with parameters
       <xs:documentation>Windows registry data types.</xs:documentation>
     </xs:annotation>
     <xs:restriction base="xs:NMTOKEN">
+      <xs:enumeration value="REG_NONE" />
       <xs:enumeration value="REG_SZ" />
+      <xs:enumeration value="REG_EXPAND_SZ" />
       <xs:enumeration value="REG_DWORD" />
+      <xs:enumeration value="REG_QWORD" />
     </xs:restriction>
   </xs:simpleType>
 

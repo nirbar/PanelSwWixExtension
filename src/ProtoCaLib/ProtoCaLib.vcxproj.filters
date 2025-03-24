@@ -79,6 +79,9 @@
     <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\reparsePointDetails.pb.cc">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\registryOperationsDetails.pb.cc">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\customActionData.pb.h">
@@ -141,6 +144,9 @@
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\reparsePointDetails.pb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\registryOperationsDetails.pb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="command.proto">
@@ -201,6 +207,9 @@
       <Filter>Protobuf</Filter>
     </None>
     <None Include="reparsePointDetails.proto">
+      <Filter>Protobuf</Filter>
+    </None>
+    <None Include="registryOperationsDetails.proto">
       <Filter>Protobuf</Filter>
     </None>
   </ItemGroup>

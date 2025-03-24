@@ -36,7 +36,11 @@ protected:
 
 	HRESULT GetCustomActionData(LPWSTR* pszCustomActionData);
 
+	HRESULT GetUserToken(HANDLE* phUserToken, LPWSTR* pszUserName);
+
 private:
+	HRESULT GetMsiexecUser(HANDLE* phUserToken, LPWSTR* pszUserName);
+
 	::com::panelsw::ca::CustomActionData _cad;
 };
 

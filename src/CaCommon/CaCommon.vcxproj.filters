@@ -39,9 +39,6 @@
     <ClCompile Include="SqlQuery.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="RegistryKey.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="pch.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -74,9 +71,6 @@
     <ClInclude Include="SqlQuery.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="RegistryKey.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="pch.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -84,9 +78,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="ErrorPrompter.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\errorHandling.pb.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

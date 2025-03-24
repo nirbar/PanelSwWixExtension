@@ -21,11 +21,10 @@ namespace PanelSw.Wix.Extensions.Symbols
                 return new ColumnDefinition[]
                 {
                     new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
-                    new ColumnDefinition(nameof(ProductCode), ColumnType.Localized, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(ProductCode), ColumnType.Localized, 0, false, true, ColumnCategory.Text, modularizeType: ColumnModularizeType.None),
                     new ColumnDefinition(nameof(Name), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
-                    new ColumnDefinition(nameof(Data), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
-                    new ColumnDefinition(nameof(DataType), ColumnType.String, 0, false, false, ColumnCategory.Text, modularizeType: ColumnModularizeType.Property),
-                    new ColumnDefinition(nameof(Attributes), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 1, maxValue: 2),
+                    new ColumnDefinition(nameof(Data), ColumnType.Localized, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
+                    new ColumnDefinition(nameof(DataType), ColumnType.Number, 0, false, false, ColumnCategory.Integer, modularizeType: ColumnModularizeType.None),
                     new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
                 };
             }
@@ -55,22 +54,25 @@ namespace PanelSw.Wix.Extensions.Symbols
             set => this.Set(2, value);
         }
 
-        public string DataType
+        public RegDataType DataType
         {
-            get => Fields[3].AsString();
-            set => this.Set(3, value);
-        }
-
-        public int Attributes
-        {
-            get => Fields[4].AsNumber();
-            set => this.Set(4, value);
+            get => (RegDataType)Fields[3].AsNumber();
+            set => this.Set(3, (int)value);
         }
 
         public string Condition
         {
-            get => Fields[5].AsString();
-            set => this.Set(5, value);
+            get => Fields[4].AsString();
+            set => this.Set(4, value);
+        }
+
+        public enum RegDataType
+        {
+            REG_NONE = 0,// No value type
+            REG_SZ = 1,// Unicode nul terminated string
+            REG_EXPAND_SZ = 2,// Unicode nul terminated string
+            REG_DWORD = 4,// 32-bit number
+            REG_QWORD = 11, // 64-bit number
         }
     }
 }

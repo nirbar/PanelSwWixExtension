@@ -114,12 +114,10 @@
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="MsiSqlQuery.cpp" />
     <ClCompile Include="PathSearch.cpp" />
-    <ClCompile Include="RegDataSerializer.cpp" />
     <ClCompile Include="CustomUninstallKey.cpp" />
     <ClCompile Include="ReadIniValues.cpp" />
-    <ClCompile Include="RegistryXmlParser.cpp" />
+    <ClCompile Include="RegistryOperations.cpp" />
     <ClCompile Include="RegularExpression.cpp" />
-    <ClCompile Include="RemoveRegistryValue.cpp" />
     <ClCompile Include="Rollback.cpp" />
     <ClCompile Include="ServiceConfig.cpp" />
     <ClCompile Include="SetPropertyFromPipe.cpp" />
@@ -152,9 +150,7 @@
     <ClInclude Include="FileIterator.h" />
     <ClInclude Include="FileOperations.h" />
     <ClInclude Include="FileRegex.h" />
-    <ClInclude Include="RegDataSerializer.h" />
-    <ClInclude Include="CustomUninstallKey.h" />
-    <ClInclude Include="RegistryXmlParser.h" />
+    <ClInclude Include="RegistryOperations.h" />
     <ClInclude Include="ReparsePoint.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="RestartLocalResources.h" />
@@ -196,9 +192,6 @@
       <AutoGen>True</AutoGen>
     </ClInclude>
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\unzipDetails.pb.h">
-      <AutoGen>True</AutoGen>
-    </ClInclude>
-    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\registryValueDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\obfuscatedString.pb.h">

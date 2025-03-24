@@ -9,19 +9,47 @@
 
   <Fragment>
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
-    <PanelSW:RemoveRegistryValue Root="HKLM" Key="Software\PanelSW\Nir" Name="Bar" Area="x86" Condition="COND1"/>
-    <PanelSW:RemoveRegistryValue Root="HKLM" Key="Software\PanelSW\Nir" Name="Bar" Area="x64"/>
 
     <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
     </StandardDirectory>
+    <StandardDirectory Id="ProgramFilesFolder">
+      <Directory Id="INSTALLFOLDER32" Name="UnitTestSetup" />
+    </StandardDirectory>
   </Fragment>
 
+  <!-- Test designed for x64 package! -->
   <Fragment>
-    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-      <Component Id="Test">
-        <File Id="Test" Source="$(sys.SOURCEFILEPATH)" KeyPath="yes"></File>
+    <PanelSW:RemoveRegistryValue Root="HKLM" Key="Software\RemoveRegistryValueUT" Name="hklm-32" x64="no"/>
+    <PanelSW:RemoveRegistryValue Root="HKLM" Key="Software\RemoveRegistryValueUT" Name="hklm-64" x64="yes"/>
+    <PanelSW:RemoveRegistryValue Root="HKLM" Key="Software\RemoveRegistryValueUT" Name="hklm-default" x64="default"/>
+
+    <ComponentGroup Id="ProductComponents">
+      <Component Id="Test" Directory="INSTALLFOLDER">
+        <File Id="Test" Source="$(sys.SOURCEFILEDIR)RemoveRegistryValueUT.bat" Compressed="no"/>
+      </Component>
+
+      <Component Id="regPermanent" Permanent="yes" Guid="{5020E96D-8E08-4E7D-A105-8EFC4E9710FA}" Directory="INSTALLFOLDER">
+        <PanelSW:RemoveRegistryValue Root="HKLM" Key="Software\RemoveRegistryValueUT" Name="comp-hklm-permanent"/>
+      </Component>
+
+      <Component Id="reg32" Guid="{25AD4D5E-5870-4820-BF08-8CEE75559EC2}" Bitness="always32" Directory="INSTALLFOLDER32">
+        <PanelSW:RemoveRegistryValue Root="HKMU" Key="Software\RemoveRegistryValueUT" Name="comp32-hkmu-default" x64="default"/>
+        <PanelSW:RemoveRegistryValue Root="HKMU" Key="Software\RemoveRegistryValueUT" Name="comp32-hkmu-64" x64="yes"/>
+      </Component>
+
+      <Component Id="reg64" Guid="{5FF75D51-464F-4183-8F86-E1D0993195A4}" Directory="INSTALLFOLDER">
+        <PanelSW:RemoveRegistryValue Root="HKLM" Key="Software\RemoveRegistryValueUT" Name="comp64-hklm-default" x64="default"/>
+        <PanelSW:RemoveRegistryValue Root="HKLM" Key="Software\RemoveRegistryValueUT" Name="comp64-hklm-32" x64="no"/>
+
+        <PanelSW:RemoveRegistryValue Root="HKCR" Key="Software\RemoveRegistryValueUT" Name="comp64-hkcr"/>
+        <PanelSW:RemoveRegistryValue Root="HKCU" Key="Software\RemoveRegistryValueUT" Name="comp64-hkcu"/>
+        <PanelSW:RemoveRegistryValue Root="HKU" Key=".DEFAULT\Software\RemoveRegistryValueUT" Name="comp64-hku"/>
       </Component>
     </ComponentGroup>
+
+    <InstallExecuteSequence>
+      <Custom Action="Rollback_Deferred" Before="InstallFiles" Condition="DO_ROLLBACK"/>
+    </InstallExecuteSequence>
   </Fragment>
 </Wix>

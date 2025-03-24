@@ -10,6 +10,9 @@
     <Compile Include="RemoveRegistryValueUT.wxs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="RemoveRegistryValueUT.bat" />
+  </ItemGroup>
+  <ItemGroup>
     <WixExtension Include="PanelSwWixExtension">
       <HintPath>$(BuildFolder)..\AnyCPU\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</HintPath>
       <Name>PanelSwWixExtension</Name>

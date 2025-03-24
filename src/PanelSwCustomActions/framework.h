@@ -6,6 +6,8 @@
 #include <strsafe.h>
 #include <msiquery.h>
 #include <shellapi.h>
+#include <msidefs.h>
+#include <userenv.h>
 
 // WiX Header Files:
 #include <wcautil.h>

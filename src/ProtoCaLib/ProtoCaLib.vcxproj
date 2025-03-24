@@ -123,6 +123,9 @@
     <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\reparsePointDetails.pb.cc">
       <AutoGen>True</AutoGen>
     </ClCompile>
+    <ClCompile Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\registryOperationsDetails.pb.cc">
+      <AutoGen>True</AutoGen>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\customActionData.pb.h">
@@ -185,6 +188,9 @@
     <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\reparsePointDetails.pb.h">
       <AutoGen>True</AutoGen>
     </ClInclude>
+    <ClInclude Include="$(BuildFolder)\obj\$(Configuration)\Protobuf\registryOperationsDetails.pb.h">
+      <AutoGen>True</AutoGen>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="command.proto" />
@@ -207,6 +213,7 @@
     <None Include="unzipDetails.proto" />
     <None Include="zipDetails.proto" />
     <None Include="xslTransformDetails.proto" />
+    <None Include="registryOperationsDetails.proto" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="TidyBuild" />

@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "ServiceConfig.h"
-#include "../CaCommon/RegistryKey.h"
 #include "google\protobuf\any.h"
 using namespace com::panelsw::ca;
 using namespace google::protobuf;

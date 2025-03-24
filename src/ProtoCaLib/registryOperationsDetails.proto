@@ -1,0 +1,20 @@
+syntax = "proto3";
+package com.panelsw.ca;
+option optimize_for = LITE_RUNTIME;
+
+enum RegistryAction {
+	createKey = 0;
+	setValue = 1;
+	deleteKey = 2;
+	deleteValue = 3;
+}
+
+message RegistryOperationsDetails{
+	RegistryAction action = 1;
+	uint32 root = 2;
+	uint32 view = 3;
+	bytes key = 4;
+	bytes name = 5;
+	uint32 type = 6;
+	bytes value = 7;
+}

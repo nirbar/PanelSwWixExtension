@@ -62,7 +62,6 @@
     <ClCompile Include="DeferredActionBase.cpp" />
     <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="MsiBreak.cpp" />
-    <ClCompile Include="RegistryKey.cpp" />
     <ClCompile Include="SqlClientBase.cpp" />
     <ClCompile Include="SqlConnection.cpp" />
     <ClCompile Include="SqlQuery.cpp" />
@@ -81,7 +80,6 @@
     <ClInclude Include="DeferredActionBase.h" />
     <ClInclude Include="ErrorPrompter.h" />
     <ClInclude Include="MsiBreak.h" />
-    <ClInclude Include="RegistryKey.h" />
     <ClInclude Include="SqlClientBase.h" />
     <ClInclude Include="SqlConnection.h" />
     <ClInclude Include="SqlQuery.h" />

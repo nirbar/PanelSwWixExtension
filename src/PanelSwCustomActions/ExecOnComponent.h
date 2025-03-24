@@ -42,8 +42,6 @@ private:
 
 	HRESULT Impersonate(BOOL bImpersonate, LPCWSTR szDomain, LPCWSTR szUser, LPCWSTR szPassword, CWixString* pszEnvironmentMultiSz, IMPERSONATION_CONTEXT* pctxImpersonation);
 	void Unimpersonate(IMPERSONATION_CONTEXT* pctxImpersonation);
-	HRESULT GetUserToken(HANDLE* phUserToken, LPWSTR *pszUserName);
-	HRESULT GetMsiexecUser(HANDLE* phUserToken, LPWSTR *pszUserName);
 
 	HRESULT SetEnvironment(CWixString *pszEnvironmentMultiSz, const ::google::protobuf::Map<std::string, com::panelsw::ca::ObfuscatedString> &customEnv);
 

@@ -14,6 +14,7 @@
 #include "RestartLocalResources.h"
 #include "ConcatFiles.h"
 #include "ReparsePoint.h"
+#include "RegistryOperations.h"
 
 // ReceiverToExecutorFunc implementation.
 HRESULT ReceiverToExecutor(LPCSTR szReceiver, CDeferredActionBase** ppExecutor)
@@ -95,6 +96,11 @@ HRESULT ReceiverToExecutor(LPCSTR szReceiver, CDeferredActionBase** ppExecutor)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating ReparsePoint handler");
 		(*ppExecutor) = new CReparsePoint();
+	}
+	else if (0 == ::strcmp(szReceiver, "CRegistryOperations"))
+	{
+		WcaLog(LOGLEVEL::LOGMSG_VERBOSE, "Creating RegistryOperations handler");
+		(*ppExecutor) = new CRegistryOperations();
 	}
 	else
 	{

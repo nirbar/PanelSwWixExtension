@@ -1,9 +1,6 @@
 #include "pch.h"
 #include "DeferredActionBase.h"
 #include "WixString.h"
-#include <strsafe.h>
-#include <memutil.h>
-#include <wcawow64.h>
 using namespace ::com::panelsw::ca;
 
 static void FirstLog(MSIHANDLE hInstall, LPCSTR szMessage);
@@ -412,4 +409,156 @@ static void FirstLog(MSIHANDLE hInstall, LPCSTR szMessage)
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, szMessage);
 	}
+}
+
+HRESULT CDeferredActionBase::GetUserToken(HANDLE* phUserToken, LPWSTR* pszUserName)
+{
+	HRESULT hr = S_OK;
+	BOOL bRes = TRUE;
+	LPWSTR szSessionUserName = nullptr;
+
+	hr = GetMsiexecUser(phUserToken, pszUserName);
+	if (FAILED(hr))
+	{
+		WcaLogError(hr, "Failed to get user from client msiexec process. Trying to get from session");
+		hr = S_OK;
+		DWORD dwNameSize = 0;
+
+		bRes = ::WTSQueryUserToken(WTS_CURRENT_SESSION, phUserToken);
+		ExitOnNullWithLastError(bRes, hr, "Failed to get user token from session");
+
+		if (pszUserName)
+		{
+			bRes = ::WTSQuerySessionInformation(WTS_CURRENT_SERVER_HANDLE, WTS_CURRENT_SESSION, WTS_INFO_CLASS::WTSUserName, &szSessionUserName, &dwNameSize);
+			ExitOnNullWithLastError(bRes, hr, "Failed to get user name from session");
+
+			if (szSessionUserName && *szSessionUserName)
+			{
+				hr = StrAllocString(pszUserName, szSessionUserName, 0);
+				ExitOnFailure(hr, "Failed to copy user name");
+			}
+		}
+	}
+
+LExit:
+	if (szSessionUserName)
+	{
+		::WTSFreeMemory(szSessionUserName);
+		szSessionUserName = nullptr;
+	}
+
+	return hr;
+}
+
+HRESULT CDeferredActionBase::GetMsiexecUser(HANDLE* phUserToken, LPWSTR* pszUserName)
+{
+	HRESULT hr = S_OK;
+	BOOL bRes = TRUE;
+	DWORD* pdwProcessIds = nullptr;
+	DWORD cdwProcessIds = 0;
+	HANDLE hProc = NULL;
+	HANDLE hProcToken = NULL;
+	TOKEN_USER* pTokenUser = nullptr;
+	CWixString szUserSID;
+	PSID pUserSID = nullptr;
+	BOOL bFound = FALSE;
+	DWORD dwSize1 = 0;
+	LPTSTR szUserName = nullptr;
+	LPTSTR szDomain = nullptr;
+	SID_NAME_USE sidName;
+
+	hr = WcaGetProperty(L"UserSID", (LPWSTR*)szUserSID);
+	ExitOnFailure(hr, "Failed to get property");
+
+	bRes = ::ConvertStringSidToSid((LPCWSTR)szUserSID, &pUserSID);
+	ExitOnNullWithLastError(bRes, hr, "Failed to convert SID from string");
+
+	hr = ProcFindAllIdsFromExeName(L"msiexec.exe", &pdwProcessIds, &cdwProcessIds);
+	ExitOnFailure(hr, "Failed to get msiexec processes");
+
+	for (DWORD i = 0; i < cdwProcessIds; ++i)
+	{
+		ReleaseHandle(hProc);
+		ReleaseHandle(hProcToken);
+		ReleaseNullMem(pTokenUser);
+		dwSize1 = 0;
+
+		hProc = ::OpenProcess(PROCESS_ALL_ACCESS, FALSE, pdwProcessIds[i]);
+		ExitOnNullWithLastError(hProc, hr, "Failed to open process handle");
+
+		bRes = ::OpenProcessToken(hProc, TOKEN_ALL_ACCESS, &hProcToken);
+		ExitOnNullWithLastError(bRes, hr, "Failed to get process token");
+
+		bRes = ::GetTokenInformation(hProcToken, TOKEN_INFORMATION_CLASS::TokenUser, pTokenUser, dwSize1, &dwSize1);
+		if (dwSize1)
+		{
+			pTokenUser = (PTOKEN_USER)MemAlloc(dwSize1, TRUE);
+			ExitOnNull(pTokenUser, hr, E_OUTOFMEMORY, "Failed to get allocate memory");
+
+			bRes = ::GetTokenInformation(hProcToken, TOKEN_INFORMATION_CLASS::TokenUser, pTokenUser, dwSize1, &dwSize1);
+		}
+		ExitOnNullWithLastError(bRes, hr, "Failed to get token's user");
+
+		if (pTokenUser && ::EqualSid(pUserSID, pTokenUser->User.Sid))
+		{
+			bRes = ::DuplicateTokenEx(hProcToken, TOKEN_ALL_ACCESS, nullptr, SECURITY_IMPERSONATION_LEVEL::SecurityImpersonation, TOKEN_TYPE::TokenPrimary, phUserToken);
+			ExitOnNullWithLastError(bRes, hr, "Failed to duplicate user token");
+
+			ReleaseHandle(hProcToken);
+			bFound = TRUE;
+			break;
+		}
+	}
+	ExitOnNull(bFound, hr, E_NOTFOUND, "Failed to find user token from msiexec.exe");
+
+	// Best effort to get user name
+	if (pszUserName)
+	{
+		DWORD dwSize2 = 0;
+		dwSize1 = 0;
+
+		bRes = ::LookupAccountSid(nullptr, pTokenUser->User.Sid, szUserName, &dwSize1, szDomain, &dwSize2, &sidName);
+		if (dwSize1 || dwSize2)
+		{
+			if (dwSize1)
+			{
+				hr = StrAlloc(&szUserName, dwSize1);
+				ExitOnFailure(hr, "Failed to allocate memory");
+			}
+			if (dwSize2)
+			{
+				hr = StrAlloc(&szDomain, dwSize2);
+				ExitOnFailure(hr, "Failed to allocate memory");
+			}
+
+			bRes = ::LookupAccountSid(nullptr, pTokenUser->User.Sid, szUserName, &dwSize1, szDomain, &dwSize2, &sidName);
+			if (!bRes)
+			{
+				WcaLogError(HRESULT_FROM_WIN32(::GetLastError()), "Failed to get user name from SID");
+				ExitFunction();
+			}
+
+			hr = StrAllocFormatted(pszUserName, L"%ls\\%ls", szDomain, szUserName);
+			if (FAILED(hr))
+			{
+				WcaLogError(hr, "Failed to format user name");
+				hr = S_OK;
+				ExitFunction();
+			}
+		}
+	}
+
+LExit:
+	ReleaseMem(pdwProcessIds);
+	ReleaseHandle(hProc);
+	ReleaseHandle(hProcToken);
+	ReleaseMem(pTokenUser);
+	ReleaseStr(szUserName);
+	ReleaseStr(szDomain);
+	if (pUserSID)
+	{
+		::LocalFree(pUserSID);
+	}
+
+	return hr;
 }

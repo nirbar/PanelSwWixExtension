@@ -2,6 +2,7 @@ using Newtonsoft.Json.Linq;
 using PanelSw.Wix.Extensions.Symbols;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -11,6 +12,7 @@ using WixToolset.Data;
 using WixToolset.Data.Symbols;
 using WixToolset.Data.WindowsInstaller;
 using WixToolset.Extensibility;
+using static PanelSw.Wix.Extensions.Symbols.PSW_CustomUninstallKey;
 
 namespace PanelSw.Wix.Extensions
 {
@@ -276,6 +278,9 @@ namespace PanelSw.Wix.Extensions
                                 break;
                             case "RemoveFolderEx":
                                 ParseRemoveFolderEx(section, element, componentId);
+                                break;
+                            case "RemoveRegistryValue":
+                                ParseRemoveRegistryValue(section, element, componentId);
                                 break;
                             default:
                                 ParseHelper.UnexpectedElement(parentElement, element);
@@ -808,17 +813,17 @@ namespace PanelSw.Wix.Extensions
                     customActions.Add("FileRegex_commit");
                     break;
                 case "PSW_CustomUninstallKey":
-                    customActions.Add("CustomUninstallKey_Immediate");
-                    customActions.Add("CustomUninstallKey_deferred");
-                    customActions.Add("CustomUninstallKey_rollback");
+                    customActions.Add("CustomUninstallKeySched");
+                    customActions.Add("CustomUninstallKeyExec");
+                    customActions.Add("CustomUninstallKeyRollback");
                     break;
                 case "PSW_ReadIniValues":
                     customActions.Add("ReadIniValues");
                     break;
                 case "PSW_RemoveRegistryValue":
-                    customActions.Add("RemoveRegistryValue_Immediate");
-                    customActions.Add("RemoveRegistryValue_deferred");
-                    customActions.Add("RemoveRegistryValue_rollback");
+                    customActions.Add("RemoveRegistryValueSched");
+                    customActions.Add("RemoveRegistryValueExec");
+                    customActions.Add("RemoveRegistryValueRollback");
                     break;
                 case "PSW_RegularExpression":
                     customActions.Add("RegularExpression");
@@ -3463,22 +3468,15 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        [Flags]
-        private enum CustomUninstallKeyAttributes
-        {
-            write = 1,
-            delete = 2
-        }
-
         private void ParseCustomUninstallKeyElement(IntermediateSection section, XElement element)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string productCode = null;
             string name = null;
             string data = null;
-            string datatype = "REG_SZ";
-            string condition = null;
-            CustomUninstallKeyAttributes attributes = CustomUninstallKeyAttributes.write;
+            RegDataType datatype = RegDataType.REG_SZ;
+            string removeCondition = null;
+            string installCondition = null;
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -3496,13 +3494,11 @@ namespace PanelSw.Wix.Extensions
                             data = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "DataType":
-                            datatype = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
-                            break;
-                        case "Operation": //TODO Isn't documented in the XSD
-                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out attributes);
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out datatype);
                             break;
                         case "Condition":
-                            condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            installCondition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib, EmptyRule.CanBeEmpty);
+                            removeCondition = installCondition;
                             break;
 
                         default:
@@ -3516,30 +3512,37 @@ namespace PanelSw.Wix.Extensions
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Name"));
             }
-
             if (string.IsNullOrEmpty(data))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Data"));
             }
-
-            if (string.IsNullOrEmpty(datatype))
+            if (installCondition == null)
             {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "DataType"));
+                installCondition = "NOT Installed";
+                if (!string.IsNullOrEmpty(productCode)) // Not removing the values of a foreign product
+                {
+                    removeCondition = "NOT Installed";
+                }
             }
 
             if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
-                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "CustomUninstallKey_Immediate");
-                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "CustomUninstallKey_deferred");
-                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "CustomUninstallKey_rollback");
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "CustomUninstallKeySched");
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "RemoveRegistryValueSched");
+
+                PSW_RemoveRegistryValue regRow = section.AddSymbol(new PSW_RemoveRegistryValue(sourceLineNumbers));
+                regRow.Condition = removeCondition;
+                regRow.Key = string.Format("Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{0}", string.IsNullOrEmpty(productCode) ? "[ProductCode]" : productCode);
+                regRow.Name = name;
+                regRow.Root = RegistryRootType.MachineUser;
+                regRow.IsX64 = YesNoDefaultType.Default;
 
                 PSW_CustomUninstallKey row = section.AddSymbol(new PSW_CustomUninstallKey(sourceLineNumbers));
                 row.ProductCode = productCode;
                 row.Name = name;
                 row.Data = data;
                 row.DataType = datatype;
-                row.Attributes = (int)attributes;
-                row.Condition = condition;
+                row.Condition = installCondition;
             }
         }
 
@@ -3617,20 +3620,13 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
-        private enum RegistryArea
-        {
-            x86,
-            x64,
-            Default
-        }
-
-        private void ParseRemoveRegistryValue(IntermediateSection section, XElement element)
+        private void ParseRemoveRegistryValue(IntermediateSection section, XElement element, string componentId = null)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
-            string root = null;
+            RegistryRootType root = RegistryRootType.MachineUser;
             string key = null;
             string name = null;
-            RegistryArea area = RegistryArea.Default;
+            YesNoDefaultType isX64 = YesNoDefaultType.Default;
             string condition = "";
 
             foreach (XAttribute attrib in element.Attributes())
@@ -3640,7 +3636,7 @@ namespace PanelSw.Wix.Extensions
                     switch (attrib.Name.LocalName)
                     {
                         case "Root":
-                            root = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            root = ParseHelper.GetAttributeRegistryRootValue(sourceLineNumbers, attrib, true) ?? RegistryRootType.MachineUser;
                             break;
                         case "Condition":
                             condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
@@ -3651,8 +3647,8 @@ namespace PanelSw.Wix.Extensions
                         case "Name":
                             name = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-                        case "Area":
-                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out area);
+                        case "x64":
+                            isX64 = ParseHelper.GetAttributeYesNoDefaultValue(sourceLineNumbers, attrib);
                             break;
 
                         default:
@@ -3666,10 +3662,6 @@ namespace PanelSw.Wix.Extensions
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Key"));
             }
-            if (string.IsNullOrEmpty(root))
-            {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Root"));
-            }
             if (string.IsNullOrEmpty(name))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Name"));
@@ -3677,13 +3669,13 @@ namespace PanelSw.Wix.Extensions
 
             if (CheckNoCData(element) && !Messaging.EncounteredError)
             {
-                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "RemoveRegistryValue_Immediate");
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "RemoveRegistryValueSched");
                 PSW_RemoveRegistryValue row = section.AddSymbol(new PSW_RemoveRegistryValue(sourceLineNumbers));
+                row.Component_ = componentId;
                 row.Root = root;
                 row.Key = key;
                 row.Name = name;
-                row.Area = area.ToString();
-                row.Attributes = 0;
+                row.IsX64 = isX64;
                 row.Condition = condition;
             }
         }

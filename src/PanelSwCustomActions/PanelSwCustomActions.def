@@ -6,8 +6,7 @@ EXPORTS
 	CleanPendingFileRenameOperations
 	CleanPendingFileRenameOperationsSched
 	CommonDeferred
-	CustomUninstallKey_Immediate
-	CustomUninstallKey_deferred
+	CustomUninstallKeySched
 	DeletePath
 	DismSched
 	ExecOnComponent
@@ -18,8 +17,7 @@ EXPORTS
 	PathExists
 	ReadIniValues
 	RegularExpression
-	RemoveRegistryValue_Deferred
-	RemoveRegistryValue_Immediate
+	RemoveRegistryValueSched
 	Rollback
 	ServiceConfig
 	SplitPath

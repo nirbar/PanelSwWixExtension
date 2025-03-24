@@ -39,33 +39,35 @@
 
   <!-- CustomUninstallKey -->
   <Fragment>
-    <CustomAction Id="CustomUninstallKey_Immediate" SuppressModularization="yes" DllEntry="CustomUninstallKey_Immediate" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="CustomUninstallKey_deferred" SuppressModularization="yes" DllEntry="CustomUninstallKey_deferred" Execute="deferred" Return="check" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="CustomUninstallKey_rollback" SuppressModularization="yes" DllEntry="CustomUninstallKey_deferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="CustomUninstallKeySched" SuppressModularization="yes" DllEntry="CustomUninstallKeySched" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="CustomUninstallKeyExec" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Return="check" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="CustomUninstallKeyRollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
 
     <InstallExecuteSequence>
-      <Custom Action="CustomUninstallKey_Immediate" Before="PublishProduct" Overridable="yes" />
+      <Custom Action="CustomUninstallKeySched" Before="PublishProduct" Overridable="yes" />
     </InstallExecuteSequence>
 
     <UI>
-      <ProgressText Action="CustomUninstallKey_deferred" Message="!(loc.CustomUninstallKey)" />
-      <ProgressText Action="CustomUninstallKey_rollback" Message="!(loc.CustomUninstallKey)" />
+      <ProgressText Action="CustomUninstallKeySched" Message="!(loc.CustomUninstallKey)" />
+      <ProgressText Action="CustomUninstallKeyExec" Message="!(loc.CustomUninstallKey)" />
+      <ProgressText Action="CustomUninstallKeyRollback" Message="!(loc.CustomUninstallKey)" />
     </UI>
   </Fragment>
 
   <!-- RemoveRegistryValue -->
   <Fragment>
-    <CustomAction Id="RemoveRegistryValue_Immediate" SuppressModularization="yes" DllEntry="RemoveRegistryValue_Immediate" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="RemoveRegistryValue_deferred" SuppressModularization="yes" DllEntry="RemoveRegistryValue_Deferred" Execute="deferred" Return="check" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
-    <CustomAction Id="RemoveRegistryValue_rollback" SuppressModularization="yes" DllEntry="RemoveRegistryValue_Deferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="RemoveRegistryValueSched" SuppressModularization="yes" DllEntry="RemoveRegistryValueSched" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="RemoveRegistryValueExec" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Return="check" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="RemoveRegistryValueRollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
 
     <InstallExecuteSequence>
-      <Custom Action="RemoveRegistryValue_Immediate" After="RemoveRegistryValues" Overridable="yes" />
+      <Custom Action="RemoveRegistryValueSched" After="RemoveRegistryValues" Overridable="yes" />
     </InstallExecuteSequence>
 
     <UI>
-      <ProgressText Action="RemoveRegistryValue_deferred" Message="!(loc.RemoveRegistryValue)" />
-      <ProgressText Action="RemoveRegistryValue_rollback" Message="!(loc.RemoveRegistryValue)" />
+      <ProgressText Action="RemoveRegistryValueSched" Message="!(loc.RemoveRegistryValue)" />
+      <ProgressText Action="RemoveRegistryValueExec" Message="!(loc.RemoveRegistryValue)" />
+      <ProgressText Action="RemoveRegistryValueRollback" Message="!(loc.RemoveRegistryValue)" />
     </UI>
   </Fragment>
 
