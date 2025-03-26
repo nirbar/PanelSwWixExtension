@@ -12,7 +12,7 @@
     </StandardDirectory>
 
     <!-- Test designed for x64 package! -->
-    <PanelSW:CustomUninstallKey Name="newVal" Data="1" DataType="REG_DWORD" />
+    <PanelSW:CustomUninstallKey Name="newVal" Data="1" DataType="REG_DWORD" ProductCode="!(bind.property.ProductCode)" />
     <PanelSW:CustomUninstallKey Name="newVal" ProductCode="CustomUninstallKeyUT" Data="1" DataType="REG_DWORD" Condition="" />
     <PanelSW:CustomUninstallKey Name="existingVal" ProductCode="CustomUninstallKeyUT" Data="1" DataType="REG_DWORD" />
 

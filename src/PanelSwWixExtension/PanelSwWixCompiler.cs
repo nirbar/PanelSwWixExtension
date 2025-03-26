@@ -3519,7 +3519,7 @@ namespace PanelSw.Wix.Extensions
             if (installCondition == null)
             {
                 installCondition = "NOT Installed";
-                if (!string.IsNullOrEmpty(productCode)) // Not removing the values of a foreign product
+                if (!string.IsNullOrEmpty(productCode) && !productCode.Equals("[ProductCode]") && !productCode.Equals("!(bind.property.ProductCode)")) // Not removing the values of a foreign product
                 {
                     removeCondition = "NOT Installed";
                 }
