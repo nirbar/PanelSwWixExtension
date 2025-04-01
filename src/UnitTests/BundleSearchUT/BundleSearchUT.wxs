@@ -2,19 +2,20 @@
      xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
   
   <?define UpgradeCode=f37b5c48-dd17-4ff6-af58-1bd697c2c1d7?>
-  <Bundle Name="BundleVariableSearchUT" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="$(UpgradeCode)" bal:CommandLineVariables="caseInsensitive">
+  <Bundle Name="BundleSearchUT" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="$(UpgradeCode)" bal:CommandLineVariables="caseInsensitive">
     <BootstrapperApplication>
       <bal:WixStandardBootstrapperApplication Theme="rtfLicense" LicenseUrl="www.google.com"/>
     </BootstrapperApplication>
 
     <Variable Name="SKIP_CONDITIONS" Value="0" Type="numeric" bal:Overridable="yes"/>
 
+    <!-- BundleVariableSearch tests -->
     <Variable Name="wix" Value="Wix" Persisted="yes" Type="string"/>
     <Variable Name="bundle" Value="Bundle" Persisted="yes" Type="string"/>
     <Variable Name="name" Value="Name" Persisted="yes" Type="string"/>
     <Variable Name="myWiXBundleName" Value="[[wix][bundle][name]]" Persisted="yes" Type="string"/>
     <PanelSW:BundleVariableSearch Condition='SKIP_CONDITIONS&lt;&gt;1' ResultVariable="testWiXBundleName" SearchVariable="myWiXBundleName" UpgradeCode="$(UpgradeCode)"/>
-    <bal:Condition Condition='(SKIP_CONDITIONS=1) OR NOT WixBundleInstalled OR (testWiXBundleName="BundleVariableSearchUT")' Message="Expected testWiXBundleName to be BundleVariableSearchUT"/>
+    <bal:Condition Condition='(SKIP_CONDITIONS=1) OR NOT WixBundleInstalled OR (testWiXBundleName="BundleSearchUT")' Message="Expected testWiXBundleName to be BundleSearchUT"/>
     <PanelSW:BundleVariableSearch Condition='SKIP_CONDITIONS&lt;&gt;1' ResultVariable="testWiXBundleNameUnformatted" SearchVariable="myWiXBundleName" Format="no" UpgradeCode="$(UpgradeCode)"/>
     <bal:Condition Condition='(SKIP_CONDITIONS=1) OR NOT WixBundleInstalled OR (testWiXBundleNameUnformatted="[[wix][bundle][name]]")' Message="Expected testWiXBundleNameUnformatted to be '[[wix][bundle][name]]'"/>
 
@@ -71,9 +72,25 @@
     <PanelSW:BundleVariableSearch Condition='SKIP_CONDITIONS&lt;&gt;1' ResultVariable="CANT_OVRD_ON_COMMAND_LINE" SearchVariable="CANT_OVRD_ON_COMMAND_LINE" UpgradeCode="$(UpgradeCode)"/>
     <bal:Condition Condition='(SKIP_CONDITIONS=1) OR (CANT_OVRD_ON_COMMAND_LINE = 1)' Message="Expected CANT_OVRD_ON_COMMAND_LINE to be 1"/>
 
+    <!-- ArpEntrySearch tests -->
+    <PanelSW:ArpEntrySearch ArpKey="BundleSearchUT-BadVersion" Variable="ArpEntrySearch_BadVersion" Bitness="always32" Condition="SKIP_CONDITIONS&lt;&gt;1"/>
+    <bal:Condition Condition='(SKIP_CONDITIONS=1) OR ArpEntrySearch_BadVersion=&quot;abcd&quot;' Message="Expected ArpEntrySearch_BadVersion to be 'abcd'"/>
+
+    <PanelSW:ArpEntrySearch ArpKey="BundleSearchUT-Version9999" Variable="ArpEntrySearch_NoMatch" Bitness="always32" Condition="SKIP_CONDITIONS&lt;&gt;1"/>
+    <bal:Condition Condition='(SKIP_CONDITIONS=1) OR NOT ArpEntrySearch_NoMatch' Message="Expected ArpEntrySearch_NoMatch to be empty"/>
+
+    <PanelSW:ArpEntrySearch ArpKey="BundleSearchUT-Version*" Variable="ArpEntrySearch_Version1234" Bitness="always32" Condition="SKIP_CONDITIONS&lt;&gt;1"/>
+    <bal:Condition Condition='(SKIP_CONDITIONS=1) OR ArpEntrySearch_Version1234=v1.2.3.4' Message="Expected ArpEntrySearch_Version1234 to be v1.2.3.4"/>
+
+    <PanelSW:ArpEntrySearch ArpKey="BundleSearchUT-Version????" Variable="ArpEntrySearch_Version2345" Bitness="always64" Scope="perMachine" Condition="SKIP_CONDITIONS&lt;&gt;1"/>
+    <bal:Condition Condition='(SKIP_CONDITIONS=1) OR ArpEntrySearch_Version2345=v2.3.4.5' Message="Expected ArpEntrySearch_Version2345 to be v2.3.4.5"/>
+
+    <PanelSW:ArpEntrySearch ArpKey="BundleSearchUT-Version????" Variable="ArpEntrySearch_Version3456" Bitness="always64" Scope="perUser" Condition="SKIP_CONDITIONS&lt;&gt;1"/>
+    <bal:Condition Condition='(SKIP_CONDITIONS=1) OR ArpEntrySearch_Version3456=v3.4.5.6' Message="Expected ArpEntrySearch_Version3456 to be v3.4.5.6"/>
+
     <Chain ParallelCache="yes" DisableSystemRestore="yes">
       <ExePackage SourceFile="$(DeferredExePackagePath)" DetectCondition="1=0" UninstallArguments="/u" InstallArguments="--ignore-me">
-        <Payload SourceFile="$(sys.SOURCEFILEDIR)BundleVariableSearchUT.bat" Compressed="no"/>
+        <Payload SourceFile="$(sys.SOURCEFILEDIR)BundleSearchUT.bat" Compressed="no"/>
       </ExePackage>
     </Chain>
   </Bundle>

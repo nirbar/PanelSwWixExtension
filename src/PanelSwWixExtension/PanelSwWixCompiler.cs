@@ -46,6 +46,9 @@ namespace PanelSw.Wix.Extensions
                         case "BundleVariableSearch":
                             ParseBundleVariableSearchElement(section, element);
                             break;
+                        case "ArpEntrySearch":
+                            ParseArpEntrySearchElement(section, element);
+                            break;
                         default:
                             ParseHelper.UnexpectedElement(parentElement, element);
                             break;
@@ -66,6 +69,9 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "BundleVariableSearch":
                             ParseBundleVariableSearchElement(section, element);
+                            break;
+                        case "ArpEntrySearch":
+                            ParseArpEntrySearchElement(section, element);
                             break;
 
                         case "DuplicateFolder":
@@ -549,6 +555,88 @@ namespace PanelSw.Wix.Extensions
                 symbol.SearchVariable = searchVariable;
                 symbol.UpgradeCode = upgradeCode;
                 symbol.Format = format;
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, SymbolDefinitions.WixBootstrapperExtension, PanelSwWixExtension.MY_EXTENSION_ID);
+                ParseHelper.CreateWixSearchSymbol(section, sourceLineNumbers, element.Name.LocalName, id, resultVariable, condition, after, PanelSwWixExtension.MY_EXTENSION_ID);
+            }
+        }
+
+        // Must be same values as REG_KEY_BITNESS
+        public enum Bitness
+        {
+            Default = 0,
+            Always32 = 1,
+            Always64 = 2,
+        }
+
+        public enum Scope
+        {
+            perMachine,
+            perUser,
+        }
+
+        private void ParseArpEntrySearchElement(IntermediateSection section, XElement element)
+        {
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
+            string keyspec = null;
+            string resultVariable = null;
+            string condition = null;
+            string after = null;
+            Bitness bitness = Bitness.Default;
+            bool isUserContext = false;
+            Identifier id = new Identifier(AccessModifier.Global, $"srch{Guid.NewGuid().ToString("N")}");
+
+            foreach (XAttribute attrib in element.Attributes())
+            {
+                if (IsMyAttribute(element, attrib))
+                {
+                    switch (attrib.Name.LocalName)
+                    {
+                        case "Id":
+                            id = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, attrib);
+                            break;
+                        case "Variable":
+                            resultVariable = ParseHelper.GetAttributeBundleVariableNameValue(sourceLineNumbers, attrib);
+                            break;
+                        case "ArpKey":
+                            keyspec = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Bitness":
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out bitness);
+                            break;
+                        case "Scope":
+                            if (TryParseEnumAttribute(sourceLineNumbers, element, attrib, out Scope scope))
+                            {
+                                isUserContext = (scope == Scope.perUser);
+                            }
+                            break;
+                        case "Condition":
+                            condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "After":
+                            after = ParseHelper.GetAttributeIdentifierValue(sourceLineNumbers, attrib);
+                            break;
+                        default:
+                            ParseHelper.UnexpectedAttribute(element, attrib);
+                            break;
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(keyspec))
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "ArpKey"));
+            }
+            if (string.IsNullOrEmpty(resultVariable))
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Variable"));
+            }
+
+            if (!Messaging.EncounteredError)
+            {
+                var symbol = section.AddSymbol(new PSW_ArpEntrySearch(sourceLineNumbers, id));
+                symbol.ArpSpec = keyspec;
+                symbol.Bitness = bitness;
+                symbol.IsUserContext = isUserContext;
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, SymbolDefinitions.WixBootstrapperExtension, PanelSwWixExtension.MY_EXTENSION_ID);
                 ParseHelper.CreateWixSearchSymbol(section, sourceLineNumbers, element.Name.LocalName, id, resultVariable, condition, after, PanelSwWixExtension.MY_EXTENSION_ID);
             }

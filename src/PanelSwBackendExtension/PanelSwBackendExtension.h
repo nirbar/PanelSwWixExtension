@@ -34,17 +34,41 @@ public:
 
 private:
 
-	struct BUNDLE_VARIABLE_SEARCH
+	enum PANELSW_SEARCH_TYPE
 	{
-		LPWSTR _szId = nullptr;
-		LPWSTR _szUpgradeCode = nullptr;
-		LPWSTR _szSearchVariable = nullptr;
-		BOOL _bFormat = TRUE;
+		PANELSW_SEARCH_TYPE_UNKNOWN,
+		PANELSW_SEARCH_TYPE_BUNDLE_VARIABLE,
+		PANELSW_SEARCH_TYPE_ARP_ENTRY,
 	};
 
+	typedef struct _PANELSW_SEARCH
+	{
+		LPWSTR szId;
+		PANELSW_SEARCH_TYPE type;
+
+		union
+		{
+			struct
+			{
+				LPWSTR szUpgradeCode;
+				LPWSTR szSearchVariable;
+				BOOL bFormat;
+			} BundleVariable;
+			
+			struct
+			{
+				LPWSTR szArpSpec;
+				REG_KEY_BITNESS bitness;
+				BOOL bUserContext;
+			} ArpEntry;
+		};
+	} PANELSW_SEARCH;
+
 	HRESULT ParseSearches(IXMLDOMNode* pixnBundleExtension);
-	HRESULT SearchBundleVariable(LPCWSTR szUpgradeCode, LPCWSTR szVariableName, BOOL bFormat, LPCWSTR szResultVariableName);
+	HRESULT SearchBundleVariable(PANELSW_SEARCH *pSearch, LPWSTR *pszValue);
+	HRESULT SearchArpEntry(PANELSW_SEARCH* pSearch, LPWSTR* pszValue);
 	HRESULT IsOnCommandLine(LPCWSTR szVariableName);
+	HRESULT FormatString(LPCWSTR szFormat, LPWSTR* pszValue);
 
 	HRESULT CreateContainer(LPCWSTR wzContainerId, IPanelSwContainer** ppContainer);
 	HRESULT GetContainer(LPVOID pContext, IPanelSwContainer** ppContainer);
@@ -54,7 +78,7 @@ private:
 
 	std::list<IPanelSwContainer*> _containers;
 	typedef std::list<IPanelSwContainer*>::iterator ContainerIterator;
-	BUNDLE_VARIABLE_SEARCH* _pSearches = nullptr;
+	PANELSW_SEARCH* _pSearches = nullptr;
 	long _cSearches = 0;
 	CPanelSwBundleVariables _bundles;
 	BAL_INFO_BUNDLE _bundleInfo = {};

@@ -271,6 +271,59 @@
       </xs:simpleContent>
     </xs:complexType>
   </xs:element>
+
+  <xs:element name="ArpEntrySearch">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Bundle" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Fragment" />
+      </xs:appinfo>
+      <xs:documentation>
+        <![CDATA[Search for the maximal version of an installed product by ARP key wildcard]]>
+      </xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:simpleContent>
+        <xs:extension base="xs:string">
+          <xs:attribute name="Id" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Id of the search</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Variable" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>Variable name to receive the maximal detected version number</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="ArpKey" type="xs:string" use="required">
+            <xs:annotation>
+              <xs:documentation>ARP entry registry name, optionally containing wildcards '?' and '*'</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Bitness" type="wix:BitnessType" use="optional" default="default">
+            <xs:annotation>
+              <xs:documentation>Registry bitness</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Scope" type="wix:PackageScopeType" use="optional" default="perMachine">
+            <xs:annotation>
+              <xs:documentation>Product context</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="Condition" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Condition to execute the search</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="After" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>ID of a search to be scheduled after</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+        </xs:extension>
+      </xs:simpleContent>
+    </xs:complexType>
+  </xs:element>
   
   <xs:element name="DuplicateFolder">
     <xs:annotation>

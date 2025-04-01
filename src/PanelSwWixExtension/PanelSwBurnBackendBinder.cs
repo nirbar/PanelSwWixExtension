@@ -23,6 +23,7 @@ namespace PanelSw.Wix.Extensions
                     {
                         PSW_ContainerTemplate.SymbolDefinition,
                         PSW_ContainerExtensionData.SymbolDefinition,
+                        PSW_ArpEntrySearch.SymbolDefinition,
                         PSW_BundleVariableSearch.SymbolDefinition,
                         PSW_CustomSearch.SymbolDefinition,
                         PSW_FileGlob.SymbolDefinition,

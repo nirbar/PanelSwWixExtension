@@ -1,4 +1,3 @@
-using System;
 using WixToolset.Data;
 using WixToolset.Data.Burn;
 

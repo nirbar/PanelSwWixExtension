@@ -52,42 +52,67 @@ LExit:
 	return hr;
 }
 
-HRESULT CPanelSwBundleExtension::ParseSearches(IXMLDOMNode *pixnBundleExtension)
+HRESULT CPanelSwBundleExtension::ParseSearches(IXMLDOMNode* pixnBundleExtension)
 {
 	HRESULT hr = S_OK;
 	CComPtr<IXMLDOMNodeList> pixnNodes;
 
 	// Select BundleVariableSearch nodes.
-	hr = XmlSelectNodes(pixnBundleExtension, L"PSW_BundleVariableSearch", &pixnNodes);
-	BextExitOnFailure(hr, "Failed to select PSW_BundleVariableSearch nodes.");
+	hr = XmlSelectNodes(pixnBundleExtension, L"PSW_BundleVariableSearch|PSW_ArpEntrySearch", &pixnNodes);
+	BextExitOnFailure(hr, "Failed to select search nodes.");
 
 	hr = pixnNodes->get_length(&_cSearches);
-	BextExitOnFailure(hr, "Failed to get PSW_BundleVariableSearch node count.");
+	BextExitOnFailure(hr, "Failed to get search node count.");
 
-	hr = MemAllocArray((void**)&_pSearches, sizeof(BUNDLE_VARIABLE_SEARCH), _cSearches);
+	hr = MemAllocArray((void**)&_pSearches, sizeof(PANELSW_SEARCH), _cSearches);
 	BextExitOnFailure(hr, "Failed to allocate memory.");
 
 	for (long i = 0; i < _cSearches; ++i)
 	{
 		CComPtr<IXMLDOMNode> pixnSearch;
-		BUNDLE_VARIABLE_SEARCH* pSearch = _pSearches + i;
-		DWORD dwFormat = 0;
+		PANELSW_SEARCH* pSearch = _pSearches + i;
+		CComBSTR sz;
 
 		hr = pixnNodes->get_item(i, &pixnSearch);
-		BextExitOnFailure(hr, "Failed to get next PSW_BundleVariableSearch node.");
+		BextExitOnFailure(hr, "Failed to get next search node.");
 
-		hr = XmlGetAttributeEx(pixnSearch, L"Id", &pSearch->_szId);
+		hr = pixnSearch->get_nodeName(&sz);
+		BextExitOnFailure(hr, "Failed to get search node name.");
+
+		hr = XmlGetAttributeEx(pixnSearch, L"Id", &pSearch->szId);
 		BextExitOnFailure(hr, "Failed to get @Id.");
 
-		hr = XmlGetAttributeEx(pixnSearch, L"UpgradeCode", &pSearch->_szUpgradeCode);
-		BextExitOnFailure(hr, "Failed to get @UpgradeCode.");
+		if (CSTR_EQUAL == ::CompareStringW(LOCALE_INVARIANT, 0, sz, -1, L"PSW_BundleVariableSearch", -1))
+		{
+			pSearch->type = PANELSW_SEARCH_TYPE_BUNDLE_VARIABLE;
 
-		hr = XmlGetAttributeEx(pixnSearch, L"SearchVariable", &pSearch->_szSearchVariable);
-		BextExitOnFailure(hr, "Failed to get @VariableName.");
+			hr = XmlGetAttributeEx(pixnSearch, L"UpgradeCode", &pSearch->BundleVariable.szUpgradeCode);
+			BextExitOnFailure(hr, "Failed to get @UpgradeCode.");
 
-		hr = XmlGetAttributeNumber(pixnSearch, L"Format", &dwFormat);
-		BextExitOnFailure(hr, "Failed to get @Format.");
-		pSearch->_bFormat = dwFormat;
+			hr = XmlGetAttributeEx(pixnSearch, L"SearchVariable", &pSearch->BundleVariable.szSearchVariable);
+			BextExitOnFailure(hr, "Failed to get @VariableName.");
+
+			hr = XmlGetAttributeNumber(pixnSearch, L"Format", (DWORD*)&pSearch->BundleVariable.bFormat);
+			BextExitOnFailure(hr, "Failed to get @Format.");
+		}
+		else if (CSTR_EQUAL == ::CompareStringW(LOCALE_INVARIANT, 0, sz, -1, L"PSW_ArpEntrySearch", -1))
+		{
+			pSearch->type = PANELSW_SEARCH_TYPE_ARP_ENTRY;
+
+			hr = XmlGetAttributeEx(pixnSearch, L"ArpSpec", &pSearch->ArpEntry.szArpSpec);
+			BextExitOnFailure(hr, "Failed to get @ArpSpec.");
+
+			hr = XmlGetAttributeNumber(pixnSearch, L"Bitness", (DWORD*)&pSearch->ArpEntry.bitness);
+			BextExitOnFailure(hr, "Failed to get @Bitness.");
+
+			hr = XmlGetAttributeNumber(pixnSearch, L"IsUserContext", (DWORD*)&pSearch->ArpEntry.bUserContext);
+			BextExitOnFailure(hr, "Failed to get @IsUserContext.");
+		}
+		else
+		{
+			hr = E_NOT_VALID_STATE;
+			BextExitOnFailure(hr, "Illegal search type '%ls' for '%ls'", sz.m_str, _pSearches[i].szId);
+		}
 	}
 
 LExit:
@@ -98,6 +123,10 @@ LExit:
 STDMETHODIMP CPanelSwBundleExtension::Search(LPCWSTR wzId, LPCWSTR wzVariable)
 {
 	HRESULT hr = S_OK;
+	LPWSTR szValue = nullptr;
+	LPWSTR szTemp = nullptr;
+	VERUTIL_VERSION* pVersion = nullptr;
+	long lVal = 0;
 
 	hr = IsOnCommandLine(wzVariable);
 	BextExitOnFailure(hr, "Failed to check whether or not variable '%ls' is on the command line", wzVariable);
@@ -110,12 +139,56 @@ STDMETHODIMP CPanelSwBundleExtension::Search(LPCWSTR wzId, LPCWSTR wzVariable)
 
 	for (long i = 0; i < _cSearches; ++i)
 	{
-		if (CSTR_EQUAL == ::CompareStringW(LOCALE_INVARIANT, 0, _pSearches[i]._szId, -1, wzId, -1))
+		if (CSTR_EQUAL != ::CompareStringW(LOCALE_INVARIANT, 0, _pSearches[i].szId, -1, wzId, -1))
 		{
-			hr = SearchBundleVariable(_pSearches[i]._szUpgradeCode, _pSearches[i]._szSearchVariable, _pSearches[i]._bFormat, wzVariable);
-			BextExitOnFailure(hr, "Failed to search for variable '%ls' in bundles with upgrade code '%ls'", _pSearches[i]._szSearchVariable, _pSearches[i]._szUpgradeCode);
+			continue;
+		}
+
+		switch (_pSearches[i].type)
+		{
+		case PANELSW_SEARCH_TYPE_BUNDLE_VARIABLE:
+			hr = SearchBundleVariable(&_pSearches[i], &szValue);
+			BextExitOnFailure(hr, "Failed to search for variable '%ls' in bundles with upgrade code '%ls'", _pSearches[i].BundleVariable.szSearchVariable, _pSearches[i].BundleVariable.szUpgradeCode);
+			break;
+		case PANELSW_SEARCH_TYPE_ARP_ENTRY:
+			hr = SearchArpEntry(&_pSearches[i], &szValue);
+			BextExitOnFailure(hr, "Failed to search for ARP entry '%ls'", _pSearches[i].ArpEntry.szArpSpec);
+			break;
+		default:
+			hr = E_NOT_VALID_STATE;
+			BextExitOnFailure(hr, "Illegal search type %u for '%ls'", _pSearches[i].type, _pSearches[i].szId);
+			break;
+		}
+
+		if (hr == S_FALSE)
+		{
 			ExitFunction();
 		}
+		if (!szValue || !*szValue)
+		{
+			hr = m_pEngine->SetVariableString(wzVariable, L"", FALSE);
+			BextExitOnFailure(hr, "Failed to clear variable");
+			ExitFunction();
+		}
+
+		lVal = wcstol(szValue, &szTemp, 10);
+		if ((errno == 0) && szTemp && !*szTemp)
+		{
+			hr = m_pEngine->SetVariableNumeric(wzVariable, lVal);
+			BextExitOnFailure(hr, "Failed to set variable");
+		}
+		else if (SUCCEEDED(VerParseVersion(szValue, 0, TRUE, &pVersion)) && pVersion)
+		{
+			hr = m_pEngine->SetVariableVersion(wzVariable, szValue);
+			BextExitOnFailure(hr, "Failed to set variable");
+		}
+		else
+		{
+			hr = m_pEngine->SetVariableString(wzVariable, szValue, FALSE);
+			BextExitOnFailure(hr, "Failed to set variable");
+		}
+
+		ExitFunction();
 	}
 	hr = E_NOTFOUND;
 
@@ -138,9 +211,22 @@ HRESULT CPanelSwBundleExtension::Reset()
 
 	for (long i = 0; i < _cSearches; ++i)
 	{
-		ReleaseStr(_pSearches[i]._szId);
-		ReleaseStr(_pSearches[i]._szSearchVariable);
-		ReleaseStr(_pSearches[i]._szUpgradeCode);
+		PANELSW_SEARCH* pSearch = _pSearches + i;
+
+		ReleaseStr(pSearch->szId);
+
+		switch (pSearch->type)
+		{
+		case PANELSW_SEARCH_TYPE_BUNDLE_VARIABLE:
+			ReleaseStr(pSearch->BundleVariable.szSearchVariable);
+			ReleaseStr(pSearch->BundleVariable.szUpgradeCode);
+			break;
+		case PANELSW_SEARCH_TYPE_ARP_ENTRY:
+			ReleaseStr(pSearch->ArpEntry.szArpSpec);
+			break;
+		default:
+			break;
+		}
 	}
 	ReleaseNullMem(_pSearches);
 	_cSearches = 0;
@@ -359,48 +445,112 @@ HRESULT CPanelSwBundleExtension::ReleaseContainer(IPanelSwContainer* pContainer)
 	return hr;
 }
 
-HRESULT CPanelSwBundleExtension::SearchBundleVariable(LPCWSTR szUpgradeCode, LPCWSTR szVariableName, BOOL bFormat, LPCWSTR szResultVariableName)
+HRESULT CPanelSwBundleExtension::SearchBundleVariable(PANELSW_SEARCH* pSearch, LPWSTR* pszValue)
 {
 	HRESULT hr = S_OK;
 	LPWSTR szValue = nullptr;
-	LPWSTR szTemp = nullptr;
-	VERUTIL_VERSION* pVersion = nullptr;
-	long lVal = 0;
 
-	hr = _bundles.SearchBundleVariable(szUpgradeCode, szVariableName, bFormat, &szValue);
-	BextExitOnFailure(hr, "Failed to search for bundle variable '%ls'", szVariableName);
+	hr = _bundles.SearchBundleVariable(pSearch->BundleVariable.szUpgradeCode, pSearch->BundleVariable.szSearchVariable, pSearch->BundleVariable.bFormat, &szValue);
+	BextExitOnFailure(hr, "Failed to search for bundle variable '%ls'", pSearch->BundleVariable.szSearchVariable);
 
 	if (hr == S_FALSE)
 	{
 		ExitFunction();
 	}
-	if (!szValue || !*szValue)
-	{
-		hr = m_pEngine->SetVariableString(szResultVariableName, L"", FALSE);
-		BextExitOnFailure(hr, "Failed to set variable");
-		ExitFunction();
-	}
 
-	lVal = wcstol(szValue, &szTemp, 10);
-	if ((errno == 0) && (szTemp == (szValue + wcslen(szValue))))
+	if (pSearch->BundleVariable.bFormat && szValue && *szValue)
 	{
-		hr = m_pEngine->SetVariableNumeric(szResultVariableName, lVal);
-		BextExitOnFailure(hr, "Failed to set variable");
-	}
-	else if (SUCCEEDED(VerParseVersion(szValue, 0, TRUE, &pVersion)) && pVersion)
-	{
-		hr = m_pEngine->SetVariableVersion(szResultVariableName, szValue);
-		BextExitOnFailure(hr, "Failed to set variable");
+		hr = FormatString(szValue, pszValue);
+		BextExitOnFailure(hr, "Failed to format string");
 	}
 	else
 	{
-		hr = m_pEngine->SetVariableString(szResultVariableName, szValue, bFormat);
-		BextExitOnFailure(hr, "Failed to set variable");
+		*pszValue = szValue;
+		szValue = nullptr;
 	}
 
 LExit:
 	ReleaseStr(szValue);
-	ReleaseVerutilVersion(pVersion);
+
+	return hr;
+}
+
+HRESULT CPanelSwBundleExtension::SearchArpEntry(PANELSW_SEARCH* pSearch, LPWSTR* pszValue)
+{
+	HRESULT hr = S_OK;
+	HKEY hkRoot = pSearch->ArpEntry.bUserContext ? HKEY_CURRENT_USER : HKEY_LOCAL_MACHINE;
+	HKEY hkUninstall = NULL;
+	HKEY hkProduct = NULL;
+	DWORD i = 0;
+	LPWSTR szSubkey = nullptr;
+	LPWSTR szDisplayName = nullptr;
+	VERUTIL_VERSION* pMaxVersion = nullptr;
+	VERUTIL_VERSION* pCurrVersion = nullptr;
+
+	hr = RegOpenEx(hkRoot, L"SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall", KEY_READ, pSearch->ArpEntry.bitness, &hkUninstall);
+	BextExitOnFailure(hr, "Failed to open uninstall key");
+
+	while (E_NOMOREITEMS != (hr = RegKeyEnum(hkUninstall, i++, &szSubkey)))
+	{
+		BextExitOnFailure(hr, "Failed to enumerate uninstall key");
+		ReleaseNullStr(szDisplayName);
+		ReleaseVerutilVersion(pCurrVersion);
+		ReleaseRegKey(hkProduct);
+		int nCompare = 0;
+
+		if (!::PathMatchSpec(szSubkey, pSearch->ArpEntry.szArpSpec))
+		{
+			continue;
+		}
+
+		hr = RegOpenEx(hkUninstall, szSubkey, KEY_READ, pSearch->ArpEntry.bitness, &hkProduct);
+		BextExitOnFailure(hr, "Failed to open product key");
+
+		hr = RegReadWixVersion(hkProduct, L"DisplayVersion", &pCurrVersion);
+		if (FAILED(hr))
+		{
+			BextLogError(hr, "Failed to parse DisplayVersion of '%ls'", szSubkey);
+			hr = S_OK;
+			continue;
+		}
+
+		RegReadString(hkProduct, L"DisplayName", &szDisplayName);
+		BextLog(BOOTSTRAPPER_EXTENSION_LOG_LEVEL_STANDARD, "Detected product '%ls' version '%ls'", szDisplayName && *szDisplayName ? szDisplayName : szSubkey, pCurrVersion->sczVersion);
+
+		if (!pMaxVersion)
+		{
+			pMaxVersion = pCurrVersion;
+			pCurrVersion = nullptr;
+			continue;
+		}
+
+		hr = VerCompareParsedVersions(pMaxVersion, pCurrVersion, &nCompare);
+		BextExitOnFailure(hr, "Failed to compare versions");
+
+		if (nCompare < 0)
+		{
+			ReleaseVerutilVersion(pMaxVersion);
+			pMaxVersion = pCurrVersion;
+			pCurrVersion = nullptr;
+		}
+	}
+
+	if (!pMaxVersion)
+	{
+		hr = S_FALSE;
+		ExitFunction();
+	}
+
+	hr = StrAllocString(pszValue, pMaxVersion->sczVersion, 0);
+	BextExitOnFailure(hr, "Failed to allocate string");
+
+LExit:
+	ReleaseStr(szDisplayName);
+	ReleaseStr(szSubkey);
+	ReleaseVerutilVersion(pCurrVersion);
+	ReleaseVerutilVersion(pMaxVersion);
+	ReleaseRegKey(hkUninstall);
+	ReleaseRegKey(hkProduct);
 
 	return hr;
 }
@@ -442,6 +592,31 @@ HRESULT CPanelSwBundleExtension::IsOnCommandLine(LPCWSTR szVariableName)
 	hr = S_FALSE;
 
 LExit:
+	return hr;
+}
+
+HRESULT CPanelSwBundleExtension::FormatString(LPCWSTR szFormat, LPWSTR* pszValue)
+{
+	HRESULT hr = S_OK;
+	LPWSTR szValue = nullptr;
+	SIZE_T cch = 0;
+
+	hr = m_pEngine->FormatString(szFormat, szValue, &cch);
+	if (hr == E_MOREDATA)
+	{
+		hr = StrAlloc(&szValue, ++cch);
+		BextExitOnFailure(hr, "Failed to allocate memory");
+
+		hr = m_pEngine->FormatString(szFormat, szValue, &cch);
+	}
+	BextExitOnFailure(hr, "Failed to format string");
+
+	*pszValue = szValue;
+	szValue = nullptr;
+
+LExit:
+	ReleaseStr(szValue);
+
 	return hr;
 }
 

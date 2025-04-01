@@ -31,6 +31,6 @@
     </BindInputPaths>
   </ItemGroup>
   <ItemGroup>
-    <None Include="BundleVariableSearchUT.bat" />
+    <None Include="BundleSearchUT.bat" />
   </ItemGroup>
 </Project>
