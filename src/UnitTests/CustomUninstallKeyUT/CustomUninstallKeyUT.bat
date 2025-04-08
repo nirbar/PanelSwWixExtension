@@ -2,23 +2,24 @@
 
 ECHO OFF
 SET /A MY_ERR=0
+CD "%~dp0"
 
 :: Install + rollback
 CALL :prepare
-msiexec /i CustomUninstallKeyUT.msi /l*v CustomUninstallKeyUT.msir.log DO_ROLLBACK=1
+ECHO === Testing install and rollback ===
+msiexec /i CustomUninstallKeyUT.msi /qn /l*v CustomUninstallKeyUT.msir.log DO_ROLLBACK=1
 CALL :testRollback
-PAUSE
 
 :: Install
 CALL :prepare
-msiexec /i CustomUninstallKeyUT.msi /l*v CustomUninstallKeyUT.msi.log
+ECHO === Testing install ===
+msiexec /i CustomUninstallKeyUT.msi /qn /l*v CustomUninstallKeyUT.msi.log
 CALL :testInstall
-PAUSE
 
 :: Uninstall
-msiexec /xCustomUninstallKeyUT.msi /l*v CustomUninstallKeyUT.msix.log
+ECHO === Testing uninstall ===
+msiexec /xCustomUninstallKeyUT.msi /qn /l*v CustomUninstallKeyUT.msix.log
 CALL :testUninstall
-PAUSE
 
 :: Clean and exit
 CALL :clean
@@ -32,7 +33,7 @@ EXIT /B %MY_ERR%
 EXIT /B %MY_ERR%
 
 :clean
-	REG delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\CustomUninstallKeyUT" /f
+	REG delete "HKLM\Software\Microsoft\Windows\CurrentVersion\Uninstall\CustomUninstallKeyUT" /reg:64 /f
 EXIT /B %MY_ERR%
 
 :testRollback

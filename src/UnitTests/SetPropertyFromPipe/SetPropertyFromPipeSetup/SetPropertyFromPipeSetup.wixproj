@@ -1,15 +1,9 @@
 <Project Sdk="WixToolset.Sdk">
   <PropertyGroup>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-  </PropertyGroup>
-  <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
     <ProductVersion>3.8</ProductVersion>
     <Name>SetPropertyFromPipeSetup</Name>
   </PropertyGroup>
-  <ItemGroup>
-    <Compile Include="SetPropertyFromPipeSetup.wxs" />
-  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="WixToolset.Util.wixext" />
     <PackageReference Include="TidyBuild" />

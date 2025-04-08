@@ -1,16 +1,17 @@
 ECHO OFF
 SET /A MY_ERR=0
+CD "%~dp0"
 
 :: Install
 CALL :prepareFolders
+ECHO === Testing install ===
 msiexec /i DuplicateFolderUT.msi /qn /l*v DuplicateFolderUT.msi.log TARGETDIR="%CD%\" INSTALLFOLDER_COPY="%CD%\\INSTALLFOLDER_COPY" INSTALLFOLDER_COPY_2="%CD%\\INSTALLFOLDER_COPY_2"
 CALL :testInstall
-PAUSE
 
 :: Uninstall
+ECHO === Testing uninstall ===
 msiexec /xDuplicateFolderUT.msi /qn /l*v DuplicateFolderUT.msix.log TARGETDIR="%CD%\" INSTALLFOLDER_COPY="%CD%\\INSTALLFOLDER_COPY" INSTALLFOLDER_COPY_2="%CD%\\INSTALLFOLDER_COPY_2"
 CALL :testUninstall
-PAUSE
 
 :: Clean and exit
 CALL :cleanFolders

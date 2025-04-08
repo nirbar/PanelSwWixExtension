@@ -1,23 +1,24 @@
 ECHO OFF
 SET /A MY_ERR=0
+CD "%~dp0"
 
 :: Install
 CALL :prepareFolders
-msiexec /i FileOperationsUT.msi /l*v FileOperationsUT.msi.log REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove" CONDITIONED_FOLDER="%CD%\never-remove-2"
+ECHO === Testing install ===
+msiexec /i FileOperationsUT.msi /qn /l*v FileOperationsUT.msi.log REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove" CONDITIONED_FOLDER="%CD%\never-remove-2"
 CALL :testInstall
-PAUSE
 
 :: Repair
 CALL :prepareFolders
-msiexec /fvamus FileOperationsUT.msi /l*v FileOperationsUT.msif.log REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove" CONDITIONED_FOLDER="%CD%\never-remove-2"
+ECHO === Testing reinstall ===
+msiexec /fvamus FileOperationsUT.msi /qn /l*v FileOperationsUT.msif.log REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove" CONDITIONED_FOLDER="%CD%\never-remove-2"
 CALL :testRepair
-PAUSE
 
 :: Uninstall
 CALL :prepareFolders
-msiexec /xFileOperationsUT.msi /l*v FileOperationsUT.msix.log REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove" CONDITIONED_FOLDER="%CD%\never-remove-2"
+ECHO === Testing uninstall ===
+msiexec /xFileOperationsUT.msi /qn /l*v FileOperationsUT.msix.log REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove" CONDITIONED_FOLDER="%CD%\never-remove-2"
 CALL :testUninstall
-PAUSE
 
 :: Clean and exit
 CALL :cleanFolders

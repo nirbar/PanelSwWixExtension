@@ -1,4 +1,4 @@
-name: PanelSwWixExtension-WiX4
+name: PanelSwWixExtension-WiX6
 on:
   pull_request:
   workflow_dispatch:
@@ -11,7 +11,7 @@ on:
       psw_wix_version:
         description: 'PanelSwWix4 version'
         required: true
-        default: 6.0.0-psw-wix.0353-37
+        default: 7.0.0-psw-wix-0371.25
         type: string
 
 jobs:
@@ -37,7 +37,7 @@ jobs:
             Add-Content -Path ${{ github.env }} -Value "PSW_WIX_VERSION=${{ env.DEFAULT_PSW_WIX_VERSION }}"
           }
         env:
-          DEFAULT_PSW_WIX_VERSION: '6.0.0-psw-wix.0353-37'
+          DEFAULT_PSW_WIX_VERSION: '7.0.0-psw-wix-0371.25'
 
       - name: Prepare for build
         run: |
@@ -46,13 +46,23 @@ jobs:
           nuget restore src/dirs.proj
 
       - name: Build PanelSwWixExtension
-        run: msbuild src/dirs.proj -restore -p:FullVersion=${{ env.FULL_VERSION }}
+        run: |
+          msbuild src/dirs.proj -restore -p:FullVersion=${{ env.FULL_VERSION }} -p:UnitTest=all -m
+          msbuild src/dirs.proj -t:RunTests
 
       - name: Build PanelSwWixExtension with PanelSwWix4
         run: |
           msbuild src/dirs.proj -t:WixtoolsetToPanelSwWix4 "-p:PanelSwWix4Version=${{ env.PSW_WIX_VERSION }}" -p:NugetPrereleaseVersion=-psw-wix
           Remove-Item ("${{ github.workspace }}" + "\build") -Recurse -Force
-          msbuild src/dirs.proj -restore -p:FullVersion=${{ env.FULL_VERSION }} "-p:PanelSwWix4Version=${{ env.PSW_WIX_VERSION }}" -p:NugetPrereleaseVersion=-psw-wix -p:EnableZipContainer=true
+          msbuild src/dirs.proj -restore -p:FullVersion=${{ env.FULL_VERSION }} "-p:PanelSwWix4Version=${{ env.PSW_WIX_VERSION }}" -p:NugetPrereleaseVersion=-psw-wix -p:EnableZipContainer=true -p:UnitTest=all -m
+          msbuild src/dirs.proj -t:RunTests
+
+      - name: Upload unit test logs
+        if: failure()
+        uses: actions/upload-artifact@v4.4.0
+        with:
+          name: unit-test-logs
+          path: Build\x*\**\*.log
 
       - uses: actions/upload-artifact@v4.4.0
         with:
@@ -61,11 +71,11 @@ jobs:
           if-no-files-found: error
 
       - name: Publish nuget packages to github and nuget.org
-        if: ${{ github.event.inputs.publish_nuget == 'true' && github.ref == 'refs/heads/master5' }}
+        if: ${{ github.event.inputs.publish_nuget == 'true' && github.ref == 'refs/heads/master6' }}
         env:
           GITHUB_TOKEN: ${{ secrets.TAGGER_PAT }}
         run: |
           dotnet nuget push nuget-out\PanelSwWixExtension4.*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source github
           dotnet nuget push nuget-out\PanelSwWixExtension4.*.nupkg --api-key ${{ secrets.NUGET_TOKEN }} --source https://api.nuget.org/v3/index.json
-          git tag "wix5-v${{ env.FULL_VERSION }}"
+          git tag "wix6-v${{ env.FULL_VERSION }}"
           git push --tags

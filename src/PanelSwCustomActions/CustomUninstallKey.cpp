@@ -11,7 +11,6 @@ extern "C" UINT __stdcall CustomUninstallKeySched(MSIHANDLE hInstall)
 	PMSIHANDLE hView;
 	PMSIHANDLE hRec;
 	CRegistryOperations deferredCAD;
-	CRegistryOperations rollbackCAD;
 	LPBYTE pbData = nullptr;
 	SIZE_T cbData = 0;
 	DWORD dwBitness = 0;
@@ -88,9 +87,6 @@ extern "C" UINT __stdcall CustomUninstallKeySched(MSIHANDLE hInstall)
 		hr = deferredCAD.AddCreateValue(nRoot, dwBitness, (LPCWSTR)szUninstallKey, (LPCWSTR)szName, nDataType, pbData, cbData);
 		ExitOnFailure(hr, "Failed to add rollback data");
 	}
-
-	hr = rollbackCAD.DoDeferredAction(L"CustomUninstallKeyRollback");
-	ExitOnFailure(hr, "Failed to schedule rollback action");
 
 	hr = deferredCAD.DoDeferredAction(L"CustomUninstallKeyExec");
 	ExitOnFailure(hr, "Failed to schedule deferred action");

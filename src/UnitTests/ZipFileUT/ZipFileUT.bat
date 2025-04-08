@@ -1,14 +1,16 @@
 ECHO OFF
 SET /A MY_ERR=0
+CD "%~dp0"
 
 :: Install
 CALL :prepareFolders
-msiexec /i ZipFileUT.msi /l*v ZipFileUT.msi.log MY_DIR="%CD%\\"
+ECHO === Testing install ===
+msiexec /i ZipFileUT.msi /qn /l*v ZipFileUT.msi.log MY_DIR="%CD%\\"
 CALL :testInstall
-PAUSE
 
 :: Uninstall
-msiexec /xZipFileUT.msi /l*v ZipFileUT.msix.log
+ECHO === Testing uninstall ===
+msiexec /xZipFileUT.msi /qn /l*v ZipFileUT.msix.log
 
 :: Clean and exit
 CALL :cleanFolders

@@ -1,16 +1,10 @@
 <Project Sdk="WixToolset.Sdk">
   <PropertyGroup>
-    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
-  </PropertyGroup>
-  <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
     <ProductVersion>3.8</ProductVersion>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="FileOperationsUT.wxs" />
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="run-test.bat" />
+    <None Include="FileOperationsUT.bat" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="WixToolset.Util.wixext" />

@@ -28,10 +28,34 @@
     <ProjectReference Include="PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.csproj" Properties="Configuration=$(Configuration);Platform=AnyCPU" Targets="Restore;Build" BuildInParallel="false" />
     <ProjectReference Include="PanelSwWixExtension\PanelSwWixExtension.csproj" Properties="Configuration=$(Configuration);Platform=AnyCPU;NugetPrereleaseVersion=$(NugetPrereleaseVersion)" Targets="Restore;Build" BuildInParallel="false" />
   </ItemGroup>
-  <ItemGroup Condition="'$(UnitTest)' != ''">
+  <!-- Build a unit test -->
+  <ItemGroup Condition=" '$(UnitTest)' != '' AND '$(UnitTest)' != 'SetPropertyFromPipe' AND '$(UnitTest)' != 'all' ">
     <ProjectReference Include="UnitTests\$(UnitTest)\$(UnitTest).wixproj" Properties="Configuration=$(Configuration);Platform=x86" Targets="Restore;Build" BuildInParallel="false" />
     <ProjectReference Include="UnitTests\$(UnitTest)\$(UnitTest).wixproj" Properties="Configuration=$(Configuration);Platform=x64" Targets="Restore;Build" BuildInParallel="false" Condition=" '$(UnitTestX64)' == '' Or $(UnitTestX64) " />
   </ItemGroup>
+  <!-- Build SetPropertyFromPipe unit test -->
+  <ItemGroup Condition=" '$(UnitTest)' == 'SetPropertyFromPipe' ">
+    <ProjectReference Include="UnitTests\SetPropertyFromPipe\SetPropertyFromPipeBAF\SetPropertyFromPipeBAF.vcxproj" Properties="Configuration=Release;Platform=x86" Targets="Restore;Build" BuildInParallel="false" />
+    <ProjectReference Include="UnitTests\SetPropertyFromPipe\SetPropertyFromPipeBAF\SetPropertyFromPipeBAF.vcxproj" Properties="Configuration=Release;Platform=x64" Targets="Restore;Build" Condition=" '$(UnitTestX64)' == '' Or $(UnitTestX64) " BuildInParallel="false" />
+    <ProjectReference Include="UnitTests\SetPropertyFromPipe\SetPropertyFromPipeSetup\SetPropertyFromPipeSetup.wixproj" Properties="Configuration=$(Configuration);Platform=x86" Targets="Restore;Build" BuildInParallel="false" />
+    <ProjectReference Include="UnitTests\SetPropertyFromPipe\SetPropertyFromPipeSetup\SetPropertyFromPipeSetup.wixproj" Properties="Configuration=$(Configuration);Platform=x64" Targets="Restore;Build" Condition=" '$(UnitTestX64)' == '' Or $(UnitTestX64) " BuildInParallel="false" />
+    <ProjectReference Include="UnitTests\SetPropertyFromPipe\SetPropertyFromPipeBootstrapper\SetPropertyFromPipeBootstrapper.wixproj" Properties="Configuration=$(Configuration);Platform=x86" Targets="Restore;Build" BuildInParallel="false" />
+    <ProjectReference Include="UnitTests\SetPropertyFromPipe\SetPropertyFromPipeBootstrapper\SetPropertyFromPipeBootstrapper.wixproj" Properties="Configuration=$(Configuration);Platform=x64" Targets="Restore;Build" Condition=" '$(UnitTestX64)' == '' Or $(UnitTestX64) " BuildInParallel="false" />
+  </ItemGroup>
+  <!-- Build all unit tests -->
+  <ItemGroup Condition=" '$(UnitTest)' == 'all' ">
+    <ProjectReference Include="UnitTests\*\*.wixproj" Properties="Configuration=$(Configuration);Platform=x86" Targets="Restore;Build" BuildInParallel="true" />
+    <ProjectReference Include="UnitTests\*\*.wixproj" Properties="Configuration=$(Configuration);Platform=x64" Targets="Restore;Build" BuildInParallel="true" Condition=" '$(UnitTestX64)' == '' Or $(UnitTestX64) " />
+  </ItemGroup>
+
+  <!-- Run unit tests with .bat files -->
+  <Target Name="RunTests">
+    <ItemGroup>
+      <BatchFiles Include="$(BaseBuildFolder)\x86\bin\Release\**\*.bat" Exclude="$(BaseBuildFolder)\x86\bin\Release\RemoveRegistryValueUT\RemoveRegistryValueUT.bat;$(BaseBuildFolder)\x86\bin\Release\CustomUninstallKeyUT\CustomUninstallKeyUT.bat" />
+      <BatchFiles Include="$(BaseBuildFolder)\x64\bin\Release\**\*.bat" />
+    </ItemGroup>
+    <Exec Command="%(BatchFiles.FullPath)" WorkingDirectory="%(BatchFiles.RootDir)%(BatchFiles.Directory)" ConsoleToMsBuild="true" LogStandardErrorAsError="false" StandardErrorImportance="normal" IgnoreStandardErrorWarningFormat="true"/>
+  </Target>
   
   <ItemGroup>
     <PackageReference Include="TidyBuild" />
@@ -42,6 +66,7 @@
     <AllMyProjects Include="UnitTests\**\*.*proj" />
   </ItemGroup>
   
+  <!-- Convert projects to PanelSwWix4 -->
   <Target Name="WixtoolsetToPanelSwWix4" Inputs="%(AllMyProjects.FullPath)" Outputs="%(AllMyProjects.FullPath).never">
     <PropertyGroup>
       <JsonFileContents>$([System.IO.File]::ReadAllText('$(MSBuildThisFileDirectory)global.json'))</JsonFileContents>
@@ -62,5 +87,4 @@
                       Overwrite="true" 
                       WriteOnlyWhenDifferent="true" />
   </Target>
-  
 </Project>

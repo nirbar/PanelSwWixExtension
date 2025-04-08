@@ -6,9 +6,9 @@
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
 
-    <CustomActionRef Id="Wix4ExitEarlyWithSuccess_A64"/>
+    <CustomActionRef Id="TerminateSuccessfully_Immediate"/>
     <InstallExecuteSequence>
-      <Custom Action="Wix4ExitEarlyWithSuccess_A64" After="LaunchConditions" Overridable="no" />
+      <Custom Action="TerminateSuccessfully_Immediate" After="LaunchConditions" Overridable="no" />
     </InstallExecuteSequence>
   </Package>
 

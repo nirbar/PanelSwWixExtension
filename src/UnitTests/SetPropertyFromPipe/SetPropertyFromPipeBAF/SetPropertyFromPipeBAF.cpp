@@ -1,7 +1,7 @@
 #include <Windows.h>
 #include <Msi.h>
 #include <dutil.h>
-#include <BootstrapperEngine.h>
+#include <IBootstrapperEngine.h>
 #include <BootstrapperApplication.h>
 #include <IBootstrapperApplication.h>
 #include <BalBaseBAFunctions.h>
@@ -16,7 +16,6 @@ using namespace ::com::panelsw::ca;
 
 #define PROP_NAME	L"MY_PROP"
 #define PROP_VAL	L"MY_VALUE"
-static HRESULT CreateBAFunctions(HMODULE hModule, const BA_FUNCTIONS_CREATE_ARGS* pArgs, BA_FUNCTIONS_CREATE_RESULTS* pResults);
 static HINSTANCE vhInstance = nullptr;
 
 class SetPropertyFromPipeBAF : public CBalBaseBAFunctions
@@ -103,8 +102,8 @@ public:
 		return ERROR_SUCCESS;
 	}
 
-	SetPropertyFromPipeBAF(HMODULE hModule, IBootstrapperEngine* pEngine, const BA_FUNCTIONS_CREATE_ARGS* pArgs) 
-		: CBalBaseBAFunctions(hModule, pEngine, pArgs)
+	SetPropertyFromPipeBAF(HMODULE hModule) 
+		: CBalBaseBAFunctions(hModule)
 		, hPipe_(INVALID_HANDLE_VALUE)
 		, hThread_(NULL)
 	{
@@ -150,46 +149,35 @@ extern "C" BOOL WINAPI DllMain(
 }
 
 extern "C" HRESULT WINAPI BAFunctionsCreate(
-	__in const BA_FUNCTIONS_CREATE_ARGS * pArgs,
-	__inout BA_FUNCTIONS_CREATE_RESULTS * pResults
-)
+    __in const BA_FUNCTIONS_CREATE_ARGS* pArgs,
+    __inout BA_FUNCTIONS_CREATE_RESULTS* pResults
+    )
 {
-	HRESULT hr = S_OK;
+    HRESULT hr = S_OK;
+    SetPropertyFromPipeBAF* pBAFunctions = nullptr;
 
-	hr = CreateBAFunctions(vhInstance, pArgs, pResults);
-	BalExitOnFailure(hr, "Failed to create BAFunctions interface.");
+    BalInitialize(pArgs->pEngine);
+
+    pBAFunctions = new SetPropertyFromPipeBAF(vhInstance);
+    ExitOnNull(pBAFunctions, hr, E_OUTOFMEMORY, "Failed to create new SetPropertyFromPipeBAF object.");
+
+    hr = pBAFunctions->OnCreate(pArgs->pEngine, pArgs->pCommand);
+    ExitOnFailure(hr, "Failed to call OnCreate CPrereqBaf.");
+
+    pResults->pfnBAFunctionsProc = BalBaseBAFunctionsProc;
+    pResults->pvBAFunctionsProcContext = pBAFunctions;
+    pBAFunctions = nullptr;
 
 LExit:
-	return hr;
+    ReleaseObject(pBAFunctions);
+
+    return hr;
 }
 
 extern "C" void WINAPI BAFunctionsDestroy(
-	__in const BA_FUNCTIONS_DESTROY_ARGS* /*pArgs*/,
-	__inout BA_FUNCTIONS_DESTROY_RESULTS* /*pResults*/
-)
+    __in const BA_FUNCTIONS_DESTROY_ARGS* /*pArgs*/,
+    __inout BA_FUNCTIONS_DESTROY_RESULTS* /*pResults*/
+    )
 {
-	BalUninitialize();
-}
-
-static HRESULT CreateBAFunctions(HMODULE hModule, const BA_FUNCTIONS_CREATE_ARGS * pArgs, BA_FUNCTIONS_CREATE_RESULTS * pResults)
-{
-	HRESULT hr = S_OK;
-	SetPropertyFromPipeBAF* pBAFunction = nullptr;
-	IBootstrapperEngine* pEngine = nullptr;
-
-	hr = BalInitializeFromCreateArgs(pArgs->pBootstrapperCreateArgs, &pEngine);
-	ExitOnFailure(hr, "Failed to initialize Bal.");
-
-	pBAFunction = new SetPropertyFromPipeBAF(hModule, pEngine, pArgs);
-	BalExitOnNullWithLastError(pBAFunction, hr, "Failed instantiating IBootstrapperBAFunction");
-
-	pResults->pfnBAFunctionsProc = BalBaseBAFunctionsProc;
-	pResults->pvBAFunctionsProcContext = pBAFunction;
-	pBAFunction = nullptr;
-
-LExit:
-	ReleaseObject(pBAFunction);
-	ReleaseObject(pEngine);
-
-	return hr;
+    BalUninitialize();
 }

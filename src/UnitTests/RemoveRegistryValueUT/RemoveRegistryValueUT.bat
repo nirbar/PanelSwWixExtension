@@ -2,24 +2,25 @@
 
 ECHO OFF
 SET /A MY_ERR=0
+CD "%~dp0"
 
 :: Install
 CALL :prepare
-msiexec /i RemoveRegistryValueUT.msi /l*v RemoveRegistryValueUT.msi.log
+ECHO === Testing install ===
+msiexec /i RemoveRegistryValueUT.msi /qn /l*v RemoveRegistryValueUT.msi.log
 CALL :testInstall
-PAUSE
 
 :: Uninstall + rollback
 CALL :prepare
-msiexec /xRemoveRegistryValueUT.msi /l*v RemoveRegistryValueUT.msir.log DO_ROLLBACK=1
+ECHO === Testing uninstall and rollback ===
+msiexec /xRemoveRegistryValueUT.msi /qn /l*v RemoveRegistryValueUT.msir.log DO_ROLLBACK=1
 CALL :testRollback
-PAUSE
 
 :: Uninstall
 CALL :prepare
-msiexec /xRemoveRegistryValueUT.msi /l*v RemoveRegistryValueUT.msix.log
+ECHO === Testing uninstall ===
+msiexec /xRemoveRegistryValueUT.msi /qn /l*v RemoveRegistryValueUT.msix.log
 CALL :testUninstall
-PAUSE
 
 :: Clean and exit
 CALL :clean
@@ -43,14 +44,14 @@ EXIT /B %MY_ERR%
 EXIT /B %MY_ERR%
 
 :clean
-	REG delete "HKLM\SOFTWARE\RemoveRegistryValueUT" /f
-	REG delete "HKCU\SOFTWARE\RemoveRegistryValueUT" /f
-	REG delete "HKCR\SOFTWARE\RemoveRegistryValueUT" /f
-	REG delete "HKU\.DEFAULT\SOFTWARE\RemoveRegistryValueUT" /f
-	REG delete "HKLM\SOFTWARE\WOW6432Node\RemoveRegistryValueUT" /f
-	REG delete "HKCU\SOFTWARE\WOW6432Node\RemoveRegistryValueUT" /f
-	REG delete "HKCR\SOFTWARE\WOW6432Node\RemoveRegistryValueUT" /f
-	REG delete "HKU\.DEFAULT\SOFTWARE\WOW6432Node\RemoveRegistryValueUT" /f
+	REG delete "HKLM\SOFTWARE\RemoveRegistryValueUT" /reg:64 /f
+	REG delete "HKCU\SOFTWARE\RemoveRegistryValueUT" /reg:64 /f
+	REG delete "HKCR\SOFTWARE\RemoveRegistryValueUT" /reg:64 /f
+	REG delete "HKU\.DEFAULT\SOFTWARE\RemoveRegistryValueUT" /reg:64 /f
+	REG delete "HKLM\SOFTWARE\RemoveRegistryValueUT" /reg:32 /f
+	REG delete "HKCU\SOFTWARE\RemoveRegistryValueUT" /reg:32 /f
+	REG delete "HKCR\SOFTWARE\RemoveRegistryValueUT" /reg:32 /f
+	REG delete "HKU\.DEFAULT\SOFTWARE\RemoveRegistryValueUT" /reg:32 /f
 EXIT /B %MY_ERR%
 
 :testInstall
