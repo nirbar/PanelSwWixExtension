@@ -30,6 +30,14 @@ namespace PanelSw.Wix.Extensions
         }
     }
 
+    public static class PanelSwWixWarningMessages
+    {
+        public static Message FileGlobNoFiles(SourceLineNumber sourceLineNumber)
+        {
+            return new Message(sourceLineNumber, MessageLevel.Warning, (int)PswWarningId.FileGlobNoFiles, MessageResources.FileGlobNoFiles);
+        }
+    }
+
     public enum PswErrorId : int
     {
         ExecuteCommandSequence = 9000,
@@ -38,5 +46,10 @@ namespace PanelSw.Wix.Extensions
         PswWixAttribute,
         MissingContainerTemplate,
         MismatchingRemoveFolderExLongPathHandling,
+    }
+
+    public enum PswWarningId : int
+    {
+        FileGlobNoFiles = 9500,
     }
 }

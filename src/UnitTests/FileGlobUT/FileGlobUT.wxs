@@ -8,6 +8,12 @@
 
       <PanelSW:FileGlob SourceDir="!(bindpath.UT)" Include="**\AccountNamesUT\**" Directory="INSTALLFOLDER"/>
     </Feature>
+    <Feature Id="wxs" Title="wxs" Level="1">
+      <PanelSW:FileGlob SourceDir="$(sys.SOURCEFILEDIR)" Include="**\*.wxs" Directory="INSTALLFOLDER"/>
+    </Feature>
+    <Feature Id="no_files" Title="no_files" Level="1">
+      <PanelSW:FileGlob SourceDir="$(sys.SOURCEFILEDIR)" Include="**\*.wxx" Directory="INSTALLFOLDER"/>
+    </Feature>
 
     <ComponentGroup Id="FileGlobUT" Directory="INSTALLFOLDER">
       <PanelSW:FileGlob SourceDir="$(sys.SOURCEFILEDIR)..\..\" Include="**\UnitTests\**">

@@ -1251,6 +1251,7 @@ namespace PanelSw.Wix.Extensions
             string baseDir = null;
             string include = null;
             string exclude = null;
+            bool hasIncludes = false;
             string feature_ = null;
             string componentGroup_ = null;
             string payloadGroup_ = null;
@@ -1270,6 +1271,7 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "Include":
                             include = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            hasIncludes = true;
                             break;
                         case "Exclude":
                             exclude = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
@@ -1386,6 +1388,7 @@ namespace PanelSw.Wix.Extensions
                                         {
                                             case "Include":
                                                 include = ParseHelper.GetAttributeValue(sourceLineNumbers, a);
+                                                hasIncludes = true;
                                                 break;
                                             case "Exclude":
                                                 exclude = ParseHelper.GetAttributeValue(sourceLineNumbers, a);
@@ -1417,6 +1420,11 @@ namespace PanelSw.Wix.Extensions
                 filter.FileGlob_ = globRow.Id.Id;
                 filter.Include = include;
                 filter.Exclude = exclude;
+            }
+
+            if (!hasIncludes)
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttributeInElementOrParent(sourceLineNumbers, "Pattern", "Include", element.Name.LocalName, "Include"));
             }
         }
 

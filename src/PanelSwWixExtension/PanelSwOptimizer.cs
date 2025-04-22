@@ -81,6 +81,7 @@ namespace PanelSw.Wix.Extensions
                         }
 
                         Dictionary<string, string> sectionCachedInlinedDirectoryIds = new Dictionary<string, string>();
+                        bool any = false;
                         foreach (string folder in baseFolders)
                         {
                             if (!Directory.Exists(folder))
@@ -89,6 +90,8 @@ namespace PanelSw.Wix.Extensions
                             }
 
                             PatternMatchingResult patternMatching = matcher.Execute(new DirectoryInfoWrapper(new DirectoryInfo(folder)));
+                            any = any || patternMatching.Files.Any();
+
                             foreach (FilePatternMatch filePattern in patternMatching.Files)
                             {
                                 string fullPath = Path.Combine(folder, filePattern.Path);
@@ -145,6 +148,10 @@ namespace PanelSw.Wix.Extensions
                                     }
                                 }
                             }
+                        }
+                        if (!any)
+                        {
+                            _messaging.Write(PanelSwWixWarningMessages.FileGlobNoFiles(glb.SourceLineNumbers));
                         }
                     }
                 }

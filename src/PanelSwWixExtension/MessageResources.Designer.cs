@@ -79,6 +79,15 @@ namespace PanelSw.Wix.Extensions {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to FileGlob did not match on any file.
+        /// </summary>
+        internal static string FileGlobNoFiles {
+            get {
+                return ResourceManager.GetString("FileGlobNoFiles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to RemoveFolderEx element has a &apos;LongPathHandling&apos; attribute that collides with another aothored RemoveFolderEx.
         /// </summary>
         internal static string MismatchingRemoveFolderExLongPathHandling {
