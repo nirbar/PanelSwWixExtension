@@ -5,19 +5,19 @@ CD "%~dp0"
 :: Install
 CALL :prepareFolders
 ECHO === Testing install ===
-msiexec /i FileOperationsUT.msi /qn /l*v FileOperationsUT.msi.log REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove" CONDITIONED_FOLDER="%CD%\never-remove-2"
+msiexec /i FileOperationsUT.msi /qn /l*v FileOperationsUT.msi.log REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove" CONDITIONED_FOLDER="%CD%\never-remove-2" EMPTY_DIR="%CD%\empty" NON_EMPTY_DIR="%CD%\non-empty"
 CALL :testInstall
 
 :: Repair
 CALL :prepareFolders
 ECHO === Testing reinstall ===
-msiexec /fvamus FileOperationsUT.msi /qn /l*v FileOperationsUT.msif.log REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove" CONDITIONED_FOLDER="%CD%\never-remove-2"
+msiexec /fvamus FileOperationsUT.msi /qn /l*v FileOperationsUT.msif.log REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove" CONDITIONED_FOLDER="%CD%\never-remove-2" EMPTY_DIR="%CD%\empty" NON_EMPTY_DIR="%CD%\non-empty"
 CALL :testRepair
 
 :: Uninstall
 CALL :prepareFolders
 ECHO === Testing uninstall ===
-msiexec /xFileOperationsUT.msi /qn /l*v FileOperationsUT.msix.log REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove" CONDITIONED_FOLDER="%CD%\never-remove-2"
+msiexec /xFileOperationsUT.msi /qn /l*v FileOperationsUT.msix.log REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove" CONDITIONED_FOLDER="%CD%\never-remove-2" EMPTY_DIR="%CD%\empty" NON_EMPTY_DIR="%CD%\non-empty"
 CALL :testUninstall
 
 :: Clean and exit
@@ -105,6 +105,11 @@ EXIT /B %MY_ERR%
 	mklink "%CD%\never-remove-2\f-sl-1.txt" "%CD%\d-target\f-target.txt"
 	mklink "%CD%\never-remove-2\f-sl-dangling-1.txt" "%CD%\d-target\f-temp.txt"
 
+	:: Folder "%CD%\never-remove-2" and all content should never be removed
+	MKDIR "%CD%\empty"
+	MKDIR "%CD%\non-empty"
+	ECHO test > "%CD%\non-empty\file.txt"
+
 	DEL "%CD%\d-target\f-temp.txt"
 EXIT /B %MY_ERR%
 
@@ -117,6 +122,8 @@ EXIT /B %MY_ERR%
     RMDIR /s /q "%CD%\remove-no-recursive"
     RMDIR /s /q "%CD%\never-remove"
     RMDIR /s /q "%CD%\never-remove-2"
+    RMDIR /s /q "%CD%\empty"
+    RMDIR /s /q "%CD%\non-empty"
 EXIT /B %MY_ERR%
 
 :testInstall
@@ -172,6 +179,14 @@ EXIT /B %MY_ERR%
 		ECHO Folder "%CD%\both-remove-2\" should exist
 		SET /A MY_ERR=1
 	)
+	IF EXIST "%CD%\empty\" (
+		ECHO Folder "%CD%\empty\" should not exist
+		SET /A MY_ERR=1
+	)
+	IF NOT EXIST "%CD%\non-empty\" (
+		ECHO Folder "%CD%\non-empty\" should exist
+		SET /A MY_ERR=1
+	)
 EXIT /B %MY_ERR%
 
 :testRepair
@@ -221,6 +236,14 @@ EXIT /B %MY_ERR%
 	)
 	IF NOT EXIST "%CD%\never-remove-2\" (
 		ECHO Folder "%CD%\both-remove-2\" should exist
+		SET /A MY_ERR=1
+	)
+	IF EXIST "%CD%\empty\" (
+		ECHO Folder "%CD%\empty\" should not exist
+		SET /A MY_ERR=1
+	)
+	IF NOT EXIST "%CD%\non-empty\" (
+		ECHO Folder "%CD%\non-empty\" should exist
 		SET /A MY_ERR=1
 	)
 EXIT /B %MY_ERR%
@@ -276,6 +299,14 @@ EXIT /B %MY_ERR%
 	)
 	IF NOT EXIST "%CD%\never-remove-2\" (
 		ECHO Folder "%CD%\both-remove-2\" should exist
+		SET /A MY_ERR=1
+	)
+	IF EXIST "%CD%\empty\" (
+		ECHO Folder "%CD%\empty\" should not exist
+		SET /A MY_ERR=1
+	)
+	IF NOT EXIST "%CD%\non-empty\" (
+		ECHO Folder "%CD%\non-empty\" should exist
 		SET /A MY_ERR=1
 	)
 EXIT /B %MY_ERR%

@@ -127,7 +127,8 @@ namespace PanelSw.Wix.Extensions
                                         KeyPath = id.Id,
                                         KeyPathType = ComponentKeyPathType.File,
                                         Location = ComponentLocation.LocalOnly,
-                                        Win64 = _context.Platform == Platform.ARM64 || _context.Platform == Platform.X64,
+                                        Win64 = ((_context.Platform == Platform.ARM64) || (_context.Platform == Platform.X64)),
+                                        NeverOverwrite = (glb.Overwrite == false),
                                     });
 
                                     section.AddSymbol(new FileSymbol(glb.SourceLineNumbers, id)
@@ -138,6 +139,14 @@ namespace PanelSw.Wix.Extensions
                                         DirectoryRef = directoryId,
                                         Attributes = FileSymbolAttributes.None | FileSymbolAttributes.Vital,
                                     });
+                                    if (glb.Overwrite == true)
+                                    {
+                                        section.AddSymbol(new PSW_ForceVersion(glb.SourceLineNumbers, id.Id)
+                                        {
+                                            Version = "65535.65535.65535.65535"
+                                        });
+                                    }
+
                                     if (!string.IsNullOrEmpty(glb.ComponentGroup_))
                                     {
                                         _parseHelper.CreateComplexReference(section, glb.SourceLineNumbers, ComplexReferenceParentType.ComponentGroup, glb.ComponentGroup_, null, ComplexReferenceChildType.Component, id.Id, false);

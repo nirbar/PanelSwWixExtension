@@ -18,8 +18,6 @@ extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall)
     PMSIHANDLE hRecord;
     std::list<LPWSTR> lstFolders;
     CRestartLocalResources cad;
-    CWixString szDevicePath;
-    CWixString szCanoncanilzedPath;
 
     hr = WcaInitialize(hInstall, __FUNCTION__);
     ExitOnFailure(hr, "Failed to initialize");
@@ -41,6 +39,8 @@ extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall)
         // Get fields
         CWixString szPath;
         CWixString szCondition;
+		CWixString szDevicePath;
+		CWixString szCanoncanilzedPath;
 
         hr = WcaGetRecordFormattedString(hRecord, 1, (LPWSTR*)szPath);
         ExitOnFailure(hr, "Failed to get Property_.");
@@ -67,10 +67,9 @@ extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall)
 
 		hr = PathCanonicalizeForComparison((LPCWSTR)szDevicePath, PATH_CANONICALIZE_APPEND_EXTENDED_PATH_PREFIX | PATH_CANONICALIZE_KEEP_UNC_ROOT | PATH_CANONICALIZE_BACKSLASH_TERMINATE, (LPWSTR*)szCanoncanilzedPath);
 		ExitOnFailure(hr, "Failed to canonicalize the directory.");
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will Enumerate processes in '%ls'", (LPCWSTR)szCanoncanilzedPath);
+		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will Enumerate processes in '%ls' (AKA '%ls')", (LPCWSTR)szPath, (LPCWSTR)szCanoncanilzedPath);
 
         lstFolders.push_back(szCanoncanilzedPath.Detach());
-		szDevicePath.Release();
     }
     hr = S_OK;
 
@@ -437,6 +436,10 @@ HRESULT CRestartLocalResources::GetServices(std::list<DWORD>* plstServices)
 		bRes = ::EnumServicesStatusEx(hServices, SC_ENUM_PROCESS_INFO, SERVICE_TYPE_ALL, SERVICE_ACTIVE, (BYTE*)pServices, dwBuffSize, &dwBuffSize, &nServices, &dwHandle, nullptr);
 	}
 	ExitOnNullWithLastError(bRes, hr, "Failed to enumerate services");
+	if (!pServices)
+	{
+		ExitFunction();
+	}
 
 	for (DWORD i = 0; i < nServices; ++i)
 	{

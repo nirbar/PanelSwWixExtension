@@ -1256,6 +1256,7 @@ namespace PanelSw.Wix.Extensions
             string componentGroup_ = null;
             string payloadGroup_ = null;
             string payloadPrefix = null;
+            YesNoDefaultType overwrite = YesNoDefaultType.NotSet;
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -1278,6 +1279,9 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "PayloadPrefix":
                             payloadPrefix = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Overwrite":
+                            overwrite = ParseHelper.GetAttributeYesNoDefaultValue(sourceLineNumbers, attrib);
                             break;
                         default:
                             ParseHelper.UnexpectedAttribute(element, attrib);
@@ -1331,6 +1335,11 @@ namespace PanelSw.Wix.Extensions
                 XAttribute dirAttrib = element.Attributes().FirstOrDefault(a => a.Name.LocalName.Equals("Directory"));
                 ParseHelper.UnexpectedAttribute(element, dirAttrib);
             }
+            if (!string.IsNullOrEmpty(payloadGroup_) && (overwrite != YesNoDefaultType.NotSet))
+            {
+                XAttribute overwriteAttrib = element.Attributes().FirstOrDefault(a => a.Name.LocalName.Equals("Overwrite"));
+                ParseHelper.UnexpectedAttribute(element, overwriteAttrib);
+            }
             if (string.IsNullOrEmpty(directory) && string.IsNullOrEmpty(payloadGroup_))
             {
                 if (parentDirAttrib != null)
@@ -1360,6 +1369,12 @@ namespace PanelSw.Wix.Extensions
             globRow.Feature_ = feature_;
             globRow.PayloadGroup_ = payloadGroup_;
             globRow.PayloadPrefix = payloadPrefix;
+            globRow.Overwrite = (overwrite == YesNoDefaultType.Yes) ? (bool?)true : (overwrite == YesNoDefaultType.No) ? (bool?)false : null;
+            if (overwrite == YesNoDefaultType.Yes)
+            {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "ForceVersion");
+                ParseHelper.EnsureTable(section, sourceLineNumbers, "PSW_ForceVersion");
+            }
 
             if (!string.IsNullOrEmpty(include) || !string.IsNullOrEmpty(exclude))
             {

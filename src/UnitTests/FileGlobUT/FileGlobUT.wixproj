@@ -21,4 +21,7 @@
       <BindName>UT</BindName>
     </BindInputPaths>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="FileGlobUT.bat"/>
+  </ItemGroup>
 </Project>

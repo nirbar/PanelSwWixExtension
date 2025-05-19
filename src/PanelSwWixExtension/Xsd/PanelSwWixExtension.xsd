@@ -75,6 +75,11 @@
           <xs:documentation>When nested under a PayloadGroup, the payloads will be extracted to the provided subfolder</xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="Overwrite" type="wix:YesNoDefaultType" use="optional" default="default">
+        <xs:annotation>
+          <xs:documentation>For Windows Installer packages, whether or not the file will overwrite an existing file. Yes= file will overwrite; No= component NeverOverwrite will be set; Default= Use file override rules.</xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
     </xs:complexType>
   </xs:element>
 

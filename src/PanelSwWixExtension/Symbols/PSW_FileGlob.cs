@@ -26,6 +26,7 @@ namespace PanelSw.Wix.Extensions.Symbols
                     new ColumnDefinition(nameof(ComponentGroup_), ColumnType.String, 72, false, true, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.None),
                     new ColumnDefinition(nameof(PayloadGroup_), ColumnType.String, 72, false, true, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.None),
                     new ColumnDefinition(nameof(PayloadPrefix), ColumnType.String, 72, false, true, ColumnCategory.Text, modularizeType: ColumnModularizeType.None),
+                    new ColumnDefinition(nameof(Overwrite), ColumnType.Number, 0, false, true, ColumnCategory.Integer, modularizeType: ColumnModularizeType.None),
                 };
             }
         }
@@ -70,6 +71,12 @@ namespace PanelSw.Wix.Extensions.Symbols
         {
             get => Fields[5].AsString();
             set => this.Set(5, value);
+        }
+
+        public bool? Overwrite
+        {
+            get => Fields[6].AsNullableBool();
+            set => this.Set(6, value);
         }
     }
 }

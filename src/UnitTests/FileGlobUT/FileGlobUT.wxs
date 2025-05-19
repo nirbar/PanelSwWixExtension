@@ -6,19 +6,20 @@
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <ComponentGroupRef Id="FileGlobUT"/>
 
-      <PanelSW:FileGlob SourceDir="!(bindpath.UT)" Include="**\AccountNamesUT\**" Directory="INSTALLFOLDER"/>
+      <PanelSW:FileGlob SourceDir="!(bindpath.UT)" Include="**\AccountNamesUT\**" Directory="INSTALLFOLDER" Overwrite="no"/>
     </Feature>
     <Feature Id="wxs" Title="wxs" Level="1">
-      <PanelSW:FileGlob SourceDir="$(sys.SOURCEFILEDIR)" Include="**\*.wxs" Directory="INSTALLFOLDER"/>
+      <PanelSW:FileGlob SourceDir="$(sys.SOURCEFILEDIR)" Include="**\*.wxs" Directory="INSTALLFOLDER" Overwrite="yes"/>
     </Feature>
     <Feature Id="no_files" Title="no_files" Level="1">
-      <PanelSW:FileGlob SourceDir="$(sys.SOURCEFILEDIR)" Include="**\*.wxx" Directory="INSTALLFOLDER"/>
+      <PanelSW:FileGlob SourceDir="$(sys.SOURCEFILEDIR)" Include="**\*.wxx" Directory="INSTALLFOLDER" Overwrite="default"/>
     </Feature>
 
     <ComponentGroup Id="FileGlobUT" Directory="INSTALLFOLDER">
       <PanelSW:FileGlob SourceDir="$(sys.SOURCEFILEDIR)..\..\" Include="**\UnitTests\**">
         <PanelSW:Pattern Exclude="\**\AccountNamesUT\**"/>
       </PanelSW:FileGlob>
+      <File Compressed="no" Source="$(sys.SOURCEFILEDIR)FileGlobUT.bat"/>
     </ComponentGroup>
 
     <Property Id="MSIFASTINSTALL" Value="1" />

@@ -10,6 +10,8 @@
     <PanelSW:DeletePath Path="[EmptyDir]" OnlyIfEmpty="yes" Condition="Not Installed"/>
     <PanelSW:DeletePath Path="[DeleteMeDir]FileOperationsUT.wxs" Condition="Not Installed"/>
     <PanelSW:DeletePath Path="[EmptyDir]" OnlyIfEmpty="yes" AllowReboot="no" Condition="Not Installed"/>
+    <PanelSW:DeletePath Path="[EMPTY_DIR]" OnlyIfEmpty="yes"/>
+    <PanelSW:DeletePath Path="[NON_EMPTY_DIR]" OnlyIfEmpty="yes"/>
 
     <Property Id="MSIFASTINSTALL" Value="1"/>
     <SetProperty Id="NONEXISTENT_FOLDER" Value="[OriginalDatabase].doesnt_exist" Before="AppSearch" Sequence="both"/>
