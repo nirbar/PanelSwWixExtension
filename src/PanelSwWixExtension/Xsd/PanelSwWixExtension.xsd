@@ -1283,6 +1283,49 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
     </xs:complexType>
   </xs:element>
 
+  <xs:element name="NssmServiceConfig">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Component" />
+      </xs:appinfo>
+      <xs:documentation><![CDATA[Configures NSSM service parameters. See https://nssm.cc/usage]]></xs:documentation>
+    </xs:annotation>
+    <xs:complexType>
+      <xs:attribute name="ServiceName" type="xs:string" use="required">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Service name. Formatted]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="Application" type="xs:string" use="required">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Full path to the target executable. Formatted.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="AppDirectory" type="xs:string" use="required">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Full path to the working folder. Formatted.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="AppParameters" type="xs:string">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Application command line parameters. Formatted]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
+      <xs:attribute name="AppExit" default="Restart">
+        <xs:annotation>
+          <xs:documentation>Configure the action which nssm should take when the application exits.</xs:documentation>
+        </xs:annotation>
+        <xs:simpleType>
+          <xs:restriction base="xs:NMTOKEN">
+            <xs:enumeration value="Restart"/>
+            <xs:enumeration value="Ignore"/>
+            <xs:enumeration value="Exit"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:attribute>
+    </xs:complexType>
+  </xs:element>
+
   <xs:element name="WebsiteConfig">
     <xs:annotation>
       <xs:appinfo>

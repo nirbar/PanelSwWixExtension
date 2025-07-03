@@ -421,7 +421,7 @@
     </UI>
   </Fragment>
 
-  <!-- ServiceConfig (account only for now) -->
+  <!-- ServiceConfig -->
   <Fragment>
     <CustomAction Id="PSW_ServiceConfig" SuppressModularization="yes" DllEntry="ServiceConfig" Execute="immediate" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="PSW_ServiceConfigRlbk" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
@@ -436,6 +436,25 @@
       <ProgressText Action="PSW_ServiceConfig" Message="!(loc.ServiceConfig)" />
       <ProgressText Action="PSW_ServiceConfigRlbk" Message="!(loc.ServiceConfig)" />
       <ProgressText Action="PSW_ServiceConfigExec" Message="!(loc.ServiceConfig)" />
+    </UI>
+  </Fragment>
+
+  <!-- NssmServiceConfig -->
+  <Fragment>
+    <CustomAction Id="PSW_NssmServiceConfig" SuppressModularization="yes" DllEntry="NssmServiceConfigSched" Execute="immediate" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="PSW_NssmServiceConfigRlbk" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="PSW_NssmServiceConfigExec" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+
+    <InstallExecuteSequence>
+      <Custom Action="PSW_NssmServiceConfig" Before="DeleteServices" Overridable="yes" />
+      <Custom Action="PSW_NssmServiceConfigRlbk" After="DeleteServices" Overridable="yes" Condition="PSW_NssmServiceConfigRlbk" />
+      <Custom Action="PSW_NssmServiceConfigExec" After="InstallServices" Overridable="yes" Condition="PSW_NssmServiceConfigExec" />
+    </InstallExecuteSequence>
+    <UI>
+      <Error Id="27002" Message="!(loc.ServiceConfigFailure)" />
+      <ProgressText Action="PSW_NssmServiceConfig" Message="!(loc.ServiceConfig)" />
+      <ProgressText Action="PSW_NssmServiceConfigRlbk" Message="!(loc.ServiceConfig)" />
+      <ProgressText Action="PSW_NssmServiceConfigExec" Message="!(loc.ServiceConfig)" />
     </UI>
   </Fragment>
 

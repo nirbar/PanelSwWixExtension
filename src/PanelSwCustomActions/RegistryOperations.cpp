@@ -50,7 +50,7 @@ extern "C" UINT __stdcall RemoveRegistryValueSched(MSIHANDLE hInstall)
 
 		// Get record.
 		CWixString szComponent, szKey, szName, szCondition;
-		int nRoot = 0;
+		msidbRegistryRoot nRoot = msidbRegistryRootLocalMachine;
 		int nView = 0;
 		HKEY hkRoot = NULL;
 		DWORD dwType = 0;
@@ -59,7 +59,7 @@ extern "C" UINT __stdcall RemoveRegistryValueSched(MSIHANDLE hInstall)
 
 		hr = WcaGetRecordString(hRec, 1, (LPWSTR*)szComponent);
 		ExitOnFailure(hr, "Failed to get Component");
-		hr = WcaGetRecordInteger(hRec, 2, &nRoot);
+		hr = WcaGetRecordInteger(hRec, 2, (int*)&nRoot);
 		ExitOnFailure(hr, "Failed to get Root");
 		hr = WcaGetRecordFormattedString(hRec, 3, (LPWSTR*)szKey);
 		ExitOnFailure(hr, "Failed to get Key");
@@ -201,7 +201,7 @@ LExit:
 	return WcaFinalize(er);
 }
 
-HRESULT CRegistryOperations::AddDeleteKey(DWORD nRoot, DWORD dwView, LPCWSTR szKey)
+HRESULT CRegistryOperations::AddDeleteKey(msidbRegistryRoot nRoot, DWORD dwView, LPCWSTR szKey)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command* pCmd = nullptr;
@@ -230,7 +230,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CRegistryOperations::AddDeleteValue(DWORD nRoot, DWORD dwView, LPCWSTR szKey, LPCWSTR szName)
+HRESULT CRegistryOperations::AddDeleteValue(msidbRegistryRoot nRoot, DWORD dwView, LPCWSTR szKey, LPCWSTR szName)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command* pCmd = nullptr;
@@ -260,7 +260,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CRegistryOperations::AddCreateKey(DWORD nRoot, DWORD dwView, LPCWSTR szKey)
+HRESULT CRegistryOperations::AddCreateKey(msidbRegistryRoot nRoot, DWORD dwView, LPCWSTR szKey)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command* pCmd = nullptr;
@@ -289,7 +289,7 @@ LExit:
 	return hr;
 }
 
-HRESULT CRegistryOperations::AddCreateValue(DWORD nRoot, DWORD dwView, LPCWSTR szKey, LPCWSTR szName, DWORD dwType, LPCBYTE pbData, DWORD cbData)
+HRESULT CRegistryOperations::AddCreateValue(msidbRegistryRoot nRoot, DWORD dwView, LPCWSTR szKey, LPCWSTR szName, DWORD dwType, LPCBYTE pbData, DWORD cbData)
 {
 	HRESULT hr = S_OK;
 	::com::panelsw::ca::Command* pCmd = nullptr;
@@ -487,5 +487,79 @@ HRESULT CRegistryOperations::SetValue(HKEY hkRoot, DWORD dwView, LPCWSTR szKey, 
 LExit:
 	ReleaseRegKey(hkSubkey);
 	
+	return hr;
+}
+
+HRESULT CRegistryOperations::AddRecreateHierarchy(msidbRegistryRoot nRoot, DWORD dwView, LPCWSTR szKey)
+{
+	HRESULT hr = S_OK;
+	REG_KEY_BITNESS kbKeyBitness = View2Bitness(dwView);
+	HKEY hkRoot = NULL;
+	HKEY hkSubkey = NULL;
+	CWixString szSubKey;
+	CWixString szName;
+	BYTE* pbData = nullptr;
+	SIZE_T cbData = 0;
+
+	switch (nRoot)
+	{
+	case msidbRegistryRootClassesRoot:
+		hkRoot = HKEY_CLASSES_ROOT;
+		break;
+	case msidbRegistryRootCurrentUser:
+		hkRoot = HKEY_CURRENT_USER;
+		break;
+	case msidbRegistryRootLocalMachine:
+		hkRoot = HKEY_LOCAL_MACHINE;
+		break;
+	case msidbRegistryRootUsers:
+		hkRoot = HKEY_USERS;
+		break;
+	default:
+		hr = E_INVALIDARG;
+		ExitOnFailure(hr, "Illegal registry root %u", nRoot);
+	}
+
+	hr = RegOpenEx(hkRoot, szKey, GENERIC_READ, kbKeyBitness, &hkSubkey);
+	if ((hr == E_NOTFOUND) || (hr == E_FILENOTFOUND) || (hr == E_PATHNOTFOUND))
+	{
+		hr = AddDeleteKey(nRoot, dwView, szKey);
+		ExitOnFailure(hr, "Failed to schedule registry key deletion");
+		ExitFunction();
+	}
+	ExitOnFailure(hr, "Failed to open registry key");
+
+	for (DWORD i = 0; (hr = RegKeyEnum(hkSubkey, i, (LPWSTR*)szSubKey)) != E_NOMOREITEMS; ++i)
+	{
+		CWixString szSubFullName;
+		ExitOnFailure(hr, "Failed to enumerate subkeys");
+
+		hr = szSubFullName.Format(L"%ls\\%ls", (LPCWSTR)szKey, (LPCWSTR)szSubKey);
+		ExitOnFailure(hr, "Failed to format string");
+
+		hr = AddRecreateHierarchy(nRoot, dwView, szSubFullName);
+		ExitOnFailure(hr, "Failed to schedule subkey recreation '%ls'", (LPCWSTR)szSubFullName);
+	}
+	hr = S_OK;
+
+	for (DWORD i = 0; (hr = RegValueEnum(hkSubkey, i, (LPWSTR*)szName, nullptr)) != E_NOMOREITEMS; ++i)
+	{
+		DWORD dwType = 0;
+		ExitOnFailure(hr, "Failed to enumerate subvalues");
+		ReleaseNullMem(pbData);
+		cbData = 0;
+
+		hr = RegReadValue(hkSubkey, szName, FALSE, &pbData, &cbData, &dwType);
+		ExitOnFailure(hr, "Failed to read registry value");
+
+		hr = AddCreateValue(nRoot, dwView, (LPCWSTR)szKey, (LPCWSTR)szName, dwType, pbData, cbData);
+		ExitOnFailure(hr, "Failed to schedule value recreation '%ls\\@%ls'", (LPCWSTR)szKey, (LPCWSTR)szName);
+	}
+	hr = S_OK;
+
+LExit:
+	ReleaseRegKey(hkSubkey);
+	ReleaseMem(pbData);
+
 	return hr;
 }

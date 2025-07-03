@@ -13,6 +13,7 @@ using WixToolset.Data.Symbols;
 using WixToolset.Data.WindowsInstaller;
 using WixToolset.Extensibility;
 using static PanelSw.Wix.Extensions.Symbols.PSW_CustomUninstallKey;
+using static PanelSw.Wix.Extensions.Symbols.PSW_NssmServiceConfig;
 
 namespace PanelSw.Wix.Extensions
 {
@@ -259,6 +260,9 @@ namespace PanelSw.Wix.Extensions
                                 ParseDismElement(section, element, componentId);
                                 break;
 
+                            case "NssmServiceConfig":
+                                ParseNssmServiceConfigElement(section, element, componentId);
+                                break;
                             case "ServiceConfig":
                                 ParseServiceConfigElement(section, element, componentId);
                                 break;
@@ -971,6 +975,11 @@ namespace PanelSw.Wix.Extensions
                 case "PSW_Unzip":
                     customActions.Add("UnzipSched");
                     customActions.Add("UnzipExec");
+                    break;
+                case "PSW_NssmServiceConfig":
+                    customActions.Add("PSW_NssmServiceConfig");
+                    customActions.Add("PSW_NssmServiceConfigRlbk");
+                    customActions.Add("PSW_NssmServiceConfigExec");
                     break;
                 case "PSW_ServiceConfig":
                 case "PSW_ServiceConfig_Dependency":
@@ -3385,6 +3394,70 @@ namespace PanelSw.Wix.Extensions
                         }
                     }
                 }
+            }
+        }
+
+        private void ParseNssmServiceConfigElement(IntermediateSection section, XElement element, string component)
+        {
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
+            string service = null;
+            string application = null;
+            string applicationDir = null;
+            string appParameters = null;
+            var appExit = AppExitType.Restart;
+
+            foreach (XAttribute attrib in element.Attributes())
+            {
+                if (IsMyAttribute(element, attrib))
+                {
+                    switch (attrib.Name.LocalName)
+                    {
+                        case "ServiceName":
+                            service = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "Application":
+                            application = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "AppDirectory":
+                            applicationDir = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "AppParameters":
+                            appParameters = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "AppExit":
+                            TryParseEnumAttribute(sourceLineNumbers, element, attrib, out appExit);
+                            break;
+                        default:
+                            ParseHelper.UnexpectedAttribute(element, attrib);
+                            break;
+                    }
+                }
+            }
+
+            if (string.IsNullOrEmpty(component))
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, "Component", "Id"));
+            }
+            if (string.IsNullOrEmpty(service))
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "ServiceName"));
+            }
+            if (string.IsNullOrEmpty(application))
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Application"));
+            }
+
+            if (!Messaging.EncounteredError)
+            {
+                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_NssmServiceConfig");
+
+                var row = section.AddSymbol(new PSW_NssmServiceConfig(sourceLineNumbers));
+                row.Component_ = component;
+                row.ServiceName = service;
+                row.Application = application;
+                row.AppDirectory = applicationDir;
+                row.AppParameters = appParameters;
+                row.AppExit = appExit;
             }
         }
 

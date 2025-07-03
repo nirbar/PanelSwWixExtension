@@ -58,6 +58,9 @@
     <ClCompile Include="MsiSqlQuery.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="NssmServiceConfig.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
     <ClCompile Include="StringOperations.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

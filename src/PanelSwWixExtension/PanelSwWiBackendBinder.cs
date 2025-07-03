@@ -85,6 +85,7 @@ namespace PanelSw.Wix.Extensions
             tableForeignKeys["PSW_TaskScheduler"].Add(new ForeignRelation(2, componentTable, 0));
             tableForeignKeys["PSW_ExecOnComponent"].Add(new ForeignRelation(1, componentTable, 0));
             tableForeignKeys["PSW_Dism"].Add(new ForeignRelation(1, componentTable, 0));
+            tableForeignKeys["PSW_NssmServiceConfig"].Add(new ForeignRelation(1, componentTable, 0));
             tableForeignKeys["PSW_ServiceConfig"].Add(new ForeignRelation(1, componentTable, 0));
             tableForeignKeys["PSW_InstallUtil"].Add(new ForeignRelation(0, fileTable, 0));
             tableForeignKeys["PSW_InstallUtil_Arg"].Add(new ForeignRelation(0, fileTable, 0));
@@ -516,6 +517,7 @@ namespace PanelSw.Wix.Extensions
                         new TableDefinition(nameof(PSW_JsonJpathSearch), PSW_JsonJpathSearch.SymbolDefinition, PSW_JsonJpathSearch.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_Md5Hash), PSW_Md5Hash.SymbolDefinition, PSW_Md5Hash.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_MsiSqlQuery), PSW_MsiSqlQuery.SymbolDefinition, PSW_MsiSqlQuery.ColumnDefinitions, symbolIdIsPrimaryKey: true),
+                        new TableDefinition(nameof(PSW_NssmServiceConfig), PSW_NssmServiceConfig.SymbolDefinition, PSW_NssmServiceConfig.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_PathSearch), PSW_PathSearch.SymbolDefinition, PSW_PathSearch.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_Payload), PSW_Payload.SymbolDefinition, PSW_Payload.ColumnDefinitions, symbolIdIsPrimaryKey: false),
                         new TableDefinition(nameof(PSW_ReadIniValues), PSW_ReadIniValues.SymbolDefinition, PSW_ReadIniValues.ColumnDefinitions, symbolIdIsPrimaryKey: true),

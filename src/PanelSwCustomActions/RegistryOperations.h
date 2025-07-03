@@ -9,11 +9,13 @@ public:
 
 	CRegistryOperations() : CDeferredActionBase("RegistryOperations") { }
 
-	HRESULT AddDeleteKey(DWORD nRoot, DWORD dwView, LPCWSTR szKey);
-	HRESULT AddDeleteValue(DWORD nRoot, DWORD dwView, LPCWSTR szKey, LPCWSTR szName);
+	HRESULT AddDeleteKey(msidbRegistryRoot nRoot, DWORD dwView, LPCWSTR szKey);
+	HRESULT AddDeleteValue(msidbRegistryRoot nRoot, DWORD dwView, LPCWSTR szKey, LPCWSTR szName);
 
-	HRESULT AddCreateKey(DWORD nRoot, DWORD dwView, LPCWSTR szKey);
-	HRESULT AddCreateValue(DWORD nRoot, DWORD dwView, LPCWSTR szKey, LPCWSTR szName, DWORD dwType, LPCBYTE pbData, DWORD cbData);
+	HRESULT AddCreateKey(msidbRegistryRoot nRoot, DWORD dwView, LPCWSTR szKey);
+	HRESULT AddCreateValue(msidbRegistryRoot nRoot, DWORD dwView, LPCWSTR szKey, LPCWSTR szName, DWORD dwType, LPCBYTE pbData, DWORD cbData);
+
+	HRESULT AddRecreateHierarchy(msidbRegistryRoot nRoot, DWORD dwView, LPCWSTR szKey);
 
 protected:
 

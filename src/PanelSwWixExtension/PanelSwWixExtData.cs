@@ -102,6 +102,9 @@ namespace PanelSw.Wix.Extensions
                 case nameof(PSW_MsiSqlQuery):
                     symbolDefinition = PSW_MsiSqlQuery.SymbolDefinition;
                     break;
+                case nameof(PSW_NssmServiceConfig):
+                    symbolDefinition = PSW_NssmServiceConfig.SymbolDefinition;
+                    break;
                 case nameof(PSW_PathSearch):
                     symbolDefinition = PSW_PathSearch.SymbolDefinition;
                     break;

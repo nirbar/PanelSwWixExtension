@@ -1,0 +1,29 @@
+﻿<Project Sdk="WixToolset.Sdk">
+  <PropertyGroup>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <CoreCompileDependsOn>DownloadNssm;$(CoreCompileDependsOn)</CoreCompileDependsOn>
+  </PropertyGroup>
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
+    <ProductVersion>3.8</ProductVersion>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="NssmServiceConfigUT.wxs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="NssmServiceConfigUT.bat" />
+  </ItemGroup>
+  <ItemGroup>
+    <WixExtension Include="PanelSwWixExtension">
+      <HintPath>$(BuildFolder)..\AnyCPU\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</HintPath>
+      <Name>PanelSwWixExtension</Name>
+    </WixExtension>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="TidyBuild" />
+  </ItemGroup>
+  <Target Name="DownloadNssm" Condition="!Exists('$(MSBuildProjectDirectory)\nssm-2.24\win64\nssm.exe')">
+    <DownloadFile SourceUrl="https://nssm.cc/release/nssm-2.24.zip" DestinationFolder="$(MSBuildProjectDirectory)"/>
+    <Unzip SourceFiles="$(MSBuildProjectDirectory)\nssm-2.24.zip" DestinationFolder="$(MSBuildProjectDirectory)"/>
+  </Target>
+</Project>

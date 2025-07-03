@@ -106,6 +106,7 @@
     <ClCompile Include="ListProcessorFeatures.cpp" />
     <ClCompile Include="IsWindowsVersionOrGreater.cpp" />
     <ClCompile Include="Md5Hash.cpp" />
+    <ClCompile Include="NssmServiceConfig.cpp" />
     <ClCompile Include="ExtractPayload.cpp" />
     <ClCompile Include="PromptFileDowngrades.cpp" />
     <ClCompile Include="RemoveFolderEx.cpp" />

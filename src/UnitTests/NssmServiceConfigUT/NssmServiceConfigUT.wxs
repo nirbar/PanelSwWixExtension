@@ -1,0 +1,47 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension">
+  <Package Name="NssmServiceConfigUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{F419BD1C-AFC0-41D3-9400-757E2256322B}" InstallerVersion="200" ProductCode="{162B3494-45A1-45F9-9F3B-0AC4D19D75DB}">
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
+
+    <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
+      <ComponentGroupRef Id="ProductComponents" />
+    </Feature>
+  </Package>
+
+  <Fragment>
+    <Property Id="MSIFASTINSTALL" Value="1"></Property>
+
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+    </StandardDirectory>
+  </Fragment>
+
+  <Fragment>
+    <Property Id="CMD_EXE">
+      <DirectorySearch Id="System64Folder.dir" Path="[System64Folder]" Depth="4">
+        <FileSearch Name="cmd.exe" />
+      </DirectorySearch>
+    </Property>
+    <Launch Condition="Installed OR CMD_EXE" Message="Could not find CMD.exe" />
+
+    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
+      <Component>
+        <File Id="nssm.exe" Source="$(sys.SOURCEFILEDIR)nssm-2.24\win64\nssm.exe"/>
+
+        <ServiceInstall Name="NssmServiceConfigUT1" Type="ownProcess" Start="auto" ErrorControl="normal"/>
+        <ServiceControl Name="NssmServiceConfigUT1" Remove="uninstall" Start="install" Stop="both"/>
+        <PanelSW:NssmServiceConfig ServiceName="NssmServiceConfigUT1" Application="[CMD_EXE]" AppDirectory="[INSTALLFOLDER]" AppParameters='/C "ECHO TEST &gt; "[INSTALLFOLDER]NssmServiceConfigUT1.txt""' AppExit='Ignore' />
+
+        <ServiceInstall Name="NssmServiceConfigUT2" Type="ownProcess" Start="auto" ErrorControl="normal"/>
+        <ServiceControl Name="NssmServiceConfigUT2" Remove="uninstall" Start="install" Stop="both"/>
+        <PanelSW:NssmServiceConfig ServiceName="NssmServiceConfigUT2" Application="[CMD_EXE]" AppDirectory="[INSTALLFOLDER]" AppParameters='/C "ECHO TEST &gt; "[INSTALLFOLDER]NssmServiceConfigUT2.txt""' AppExit='Ignore' />
+      </Component>
+      <Component>
+        <File Source="$(sys.SOURCEFILEDIR)NssmServiceConfigUT.bat" Compressed="no"/>
+      </Component>
+    </ComponentGroup>
+
+    <InstallExecuteSequence>
+      <Custom Action="Rollback_Deferred" Before="StartServices" Condition="DO_ROLLBACK"/>
+    </InstallExecuteSequence>
+  </Fragment>
+</Wix>
