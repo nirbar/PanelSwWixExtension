@@ -105,6 +105,9 @@ namespace PanelSw.Wix.Extensions
                 case nameof(PSW_NssmServiceConfig):
                     symbolDefinition = PSW_NssmServiceConfig.SymbolDefinition;
                     break;
+                case nameof(PSW_NssmServiceConfig_Property):
+                    symbolDefinition = PSW_NssmServiceConfig_Property.SymbolDefinition;
+                    break;
                 case nameof(PSW_PathSearch):
                     symbolDefinition = PSW_PathSearch.SymbolDefinition;
                     break;

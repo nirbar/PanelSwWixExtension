@@ -1291,6 +1291,9 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
       <xs:documentation><![CDATA[Configures NSSM service parameters. See https://nssm.cc/usage]]></xs:documentation>
     </xs:annotation>
     <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element ref="wix:RegistryValue" />
+      </xs:choice>
       <xs:attribute name="ServiceName" type="xs:string" use="required">
         <xs:annotation>
           <xs:documentation><![CDATA[Service name. Formatted]]></xs:documentation>

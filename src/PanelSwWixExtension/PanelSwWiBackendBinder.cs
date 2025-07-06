@@ -106,10 +106,12 @@ namespace PanelSw.Wix.Extensions
 
             Table execOnTable = data.Tables["PSW_ExecOnComponent"];
             Table serviceConfigTable = data.Tables["PSW_ServiceConfig"];
+            Table nssmServiceConfigTable = data.Tables["PSW_NssmServiceConfig"];
             tableForeignKeys["PSW_ExecOnComponent_ExitCode"].Add(new ForeignRelation(0, execOnTable, 0));
             tableForeignKeys["PSW_ExecOn_ConsoleOutput"].Add(new ForeignRelation(1, execOnTable, 0));
             tableForeignKeys["PSW_ExecOnComponent_Environment"].Add(new ForeignRelation(0, execOnTable, 0));
             tableForeignKeys["PSW_ServiceConfig_Dependency"].Add(new ForeignRelation(0, serviceConfigTable, 0));
+            tableForeignKeys["PSW_NssmServiceConfig_Property"].Add(new ForeignRelation(1, nssmServiceConfigTable, 0));
             AssignSectionIdToTables(data, tableForeignKeys, rowToFilterId, filterIdPrefix);
 
             ResolveAppSearch(data, rowToFilterId);
@@ -518,6 +520,7 @@ namespace PanelSw.Wix.Extensions
                         new TableDefinition(nameof(PSW_Md5Hash), PSW_Md5Hash.SymbolDefinition, PSW_Md5Hash.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_MsiSqlQuery), PSW_MsiSqlQuery.SymbolDefinition, PSW_MsiSqlQuery.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_NssmServiceConfig), PSW_NssmServiceConfig.SymbolDefinition, PSW_NssmServiceConfig.ColumnDefinitions, symbolIdIsPrimaryKey: true),
+                        new TableDefinition(nameof(PSW_NssmServiceConfig_Property), PSW_NssmServiceConfig_Property.SymbolDefinition, PSW_NssmServiceConfig_Property.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_PathSearch), PSW_PathSearch.SymbolDefinition, PSW_PathSearch.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_Payload), PSW_Payload.SymbolDefinition, PSW_Payload.ColumnDefinitions, symbolIdIsPrimaryKey: false),
                         new TableDefinition(nameof(PSW_ReadIniValues), PSW_ReadIniValues.SymbolDefinition, PSW_ReadIniValues.ColumnDefinitions, symbolIdIsPrimaryKey: true),

@@ -84,4 +84,19 @@ EXIT /B %MY_ERR%
 		ECHO Registry "HKLM\System\CurrentControlSet\Services\NssmServiceConfigUT2\Parameters\@Useless" should exist
 		SET /A MY_ERR=1
 	)
+	REG query "HKLM\System\CurrentControlSet\Services\NssmServiceConfigUT2\Parameters" /v "AppNoConsole" /reg:64
+	IF %ERRORLEVEL% NEQ 0 (
+		ECHO Registry "HKLM\System\CurrentControlSet\Services\NssmServiceConfigUT2\Parameters\@AppNoConsole" should exist
+		SET /A MY_ERR=1
+	)
+	REG query "HKLM\System\CurrentControlSet\Services\NssmServiceConfigUT2\Parameters" /v "AppAffinity" /reg:64
+	IF %ERRORLEVEL% NEQ 0 (
+		ECHO Registry "HKLM\System\CurrentControlSet\Services\NssmServiceConfigUT2\Parameters\@AppAffinity" should exist
+		SET /A MY_ERR=1
+	)
+	REG query "HKLM\System\CurrentControlSet\Services\NssmServiceConfigUT2\Parameters" /v "Test" /reg:64
+	IF %ERRORLEVEL% NEQ 0 (
+		ECHO Registry "HKLM\System\CurrentControlSet\Services\NssmServiceConfigUT2\Parameters\@Test" should exist
+		SET /A MY_ERR=1
+	)
 EXIT /B %MY_ERR%

@@ -14,6 +14,7 @@ using WixToolset.Data.WindowsInstaller;
 using WixToolset.Extensibility;
 using static PanelSw.Wix.Extensions.Symbols.PSW_CustomUninstallKey;
 using static PanelSw.Wix.Extensions.Symbols.PSW_NssmServiceConfig;
+using static PanelSw.Wix.Extensions.Symbols.PSW_NssmServiceConfig_Property;
 
 namespace PanelSw.Wix.Extensions
 {
@@ -3447,17 +3448,70 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Application"));
             }
 
+            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_NssmServiceConfig");
+            ParseHelper.EnsureTable(section, sourceLineNumbers, "PSW_NssmServiceConfig_Property");
+
+            PSW_NssmServiceConfig rootRow = null;
             if (!Messaging.EncounteredError)
             {
-                ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_NssmServiceConfig");
+                rootRow = section.AddSymbol(new PSW_NssmServiceConfig(sourceLineNumbers));
+                rootRow.Component_ = component;
+                rootRow.ServiceName = service;
+                rootRow.Application = application;
+                rootRow.AppDirectory = applicationDir;
+                rootRow.AppParameters = appParameters;
+                rootRow.AppExit = appExit;
+            }
 
-                var row = section.AddSymbol(new PSW_NssmServiceConfig(sourceLineNumbers));
-                row.Component_ = component;
-                row.ServiceName = service;
-                row.Application = application;
-                row.AppDirectory = applicationDir;
-                row.AppParameters = appParameters;
-                row.AppExit = appExit;
+            foreach (var child in element.Descendants())
+            {
+                if (child.Name.LocalName.Equals("RegistryValue"))
+                {
+                    SourceLineNumber childSourceLineNumbers = ParseHelper.GetSourceLineNumbers(child);
+                    string name = null;
+                    string value = null;
+                    RegistryValueType type = RegistryValueType.String;
+
+                    foreach (var attrib in child.Attributes())
+                    {
+                        switch (attrib.Name.LocalName)
+                        {
+                            case "Name":
+                                name = ParseHelper.GetAttributeLongFilename(childSourceLineNumbers, attrib);
+                                break;
+                            case "Value":
+                                value = ParseHelper.GetAttributeValue(childSourceLineNumbers, attrib);
+                                break;
+                            case "Type":
+                                TryParseEnumAttribute(childSourceLineNumbers, child, attrib, out type);
+                                break;
+                            default:
+                                ParseHelper.UnexpectedAttribute(element, attrib);
+                                break;
+                        }
+                    }
+
+                    if (string.IsNullOrEmpty(name))
+                    {
+                        Messaging.Write(ErrorMessages.ExpectedAttribute(childSourceLineNumbers, "RegistryValue", "Name"));
+                    }
+                    var cppDataType = (type == RegistryValueType.String) ? NssmRegDataType.REG_SZ
+                        : (type == RegistryValueType.Integer) ? NssmRegDataType.REG_DWORD
+                        : (type == RegistryValueType.Expandable) ? NssmRegDataType.REG_EXPAND_SZ : NssmRegDataType.REG_NONE;
+                    if (cppDataType == NssmRegDataType.REG_NONE)
+                    {
+                        Messaging.Write(ErrorMessages.RegistryNameValueIncorrect(childSourceLineNumbers, "RegistryValue", "Type", type.ToString()));
+                    }
+
+                    if (!Messaging.EncounteredError)
+                    {
+                        var row = section.AddSymbol(new PSW_NssmServiceConfig_Property(childSourceLineNumbers));
+                        row.PSW_NssmServiceConfig_ = rootRow.Id.Id;
+                        row.Name = name;
+                        row.Value = value;
+                        row.DataType = cppDataType;
+                    }
+                }
             }
         }
 

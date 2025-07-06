@@ -520,11 +520,13 @@ HRESULT CRegistryOperations::AddRecreateHierarchy(msidbRegistryRoot nRoot, DWORD
 		ExitOnFailure(hr, "Illegal registry root %u", nRoot);
 	}
 
+	hr = AddDeleteKey(nRoot, dwView, szKey);
+	ExitOnFailure(hr, "Failed to schedule registry key deletion");
+
 	hr = RegOpenEx(hkRoot, szKey, GENERIC_READ, kbKeyBitness, &hkSubkey);
 	if ((hr == E_NOTFOUND) || (hr == E_FILENOTFOUND) || (hr == E_PATHNOTFOUND))
 	{
-		hr = AddDeleteKey(nRoot, dwView, szKey);
-		ExitOnFailure(hr, "Failed to schedule registry key deletion");
+		hr = S_OK;
 		ExitFunction();
 	}
 	ExitOnFailure(hr, "Failed to open registry key");
