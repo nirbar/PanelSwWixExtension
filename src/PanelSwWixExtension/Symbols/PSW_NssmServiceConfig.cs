@@ -33,7 +33,7 @@ namespace PanelSw.Wix.Extensions.Symbols
                     new ColumnDefinition(nameof(Application), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
                     new ColumnDefinition(nameof(AppDirectory), ColumnType.Localized, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
                     new ColumnDefinition(nameof(AppParameters), ColumnType.Localized, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
-                    new ColumnDefinition(nameof(AppExit), ColumnType.String, 2, false, false, ColumnCategory.Text, modularizeType: ColumnModularizeType.None),
+                    new ColumnDefinition(nameof(AppExit), ColumnType.String, 0, false, false, ColumnCategory.Text, modularizeType: ColumnModularizeType.None),
                 };
             }
         }

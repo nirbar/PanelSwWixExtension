@@ -432,7 +432,7 @@
       <Custom Action="PSW_ServiceConfig" After="InstallServices" Overridable="yes" />
     </InstallExecuteSequence>
     <UI>
-      <Error Id="27002" Message="!(loc.ServiceConfigFailure)" />
+      <UIRef Id="ServiceConfigFailure"/>
       <ProgressText Action="PSW_ServiceConfig" Message="!(loc.ServiceConfig)" />
       <ProgressText Action="PSW_ServiceConfigRlbk" Message="!(loc.ServiceConfig)" />
       <ProgressText Action="PSW_ServiceConfigExec" Message="!(loc.ServiceConfig)" />
@@ -451,10 +451,16 @@
       <Custom Action="PSW_NssmServiceConfigExec" After="InstallServices" Overridable="yes" Condition="PSW_NssmServiceConfigExec" />
     </InstallExecuteSequence>
     <UI>
-      <Error Id="27002" Message="!(loc.ServiceConfigFailure)" />
+      <UIRef Id="ServiceConfigFailure"/>
       <ProgressText Action="PSW_NssmServiceConfig" Message="!(loc.ServiceConfig)" />
       <ProgressText Action="PSW_NssmServiceConfigRlbk" Message="!(loc.ServiceConfig)" />
       <ProgressText Action="PSW_NssmServiceConfigExec" Message="!(loc.ServiceConfig)" />
+    </UI>
+  </Fragment>
+
+  <Fragment>
+    <UI Id="ServiceConfigFailure">
+      <Error Id="27002" Message="!(loc.ServiceConfigFailure)" />
     </UI>
   </Fragment>
 
