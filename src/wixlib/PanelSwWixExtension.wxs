@@ -176,13 +176,17 @@
   <!-- DeletePath -->
   <Fragment>
     <CustomAction Id="DeletePath" SuppressModularization="yes" DllEntry="DeletePath" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="DeletePath_rollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="DeletePath_commit" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="commit" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
 
     <InstallExecuteSequence>
-      <Custom Action="DeletePath" Before="InstallFinalize" Overridable="yes" />
+      <Custom Action="DeletePath" Before="ProcessComponents" Overridable="yes" />
+      <Custom Action="DeletePath_rollback" After="DeletePath" Overridable="yes" />
+      <Custom Action="DeletePath_commit" Before="InstallFinalize" Overridable="yes" />
     </InstallExecuteSequence>
     <UI>
-      <ProgressText Action="DeletePath_commit" Message="Deleting files and folders" />
+      <ProgressText Action="DeletePath_rollback" Message="!(loc.DeletePath)" />
+      <ProgressText Action="DeletePath_commit" Message="!(loc.DeletePath)" />
     </UI>
   </Fragment>
 

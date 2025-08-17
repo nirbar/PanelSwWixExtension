@@ -24,7 +24,7 @@ extern "C" UINT __stdcall TopShelf(MSIHANDLE hInstall)
 	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
-	// Ensure table PSW_DeletePath exists.
+	// Ensure table exists.
 	hr = WcaTableExists(L"PSW_TopShelf");
 	ExitOnFailure(hr, "Failed to check if table exists 'PSW_TopShelf'");
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_TopShelf'. Have you authored 'PanelSw:TopShelf' entries in WiX code?");

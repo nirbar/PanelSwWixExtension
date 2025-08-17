@@ -40,7 +40,7 @@ extern "C" UINT __stdcall Unzip(MSIHANDLE hInstall)
 	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
-	// Ensure table PSW_DeletePath exists.
+	// Ensure table exists.
 	hr = WcaTableExists(L"PSW_Unzip");
 	ExitOnFailure(hr, "Failed to check if table exists 'PSW_Unzip'");
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_Unzip'. Have you authored 'PanelSw:Unzip' entries in WiX code?");
@@ -126,7 +126,7 @@ extern "C" UINT __stdcall ZipFileSched(MSIHANDLE hInstall)
 	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
-	// Ensure table PSW_DeletePath exists.
+	// Ensure table exists.
 	hr = WcaTableExists(L"PSW_ZipFile");
 	ExitOnFailure(hr, "Failed to check if table exists 'PSW_ZipFile'");
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ZipFile'. Have you authored 'PanelSw:ZipFile' entries in WiX code?");

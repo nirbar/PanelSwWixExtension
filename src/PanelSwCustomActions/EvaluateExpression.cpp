@@ -21,7 +21,7 @@ extern "C" UINT __stdcall EvaluateExpression(MSIHANDLE hInstall)
 	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
-	// Ensure table PSW_DeletePath exists.
+	// Ensure table exists.
 	hr = WcaTableExists(L"PSW_EvaluateExpression");
 	ExitOnFailure(hr, "Failed to check if table exists 'PSW_EvaluateExpression'");
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_EvaluateExpression'. Have you authored 'PanelSw:Evaluate' entries in WiX code?");

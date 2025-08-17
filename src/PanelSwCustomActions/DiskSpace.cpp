@@ -14,7 +14,7 @@ extern "C" UINT __stdcall DiskSpace(MSIHANDLE hInstall)
 	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
 
-	// Ensure table PSW_DeletePath exists.
+	// Ensure table exists.
 	hr = WcaTableExists(L"PSW_DiskSpace");
 	ExitOnFailure(hr, "Failed to check if table exists 'PSW_DiskSpace'");
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_DiskSpace'. Have you authored 'PanelSw:DiskSpace' entries in WiX code?");

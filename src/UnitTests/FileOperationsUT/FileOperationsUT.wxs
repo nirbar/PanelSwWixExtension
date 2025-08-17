@@ -12,6 +12,7 @@
     <PanelSW:DeletePath Path="[EmptyDir]" OnlyIfEmpty="yes" AllowReboot="no" Condition="Not Installed"/>
     <PanelSW:DeletePath Path="[EMPTY_DIR]" OnlyIfEmpty="yes"/>
     <PanelSW:DeletePath Path="[NON_EMPTY_DIR]" OnlyIfEmpty="yes"/>
+    <PanelSW:DeletePath Path="[DELETE_ON_ROLLBACK_DIR]" OnRollback="yes"/>
 
     <Property Id="MSIFASTINSTALL" Value="1"/>
     <SetProperty Id="NONEXISTENT_FOLDER" Value="[OriginalDatabase].doesnt_exist" Before="AppSearch" Sequence="both"/>
@@ -63,6 +64,7 @@
 
     <InstallExecuteSequence>
       <Custom Action="PromptCancel_Deferred" After="RemoveReparseDataSched"/>
+      <Custom Action="Rollback_Deferred" Before="StartServices" Condition="DO_ROLLBACK"/>
     </InstallExecuteSequence>
   </Package>
 </Wix>

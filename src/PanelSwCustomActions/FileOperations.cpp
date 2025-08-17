@@ -21,6 +21,7 @@ extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
 	PMSIHANDLE hView;
 	PMSIHANDLE hRecord;
 	CFileOperations commitCAD;
+	CFileOperations rollbackCAD;
 	DWORD dwRes = 0;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
@@ -76,12 +77,24 @@ extern "C" UINT __stdcall DeletePath(MSIHANDLE hInstall)
 			szFilePath[i] = NULL;
 		}
 
-		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will delete path '%ls'", (LPCWSTR)szFilePath);
-		hr = commitCAD.AddDeleteFile((LPCWSTR)szFilePath, flags);
-		ExitOnFailure(hr, "Failed creating custom action data for commit action.");
+		if ((flags & CFileOperations::FileOperationsAttributes::OnRollback) == CFileOperations::FileOperationsAttributes::OnRollback)
+		{
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will delete path '%ls' on rollback", (LPCWSTR)szFilePath);
+			hr = rollbackCAD.AddDeleteFile((LPCWSTR)szFilePath, flags);
+			ExitOnFailure(hr, "Failed creating custom action data for commit action.");
+		}
+		else
+		{
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Will delete path '%ls'", (LPCWSTR)szFilePath);
+			hr = commitCAD.AddDeleteFile((LPCWSTR)szFilePath, flags);
+			ExitOnFailure(hr, "Failed creating custom action data for commit action.");
+		}
 	}
 
-	hr = commitCAD.DoDeferredAction(L"DeletePath_commit");
+	hr = rollbackCAD.SetCustomActionData(L"DeletePath_rollback");
+	ExitOnFailure(hr, "Failed scheduling rollback action.");
+
+	hr = commitCAD.SetCustomActionData(L"DeletePath_commit");
 	ExitOnFailure(hr, "Failed scheduling deferred action.");
 
 LExit:

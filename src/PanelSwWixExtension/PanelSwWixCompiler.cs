@@ -939,7 +939,6 @@ namespace PanelSw.Wix.Extensions
                 case "PSW_DeletePath":
                     customActions.Add("DeletePath");
                     customActions.Add("DeletePath_rollback");
-                    customActions.Add("DeletePath_deferred");
                     customActions.Add("DeletePath_commit");
                     break;
                 case "PSW_TaskScheduler":
@@ -2211,7 +2210,7 @@ namespace PanelSw.Wix.Extensions
                         case "IgnoreMissing":
                             if (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
                             {
-                                flags |= DeletePathFlags.IgnoreMissing;
+                                flags |= DeletePathFlags.IgnoreMissingPath;
                             }
                             break;
                         case "IgnoreErrors":
@@ -4906,10 +4905,11 @@ namespace PanelSw.Wix.Extensions
         [Flags]
         private enum DeletePathFlags
         {
-            IgnoreMissing = 1,
-            IgnoreErrors = 2 * IgnoreMissing,
+            IgnoreMissingPath = 1,
+            IgnoreErrors = 2 * IgnoreMissingPath,
             OnlyIfEmpty = 2 * IgnoreErrors,
-            AllowReboot = 2 * OnlyIfEmpty
+            AllowReboot = 2 * OnlyIfEmpty,
+            OnRollback = 2 * AllowReboot,
         }
 
         private void ParseDeletePath(IntermediateSection section, XElement element)
@@ -4917,7 +4917,7 @@ namespace PanelSw.Wix.Extensions
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
             string filepath = null;
             string condition = null;
-            DeletePathFlags flags = DeletePathFlags.AllowReboot | DeletePathFlags.IgnoreErrors | DeletePathFlags.IgnoreMissing;
+            DeletePathFlags flags = DeletePathFlags.AllowReboot | DeletePathFlags.IgnoreErrors | DeletePathFlags.IgnoreMissingPath;
             int order = 1000000000 + sourceLineNumbers.LineNumber ?? 0;
 
             foreach (XAttribute attrib in element.Attributes())
@@ -4939,6 +4939,12 @@ namespace PanelSw.Wix.Extensions
                             if (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.No)
                             {
                                 flags &= ~DeletePathFlags.AllowReboot;
+                            }
+                            break;
+                        case "OnRollback":
+                            if (ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib) == YesNoType.Yes)
+                            {
+                                flags |= DeletePathFlags.OnRollback;
                             }
                             break;
                         case "Condition":

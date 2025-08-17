@@ -8,10 +8,11 @@ class CFileOperations :
 public:
 	enum FileOperationsAttributes
 	{
-		IgnoreMissingPath = 1
-		, IgnoreErrors = 2 * IgnoreMissingPath
-		, OnlyIfEmpty = 2 * IgnoreErrors
-		, AllowReboot = 2 * OnlyIfEmpty
+		IgnoreMissingPath = 1,
+		IgnoreErrors = 2 * IgnoreMissingPath,
+		OnlyIfEmpty = 2 * IgnoreErrors,
+		AllowReboot = 2 * OnlyIfEmpty,
+		OnRollback = 2 * AllowReboot,
 	};
 
 	CFileOperations() : CDeferredActionBase("FileOperations") { }
