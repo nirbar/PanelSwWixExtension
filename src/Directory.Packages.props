@@ -1,9 +1,9 @@
 <Project>
   <PropertyGroup>
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-    <Wix4Version Condition=" '$(Wix4Version)' == '' ">6.0.0</Wix4Version>
-    <PanelSwWix4Version Condition=" '$(PanelSwWix4Version)' == '' ">7.0.0-psw-wix-0371.25</PanelSwWix4Version>
-    <SevenZapVersion Condition=" '$(SevenZapVersion)' == '' ">24.8.41</SevenZapVersion>
+    <Wix4Version Condition=" '$(Wix4Version)' == '' ">6.0.1</Wix4Version>
+    <PanelSwWix4Version Condition=" '$(PanelSwWix4Version)' == '' ">7.0.0-psw-wix-0384.28</PanelSwWix4Version>
+    <SevenZapVersion Condition=" '$(SevenZapVersion)' == '' ">25.1.43</SevenZapVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="9.0.0" />

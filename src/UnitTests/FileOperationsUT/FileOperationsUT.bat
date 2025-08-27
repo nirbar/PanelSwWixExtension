@@ -117,8 +117,9 @@ EXIT /B %MY_ERR%
 	ECHO test > "%CD%\non-empty\file.txt"
 
 	:: Folder "%CD%\delete-on-rollback" and all content should be removed on rollback
-	MKDIR "%CD%\delete-on-rollback"
+	MKDIR "%CD%\delete-on-rollback\1"
 	ECHO test > "%CD%\delete-on-rollback\file.txt"
+	ECHO test > "%CD%\delete-on-rollback\1\file.txt"
 
 	DEL "%CD%\d-target\f-temp.txt"
 EXIT /B %MY_ERR%
