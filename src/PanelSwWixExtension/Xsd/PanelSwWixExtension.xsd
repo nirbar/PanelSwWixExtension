@@ -252,9 +252,9 @@
               </xs:documentation>
             </xs:annotation>
           </xs:attribute>
-          <xs:attribute name="UpgradeCode" type="xs:string" use="required">
+          <xs:attribute name="UpgradeCode" type="xs:string" use="optional">
             <xs:annotation>
-              <xs:documentation>Bundle UpgradeCode</xs:documentation>
+              <xs:documentation>Bundle UpgradeCode. If not specified, then the UpgradeCode of the current bundle is used.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="Format" type="wix:YesNoType" use="optional" default="yes" >

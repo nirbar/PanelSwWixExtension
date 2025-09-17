@@ -541,10 +541,6 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            if (string.IsNullOrEmpty(upgradeCode))
-            {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "UpgradeCode"));
-            }
             if (string.IsNullOrEmpty(searchVariable))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "SearchVariable"));

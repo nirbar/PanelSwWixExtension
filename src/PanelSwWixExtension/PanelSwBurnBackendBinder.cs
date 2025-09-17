@@ -49,7 +49,48 @@ namespace PanelSw.Wix.Extensions
         public override void SymbolsFinalized(IntermediateSection section)
         {
             FinalizeAutoContainers(section);
+            FinalizeBundleVariableSearch(section);
             base.SymbolsFinalized(section);
+        }
+
+        private void FinalizeBundleVariableSearch(IntermediateSection section)
+        {
+            var searches = new List<PSW_BundleVariableSearch>();
+            WixBundleSymbol wixBundleSymbol = null;
+            foreach (IntermediateSection intermediate in Context.IntermediateRepresentation.Sections)
+            {
+                foreach (IntermediateSymbol symbol in intermediate.Symbols)
+                {
+                    if ((symbol is PSW_BundleVariableSearch search) && string.IsNullOrEmpty(search.UpgradeCode))
+                    {
+                        searches.Add(search);
+                    }
+                    if (symbol is WixBundleSymbol bundle)
+                    {
+                        wixBundleSymbol = bundle;
+                    }
+                }
+            }
+
+            if (!searches.Any())
+            {
+                return;
+            }
+            if (wixBundleSymbol == null)
+            {
+                Messaging.Write(ErrorMessages.MissingBundleInformation("symbol"));
+                return;
+            }
+            if (string.IsNullOrEmpty(wixBundleSymbol.UpgradeCode) || !Guid.TryParse(wixBundleSymbol.UpgradeCode, out Guid g))
+            {
+                Messaging.Write(ErrorMessages.MissingBundleInformation("UpgradeCode"));
+                return;
+            }
+         
+            foreach (var search in searches)
+            {
+                search.UpgradeCode = wixBundleSymbol.UpgradeCode;
+            }
         }
 
         private void FinalizeAutoContainers(IntermediateSection section)
