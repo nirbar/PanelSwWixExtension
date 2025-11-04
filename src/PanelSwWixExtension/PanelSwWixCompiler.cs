@@ -1980,6 +1980,7 @@ namespace PanelSw.Wix.Extensions
             string jpath = null;
             string value = null;
             string filePath = null;
+            string condition = null;
             JsonFormatting jsonFormatting = JsonFormatting.Raw;
             ErrorHandling promptOnError = ErrorHandling.fail;
 
@@ -1992,23 +1993,21 @@ namespace PanelSw.Wix.Extensions
                         case "JPath":
                             jpath = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-
                         case "FilePath":
                             filePath = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-
                         case "Value":
                             value = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
-
+                        case "Condition":
+                            condition = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
                         case "Formatting":
                             TryParseEnumAttribute(sourceLineNumbers, element, attrib, out jsonFormatting);
                             break;
-
                         case "ErrorHandling":
                             TryParseEnumAttribute(sourceLineNumbers, element, attrib, out promptOnError);
                             break;
-
                         default:
                             ParseHelper.UnexpectedAttribute(element, attrib);
                             break;
@@ -2041,6 +2040,7 @@ namespace PanelSw.Wix.Extensions
                 row.Value = value;
                 row.Formatting = (int)jsonFormatting;
                 row.ErrorHandling = (int)promptOnError;
+                row.Condition = condition;
             }
         }
 

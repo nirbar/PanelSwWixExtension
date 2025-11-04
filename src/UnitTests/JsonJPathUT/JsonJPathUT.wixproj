@@ -1,4 +1,4 @@
-<Project Sdk="WixToolset.Sdk">
+﻿<Project Sdk="WixToolset.Sdk">
   <PropertyGroup>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
   </PropertyGroup>
@@ -17,6 +17,7 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="Json-Object.json" />
+    <Content Include="JsonJPathUT.ps1" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="TidyBuild" />

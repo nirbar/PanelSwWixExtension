@@ -53,8 +53,10 @@
     <ItemGroup>
       <BatchFiles Include="$(BaseBuildFolder)\x86\bin\Release\**\*.bat" Exclude="$(BaseBuildFolder)\x86\bin\Release\RemoveRegistryValueUT\RemoveRegistryValueUT.bat;$(BaseBuildFolder)\x86\bin\Release\CustomUninstallKeyUT\CustomUninstallKeyUT.bat" />
       <BatchFiles Include="$(BaseBuildFolder)\x64\bin\Release\**\*.bat" />
+      <PsFiles Include="$(BaseBuildFolder)\x64\bin\Release\**\*.ps1" />
     </ItemGroup>
     <Exec Command="%(BatchFiles.FullPath)" WorkingDirectory="%(BatchFiles.RootDir)%(BatchFiles.Directory)" ConsoleToMsBuild="true" LogStandardErrorAsError="false" StandardErrorImportance="normal" IgnoreStandardErrorWarningFormat="true"/>
+    <Exec Command='powershell -File "%(PsFiles.FullPath)"' WorkingDirectory="%(PsFiles.RootDir)%(PsFiles.Directory)" ConsoleToMsBuild="true" LogStandardErrorAsError="false" StandardErrorImportance="normal" IgnoreStandardErrorWarningFormat="true"/>
   </Target>
   
   <ItemGroup>

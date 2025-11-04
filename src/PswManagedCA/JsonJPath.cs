@@ -73,7 +73,7 @@ namespace PswManagedCA
 
             List<JsonJPathCatalog> catalogs = new List<JsonJPathCatalog>(); ;
 
-            using (View jsonView = session.Database.OpenView("SELECT `PSW_JsonJPath`.`File_`, `PSW_JsonJPath`.`Component_`, `PSW_JsonJPath`.`FilePath`, `PSW_JsonJPath`.`JPath`, `PSW_JsonJPath`.`Value`, `PSW_JsonJPath`.`Formatting`, `PSW_JsonJPath`.`ErrorHandling` FROM `PSW_JsonJPath`"))
+            using (View jsonView = session.Database.OpenView("SELECT `PSW_JsonJPath`.`File_`, `PSW_JsonJPath`.`Component_`, `PSW_JsonJPath`.`FilePath`, `PSW_JsonJPath`.`JPath`, `PSW_JsonJPath`.`Value`, `PSW_JsonJPath`.`Formatting`, `PSW_JsonJPath`.`ErrorHandling`, `PSW_JsonJPath`.`Condition` FROM `PSW_JsonJPath`"))
             {
                 jsonView.Execute(null);
 
@@ -89,6 +89,7 @@ namespace PswManagedCA
                         string value = rec[5] as string;
                         int? formatting = rec[6] as int?;
                         int? errorHandling = rec[7] as int?;
+                        string condition = rec[8] as string;
                         ctlg.JPathObfuscated = session.Obfuscate(jpath);
                         ctlg.ValueObfuscated = session.Obfuscate(value);
                         ctlg.JPath = session.Format(jpath);
@@ -142,6 +143,12 @@ namespace PswManagedCA
                         {
                             session.Log("Either File_ or FilePath must be supplied");
                             return ActionResult.Failure;
+                        }
+
+                        if (!string.IsNullOrWhiteSpace(condition) && !session.EvaluateCondition(condition))
+                        {
+                            session.Log("Skipping. Condition evaluated to false");
+                            continue;
                         }
 
                         if (string.IsNullOrEmpty(fileId))

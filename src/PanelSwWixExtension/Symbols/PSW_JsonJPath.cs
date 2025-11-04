@@ -27,6 +27,7 @@ namespace PanelSw.Wix.Extensions.Symbols
                     new ColumnDefinition(nameof(Value), ColumnType.Localized, 0, false, false, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
                     new ColumnDefinition(nameof(Formatting), ColumnType.Number, 1, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 127),
                     new ColumnDefinition(nameof(ErrorHandling), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 2),
+                    new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
                 };
             }
         }
@@ -77,6 +78,12 @@ namespace PanelSw.Wix.Extensions.Symbols
         {
             get => Fields[6].AsNumber();
             set => this.Set(6, value);
+        }
+
+        public string Condition
+        {
+            get => Fields[7].AsString();
+            set => this.Set(7, value);
         }
     }
 }
