@@ -4,6 +4,7 @@
 #include <Objbase.h>
 #include <tchar.h>
 #include <sddl.h>
+#include <stdio.h>
 #pragma comment (lib, "Rpcrt4.lib")
 #pragma comment (lib, "Ole32.lib")
 
@@ -12,31 +13,34 @@
 #define IGNORE_ME_FLAG			TEXT("--ignore-me")
 #define USER_FLAG				TEXT("--user")
 #define DOMAIN_FLAG		        TEXT("--domain")
+#define LOG_FLAG		        TEXT("--log")
 #define OUTPUT_BUFFER_SIZE		1024
 
-#define ExitIf(cond, op, fmt, ...)	if (cond) {op; _tprintf(TEXT(fmt) TEXT("\n"), __VA_ARGS__); goto LExit; }
+#define ExitIf(cond, op, fmt, ...)	if (cond) {op; _ftprintf(stdout, TEXT(fmt) TEXT("\n"), __VA_ARGS__); goto LExit; }
 
 static void PrintDebugInfo();
 static DWORD CreatePipes(HANDLE* phStdOutRd, HANDLE* phStdOutWr, HANDLE* phStdErr, HANDLE* phStdIn);
 static DWORD LogProcessOutput(HANDLE hProcess, HANDLE hStdErrOut);
 
-int _tmain(int argc, _TCHAR* argv[])
+int _tmain(int argc, _TCHAR * argv[])
 {
-    DWORD dwExitCode = ERROR_SUCCESS;
-    STARTUPINFO startupInfo = {};
-    PROCESS_INFORMATION processInfo = {};
-    _TCHAR* szCmdLine = nullptr;
-    _TCHAR* szSkipArg = nullptr;
-    _TCHAR* szIgnoreArg = nullptr;
-    const _TCHAR* szDomain = nullptr;
-    const _TCHAR* szUser = nullptr;
-    _TCHAR* szPassword = nullptr;
-    BOOL bRes = TRUE;
-	HANDLE hStdout = ::GetStdHandle(STD_OUTPUT_HANDLE);
+	DWORD dwExitCode = ERROR_SUCCESS;
+	STARTUPINFO startupInfo = {};
+	PROCESS_INFORMATION processInfo = {};
+	_TCHAR* szCmdLine = nullptr;
+	_TCHAR* szSkipArg = nullptr;
+	_TCHAR* szIgnoreArg = nullptr;
+	const _TCHAR* szDomain = nullptr;
+	const _TCHAR* szUser = nullptr;
+	const _TCHAR* szLogFile = nullptr;
+	FILE* logFile = nullptr;
+	BOOL bPrintDebugInfo = FALSE;
+	_TCHAR* szPassword = nullptr;
+	BOOL bRes = TRUE;
 	HANDLE hStdin = ::GetStdHandle(STD_INPUT_HANDLE);
 	HANDLE hStdinRd = INVALID_HANDLE_VALUE;
 
-	// Parse logon user
+	// Parse our command line flags
 	for (int i = 0; i < argc; ++i)
 	{
 		if ((_tcscmp(argv[i], USER_FLAG) == 0) && (++i < argc))
@@ -51,18 +55,39 @@ int _tmain(int argc, _TCHAR* argv[])
 		}
 		if (_tcscmp(argv[i], PRINT_INFO) == 0)
 		{
-			PrintDebugInfo();
-			goto LExit;
+			bPrintDebugInfo = TRUE;
+			continue;
+		}
+		if ((_tcscmp(argv[i], LOG_FLAG) == 0) && (++i < argc))
+		{
+			szLogFile = argv[i];
+			continue;
 		}
 		if ((_tcscmp(argv[i], SKIP_UNTIL_HERE_FLAG) == 0) || (_tcscmp(argv[i], IGNORE_ME_FLAG) == 0))
 		{
 			break;
 		}
 	}
+
+	if (szLogFile && *szLogFile)
+	{
+		errno_t err = _tfreopen_s(&logFile, szLogFile, TEXT("w"), stdout);
+		if (err != 0)
+		{
+			(void)_tfreopen_s(&logFile, TEXT("con"), TEXT("w"), stdout); // Revert back to console output.
+			_ftprintf(stdout, TEXT("Failed setting log file '%s'. Errno %u\n"), szLogFile, err);
+		}
+	}
+	if (bPrintDebugInfo)
+	{
+		PrintDebugInfo();
+		goto LExit;
+	}
+
 	if (szUser && *szUser)
 	{
 		DWORD dwSize = 1000; // oversized password
-		
+
 		szPassword = new _TCHAR[dwSize + 1];
 		ExitIf(!szPassword, dwExitCode = ERROR_OUTOFMEMORY, "Failed to allocate buffer");
 		ZeroMemory(szPassword, sizeof(_TCHAR) * (dwSize + 1));
@@ -78,27 +103,27 @@ int _tmain(int argc, _TCHAR* argv[])
 	}
 
 	// Parse ignore/skip command line args
-    szCmdLine = ::GetCommandLine();
-    if ((szCmdLine == nullptr) || (szCmdLine[0] == NULL))
-    {
-        goto LExit;
-    }
+	szCmdLine = ::GetCommandLine();
+	if ((szCmdLine == nullptr) || (szCmdLine[0] == NULL))
+	{
+		goto LExit;
+	}
 
-    // Search for first arg in full command line
-    szSkipArg = _tcsstr(szCmdLine, SKIP_UNTIL_HERE_FLAG);
-    szIgnoreArg = _tcsstr(szCmdLine, IGNORE_ME_FLAG);
-    if (szIgnoreArg && (!szSkipArg || (szIgnoreArg < szSkipArg)))
-    {
-        _tprintf(TEXT("Empty run requested: %s\n"), ::GetCommandLine());
-        goto LExit;
-    }
+	// Search for first arg in full command line
+	szSkipArg = _tcsstr(szCmdLine, SKIP_UNTIL_HERE_FLAG);
+	szIgnoreArg = _tcsstr(szCmdLine, IGNORE_ME_FLAG);
+	if (szIgnoreArg && (!szSkipArg || (szIgnoreArg < szSkipArg)))
+	{
+		_ftprintf(stdout, TEXT("Empty run requested: %s\n"), ::GetCommandLine());
+		goto LExit;
+	}
 	ExitIf(!szSkipArg, dwExitCode = ERROR_BAD_ARGUMENTS, "Unidentified command line: '%s'", szCmdLine);
 
-    szCmdLine = szSkipArg + ::_tcsclen(SKIP_UNTIL_HERE_FLAG);
-    while ((szCmdLine[0] != NULL) && ::_istspace(szCmdLine[0]))
-    {
-        ++szCmdLine;
-    }
+	szCmdLine = szSkipArg + ::_tcsclen(SKIP_UNTIL_HERE_FLAG);
+	while ((szCmdLine[0] != NULL) && ::_istspace(szCmdLine[0]))
+	{
+		++szCmdLine;
+	}
 	ExitIf(szCmdLine[0] == NULL, dwExitCode = ERROR_BAD_ARGUMENTS, "Command line after skip is empty: '%s'", ::GetCommandLine());
 
 	::memset(&processInfo, 0, sizeof(processInfo));
@@ -114,10 +139,10 @@ int _tmain(int argc, _TCHAR* argv[])
 		bRes = ::CreateProcessWithLogonW(szUser, szDomain, szPassword, LOGON_WITH_PROFILE, nullptr, szCmdLine, CREATE_NO_WINDOW, nullptr, nullptr, &startupInfo, &processInfo);
 		if (szPassword && *szPassword)
 		{
-			ZeroMemory(szPassword, wcslen(szPassword) * sizeof(szPassword[0]));
+			::ZeroMemory(szPassword, wcslen(szPassword) * sizeof(szPassword[0]));
 		}
 	}
-	else 
+	else
 	{
 		bRes = ::CreateProcess(nullptr, szCmdLine, nullptr, nullptr, FALSE, CREATE_NO_WINDOW, nullptr, nullptr, &startupInfo, &processInfo);
 	}
@@ -129,20 +154,21 @@ int _tmain(int argc, _TCHAR* argv[])
 	dwExitCode = ::WaitForSingleObject(processInfo.hProcess, INFINITE);
 	ExitIf(dwExitCode == WAIT_FAILED, dwExitCode = ::GetLastError(), "Failed to wait for process to complete. Error %u", dwExitCode);
 
-    bRes = ::GetExitCodeProcess(processInfo.hProcess, &dwExitCode);
+	bRes = ::GetExitCodeProcess(processInfo.hProcess, &dwExitCode);
 	ExitIf(!bRes, dwExitCode = ::GetLastError(), "Failed to get exit code of process with command line '%s'. Error %u", szCmdLine, dwExitCode);
 
 LExit:
-    if (processInfo.hThread != NULL)
-    {
-        ::CloseHandle(processInfo.hThread);
-    }
-    if (processInfo.hProcess != NULL)
-    {
-        ::CloseHandle(processInfo.hProcess);
-    }
+	if (processInfo.hThread != NULL)
+	{
+		::CloseHandle(processInfo.hThread);
+	}
+	if (processInfo.hProcess != NULL)
+	{
+		::CloseHandle(processInfo.hProcess);
+	}
 	if (szPassword)
 	{
+		::ZeroMemory(szPassword, wcslen(szPassword) * sizeof(szPassword[0]));
 		delete[]szPassword;
 	}
 	if (startupInfo.hStdError && startupInfo.hStdError != INVALID_HANDLE_VALUE)
@@ -161,8 +187,12 @@ LExit:
 	{
 		::CloseHandle(hStdinRd);
 	}
+	if (logFile)
+	{
+		fclose(logFile);
+	}
 
-    return dwExitCode;
+	return dwExitCode;
 }
 
 static DWORD CreatePipes(HANDLE* phStdOutRd, HANDLE* phStdOutWr, HANDLE* phStdErr, HANDLE* phStdIn)
@@ -389,10 +419,10 @@ static void PrintDebugInfo()
 
 	if (szEnvBlock)
 	{
-		_tprintf(TEXT("Environment:\n"));
+		_ftprintf(stdout, TEXT("Environment:\n"));
 		for (LPCTSTR sz = szEnvBlock; sz && *sz; sz += 1 + _tcslen(sz))
 		{
-			_tprintf(TEXT("\t%s\n"), sz);
+			_ftprintf(stdout, TEXT("\t%s\n"), sz);
 		}
 	}
 
@@ -431,17 +461,17 @@ static void PrintDebugInfo()
 			bRes = ::LookupAccountSid(nullptr, pTokenUser->User.Sid, szUserName, &dwSize1, szDomain, &dwSize2, &sidName);
 		}
 		ExitIf(!bRes, NULL, "Failed to get user name. Error %u", ::GetLastError());
-		_tprintf(TEXT("User '%s\\%s', user type %u\n"), szDomain, szUserName, sidName);
+		_ftprintf(stdout, TEXT("User '%s\\%s', user type %u\n"), szDomain, szUserName, sidName);
 
 		bRes = ::ConvertSidToStringSid(pTokenUser->User.Sid, &szSid);
 		ExitIf(!bRes, NULL, "Failed to get user SID string. Error %u", ::GetLastError());
-		_tprintf(TEXT("User SID '%s'\n"), szSid);
+		_ftprintf(stdout, TEXT("User SID '%s'\n"), szSid);
 	}
 
 	dwSize1 = 0;
 	bRes = ::GetTokenInformation(hProcessToken, TOKEN_INFORMATION_CLASS::TokenElevation, &tokenElevated, sizeof(tokenElevated), &dwSize1);
 	ExitIf(!bRes, NULL, "Failed to get elevation. Error %u", ::GetLastError());
-	_tprintf(TEXT("Elevated: '%s'\n"), tokenElevated.TokenIsElevated ? TEXT("yes") : TEXT("no"));
+	_ftprintf(stdout, TEXT("Elevated: '%s'\n"), tokenElevated.TokenIsElevated ? TEXT("yes") : TEXT("no"));
 
 LExit:
 	if (szEnvBlock)

@@ -11,8 +11,8 @@
     <?endif?>
 
     <Chain ParallelCache="yes" DisableSystemRestore="yes">
-      <ExePackage SourceFile="$(DeferredExePackagePath)" DetectCondition="1=0" UninstallArguments="/u" InstallArguments="--ignore-me">
-		<PayloadGroupRef Id="ContainerTemplateUT"/>
+      <ExePackage SourceFile="$(DeferredExePackagePath)" Id="Test" DetectCondition="1=0" UninstallArguments="/u" InstallArguments='--log "[WixBundleLog_Test]" --ignore-me'>
+        <PayloadGroupRef Id="ContainerTemplateUT"/>
       </ExePackage>
     </Chain>
   </Bundle>
