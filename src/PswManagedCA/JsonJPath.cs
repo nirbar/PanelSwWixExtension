@@ -1,12 +1,12 @@
-using WixToolset.Dtf.WindowsInstaller;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using PswManagedCA.Util;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using System.Xml.Serialization;
-using PswManagedCA.Util;
+using WixToolset.Dtf.WindowsInstaller;
 
 namespace PswManagedCA
 {
@@ -73,7 +73,7 @@ namespace PswManagedCA
 
             List<JsonJPathCatalog> catalogs = new List<JsonJPathCatalog>(); ;
 
-            using (View jsonView = session.Database.OpenView("SELECT `PSW_JsonJPath`.`File_`, `PSW_JsonJPath`.`Component_`, `PSW_JsonJPath`.`FilePath`, `PSW_JsonJPath`.`JPath`, `PSW_JsonJPath`.`Value`, `PSW_JsonJPath`.`Formatting`, `PSW_JsonJPath`.`ErrorHandling`, `PSW_JsonJPath`.`Condition` FROM `PSW_JsonJPath`"))
+            using (View jsonView = session.Database.OpenView("SELECT `PSW_JsonJPath`.`File_`, `PSW_JsonJPath`.`Component_`, `PSW_JsonJPath`.`FilePath`, `PSW_JsonJPath`.`JPath`, `PSW_JsonJPath`.`Value`, `PSW_JsonJPath`.`Formatting`, `PSW_JsonJPath`.`ErrorHandling`, `PSW_JsonJPath`.`AddMissingLeaf`, `PSW_JsonJPath`.`Condition` FROM `PSW_JsonJPath`"))
             {
                 jsonView.Execute(null);
 
@@ -89,7 +89,8 @@ namespace PswManagedCA
                         string value = rec[5] as string;
                         int? formatting = rec[6] as int?;
                         int? errorHandling = rec[7] as int?;
-                        string condition = rec[8] as string;
+                        int? addMissingLeaf = rec[8] as int?;
+                        string condition = rec[9] as string;
                         ctlg.JPathObfuscated = session.Obfuscate(jpath);
                         ctlg.ValueObfuscated = session.Obfuscate(value);
                         ctlg.JPath = session.Format(jpath);
@@ -164,6 +165,7 @@ namespace PswManagedCA
                         {
                             ctlg.ErrorHandling = (ErrorHandling)errorHandling;
                         }
+                        ctlg.AddMissingLeaf = addMissingLeaf.HasValue && (addMissingLeaf.Value > 0);
 
                         ComponentInfo ci = session.Components[component];
                         if (ci == null)
@@ -250,19 +252,43 @@ namespace PswManagedCA
                 try
                 {
                     JObject jo = JObject.Parse(File.ReadAllText(ctlg.FilePath));
-                    JToken token = jo.SelectToken(ctlg.JPath, true);
+                    JToken token = jo.SelectToken(ctlg.JPath);
                     if (token == null)
                     {
-                        throw new Exception("JPath did not match any results");
-                    }
+                        if (!ctlg.AddMissingLeaf)
+                        {
+                            throw new Exception("JPath did not match any results");
+                        }
 
-                    token.Replace(JToken.Parse(ctlg.Value));
+                        var i = ctlg.JPath.LastIndexOf(".");
+                        if (i < 0)
+                        {
+                            throw new Exception("JPath did not match any results and leaf could not be detected in JPath");
+                        }
+                        var parentJpath = ctlg.JPath.Substring(0, i);
+                        var newField = ctlg.JPath.Substring(i + 1);
+                        if (string.IsNullOrEmpty(parentJpath) || string.IsNullOrEmpty(newField) || newField.Contains("["))
+                        {
+                            throw new Exception("JPath did not match any results and parent is empty, or leaf is invalid");
+                        }
+
+                        token = jo.SelectToken(parentJpath);
+                        if (token == null)
+                        {
+                            throw new Exception("JPath did not match any results for parent so leaf could not be added");
+                        }
+                        ((JObject)token).Add(newField, ctlg.Value);
+                    }
+                    else
+                    {
+                        token.Replace(JToken.Parse(ctlg.Value));
+                    }
                     File.WriteAllText(ctlg.FilePath, jo.ToString(Formatting.Indented));
                 }
                 catch (Exception ex)
                 {
                     session.LogUnformatted($"Failed setting JsonJpath '{ctlg.JPathObfuscated}' to '{ctlg.ValueObfuscated}' in file '{ctlg.FilePath}': {ex}");
-                    switch( session.HandleError(ctlg.ErrorHandling, (int)PswErrorMessages.JsonJpathFailure, ctlg.JPathObfuscated, ctlg.ValueObfuscated, ctlg.FilePath, ex.Message))
+                    switch (session.HandleError(ctlg.ErrorHandling, (int)PswErrorMessages.JsonJpathFailure, ctlg.JPathObfuscated, ctlg.ValueObfuscated, ctlg.FilePath, ex.Message))
                     {
                         case MessageResult.Abort:
                             session.Log("Aborted on failure");
@@ -294,6 +320,8 @@ namespace PswManagedCA
         public string ValueObfuscated { get; set; }
 
         public string Value { get; set; }
+
+        public bool AddMissingLeaf { get; set; }
 
         public ErrorHandling ErrorHandling { get; set; } = ErrorHandling.fail;
     }

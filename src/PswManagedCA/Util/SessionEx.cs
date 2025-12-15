@@ -107,7 +107,12 @@ namespace PswManagedCA.Util
                 }
 
                 int hint = (int)InstallMessage.Error | (int)MessageButtons.AbortRetryIgnore | (int)MessageDefaultButton.Button1 | (int)MessageIcon.Error;
-                return session.Message((InstallMessage)hint, rec);
+                var res = session.Message((InstallMessage)hint, rec);
+                if (res == 0)
+                {
+                    res = MessageResult.Abort;
+                }
+                return res;
             }
         }
     }

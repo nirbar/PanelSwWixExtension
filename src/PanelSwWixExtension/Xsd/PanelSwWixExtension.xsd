@@ -740,6 +740,11 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
           <xs:documentation><![CDATA[On error fail, ignore, or prompt user to abort, retry or ignore. Defaults to 'fail']]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="AddMissingLeaf" use="optional" type="wix:YesNoType" default="no">
+        <xs:annotation>
+          <xs:documentation><![CDATA[Whether or not to add a missing leaf if the JPath expression yields no results.]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
       <xs:attribute name="Condition" type="xs:string" use="optional">
         <xs:annotation>
           <xs:documentation>Condition to test whether or not to apply this configuration</xs:documentation>

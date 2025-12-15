@@ -2,7 +2,6 @@ using Newtonsoft.Json.Linq;
 using PanelSw.Wix.Extensions.Symbols;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -1983,6 +1982,7 @@ namespace PanelSw.Wix.Extensions
             string condition = null;
             JsonFormatting jsonFormatting = JsonFormatting.Raw;
             ErrorHandling promptOnError = ErrorHandling.fail;
+            YesNoType addMissingLeaf = YesNoType.No;
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -2007,6 +2007,9 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "ErrorHandling":
                             TryParseEnumAttribute(sourceLineNumbers, element, attrib, out promptOnError);
+                            break;
+                        case "AddMissingLeaf":
+                            addMissingLeaf = ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attrib);
                             break;
                         default:
                             ParseHelper.UnexpectedAttribute(element, attrib);
@@ -2041,6 +2044,7 @@ namespace PanelSw.Wix.Extensions
                 row.Formatting = (int)jsonFormatting;
                 row.ErrorHandling = (int)promptOnError;
                 row.Condition = condition;
+                row.AddMissingLeaf = (addMissingLeaf == YesNoType.Yes);
             }
         }
 

@@ -28,6 +28,7 @@ namespace PanelSw.Wix.Extensions.Symbols
                     new ColumnDefinition(nameof(Formatting), ColumnType.Number, 1, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 127),
                     new ColumnDefinition(nameof(ErrorHandling), ColumnType.Number, 2, false, false, ColumnCategory.Integer, minValue: 0, maxValue: 2),
                     new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),
+                    new ColumnDefinition(nameof(AddMissingLeaf), ColumnType.Number, 1, false, false, ColumnCategory.Integer, modularizeType: ColumnModularizeType.None),
                 };
             }
         }
@@ -84,6 +85,12 @@ namespace PanelSw.Wix.Extensions.Symbols
         {
             get => Fields[7].AsString();
             set => this.Set(7, value);
+        }
+
+        public bool AddMissingLeaf
+        {
+            get => Fields[8].AsBool();
+            set => this.Set(8, value);
         }
     }
 }

@@ -16,7 +16,9 @@
           <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'MyName')[\]].Customer2" Value="FALsE" Formatting="boolean" />
           <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'MyName')[\]].Customer3" Value="0" Formatting="boolean" />
           <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'MyName')[\]].Customer4" Value="[HiddenTest]" Formatting="boolean" />
-          <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'Missing')[\]].Customer4" Value="[HiddenTest]" Formatting="boolean" ErrorHandling="prompt" />
+          <PanelSW:JsonJPath JPath="$.Manufacturers[\[]?(@.Name == 'Missing')[\]].Customer4" Value="[HiddenTest]" Formatting="boolean" ErrorHandling="ignore" />
+          <PanelSW:JsonJPath JPath="$.TestAdd" Value="10" AddMissingLeaf="yes" ErrorHandling="prompt" />
+          <PanelSW:JsonJPath JPath="$.TestDontAdd" Value="10" AddMissingLeaf="no" ErrorHandling="ignore" />
         </File>
         <PanelSW:JsonJPath FilePath="[#Json_Object.json]" JPath="$.Manufacturers[\[]?(@.Name == '[HiddenTest]')[\]]" Value="{ &quot;Customer&quot;: &quot;Id&quot;, &quot;Customer1&quot;: &quot;Id1&quot;, &quot;Customer2&quot;: &quot;Id2&quot;, &quot;Customer3&quot;: &quot;Id3&quot;, &quot;Customer4&quot;: &quot;Id4&quot; }" ErrorHandling="ignore" />
       </Component>

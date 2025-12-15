@@ -23,6 +23,14 @@ function testInstall{
 		Write-Host "Headlight Fluid price should be 10"
 		$Script:MY_ERR=1
 	}
+	if ($($json.TestAdd) -ne 10){
+		Write-Host "TestAdd should be 10"
+		$Script:MY_ERR=1
+	}
+	if ($json.PSObject.Properties.Name -contains 'TestDontAdd'){
+		Write-Host "TestDontAdd should not exist"
+		$Script:MY_ERR=1
+	}
 }
 
 function testUninstall{
