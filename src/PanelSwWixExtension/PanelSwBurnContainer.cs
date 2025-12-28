@@ -138,6 +138,8 @@ namespace PanelSw.Wix.Extensions
             switch (level)
             {
                 case WixToolset.Data.CompressionLevel.None:
+                    level7z = SevenZap.SevenZap.CompressionLevel.None;
+                    break;
                 case WixToolset.Data.CompressionLevel.Low:
                     level7z = SevenZap.SevenZap.CompressionLevel.X1_Fastest;
                     break;
