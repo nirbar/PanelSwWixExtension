@@ -69,6 +69,7 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
   - *SqlScript*: Execute SQL scripts, optionally with text replacements.
   - *SplitFile*: Splits a file to parts during build, and reconstruct it during install. Used to workaround MSI limitation of 2GB file size.
   - *NssmServiceConfig*: Configures [NSSM](https://nssm.cc/)-based service parameters.
+  - *Property/@Persist* Persist a property value. The property value will be restored on modify/repair/upgrade.
 
 ## Preprocessor
 - *$(psw.VarNullOrEmpty(VAR_NAME))*: Return 1 if the variable is not defined, or if it defined as empty. Return 0 otherwise

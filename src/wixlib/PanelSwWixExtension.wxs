@@ -1012,4 +1012,27 @@
       <ProgressText Action="PSW_DuplicateFolder" Message="!(loc.DuplicateFolder)" />
     </UI>
   </Fragment>
+
+  <!-- PropertyPersist -->
+  <Fragment>
+    <CustomAction Id="PropertyPersist" SuppressModularization="yes" DllEntry="PropertyPersist" Execute="firstSequence" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="PropertyPersistSched" SuppressModularization="yes" DllEntry="PropertyPersistSched" Execute="immediate" Return="check" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="PropertyPersistExec" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="deferred" Return="check" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="PropertyPersistRollback" SuppressModularization="yes" DllEntry="CommonDeferred" Execute="rollback" Return="ignore" Impersonate="no" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+
+    <InstallUISequence>
+      <Custom Action="PropertyPersist" Before="AppSearch" Overridable="yes" />
+    </InstallUISequence>
+    <InstallExecuteSequence>
+      <Custom Action="PropertyPersist" Before="AppSearch" Overridable="yes" />
+      <Custom Action="PropertyPersistSched" Before="InstallFinalize" Overridable="yes" />
+    </InstallExecuteSequence>
+
+    <UI>
+      <ProgressText Action="PropertyPersist" Message="!(loc.PropertyPersist)" />
+      <ProgressText Action="PropertyPersistSched" Message="!(loc.PropertyPersist)" />
+      <ProgressText Action="PropertyPersistExec" Message="!(loc.PropertyPersist)" />
+      <ProgressText Action="PropertyPersistRollback" Message="!(loc.PropertyPersist)" />
+    </UI>
+  </Fragment>
 </Wix>

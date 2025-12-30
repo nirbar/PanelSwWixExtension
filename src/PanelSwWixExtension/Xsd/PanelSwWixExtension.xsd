@@ -32,6 +32,15 @@
     </xs:annotation>
   </xs:attribute>
 
+  <xs:attribute name="Persist" type="wix:YesNoType">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Property" />
+      </xs:appinfo>
+      <xs:documentation><![CDATA[Persist a property value. The property value will be restored on modify/repair/upgrade.]]></xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+
   <xs:element name="FileGlob">
     <xs:annotation>
       <xs:appinfo>

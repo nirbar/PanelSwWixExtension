@@ -523,6 +523,7 @@ namespace PanelSw.Wix.Extensions
                         new TableDefinition(nameof(PSW_NssmServiceConfig_Property), PSW_NssmServiceConfig_Property.SymbolDefinition, PSW_NssmServiceConfig_Property.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_PathSearch), PSW_PathSearch.SymbolDefinition, PSW_PathSearch.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_Payload), PSW_Payload.SymbolDefinition, PSW_Payload.ColumnDefinitions, symbolIdIsPrimaryKey: false),
+                        new TableDefinition(nameof(PSW_PropertyPersist), PSW_PropertyPersist.SymbolDefinition, PSW_PropertyPersist.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_ReadIniValues), PSW_ReadIniValues.SymbolDefinition, PSW_ReadIniValues.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_RegularExpression), PSW_RegularExpression.SymbolDefinition, PSW_RegularExpression.ColumnDefinitions, symbolIdIsPrimaryKey: true),
                         new TableDefinition(nameof(PSW_RemoveFolderEx), PSW_RemoveFolderEx.SymbolDefinition, PSW_RemoveFolderEx.ColumnDefinitions, symbolIdIsPrimaryKey: true),

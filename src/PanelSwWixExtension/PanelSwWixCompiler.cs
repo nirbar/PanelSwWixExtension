@@ -1039,6 +1039,10 @@ namespace PanelSw.Wix.Extensions
                 case "PSW_AccountSidSearch":
                     customActions.Add("AccountSidSearch");
                     break;
+                case "PSW_PropertyPersist":
+                    customActions.Add("PropertyPersist");
+                    customActions.Add("PropertyPersistSched");
+                    break;
                 case "PSW_XslTransform":
                 case "PSW_XslTransform_Replacements":
                     customActions.Add("PSW_XslTransform");
@@ -1121,6 +1125,17 @@ namespace PanelSw.Wix.Extensions
                             ParseActionStartTextAttribute(section, parentElement, attribute);
                             break;
 
+                        default:
+                            ParseHelper.UnexpectedAttribute(parentElement, attribute);
+                            break;
+                    }
+                    break;
+                case "Property":
+                    switch (attribute.Name.LocalName)
+                    {
+                        case "Persist":
+                            ParsePropertyPersistAttribute(section, parentElement, attribute);
+                            break;
                         default:
                             ParseHelper.UnexpectedAttribute(parentElement, attribute);
                             break;
@@ -1246,6 +1261,39 @@ namespace PanelSw.Wix.Extensions
                     ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", id);
                 }
             }
+        }
+
+        private void ParsePropertyPersistAttribute(IntermediateSection section, XElement parentElement, XAttribute attribute)
+        {
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(parentElement);
+            YesNoType aye = ParseHelper.GetAttributeYesNoValue(sourceLineNumbers, attribute);
+            if (aye != YesNoType.Yes)
+            {
+                return;
+            }
+
+            XAttribute idAttrib = parentElement.Attribute("Id");
+            if (idAttrib == null)
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, parentElement.Name.LocalName, "Id"));
+                return;
+            }
+            string propName = ParseHelper.GetAttributeValue(sourceLineNumbers, idAttrib, EmptyRule.MustHaveNonWhitespaceCharacters);
+            if (string.IsNullOrEmpty(propName))
+            {
+                // CustomActionData is only relevant for deferred actions
+                Messaging.Write(ErrorMessages.IllegalEmptyAttributeValue(sourceLineNumbers, parentElement.Name.LocalName, idAttrib.Name.LocalName));
+                return;
+            }
+
+            if (Messaging.EncounteredError)
+            {
+                return;
+            }
+
+            PSW_PropertyPersist row = section.AddSymbol(new PSW_PropertyPersist(sourceLineNumbers, propName));
+            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PropertyPersist");
+            ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PropertyPersistSched");
         }
 
         private void ParseFileGlobElement(IntermediateSection section, XElement element)

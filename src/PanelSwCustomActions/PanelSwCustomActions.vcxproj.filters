@@ -196,6 +196,9 @@
     <ClCompile Include="FileGlobFilter.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="PropertyPersist.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\build\obj\$(Configuration)\Protobuf\*.pb.*">

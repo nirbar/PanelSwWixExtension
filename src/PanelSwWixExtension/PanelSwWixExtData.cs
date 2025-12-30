@@ -114,6 +114,9 @@ namespace PanelSw.Wix.Extensions
                 case nameof(PSW_Payload):
                     symbolDefinition = PSW_Payload.SymbolDefinition;
                     break;
+                case nameof(PSW_PropertyPersist):
+                    symbolDefinition = PSW_PropertyPersist.SymbolDefinition;
+                    break;
                 case nameof(PSW_ReadIniValues):
                     symbolDefinition = PSW_ReadIniValues.SymbolDefinition;
                     break;

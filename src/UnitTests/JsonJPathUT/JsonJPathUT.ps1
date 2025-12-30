@@ -43,12 +43,20 @@ function testUninstall{
 # Install
 Write-Host "=== Testing install ==="
 cleanFolders
-Start-Process msiexec -ArgumentList ("/i", "JsonJPathUT.msi", "/qn", "/l*v", "JsonJPathUT.msi.log", "INSTALLFOLDER=""$MY_DIR\install-folder""") -Wait
+$prc = Start-Process msiexec -ArgumentList ("/i", "JsonJPathUT.msi", "/qn", "/l*v", "JsonJPathUT.msi.log", "INSTALLFOLDER=""$MY_DIR\install-folder""") -Wait -PassThru
+if ($prc.ExitCode -ne 0){
+	Write-Host "msiexec failed"
+	$Script:MY_ERR=1
+}
 testInstall
 
 # Uninstall
 Write-Host "=== Testing uninstall ==="
-Start-Process msiexec -ArgumentList ("/xJsonJPathUT.msi", "/qn", "/l*v", "JsonJPathUT.msix.log", "INSTALLFOLDER=""$MY_DIR\install-folder""") -Wait
+$prc = Start-Process msiexec -ArgumentList ("/xJsonJPathUT.msi", "/qn", "/l*v", "JsonJPathUT.msix.log", "INSTALLFOLDER=""$MY_DIR\install-folder""") -Wait -PassThru
+if ($prc.ExitCode -ne 0){
+	Write-Host "msiexec failed"
+	$Script:MY_ERR=1
+}
 testUninstall
 
 # Clean and exit

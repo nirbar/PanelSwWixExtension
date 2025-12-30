@@ -67,4 +67,5 @@
   <String Overridable="yes" Id="LongPathsWarning" Value="הקבצים הבאים הם בעלי נתיב ארוך מדי. האם לנסות למחוק אותם בכל זאת? פעולה זו עלולה להיות בלתי הפיכה.[2]" />
   <String Overridable="yes" Id="DuplicateFolder" Value="מעתיק ספריות" />
   <String Overridable="yes" Id="DeletePath" Value="מוחק קבצים וספריות" />
+  <String Overridable="yes" Id="PropertyPersist" Value="משחזר ערכי פרמטרים" />
 </WixLocalization>

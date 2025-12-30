@@ -139,6 +139,7 @@
     <ClCompile Include="WmiSearch.cpp" />
     <ClCompile Include="XmlSearch.cpp" />
     <ClCompile Include="XslTransform.cpp" />
+    <ClCompile Include="PropertyPersist.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ConcatFiles.h" />

@@ -1,0 +1,41 @@
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/XSD/PanelSwWixExtension.xsd">
+  <Package Name="PropertyPersistUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}" InstallerVersion="200">
+    <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." AllowSameVersionUpgrades="yes" />
+
+    <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
+      <Component Directory="INSTALLFOLDER">
+        <File Source="PropertyPersistUT.ps1" Compressed="no"/>
+      </Component>
+      <Component Directory="INSTALLFOLDER">
+        <RegistryKey Root="HKLM" Key="SOFTWARE\PanelSwWixExtension\[UpgradeCode]\Properties">
+          <RegistryValue Name="NoPersist1" Type="string" Value="test"/>
+          <RegistryValue Name="NoPersist2" Type="string" Value="test"/>
+        </RegistryKey>
+      </Component>
+    </Feature>
+
+    <Property Id="hidden_test" Value="hidden" Hidden="yes" PanelSW:Persist="yes" />
+    <Property Id="plain_test" Value='plain' PanelSW:Persist="yes"/>
+    <Property Id="plain_nothing_test" PanelSW:Persist="yes"/>
+    <Property Id="NoPersist1" Value='no-persist1' PanelSW:Persist="no"/>
+    <Property Id="NoPersist2" Value='no-persist2'/>
+
+    <SetProperty Id='hidden_test' Value='' Sequence='first' Before='PropertyPersist' Condition='Installed'/>
+    <Launch Condition='NOT Installed Or (hidden_test = "hidden") OR SKIP_TEST' Message="Expected hidden_test to be 'hidden'" />
+
+    <SetProperty Id='plain_test' Value='' Sequence='first' Before='PropertyPersist' Condition='Installed'/>
+    <Launch Condition='NOT Installed Or (plain_test = "plain") OR SKIP_TEST' Message="Expected plain_test to be 'plain'" />
+
+    <SetProperty Id='plain_nothing_test' Value='something' Sequence='first' Before='PropertyPersist' Condition='Installed'/>
+    <Launch Condition='NOT Installed Or Not plain_nothing_test OR SKIP_TEST' Message="Expected plain_nothing_test to be nothing" />
+
+    <Launch Condition='NoPersist1 = "no-persist1" OR SKIP_TEST' Message='Expected NoPersist1 = "no-persist1"' />
+    <Launch Condition='NoPersist2 = "no-persist2" OR SKIP_TEST' Message='Expected NoPersist2 = "no-persist2"' />
+
+    <Property Id="MSIFASTINSTALL" Value="7" />
+
+    <StandardDirectory Id="ProgramFiles6432Folder">
+      <Directory Id="INSTALLFOLDER" Name="UnitTestSetup" />
+    </StandardDirectory>
+  </Package>
+</Wix>
