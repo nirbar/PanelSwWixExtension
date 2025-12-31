@@ -36,8 +36,11 @@
     <xs:annotation>
       <xs:appinfo>
         <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Property" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="PropertyRef" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Directory" />
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="DirectoryRef" />
       </xs:appinfo>
-      <xs:documentation><![CDATA[Persist a property value. The property value will be restored on modify/repair/upgrade.]]></xs:documentation>
+      <xs:documentation><![CDATA[Persist a property or directory value. The value will be restored on modify/repair/upgrade.]]></xs:documentation>
     </xs:annotation>
   </xs:attribute>
 

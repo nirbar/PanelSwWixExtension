@@ -19,6 +19,7 @@
     <Property Id="plain_nothing_test" PanelSW:Persist="yes"/>
     <Property Id="NoPersist1" Value='no-persist1' PanelSW:Persist="no"/>
     <Property Id="NoPersist2" Value='no-persist2'/>
+    <DirectoryRef Id='INSTALLFOLDER' PanelSW:Persist="yes"/>
 
     <SetProperty Id='hidden_test' Value='' Sequence='first' Before='PropertyPersist' Condition='Installed'/>
     <Launch Condition='NOT Installed Or (hidden_test = "hidden") OR SKIP_TEST' Message="Expected hidden_test to be 'hidden'" />
@@ -28,6 +29,9 @@
 
     <SetProperty Id='plain_nothing_test' Value='something' Sequence='first' Before='PropertyPersist' Condition='Installed'/>
     <Launch Condition='NOT Installed Or Not plain_nothing_test OR SKIP_TEST' Message="Expected plain_nothing_test to be nothing" />
+
+    <SetProperty Id='INSTALLFOLDER' Value='' Sequence='first' Before='PropertyPersist' Condition='Installed'/>
+    <Launch Condition='NOT Installed Or INSTALLFOLDER OR SKIP_TEST' Message="Expected INSTALLFOLDER to be restored" />
 
     <Launch Condition='NoPersist1 = "no-persist1" OR SKIP_TEST' Message='Expected NoPersist1 = "no-persist1"' />
     <Launch Condition='NoPersist2 = "no-persist2" OR SKIP_TEST' Message='Expected NoPersist2 = "no-persist2"' />

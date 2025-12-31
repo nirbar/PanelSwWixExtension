@@ -1131,6 +1131,9 @@ namespace PanelSw.Wix.Extensions
                     }
                     break;
                 case "Property":
+                case "PropertyRef":
+                case "Directory":
+                case "DirectoryRef":
                     switch (attribute.Name.LocalName)
                     {
                         case "Persist":
