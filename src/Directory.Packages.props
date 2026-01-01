@@ -18,6 +18,7 @@
     <PackageVersion Include="WixToolset.WixStandardBootstrapperApplicationFunctionApi" Version="$(Wix4Version)" />
     <PackageVersion Include="WixToolset.BootstrapperCore.Native" Version="$(Wix4Version)" />
     <PackageVersion Include="WixToolset.NetFx.wixext" Version="$(Wix4Version)" />
+    <PackageVersion Include="WixToolset.UI.wixext" Version="$(Wix4Version)" />
     <PackageVersion Include="WixToolset.BootstrapperExtensionApi" Version="$(Wix4Version)" />
     <PackageVersion Include="WixToolset.BootstrapperApplicationApi" Version="$(Wix4Version)" />
     <PackageVersion Include="PanelSwWix4.DUtil" version="$(PanelSwWix4Version)" />
@@ -31,6 +32,7 @@
     <PackageVersion Include="PanelSwWix4.WixStandardBootstrapperApplicationFunctionApi" Version="$(PanelSwWix4Version)" />
     <PackageVersion Include="PanelSwWix4.BootstrapperCore.Native" Version="$(PanelSwWix4Version)" />
     <PackageVersion Include="PanelSwWix4.NetFx.wixext" Version="$(PanelSwWix4Version)" />
+    <PackageVersion Include="PanelSwWix4.UI.wixext" Version="$(PanelSwWix4Version)" />
     <PackageVersion Include="PanelSwWix4.BootstrapperExtensionApi" Version="$(PanelSwWix4Version)" />
     <PackageVersion Include="PanelSwWix4.BootstrapperApplicationApi" Version="$(PanelSwWix4Version)" />
     <PackageVersion Include="TidyBuild" version="1.5.2" />

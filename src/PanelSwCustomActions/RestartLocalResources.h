@@ -16,7 +16,7 @@ public:
 
 	HRESULT AddRestartLocalResources(const std::list<LPWSTR>& lstFolders);
 
-	HRESULT EnumerateLocalProcesses(const std::list<LPWSTR>& lstFolders, std::map<DWORD, LPWSTR>& mapProcId, bool bIgnoreServices);
+	HRESULT EnumerateLocalProcesses(const std::list<LPWSTR>& lstFolders, std::map<DWORD, LPWSTR>& mapProcId, std::map<DWORD, LPWSTR>& mapServiceId);
 
 	HRESULT RegisterWithRm(const std::list<LPWSTR>& lstFolders);
 
@@ -28,9 +28,7 @@ private:
 
 	HRESULT Execute(const std::list<LPWSTR>& lstFolders);
 	HRESULT KillOneProcess(DWORD dwProcessId, LPCWSTR szProcessName);
-	HRESULT GetServices(std::list<DWORD>* plstServices);
-
-	INT PromptFilesInUse(const std::map<DWORD, LPWSTR> &mapProcId);
+	HRESULT GetServices(std::map<DWORD, LPWSTR>& mapServiceId);
 
 	static BOOL CALLBACK KillWindowsProc(HWND hwnd, LPARAM lParam);
 

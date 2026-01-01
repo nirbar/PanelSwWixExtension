@@ -5,6 +5,7 @@
     <Property Id="MSIFASTINSTALL" Value="1"></Property>
     <Property Id="MSIRMSHUTDOWN" Value="1" />
     <Property Id="MSIDISABLERMRESTART" Value="1" />
+    <UIRef Id="WixUI_Minimal_$(sys.BUILDARCHSHORT)"/>
 
     <Feature Id="ProductFeature" Title="RestartLocalResourcesUT" Level="1">
       <ComponentGroupRef Id="ProductComponents" />
@@ -14,9 +15,17 @@
       <Component>
         <File Source="$(sys.SOURCEFILEPATH)" />
       </Component>
+      <Component>
+        <File Id="nssm.exe" Source="$(sys.SOURCEFILEDIR)..\NssmServiceConfigUT\nssm-2.24\win64\nssm.exe"/>
+
+        <ServiceInstall Name="RestartLocalResourcesUT" Type="ownProcess" Start="auto" ErrorControl="normal" Interactive="yes"/>
+        <ServiceControl Name="RestartLocalResourcesUT" Remove="uninstall" Start="install"/>
+        <PanelSW:NssmServiceConfig ServiceName="RestartLocalResourcesUT" Application="[NPP_FOLDER]\notepad++.exe" AppDirectory="[NPP_FOLDER]" AppExit='Restart' />
+      </Component>
     </ComponentGroup>
 
-    <PanelSW:RestartLocalResources Path="C:\Users\Administrator\Desktop\Notepad++\" />
+    <Property Id="NPP_FOLDER" Value="C:\Users\Administrator\Desktop\Notepad++\"/>
+    <PanelSW:RestartLocalResources Path="[NPP_FOLDER]" />
 
     <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="RestartLocalResourcesUT" />

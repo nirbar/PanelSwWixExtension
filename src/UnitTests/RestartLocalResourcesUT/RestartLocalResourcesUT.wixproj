@@ -17,5 +17,6 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="TidyBuild" />
+    <PackageReference Include="WixToolset.UI.wixext" />
   </ItemGroup>
 </Project>
