@@ -62,6 +62,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		TidyBuild.custom.props = TidyBuild.custom.props
 		TidyBuild.custom.targets = TidyBuild.custom.targets
 		TidyBuild.user.props = TidyBuild.user.props
+		TidyBuild.vcxproj.targets = TidyBuild.vcxproj.targets
 	EndProjectSection
 EndProject
 Project("{B7DD6F7E-DEF8-4E67-B5B7-07EF123DB6F0}") = "ExecOnComponentUT", "UnitTests\ExecOnComponentUT\ExecOnComponentUT.wixproj", "{80C0972A-EB37-4DF3-95DB-704EB7F7965C}"

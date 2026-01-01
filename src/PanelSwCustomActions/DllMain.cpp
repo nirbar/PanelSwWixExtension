@@ -10,6 +10,13 @@ extern "C" BOOL WINAPI DllMain(HINSTANCE hInst, ULONG ulReason, LPVOID)
 	switch (ulReason)
 	{
 	case DLL_PROCESS_ATTACH:
+#ifdef DEBUGGABLE_RELEASE
+		if (::GetEnvironmentVariableW(L"DEBUG_PSW", nullptr, 0) > 0)
+		{
+			::MessageBoxW(NULL, L"DEBUG_PSW environment variable is set. You may attach a debugger now.\nTo disable this message, delete the environment variable 'DEBUG_PSW'", L"DEBUG_PSW", MB_OK);
+		}
+#endif
+
 		WcaGlobalInitialize(hInst);
 		_gFsRedirect.fDisabled = FALSE;
 
