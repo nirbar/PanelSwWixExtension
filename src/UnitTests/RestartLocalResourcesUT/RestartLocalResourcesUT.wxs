@@ -11,24 +11,36 @@
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
 
-    <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
-      <Component>
-        <File Source="$(sys.SOURCEFILEPATH)" />
+    <ComponentGroup Id="ProductComponents">
+      <Component Directory="INSTALLFOLDER2">
+        <File Id="nssm.exe2" Source="$(sys.SOURCEFILEDIR)nssm-2.24\win64\nssm.exe"/>
+
+        <ServiceInstall Name="RestartLocalResourcesUT2" Type="ownProcess" Start="auto" ErrorControl="normal" Interactive="yes">
+          <ServiceDependency Id="RestartLocalResourcesUT"/>
+        </ServiceInstall>
+        <ServiceControl Name="RestartLocalResourcesUT2" Remove="uninstall" Start="install"/>
+        <PanelSW:NssmServiceConfig ServiceName="RestartLocalResourcesUT2" Application="ping.exe" AppDirectory="[INSTALLFOLDER]" AppParameters="google.com /n 1000" AppExit='Restart' />
       </Component>
-      <Component>
-        <File Id="nssm.exe" Source="$(sys.SOURCEFILEDIR)..\NssmServiceConfigUT\nssm-2.24\win64\nssm.exe"/>
+      <Component Directory="INSTALLFOLDER">
+        <File Id="nssm.exe" Source="$(sys.SOURCEFILEDIR)nssm-2.24\win64\nssm.exe"/>
 
         <ServiceInstall Name="RestartLocalResourcesUT" Type="ownProcess" Start="auto" ErrorControl="normal" Interactive="yes"/>
         <ServiceControl Name="RestartLocalResourcesUT" Remove="uninstall" Start="install"/>
-        <PanelSW:NssmServiceConfig ServiceName="RestartLocalResourcesUT" Application="[NPP_FOLDER]\notepad++.exe" AppDirectory="[NPP_FOLDER]" AppExit='Restart' />
+        <PanelSW:NssmServiceConfig ServiceName="RestartLocalResourcesUT" Application="ping.exe" AppDirectory="[INSTALLFOLDER]" AppParameters="google.com /n 1000" AppExit='Restart' />
       </Component>
     </ComponentGroup>
 
     <Property Id="NPP_FOLDER" Value="C:\Users\Administrator\Desktop\Notepad++\"/>
     <PanelSW:RestartLocalResources Path="[NPP_FOLDER]" />
+    <PanelSW:RestartLocalResources Path="[INSTALLFOLDER]" />
+
+    <InstallExecuteSequence>
+      <Custom Action="override RestartLocalResourcesExec" Before="DeleteServices"/>
+    </InstallExecuteSequence>
 
     <StandardDirectory Id="ProgramFiles6432Folder">
       <Directory Id="INSTALLFOLDER" Name="RestartLocalResourcesUT" />
+      <Directory Id="INSTALLFOLDER2" Name="RestartLocalResourcesUT2" />
     </StandardDirectory>
   </Package>
 </Wix>

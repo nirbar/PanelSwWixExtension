@@ -16,3 +16,4 @@ packages/
 /build-v142/
 *.user.*
 *.log
+nssm-2.24/

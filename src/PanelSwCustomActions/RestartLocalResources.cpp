@@ -218,7 +218,7 @@ HRESULT CRestartLocalResources::Execute(const std::list<LPWSTR>& lstFolders)
 
 	hr = EnumerateLocalProcesses(lstFolders, mapProcId, mapServiceId);
 	ExitOnFailure(hr, "Failed enumerating local processes");
-	if (mapProcId.size() <= 0)
+	if ((mapProcId.size() <= 0) && (mapServiceId.size() <= 0))
 	{
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "No processes found in any of the folders");
 		ExitFunction();
@@ -227,6 +227,10 @@ HRESULT CRestartLocalResources::Execute(const std::list<LPWSTR>& lstFolders)
 	for (const std::pair<DWORD, LPWSTR>& prcId : mapProcId)
 	{
 		KillOneProcess(prcId.first, prcId.second);
+	}
+	for (const std::pair<DWORD, LPWSTR>& svcId : mapServiceId)
+	{
+		KillOneService(svcId.first, svcId.second);
 	}
 
 LExit:
@@ -278,6 +282,162 @@ HRESULT CRestartLocalResources::KillOneProcess(DWORD dwProcessId, LPCWSTR szProc
 
 LExit:
 	ReleaseHandle(hProcess);
+	return hr;
+}
+
+HRESULT CRestartLocalResources::KillOneService(DWORD dwProcessId, LPCWSTR szServiceName)
+{
+	HRESULT hr = S_OK;
+	BOOL bRes = TRUE;
+	PMSIHANDLE hActionData;
+	SC_HANDLE hServices = NULL;
+	SC_HANDLE hSvc = NULL;
+	SERVICE_STATUS_PROCESS svcServiceProcess = {};
+	SERVICE_STATUS svcServiceStatus = {};
+	DWORD dwSize = 0;
+	DWORD dwRes = 0;
+	HANDLE hStoppedEvent = NULL;
+
+	// ActionData: "Closing [1]"
+	hActionData = ::MsiCreateRecord(1);
+	if (hActionData && SUCCEEDED(WcaSetRecordString(hActionData, 1, szServiceName)))
+	{
+		WcaProcessMessage(INSTALLMESSAGE::INSTALLMESSAGE_ACTIONDATA, hActionData);
+	}
+
+	hServices = ::OpenSCManager(nullptr, nullptr, SC_MANAGER_ALL_ACCESS);
+	ExitOnNullWithLastError(hServices, hr, "Failed to open service manager");
+
+	hSvc = OpenService(hServices, szServiceName, SERVICE_STOP | SERVICE_QUERY_STATUS | SERVICE_ENUMERATE_DEPENDENTS);
+	ExitOnNullWithLastError(hSvc, hr, "Failed to open service '%ls'", szServiceName);
+
+	hr = StopDependentServices(hServices, hSvc);
+	ExitOnFailure(hr, "Failed to stop dependent services");
+
+	bRes = ::QueryServiceStatusEx(hSvc, SC_STATUS_PROCESS_INFO, (LPBYTE)&svcServiceProcess, sizeof(svcServiceProcess), &dwSize);
+	ExitOnNullWithLastError(bRes, hr, "Failed to query service '%ls' status", szServiceName);
+	if (svcServiceProcess.dwCurrentState == SERVICE_STOPPED)
+	{
+		ExitFunction();
+	}
+	// Wait for the service to stop.
+	else if (svcServiceProcess.dwCurrentState == SERVICE_STOP_PENDING)
+	{
+		SERVICE_NOTIFYW notifyBuffer = {};
+
+		hStoppedEvent = ::CreateEvent(nullptr, TRUE, FALSE, nullptr);
+		ExitOnNullWithLastError(hStoppedEvent, hr, "Failed to create event");
+
+		notifyBuffer.dwVersion = SERVICE_NOTIFY_STATUS_CHANGE;
+		notifyBuffer.pfnNotifyCallback = &CRestartLocalResources::ServiceStoppedCallback;
+		notifyBuffer.pContext = hStoppedEvent;
+
+		dwRes = ::NotifyServiceStatusChangeW(hSvc, SERVICE_NOTIFY_STOPPED, &notifyBuffer);
+		ExitOnWin32Error(dwRes, hr, "Failed to schedule wait for service '%ls' to stop", szServiceName);
+
+		dwRes = ::WaitForSingleObject(hStoppedEvent, svcServiceProcess.dwWaitHint);
+		if (dwRes != WAIT_OBJECT_0)
+		{
+			hr = HRESULT_FROM_WIN32(dwRes);
+			WcaLogError(hr, "Failed to wait for service '%ls' to stop", szServiceName);
+
+			if (dwProcessId)
+			{
+				hr = KillOneProcess(dwProcessId, szServiceName);
+			}
+		}
+		ExitFunction();
+	}
+
+	// Stop the service
+	bRes = ::ControlService(hSvc, SERVICE_CONTROL_STOP, &svcServiceStatus);
+	if (!bRes)
+	{
+		dwRes = ::GetLastError();
+		switch (dwRes)
+		{
+		case NO_ERROR:
+			KillOneService(dwProcessId, szServiceName); // Now the service should be in pending stop state.
+			break;
+		case ERROR_INVALID_SERVICE_CONTROL:
+		case ERROR_SERVICE_CANNOT_ACCEPT_CTRL:
+		case ERROR_SERVICE_NOT_ACTIVE:
+		default:
+			hr = HRESULT_FROM_WIN32(dwRes);
+			WcaLogError(hr, "Failed to stop service '%ls'", szServiceName);
+
+			if (dwProcessId)
+			{
+				hr = KillOneProcess(dwProcessId, szServiceName);
+			}
+			ExitFunction();
+		}
+	}
+
+LExit:
+	ReleaseServiceHandle(hServices);
+	ReleaseServiceHandle(hSvc);
+	ReleaseHandle(hStoppedEvent);
+
+	return hr;
+}
+
+/*static*/ void CALLBACK CRestartLocalResources::ServiceStoppedCallback(PVOID pParameter)
+{
+	HANDLE hEvent = (HANDLE)pParameter;
+	::SetEvent(hEvent);
+}
+
+HRESULT CRestartLocalResources::StopDependentServices(SC_HANDLE hServices, SC_HANDLE hSvc)
+{
+	HRESULT hr = S_OK;
+	BOOL bRes = TRUE;
+	DWORD dwRes = ERROR_SUCCESS;
+	DWORD dwBytesNeeded = 0;
+	DWORD dwCount = 0;
+	LPENUM_SERVICE_STATUS lpDependencies = nullptr;
+	SC_HANDLE hDepService = NULL;
+
+	// Pass a zero-length buffer to get the required buffer size.
+	bRes = ::EnumDependentServices(hSvc, SERVICE_ACTIVE, lpDependencies, 0, &dwBytesNeeded, &dwCount);
+	if (bRes)
+	{
+		ExitFunction();
+	}
+	dwRes = ::GetLastError();
+	if (dwRes != ERROR_MORE_DATA)
+	{
+		ExitOnWin32Error(dwRes, hr, "Failed to enumerate dependent services");
+	}
+
+	lpDependencies = (LPENUM_SERVICE_STATUS)MemAlloc(dwBytesNeeded, FALSE);
+	ExitOnNull(lpDependencies, hr, E_OUTOFMEMORY, "Failed to allocate memory");
+
+	bRes = ::EnumDependentServices(hSvc, SERVICE_ACTIVE, lpDependencies, dwBytesNeeded, &dwBytesNeeded, &dwCount);
+	ExitOnNullWithLastError(bRes, hr, "Failed to enumerate dependent services");
+
+	for (DWORD i = 0; i < dwCount; i++)
+	{
+		ReleaseServiceHandle(hDepService);
+		dwBytesNeeded = 0;
+		ENUM_SERVICE_STATUS* pDepSvc = &lpDependencies[i];
+		SERVICE_STATUS_PROCESS svcServiceProcess = {};
+
+		// Open the service.
+		hDepService = ::OpenService(hServices, pDepSvc->lpServiceName, SERVICE_QUERY_STATUS);
+		ExitOnNullWithLastError(hDepService, hr, "Failed to open dependent service '%ls'", pDepSvc->lpServiceName);
+
+		bRes = ::QueryServiceStatusEx(hSvc, SC_STATUS_PROCESS_INFO, (LPBYTE)&svcServiceProcess, sizeof(svcServiceProcess), &dwBytesNeeded);
+		ExitOnNullWithLastError(bRes, hr, "Failed to query service '%ls' status", pDepSvc->lpServiceName);
+
+		hr = KillOneService(svcServiceProcess.dwProcessId, pDepSvc->lpServiceName);
+		ExitOnFailure(hr, "Failed to stop dependent service '%ls'", pDepSvc->lpServiceName);
+	}
+
+LExit:
+	ReleaseMem(lpDependencies);
+	ReleaseServiceHandle(hDepService);
+
 	return hr;
 }
 
@@ -352,12 +512,12 @@ HRESULT CRestartLocalResources::EnumerateLocalProcesses(const std::list<LPWSTR>&
 		// Executable is within the folder?
 		if (std::any_of(lstFolders.begin(), lstFolders.end(), visInFolder_))
 		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Detected process %u: '%ls'", peData.th32ProcessID, visInFolder_.szFullExePath);
-
 			// Process is a service?
 			auto it = mapAllServices.find(peData.th32ProcessID);
 			if (it != mapAllServices.end())
 			{
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Detected service %u '%ls': '%ls'", peData.th32ProcessID, it->second, visInFolder_.szFullExePath);
+
 				hr = StrAllocString(&szProcessName, it->second, 0);
 				ExitOnFailure(hr, "Failed to allocate memory");
 
@@ -366,6 +526,8 @@ HRESULT CRestartLocalResources::EnumerateLocalProcesses(const std::list<LPWSTR>&
 			}
 			else
 			{
+				WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Detected process %u: '%ls'", peData.th32ProcessID, visInFolder_.szFullExePath);
+
 				hr = StrAllocString(&szProcessName, peData.szExeFile, 0);
 				ExitOnFailure(hr, "Failed to allocate memory");
 

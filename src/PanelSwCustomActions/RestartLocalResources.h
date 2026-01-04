@@ -29,6 +29,9 @@ private:
 	HRESULT Execute(const std::list<LPWSTR>& lstFolders);
 	HRESULT KillOneProcess(DWORD dwProcessId, LPCWSTR szProcessName);
 	HRESULT GetServices(std::map<DWORD, LPWSTR>& mapServiceId);
+	HRESULT KillOneService(DWORD dwProcessId, LPCWSTR szServiceName);
+	HRESULT StopDependentServices(SC_HANDLE hServices, SC_HANDLE hSvc);
+	static void CALLBACK ServiceStoppedCallback(PVOID pParameter);
 
 	static BOOL CALLBACK KillWindowsProc(HWND hwnd, LPARAM lParam);
 
