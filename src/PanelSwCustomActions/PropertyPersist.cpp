@@ -49,12 +49,19 @@ extern "C" UINT __stdcall PropertyPersist(MSIHANDLE hInstall)
 		hr = RegReadString(hkReg, szId, (LPWSTR*)szValue);
 		if ((hr == E_FILENOTFOUND) || (hr == E_PATHNOTFOUND))
 		{
-			hr = szValue.Release();
+			hr = S_OK;
+			continue;
 		}
-		ExitOnFailure(hr, "Failed to get read value '%ls' from registry", (LPCWSTR)szId);
+		ExitOnFailure(hr, "Failed to read value '%ls' from registry", (LPCWSTR)szId);
+
+		if ((LPCWSTR)szValue == nullptr) 
+		{
+			hr = szValue.Copy(L"");
+			ExitOnFailure(hr, "Failed to copy string");
+		}
 
 		hr = WcaSetProperty(szId, szValue);
-		ExitOnFailure(hr, "Failed to set property");
+		ExitOnFailure(hr, "Failed to set property '%ls'", (LPCWSTR)szId);
 	}
 	hr = S_OK;
 
