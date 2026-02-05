@@ -99,6 +99,9 @@ extern "C" UINT __stdcall PropertyPersistSched(MSIHANDLE hInstall)
 	hr = RegOpen(hkRoot, szRegistryKey, dwBitness | GENERIC_READ, &hkReg);
 	if ((hr == E_FILENOTFOUND) || (hr == E_PATHNOTFOUND))
 	{
+		hr = rollbackCAD.AddDeleteKey(nRoot, dwBitness, szRegistryKey);
+		ExitOnFailure(hr, "Failed to add rollback data");
+
 		hr = S_OK;
 	}
 	ExitOnFailure(hr, "Failed to open registry key '%ls'", (LPCWSTR)szRegistryKey);
