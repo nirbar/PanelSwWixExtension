@@ -167,17 +167,6 @@ namespace PanelSw.Wix.Extensions
             myPayloadSymbols.Sort((p1, p2) => SortPayloads(p1, p2, groupSymbols));
 
             defaultContainer.Type = containerTemplate.DefaultType;
-#if EnableZipContainer
-            if (containerTemplate.Compression != PSW_ContainerTemplate.ContainerCompressionType.Cab)
-            {
-                defaultContainer.BootstrapperExtensionRef = PanelSwWixExtension.MY_EXTENSION_ID;
-                BackendHelper.AddBootstrapperExtensionData(PanelSwWixExtension.MY_EXTENSION_ID, new PSW_ContainerExtensionData(defaultContainer.SourceLineNumbers)
-                {
-                    Compression = containerTemplate.Compression,
-                    ContainerId = defaultContainer.Id.Id
-                });
-            }
-#endif
             // For too-large attached container, grab payloads for the default container
             if ((defaultContainer.Type == ContainerType.Attached) && (containerTemplate.MaximumUncompressedContainerSize > containerTemplate.MaximumUncompressedExeSize))
             {
@@ -236,18 +225,7 @@ namespace PanelSw.Wix.Extensions
                 {
                     container = section.AddSymbol(new WixBundleContainerSymbol(containerTemplate.SourceLineNumbers, new Identifier(AccessModifier.Global, containerSize.Count)));
                     container.Type = containerTemplate.DefaultType;
-#if EnableZipContainer
-                    container.BootstrapperExtensionRef = defaultContainer.BootstrapperExtensionRef;
-                    if (containerTemplate.Compression != PSW_ContainerTemplate.ContainerCompressionType.Cab)
-                    {
-                        BackendHelper.AddBootstrapperExtensionData(PanelSwWixExtension.MY_EXTENSION_ID, new PSW_ContainerExtensionData(container.SourceLineNumbers)
-                        {
-                            Compression = containerTemplate.Compression,
-                            ContainerId = container.Id.Id
-                        });
-                    }
-#endif
-
+                    containerSymbols.Add(container);
                     containerSize[container] = 0;
 
                     if (payload.FileSize.HasValue && (payload.FileSize.Value > containerTemplate.MaximumUncompressedContainerSize))
@@ -278,6 +256,31 @@ namespace PanelSw.Wix.Extensions
                     containerSymbol.Type = ContainerType.Detached;
                 }
             }
+
+#if EnableZipContainer
+            if (containerTemplate.Compression != PSW_ContainerTemplate.ContainerCompressionType.Cab)
+            {
+                defaultContainer.BootstrapperExtensionRef = PanelSwWixExtension.MY_EXTENSION_ID;
+                BackendHelper.AddBootstrapperExtensionData(PanelSwWixExtension.MY_EXTENSION_ID, new PSW_ContainerExtensionData(defaultContainer.SourceLineNumbers)
+                {
+                    Compression = containerTemplate.Compression,
+                    ContainerId = defaultContainer.Id.Id
+                });
+
+                foreach (WixBundleContainerSymbol container in containerSymbols)
+                {
+                    if (!container.Id.Id.Equals(BurnConstants.BurnUXContainerName))
+                    {
+                        container.BootstrapperExtensionRef = PanelSwWixExtension.MY_EXTENSION_ID;
+                        BackendHelper.AddBootstrapperExtensionData(PanelSwWixExtension.MY_EXTENSION_ID, new PSW_ContainerExtensionData(container.SourceLineNumbers)
+                        {
+                            Compression = containerTemplate.Compression,
+                            ContainerId = container.Id.Id
+                        });
+                    }
+                }
+            }
+#endif
         }
 
         // Best effort to group payloads by package and payload group (layout)
