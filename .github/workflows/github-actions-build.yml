@@ -14,6 +14,9 @@ on:
         default: 7.0.0-psw-wix-0384.28
         type: string
 
+env:
+  DEFAULT_PSW_WIX_VERSION: '7.0.0-psw-wix-0384.28'
+
 jobs:
   PanelSwWixExtension-Build:
     runs-on: windows-latest
@@ -36,8 +39,6 @@ jobs:
           } else {
             Add-Content -Path ${{ github.env }} -Value "PSW_WIX_VERSION=${{ env.DEFAULT_PSW_WIX_VERSION }}"
           }
-        env:
-          DEFAULT_PSW_WIX_VERSION: '7.0.0-psw-wix-0384.28'
 
       - name: Prepare for build
         run: |
