@@ -22,8 +22,11 @@
   <ItemGroup>
     <PackageReference Include="TidyBuild" />
   </ItemGroup>
-  <Target Name="DownloadNssm" Condition="!Exists('$(MSBuildProjectDirectory)\nssm-2.24\win64\nssm.exe')">
-    <DownloadFile SourceUrl="https://nssm.cc/release/nssm-2.24.zip" DestinationFolder="$(MSBuildProjectDirectory)"/>
-    <Unzip SourceFiles="$(MSBuildProjectDirectory)\nssm-2.24.zip" DestinationFolder="$(MSBuildProjectDirectory)"/>
+  <PropertyGroup>
+    <DefineConstants>BuildFolderCommon=$(BuildFolderCommon);$(DefineConstants)</DefineConstants>
+  </PropertyGroup>
+  <Target Name="DownloadNssm" Condition="!Exists('$(BuildFolderCommon)\nssm-2.24\win64\nssm.exe')">
+    <DownloadFile SourceUrl="https://nssm.cc/release/nssm-2.24.zip" DestinationFolder="$(BuildFolderCommon)"/>
+    <Unzip SourceFiles="$(BuildFolderCommon)\nssm-2.24.zip" DestinationFolder="$(BuildFolderCommon)"/>
   </Target>
 </Project>

@@ -28,6 +28,18 @@ namespace PanelSw.Wix.Extensions
         {
             return new Message(sourceLineNumber, MessageLevel.Error, (int)PswErrorId.MismatchingRemoveFolderExLongPathHandling, MessageResources.MismatchingRemoveFolderExLongPathHandling);
         }
+        public static Message MissingBundleInformation(string friendlyName)
+        {
+            return new Message(null, MessageLevel.Error, (int)PswErrorId.MissingBundleInformation, MessageResources.MissingBundleInformation, friendlyName);
+        }
+        public static Message SearchPropertyNotUppercase(SourceLineNumber sourceLineNumbers, string elementName, string attributeName, string value)
+        {
+            return new Message(sourceLineNumbers, MessageLevel.Error, (int)PswErrorId.SearchPropertyNotUppercase, MessageResources.SearchPropertyNotUppercase, elementName, attributeName, value);
+        }
+        public static Message UnresolvedBindReference(SourceLineNumber sourceLineNumbers, string BindRef)
+        {
+            return new Message(sourceLineNumbers, MessageLevel.Error, (int)PswErrorId.UnresolvedBindReference, MessageResources.UnresolvedBindReference, BindRef);
+        }
     }
 
     public static class PanelSwWixWarningMessages
@@ -46,6 +58,9 @@ namespace PanelSw.Wix.Extensions
         PswWixAttribute,
         MissingContainerTemplate,
         MismatchingRemoveFolderExLongPathHandling,
+        MissingBundleInformation,
+        SearchPropertyNotUppercase,
+        UnresolvedBindReference,
     }
 
     public enum PswWarningId : int

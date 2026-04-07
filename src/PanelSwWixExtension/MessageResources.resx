@@ -129,6 +129,9 @@
   <data name="MismatchingRemoveFolderExLongPathHandling" xml:space="preserve">
     <value>RemoveFolderEx element has a 'LongPathHandling' attribute that collides with another aothored RemoveFolderEx</value>
   </data>
+  <data name="MissingBundleInformation" xml:space="preserve">
+    <value>The Bundle is missing {0} data, and cannot continue.</value>
+  </data>
   <data name="MissingContainerTemplate" xml:space="preserve">
     <value>Could not find ContainerTemplate element to create container '{0}' with.</value>
   </data>
@@ -137,5 +140,11 @@
   </data>
   <data name="PswWixAttribute" xml:space="preserve">
     <value>Attribute '{0}' of element '{1}' is only supported when using PanelSwWix4.Sdk. Replace all 'WixToolset.*' package references with 'PanelSwWix4.*'</value>
+  </data>
+  <data name="SearchPropertyNotUppercase" xml:space="preserve">
+    <value>The {0}/@{1} attribute's value, '{2}', cannot contain lowercase characters. Since this is a search property, it must also be a public property. This means the Property/@Id value must be completely uppercase.</value>
+  </data>
+  <data name="UnresolvedBindReference" xml:space="preserve">
+    <value>Unresolved bind-time variable {0}.</value>
   </data>
 </root>

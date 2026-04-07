@@ -700,7 +700,7 @@ namespace PanelSw.Wix.Extensions
             }
             if ((maximumUncompressedContainerSize.Value > int.MaxValue) && (compression == PSW_ContainerTemplate.ContainerCompressionType.Cab))
             {
-                Messaging.Write(ErrorMessages.MaximumUncompressedMediaSizeTooLarge(sourceLineNumbers, Int32.MaxValue));
+                Messaging.Write(ErrorMessages.IntegralValueOutOfRange(sourceLineNumbers, element.Name.LocalName, "MaximumUncompressedContainerSize", maximumUncompressedContainerSize.Value, 1, Int32.MaxValue));
             }
 
             if (string.IsNullOrEmpty(cabinetTemplate))
@@ -1654,7 +1654,7 @@ namespace PanelSw.Wix.Extensions
             }
             if (string.IsNullOrEmpty(after) == string.IsNullOrEmpty(before))
             {
-                Messaging.Write(ErrorMessages.NeedSequenceBeforeOrAfter(sourceLineNumbers, element.Name.LocalName));
+                Messaging.Write(ErrorMessages.ExpectedAttributeWithoutOtherAttribute(sourceLineNumbers, element.Name.LocalName, "Before", "After"));
             }
 
             if (Messaging.EncounteredError)
@@ -1815,7 +1815,7 @@ namespace PanelSw.Wix.Extensions
             property = element.Parent.Attribute("Id").Value;
             if (!property.ToUpper().Equals(property))
             {
-                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
+                Messaging.Write(PanelSwWixErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
             }
 
             foreach (XAttribute attrib in element.Attributes())
@@ -1889,7 +1889,7 @@ namespace PanelSw.Wix.Extensions
             property = element.Parent.Attribute("Id").Value;
             if (!property.ToUpper().Equals(property))
             {
-                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
+                Messaging.Write(PanelSwWixErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
             }
 
             foreach (XAttribute attrib in element.Attributes())
@@ -1940,7 +1940,7 @@ namespace PanelSw.Wix.Extensions
             property = element.Parent.Attribute("Id").Value;
             if (!property.ToUpper().Equals(property))
             {
-                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
+                Messaging.Write(PanelSwWixErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
             }
 
             if (string.IsNullOrEmpty(property))
@@ -1970,7 +1970,7 @@ namespace PanelSw.Wix.Extensions
             property = element.Parent.Attribute("Id").Value;
             if (!property.ToUpper().Equals(property))
             {
-                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
+                Messaging.Write(PanelSwWixErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
             }
 
             foreach (XAttribute attrib in element.Attributes())
@@ -2108,13 +2108,13 @@ namespace PanelSw.Wix.Extensions
             XAttribute idAttrib = parentElement.Attribute("Id");
             if (idAttrib == null)
             {
-                Messaging.Write(ErrorMessages.ParentElementAttributeRequired(sourceLineNumbers, parentElement.Name.LocalName, "Id", element.Name.LocalName));
+                Messaging.Write(ErrorMessages.ExpectedParentWithAttribute(sourceLineNumbers, parentElement.Name.LocalName, "Id", element.Name.LocalName));
                 return;
             }
             directory = ParseHelper.GetAttributeIdentifier(sourceLineNumbers, idAttrib);
             if (directory == null)
             {
-                Messaging.Write(ErrorMessages.ParentElementAttributeRequired(sourceLineNumbers, parentElement.Name.LocalName, "Id", element.Name.LocalName));
+                Messaging.Write(ErrorMessages.ExpectedParentWithAttribute(sourceLineNumbers, parentElement.Name.LocalName, "Id", element.Name.LocalName));
                 return;
             }
             directoryId = WindowsInstallerStandard.GetPlatformSpecificDirectoryId(directory.Id, Context.Platform);
@@ -2285,7 +2285,7 @@ namespace PanelSw.Wix.Extensions
                                         restoreSchedule = BackupAndRestore_deferred_Schedule.BackupAndRestore_deferred_After_RemoveExistingProducts;
                                         break;
                                     default:
-                                        Messaging.Write(ErrorMessages.ValueNotSupported(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, val));
+                                        Messaging.Write(ErrorMessages.IllegalAttributeValue(sourceLineNumbers, element.Name.LocalName, attrib.Name.LocalName, val));
                                         break;
                                 }
                             }
@@ -2369,7 +2369,6 @@ namespace PanelSw.Wix.Extensions
             {
                 if (child.Name.Namespace.Equals(Namespace) && !child.Name.LocalName.Equals("Argument"))
                 {
-                    Messaging.Write(ErrorMessages.UnsupportedExtensionElement(sourceLineNumbers, element.Name.LocalName, child.Name.LocalName));
                     continue;
                 }
 
@@ -3550,7 +3549,7 @@ namespace PanelSw.Wix.Extensions
                         : (type == RegistryValueType.Expandable) ? NssmRegDataType.REG_EXPAND_SZ : NssmRegDataType.REG_NONE;
                     if (cppDataType == NssmRegDataType.REG_NONE)
                     {
-                        Messaging.Write(ErrorMessages.RegistryNameValueIncorrect(childSourceLineNumbers, "RegistryValue", "Type", type.ToString()));
+                        Messaging.Write(ErrorMessages.IllegalParentAttributeWhenNested(childSourceLineNumbers, "RegistryValue", "Type", type.ToString()));
                     }
 
                     if (!Messaging.EncounteredError)
@@ -3707,7 +3706,7 @@ namespace PanelSw.Wix.Extensions
                 {
                     if (!string.IsNullOrWhiteSpace(taskXml))
                     {
-                        Messaging.Write(ErrorMessages.IllegalAttributeWithInnerText(sourceLineNumbers, element.Name.LocalName, "XmlFile"));
+                        Messaging.Write(ErrorMessages.IllegalAttributeValueWithOtherAttribute(sourceLineNumbers, element.Name.LocalName, "XmlFile", "*", "InnerText"));
                     }
                     taskXml = child.Value;
                 }
@@ -3716,7 +3715,7 @@ namespace PanelSw.Wix.Extensions
             {
                 if (!string.IsNullOrWhiteSpace(taskXml))
                 {
-                    Messaging.Write(ErrorMessages.IllegalAttributeWithInnerText(sourceLineNumbers, element.Name.LocalName, "XmlFile"));
+                    Messaging.Write(ErrorMessages.IllegalAttributeValueWithOtherAttribute(sourceLineNumbers, element.Name.LocalName, "XmlFile", "*", "InnerText"));
                 }
                 taskXml = element.Value;
             }
@@ -3727,7 +3726,7 @@ namespace PanelSw.Wix.Extensions
             }
             if (string.IsNullOrWhiteSpace(taskXml))
             {
-                Messaging.Write(ErrorMessages.ExpectedAttributeOrElement(sourceLineNumbers, element.Name.LocalName, "XmlFile", "Inner text or CDATA"));
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "XmlFile", "Inner text or CDATA"));
             }
             if (string.IsNullOrEmpty(taskName))
             {
@@ -3984,7 +3983,7 @@ namespace PanelSw.Wix.Extensions
             property = element.Parent.Attribute("Id").Value;
             if (!property.ToUpper().Equals(property))
             {
-                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
+                Messaging.Write(PanelSwWixErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
             }
 
             foreach (XAttribute attrib in element.Attributes())
@@ -4057,7 +4056,7 @@ namespace PanelSw.Wix.Extensions
             property = element.Parent.Attribute("Id").Value;
             if (!property.ToUpper().Equals(property))
             {
-                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
+                Messaging.Write(PanelSwWixErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property));
             }
 
             foreach (XAttribute attrib in element.Attributes())
@@ -5265,7 +5264,7 @@ namespace PanelSw.Wix.Extensions
             }
             if (!property.Id.ToUpper().Equals(property.Id))
             {
-                Messaging.Write(ErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property.Id));
+                Messaging.Write(PanelSwWixErrorMessages.SearchPropertyNotUppercase(sourceLineNumbers, "Property", "Id", property.Id));
                 return false;
             }
             return true;
@@ -5283,13 +5282,13 @@ namespace PanelSw.Wix.Extensions
             {
                 if ((child.NodeType == XmlNodeType.Text) || (child.NodeType == XmlNodeType.CDATA))
                 {
-                    Messaging.Write(ErrorMessages.IllegalInnerText(sourceLineNumbers, element.Name.LocalName, child.Value));
+                    Messaging.Write(ErrorMessages.UnexpectedAttribute(sourceLineNumbers, element.Name.LocalName, "InnerText"));
                     return false;
                 }
             }
             if (!string.IsNullOrEmpty(element.Value))
             {
-                Messaging.Write(ErrorMessages.IllegalInnerText(sourceLineNumbers, element.Name.LocalName, element.Value));
+                Messaging.Write(ErrorMessages.UnexpectedAttribute(sourceLineNumbers, element.Name.LocalName, "InnerText"));
                 return false;
             }
             return true;
@@ -5338,7 +5337,7 @@ namespace PanelSw.Wix.Extensions
                         rootWixFile = allFiles.FirstOrDefault(f => f.Id.Id.Equals(concatSymbol.RootFile_));
                         if (rootWixFile == null)
                         {
-                            Messaging.Write(ErrorMessages.WixFileNotFound(concatSymbol.RootFile_));
+                            Messaging.Write(ErrorMessages.FileNotFound(concatSymbol.SourceLineNumbers, concatSymbol.RootFile_));
                             return;
                         }
 
@@ -5354,7 +5353,7 @@ namespace PanelSw.Wix.Extensions
                     FileSymbol currWixFile = allFiles.FirstOrDefault(f => f.Id.Id.Equals(concatSymbol.MyFile_));
                     if (currWixFile == null)
                     {
-                        Messaging.Write(ErrorMessages.WixFileNotFound(concatSymbol.MyFile_));
+                        Messaging.Write(ErrorMessages.FileNotFound(concatSymbol.SourceLineNumbers, concatSymbol.MyFile_));
                         return;
                     }
 

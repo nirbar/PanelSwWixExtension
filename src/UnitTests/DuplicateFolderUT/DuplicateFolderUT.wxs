@@ -47,5 +47,8 @@
         <PanelSW:DuplicateFolder DestinationDir="CopySubDir" DuplicateExistingFiles="yes"/>
       </Component>
     </ComponentGroup>
+    <ComponentGroup Id="DuplicateFolderUT">
+      <Files Directory="INSTALLFOLDER" Include="$(sys.SOURCEFILEDIR)..\**"/>
+    </ComponentGroup>
   </Fragment>
 </Wix>

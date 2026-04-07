@@ -97,6 +97,15 @@ namespace PanelSw.Wix.Extensions {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to The Bundle is missing {0} data, and cannot continue..
+        /// </summary>
+        internal static string MissingBundleInformation {
+            get {
+                return ResourceManager.GetString("MissingBundleInformation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Could not find ContainerTemplate element to create container &apos;{0}&apos; with..
         /// </summary>
         internal static string MissingContainerTemplate {
@@ -120,6 +129,24 @@ namespace PanelSw.Wix.Extensions {
         internal static string PswWixAttribute {
             get {
                 return ResourceManager.GetString("PswWixAttribute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The {0}/@{1} attribute&apos;s value, &apos;{2}&apos;, cannot contain lowercase characters. Since this is a search property, it must also be a public property. This means the Property/@Id value must be completely uppercase..
+        /// </summary>
+        internal static string SearchPropertyNotUppercase {
+            get {
+                return ResourceManager.GetString("SearchPropertyNotUppercase", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unresolved bind-time variable {0}..
+        /// </summary>
+        internal static string UnresolvedBindReference {
+            get {
+                return ResourceManager.GetString("UnresolvedBindReference", resourceCulture);
             }
         }
     }

@@ -27,7 +27,7 @@
     <Property Id="APP_AFFINITY" Value="3"/>
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component>
-        <File Id="nssm.exe" Source="$(sys.SOURCEFILEDIR)nssm-2.24\win64\nssm.exe"/>
+        <File Id="nssm.exe" Source="$(BuildFolderCommon)\nssm-2.24\win64\nssm.exe"/>
 
         <ServiceInstall Name="NssmServiceConfigUT1" Type="ownProcess" Start="auto" ErrorControl="normal"/>
         <ServiceControl Name="NssmServiceConfigUT1" Remove="uninstall" Start="install" Stop="both"/>

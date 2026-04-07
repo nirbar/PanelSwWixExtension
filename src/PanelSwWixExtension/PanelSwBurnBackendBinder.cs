@@ -78,12 +78,12 @@ namespace PanelSw.Wix.Extensions
             }
             if (wixBundleSymbol == null)
             {
-                Messaging.Write(ErrorMessages.MissingBundleInformation("symbol"));
+                Messaging.Write(PanelSwWixErrorMessages.MissingBundleInformation("symbol"));
                 return;
             }
             if (string.IsNullOrEmpty(wixBundleSymbol.UpgradeCode) || !Guid.TryParse(wixBundleSymbol.UpgradeCode, out Guid g))
             {
-                Messaging.Write(ErrorMessages.MissingBundleInformation("UpgradeCode"));
+                Messaging.Write(PanelSwWixErrorMessages.MissingBundleInformation("UpgradeCode"));
                 return;
             }
          

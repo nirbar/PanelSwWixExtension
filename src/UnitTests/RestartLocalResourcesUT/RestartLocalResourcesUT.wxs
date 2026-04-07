@@ -13,7 +13,7 @@
 
     <ComponentGroup Id="ProductComponents">
       <Component Directory="INSTALLFOLDER2">
-        <File Id="nssm.exe2" Source="$(sys.SOURCEFILEDIR)nssm-2.24\win64\nssm.exe"/>
+        <File Id="nssm.exe2" Source="$(BuildFolderCommon)\nssm-2.24\win64\nssm.exe"/>
 
         <ServiceInstall Name="RestartLocalResourcesUT2" Type="ownProcess" Start="auto" ErrorControl="normal" Interactive="yes">
           <ServiceDependency Id="RestartLocalResourcesUT"/>
@@ -22,7 +22,7 @@
         <PanelSW:NssmServiceConfig ServiceName="RestartLocalResourcesUT2" Application="ping.exe" AppDirectory="[INSTALLFOLDER]" AppParameters="google.com /n 1000" AppExit='Restart' />
       </Component>
       <Component Directory="INSTALLFOLDER">
-        <File Id="nssm.exe" Source="$(sys.SOURCEFILEDIR)nssm-2.24\win64\nssm.exe"/>
+        <File Id="nssm.exe" Source="$(BuildFolderCommon)\nssm-2.24\win64\nssm.exe"/>
 
         <ServiceInstall Name="RestartLocalResourcesUT" Type="ownProcess" Start="auto" ErrorControl="normal" Interactive="yes"/>
         <ServiceControl Name="RestartLocalResourcesUT" Remove="uninstall" Start="install"/>

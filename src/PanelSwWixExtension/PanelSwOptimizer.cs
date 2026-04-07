@@ -76,7 +76,7 @@ namespace PanelSw.Wix.Extensions
 
                         if ((baseFolders == null) || (baseFolders.Count == 0) || !baseFolders.Any(d => Directory.Exists(d)))
                         {
-                            _messaging.Write(ErrorMessages.ExpectedDirectory(glb.SourceDir));
+                            _messaging.Write(ErrorMessages.FileNotFound(glb.SourceLineNumbers, glb.SourceDir));
                             continue;
                         }
 

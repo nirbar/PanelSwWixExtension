@@ -23,7 +23,7 @@ namespace PanelSw.Wix.Extensions
                 case "VarNullOrEmpty":
                     if (args.Length != 1 || string.IsNullOrEmpty(args[0]))
                     {
-                        Messaging.Write(ErrorMessages.InvalidPreprocessorFunction(null, function));
+                        Messaging.Write(ErrorMessages.IllegalIdentifier(null, prefix, function));
                         break;
                     }
 
@@ -33,7 +33,7 @@ namespace PanelSw.Wix.Extensions
                 case "AutoGuid":
                     if (args.Length == 0)
                     {
-                        Messaging.Write(ErrorMessages.InvalidPreprocessorFunction(null, function));
+                        Messaging.Write(ErrorMessages.IllegalIdentifier(null, prefix, function));
                         break;
                     }
 
@@ -45,7 +45,7 @@ namespace PanelSw.Wix.Extensions
                 case "FileExists":
                     if (args.Length != 1 || string.IsNullOrEmpty(args[0]))
                     {
-                        Messaging.Write(ErrorMessages.InvalidPreprocessorFunction(null, function));
+                        Messaging.Write(ErrorMessages.IllegalIdentifier(null, prefix, function));
                         break;
                     }
 
@@ -54,7 +54,7 @@ namespace PanelSw.Wix.Extensions
                 case "DirExists":
                     if (args.Length != 1 || string.IsNullOrEmpty(args[0]))
                     {
-                        Messaging.Write(ErrorMessages.InvalidPreprocessorFunction(null, function));
+                        Messaging.Write(ErrorMessages.IllegalIdentifier(null, prefix, function));
                         break;
                     }
 
@@ -63,7 +63,7 @@ namespace PanelSw.Wix.Extensions
                 case "DirEmpty":
                     if (args.Length != 1 || string.IsNullOrEmpty(args[0]))
                     {
-                        Messaging.Write(ErrorMessages.InvalidPreprocessorFunction(null, function));
+                        Messaging.Write(ErrorMessages.IllegalIdentifier(null, prefix, function));
                         break;
                     }
 

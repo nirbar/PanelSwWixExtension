@@ -786,7 +786,7 @@ namespace PanelSw.Wix.Extensions
             {
                 if (r.TaskXml.Contains("!(bindpath."))
                 {
-                    Messaging.Write(ErrorMessages.UnresolvedBindReference(null, $"TaskScheduler XmlFile {r.TaskXml}"));
+                    Messaging.Write(PanelSwWixErrorMessages.UnresolvedBindReference(null, $"TaskScheduler XmlFile {r.TaskXml}"));
                 }
                 if (!File.Exists(r.TaskXml))
                 {

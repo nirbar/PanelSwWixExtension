@@ -25,7 +25,6 @@
     <!-- WiX -->
     <ProjectReference Include="wixlib\PanelSwWixLib.wixproj" Properties="Configuration=Release;Platform=x86" Targets="Restore;Build" BuildInParallel="false" />
     <ProjectReference Include="wixlib\PanelSwWixLib.wixproj" Properties="Configuration=Release;Platform=x64" Targets="Restore;Build" BuildInParallel="false" />
-    <ProjectReference Include="PanelSwWixHarvestExtension\PanelSwWixHarvestExtension.csproj" Properties="Configuration=$(Configuration);Platform=AnyCPU" Targets="Restore;Build" BuildInParallel="false" />
     <ProjectReference Include="PanelSwWixExtension\PanelSwWixExtension.csproj" Properties="Configuration=$(Configuration);Platform=AnyCPU;NugetPrereleaseVersion=$(NugetPrereleaseVersion)" Targets="Restore;Build" BuildInParallel="false" />
   </ItemGroup>
   <!-- Build a unit test -->

@@ -1,4 +1,4 @@
-name: PanelSwWixExtension-WiX6
+name: Build
 on:
   pull_request:
   workflow_dispatch:
@@ -11,20 +11,20 @@ on:
       psw_wix_version:
         description: 'PanelSwWix4 version'
         required: true
-        default: 7.0.0-psw-wix-0384.28
+        default: 7.1.0-psw-wix-0443.35
         type: string
 
 env:
-  DEFAULT_PSW_WIX_VERSION: '7.0.0-psw-wix-0384.28'
+  DEFAULT_PSW_WIX_VERSION: '7.1.0-psw-wix-0443.35'
 
 jobs:
-  PanelSwWixExtension-Build:
+  Build:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4.1.7
+      - uses: actions/checkout@v6.0.2
         with:
           submodules: 'true'
-      - uses: microsoft/setup-msbuild@v2
+      - uses: microsoft/setup-msbuild@v3
 
       - name: Resolve build version
         run: |
@@ -47,25 +47,30 @@ jobs:
           nuget restore src/dirs.proj
 
       - name: Build PanelSwWixExtension
-        run: |
-          msbuild src/dirs.proj -restore -p:FullVersion=${{ env.FULL_VERSION }} -p:UnitTest=all -m
-          msbuild src/dirs.proj -t:RunTests
+        run: msbuild src/dirs.proj -restore -p:FullVersion=${{ env.FULL_VERSION }} -p:UnitTest=all -m
 
-      - name: Build PanelSwWixExtension with PanelSwWix4
+      - name: Test PanelSwWixExtension
+        run: msbuild src/dirs.proj -t:RunTests
+
+      - name: Convert to use PanelSwWix4.Sdk
+        run: msbuild src/dirs.proj -t:WixtoolsetToPanelSwWix4 "-p:PanelSwWix4Version=${{ env.PSW_WIX_VERSION }}" -p:NugetPrereleaseVersion=-psw-wix
+
+      - name: Build PanelSwWixExtension with PanelSwWix4.Sdk
         run: |
-          msbuild src/dirs.proj -t:WixtoolsetToPanelSwWix4 "-p:PanelSwWix4Version=${{ env.PSW_WIX_VERSION }}" -p:NugetPrereleaseVersion=-psw-wix
           Remove-Item ("${{ github.workspace }}" + "\build") -Recurse -Force
           msbuild src/dirs.proj -restore -p:FullVersion=${{ env.FULL_VERSION }} "-p:PanelSwWix4Version=${{ env.PSW_WIX_VERSION }}" -p:NugetPrereleaseVersion=-psw-wix -p:EnableZipContainer=true -p:UnitTest=all -m
-          msbuild src/dirs.proj -t:RunTests
+
+      - name: Test PanelSwWixExtension with PanelSwWix4.Sdk
+        run: msbuild src/dirs.proj -t:RunTests
 
       - name: Upload unit test logs
         if: failure()
-        uses: actions/upload-artifact@v4.4.0
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: unit-test-logs
           path: Build\x*\**\*.log
 
-      - uses: actions/upload-artifact@v4.4.0
+      - uses: actions/upload-artifact@v7.0.1
         with:
           name: nuget
           path: nuget-out\*.nupkg

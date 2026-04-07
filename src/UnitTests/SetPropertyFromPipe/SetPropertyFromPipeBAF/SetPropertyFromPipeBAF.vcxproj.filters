@@ -20,7 +20,6 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
     <None Include="bafunctions.def">
       <Filter>Source Files</Filter>
     </None>
