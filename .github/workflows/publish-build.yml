@@ -40,28 +40,23 @@ jobs:
         run: |
           $sdkFileName = Get-Childitem –Path "PanelSwWixExtension4.*.nupkg" -Exclude "*-psw-wix*" -Name
           if ($sdkFileName) {
-            if ($sdkFileName.StartsWith("PanelSwWixExtension4.6")) {
-                Add-Content -Path ${{ github.env }} -Value ("WIX_VERSION=wix6")
-            } elseif ($sdkFileName.StartsWith("PanelSwWixExtension4.5")) {
-                Add-Content -Path ${{ github.env }} -Value ("WIX_VERSION=wix5")
-            } else {
-                Add-Content -Path ${{ github.env }} -Value ("WIX_VERSION=wix4")
-            }
-            $sdkFileName = $sdkFileName.Replace("PanelSwWixExtension4.", "");
+            $wixVersion = $sdkFileName -replace "PanelSwWixExtension4\.(\d+)\..*", "$1";
+            $nugetVersion = $sdkFileName -replace "PanelSwWixExtension4\.([\d\.]+)\.nupkg", "$1";
+            Add-Content -Path ${{ github.env }} -Value ("WIX_VERSION=wix" + $wixVersion)
+            Add-Content -Path ${{ github.env }} -Value ("NUGET_VERSION=" + $nugetVersion)
           } 
           else {
             $sdkFileName = Get-Childitem –Path "PanelSwWixExtension.*.nupkg" -Exclude "*-psw-wix*" -Name
             if ($sdkFileName) {
-              Add-Content -Path ${{ github.env }} -Value ("WIX_VERSION=wix3")
-              $sdkFileName = $sdkFileName.Replace("PanelSwWixExtension.", "");
+                $nugetVersion = $sdkFileName -replace "PanelSwWixExtension\.([\d\.]+)\.nupkg", "$1";
+                Add-Content -Path ${{ github.env }} -Value "WIX_VERSION=wix3"
+                Add-Content -Path ${{ github.env }} -Value ("NUGET_VERSION=" + $nugetVersion)
             } 
             else {
               Write-Host "Failed to resolve WiX Toolset version"
               exit 1            
             }
           }
-          $sdkFileName = $sdkFileName.Replace(".nupkg", "");
-          Add-Content -Path ${{ github.env }} -Value ("NUGET_VERSION=" + $sdkFileName)
 
       - name: Publish nuget packages to github
         if: ${{ env.NUGET_VERSION != '' }}
