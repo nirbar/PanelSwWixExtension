@@ -21,6 +21,9 @@ namespace PanelSw.Wix.Extensions
                 {
                     _intermediateSymbols = new List<IntermediateSymbolDefinition>
                     {
+#if EnableZipContainer
+                        PSW_Container.SymbolDefinition,
+#endif
                         PSW_ContainerTemplate.SymbolDefinition,
                         PSW_ContainerExtensionData.SymbolDefinition,
                         PSW_ArpEntrySearch.SymbolDefinition,

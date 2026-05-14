@@ -11,6 +11,7 @@ I would like to thank JetBrains for their [support](https://www.jetbrains.com/co
   - *FileGlob*: In-code payload harvester with include and exclude glob patterns. Works in bundles and in packages 
   - *ContainerTemplate*: A container template to which bundle payloads can be assigned
     - When using PanelSwWix4.Sdk, support 7z and Zip containers
+  - *Container/@CompressionLevel*: Set a compression level to a single container. Applicable to PanelSwWix4.Sdk only
   - *BundleVariableSearch*: Get a persisted variable value of another bundle
   - *ArpEntrySearch*: Search for the maximal version of an installed product by ARP key wildcard
   - *CustomSearch*: Use a BundleExtension to perform custom searches without having to implement a complete WiX extension

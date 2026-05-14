@@ -737,6 +737,29 @@ namespace PanelSw.Wix.Extensions
             }
         }
 
+#if EnableZipContainer
+        private void ParseContainerCompressionLevelAttribute(IntermediateSection section, XElement parentElement, XAttribute attribute)
+        {
+            SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(parentElement);
+            TryParseEnumAttribute(sourceLineNumbers, parentElement, attribute, out CompressionLevel compressionLevel);
+
+            XAttribute idAttrib = parentElement.Attribute("Id");
+            if (idAttrib == null)
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, parentElement.Name.LocalName, "Id"));
+                return;
+            }
+
+            if (Messaging.EncounteredError)
+            {
+                return;
+            }
+
+            PSW_Container row = section.AddSymbol(new PSW_Container(sourceLineNumbers, new Identifier(AccessModifier.Section, idAttrib.Value)));
+            row.CompressionLevel = compressionLevel;
+        }
+#endif
+
         private void ParsePayload(IntermediateSection section, XElement element, object p1, object p2)
         {
             SourceLineNumber sourceLineNumbers = ParseHelper.GetSourceLineNumbers(element);
@@ -1139,6 +1162,19 @@ namespace PanelSw.Wix.Extensions
                         case "Persist":
                             ParsePropertyPersistAttribute(section, parentElement, attribute);
                             break;
+                        default:
+                            ParseHelper.UnexpectedAttribute(parentElement, attribute);
+                            break;
+                    }
+                    break;
+                case "Container":
+                    switch (attribute.Name.LocalName)
+                    {
+#if EnableZipContainer
+                        case "CompressionLevel":
+                            ParseContainerCompressionLevelAttribute(section, parentElement, attribute);
+                            break;
+#endif
                         default:
                             ParseHelper.UnexpectedAttribute(parentElement, attribute);
                             break;
