@@ -14,6 +14,7 @@
       <ExePackage SourceFile="$(DeferredExePackagePath)" Id="Test" DetectCondition="1=0" UninstallArguments="/u" InstallArguments='--log "[WixBundleLog_Test]" --ignore-me'>
         <PayloadGroupRef Id="ContainerTemplateUT"/>
       </ExePackage>
+      <PackageGroupRef Id="Test2"/>
     </Chain>
   </Bundle>
 
@@ -25,5 +26,21 @@
 
       <PanelSW:FileGlob SourceDir="!(bindpath.UT)" Include="**\AccountNamesUT\**" PayloadPrefix="my\sub\folder"/>
     </PayloadGroup>
+  </Fragment>
+
+  <Fragment>
+    <PackageGroup Id="Test2">
+      <ExePackage SourceFile="$(DeferredExePackagePath)" CacheId="Test2" Id="Test2" DetectCondition="1=0" UninstallArguments="/u" InstallArguments='--log "[WixBundleLog_Test]" --ignore-me'>
+        <PayloadGroupRef Id="ContainerTemplateUT2"/>
+      </ExePackage>
+    </PackageGroup>
+    <PayloadGroup Id="ContainerTemplateUT2">
+      <PanelSW:FileGlob SourceDir="$(sys.SOURCEFILEDIR)" Include="**"/>
+    </PayloadGroup>
+    <?if $(EnableZipContainer) ~= true?>
+    <Container Id="ContainerTemplateUT2.7z" Type="detached" PanelSW:CompressionLevel="High">
+      <PackageGroupRef Id="Test2"/>
+    </Container>
+    <?endif?>
   </Fragment>
 </Wix>

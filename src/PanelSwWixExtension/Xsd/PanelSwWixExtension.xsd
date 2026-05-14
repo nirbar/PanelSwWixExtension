@@ -44,6 +44,15 @@
     </xs:annotation>
   </xs:attribute>
 
+  <xs:attribute name="CompressionLevel" type="wix:CompressionLevelTypeUnion">
+    <xs:annotation>
+      <xs:appinfo>
+        <xse:parent namespace="http://wixtoolset.org/schemas/v4/wxs" ref="Container" />
+      </xs:appinfo>
+      <xs:documentation><![CDATA[Set a compression level to a single container. Applicable for psw-wix only]]></xs:documentation>
+    </xs:annotation>
+  </xs:attribute>
+
   <xs:element name="FileGlob">
     <xs:annotation>
       <xs:appinfo>

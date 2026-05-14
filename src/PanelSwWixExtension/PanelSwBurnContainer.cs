@@ -25,10 +25,14 @@ namespace PanelSw.Wix.Extensions
             PSW_ContainerTemplate containerTemplate = null;
             foreach (IntermediateSection section in Context.IntermediateRepresentation.Sections)
             {
-                containerTemplate = section.Symbols.FirstOrDefault(s => s is PSW_ContainerTemplate) as PSW_ContainerTemplate;
-                if (containerTemplate != null)
+                if (containerTemplate == null)
                 {
-                    break;
+                    containerTemplate = section.Symbols.FirstOrDefault(s => s is PSW_ContainerTemplate) as PSW_ContainerTemplate;
+                }
+                var pswContainer = section.Symbols.FirstOrDefault(s => s is PSW_Container && s.Id.Id == container.Id.Id) as PSW_Container;
+                if (pswContainer != null)
+                {
+                    level = pswContainer.CompressionLevel;
                 }
             }
             if (containerTemplate == null)
