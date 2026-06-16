@@ -21,7 +21,7 @@ extern "C" UINT __stdcall NssmServiceConfigSched(MSIHANDLE hInstall)
 	ExitOnFailure(hr, "Failed to check if table exists 'PSW_NssmServiceConfig_Property'");
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_NssmServiceConfig_Property'. Have you authored 'PanelSw:NssmServiceConfig' entries in WiX code?");
 
-	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `ServiceName`, `Application`, `AppDirectory`, `AppParameters`, `AppExit` FROM `PSW_NssmServiceConfig`", &hView);
+	hr = WcaOpenExecuteView(L"SELECT `Id`, `Component_`, `ServiceName`, `Application`, `AppDirectory`, `AppParameters`, `AppExit`, `AppRestartDelay` FROM `PSW_NssmServiceConfig`", &hView);
 	ExitOnFailure(hr, "Failed to execute view");
 	hr = WcaOpenView(L"SELECT `Name`, `Value`, `DataType` FROM `PSW_NssmServiceConfig_Property` WHERE `PSW_NssmServiceConfig_` = ?", &hChildView);
 	ExitOnFailure(hr, "Failed to execute view");
@@ -35,6 +35,7 @@ extern "C" UINT __stdcall NssmServiceConfigSched(MSIHANDLE hInstall)
 		// Get record.
 		CWixString szId, szComponent, szServiceName, szApplication, szAppDirectory, szAppParameters, szAppExit, szServiceReg, szParametersReg, szAppExitReg;
 		PMSIHANDLE hChildRec;
+		int nAppRestartDelay = -1;
 
 		hr = WcaGetRecordString(hRec, 1, (LPWSTR*)szId);
 		ExitOnFailure(hr, "Failed to get Id");
@@ -50,6 +51,8 @@ extern "C" UINT __stdcall NssmServiceConfigSched(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to get AppParameters");
 		hr = WcaGetRecordString(hRec, 7, (LPWSTR*)szAppExit);
 		ExitOnFailure(hr, "Failed to get AppExit");
+		hr = WcaGetRecordInteger(hRec, 8, &nAppRestartDelay);
+		ExitOnFailure(hr, "Failed to get AppRestartDelay");
 
 		WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Configuring NSSM service '%ls'", (LPCWSTR)szServiceName);
 
@@ -87,6 +90,12 @@ extern "C" UINT __stdcall NssmServiceConfigSched(MSIHANDLE hInstall)
 
 		hr = deferredCAD.AddCreateValue(msidbRegistryRootLocalMachine, KEY_WOW64_64KEY, (LPCWSTR)szAppExitReg, nullptr, REG_SZ, (LPCBYTE)(LPCWSTR)szAppExit, (szAppExit.StrLen() + 1) * sizeof(WCHAR));
 		ExitOnFailure(hr, "Failed to schedule registry operation");
+
+		if (nAppRestartDelay >= 0)
+		{
+			hr = deferredCAD.AddCreateValue(msidbRegistryRootLocalMachine, KEY_WOW64_64KEY, (LPCWSTR)szParametersReg, L"AppRestartDelay", REG_DWORD, (LPCBYTE)&nAppRestartDelay, sizeof(nAppRestartDelay));
+			ExitOnFailure(hr, "Failed to schedule registry operation");
+		}
 
 		// Optional fields
 		hr = WcaSetRecordString(hChildExecRec, 1, (LPCWSTR)szId);

@@ -34,6 +34,7 @@ namespace PanelSw.Wix.Extensions.Symbols
                     new ColumnDefinition(nameof(AppDirectory), ColumnType.Localized, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
                     new ColumnDefinition(nameof(AppParameters), ColumnType.Localized, 0, false, true, ColumnCategory.Formatted, modularizeType: ColumnModularizeType.Property),
                     new ColumnDefinition(nameof(AppExit), ColumnType.String, 0, false, false, ColumnCategory.Text, modularizeType: ColumnModularizeType.None),
+                    new ColumnDefinition(nameof(AppRestartDelay), ColumnType.Number, 0, false, false, ColumnCategory.Integer, modularizeType: ColumnModularizeType.None),
                 };
             }
         }
@@ -78,6 +79,12 @@ namespace PanelSw.Wix.Extensions.Symbols
         {
             get => (AppExitType)Enum.Parse(typeof(AppExitType),Fields[5].AsString());
             set => this.Set(5, value.ToString());
+        }
+
+        public int AppRestartDelay
+        {
+            get => Fields[6].AsNumber();
+            set => this.Set(6, value);
         }
     }
 }

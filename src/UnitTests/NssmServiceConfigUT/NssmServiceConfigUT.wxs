@@ -38,6 +38,7 @@
         <PanelSW:NssmServiceConfig ServiceName="NssmServiceConfigUT2" Application="[CMD_EXE]" AppDirectory="[INSTALLFOLDER]" AppParameters='/C "ECHO TEST &gt; "[INSTALLFOLDER]NssmServiceConfigUT2.txt""' AppExit='Ignore'>
           <RegistryValue Name='AppNoConsole' Type='integer' Value='1'/>
           <RegistryValue Name='AppAffinity' Type='integer' Value='[APP_AFFINITY]'/>
+          <RegistryValue Name='AppRestartDelay' Type='integer' Value='10'/>
           <RegistryValue Name='Test' Type='string' Value='[APP_AFFINITY]'/>
         </PanelSW:NssmServiceConfig>
         
