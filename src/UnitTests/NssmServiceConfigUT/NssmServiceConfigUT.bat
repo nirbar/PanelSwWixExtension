@@ -79,6 +79,11 @@ EXIT /B %MY_ERR%
 		ECHO File "%CD%\install-dir\NssmServiceConfigUT2.txt" should exist
 		SET /A MY_ERR=1
 	)
+	REG query "HKLM\System\CurrentControlSet\Services\NssmServiceConfigUT1\Parameters" /v "AppRestartDelay" /reg:64
+	IF %ERRORLEVEL% EQU 0 (
+		ECHO Registry "HKLM\System\CurrentControlSet\Services\NssmServiceConfigUT1\Parameters\@AppRestartDelay" should not exist
+		SET /A MY_ERR=1
+	)
 	REG query "HKLM\System\CurrentControlSet\Services\NssmServiceConfigUT2\Parameters" /v "Useless" /reg:64
 	IF %ERRORLEVEL% NEQ 0 (
 		ECHO Registry "HKLM\System\CurrentControlSet\Services\NssmServiceConfigUT2\Parameters\@Useless" should exist
@@ -87,6 +92,11 @@ EXIT /B %MY_ERR%
 	REG query "HKLM\System\CurrentControlSet\Services\NssmServiceConfigUT2\Parameters" /v "AppNoConsole" /reg:64
 	IF %ERRORLEVEL% NEQ 0 (
 		ECHO Registry "HKLM\System\CurrentControlSet\Services\NssmServiceConfigUT2\Parameters\@AppNoConsole" should exist
+		SET /A MY_ERR=1
+	)
+	REG query "HKLM\System\CurrentControlSet\Services\NssmServiceConfigUT2\Parameters" /v "AppRestartDelay" /reg:64
+	IF %ERRORLEVEL% NEQ 0 (
+		ECHO Registry "HKLM\System\CurrentControlSet\Services\NssmServiceConfigUT2\Parameters\@AppRestartDelay" should exist
 		SET /A MY_ERR=1
 	)
 	REG query "HKLM\System\CurrentControlSet\Services\NssmServiceConfigUT2\Parameters" /v "AppAffinity" /reg:64

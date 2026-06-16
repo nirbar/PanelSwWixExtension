@@ -1345,6 +1345,11 @@ Note that build-time resolution may be harmed by this process. For example, MsiA
           <xs:documentation><![CDATA[Application command line parameters. Formatted]]></xs:documentation>
         </xs:annotation>
       </xs:attribute>
+      <xs:attribute name="AppRestartDelay" type="xs:int">
+        <xs:annotation>
+          <xs:documentation><![CDATA[The number of milliseconds to wait before attempting to restart the process if AppExit is Restart]]></xs:documentation>
+        </xs:annotation>
+      </xs:attribute>
       <xs:attribute name="AppExit" default="Restart">
         <xs:annotation>
           <xs:documentation>Configure the action which nssm should take when the application exits.</xs:documentation>

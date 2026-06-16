@@ -3492,6 +3492,7 @@ namespace PanelSw.Wix.Extensions
             string applicationDir = null;
             string appParameters = null;
             var appExit = AppExitType.Restart;
+            int appRestartDelay = -1;
 
             foreach (XAttribute attrib in element.Attributes())
             {
@@ -3513,6 +3514,9 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "AppExit":
                             TryParseEnumAttribute(sourceLineNumbers, element, attrib, out appExit);
+                            break;
+                        case "AppRestartDelay":
+                            appRestartDelay = ParseHelper.GetAttributeIntegerValue(sourceLineNumbers, attrib, 0, Int32.MaxValue);
                             break;
                         default:
                             ParseHelper.UnexpectedAttribute(element, attrib);
@@ -3547,6 +3551,7 @@ namespace PanelSw.Wix.Extensions
                 rootRow.AppDirectory = applicationDir;
                 rootRow.AppParameters = appParameters;
                 rootRow.AppExit = appExit;
+                rootRow.AppRestartDelay = appRestartDelay;
             }
 
             foreach (var child in element.Descendants())
