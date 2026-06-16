@@ -224,13 +224,13 @@ HRESULT CRestartLocalResources::Execute(const std::list<LPWSTR>& lstFolders)
 		ExitFunction();
 	}
 
-	for (const std::pair<DWORD, LPWSTR>& prcId : mapProcId)
-	{
-		KillOneProcess(prcId.first, prcId.second);
-	}
 	for (const std::pair<DWORD, LPWSTR>& svcId : mapServiceId)
 	{
 		KillOneService(svcId.first, svcId.second);
+	}
+	for (const std::pair<DWORD, LPWSTR>& prcId : mapProcId)
+	{
+		KillOneProcess(prcId.first, prcId.second);
 	}
 
 LExit:
@@ -560,7 +560,7 @@ HRESULT CRestartLocalResources::GetServices(std::map<DWORD, LPWSTR>& mapServiceI
 	ExitOnNullWithLastError(hServices, hr, "Failed to open service manager");
 
 	bRes = ::EnumServicesStatusEx(hServices, SC_ENUM_PROCESS_INFO, SERVICE_TYPE_ALL, SERVICE_ACTIVE, nullptr, 0, &dwBuffSize, &nServices, &dwHandle, nullptr);
-	if (!bRes && (::GetLastError() == ERROR_MORE_DATA))
+	while (!bRes && (::GetLastError() == ERROR_MORE_DATA))
 	{
 		pServices = (ENUM_SERVICE_STATUS_PROCESS*)MemAlloc(dwBuffSize, FALSE);
 		ExitOnNull(pServices, hr, HRESULT_FROM_WIN32(ERROR_NOT_ENOUGH_MEMORY), "Failed to allocate memory");
