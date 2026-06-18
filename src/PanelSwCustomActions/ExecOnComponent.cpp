@@ -688,6 +688,7 @@ HRESULT CExecOnComponent::ExecuteOne(const com::panelsw::ca::ExecOnDetails& deta
 	if (details.async())
 	{
 		ExitOnFailure(hr, "Failed to launch command '%ls'", (LPCWSTR)szCommand);
+		LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"Process was launched a-synchronically.");
 		ExitFunction();
 	}
 
@@ -870,7 +871,7 @@ HRESULT CExecOnComponent::LogProcessOutput(HANDLE hProcess, HANDLE hStdErrOut, L
 				ExitOnFailure(hr, "Failed to obfuscate log line");
 			}
 
-			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"%ls", (LPCWSTR)szLogLine);
+			LogUnformatted(LOGLEVEL::LOGMSG_STANDARD, true, L"  %ls", (LPCWSTR)szLogLine);
 
 			// Go past \n or \r\n
 			if ((szLogEnd[0] == L'\r') && (szLogEnd[1] == L'\n'))
@@ -918,7 +919,7 @@ HRESULT CExecOnComponent::LogProcessOutput(HANDLE hProcess, HANDLE hStdErrOut, L
 			ExitOnFailure(hr, "Failed to obfuscate log line");
 		}
 
-		LogUnformatted(LOGMSG_STANDARD, true, L"%ls", (LPCWSTR)szLogLine);
+		LogUnformatted(LOGMSG_STANDARD, true, L"  %ls", (LPCWSTR)szLogLine);
 	}
 
 	// Return full log to the caller

@@ -1317,13 +1317,7 @@ namespace PanelSw.Wix.Extensions
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, parentElement.Name.LocalName, "Id"));
                 return;
             }
-            string propName = ParseHelper.GetAttributeValue(sourceLineNumbers, idAttrib, EmptyRule.MustHaveNonWhitespaceCharacters);
-            if (string.IsNullOrEmpty(propName))
-            {
-                // CustomActionData is only relevant for deferred actions
-                Messaging.Write(ErrorMessages.IllegalEmptyAttributeValue(sourceLineNumbers, parentElement.Name.LocalName, idAttrib.Name.LocalName));
-                return;
-            }
+            string propName = ParseHelper.GetAttributeIdentifierValue(sourceLineNumbers, idAttrib);
 
             if (Messaging.EncounteredError)
             {
