@@ -4,9 +4,23 @@
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <Component Directory="INSTALLFOLDER">
-        <File Source="$(sys.SOURCEFILEPATH)" />
+        <File Source="$(BuildFolderCommon)\nssm-2.24\win64\nssm.exe" Compressed="no" />
+      </Component>
+      <Component Directory="INSTALLFOLDER">
+        <File Source="$(sys.SOURCEFILEDIR)VersionCompareUT.ps1" Compressed="no" />
       </Component>
     </Feature>
+
+    <Property Id="NSSM_EXE_PATH_">
+      <DirectorySearch Id="NSSM_EXE_PATH_.dir" Path="[MY_DIR]">
+        <FileSearch Name="nssm.exe" Id="NSSM_EXE_PATH_.file" />
+      </DirectorySearch>
+    </Property>
+    <Property Id="TEST_NSSM_VERSION_">
+      <PanelSW:VersionCompare Version1="[NSSM_EXE_PATH_]" Version2="0.0.0.0" />
+    </Property>
+    <Launch Condition="NSSM_EXE_PATH_" Message="Expected to find nssm.exe" />
+    <Launch Condition="TEST_NSSM_VERSION_&gt;0" Message="Expected nssm.exe to have a version" />
 
     <Property Id="TEST_SMALLER">
       <PanelSW:VersionCompare Version1="1.9.0.0" Version2="1.10.0.0" />

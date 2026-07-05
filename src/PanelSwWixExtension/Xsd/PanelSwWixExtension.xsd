@@ -635,12 +635,12 @@ The property is not set if Version1 or Version2 cannot be parsed to a version nu
         <xs:extension base="xs:string">
           <xs:attribute name="Version1" type="xs:string" use="required">
             <xs:annotation>
-              <xs:documentation>Left-hand side version for comparison. This field is formatted</xs:documentation>
+              <xs:documentation>Left-hand side version for comparison. This field is formatted. If the field resolves to a file path, then the file version is compared.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="Version2" type="xs:string" use="required">
             <xs:annotation>
-              <xs:documentation>Right-hand side version for comparison. This field is formatted</xs:documentation>
+              <xs:documentation>Right-hand side version for comparison. This field is formatted. If the field resolves to a file path, then the file version is compared.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
         </xs:extension>

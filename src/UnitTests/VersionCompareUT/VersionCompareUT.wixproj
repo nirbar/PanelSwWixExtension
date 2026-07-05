@@ -1,6 +1,7 @@
 <Project Sdk="WixToolset.Sdk">
   <PropertyGroup>
     <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <CoreCompileDependsOn>DownloadNssm;$(CoreCompileDependsOn)</CoreCompileDependsOn>
   </PropertyGroup>
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Release</Configuration>
@@ -16,4 +17,11 @@
     </WixExtension>
     <PackageReference Include="TidyBuild" />
   </ItemGroup>
+  <PropertyGroup>
+    <DefineConstants>BuildFolderCommon=$(BuildFolderCommon);$(DefineConstants)</DefineConstants>
+  </PropertyGroup>
+  <Target Name="DownloadNssm" Condition="!Exists('$(BuildFolderCommon)\nssm-2.24\win64\nssm.exe')">
+    <DownloadFile SourceUrl="https://nssm.cc/release/nssm-2.24.zip" DestinationFolder="$(BuildFolderCommon)"/>
+    <Unzip SourceFiles="$(BuildFolderCommon)\nssm-2.24.zip" DestinationFolder="$(BuildFolderCommon)"/>
+  </Target>
 </Project>

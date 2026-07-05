@@ -28,8 +28,8 @@ extern "C" UINT __stdcall VersionCompare(MSIHANDLE hInstall)
 
 		// Get fields
 		CWixString ver1, ver2, property;
-		ULARGE_INTEGER ullVer1, ullVer2;
-		USHORT  rgusVer1[4], rgusVer2[4];
+		ULARGE_INTEGER ullVer1 = {}, ullVer2 = {};
+		USHORT rgusVer1[4], rgusVer2[4];
 		int nCompareRes = 0;
 
 		hr = WcaGetRecordString(hRecord, 1, (LPWSTR*)property);
@@ -38,10 +38,15 @@ extern "C" UINT __stdcall VersionCompare(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to get Version1.");
 		hr = WcaGetRecordFormattedString(hRecord, 3, (LPWSTR*)ver2);
 		ExitOnFailure(hr, "Failed to get Version2.");
-
-		if (FAILED(FileVersionFromStringEx(ver1, 0, &ullVer1.QuadPart)) || FAILED(FileVersionFromStringEx(ver2, 0, &ullVer2.QuadPart)))
+		
+		if (FAILED(FileVersion(ver1, &ullVer1.u.HighPart, &ullVer1.u.LowPart)) && FAILED(FileVersionFromStringEx(ver1, 0, &ullVer1.QuadPart)))
 		{
-			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed parsing '%ls' or '%ls' as version. Skipping comparison for property '%ls'", (LPCWSTR)ver1, (LPCWSTR)ver2, (LPCWSTR)property);
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed parsing '%ls' for version1. Skipping comparison for property '%ls'", (LPCWSTR)ver1, (LPCWSTR)property);
+			continue;
+		}
+		if (FAILED(FileVersion(ver2, &ullVer2.u.HighPart, &ullVer2.u.LowPart)) && FAILED(FileVersionFromStringEx(ver2, 0, &ullVer2.QuadPart)))
+		{
+			WcaLog(LOGLEVEL::LOGMSG_STANDARD, "Failed parsing '%ls' for version2. Skipping comparison for property '%ls'", (LPCWSTR)ver2, (LPCWSTR)property);
 			continue;
 		}
 
