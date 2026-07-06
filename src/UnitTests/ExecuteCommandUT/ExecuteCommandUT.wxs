@@ -7,12 +7,19 @@
       <ComponentGroupRef Id="ProductComponents" />
     </Feature>
 
+    <Property Id="DO_ROLLBACK" Value="0"/>
     <Property Id="HIDDEN_ME" Hidden="yes"/>
     <SetProperty Id="HIDDEN_ME" Value="[#DeferredExePackage.exe]" Sequence="execute" Before="InstallInitialize"/>
 
     <PanelSW:ExecuteCommand Id='pswExec' After="DuplicateFiles" Command='"[HIDDEN_ME]" --print-info' Condition='Not REMOVE' ErrorHandling='prompt' Impersonate='no'/>
     <PanelSW:ExecuteCommand Id='pswExecAsUser' After="pswExec" Command='"[#DeferredExePackage.exe]" --print-info' Condition='Not REMOVE' ErrorHandling='prompt' Impersonate='yes'/>
-    <PanelSW:ExecuteCommand Before="RemoveFiles" Command='"notepad" "ExecuteCommandUT.wxs"' WorkingDirectory='[INSTALLFOLDER]' Condition='REMOVE' ErrorHandling='ignore'/>
+    <PanelSW:ExecuteCommand Before="RemoveFiles" Command='"notepad" "ExecuteCommandUT.ps1"' WorkingDirectory='[INSTALLFOLDER]' Condition='REMOVE' Wait="no"/>
+    
+    <PanelSW:ExecuteCommand Id='touch' After="DuplicateFiles" ErrorHandling='prompt' Impersonate='no' WorkingDirectory='[MY_DIR]'
+                            Command='powershell.exe -C "New-Item -Path install-test.txt -ItemType File"'
+                            RollbackCommand='powershell.exe -C "New-Item -Path rollback-test.txt -ItemType File"'
+                            CommitCommand='powershell.exe -C "New-Item -Path commit-test.txt -ItemType File"'
+                            />
 
     <!-- Compare to built-in msi impersonation -->
     <SetProperty Id="msiExec" Value='"[HIDDEN_ME]" --print-info' Before="msiExec" Sequence="execute"/>
@@ -22,8 +29,9 @@
     <CustomAction Id="msiExecAsUser" BinaryRef="Wix4UtilCA_$(sys.BUILDARCHSHORT)" DllEntry="WixQuietExec" Execute="deferred" Impersonate="yes"/>
 
     <InstallExecuteSequence>
-      <Custom Action="msiExec" After="InstallFiles"/>
-      <Custom Action="msiExecAsUser" After="msiExec"/>
+      <Custom Action="msiExec" After="InstallFiles" Condition='Not REMOVE'/>
+      <Custom Action="msiExecAsUser" After="msiExec" Condition='Not REMOVE'/>
+      <Custom Action="Rollback_Deferred" Before="InstallFinalize" Condition="DO_ROLLBACK=1"/>
     </InstallExecuteSequence>
 
     <StandardDirectory Id="ProgramFiles6432Folder">
@@ -31,7 +39,7 @@
     </StandardDirectory>
     <ComponentGroup Id="ProductComponents" Directory="INSTALLFOLDER">
       <Component>
-        <File Source="$(sys.SOURCEFILEPATH)" />
+        <File Source="$(sys.SOURCEFILEDIR)ExecuteCommandUT.ps1" Compressed="no" />
       </Component>
       <Component>
         <File Source="$(TargetDir)..\DeferredExePackage\DeferredExePackage.exe" Id="DeferredExePackage.exe" />

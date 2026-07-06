@@ -11,6 +11,9 @@
     <Compile Include="VersionCompareUT.wxs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="VersionCompareUT.ps1"/>
+  </ItemGroup>
+  <ItemGroup>
     <WixExtension Include="PanelSwWixExtension">
       <HintPath>$(BuildFolder)..\AnyCPU\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</HintPath>
       <Name>PanelSwWixExtension</Name>

@@ -7,6 +7,9 @@
     <ProductVersion>3.8</ProductVersion>
   </PropertyGroup>
   <ItemGroup>
+    <None Include="ExecuteCommandUT.ps1"/>
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="TidyBuild"/>
     <PackageReference Include="WixToolset.Util.wixext"/>
     

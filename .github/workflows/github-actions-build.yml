@@ -64,7 +64,7 @@ jobs:
         run: msbuild src/dirs.proj -t:RunTests
 
       - name: Upload unit test logs
-        if: failure()
+        if: ${{ cancelled() || failure() }}
         uses: actions/upload-artifact@v7.0.1
         with:
           name: unit-test-logs
@@ -77,7 +77,7 @@ jobs:
           if-no-files-found: error
 
       - name: Publish nuget packages to github and nuget.org
-        if: ${{ github.event.inputs.publish_nuget == 'true' && github.ref == 'refs/heads/master6' }}
+        if: ${{ github.event.inputs.publish_nuget == 'true' && github.ref == 'refs/heads/master7' }}
         env:
           GITHUB_TOKEN: ${{ secrets.TAGGER_PAT }}
         run: |

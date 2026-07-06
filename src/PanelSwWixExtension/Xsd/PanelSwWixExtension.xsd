@@ -414,6 +414,16 @@
               <xs:documentation>Full command to execute. The executable name is expected to be enclosed in quotes</xs:documentation>
             </xs:annotation>
           </xs:attribute>
+          <xs:attribute name="RollbackCommand" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Optional command to execute on rollback. The executable name is expected to be enclosed in quotes. Can only be specified when Execute is set to 'deferred' (the default).</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
+          <xs:attribute name="CommitCommand" type="xs:string" use="optional">
+            <xs:annotation>
+              <xs:documentation>Optional command to execute on commit. The executable name is expected to be enclosed in quotes. Can only be specified when Execute is set to 'deferred' (the default).</xs:documentation>
+            </xs:annotation>
+          </xs:attribute>
           <xs:attribute name="WorkingDirectory" type="xs:string" use="optional">
             <xs:annotation>
               <xs:documentation><![CDATA[Working directory for the command. This field is formatted.]]></xs:documentation>

@@ -60,7 +60,7 @@ extern "C" UINT __stdcall ExecuteCommand(MSIHANDLE hInstall)
 	Parser parser;
 	Poco::Dynamic::Var jsonVar;
 	Object::Ptr jsonObject;
-	string command, workingFolder, id;
+	string command, rollbackCommand, commitCommand, workingFolder, id;
 	bool isAsync;
 	bool isImpersonate;
 	int flags = Flags::None;
@@ -87,6 +87,8 @@ extern "C" UINT __stdcall ExecuteCommand(MSIHANDLE hInstall)
 
 		id = jsonObject->getValue<string>("Id");
 		command = jsonObject->getValue<string>("Command");
+		rollbackCommand = jsonObject->getValue<string>("RollbackCommand");
+		commitCommand = jsonObject->getValue<string>("CommitCommand");
 		workingFolder = jsonObject->getValue<string>("WorkingFolder");
 		isAsync = jsonObject->getValue<bool>("Async");
 		isImpersonate = jsonObject->getValue<bool>("Impersonate");
@@ -110,12 +112,6 @@ extern "C" UINT __stdcall ExecuteCommand(MSIHANDLE hInstall)
 	hr = szId.Format(L"%hs", id.c_str());
 	ExitOnFailure(hr, "Failed to format ID");
 
-	// Format command
-	hr = szCommandFormat.Format(L"%hs", command.c_str());
-	ExitOnFailure(hr, "Failed to format command");
-	hr = szCommand.MsiFormat((LPCWSTR)szCommandFormat);
-	ExitOnFailure(hr, "Failed to msi-format command");
-
 	if (isAsync)
 	{
 		flags |= Flags::ASync;
@@ -133,6 +129,54 @@ extern "C" UINT __stdcall ExecuteCommand(MSIHANDLE hInstall)
 		hr = szWorkingFolder.MsiFormat((LPCWSTR)szWorkingFolderFormat);
 		ExitOnFailure(hr, "Failed to msi-format working folder");
 	}
+	
+	if (rollbackCommand.size() > 0)
+	{
+		CWixString szRollbackId;
+		CExecOnComponent rollbackCAD;
+		
+		// Format rollback command
+		hr = szCommandFormat.Format(L"%hs", rollbackCommand.c_str());
+		ExitOnFailure(hr, "Failed to format rollback command");
+		hr = szCommand.MsiFormat((LPCWSTR)szCommandFormat);
+		ExitOnFailure(hr, "Failed to msi-format rollback command");
+
+		hr = rollbackCAD.AddExec(szCommand, (LPCWSTR)szWorkingFolder, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, flags, errorHandling, nullptr);
+		ExitOnFailure(hr, "Failed to create rollback command");
+
+		hr = szRollbackId.Format(L"%ls.rlbk", (LPCWSTR)szId);
+		ExitOnFailure(hr, "Failed to format rollback action ID");
+
+		hr = rollbackCAD.DoDeferredAction((LPCWSTR)szRollbackId);
+		ExitOnFailure(hr, "Failed to set rollback CustomActionData");
+	}
+
+	if (commitCommand.size() > 0)
+	{
+		CWixString szCommitId;
+		CExecOnComponent commitCAD;
+
+		// Format commit command
+		hr = szCommandFormat.Format(L"%hs", commitCommand.c_str());
+		ExitOnFailure(hr, "Failed to format commit command");
+		hr = szCommand.MsiFormat((LPCWSTR)szCommandFormat);
+		ExitOnFailure(hr, "Failed to msi-format commit command");
+
+		hr = commitCAD.AddExec(szCommand, (LPCWSTR)szWorkingFolder, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, flags, errorHandling, nullptr);
+		ExitOnFailure(hr, "Failed to create commit command");
+
+		hr = szCommitId.Format(L"%ls.commit", (LPCWSTR)szId);
+		ExitOnFailure(hr, "Failed to format commit action ID");
+
+		hr = commitCAD.DoDeferredAction((LPCWSTR)szCommitId);
+		ExitOnFailure(hr, "Failed to set commit CustomActionData");
+	}
+
+	// Format command
+	hr = szCommandFormat.Format(L"%hs", command.c_str());
+	ExitOnFailure(hr, "Failed to format command");
+	hr = szCommand.MsiFormat((LPCWSTR)szCommandFormat);
+	ExitOnFailure(hr, "Failed to msi-format command");
 
 	hr = cad.AddExec(szCommand, (LPCWSTR)szWorkingFolder, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, flags, errorHandling, nullptr);
 	ExitOnFailure(hr, "Failed to create command");

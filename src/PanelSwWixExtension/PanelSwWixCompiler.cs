@@ -1619,7 +1619,7 @@ namespace PanelSw.Wix.Extensions
             string id = "exc" + Guid.NewGuid().ToString("N");
             ErrorHandling errorHandling = ErrorHandling.fail;
             bool isAsync = false, impersonate = true;
-            string command = null, workingFolder = "", condition = null, before = null, after = null;
+            string command = null, rollbackCommand = "", commitCommand = "", workingFolder = "", condition = null, before = null, after = null;
             CustomActionExecutionType actionExecutionType = CustomActionExecutionType.Deferred;
 
             foreach (XAttribute attrib in element.Attributes())
@@ -1642,6 +1642,12 @@ namespace PanelSw.Wix.Extensions
                             break;
                         case "Command":
                             command = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "RollbackCommand":
+                            rollbackCommand = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
+                            break;
+                        case "CommitCommand":
+                            commitCommand = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
                             break;
                         case "WorkingDirectory":
                             workingFolder = ParseHelper.GetAttributeValue(sourceLineNumbers, attrib);
@@ -1682,6 +1688,14 @@ namespace PanelSw.Wix.Extensions
             {
                 Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Command"));
             }
+            if (!string.IsNullOrEmpty(rollbackCommand) && (actionExecutionType != CustomActionExecutionType.Deferred))
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttributeWithoutOtherAttribute(sourceLineNumbers, element.Name.LocalName, "RollbackCommand", "Execute"));
+            }
+            if (!string.IsNullOrEmpty(commitCommand) && (actionExecutionType != CustomActionExecutionType.Deferred))
+            {
+                Messaging.Write(ErrorMessages.ExpectedAttributeWithoutOtherAttribute(sourceLineNumbers, element.Name.LocalName, "CommitCommand", "Execute"));
+            }
             if (string.IsNullOrEmpty(after) == string.IsNullOrEmpty(before))
             {
                 Messaging.Write(ErrorMessages.ExpectedAttributeWithoutOtherAttribute(sourceLineNumbers, element.Name.LocalName, "Before", "After"));
@@ -1692,15 +1706,17 @@ namespace PanelSw.Wix.Extensions
                 return;
             }
 
-            // Create 3 custom actions:
+            // Create 3-5 custom actions:
             // 1. Set PSW_ExecuteCommand property
             // 2. Call PanelSwCustomActions::ExecuteCommand
             // 3. PanelSwCustomActions::CommonDeferred
+            // 4. PanelSwCustomActions::CommonDeferred for rollback (optional)
+            // 4. PanelSwCustomActions::CommonDeferred for commit (optional)
 
             // 1. Set PSW_ExecuteCommand property
             ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "Binary", "PanelSwCustomActions.dll");
             ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "Property", "PSW_ExecuteCommand");
-            JObject json = JObject.FromObject(new { Id = id, Command = command, WorkingFolder = workingFolder, Async = isAsync, Impersonate = impersonate, ErrorHandling = (int)errorHandling });
+            JObject json = JObject.FromObject(new { Id = id, Command = command, RollbackCommand = rollbackCommand, CommitCommand = commitCommand, WorkingFolder = workingFolder, Async = isAsync, Impersonate = impersonate, ErrorHandling = (int)errorHandling });
             string cad = json.ToString();
             cad = Regex.Replace(cad, "([\\[\\]\\{\\}])", "[\\$1]");
 
@@ -1754,6 +1770,32 @@ namespace PanelSw.Wix.Extensions
             deferredCASched.Before = before;
             deferredCASched.After = after;
             deferredCASched.Overridable = false;
+
+            // 4. Optional rollback PanelSwCustomActions::CommonDeferred
+            if (!string.IsNullOrEmpty(rollbackCommand))
+            {
+                deferredCA = section.AddSymbol(new CustomActionSymbol(sourceLineNumbers, new Identifier(AccessModifier.Global, $"{id}.rlbk")));
+                deferredCA.ExecutionType = CustomActionExecutionType.Rollback;
+                deferredCA.Source = "PanelSwCustomActions.dll";
+                deferredCA.SourceType = CustomActionSourceType.Binary;
+                deferredCA.Target = "CommonDeferred";
+                deferredCA.TargetType = CustomActionTargetType.Dll;
+                deferredCA.Impersonate = false;
+                deferredCA.Hidden = true;
+            }
+
+            // 5. Optional commit PanelSwCustomActions::CommonDeferred
+            if (!string.IsNullOrEmpty(commitCommand))
+            {
+                deferredCA = section.AddSymbol(new CustomActionSymbol(sourceLineNumbers, new Identifier(AccessModifier.Global, $"{id}.commit")));
+                deferredCA.ExecutionType = CustomActionExecutionType.Commit;
+                deferredCA.Source = "PanelSwCustomActions.dll";
+                deferredCA.SourceType = CustomActionSourceType.Binary;
+                deferredCA.Target = "CommonDeferred";
+                deferredCA.TargetType = CustomActionTargetType.Dll;
+                deferredCA.Impersonate = false;
+                deferredCA.Hidden = true;
+            }
         }
 
         private void ParseWebsiteConfigElement(IntermediateSection section, XElement element, string component)
