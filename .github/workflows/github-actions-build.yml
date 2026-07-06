@@ -83,5 +83,5 @@ jobs:
         run: |
           dotnet nuget push nuget-out\PanelSwWixExtension4.*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source github
           dotnet nuget push nuget-out\PanelSwWixExtension4.*.nupkg --api-key ${{ secrets.NUGET_TOKEN }} --source https://api.nuget.org/v3/index.json
-          git tag "wix6-v${{ env.FULL_VERSION }}"
+          git tag "wix7-v${{ env.FULL_VERSION }}"
           git push --tags
