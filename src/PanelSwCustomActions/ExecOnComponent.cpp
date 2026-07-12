@@ -64,15 +64,20 @@ extern "C" UINT __stdcall ExecuteCommand(MSIHANDLE hInstall)
 	bool isAsync;
 	bool isImpersonate;
 	int flags = Flags::None;
-	CWixString szCommandFormat, szCommand;
-	CWixString szWorkingFolderFormat, szWorkingFolder;
-	CWixString szId;
+	CWixString szCommandFormat, szCommand, szWorkingFolderFormat, szWorkingFolder, szId, szSubQuery;
 	ErrorHandling errorHandling = ErrorHandling::fail;
 	CExecOnComponent cad;
+	PMSIHANDLE hSubView;
+	PMSIHANDLE hSubRecord;
+	std::map<std::string, com::panelsw::ca::ObfuscatedString> environment;
 
 	hr = WcaInitialize(hInstall, __FUNCTION__);
 	ExitOnFailure(hr, "Failed to initialize");
 	WcaLog(LOGMSG_STANDARD, "Initialized from PanelSwCustomActions " FullVersion);
+
+	hr = WcaTableExists(L"PSW_ExecOnComponent_Environment");
+	ExitOnFailure(hr, "Failed to check if table exists 'PSW_ExecOnComponent_Environment'");
+	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_ExecOnComponent_Environment'. Have you authored 'PanelSw:ExecuteCommand' entries in WiX code?");
 
 	hr = WcaGetProperty(L"PSW_ExecuteCommand", (LPWSTR*)szExecuteCommand);
 	ExitOnFailure(hr, "Failed to get property");
@@ -112,6 +117,33 @@ extern "C" UINT __stdcall ExecuteCommand(MSIHANDLE hInstall)
 	hr = szId.Format(L"%hs", id.c_str());
 	ExitOnFailure(hr, "Failed to format ID");
 
+	// Custom environment variables
+	hr = szSubQuery.Format(L"SELECT `Name`, `Value` FROM `PSW_ExecOnComponent_Environment` WHERE `ExecOnId_`='%hs'", id.c_str());
+	ExitOnFailure(hr, "Failed to format string");
+
+	hr = WcaOpenExecuteView((LPCWSTR)szSubQuery, &hSubView);
+	ExitOnFailure(hr, "Failed to execute SQL query '%ls'.", (LPCWSTR)szSubQuery);
+
+	// Iterate records
+	while ((hr = WcaFetchRecord(hSubView, &hSubRecord)) != E_NOMOREITEMS)
+	{
+		ExitOnFailure(hr, "Failed to fetch record.");
+		CWixString name, valueFormat, value;
+		std::string nameA;
+
+		hr = WcaGetRecordFormattedString(hSubRecord, 1, (LPWSTR*)name);
+		ExitOnFailure(hr, "Failed to get environment variable name");
+		hr = WcaGetRecordString(hSubRecord, 2, (LPWSTR*)valueFormat);
+		ExitOnFailure(hr, "Failed to get environment variable value");
+
+		hr = value.MsiFormat((LPCWSTR)valueFormat);
+		ExitOnFailure(hr, "Failed to MSI-format string");
+
+		nameA.assign((LPCSTR)(LPCWSTR)name, WSTR_BYTE_SIZE((LPCWSTR)name));
+		environment[nameA].set_plain((LPCSTR)(LPCWSTR)value, WSTR_BYTE_SIZE((LPCWSTR)value));
+		environment[nameA].set_obfuscated((LPCSTR)value.Obfuscated(), WSTR_BYTE_SIZE(value.Obfuscated()));
+	}
+
 	if (isAsync)
 	{
 		flags |= Flags::ASync;
@@ -141,7 +173,7 @@ extern "C" UINT __stdcall ExecuteCommand(MSIHANDLE hInstall)
 		hr = szCommand.MsiFormat((LPCWSTR)szCommandFormat);
 		ExitOnFailure(hr, "Failed to msi-format rollback command");
 
-		hr = rollbackCAD.AddExec(szCommand, (LPCWSTR)szWorkingFolder, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, flags, errorHandling, nullptr);
+		hr = rollbackCAD.AddExec(szCommand, (LPCWSTR)szWorkingFolder, nullptr, nullptr, nullptr, nullptr, nullptr, &environment, flags, errorHandling, nullptr);
 		ExitOnFailure(hr, "Failed to create rollback command");
 
 		hr = szRollbackId.Format(L"%ls.rlbk", (LPCWSTR)szId);
@@ -162,7 +194,7 @@ extern "C" UINT __stdcall ExecuteCommand(MSIHANDLE hInstall)
 		hr = szCommand.MsiFormat((LPCWSTR)szCommandFormat);
 		ExitOnFailure(hr, "Failed to msi-format commit command");
 
-		hr = commitCAD.AddExec(szCommand, (LPCWSTR)szWorkingFolder, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, flags, errorHandling, nullptr);
+		hr = commitCAD.AddExec(szCommand, (LPCWSTR)szWorkingFolder, nullptr, nullptr, nullptr, nullptr, nullptr, &environment, flags, errorHandling, nullptr);
 		ExitOnFailure(hr, "Failed to create commit command");
 
 		hr = szCommitId.Format(L"%ls.commit", (LPCWSTR)szId);
@@ -178,7 +210,7 @@ extern "C" UINT __stdcall ExecuteCommand(MSIHANDLE hInstall)
 	hr = szCommand.MsiFormat((LPCWSTR)szCommandFormat);
 	ExitOnFailure(hr, "Failed to msi-format command");
 
-	hr = cad.AddExec(szCommand, (LPCWSTR)szWorkingFolder, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, flags, errorHandling, nullptr);
+	hr = cad.AddExec(szCommand, (LPCWSTR)szWorkingFolder, nullptr, nullptr, nullptr, nullptr, nullptr, &environment, flags, errorHandling, nullptr);
 	ExitOnFailure(hr, "Failed to create command");
 
 	hr = cad.SetCustomActionData((LPCWSTR)szId);

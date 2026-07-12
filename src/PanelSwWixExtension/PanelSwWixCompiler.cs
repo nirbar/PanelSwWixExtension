@@ -1720,7 +1720,7 @@ namespace PanelSw.Wix.Extensions
             string cad = json.ToString();
             cad = Regex.Replace(cad, "([\\[\\]\\{\\}])", "[\\$1]");
 
-            section.AddSymbol(new PSW_ExecuteCommand(sourceLineNumbers, new Identifier(AccessModifier.Global, id)));
+            var execSymbol = section.AddSymbol(new PSW_ExecuteCommand(sourceLineNumbers, new Identifier(AccessModifier.Global, id)));
 
             CustomActionSymbol prepareCA = section.AddSymbol(new CustomActionSymbol(sourceLineNumbers, new Identifier(AccessModifier.Global, $"Prepare{id}")));
             prepareCA.ExecutionType = CustomActionExecutionType.Immediate;
@@ -1795,6 +1795,57 @@ namespace PanelSw.Wix.Extensions
                 deferredCA.TargetType = CustomActionTargetType.Dll;
                 deferredCA.Impersonate = false;
                 deferredCA.Hidden = true;
+            }
+
+            ParseHelper.EnsureTable(section, sourceLineNumbers, "PSW_ExecOnComponent_Environment");
+            // ExitCode, environment, etc.
+            foreach (XElement child in element.Descendants())
+            {
+                if (child.Name.Namespace.Equals(Namespace))
+                {
+                    switch (child.Name.LocalName)
+                    {
+                        case "Environment":
+                            {
+                                string name = null, value = null;
+
+                                foreach (XAttribute a in child.Attributes())
+                                {
+                                    if (IsMyAttribute(child, a))
+                                    {
+                                        switch (a.Name.LocalName)
+                                        {
+                                            case "Value":
+                                                value = ParseHelper.GetAttributeValue(sourceLineNumbers, a);
+                                                break;
+                                            case "Name":
+                                                name = ParseHelper.GetAttributeValue(sourceLineNumbers, a);
+                                                break;
+                                            default:
+                                                ParseHelper.UnexpectedAttribute(child, a);
+                                                break;
+                                        }
+                                    }
+                                }
+                                if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(value))
+                                {
+                                    Messaging.Write(ErrorMessages.ExpectedAttributes(sourceLineNumbers, child.Name.LocalName, "Name", "Value"));
+                                    break;
+                                }
+
+                                if (CheckNoCData(child) && !Messaging.EncounteredError)
+                                {
+                                    PSW_ExecOnComponent_Environment row1 = section.AddSymbol(new PSW_ExecOnComponent_Environment(sourceLineNumbers, execSymbol.Id));
+                                    row1.Name = name;
+                                    row1.Value = value;
+                                }
+                            }
+                            break;
+                        default:
+                            ParseHelper.UnexpectedElement(element, child);
+                            break;
+                    }
+                }
             }
         }
 
@@ -3225,7 +3276,7 @@ namespace PanelSw.Wix.Extensions
                 row.ObfuscateLog = obfuscateLog;
             }
 
-            // ExitCode mapping
+            // ExitCode, environment, etc.
             foreach (XElement child in element.Descendants())
             {
                 if (child.Name.Namespace.Equals(Namespace))

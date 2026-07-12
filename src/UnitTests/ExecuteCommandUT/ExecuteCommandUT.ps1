@@ -25,6 +25,16 @@ function testInstall{
 		$Script:MY_ERR=1
 		return
 	}
+	if (1 -NE (Select-String -Path "ExecuteCommandUT.msi-i.log" -Pattern "MY_CUSTOM_ENV=machine_value").Count){
+		Write-Host "Expected an environment variable to be set once on command execution"
+		$Script:MY_ERR=1
+		return
+	}
+	if (1 -NE (Select-String -Path "ExecuteCommandUT.msi-i.log" -Pattern "MY_CUSTOM_ENV=user_value").Count){
+		Write-Host "Expected an environment variable to be set once on command execution"
+		$Script:MY_ERR=1
+		return
+	}
 }
 
 function testUninstall{

@@ -1,4 +1,4 @@
-<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension">
+<Wix xmlns="http://wixtoolset.org/schemas/v4/wxs" xmlns:PanelSW="http://schemas.panel-sw.co.il/wix/WixExtension" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.panel-sw.co.il/wix/WixExtension ../../PanelSwWixExtension/Xsd/PanelSwWixExtension.xsd">
   <Package Name="ExecuteCommandUT" Language="1033" Version="$(var.JetVersion)" Manufacturer="$(var.JetManufacturer)" UpgradeCode="{B997AF76-8F98-40D1-B123-552C82C40B37}" InstallerVersion="200">
 
     <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
@@ -11,9 +11,13 @@
     <Property Id="HIDDEN_ME" Hidden="yes"/>
     <SetProperty Id="HIDDEN_ME" Value="[#DeferredExePackage.exe]" Sequence="execute" Before="InstallInitialize"/>
 
-    <PanelSW:ExecuteCommand Id='pswExec' After="DuplicateFiles" Command='"[HIDDEN_ME]" --print-info' Condition='Not REMOVE' ErrorHandling='prompt' Impersonate='no'/>
-    <PanelSW:ExecuteCommand Id='pswExecAsUser' After="pswExec" Command='"[#DeferredExePackage.exe]" --print-info' Condition='Not REMOVE' ErrorHandling='prompt' Impersonate='yes'/>
-    <PanelSW:ExecuteCommand Before="RemoveFiles" Command='"notepad" "ExecuteCommandUT.ps1"' WorkingDirectory='[INSTALLFOLDER]' Condition='REMOVE' Wait="no"/>
+    <PanelSW:ExecuteCommand Id='pswExec' After="DuplicateFiles" Command='"[HIDDEN_ME]" --print-info' Condition='Not REMOVE' ErrorHandling='prompt' Impersonate='no'>
+      <PanelSW:Environment Name='MY_CUSTOM_ENV' Value ='machine_value'/>
+    </PanelSW:ExecuteCommand>
+    <PanelSW:ExecuteCommand Id='pswExecAsUser' After="pswExec" Command='"[#DeferredExePackage.exe]" --print-info' Condition='Not REMOVE' ErrorHandling='prompt' Impersonate='yes'>
+      <PanelSW:Environment Name='MY_CUSTOM_ENV' Value ='user_value'/>
+    </PanelSW:ExecuteCommand>
+    <PanelSW:ExecuteCommand Before="RemoveFiles" Command='powershell.exe -C "Write-Host (Get-Content ExecuteCommandUT.ps1)"' WorkingDirectory='[INSTALLFOLDER]' Condition='REMOVE'/>
     
     <PanelSW:ExecuteCommand Id='touch' After="DuplicateFiles" ErrorHandling='prompt' Impersonate='no' WorkingDirectory='[MY_DIR]'
                             Command='powershell.exe -C "New-Item -Path install-test.txt -ItemType File"'

@@ -3,7 +3,7 @@
   <Import Project="$(MSBuildThisFileDirectory)TidyBuild.user.props" Condition="Exists('$(MSBuildThisFileDirectory)TidyBuild.user.props')"/>
   <Import Project="$(MSBuildThisFileDirectory)TidyBuild$(MSBuildProjectExtension).props" Condition="Exists('$(MSBuildThisFileDirectory)TidyBuild$(MSBuildProjectExtension).props')"/>
   <PropertyGroup>
-    <FullVersion>7.4.0</FullVersion>
+    <FullVersion>7.5.0</FullVersion>
     <FullVersion Condition=" '$(GITHUB_RUN_NUMBER)'!='' ">$(FullVersion).$(GITHUB_RUN_NUMBER)</FullVersion>
     <ProductName>PanelSwWixExtension</ProductName>
     <Manufacturer>Panel::Software</Manufacturer>
