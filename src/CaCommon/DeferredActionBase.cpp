@@ -15,7 +15,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToEx
 	BOOL bRes = TRUE;
 	CDeferredActionBase* pExecutor = nullptr;
 	CustomActionData cad;
-	BOOL bIsRollback = FALSE;
+	BOOL bCantFail = FALSE;
 	BOOL bIsWow64Initialized = FALSE;
 	BOOL bRedirected = FALSE;
 
@@ -86,7 +86,8 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToEx
 #endif
 
 	// During rollback we don't exit on failure before completing cleanup.
-	bIsRollback = ::MsiGetMode(WcaGetInstallHandle(), MSIRUNMODE::MSIRUNMODE_ROLLBACK);
+	bCantFail = ::MsiGetMode(WcaGetInstallHandle(), MSIRUNMODE::MSIRUNMODE_ROLLBACK)
+		|| ::MsiGetMode(WcaGetInstallHandle(), MSIRUNMODE::MSIRUNMODE_COMMIT);
 
 	// Iterate elements
 	for (const Command& cmd : cad.commands())
@@ -98,7 +99,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToEx
 
 		// Get receiver
 		hr = mapFunc(cmd.handler().c_str(), &pExecutor);
-		if (bIsRollback && FAILED(hr))
+		if (bCantFail && FAILED(hr))
 		{
 			WcaLogError(hr, "Failed to get CDeferredActionBase for '%hs'", cmd.handler().c_str());
 			hrErr = hr;
@@ -109,7 +110,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToEx
 
 		// Execute
 		hr = pExecutor->DeferredExecute(cmd.details());
-		if (bIsRollback && FAILED(hr))
+		if (bCantFail && FAILED(hr))
 		{
 			WcaLogError(hr, "Failed");
 			hrErr = hr;
@@ -119,7 +120,7 @@ HRESULT CDeferredActionBase::DeferredEntryPoint(MSIHANDLE hInstall, ReceiverToEx
 		ExitOnFailure(hr, "Failed");
 
 		hr = WcaProgressMessage(cmd.cost(), FALSE);
-		if (bIsRollback && FAILED(hr))
+		if (bCantFail && FAILED(hr))
 		{
 			WcaLogError(hr, "Failed to report progress by cost");
 			hrErr = hr;
