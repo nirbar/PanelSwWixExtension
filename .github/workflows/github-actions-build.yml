@@ -20,6 +20,8 @@ env:
 jobs:
   Build:
     runs-on: windows-2022
+    permissions:
+      id-token: write  # For nuget.org publish
     steps:
       - uses: actions/checkout@v6.0.2
         with:
@@ -75,6 +77,13 @@ jobs:
           name: nuget
           path: nuget-out\*.nupkg
           if-no-files-found: error
+    
+      # Generate NuGet API key
+      - name: NuGet login (OIDC → temp API key)
+        uses: NuGet/login@v1
+        id: login
+        with:
+          user: Nir.Bar
 
       - name: Publish nuget packages to github and nuget.org
         if: ${{ github.event.inputs.publish_nuget == 'true' && github.ref == 'refs/heads/master7' }}
@@ -82,6 +91,6 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TAGGER_PAT }}
         run: |
           dotnet nuget push nuget-out\PanelSwWixExtension4.*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source github
-          dotnet nuget push nuget-out\PanelSwWixExtension4.*.nupkg --api-key ${{ secrets.NUGET_TOKEN }} --source https://api.nuget.org/v3/index.json
+          dotnet nuget push nuget-out\PanelSwWixExtension4.*.nupkg --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
           git tag "wix7-v${{ env.FULL_VERSION }}"
           git push --tags

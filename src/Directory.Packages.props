@@ -3,7 +3,7 @@
     <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
     <Wix4Version Condition=" '$(Wix4Version)' == '' ">7.0.0</Wix4Version>
     <PanelSwWix4Version Condition=" '$(PanelSwWix4Version)' == '' ">7.1.0-psw-wix-0443.35</PanelSwWix4Version>
-    <SevenZapVersion Condition=" '$(SevenZapVersion)' == '' ">26.0.45</SevenZapVersion>
+    <SevenZapVersion Condition=" '$(SevenZapVersion)' == '' ">26.2.46</SevenZapVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Microsoft.Extensions.FileSystemGlobbing" Version="9.0.0" />
