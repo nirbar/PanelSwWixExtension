@@ -14,6 +14,7 @@ jobs:
     runs-on: windows-latest
     permissions:
       id-token: write  # For nuget.org publish
+      contents: write
     steps:
       - name: Resolve build commit
         env:
@@ -69,8 +70,6 @@ jobs:
 
       - name: Publish nuget packages to github
         if: ${{ env.NUGET_VERSION != '' }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.MY_GITHUB_PAT }}
         run: |
           dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
           dotnet nuget push "PanelSwWixExtension*.${{ env.NUGET_VERSION }}*.nupkg" --api-key ${{ secrets.GITHUB_TOKEN }} --source github --skip-duplicate

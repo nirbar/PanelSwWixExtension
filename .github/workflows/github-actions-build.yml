@@ -22,6 +22,7 @@ jobs:
     runs-on: windows-2022
     permissions:
       id-token: write  # For nuget.org publish
+      contents: write
     steps:
       - uses: actions/checkout@v6.0.2
         with:
@@ -87,8 +88,6 @@ jobs:
 
       - name: Publish nuget packages to github and nuget.org
         if: ${{ github.event.inputs.publish_nuget == 'true' && github.ref == 'refs/heads/master7' }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.TAGGER_PAT }}
         run: |
           dotnet nuget push nuget-out\PanelSwWixExtension4.*.nupkg --api-key ${{ secrets.GITHUB_TOKEN }} --source github
           dotnet nuget push nuget-out\PanelSwWixExtension4.*.nupkg --api-key ${{ steps.login.outputs.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
