@@ -1,4 +1,4 @@
-<Project Sdk="WixToolset.Sdk">
+﻿<Project Sdk="WixToolset.Sdk">
   <PropertyGroup>
     <EnableDefaultCompileItems>true</EnableDefaultCompileItems>
     <DefineConstants>$(DefineConstants);PanelSwWixExtensionDll=$(BuildFolder)..\AnyCPU\bin\$(Configuration)\PanelSwWixExtension\PanelSwWixExtension.dll</DefineConstants>
@@ -9,8 +9,8 @@
     <DefaultCompressionLevel>Low</DefaultCompressionLevel>
   </PropertyGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\DeferredExePackage\DeferredExePackage.vcxproj"/>
-    <PackageReference Include="WixToolset.Bal.wixext"/>
+    <ProjectReference Include="..\..\DeferredExePackage\DeferredExePackage.vcxproj" />
+    <PackageReference Include="WixToolset.Bal.wixext" />
     <PackageReference Include="TidyBuild" />
   </ItemGroup>
   <ItemGroup>
@@ -28,5 +28,8 @@
     <BindInputPaths Include="$(SolutionDir)UnitTests\">
       <BindName>UT</BindName>
     </BindInputPaths>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ContainerTemplateUT.ps1" />
   </ItemGroup>
 </Project>
