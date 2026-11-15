@@ -143,9 +143,9 @@
     <xs:complexType>
       <xs:simpleContent>
         <xs:extension base="xs:string">
-          <xs:attribute name="Property" type="xs:string" use="required">
+          <xs:attribute name="Property" type="xs:string" use="optional">
             <xs:annotation>
-              <xs:documentation>Property that hold folder path to remove entirely. This field may be formatted, but is resolved before CostInitialize, so it may not be a Directory table key.</xs:documentation>
+              <xs:documentation>Property that hold folder path to remove entirely. This field may be formatted, but is resolved before CostInitialize, so it may not be a Directory table key. If not provided, then the folder will be resolved from the component location.</xs:documentation>
             </xs:annotation>
           </xs:attribute>
           <xs:attribute name="Condition" type="xs:string" use="optional">

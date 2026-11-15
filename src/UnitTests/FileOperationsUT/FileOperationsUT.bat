@@ -5,25 +5,26 @@ CD "%~dp0"
 :: Install + rollback
 CALL :prepareFolders
 ECHO === Testing install and rollback ===
-msiexec /i FileOperationsUT.msi /qn /l*v FileOperationsUT.msir.log DELETE_ON_ROLLBACK_DIR="%CD%\delete-on-rollback" DO_ROLLBACK=1
+msiexec /i FileOperationsUT.msi MSIFASTINSTALL=7 /qn /l*v FileOperationsUT.msir.log DELETE_ON_ROLLBACK_DIR="%CD%\delete-on-rollback" DO_ROLLBACK=1 INSTALLFOLDER="%CD%\INSTALLFOLDER"
 CALL :testInstallRollback
 
 :: Install
 CALL :prepareFolders
 ECHO === Testing install ===
-msiexec /i FileOperationsUT.msi /qn /l*v FileOperationsUT.msi.log DELETE_ON_ROLLBACK_DIR="%CD%\delete-on-rollback" REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove" CONDITIONED_FOLDER="%CD%\never-remove-2" EMPTY_DIR="%CD%\empty" NON_EMPTY_DIR="%CD%\non-empty"
+msiexec /i FileOperationsUT.msi MSIFASTINSTALL=7 /qn /l*v FileOperationsUT.msi.log DELETE_ON_ROLLBACK_DIR="%CD%\delete-on-rollback" REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove" CONDITIONED_FOLDER="%CD%\never-remove-2" EMPTY_DIR="%CD%\empty" NON_EMPTY_DIR="%CD%\non-empty" INSTALLFOLDER="%CD%\INSTALLFOLDER"
 CALL :testInstall
 
 :: Repair
 CALL :prepareFolders
 ECHO === Testing reinstall ===
-msiexec /fvamus FileOperationsUT.msi /qn /l*v FileOperationsUT.msif.log DELETE_ON_ROLLBACK_DIR="%CD%\delete-on-rollback" REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove" CONDITIONED_FOLDER="%CD%\never-remove-2" EMPTY_DIR="%CD%\empty" NON_EMPTY_DIR="%CD%\non-empty"
+msiexec /fvamus FileOperationsUT.msi MSIFASTINSTALL=7 /qn /l*v FileOperationsUT.msif.log DELETE_ON_ROLLBACK_DIR="%CD%\delete-on-rollback" REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove" CONDITIONED_FOLDER="%CD%\never-remove-2" EMPTY_DIR="%CD%\empty" NON_EMPTY_DIR="%CD%\non-empty" INSTALLFOLDER="%CD%\INSTALLFOLDER"
 CALL :testRepair
 
 :: Uninstall
 CALL :prepareFolders
+ECHO test > "%CD%\INSTALLFOLDER\excessive.txt"
 ECHO === Testing uninstall ===
-msiexec /xFileOperationsUT.msi /qn /l*v FileOperationsUT.msix.log DELETE_ON_ROLLBACK_DIR="%CD%\delete-on-rollback" REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove" CONDITIONED_FOLDER="%CD%\never-remove-2" EMPTY_DIR="%CD%\empty" NON_EMPTY_DIR="%CD%\non-empty"
+msiexec /xFileOperationsUT.msi MSIFASTINSTALL=7 /qn /l*v FileOperationsUT.msix.log DELETE_ON_ROLLBACK_DIR="%CD%\delete-on-rollback" REMOVE_ON_INSTALL="%CD%\install-remove" REMOVE_ON_REPAIR="%CD%\repair-remove" REMOVE_ON_UNINSTALL="%CD%\uninstall-remove" REMOVE_NO_RECURSIVE="%CD%\remove-no-recursive" REMOVE_ON_BOTH="%CD%\both-remove" NEVER_REMOVED="%CD%\never-remove" CONDITIONED_FOLDER="%CD%\never-remove-2" EMPTY_DIR="%CD%\empty" NON_EMPTY_DIR="%CD%\non-empty"
 CALL :testUninstall
 
 :: Clean and exit
@@ -290,6 +291,10 @@ EXIT /B %MY_ERR%
 	)
 	IF NOT EXIST "\\?\%CD%\repair-remove\2\filefilefile*.txt" (
 		ECHO File "%CD%\repair-remove\2\filefilefile*.txt" should exist
+		SET /A MY_ERR=1
+	)
+	IF EXIST "%CD%\INSTALLFOLDER\" (
+		ECHO Folder "%CD%\INSTALLFOLDER\" should not exist
 		SET /A MY_ERR=1
 	)
 	IF EXIST "%CD%\uninstall-remove\" (

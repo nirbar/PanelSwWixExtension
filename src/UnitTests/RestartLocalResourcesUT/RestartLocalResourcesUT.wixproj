@@ -23,8 +23,7 @@
   <PropertyGroup>
      <DefineConstants>BuildFolderCommon=$(BuildFolderCommon);$(DefineConstants)</DefineConstants>
   </PropertyGroup>
-  <Target Name="DownloadNssm" Condition="!Exists('$(BuildFolderCommon)\nssm-2.24\win64\nssm.exe')">
-    <DownloadFile SourceUrl="https://nssm.cc/release/nssm-2.24.zip" DestinationFolder="$(BuildFolderCommon)"/>
-    <Unzip SourceFiles="$(BuildFolderCommon)\nssm-2.24.zip" DestinationFolder="$(BuildFolderCommon)"/>
+  <Target Name="DownloadNssm" Condition="!Exists('$(BuildFolderCommon)\nssm.exe')">
+    <DownloadFile SourceUrl="https://github.com/nirbar/nssm/releases/download/4/nssm.exe" DestinationFolder="$(BuildFolderCommon)"/>
   </Target>
 </Project>

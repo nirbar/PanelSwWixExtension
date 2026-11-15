@@ -23,3 +23,5 @@
 #include <rmutil.h>
 #include <svcutil.h>
 #include <resrutil.h>
+#include <wiutil.h>
+#include <pathutil.h>

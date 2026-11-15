@@ -45,6 +45,8 @@ jobs:
 
       - name: Prepare for build
         run: |
+          mkdir build-common
+          Invoke-WebRequest -Uri https://github.com/nirbar/nssm/releases/download/4/nssm.exe -OutFile build-common/nssm.exe
           choco install windows-adk-all
           dotnet nuget add source --username ${{ github.actor }} --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json"
           nuget restore src/dirs.proj

@@ -4,10 +4,6 @@
 #include "../CaCommon/WixString.h"
 #include "FileEntry.h"
 #include "FileIterator.h"
-#include <fileutil.h>
-#include <dirutil.h>
-#include <memutil.h>
-#include <pathutil.h>
 #include <Shellapi.h>
 #include <Shlwapi.h>
 
@@ -45,7 +41,7 @@ extern "C" UINT __stdcall RemoveFolderEx(MSIHANDLE hInstall)
 	ExitOnNull((hr == S_OK), hr, E_FAIL, "Table does not exist 'PSW_RemoveFolderEx'. Have you authored 'PanelSw:RemoveFolderEx' entries in WiX code?");
 
 	// Execute view
-	hr = WcaOpenExecuteView(L"SELECT `Component_`, `Property`, `InstallMode`, `LongPathHandling`, `Condition` FROM `PSW_RemoveFolderEx`", &hView);
+	hr = WcaOpenExecuteView(L"SELECT `PSW_RemoveFolderEx`.`Component_`, `PSW_RemoveFolderEx`.`Property`, `PSW_RemoveFolderEx`.`InstallMode`, `PSW_RemoveFolderEx`.`LongPathHandling`, `PSW_RemoveFolderEx`.`Condition`, `Component`.`ComponentId` FROM `PSW_RemoveFolderEx`, `Component` WHERE `PSW_RemoveFolderEx`.`Component_`=`Component`.`Component`", &hView);
 	ExitOnFailure(hr, "Failed to execute SQL query");
 
 	// Iterate records
@@ -54,7 +50,7 @@ extern "C" UINT __stdcall RemoveFolderEx(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to fetch record.");
 
 		// Get fields
-		CWixString szComponent, szBaseProperty, szBasePath, szCondition;
+		CWixString szComponent, szComponentGUID, szBaseProperty, szBasePath, szCondition;
 		int flags = 0, currLongPathHandling = 0;
 		CFileIterator fileFinder;
 		UINT i = 0;
@@ -69,9 +65,48 @@ extern "C" UINT __stdcall RemoveFolderEx(MSIHANDLE hInstall)
 		ExitOnFailure(hr, "Failed to get LongPathHandling.");
 		hr = WcaGetRecordString(hRecord, 5, (LPWSTR*)szCondition);
 		ExitOnFailure(hr, "Failed to get Property.");
+		hr = WcaGetRecordString(hRecord, 6, (LPWSTR*)szComponentGUID);
+		ExitOnFailure(hr, "Failed to get Component GUID.");
 
-		hr = WcaGetProperty(szBaseProperty, (LPWSTR*)szBasePath);
-		ExitOnFailure(hr, "Failed to get property");
+		if (szBaseProperty.IsNullOrEmpty())
+		{
+			INSTALLSTATE installState = INSTALLSTATE::INSTALLSTATE_UNKNOWN;
+			DWORD dwAttrib = 0;
+			UUID guid = {};
+			WCHAR wzGuid[39];
+			BOOL bRes = TRUE;
+
+			hr = WiuLocateComponent(szComponentGUID, &installState, (LPWSTR*)szBasePath);
+			ExitOnFailure(hr, "Failed to get path of component '%ls'", (LPCWSTR)szComponent);
+
+			if (FileExistsEx(szBasePath, &dwAttrib) && !(dwAttrib & FILE_ATTRIBUTE_DIRECTORY))
+			{
+				CWixString szDir;
+
+				hr = PathGetParentPath(szBasePath, (LPWSTR*)szDir, nullptr);
+				ExitOnFailure(hr, "Failed to get parent path of '%ls'", (LPCWSTR)szBasePath);
+
+				hr = szBasePath.Copy(szDir);
+				ExitOnFailure(hr, "Failed to copy string");
+			}
+
+			hr = ::UuidCreate(&guid);
+			ExitOnFailure(hr, "Failed to generate UUID");
+
+			bRes = ::StringFromGUID2(guid, wzGuid, ARRAYSIZE(wzGuid));
+			ExitOnNull(bRes, hr, E_FAIL, "Failed to stringify UUID");
+
+			hr = szBaseProperty.Format(L"DIR%ls", wzGuid);
+			ExitOnFailure(hr, "Failed to format string");
+
+			hr = WcaSetProperty(szBaseProperty, szBasePath);
+			ExitOnFailure(hr, "Failed to set property");
+		}
+		else
+		{
+			hr = WcaGetProperty(szBaseProperty, (LPWSTR*)szBasePath);
+			ExitOnFailure(hr, "Failed to get property");
+		}
 
 		// Apply long path handling even if conditions don't apply
 		if (currLongPathHandling != RemoveFolderExLongPathHandling::RemoveFolderExLongPathHandling_Default)

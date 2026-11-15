@@ -29,6 +29,7 @@
       <Component>
         <File Source="$(sys.SOURCEFILEDIR)\FileOperationsUT.bat" Compressed="no"/>
 
+        <PanelSW:RemoveFolderEx On="uninstall"/>
         <PanelSW:RemoveFolderEx Property="REMOVE_ON_INSTALL" On="install" Condition="1=1"/>
         <PanelSW:RemoveFolderEx Property="REMOVE_ON_UNINSTALL" On="uninstall" LongPathHandling="prompt"/>
         <PanelSW:RemoveFolderEx Property="REMOVE_ON_BOTH" On="both"/>

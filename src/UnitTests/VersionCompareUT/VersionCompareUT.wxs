@@ -4,7 +4,7 @@
 
     <Feature Id="ProductFeature" Title="UnitTestSetup" Level="1">
       <Component Directory="INSTALLFOLDER">
-        <File Source="$(BuildFolderCommon)\nssm-2.24\win64\nssm.exe" Compressed="no" />
+        <File Source="$(BuildFolderCommon)\nssm.exe" Compressed="no" />
       </Component>
       <Component Directory="INSTALLFOLDER">
         <File Source="$(sys.SOURCEFILEDIR)VersionCompareUT.ps1" Compressed="no" />

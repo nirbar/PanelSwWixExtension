@@ -37,7 +37,7 @@ namespace PanelSw.Wix.Extensions.Symbols
                 {
                     new ColumnDefinition(nameof(Id), ColumnType.String, 72, true, false, ColumnCategory.Identifier, modularizeType: ColumnModularizeType.Column),
                     new ColumnDefinition(nameof(Component_), ColumnType.String, 0, false, false, ColumnCategory.Text, modularizeType: ColumnModularizeType.Column),
-                    new ColumnDefinition(nameof(Property), ColumnType.String, 0, false, false, ColumnCategory.Text, modularizeType: ColumnModularizeType.Column),
+                    new ColumnDefinition(nameof(Property), ColumnType.String, 0, false, true, ColumnCategory.Text, modularizeType: ColumnModularizeType.Column),
                     new ColumnDefinition(nameof(InstallMode), ColumnType.Number, 0, false, false, ColumnCategory.Integer, modularizeType: ColumnModularizeType.None),
                     new ColumnDefinition(nameof(LongPathHandling), ColumnType.Number, 0, false, false, ColumnCategory.Integer, modularizeType: ColumnModularizeType.None),
                     new ColumnDefinition(nameof(Condition), ColumnType.String, 0, false, true, ColumnCategory.Condition, modularizeType: ColumnModularizeType.Condition),

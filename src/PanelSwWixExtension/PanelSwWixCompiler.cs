@@ -422,11 +422,6 @@ namespace PanelSw.Wix.Extensions
                 }
             }
 
-            if (string.IsNullOrEmpty(property))
-            {
-                Messaging.Write(ErrorMessages.ExpectedAttribute(sourceLineNumbers, element.Name.LocalName, "Property"));
-            }
-
             if (!Messaging.EncounteredError)
             {
                 ParseHelper.CreateSimpleReference(section, sourceLineNumbers, "CustomAction", "PSW_RemoveFolderEx");
