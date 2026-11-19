@@ -85,6 +85,9 @@ extern "C" UINT __stdcall RestartLocalResources(MSIHANDLE hInstall)
     hr = cad.SetCustomActionData(L"RestartLocalResourcesExec");
     ExitOnFailure(hr, "Failed to set property.");
 
+    hr = cad.SetCustomActionData(L"RestartLocalResourcesRollback");
+    ExitOnFailure(hr, "Failed to set property.");
+
     // Best effort to register the processes with restart manager
     cad.RegisterWithRm(lstFolders);
 

@@ -840,13 +840,16 @@
   <Fragment>
     <CustomAction Id="RestartLocalResources" DllEntry="RestartLocalResources" Execute="immediate" SuppressModularization="yes" BinaryRef="PanelSwCustomActions.dll" />
     <CustomAction Id="RestartLocalResourcesExec" DllEntry="CommonDeferred" Execute="deferred" Impersonate="no" Return="ignore" SuppressModularization="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
+    <CustomAction Id="RestartLocalResourcesRollback" DllEntry="CommonDeferred" Execute="rollback" Impersonate="no" Return="ignore" SuppressModularization="yes" HideTarget="yes" BinaryRef="PanelSwCustomActions.dll" />
     <InstallExecuteSequence>
       <Custom Action="RestartLocalResources" Before="InstallValidate" Overridable="yes" />
       <Custom Action="RestartLocalResourcesExec" Before="RemoveFiles" Overridable="yes" />
+      <Custom Action="RestartLocalResourcesRollback" After="DuplicateFiles" Overridable="yes" />
     </InstallExecuteSequence>
     <UI>
       <ProgressText Action="RestartLocalResources" Message="!(loc.RestartLocalResources)" />
       <ProgressText Action="RestartLocalResourcesExec" Template="!(loc.RestartLocalResourcesTemplate)" Message="!(loc.RestartLocalResources)" />
+      <ProgressText Action="RestartLocalResourcesRollback" Template="!(loc.RestartLocalResourcesTemplate)" Message="!(loc.RestartLocalResources)" />
     </UI>
   </Fragment>
 

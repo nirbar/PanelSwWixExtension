@@ -12,30 +12,21 @@
     </Feature>
 
     <ComponentGroup Id="ProductComponents">
-      <Component Directory="INSTALLFOLDER2">
-        <File Id="nssm.exe2" Source="$(BuildFolderCommon)\nssm.exe"/>
-
-        <ServiceInstall Name="RestartLocalResourcesUT2" Type="ownProcess" Start="auto" ErrorControl="normal" Interactive="yes">
-          <ServiceDependency Id="RestartLocalResourcesUT"/>
-        </ServiceInstall>
-        <ServiceControl Name="RestartLocalResourcesUT2" Remove="uninstall" Start="install"/>
-        <PanelSW:NssmServiceConfig ServiceName="RestartLocalResourcesUT2" Application="ping.exe" AppDirectory="[INSTALLFOLDER]" AppParameters="google.com /n 1000" AppExit='Restart' />
+      <Component Directory="INSTALLFOLDER">
+        <File Id="DeferredExePackage.exe" Source="$(DeferredExePackagePath)"/>
+        <PanelSW:ExecOn BeforeStartServices="yes" OnInstall="yes" ErrorHandling="prompt" Command='"[#DeferredExePackage.exe]" --skip-until-here powershell.exe -F "[#LockFile.ps1]"' Impersonate='no' Wait='no'/>
       </Component>
       <Component Directory="INSTALLFOLDER">
-        <File Id="nssm.exe" Source="$(BuildFolderCommon)\nssm.exe"/>
-
-        <ServiceInstall Name="RestartLocalResourcesUT" Type="ownProcess" Start="auto" ErrorControl="normal" Interactive="yes"/>
-        <ServiceControl Name="RestartLocalResourcesUT" Remove="uninstall" Start="install"/>
-        <PanelSW:NssmServiceConfig ServiceName="RestartLocalResourcesUT" Application="ping.exe" AppDirectory="[INSTALLFOLDER]" AppParameters="google.com /n 1000" AppExit='Restart' />
+        <File Id="LockFile.ps1" Source="$(sys.SOURCEFILEDIR)\LockFile.ps1"/>
+      </Component>
+      <Component Directory="INSTALLFOLDER">
+        <File Source="$(sys.SOURCEFILEDIR)\RestartLocalResourcesUT.ps1" Compressed="no"/>
       </Component>
     </ComponentGroup>
 
-    <Property Id="NPP_FOLDER" Value="C:\Users\Administrator\Desktop\Notepad++\"/>
-    <PanelSW:RestartLocalResources Path="[NPP_FOLDER]" />
     <PanelSW:RestartLocalResources Path="[INSTALLFOLDER]" />
-
     <InstallExecuteSequence>
-      <Custom Action="override RestartLocalResourcesExec" Before="DeleteServices"/>
+      <Custom Action="Rollback_Deferred" Before="InstallFinalize" Condition="DO_ROLLBACK=1"/>
     </InstallExecuteSequence>
 
     <StandardDirectory Id="ProgramFiles6432Folder">
